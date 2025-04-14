@@ -5,6 +5,7 @@ ifndef MLDSA_MODE
 endif
 
 MLDSA_MODE ?= 3
+FIPS202_NAMESPACE = mldsa_fips202_ref_
 
 ifeq ($(MLDSA_MODE),2)
      MLD_NAMESPACE=MLD_44_ref_
