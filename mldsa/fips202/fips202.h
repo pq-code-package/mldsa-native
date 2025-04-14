@@ -15,6 +15,7 @@
 #define SHA3_512_RATE 72
 #define MLD_KECCAK_LANES 25
 #define SHA3_256_HASHBYTES 32
+#define SHA3_512_HASHBYTES 64
 
 #define FIPS202_NAMESPACE(s) mldsa_fips202_ref_##s
 
@@ -78,6 +79,11 @@ __contract__(
 );
 
 #define sha3_512 FIPS202_NAMESPACE(sha3_512)
-void sha3_512(uint8_t h[64], const uint8_t *in, size_t inlen);
+void sha3_512(uint8_t h[SHA3_512_HASHBYTES], const uint8_t *in, size_t inlen)
+__contract__(
+  requires(memory_no_alias(in, inlen))
+  requires(memory_no_alias(h, SHA3_512_HASHBYTES))
+  assigns(memory_slice(h, SHA3_512_HASHBYTES))
+);
 
 #endif /* !MLD_FIPS202_FIPS202_H */

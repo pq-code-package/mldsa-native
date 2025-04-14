@@ -9,5 +9,5 @@ void harness(void)
   const uint8_t *in;
   size_t inlen;
 
-  sha3_256(h, in, inlen);
+  sha3_512(h, in, inlen);
 }
