@@ -13,12 +13,13 @@
 #define SHAKE256_RATE 136
 #define SHA3_256_RATE 136
 #define SHA3_512_RATE 72
+#define MLD_KECCAK_LANES 25
 
 #define FIPS202_NAMESPACE(s) mldsa_fips202_ref_##s
 
 typedef struct
 {
-  uint64_t s[25];
+  uint64_t s[MLD_KECCAK_LANES];
   unsigned int pos;
 } keccak_state;
 

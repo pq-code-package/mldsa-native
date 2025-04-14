@@ -92,7 +92,11 @@ const uint64_t KeccakF_RoundConstants[NROUNDS] = {
  *
  * Arguments:   - uint64_t *state: pointer to input/output Keccak state
  **************************************************/
-static void KeccakF1600_StatePermute(uint64_t state[25])
+static void KeccakF1600_StatePermute(uint64_t state[MLD_KECCAK_LANES])
+__contract__(
+  requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
+  assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
+)
 {
   int round;
 
@@ -137,6 +141,10 @@ static void KeccakF1600_StatePermute(uint64_t state[25])
   Asu = state[24];
 
   for (round = 0; round < NROUNDS; round += 2)
+  __loop__(
+    invariant(round >= 0)
+    invariant(round <= NROUNDS && round % 2 == 0)
+  )
   {
     /* prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
