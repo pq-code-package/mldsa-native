@@ -475,7 +475,6 @@ static unsigned int keccak_squeeze(uint8_t *out, size_t outlen, uint64_t s[25],
   return pos;
 }
 
-
 /*************************************************
  * Name:        keccak_absorb_once
  *
@@ -483,25 +482,41 @@ static unsigned int keccak_squeeze(uint8_t *out, size_t outlen, uint64_t s[25],
  *              non-incremental, starts by zeroeing the state.
  *
  * Arguments:   - uint64_t *s: pointer to (uninitialized) output Keccak state
- *              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
+ *              - const unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
  *              - const uint8_t *in: pointer to input to be absorbed into s
  *              - size_t inlen: length of input in bytes
  *              - uint8_t p: domain-separation byte for different Keccak-derived
  *functions
  **************************************************/
-static void keccak_absorb_once(uint64_t s[25], unsigned int r,
-                               const uint8_t *in, size_t inlen, uint8_t p)
+static void keccak_absorb_once(uint64_t s[MLD_KECCAK_LANES],
+                               const unsigned int r, const uint8_t *in,
+                               size_t inlen, uint8_t p)
+__contract__(
+    requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
+    requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
+    requires(memory_no_alias(in, inlen))
+    assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
 {
   unsigned int i;
 
-  for (i = 0; i < 25; i++)
+  for (i = 0; i < MLD_KECCAK_LANES; i++)
+  __loop__(
+    invariant(i <= MLD_KECCAK_LANES)
+  )
   {
     s[i] = 0;
   }
 
   while (inlen >= r)
+  __loop__(
+    invariant(inlen <= loop_entry(inlen))
+    invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen))
+  )
   {
     for (i = 0; i < r / 8; i++)
+    __loop__(
+      invariant(i <= r / 8)
+    )
     {
       s[i] ^= load64(in + 8 * i);
     }
@@ -511,6 +526,9 @@ static void keccak_absorb_once(uint64_t s[25], unsigned int r,
   }
 
   for (i = 0; i < inlen; i++)
+  __loop__(
+    invariant(i <= inlen)
+  )
   {
     s[i / 8] ^= (uint64_t)in[i] << 8 * (i % 8);
   }
