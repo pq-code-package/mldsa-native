@@ -815,6 +815,9 @@ void sha3_256(uint8_t h[32], const uint8_t *in, size_t inlen)
   keccak_absorb_once(s, SHA3_256_RATE, in, inlen, 0x06);
   KeccakF1600_StatePermute(s);
   for (i = 0; i < 4; i++)
+  __loop__(
+    invariant(i <= 4)
+  )
   {
     store64(h + 8 * i, s[i]);
   }
