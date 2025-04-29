@@ -95,10 +95,9 @@ const uint64_t KeccakF_RoundConstants[NROUNDS] = {
 static void KeccakF1600_StatePermute(uint64_t state[MLD_KECCAK_LANES])
 __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
-)
+  assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES)))
 {
-  int round;
+  unsigned round;
 
   uint64_t Aba, Abe, Abi, Abo, Abu;
   uint64_t Aga, Age, Agi, Ago, Agu;
@@ -141,10 +140,7 @@ __contract__(
   Asu = state[24];
 
   for (round = 0; round < NROUNDS; round += 2)
-  __loop__(
-    invariant(round >= 0)
-    invariant(round <= NROUNDS && round % 2 == 0)
-  )
+  __loop__(invariant(round <= NROUNDS && round % 2 == 0))
   {
     /* prepareTheta */
     BCa = Aba ^ Aga ^ Aka ^ Ama ^ Asa;
@@ -528,17 +524,15 @@ static void keccak_absorb_once(uint64_t s[MLD_KECCAK_LANES],
                                const unsigned int r, const uint8_t *in,
                                size_t inlen, uint8_t p)
 __contract__(
-    requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
-    requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-    requires(memory_no_alias(in, inlen))
-    assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
+  requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
+  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
+  requires(memory_no_alias(in, inlen))
+  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
 {
   unsigned int i;
 
   for (i = 0; i < MLD_KECCAK_LANES; i++)
-  __loop__(
-    invariant(i <= MLD_KECCAK_LANES)
-  )
+  __loop__(invariant(i <= MLD_KECCAK_LANES))
   {
     s[i] = 0;
   }
@@ -546,13 +540,10 @@ __contract__(
   while (inlen >= r)
   __loop__(
     invariant(inlen <= loop_entry(inlen))
-    invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen))
-  )
+    invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen)))
   {
     for (i = 0; i < r / 8; i++)
-    __loop__(
-      invariant(i <= r / 8)
-    )
+    __loop__(invariant(i <= r / 8))
     {
       s[i] ^= load64(in + 8 * i);
     }
@@ -562,9 +553,7 @@ __contract__(
   }
 
   for (i = 0; i < inlen; i++)
-  __loop__(
-    invariant(i <= inlen)
-  )
+  __loop__(invariant(i <= inlen))
   {
     s[i / 8] ^= (uint64_t)in[i] << 8 * (i % 8);
   }
@@ -846,14 +835,12 @@ void shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 void sha3_256(uint8_t h[SHA3_256_HASHBYTES], const uint8_t *in, size_t inlen)
 {
   unsigned int i;
-  uint64_t s[25];
+  uint64_t s[MLD_KECCAK_LANES];
 
   keccak_absorb_once(s, SHA3_256_RATE, in, inlen, 0x06);
   KeccakF1600_StatePermute(s);
   for (i = 0; i < 4; i++)
-  __loop__(
-    invariant(i <= 4)
-  )
+  __loop__(invariant(i <= 4))
   {
     store64(h + 8 * i, s[i]);
   }
@@ -876,9 +863,7 @@ void sha3_512(uint8_t h[SHA3_512_HASHBYTES], const uint8_t *in, size_t inlen)
   keccak_absorb_once(s, SHA3_512_RATE, in, inlen, 0x06);
   KeccakF1600_StatePermute(s);
   for (i = 0; i < 8; i++)
-  __loop__(
-    invariant(i <= 8)
-  )
+  __loop__(invariant(i <= 8))
   {
     store64(h + 8 * i, s[i]);
   }
