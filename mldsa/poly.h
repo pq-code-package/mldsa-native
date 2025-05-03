@@ -297,7 +297,13 @@ __contract__(
  *                MLDSA_SEEDBYTES
  *              - uint16_t nonce: 2-byte nonce
  **************************************************/
-void poly_uniform(poly *a, const uint8_t seed[MLDSA_SEEDBYTES], uint16_t nonce);
+void poly_uniform(poly *a, const uint8_t seed[MLDSA_SEEDBYTES], uint16_t nonce)
+__contract__(
+  requires(memory_no_alias(a, sizeof(poly)))
+  requires(memory_no_alias(seed, MLDSA_SEEDBYTES))
+  assigns(memory_slice(a, sizeof(poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+);
 
 #define poly_uniform_eta MLD_NAMESPACE(poly_uniform_eta)
 /*************************************************

@@ -265,9 +265,18 @@ void poly_uniform(poly *a, const uint8_t seed[MLDSA_SEEDBYTES], uint16_t nonce)
   ctr = rej_uniform(a->coeffs, MLDSA_N, buf, buflen);
 
   while (ctr < MLDSA_N)
+  __loop__(
+    invariant(0 <= ctr && ctr < MLDSA_N)
+    invariant(array_bound(a->coeffs, 0, ctr, 0, MLDSA_Q)))
   {
     off = buflen % 3;
     for (i = 0; i < off; ++i)
+    __loop__(
+      invariant(i <= off && off < 3)
+      invariant(ctr <= MLDSA_N)
+      invariant(array_bound(a->coeffs, 0, ctr, 0, MLDSA_Q))
+      invariant(forall(k, 0, i, buf[k] == buf[buflen - off + k]))
+    )
     {
       buf[i] = buf[buflen - off + i];
     }
