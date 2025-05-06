@@ -19,7 +19,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/poly.c $(SRCDIR)/mldsa/symmetric-shake.c $(SRCDIR)/mldsa/fips202/fips202.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_uniform
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)mldsa_shake128_stream_init $(FIPS202_NAMESPACE)shake128_squeezeblocks
+USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)mldsa_shake128_stream_init $(FIPS202_NAMESPACE)shake128_squeezeblocks rej_uniform
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
