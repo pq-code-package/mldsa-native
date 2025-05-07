@@ -447,6 +447,10 @@ void poly_uniform_eta(poly *a, const uint8_t seed[MLDSA_CRHBYTES],
   ctr = rej_eta(a->coeffs, MLDSA_N, 0, buf, buflen);
   buflen = STREAM256_BLOCKBYTES;
   while (ctr < MLDSA_N)
+  __loop__(
+    assigns(ctr, state, memory_slice(a, sizeof(poly)), object_whole(buf))
+    invariant(ctr <= MLDSA_N)
+    invariant(array_abs_bound(a->coeffs, 0, ctr, MLDSA_ETA + 1)))
   {
     stream256_squeezeblocks(buf, 1, &state);
     ctr = rej_eta(a->coeffs, MLDSA_N, ctr, buf, buflen);

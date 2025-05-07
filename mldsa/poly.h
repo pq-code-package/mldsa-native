@@ -319,7 +319,13 @@ __contract__(
  *              - uint16_t nonce: 2-byte nonce
  **************************************************/
 void poly_uniform_eta(poly *a, const uint8_t seed[MLDSA_CRHBYTES],
-                      uint16_t nonce);
+                      uint16_t nonce)
+__contract__(
+  requires(memory_no_alias(a, sizeof(poly)))
+  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
+  assigns(memory_slice(a, sizeof(poly)))
+  ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
+);
 
 #define poly_uniform_gamma1 MLD_NAMESPACE(poly_uniform_gamma1)
 /*************************************************
