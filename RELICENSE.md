@@ -18,3 +18,18 @@ in the mldsa-native project under `Apache-2.0 OR ISC OR MIT`.
 - Pravek Sharma <sharmapravek@gmail.com>
 - Mila Anastasova <manastasova2017@fau.edu>
 - Thing Han, Lim potsrevenmil@gmail.com
+
+# Relicensing of AArch64 assembly
+
+This document gathers consent by copyright holders of the MIT-licensed
+AArch64 assembly in mldsa-native to relicense it to `Apache-2.0 OR ISC OR MIT`.
+
+The relicensing itself is intended to be carried out once all copyright
+holders have given their consent.
+
+## Copyright holders agreeing to relicensing
+
+By adding my name to the list below, I agree to relicensing
+the AArch64 assembly in mldsa-native to `Apache-2.0 OR ISC OR MIT`.
+
+- Hanno Becker <beckphan@amazon.co.uk>
