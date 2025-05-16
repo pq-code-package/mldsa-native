@@ -108,10 +108,24 @@ void polyvecl_uniform_gamma1(polyvecl *v, const uint8_t seed[MLDSA_CRHBYTES],
                              uint16_t nonce)
 {
   unsigned int i;
+  uint16_t n = MLDSA_L * nonce;
 
   for (i = 0; i < MLDSA_L; ++i)
+  __loop__(
+    assigns(i, n, object_whole(v))
+    invariant(i <= MLDSA_L)
+    invariant(n == MLDSA_L * nonce + i)
+    invariant(forall(k0, 0, i,
+      array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+  )
   {
-    poly_uniform_gamma1(&v->vec[i], seed, MLDSA_L * nonce + i);
+    poly t;
+    poly_uniform_gamma1(&t, seed, n);
+    n++;
+    /* Full struct assignment from local variables to simplify proof */
+    /* TODO: eliminate once CBMC resolves
+     * https://github.com/diffblue/cbmc/issues/8617 */
+    v->vec[i] = t;
   }
 }
 
@@ -122,7 +136,8 @@ void polyvecl_reduce(polyvecl *v)
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
     invariant(i <= MLDSA_L)
-    invariant(forall(k0, i, MLDSA_L, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
+    invariant(forall(k0, i, MLDSA_L,
+      forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
     invariant(forall(k2, 0, i,
       array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -REDUCE_RANGE_MAX, REDUCE_RANGE_MAX))))
   {

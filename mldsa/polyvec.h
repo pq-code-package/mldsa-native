@@ -42,8 +42,28 @@ __contract__(
 );
 
 #define polyvecl_uniform_gamma1 MLD_NAMESPACE(polyvecl_uniform_gamma1)
+/*************************************************
+ * Name:        polyvecl_uniform_gamma1
+ *
+ * Description: Sample vector of polynomials with uniformly random coefficients
+ *              in [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output
+ *              stream of SHAKE256(seed|nonce)
+ *
+ * Arguments:   - polyvecl *v: pointer to output vector
+ *              - const uint8_t seed[]: byte array with seed of length
+ *                MLDSA_CRHBYTES
+ *              - uint16_t nonce: 16-bit nonce
+ *************************************************/
 void polyvecl_uniform_gamma1(polyvecl *v, const uint8_t seed[MLDSA_CRHBYTES],
-                             uint16_t nonce);
+                             uint16_t nonce)
+__contract__(
+  requires(memory_no_alias(v, sizeof(polyvecl)))
+  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
+  requires(nonce <= (UINT16_MAX - MLDSA_L) / MLDSA_L)
+  assigns(memory_slice(v, sizeof(polyvecl)))
+  ensures(forall(k0, 0, MLDSA_L,
+    array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+);
 
 #define polyvecl_reduce MLD_NAMESPACE(polyvecl_reduce)
 /*************************************************
