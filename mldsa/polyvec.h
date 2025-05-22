@@ -615,12 +615,31 @@ __contract__(
     array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 );
 
-
-
 #define polyvec_matrix_pointwise_montgomery \
   MLD_NAMESPACE(polyvec_matrix_pointwise_montgomery)
+
+/*************************************************
+ * Name:        polyvec_matrix_pointwise_montgomery
+ *
+ * Description: Compute matrix-vector multiplication in NTT domain with
+ *              pointwise multiplication and multiplication by 2^{-32}.
+ *              Input matrix and vector must be in NTT domain representation
+ *              with coefficients bounded by MLD_NTT_BOUND. Output vector t
+ *              will have coefficients bounded by MLDSA_Q.
+ *
+ * Arguments:   - polyveck *t: pointer to output vector t
+ *              - const polyvecl mat[MLDSA_K]: pointer to input matrix
+ *              - const polyvecl *v: pointer to input vector v
+ **************************************************/
 void polyvec_matrix_pointwise_montgomery(polyveck *t,
                                          const polyvecl mat[MLDSA_K],
-                                         const polyvecl *v);
-
+                                         const polyvecl *v)
+__contract__(
+  requires(memory_no_alias(t, sizeof(polyveck)))
+  requires(memory_no_alias(mat, MLDSA_K*sizeof(polyvecl)))
+  requires(memory_no_alias(v, sizeof(polyvecl)))
+  requires(forall(l1, 0, MLDSA_L,
+    array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(object_whole(t))
+);
 #endif /* !MLD_POLYVEC_H */
