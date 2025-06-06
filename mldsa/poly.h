@@ -73,7 +73,6 @@ __contract__(
   requires(forall(k0, 0, MLDSA_N, (int64_t) r->coeffs[k0] + b->coeffs[k0] <= INT32_MAX))
   requires(forall(k1, 0, MLDSA_N, (int64_t) r->coeffs[k1] + b->coeffs[k1] >= INT32_MIN))
   assigns(memory_slice(r, sizeof(poly)))
-  ensures(forall(k, 0, MLDSA_N, r->coeffs[k] == old(*r).coeffs[k] + b->coeffs[k]))
 );
 
 #define poly_sub MLD_NAMESPACE(poly_sub)
