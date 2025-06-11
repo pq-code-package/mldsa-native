@@ -674,6 +674,57 @@ def gen_aarch64_zeta_file(dry_run=False):
     )
 
 
+def gen_avx2_rej_uniform_table_rows():
+    # The index into the lookup table is an 8-bit bitmap, i.e. a number 0..255.
+    # Conceptually, the table entry at index i is a vector of 8 16-bit values, of
+    # which only the first popcount(i) are set; those are the indices of the set-bits
+    # in i.
+    def get_set_bits_idxs(i):
+        bits = list(map(int, format(i, "08b")))
+        bits.reverse()
+        return [bit_idx for bit_idx in range(8) if bits[bit_idx] == 1]
+
+    for i in range(256):
+        idxs = get_set_bits_idxs(i)
+        idxs = [i for i in idxs]
+        # Pad by 0
+        idxs = idxs + [0] * (8 - len(idxs))
+        yield "{" + ",".join(map(str, idxs)) + "}"
+
+
+def gen_avx2_rej_uniform_table(dry_run=False):
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield "#include <stdint.h>"
+        yield '#include "arith_native_x86_64.h"'
+        yield ""
+        yield "/*"
+        yield " * Lookup table used by rejection sampling."
+        yield " * See autogen for details."
+        yield " */"
+        yield "MLD_ALIGN const uint8_t mld_rej_uniform_table[256][8] = {"
+        yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
+        yield "};"
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(avx2_rej_uniform_table)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file(
+        "mldsa/native/x86_64/src/rej_uniform_table.c",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
 def signed_reduce(a):
     """Return signed canonical representative of a mod b"""
     c = a % modulus
@@ -874,6 +925,7 @@ def _main():
     gen_c_zeta_file(args.dry_run)
     gen_aarch64_zeta_file(args.dry_run)
     gen_avx2_zeta_file(args.dry_run)
+    gen_avx2_rej_uniform_table(args.dry_run)
     gen_header_guards(args.dry_run)
     gen_preprocessor_comments(args.dry_run)
 

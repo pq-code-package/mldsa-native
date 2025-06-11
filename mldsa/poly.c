@@ -301,6 +301,20 @@ __contract__(
   unsigned int ctr, pos;
   uint32_t t;
 
+/* TODO: CBMC proof based on mld_rej_uniform_native */
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM)
+  if (offset == 0)
+  {
+    int ret = mld_rej_uniform_native(a, target, buf, buflen);
+    if (ret != -1)
+    {
+      unsigned res = (unsigned)ret;
+      mld_assert_bound(a, res, 0, MLDSA_Q);
+      return res;
+    }
+  }
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
+
   ctr = offset;
   pos = 0;
   /* pos + 3 cannot overflow due to the assumption

@@ -14,6 +14,7 @@
 #define MLD_USE_NATIVE_NTT_CUSTOM_ORDER
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
+#define MLD_USE_NATIVE_REJ_UNIFORM
 
 #if !defined(__ASSEMBLER__)
 #include <string.h>
@@ -32,6 +33,19 @@ static MLD_INLINE void mld_ntt_native(int32_t data[MLDSA_N])
 static MLD_INLINE void mld_intt_native(int32_t data[MLDSA_N])
 {
   mld_invntt_avx2((__m256i *)data, mld_qdata.vec);
+}
+
+static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
+{
+  /* AVX2 implementation assumes specific buffer lengths */
+  if (len != MLDSA_N || buflen != MLD_AVX2_REJ_UNIFORM_BUFLEN)
+  {
+    return -1;
+  }
+
+  return (int)mld_rej_uniform_avx2(r, buf);
 }
 
 #endif /* !__ASSEMBLER__ */

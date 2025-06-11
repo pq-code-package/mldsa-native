@@ -80,23 +80,46 @@ set if there are native implementations for NTT and INTT."
  * Arguments:   - int32_t p[MLDSA_N]: pointer to in/output polynomial
  *
  **************************************************/
-static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N])
+static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 
 #if defined(MLD_USE_NATIVE_INTT)
-    /*************************************************
-     * Name:        mld_intt_native
-     *
-     * Description: Computes inverse of negacyclic number-theoretic transform
-     *(NTT) of a polynomial in place.
-     *
-     *              The input polynomial is in bitreversed order.
-     *              The output polynomial is assumed to be in normal order.
-     *
-     * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
-     **************************************************/
-    static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N])
+/*************************************************
+ * Name:        mld_intt_native
+ *
+ * Description: Computes inverse of negacyclic number-theoretic transform
+ *(NTT) of a polynomial in place.
+ *
+ *              The input polynomial is in bitreversed order.
+ *              The output polynomial is assumed to be in normal order.
+ *
+ * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
+ **************************************************/
+static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_INTT */
+
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM)
+/*************************************************
+ * Name:        mld_rej_uniform_native
+ *
+ * Description: Run rejection sampling on uniform random bytes to generate
+ *              uniform random integers mod q
+ *
+ * Arguments:   - int32_t *r:          pointer to output buffer
+ *              - unsigned len:        requested number of 32-bit integers
+ *                                     (uniform mod q).
+ *              - const uint8_t *buf:  pointer to input buffer
+ *                                     (assumed to be uniform random bytes)
+ *              - unsigned buflen:     length of input buffer in bytes.
+ *
+ * Return -1 if the native implementation does not support the input
+ *lengths. Otherwise, returns non-negative number of sampled 32-bit integers
+ *(at most len).
+ **************************************************/
+static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen);
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
 
 #endif /* !MLD_NATIVE_API_H */

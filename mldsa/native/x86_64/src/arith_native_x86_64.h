@@ -10,6 +10,13 @@
 #include <immintrin.h>
 #include <stdint.h>
 #include "consts.h"
+
+#define MLD_AVX2_REJ_UNIFORM_BUFLEN \
+  (5 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
+
+#define mld_rej_uniform_table MLD_NAMESPACE(mld_rej_uniform_table)
+extern const uint8_t mld_rej_uniform_table[256][8];
+
 #define mld_ntt_avx2 MLD_NAMESPACE(ntt_avx2)
 void mld_ntt_avx2(__m256i *r, const __m256i *mld_qdata);
 
@@ -18,5 +25,9 @@ void mld_invntt_avx2(__m256i *r, const __m256i *mld_qdata);
 
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
 void mld_nttunpack_avx2(__m256i *r);
+
+#define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
+unsigned mld_rej_uniform_avx2(int32_t *r,
+                              const uint8_t buf[MLD_AVX2_REJ_UNIFORM_BUFLEN]);
 
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */
