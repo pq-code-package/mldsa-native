@@ -35,6 +35,9 @@ void mld_nttunpack_avx2(__m256i *r);
 #define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
 unsigned mld_rej_uniform_avx2(int32_t *r, const uint8_t *buf);
 
+#define mld_rej_uniform MLD_NAMESPACE(mld_rej_uniform)
+unsigned mld_rej_uniform(int32_t *r, const uint8_t *buf);
+
 #define mld_rej_uniform_eta2_avx2 MLD_NAMESPACE(mld_rej_uniform_eta2_avx2)
 unsigned mld_rej_uniform_eta2_avx2(int32_t *r, const uint8_t *buf);
 
