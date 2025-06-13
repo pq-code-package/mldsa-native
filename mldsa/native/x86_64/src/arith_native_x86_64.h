@@ -14,6 +14,12 @@
 #define MLD_AVX2_REJ_UNIFORM_BUFLEN \
   (5 * 168) /* REJ_UNIFORM_NBLOCKS * SHAKE128_RATE */
 
+#define MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN \
+  (1 * 136) /* POLY_UNIFORM_ETA_NBLOCKS * SHAKE256_RATE */
+
+#define MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN \
+  (2 * 136) /* POLY_UNIFORM_ETA_NBLOCKS * SHAKE256_RATE */
+
 #define mld_rej_uniform_table MLD_NAMESPACE(mld_rej_uniform_table)
 extern const uint8_t mld_rej_uniform_table[256][8];
 
@@ -29,5 +35,13 @@ void mld_nttunpack_avx2(__m256i *r);
 #define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
 unsigned mld_rej_uniform_avx2(int32_t *r,
                               const uint8_t buf[MLD_AVX2_REJ_UNIFORM_BUFLEN]);
+
+#define mld_rej_uniform_eta2_avx2 MLD_NAMESPACE(mld_rej_uniform_eta2_avx2)
+unsigned mld_rej_uniform_eta2_avx2(
+    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN]);
+
+#define mld_rej_uniform_eta4_avx2 MLD_NAMESPACE(mld_rej_uniform_eta4_avx2)
+unsigned mld_rej_uniform_eta4_avx2(
+    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
 
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */

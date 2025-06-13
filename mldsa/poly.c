@@ -474,6 +474,33 @@ __contract__(
   unsigned int ctr, pos;
   uint32_t t0, t1;
 
+/* TODO: CBMC proof based on mld_rej_uniform_eta2_native */
+#if MLDSA_ETA == 2 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
+  if (offset == 0)
+  {
+    int ret = mld_rej_uniform_eta2_native(a, target, buf, buflen);
+    if (ret != -1)
+    {
+      unsigned res = (unsigned)ret;
+      mld_assert_abs_bound(a, res, MLDSA_ETA + 1);
+      return res;
+    }
+  }
+/* TODO: CBMC proof based on mld_rej_uniform_eta4_native */
+#elif MLDSA_ETA == 4 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4)
+  if (offset == 0)
+  {
+    int ret = mld_rej_uniform_eta4_native(a, target, buf, buflen);
+    if (ret != -1)
+    {
+      unsigned res = (unsigned)ret;
+      mld_assert_abs_bound(a, res, MLDSA_ETA + 1);
+      return res;
+    }
+  }
+#endif /* !(MLDSA_ETA == 2 && MLD_USE_NATIVE_REJ_UNIFORM_ETA2) && MLDSA_ETA == \
+          4 && MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
+
   ctr = offset;
   pos = 0;
   while (ctr < target && pos < buflen)
