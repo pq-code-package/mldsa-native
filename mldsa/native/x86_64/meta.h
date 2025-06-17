@@ -14,6 +14,8 @@
 #define MLD_USE_NATIVE_NTT_CUSTOM_ORDER
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
+#define MLD_USE_NATIVE_POLY_REDUCE
+#define MLD_USE_NATIVE_POLY_CADDQ
 
 #if !defined(__ASSEMBLER__)
 #include <string.h>
@@ -32,6 +34,16 @@ static MLD_INLINE void mld_ntt_native(int32_t data[MLDSA_N])
 static MLD_INLINE void mld_intt_native(int32_t data[MLDSA_N])
 {
   mld_invntt_avx2((__m256i *)data, mld_qdata.vec);
+}
+
+static MLD_INLINE void mld_poly_reduce_native(int32_t a[MLDSA_N])
+{
+  mld_poly_reduce_avx2(a);
+}
+
+static MLD_INLINE void mld_poly_caddq_native(int32_t a[MLDSA_N])
+{
+  mld_poly_caddq_avx2(a);
 }
 
 #endif /* !__ASSEMBLER__ */

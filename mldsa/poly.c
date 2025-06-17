@@ -16,11 +16,16 @@
 
 void poly_reduce(poly *a)
 {
+#if !defined(MLD_USE_NATIVE_POLY_REDUCE)
   unsigned int i;
+#endif
   /* TODO: Introduce the following after using inclusive lower bounds in
    * the underlying debug function mld_debug_check_bounds(). */
   /* mld_assert_bound(a->coeffs, MLDSA_N, INT32_MIN, REDUCE_DOMAIN_MAX); */
 
+#if defined(MLD_USE_NATIVE_POLY_REDUCE)
+  mld_poly_reduce_native(a->coeffs);
+#else
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
@@ -29,15 +34,21 @@ void poly_reduce(poly *a)
   {
     a->coeffs[i] = reduce32(a->coeffs[i]);
   }
+#endif /* !MLD_USE_NATIVE_POLY_REDUCE */
 
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE_RANGE_MAX, REDUCE_RANGE_MAX);
 }
 
 void poly_caddq(poly *a)
 {
+#if !defined(MLD_USE_NATIVE_POLY_CADDQ)
   unsigned int i;
+#endif
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
 
+#if defined(MLD_USE_NATIVE_POLY_CADDQ)
+  mld_poly_caddq_native(a->coeffs);
+#else
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
@@ -47,6 +58,7 @@ void poly_caddq(poly *a)
   {
     a->coeffs[i] = caddq(a->coeffs[i]);
   }
+#endif /* !MLD_USE_NATIVE_POLY_CADDQ */
 
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
 }

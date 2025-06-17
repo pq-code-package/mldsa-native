@@ -80,23 +80,49 @@ set if there are native implementations for NTT and INTT."
  * Arguments:   - int32_t p[MLDSA_N]: pointer to in/output polynomial
  *
  **************************************************/
-static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N])
+static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 
 #if defined(MLD_USE_NATIVE_INTT)
-    /*************************************************
-     * Name:        mld_intt_native
-     *
-     * Description: Computes inverse of negacyclic number-theoretic transform
-     *(NTT) of a polynomial in place.
-     *
-     *              The input polynomial is in bitreversed order.
-     *              The output polynomial is assumed to be in normal order.
-     *
-     * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
-     **************************************************/
-    static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N])
+/*************************************************
+ * Name:        mld_intt_native
+ *
+ * Description: Computes inverse of negacyclic number-theoretic transform
+ *(NTT) of a polynomial in place.
+ *
+ *              The input polynomial is in bitreversed order.
+ *              The output polynomial is assumed to be in normal order.
+ *
+ * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
+ **************************************************/
+static MLD_INLINE void mld_intt_native(int32_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_INTT */
+
+#if defined(MLD_USE_NATIVE_POLY_REDUCE)
+/*************************************************
+ * Name:        mld_poly_reduce_native
+ *
+ * Description: Inplace reduction of all coefficients of polynomial to
+ *              representative in [-6283009,6283008]. Assumes input
+ *              coefficients to be at most 2^31 - 2^22 - 1 in absolute
+ *value.
+ *
+ * Arguments:   - int32_t *a: pointer to input/output polynomial
+ **************************************************/
+static MLD_INLINE void mld_poly_reduce_native(int32_t a[MLDSA_N]);
+#endif /* MLD_USE_NATIVE_POLY_REDUCE */
+
+#if defined(MLD_USE_NATIVE_POLY_CADDQ)
+/*************************************************
+ * Name:        mld_poly_caddq_native
+ *
+ * Description: For all coefficients of in/out polynomial add Q if
+ *              coefficient is negative.
+ *
+ * Arguments:   - int32_t *a: pointer to input/output polynomial
+ **************************************************/
+static MLD_INLINE void mld_poly_caddq_native(int32_t a[MLDSA_N]);
+#endif /* MLD_USE_NATIVE_POLY_CADDQ */
 
 #endif /* !MLD_NATIVE_API_H */
