@@ -26,69 +26,16 @@ void polyvec_matrix_expand(polyvecl mat[MLDSA_K],
                            const uint8_t rho[MLDSA_SEEDBYTES])
 {
   unsigned int i, j;
+
   /*
    * We generate four separate seed arrays rather than a single one to work
    * around limitations in CBMC function contracts dealing with disjoint slices
    * of the same parent object.
    */
 
-  MLD_ALIGN uint8_t seed_ext[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
-
-  for (j = 0; j < 4; j++)
-  __loop__(
-    assigns(j, object_whole(seed_ext))
-    invariant(j <= 4)
-  )
-  {
-    memcpy(seed_ext[j], rho, MLDSA_SEEDBYTES);
-  }
-  /* Sample 4 matrix entries a time. */
-  for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
-  __loop__(
-    assigns(i, j, object_whole(seed_ext), memory_slice(mat, MLDSA_K * sizeof(polyvecl)))
-    invariant(i <= (MLDSA_K * MLDSA_L / 4) * 4 && i % 4 == 0)
-    /* vectors 0 .. i / MLDSA_L are completely sampled */
-    invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
-      array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    /* last vector is sampled up to i % MLDSA_L */
-    invariant(forall(k2, i / MLDSA_L, i / MLDSA_L + 1, forall(l2, 0, i % MLDSA_L,
-      array_bound(mat[k2].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  )
-  {
-    poly tmpvec[4];
-
-    for (j = 0; j < 4; j++)
-    __loop__(
-      assigns(j, object_whole(seed_ext))
-      invariant(j <= 4)
-    )
-    {
-      uint8_t x = (i + j) / MLDSA_L;
-      uint8_t y = (i + j) % MLDSA_L;
-
-      seed_ext[j][MLDSA_SEEDBYTES + 0] = y;
-      seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
-    }
-
-    /*
-     * This call writes across polyvec boundaries for L=5 and L=7.
-     */
-    /* TODO: This is actually not safe; we cannot be sure that the compiler
-     * does not introduce any padding here. Need to refactor the data type to
-     * polymat as in mlkem-native.
-     */
-
-    /* Full struct assignment from local variables to simplify proof */
-    /* TODO: eliminate once CBMC resolves
-     * https://github.com/diffblue/cbmc/issues/8617 */
-    poly_uniform_4x(tmpvec, seed_ext);
-    mat[i / MLDSA_L].vec[i % MLDSA_L] = tmpvec[0];
-    mat[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L] = tmpvec[1];
-    mat[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L] = tmpvec[2];
-    mat[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L] = tmpvec[3];
-  }
-
-  /* For MLDSA_K=6, MLDSA_L=5, process the last two entries individually */
+  MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  memcpy(seed_ext, rho, MLDSA_SEEDBYTES);
+  i = 0;
   while (i < MLDSA_K * MLDSA_L)
   __loop__(
     assigns(i, object_whole(seed_ext), memory_slice(mat, MLDSA_K * sizeof(polyvecl)))
@@ -105,14 +52,14 @@ void polyvec_matrix_expand(polyvecl mat[MLDSA_K],
     uint8_t x = i / MLDSA_L;
     uint8_t y = i % MLDSA_L;
 
-    seed_ext[0][MLDSA_SEEDBYTES + 0] = y;
-    seed_ext[0][MLDSA_SEEDBYTES + 1] = x;
+    seed_ext[MLDSA_SEEDBYTES + 0] = y;
+    seed_ext[MLDSA_SEEDBYTES + 1] = x;
 
 
     /* Full struct assignment from local variables to simplify proof */
     /* TODO: eliminate once CBMC resolves
      * https://github.com/diffblue/cbmc/issues/8617 */
-    poly_uniform(&tmp, seed_ext[0]);
+    poly_uniform(&tmp, seed_ext);
     mat[i / MLDSA_L].vec[i % MLDSA_L] = tmp;
 
     i++;
