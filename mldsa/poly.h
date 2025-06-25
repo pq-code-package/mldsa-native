@@ -176,6 +176,17 @@ __contract__(
   assigns(memory_slice(c, sizeof(poly)))
 );
 
+
+#define poly_pointwise_acc_montgomery \
+  MLD_NAMESPACE(poly_pointwise_acc_montgomery)
+void poly_pointwise_acc_montgomery(poly *c, const poly *a, const poly *b)
+__contract__(
+  requires(memory_no_alias(a, sizeof(poly)))
+  requires(memory_no_alias(b, sizeof(poly)))
+  requires(memory_no_alias(c, sizeof(poly)))
+  assigns(memory_slice(c, sizeof(poly)))
+);
+
 #define poly_power2round MLD_NAMESPACE(poly_power2round)
 /*************************************************
  * Name:        poly_power2round

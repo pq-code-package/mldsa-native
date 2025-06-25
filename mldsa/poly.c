@@ -153,6 +153,19 @@ void poly_pointwise_montgomery(poly *c, const poly *a, const poly *b)
 }
 #endif /* MLD_USE_NATIVE_POINTWISE */
 
+void poly_pointwise_acc_montgomery(poly *c, const poly *a, const poly *b)
+{
+  unsigned int i;
+
+  for (i = 0; i < MLDSA_N; ++i)
+  __loop__(
+    invariant(i <= MLDSA_N))
+  {
+    c->coeffs[i] += montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
+  }
+}
+
+
 void poly_power2round(poly *a1, poly *a0, const poly *a)
 {
   unsigned int i;

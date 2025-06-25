@@ -231,52 +231,11 @@ void polyvecl_pointwise_poly_montgomery(polyvecl *r, const poly *a,
 void polyvecl_pointwise_acc_montgomery(poly *w, const polyvecl *u,
                                        const polyvecl *v)
 {
-  unsigned int i, j;
-  /* The first input is bounded by [0, Q-1] inclusive
-   * The second input is bounded by [-9Q+1, 9Q-1] inclusive . Hence, we can
-   * safely accumulate in 64-bits without intermediate reductions as
-   * MLDSA_L * (MLD_NTT_BOUND-1) * (Q-1) < INT64_MAX
-   *
-   * The worst case is ML-DSA-87: 7 * (9Q-1) * (Q-1) < 2**52
-   * (and likewise for negative values)
-   */
-
-  for (i = 0; i < MLDSA_N; i++)
-  __loop__(
-    assigns(i, j, object_whole(w))
-    invariant(i <= MLDSA_N)
-    invariant(array_abs_bound(w->coeffs, 0, i, MLDSA_Q))
-  )
+  unsigned int i;
+  poly_pointwise_montgomery(w, &u->vec[0], &v->vec[0]);
+  for (i = 1; i < MLDSA_L; i++)
   {
-    int64_t t = 0;
-    int32_t r;
-    for (j = 0; j < MLDSA_L; j++)
-    __loop__(
-      assigns(j, t)
-      invariant(j <= MLDSA_L)
-      invariant(t >= -(int64_t)j*(MLDSA_Q - 1)*(MLD_NTT_BOUND - 1))
-      invariant(t <= (int64_t)j*(MLDSA_Q - 1)*(MLD_NTT_BOUND - 1))
-    )
-    {
-      t += (int64_t)u->vec[j].coeffs[i] * v->vec[j].coeffs[i];
-    }
-
-    /* Substitute j == MLSDA_L into the loop invariant to get... */
-    cassert(j == MLDSA_L);
-    cassert(t >= -(int64_t)MLDSA_L * (MLDSA_Q - 1) * (MLD_NTT_BOUND - 1));
-    cassert(t <= (int64_t)MLDSA_L * (MLDSA_Q - 1) * (MLD_NTT_BOUND - 1));
-
-    /* ...and therefore... */
-    cassert(t >= -MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX);
-    cassert(t < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX);
-
-    /* ...which meets the "strong" case of montgomery_reduce() */
-    r = montgomery_reduce(t);
-
-    /* ...and therefore we can assert a stronger bound on r */
-    cassert(r > -MLDSA_Q);
-    cassert(r < MLDSA_Q);
-    w->coeffs[i] = r;
+    poly_pointwise_acc_montgomery(w, &u->vec[i], &v->vec[i]);
   }
 }
 
