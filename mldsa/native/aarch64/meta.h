@@ -39,6 +39,14 @@ static MLD_INLINE void mld_pointwise_montgomery_native(
   mld_pointwise_montgomery_asm(out, in0, in1);
 }
 
+static MLD_INLINE void mld_pointwise_acc_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N])
+{
+  mld_pointwise_acc_montgomery_asm(out, in0, in1);
+}
+
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_NATIVE_AARCH64_META_H */
