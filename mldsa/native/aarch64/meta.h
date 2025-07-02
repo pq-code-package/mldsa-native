@@ -10,6 +10,7 @@
 /* Set of primitives that this backend replaces */
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
+#define MLD_USE_NATIVE_POINTWISE
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -29,6 +30,13 @@ static MLD_INLINE void mld_intt_native(int32_t data[MLDSA_N])
 {
   mld_intt_asm(data, mld_aarch64_intt_zetas_layer78,
                mld_aarch64_intt_zetas_layer123456);
+}
+
+static MLD_INLINE void mld_pointwise_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N])
+{
+  mld_pointwise_montgomery_asm(out, in0, in1);
 }
 
 #endif /* !__ASSEMBLER__ */
