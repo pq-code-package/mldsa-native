@@ -19,4 +19,9 @@ void mld_invntt_avx2(__m256i *r, const __m256i *mld_qdata);
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
 void mld_nttunpack_avx2(__m256i *r);
 
+#define mld_pointwise_montgomery_avx2 \
+  MLD_NAMESPACE(mld_pointwise_montgomery_avx2)
+void mld_pointwise_montgomery_avx2(__m256i *r, const __m256i *a,
+                                   const __m256i *b, const __m256i *mld_qdata);
+
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */
