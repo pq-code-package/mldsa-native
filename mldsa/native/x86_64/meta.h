@@ -14,6 +14,7 @@
 #define MLD_USE_NATIVE_NTT_CUSTOM_ORDER
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
+#define MLD_USE_NATIVE_POINTWISE
 
 #if !defined(__ASSEMBLER__)
 #include <string.h>
@@ -32,6 +33,14 @@ static MLD_INLINE void mld_ntt_native(int32_t data[MLDSA_N])
 static MLD_INLINE void mld_intt_native(int32_t data[MLDSA_N])
 {
   mld_invntt_avx2((__m256i *)data, mld_qdata.vec);
+}
+
+static MLD_INLINE void mld_pointwise_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N])
+{
+  mld_pointwise_montgomery_avx2((__m256i *)out, (const __m256i *)in0,
+                                (const __m256i *)in1, mld_qdata.vec);
 }
 
 #endif /* !__ASSEMBLER__ */
