@@ -32,4 +32,7 @@ void mld_ntt_asm(int32_t *, const int32_t *, const int32_t *);
 #define mld_intt_asm MLD_NAMESPACE(intt_asm)
 void mld_intt_asm(int32_t *, const int32_t *, const int32_t *);
 
+#define mld_pointwise_montgomery_asm MLD_NAMESPACE(mld_pointwise_montgomery_asm)
+void mld_pointwise_montgomery_asm(int32_t *, const int32_t *, const int32_t *);
+
 #endif /* !MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H */
