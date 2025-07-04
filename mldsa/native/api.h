@@ -96,27 +96,43 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N])
      *
      * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
      **************************************************/
-    static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N])
+    static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_INTT */
 
 #if defined(MLD_USE_NATIVE_POINTWISE)
-    /*************************************************
-     * Name:        mld_pointwise_montgomery_native
-     *
-     * Description: Pointwise multiplication of polynomials in NTT domain
-     *              representation and multiplication of resulting polynomial
-     *              by 2^{-32}.
-     *
-     * Arguments:   - int32_t out[MLDSA_N]: pointer to output polynomial
-     *              - const int32_t in0[MLDSA_N]: pointer to first input
-     *polynomial
-     *              - const int32_t in1[MLDSA_N]: pointer to second input
-     *polynomial
-     **************************************************/
-    static MLD_INLINE
-    void mld_pointwise_montgomery_native(int32_t out[MLDSA_N],
-                                         const int32_t in0[MLDSA_N],
-                                         const int32_t in1[MLDSA_N]);
+/*************************************************
+ * Name:        mld_pointwise_montgomery_native
+ *
+ * Description: Pointwise multiplication of polynomials in NTT domain
+ *              representation and multiplication of resulting polynomial
+ *              by 2^{-32}.
+ *
+ * Arguments:   - int32_t out[MLDSA_N]: pointer to output polynomial
+ *              - const int32_t in0[MLDSA_N]: pointer to first input
+ *polynomial
+ *              - const int32_t in1[MLDSA_N]: pointer to second input
+ *polynomial
+ **************************************************/
+static MLD_INLINE void mld_pointwise_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N]);
+
+/*************************************************
+ * Name:        mld_pointwise_acc_montgomery_native
+ *
+ * Description: Pointwise multiplication of polynomials in NTT domain
+ *              representation and multiplication of resulting polynomial
+ *              by 2^{-32}, with accumulation.
+ *
+ * Arguments:   - int32_t out[MLDSA_N]: pointer to output polynomial
+ *              - const int32_t in0[MLDSA_N]: pointer to first input polynomial
+ *              - const int32_t in1[MLDSA_N]: pointer to second input polynomial
+ *
+ * Note: out = out + in0 * in1 * 2^{-32}
+ **************************************************/
+static MLD_INLINE void mld_pointwise_acc_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POINTWISE */
 
 #endif /* !MLD_NATIVE_API_H */

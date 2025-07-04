@@ -43,6 +43,14 @@ static MLD_INLINE void mld_pointwise_montgomery_native(
                                 (const __m256i *)in1, mld_qdata.vec);
 }
 
+static MLD_INLINE void mld_pointwise_acc_montgomery_native(
+    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
+    const int32_t in1[MLDSA_N])
+{
+  mld_pointwise_acc_montgomery_avx2((__m256i *)out, (const __m256i *)in0,
+                                    (const __m256i *)in1, mld_qdata.vec);
+}
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_NATIVE_X86_64_META_H */
