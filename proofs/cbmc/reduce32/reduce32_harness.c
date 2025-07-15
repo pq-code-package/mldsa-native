@@ -6,5 +6,5 @@
 void harness(void)
 {
   int32_t a;
-  int32_t result = reduce32(a);
+  int32_t result = mld_reduce32(a);
 }

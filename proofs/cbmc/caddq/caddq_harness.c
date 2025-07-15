@@ -6,5 +6,5 @@
 void harness(void)
 {
   int32_t a;
-  int32_t result = caddq(a);
+  int32_t result = mld_caddq(a);
 }

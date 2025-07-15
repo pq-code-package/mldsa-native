@@ -51,7 +51,6 @@ static MLD_INLINE int32_t mld_cast_uint32_to_int32(uint32_t x)
 #pragma CPROVER check pop
 #endif
 
-#define montgomery_reduce MLD_NAMESPACE(montgomery_reduce)
 /*************************************************
  * Name:        montgomery_reduce
  *
@@ -73,7 +72,7 @@ static MLD_INLINE int32_t mld_cast_uint32_to_int32(uint32_t x)
  *
  * Returns r.
  **************************************************/
-static MLD_INLINE int32_t montgomery_reduce(int64_t a)
+static MLD_INLINE int32_t mld_montgomery_reduce(int64_t a)
 __contract__(
   requires(a >= -MONTGOMERY_REDUCE_DOMAIN_MAX && a <= MONTGOMERY_REDUCE_DOMAIN_MAX)
   ensures(return_value >= INT32_MIN && return_value < REDUCE32_DOMAIN_MAX)
@@ -107,7 +106,6 @@ __contract__(
 }
 
 
-#define reduce32 MLD_NAMESPACE(reduce32)
 /*************************************************
  * Name:        reduce32
  *
@@ -119,7 +117,7 @@ __contract__(
  *
  * Returns r.
  **************************************************/
-static MLD_INLINE int32_t reduce32(int32_t a)
+static MLD_INLINE int32_t mld_reduce32(int32_t a)
 __contract__(
   requires(a <= REDUCE32_DOMAIN_MAX)
   ensures(return_value >= -REDUCE32_RANGE_MAX)
@@ -134,7 +132,6 @@ __contract__(
   return t;
 }
 
-#define caddq MLD_NAMESPACE(caddq)
 /*************************************************
  * Name:        caddq
  *
@@ -144,7 +141,7 @@ __contract__(
  *
  * Returns r.
  **************************************************/
-static MLD_INLINE int32_t caddq(int32_t a)
+static MLD_INLINE int32_t mld_caddq(int32_t a)
 __contract__(
   requires(a > -MLDSA_Q)
   requires(a < MLDSA_Q)

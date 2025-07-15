@@ -27,7 +27,7 @@ void poly_reduce(poly *a)
     invariant(forall(k0, i, MLDSA_N, a->coeffs[k0] == loop_entry(*a).coeffs[k0]))
     invariant(array_bound(a->coeffs, 0, i, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX)))
   {
-    a->coeffs[i] = reduce32(a->coeffs[i]);
+    a->coeffs[i] = mld_reduce32(a->coeffs[i]);
   }
 
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
@@ -45,7 +45,7 @@ void poly_caddq(poly *a)
     invariant(array_bound(a->coeffs, 0, i, 0, MLDSA_Q))
     )
   {
-    a->coeffs[i] = caddq(a->coeffs[i]);
+    a->coeffs[i] = mld_caddq(a->coeffs[i]);
   }
 
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
@@ -145,7 +145,7 @@ void poly_pointwise_montgomery(poly *c, const poly *a, const poly *b)
     invariant(array_abs_bound(c->coeffs, 0, i, MLDSA_Q))
   )
   {
-    c->coeffs[i] = montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
+    c->coeffs[i] = mld_montgomery_reduce((int64_t)a->coeffs[i] * b->coeffs[i]);
   }
 }
 

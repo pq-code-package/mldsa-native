@@ -276,7 +276,7 @@ void polyvecl_pointwise_acc_montgomery(poly *w, const polyvecl *u,
     cassert(t < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX);
 
     /* ...which meets the "strong" case of montgomery_reduce() */
-    r = montgomery_reduce(t);
+    r = mld_montgomery_reduce(t);
 
     /* ...and therefore we can assert a stronger bound on r */
     cassert(r > -MLDSA_Q);

@@ -7,5 +7,5 @@ void harness(void)
 {
   int64_t a;
   int32_t r;
-  r = montgomery_reduce(a);
+  r = mld_montgomery_reduce(a);
 }

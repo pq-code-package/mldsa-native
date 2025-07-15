@@ -13,7 +13,7 @@ __contract__(
   ensures(return_value > -MLDSA_Q && return_value < MLDSA_Q)
 )
 {
-  return montgomery_reduce((int64_t)a * (int64_t)b);
+  return mld_montgomery_reduce((int64_t)a * (int64_t)b);
   /* TODO: reason about bounds */
 }
 
@@ -35,7 +35,7 @@ __contract__(
 )
 {
   const int32_t f = 41978; /* mont^2/256 */
-  return montgomery_reduce((int64_t)a * f);
+  return mld_montgomery_reduce((int64_t)a * f);
   /* TODO: reason about bounds */
 }
 
