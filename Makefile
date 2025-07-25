@@ -22,7 +22,7 @@ all: build
 
 W := $(EXEC_WRAPPER)
 
-# Platform-specific hash command detection for cross-platform compatibility
+# Platform-specific hash command
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     SHA256_CMD = shasum -a 256
