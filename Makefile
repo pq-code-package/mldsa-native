@@ -22,6 +22,14 @@ all: build
 
 W := $(EXEC_WRAPPER)
 
+# Platform-specific hash command detection for cross-platform compatibility
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    SHA256_CMD = shasum -a 256
+else
+    SHA256_CMD = sha256sum
+endif
+
 include test/mk/config.mk
 include test/mk/components.mk
 include test/mk/rules.mk
@@ -35,11 +43,11 @@ test: run_kat run_func run_acvp
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
-	$(W) $(MLDSA44_DIR)/bin/gen_KAT44 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-DSA-44  kat-sha256
+	$(W) $(MLDSA44_DIR)/bin/gen_KAT44 | $(SHA256_CMD) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-44  kat-sha256
 run_kat_65: kat_65
-	$(W) $(MLDSA65_DIR)/bin/gen_KAT65 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-DSA-65  kat-sha256
+	$(W) $(MLDSA65_DIR)/bin/gen_KAT65 | $(SHA256_CMD) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-65  kat-sha256
 run_kat_87: kat_87
-	$(W) $(MLDSA87_DIR)/bin/gen_KAT87 | sha256sum | cut -d " " -f 1 | xargs ./META.sh ML-DSA-87  kat-sha256
+	$(W) $(MLDSA87_DIR)/bin/gen_KAT87 | $(SHA256_CMD) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-87  kat-sha256
 run_kat: run_kat_44 run_kat_65 run_kat_87
 
 run_func_44: func_44
