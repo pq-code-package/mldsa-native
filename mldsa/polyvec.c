@@ -295,20 +295,20 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
 int mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
 {
   unsigned int i;
+  int rc = 0;
 
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
     invariant(i <= MLDSA_L)
+    invariant(rc == 0 || rc == 1)
     invariant(forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, bound)))
   )
   {
-    if (mld_poly_chknorm(&v->vec[i], bound))
-    {
-      return 1;
-    }
+    /* Constant-time: accumulate result instead of early return */
+    rc |= mld_poly_chknorm(&v->vec[i], bound);
   }
 
-  return 0;
+  return rc;
 }
 
 /**************************************************************/
@@ -450,20 +450,20 @@ void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *r, const mld_poly *a,
 int mld_polyveck_chknorm(const mld_polyveck *v, int32_t bound)
 {
   unsigned int i;
+  int rc = 0;
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
     invariant(i <= MLDSA_K)
+    invariant(rc == 0 || rc == 1)
     invariant(forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, bound)))
   )
   {
-    if (mld_poly_chknorm(&v->vec[i], bound))
-    {
-      return 1;
-    }
+    /* Constant-time: accumulate result instead of early return */
+    rc |= mld_poly_chknorm(&v->vec[i], bound);
   }
 
-  return 0;
+  return rc;
 }
 
 void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
