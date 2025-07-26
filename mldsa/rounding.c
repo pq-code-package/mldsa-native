@@ -17,15 +17,18 @@ void mld_decompose(int32_t *a0, int32_t *a1, int32_t a)
 {
   *a1 = (a + 127) >> 7;
   /* We know a >= 0 and a < MLDSA_Q, so... */
+  /* check-magic: 65472 == (MLDSA_Q - 1 + 127) >> 7 */
   cassert(*a1 >= 0 && *a1 <= 65472);
 
 #if MLDSA_MODE == 2
+  /* check-magic: 11275 == (1 << 24) / 88 */
   *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
   cassert(*a1 >= 0 && *a1 <= 44);
 
   *a1 ^= ((43 - *a1) >> 31) & *a1;
   cassert(*a1 >= 0 && *a1 <= 43);
 #else /* MLDSA_MODE == 2 */
+  /* check-magic: 1025 == (1 << 22) / 32 + 1 */
   *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
   cassert(*a1 >= 0 && *a1 <= 16);
 

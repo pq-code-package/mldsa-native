@@ -9,12 +9,14 @@
 #include "cbmc.h"
 #include "common.h"
 
+/* check-magic: -4186625 == signed_mod(2^32, MLDSA_Q) */
 #define MONT -4186625 /* 2^32 % MLDSA_Q */
 
 /* Upper bound for domain of mld_reduce32() */
 #define REDUCE32_DOMAIN_MAX (INT32_MAX - (1 << 22))
 
 /* Absolute bound for range of mld_reduce32() */
+/* check-magic: 6283009 == 3 * MLDSA_Q / 4 */
 #define REDUCE32_RANGE_MAX 6283009
 
 /* Absolute bound for domain of mld_montgomery_reduce() */

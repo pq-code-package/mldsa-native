@@ -34,6 +34,7 @@ __contract__(
   ensures(return_value > -MLD_INTT_BOUND && return_value < MLD_INTT_BOUND)
 )
 {
+  /* check-magic: 41978 == signed_mod(pow(2^32, 2, MLDSA_Q) / 256, MLDSA_Q) */
   const int32_t f = 41978; /* mont^2/256 */
   return mld_montgomery_reduce((int64_t)a * f);
   /* TODO: reason about bounds */
