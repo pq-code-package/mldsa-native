@@ -14,7 +14,7 @@
 	run_bench_44 run_bench_65 run_bench_87 run_bench \
 	bench_components_44 bench_components_65 bench_components_87 bench_components \
 	run_bench_components_44 run_bench_components_65 run_bench_components_87 run_bench_components \
-	build test all \
+	build test all check-magic \
 	clean quickcheck check-defined-CYCLES
 
 .DEFAULT_GOAL := build
@@ -31,7 +31,7 @@ quickcheck: test
 build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp
+test: run_kat run_func run_acvp check-magic
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
@@ -142,6 +142,10 @@ run_bench_components: \
 	run_bench_components_44 .WAIT\
 	run_bench_components_65 .WAIT\
 	run_bench_components_87
+
+check-magic:
+	$(Q)echo "  Checking magic constants..."
+	$(Q)python3 scripts/check-magic
 
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so

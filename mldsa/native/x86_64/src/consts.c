@@ -16,9 +16,13 @@
 #include "align.h"
 #include "consts.h"
 #define MLD_AVX2_Q MLDSA_Q
+/* check-magic: 58728449 == unsigned_mod(pow(MLDSA_Q, -1, 2^32), 2^32) */
 #define MLD_AVX2_QINV 58728449 /* q^(-1) mod 2^32 */
+/* check-magic: -4186625 == signed_mod(2^32, MLDSA_Q) */
 #define MLD_AVX2_MONT -4186625 /* 2^32 mod q */
+/* check-magic: 41978 == signed_mod(pow(2^32, 2, MLDSA_Q) / 256, MLDSA_Q) */
 #define MLD_AVX2_DIV 41978     /* mont^2/256 */
+/* check-magic: -8395782 == signed_mod(41978 * 58728449, 2^32) */
 #define MLD_AVX2_DIV_QINV -8395782
 
 const qdata_t mld_qdata = {{

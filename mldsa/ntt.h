@@ -12,6 +12,7 @@
 /* Absolute exclusive upper bound for the output of the forward NTT */
 #define MLD_NTT_BOUND (9 * MLDSA_Q)
 /* Absolute exclusive upper bound for the output of the inverse NTT*/
+/* check-magic: 4211139 == MLDSA_Q / 2 + 1 */
 #define MLD_INTT_BOUND 4211139
 
 #define mld_ntt MLD_NAMESPACE(ntt)
