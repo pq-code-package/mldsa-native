@@ -25,8 +25,10 @@ SIZE := $(CROSS_PREFIX)size
 # 	such as lto. Using gcc-ar is preferred when creating or linking static libraries
 # 	if the binary is compiled with -flto. However, it is not universally present, so
 #       only use it if available.
-CC_AR ?= $(if $(and $(findstring gcc,$(shell $(CC) --version)), $(findstring gcc-ar, $(shell which $(CROSS_PREFIX)gcc-ar))),gcc-ar,ar)
+# NOTE: Similarly, clang's LTO requires llvm-ar for proper static library creation.
+CC_AR ?= $(if $(and $(findstring gcc,$(shell $(CC) --version)), $(findstring gcc-ar, $(shell which $(CROSS_PREFIX)gcc-ar))),gcc-ar,$(if $(and $(findstring clang,$(shell $(CC) --version)), $(findstring llvm-ar, $(shell which $(CROSS_PREFIX)llvm-ar))),llvm-ar,ar))
 CC_AR  := $(CROSS_PREFIX)$(CC_AR)
+
 
 #################
 # Common config #
