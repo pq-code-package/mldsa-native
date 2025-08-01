@@ -24,7 +24,7 @@ void mld_decompose(int32_t *a0, int32_t *a1, int32_t a)
   *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
   cassert(*a1 >= 0 && *a1 <= 44);
 
-  *a1 = mld_ct_sel_int32(0, *a1, mld_ct_cmask_neg_i32(43 - *a1));
+  *a1 ^= ((43 - *a1) >> 31) & *a1;
   cassert(*a1 >= 0 && *a1 <= 43);
 #else /* MLDSA_MODE == 2 */
   *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
@@ -36,8 +36,7 @@ void mld_decompose(int32_t *a0, int32_t *a1, int32_t a)
 #endif /* MLDSA_MODE != 2 */
 
   *a0 = a - *a1 * 2 * MLDSA_GAMMA2;
-  *a0 = mld_ct_sel_int32(*a0 - MLDSA_Q, *a0,
-                         mld_ct_cmask_neg_i32((MLDSA_Q - 1) / 2 - *a0));
+  *a0 -= (((MLDSA_Q - 1) / 2 - *a0) >> 31) & MLDSA_Q;
 }
 
 unsigned int mld_make_hint(int32_t a0, int32_t a1)

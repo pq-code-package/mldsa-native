@@ -316,7 +316,7 @@ __contract__(
   uint8_t challenge_bytes[MLDSA_CTILDEBYTES];
   unsigned int n;
   mld_polyvecl y, z;
-  mld_polyveck w2, w1, w0, h;
+  mld_polyveck w1, w0, h;
   mld_poly cp;
   uint32_t z_invalid, w0_invalid, h_invalid;
 
@@ -332,8 +332,8 @@ __contract__(
 
   /* Decompose w and call the random oracle */
   mld_polyveck_caddq(&w1);
-  mld_polyveck_decompose(&w2, &w0, &w1);
-  mld_polyveck_pack_w1(sig, &w2);
+  mld_polyveck_decompose(&w1, &w0, &w1);
+  mld_polyveck_pack_w1(sig, &w1);
 
   mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
@@ -364,7 +364,6 @@ __contract__(
     mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
     mld_zeroize(&y, sizeof(y));
     mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
     mld_zeroize(&w1, sizeof(w1));
     mld_zeroize(&w0, sizeof(w0));
     mld_zeroize(&h, sizeof(h));
@@ -395,7 +394,6 @@ __contract__(
     mld_zeroize(challenge_bytes, sizeof(challenge_bytes));
     mld_zeroize(&y, sizeof(y));
     mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
     mld_zeroize(&w1, sizeof(w1));
     mld_zeroize(&w0, sizeof(w0));
     mld_zeroize(&h, sizeof(h));
@@ -417,7 +415,6 @@ __contract__(
     mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
     mld_zeroize(&y, sizeof(y));
     mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
     mld_zeroize(&w1, sizeof(w1));
     mld_zeroize(&w0, sizeof(w0));
     mld_zeroize(&h, sizeof(h));
@@ -436,15 +433,14 @@ __contract__(
    * For a more detailed discussion, refer to https://eprint.iacr.org/2022/1406.
    */
   MLD_CT_TESTING_DECLASSIFY(&w0, sizeof(w0));
-  MLD_CT_TESTING_DECLASSIFY(&w2, sizeof(w2));
-  n = mld_polyveck_make_hint(&h, &w0, &w2);
+  MLD_CT_TESTING_DECLASSIFY(&w1, sizeof(w1));
+  n = mld_polyveck_make_hint(&h, &w0, &w1);
   if (n > MLDSA_OMEGA)
   {
     /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
     mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
     mld_zeroize(&y, sizeof(y));
     mld_zeroize(&z, sizeof(z));
-    mld_zeroize(&w2, sizeof(w2));
     mld_zeroize(&w1, sizeof(w1));
     mld_zeroize(&w0, sizeof(w0));
     mld_zeroize(&h, sizeof(h));
@@ -463,7 +459,6 @@ __contract__(
   mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
   mld_zeroize(&y, sizeof(y));
   mld_zeroize(&z, sizeof(z));
-  mld_zeroize(&w2, sizeof(w2));
   mld_zeroize(&w1, sizeof(w1));
   mld_zeroize(&w0, sizeof(w0));
   mld_zeroize(&h, sizeof(h));

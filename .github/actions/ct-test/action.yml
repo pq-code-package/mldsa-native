@@ -41,4 +41,4 @@ runs:
       - shell: ${{ env.SHELL }}
         run: |
           make clean
-          tests func --exec-wrapper="valgrind --error-exitcode=1 ${{ inputs.valgrind_flags }}" --cflags="-DMLD_CONFIG_CT_TESTING_ENABLED -DNTESTS=5 ${{ inputs.cflags }}"
+          tests func --exec-wrapper="valgrind --error-exitcode=1 ${{ inputs.valgrind_flags }}" --cflags="-DMLD_CONFIG_CT_TESTING_ENABLED -DNTESTS=5 ${{ inputs.cflags }} -flto"
