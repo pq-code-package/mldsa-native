@@ -174,9 +174,19 @@ void mld_poly_power2round(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 
 void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 {
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) && MLDSA_MODE == 2
+  /* TODO: proof */
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_poly_decompose_88_native(a1->coeffs, a0->coeffs, a->coeffs);
+#elif defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) && \
+    (MLDSA_MODE == 3 || MLDSA_MODE == 5)
+  /* TODO: proof */
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_poly_decompose_32_native(a1->coeffs, a0->coeffs, a->coeffs);
+#else  /* !None && MLD_USE_NATIVE_POLY_DECOMPOSE_32 && (MLDSA_MODE == 3 || \
+          MLDSA_MODE == 5) */
   unsigned int i;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     assigns(i, memory_slice(a0, sizeof(mld_poly)), memory_slice(a1, sizeof(mld_poly)))
@@ -187,6 +197,8 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
   {
     mld_decompose(&a0->coeffs[i], &a1->coeffs[i], a->coeffs[i]);
   }
+#endif /* !None && !(MLD_USE_NATIVE_POLY_DECOMPOSE_32 && (MLDSA_MODE == 3 || \
+          MLDSA_MODE == 5)) */
 
   mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
   mld_assert_bound(a1->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));

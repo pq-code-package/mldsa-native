@@ -54,4 +54,10 @@ unsigned mld_rej_uniform_eta2_avx2(
 unsigned mld_rej_uniform_eta4_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
 
+#define mld_poly_decompose_32_avx2 MLD_NAMESPACE(mld_poly_decompose_32_avx2)
+void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0, const __m256i *a);
+
+#define mld_poly_decompose_88_avx2 MLD_NAMESPACE(mld_poly_decompose_88_avx2)
+void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a);
+
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */

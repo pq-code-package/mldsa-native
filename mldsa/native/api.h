@@ -168,4 +168,47 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   unsigned buflen);
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
 
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
+/*************************************************
+ * Name:        mld_poly_decompose_32_native
+ *
+ * Description: Native implementation of poly_decompose for GAMMA2 = (Q-1)/32.
+ *              For all coefficients c of the input polynomial,
+ *              compute high and low bits c0, c1 such
+ *              c mod MLDSA_Q = c1*(2*GAMMA2) + c0
+ *              with -(2*GAMMA2)/2 < c0 <= (2*GAMMA2)/2 except
+ *              c1 = (MLDSA_Q-1)/(2*GAMMA2) where we set
+ *              c1 = 0 and -(2*GAMMA2)/2 <= c0 = c mod MLDSA_Q - MLDSA_Q < 0.
+ *              Assumes coefficients to be standard representatives.
+ *
+ * Arguments:   - int32_t *a1: output polynomial with coefficients c1
+ *              - int32_t *a0: output polynomial with coefficients c0
+ *              - const int32_t *a: input polynomial
+ **************************************************/
+static MLD_INLINE void mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a);
+#endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 */
+
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+/*************************************************
+ * Name:        mld_poly_decompose_88_native
+ *
+ * Description: Native implementation of poly_decompose for GAMMA2 = (Q-1)/88.
+ *              For all coefficients c of the input polynomial,
+ *              compute high and low bits c0, c1 such
+ *              c mod MLDSA_Q = c1*(2*GAMMA2) + c0
+ *              with -(2*GAMMA2)/2 < c0 <= (2*GAMMA2)/2 except
+ *              c1 = (MLDSA_Q-1)/(2*GAMMA2) where we set
+ *              c1 = 0 and -(2*GAMMA2)/2 <= c0 = c mod MLDSA_Q - MLDSA_Q < 0.
+ *              Assumes coefficients to be standard representatives.
+ *
+ * Arguments:   - int32_t *a1: output polynomial with coefficients c1
+ *              - int32_t *a0: output polynomial with coefficients c0
+ *              - const int32_t *a: input polynomial
+ **************************************************/
+static MLD_INLINE void mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a);
+#endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
+
+
 #endif /* !MLD_NATIVE_API_H */

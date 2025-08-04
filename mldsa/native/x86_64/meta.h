@@ -17,6 +17,8 @@
 #define MLD_USE_NATIVE_REJ_UNIFORM
 #define MLD_USE_NATIVE_REJ_UNIFORM_ETA2
 #define MLD_USE_NATIVE_REJ_UNIFORM_ETA4
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
 
 #if !defined(__ASSEMBLER__)
 #include <string.h>
@@ -96,6 +98,18 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   outlen = (int)mld_rej_uniform_eta4_avx2(r, buf);
   MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
   return outlen;
+}
+
+static MLD_INLINE void mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a)
+{
+  mld_poly_decompose_32_avx2((__m256i *)a1, (__m256i *)a0, (const __m256i *)a);
+}
+
+static MLD_INLINE void mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a)
+{
+  mld_poly_decompose_88_avx2((__m256i *)a1, (__m256i *)a0, (const __m256i *)a);
 }
 
 #endif /* !__ASSEMBLER__ */
