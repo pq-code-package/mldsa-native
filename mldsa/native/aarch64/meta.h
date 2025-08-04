@@ -13,6 +13,8 @@
 #define MLD_USE_NATIVE_REJ_UNIFORM
 #define MLD_USE_NATIVE_REJ_UNIFORM_ETA2
 #define MLD_USE_NATIVE_REJ_UNIFORM_ETA4
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -91,6 +93,18 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
       (int)mld_rej_uniform_eta4_asm(r, buf, buflen, mld_rej_uniform_eta_table);
   MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
   return outlen;
+}
+
+static MLD_INLINE void mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a)
+{
+  mld_poly_decompose_32_asm(a1, a0, a);
+}
+
+static MLD_INLINE void mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
+                                                    const int32_t *a)
+{
+  mld_poly_decompose_88_asm(a1, a0, a);
 }
 
 #endif /* !__ASSEMBLER__ */
