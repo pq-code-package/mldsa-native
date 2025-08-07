@@ -228,16 +228,47 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
 void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
 {
   unsigned int i;
+  mld_poly a0;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
 
+  /* Reference: The reference implementation has a function use_hint operating
+   * on individual coefficients that first calls decompose and then uses the
+   * same conditionals as in the following. We instead call decompose on the
+   * entire polynomial with the benefit of being able to re-use the native
+   * poly_decompose implementation at the cost of a temporay polynomial on the
+   * stack.
+   */
+  mld_poly_decompose(b, &a0, a);
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
     invariant(array_bound(b->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+    invariant(forall(k0, i, MLDSA_N, b->coeffs[k0] == loop_entry(*b).coeffs[k0]))
   )
   {
-    b->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
+    if (h->coeffs[i] != 0)
+    {
+#if MLDSA_MODE == 2
+      if (a0.coeffs[i] > 0)
+      {
+        b->coeffs[i] = (b->coeffs[i] == 43) ? 0 : b->coeffs[i] + 1;
+      }
+      else
+      {
+        b->coeffs[i] = (b->coeffs[i] == 0) ? 43 : b->coeffs[i] - 1;
+      }
+#else  /* MLDSA_MODE == 2 */
+      if (a0.coeffs[i] > 0)
+      {
+        b->coeffs[i] = (b->coeffs[i] + 1) & 15;
+      }
+      else
+      {
+        b->coeffs[i] = (b->coeffs[i] - 1) & 15;
+      }
+#endif /* MLDSA_MODE != 2 */
+    }
   }
 
   mld_assert_bound(b->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));

@@ -121,51 +121,5 @@ __contract__(
   return 0;
 }
 
-/*************************************************
- * Name:        mld_use_hint
- *
- * Description: Correct high bits according to hint.
- *
- * Arguments:   - int32_t a: input element
- *              - unsigned int hint: hint bit
- *
- * Returns corrected high bits.
- **************************************************/
-static MLD_INLINE int32_t mld_use_hint(int32_t a, unsigned int hint)
-__contract__(
-  requires(hint >= 0 && hint <= 1)
-  requires(a >= 0 && a < MLDSA_Q)
-  ensures(return_value >= 0 && return_value < (MLDSA_Q-1)/(2*MLDSA_GAMMA2))
-)
-{
-  int32_t a0, a1;
-
-  mld_decompose(&a0, &a1, a);
-  if (hint == 0)
-  {
-    return a1;
-  }
-
-#if MLDSA_MODE == 2
-  if (a0 > 0)
-  {
-    return (a1 == 43) ? 0 : a1 + 1;
-  }
-  else
-  {
-    return (a1 == 0) ? 43 : a1 - 1;
-  }
-#else  /* MLDSA_MODE == 2 */
-  if (a0 > 0)
-  {
-    return (a1 + 1) & 15;
-  }
-  else
-  {
-    return (a1 - 1) & 15;
-  }
-#endif /* MLDSA_MODE != 2 */
-}
-
 
 #endif /* !MLD_ROUNDING_H */
