@@ -243,21 +243,63 @@ __contract__(
 )
 {
   keccak_state state;
+  uint8_t buffer[8];
+  size_t buffer_pos = 0;
+  size_t i;
+
   shake256_init(&state);
-  shake256_absorb(&state, in1, in1len);
+
+  /* Process in1 in 8-byte chunks */
+  for (i = 0; i < in1len; i++)
+  {
+    buffer[buffer_pos++] = in1[i];
+    if (buffer_pos == 8)
+    {
+      shake256_absorb(&state, buffer, 8);
+      buffer_pos = 0;
+    }
+  }
+
+  /* Process in2 in 8-byte chunks if present */
   if (in2 != NULL)
   {
-    shake256_absorb(&state, in2, in2len);
+    for (i = 0; i < in2len; i++)
+    {
+      buffer[buffer_pos++] = in2[i];
+      if (buffer_pos == 8)
+      {
+        shake256_absorb(&state, buffer, 8);
+        buffer_pos = 0;
+      }
+    }
   }
+
+  /* Process in3 in 8-byte chunks if present */
   if (in3 != NULL)
   {
-    shake256_absorb(&state, in3, in3len);
+    for (i = 0; i < in3len; i++)
+    {
+      buffer[buffer_pos++] = in3[i];
+      if (buffer_pos == 8)
+      {
+        shake256_absorb(&state, buffer, 8);
+        buffer_pos = 0;
+      }
+    }
   }
+
+  /* Absorb any remaining bytes in buffer */
+  if (buffer_pos > 0)
+  {
+    shake256_absorb(&state, buffer, buffer_pos);
+  }
+
   shake256_finalize(&state);
   shake256_squeeze(out, outlen, &state);
 
   /* FIPS 204. Section 3.6.3 Destruction of intermediate values. */
   mld_zeroize(&state, sizeof(state));
+  mld_zeroize(buffer, sizeof(buffer));
 }
 
 /* Reference: The reference implementation does not explicitly   */
