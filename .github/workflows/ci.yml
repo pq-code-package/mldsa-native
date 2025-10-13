@@ -362,6 +362,16 @@ jobs:
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
           cflags: "-std=c23 ${{ matrix.cflags }}"
+      - name: native bench
+        uses: ./.github/actions/bench
+        with:
+          name: ""
+          cflags: ${{ matrix.target.cflags }}
+          perf: "NO"
+          store_results: false
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: ${{ matrix.compiler.shell }}
+          opt: ${{ matrix.compiler.opt }}
   stack_analysis:
     name: Stack analysis (${{ matrix.target.name }}, ${{ matrix.cflags }})
     strategy:
