@@ -179,10 +179,20 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
                                  const uint8_t seed[MLDSA_CRHBYTES],
                                  uint16_t nonce)
 {
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+  int i;
+#endif
+
   /* Safety: nonce is at most ((UINT16_MAX - MLDSA_L) / MLDSA_L), and, hence,
    * this cast is safe. See NONCE_UB comment in sign.c. */
   nonce = (uint16_t)(MLDSA_L * nonce);
   /* Now, nonce <= UINT16_MAX - (MLDSA_L - 1), so the casts below are safe. */
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+  for (i = 0; i < MLDSA_L; i++)
+  {
+    mld_poly_uniform_gamma1(&v->vec[i], seed, (uint16_t)(nonce + i));
+  }
+#else /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #if MLDSA_L == 4
   mld_poly_uniform_gamma1_4x(&v->vec[0], &v->vec[1], &v->vec[2], &v->vec[3],
                              seed, nonce, (uint16_t)(nonce + 1),
@@ -201,6 +211,7 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
                              seed, (uint16_t)(nonce + 3), (uint16_t)(nonce + 4),
                              (uint16_t)(nonce + 5), (uint16_t)(nonce + 6));
 #endif /* MLDSA_L == 7 */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
   mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -(MLDSA_GAMMA1 - 1),
                       MLDSA_GAMMA1 + 1);
