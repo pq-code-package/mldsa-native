@@ -89,6 +89,7 @@ __contract__(
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
 /*************************************************
  * Name:        mld_poly_uniform_eta
@@ -128,6 +129,32 @@ __contract__(
   ensures(array_abs_bound(r2->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
   ensures(array_abs_bound(r3->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#define mld_poly_uniform_eta MLD_NAMESPACE_KL(poly_uniform_eta)
+/*************************************************
+ * Name:        mld_poly_uniform_eta
+ *
+ * Description: Sample polynomial with uniformly random coefficients
+ *              in [-MLDSA_ETA,MLDSA_ETA] by performing rejection sampling on
+ *              the output stream from SHAKE256(seed|nonce)
+ *
+ * Arguments:   - mld_poly *r: pointer to output polynomial
+ *              - const uint8_t seed[]: byte array with seed of length
+ *                MLDSA_CRHBYTES
+ *              - uint8_t nonce: nonce
+ **************************************************/
+MLD_INTERNAL_API
+void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
+                          uint8_t nonce)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
+  assigns(memory_slice(r, sizeof(mld_poly)))
+  ensures(array_abs_bound(r->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
+);
+#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)

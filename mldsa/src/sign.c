@@ -132,6 +132,20 @@ __contract__(
 )
 {
 /* Sample short vectors s1 and s2 */
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+  int i;
+  uint16_t nonce = 0;
+  /* Safety: The nonces are at most 14 (MLDSA_L + MLDSA_K - 1), and, hence, the
+   * casts are safe. */
+  for (i = 0; i < MLDSA_L; i++)
+  {
+    mld_poly_uniform_eta(&s1->vec[i], seed, (uint8_t)(nonce + i));
+  }
+  for (i = 0; i < MLDSA_K; i++)
+  {
+    mld_poly_uniform_eta(&s2->vec[i], seed, (uint8_t)(nonce + MLDSA_L + i));
+  }
+#else /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #if MLD_CONFIG_PARAMETER_SET == 44
   mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
                           seed, 0, 1, 2, 3);
@@ -156,6 +170,7 @@ __contract__(
   mld_poly_uniform_eta_4x(&s2->vec[4], &s2->vec[5], &s2->vec[6], &s2->vec[7],
                           seed, 11, 12, 13, 14);
 #endif /* MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 }
 
 MLD_MUST_CHECK_RETURN_VALUE
