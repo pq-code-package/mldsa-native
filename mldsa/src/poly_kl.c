@@ -324,6 +324,7 @@ __contract__(
   return ctr;
 }
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 MLD_INTERNAL_API
 void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
                              mld_poly *r3, const uint8_t seed[MLDSA_CRHBYTES],
@@ -407,6 +408,63 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
+#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+
+MLD_INTERNAL_API
+void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
+                          uint8_t nonce)
+{
+  /* Temporary buffer for XOF output before rejection sampling */
+  MLD_ALIGN uint8_t buf[POLY_UNIFORM_ETA_NBLOCKS * STREAM256_BLOCKBYTES];
+  MLD_ALIGN uint8_t extseed[MLDSA_CRHBYTES + 2];
+
+  /* Tracks the number of coefficients we have already sampled */
+  unsigned ctr;
+  mld_xof256_ctx state;
+  unsigned buflen;
+
+  mld_memcpy(extseed, seed, MLDSA_CRHBYTES);
+  extseed[MLDSA_CRHBYTES] = nonce;
+  extseed[MLDSA_CRHBYTES + 1] = 0;
+
+  mld_xof256_init(&state);
+  mld_xof256_absorb_once(&state, extseed, MLDSA_CRHBYTES + 2);
+
+  /*
+   * Initially, squeeze heuristic number of POLY_UNIFORM_ETA_NBLOCKS.
+   * This should generate the coefficients with high probability.
+   */
+  mld_xof256_squeezeblocks(buf, POLY_UNIFORM_ETA_NBLOCKS, &state);
+  buflen = POLY_UNIFORM_ETA_NBLOCKS * STREAM256_BLOCKBYTES;
+
+  ctr = mld_rej_eta(r->coeffs, MLDSA_N, 0, buf, buflen);
+
+  /*
+   * So long as not all entries have been generated, squeeze
+   * one more block a time until we're done.
+   */
+  buflen = STREAM256_BLOCKBYTES;
+  while (ctr < MLDSA_N)
+  __loop__(
+    assigns(ctr, memory_slice(&state, sizeof(mld_xof256_ctx)),
+      memory_slice(buf, STREAM256_BLOCKBYTES), memory_slice(r, sizeof(mld_poly)))
+    invariant(ctr <= MLDSA_N)
+    invariant(state.pos <= SHAKE256_RATE)
+    invariant(array_abs_bound(r->coeffs, 0, ctr, MLDSA_ETA + 1)))
+  {
+    mld_xof256_squeezeblocks(buf, 1, &state);
+    ctr = mld_rej_eta(r->coeffs, MLDSA_N, ctr, buf, buflen);
+  }
+
+  mld_xof256_release(&state);
+
+  mld_assert_abs_bound(r->coeffs, MLDSA_N, MLDSA_ETA + 1);
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(buf, sizeof(buf));
+  mld_zeroize(extseed, sizeof(extseed));
+}
+#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define POLY_UNIFORM_GAMMA1_NBLOCKS \
   ((MLDSA_POLYZ_PACKEDBYTES + STREAM256_BLOCKBYTES - 1) / STREAM256_BLOCKBYTES)

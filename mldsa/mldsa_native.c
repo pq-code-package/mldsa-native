@@ -242,6 +242,7 @@
 #undef mld_poly_chknorm
 #undef mld_poly_decompose
 #undef mld_poly_make_hint
+#undef mld_poly_uniform_eta
 #undef mld_poly_uniform_eta_4x
 #undef mld_poly_uniform_gamma1
 #undef mld_poly_uniform_gamma1_4x
