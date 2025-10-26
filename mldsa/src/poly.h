@@ -238,6 +238,7 @@ __contract__(
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_4x MLD_NAMESPACE(poly_uniform_4x)
 /*************************************************
  * Name:        mld_poly_uniform_x4
@@ -271,6 +272,7 @@ __contract__(
   ensures(array_bound(vec2->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   ensures(array_bound(vec3->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mld_polyt1_pack MLD_NAMESPACE(polyt1_pack)
 /*************************************************

@@ -352,6 +352,7 @@ void mld_poly_uniform(mld_poly *a, const uint8_t seed[MLDSA_SEEDBYTES + 2])
   mld_zeroize(buf, sizeof(buf));
 }
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 MLD_INTERNAL_API
 void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
                          mld_poly *vec3,
@@ -416,6 +417,7 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
   mld_zeroize(buf, sizeof(buf));
 }
 
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 MLD_INTERNAL_API
 void mld_polyt1_pack(uint8_t *r, const mld_poly *a)

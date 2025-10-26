@@ -86,6 +86,8 @@ void mld_polyvec_matrix_expand(mld_polyvecl mat[MLDSA_K],
   {
     mld_memcpy(seed_ext[j], rho, MLDSA_SEEDBYTES);
   }
+
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
   /* Sample 4 matrix entries a time. */
   for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
   __loop__(
@@ -118,8 +120,11 @@ void mld_polyvec_matrix_expand(mld_polyvecl mat[MLDSA_K],
                         &mat[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L],
                         seed_ext);
   }
+#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+  i = 0;
+#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
-  /* For MLDSA_K=6, MLDSA_L=5, process the last two entries individually */
+  /* Entries omitted by the batch-sampling are sampled individually. */
   while (i < MLDSA_K * MLDSA_L)
   __loop__(
     assigns(i, object_whole(seed_ext), memory_slice(mat, MLDSA_K * sizeof(mld_polyvecl)))
