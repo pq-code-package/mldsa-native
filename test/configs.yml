@@ -23,6 +23,11 @@ configs:
           }
           #endif
 
+  - path: test/serial_fips202_config.h
+    description: "Test configuration with serial FIPS202 only"
+    defines:
+      MLD_CONFIG_SERIAL_FIPS202_ONLY: true
+
   - path: test/custom_randombytes_config.h
     description: "Test configuration with custom randombytes"
     defines:
