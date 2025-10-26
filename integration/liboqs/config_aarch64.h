@@ -273,6 +273,29 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
 #define MLD_CONFIG_EXTERNAL_API_QUALIFIER OQS_API
 #endif
 
+/******************************************************************************
+ * Name:        MLD_CONFIG_SERIAL_FIPS202_ONLY
+ *
+ * Description: Set this to use a FIPS202 implementation with global state
+ *              that supports only one active Keccak computation at a time
+ *              (e.g. some hardware accelerators).
+ *
+ *              If this option is set, ML-DSA will use FIPS202 operations
+ *              serially, ensuring that only one SHAKE context is active
+ *              at any given time.
+ *
+ *              This allows offloading Keccak computations to a hardware
+ *              accelerator that holds only a single Keccak state locally,
+ *              rather than requiring support for multiple concurrent
+ *              Keccak states.
+ *
+ *              NOTE: Depending on the target CPU, this may reduce
+ *              performance when using software FIPS202 implementations.
+ *              Only enable this when you have to.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
+
 /*************************  Config internals  ********************************/
 
 /* Default namespace
