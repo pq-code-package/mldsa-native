@@ -43,6 +43,13 @@ vpsrlq		$32,%ymm\r0,%ymm\r0
 vpblendd	$0xAA,%ymm\r1,%ymm\r0,%ymm\r3
 .endm
 
+/*
+ * Compute l' = l + h, h' = montmul(h - l, zh)
+ *
+ * Bounds: |l'| <= |l| + |h|
+ *         |h'| < MONTMUL_BOUND
+ *         (See the end of this file for the exact value of MONTMUL_BOUND)
+ */
 .macro butterfly l,h,zl0=1,zl1=1,zh0=2,zh1=2
 vpsubd		%ymm\l,%ymm\h,%ymm12
 vpaddd		%ymm\h,%ymm\l,%ymm\l
@@ -74,6 +81,8 @@ vmovdqa		256*\off+160(%rdi),%ymm9
 vmovdqa		256*\off+192(%rdi),%ymm10
 vmovdqa	 	256*\off+224(%rdi),%ymm11
 
+/* Bounds: |ymm{i}| < q for i in 4...11 */
+
 /* level 0 */
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+296-8*\off-8)*4(%rsi),%ymm3
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+296-8*\off-8)*4(%rsi),%ymm15
@@ -99,6 +108,22 @@ vmovshdup	%ymm3,%ymm1
 vmovshdup	%ymm15,%ymm2
 butterfly	10,11,1,3,2,15
 
+/*
+ * Bounds: |ymm{i}| < 2q            for i in 4, 6, 8, 10
+ *                  < MONTMUL_BOUND for i in 5, 7, 9, 11
+ *
+ * Note that since 2^31 / q > 256, the sum of all 256 coefficients does not
+ * overflow. This allows us to greatly simplify the range analysis by relaxing
+ * and unifying the bounds of all coefficients on the same layer. As a concrete
+ * example, here we relax the bounds on 5, 7, 9, 11 and conclude that (for all
+ * relevant i)
+ *
+ * Bounds: |ymm{i}| < 2q
+ *
+ * In all but last of the following levels of butterflies, we do the same
+ * relaxation without explicit mention.
+ */
+
 /* level 1 */
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168-8*\off-8)*4(%rsi),%ymm3
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168-8*\off-8)*4(%rsi),%ymm15
@@ -114,6 +139,8 @@ vmovshdup	%ymm15,%ymm2
 butterfly	8,10,1,3,2,15
 butterfly	9,11,1,3,2,15
 
+/* Bounds: |ymm{i}| < 4q */
+
 /* level 2 */
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+104-8*\off-8)*4(%rsi),%ymm3
 vpermq		$0x1B,(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+104-8*\off-8)*4(%rsi),%ymm15
@@ -123,6 +150,8 @@ butterfly	4,8,1,3,2,15
 butterfly	5,9,1,3,2,15
 butterfly	6,10,1,3,2,15
 butterfly	7,11,1,3,2,15
+
+/* Bounds: |ymm{i}| < 8q */
 
 /* level 3 */
 shuffle2	4,5,3,5
@@ -137,6 +166,8 @@ butterfly	4,7
 butterfly	6,9
 butterfly	8,11
 
+/* Bounds: |ymm{i}| < 16q */
+
 /* level 4 */
 shuffle4	3,4,10,4
 shuffle4	6,8,3,8
@@ -150,6 +181,8 @@ butterfly	3,8
 butterfly	6,7
 butterfly	5,11
 
+/* Bounds: |ymm{i}| < 32q */
+
 /* level 5 */
 shuffle8	10,3,9,3
 shuffle8	6,5,10,5
@@ -162,6 +195,8 @@ butterfly	9,3
 butterfly	10,5
 butterfly	6,8
 butterfly	4,11
+
+/* Bounds: |ymm{i}| < 64q */
 
 vmovdqa		%ymm9,256*\off+  0(%rdi)
 vmovdqa		%ymm10,256*\off+ 32(%rdi)
@@ -194,6 +229,8 @@ vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+2)*4(%rsi),%ymm2
 butterfly	8,10
 butterfly	9,11
 
+/* Bounds: |ymm{i}| < 128q */
+
 /* level 7 */
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+0)*4(%rsi),%ymm1
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+0)*4(%rsi),%ymm2
@@ -203,10 +240,28 @@ butterfly	5,9
 butterfly	6,10
 butterfly	7,11
 
+/*
+ * Bounds: |ymm{i}| < 256q          for i in 4...7
+ *                  < MONTMUL_BOUND for i in 8...11
+ */
+
 vmovdqa         %ymm8,512+32*\off(%rdi)
 vmovdqa         %ymm9,640+32*\off(%rdi)
 vmovdqa         %ymm10,768+32*\off(%rdi)
 vmovdqa         %ymm11,896+32*\off(%rdi)
+
+/*
+ * In order to (a) remove the factor of 256 arising from the 256-point INTT
+ * butterflies and (b) transform the output into Montgomery domain, we need to
+ * multiply all coefficients by 2^32/256.
+ *
+ * For ymm{8,9,10,11}, the scaling has been merged into the last butterfly, so
+ * only ymm{4,5,6,7} need to be scaled explicitly.
+ *
+ * The scaling is achieved by computing montmul(-, MLD_AVX2_DIV).
+ *
+ * Bounds: |ymm{i}| < 256q for i in 4...7
+ */
 
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV_QINV)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV)*4(%rsi),%ymm2
@@ -255,6 +310,25 @@ vmovshdup	%ymm6,%ymm6
 vmovshdup	%ymm7,%ymm7
 vpblendd	$0xAA,%ymm8,%ymm6,%ymm6
 vpblendd	$0xAA,%ymm9,%ymm7,%ymm7
+
+/* Bounds: |ymm{i}| < MONTMUL_BOUND for i in 4...7 */
+
+/*
+ * In the following we show that |montmul(a, b)| < MONTMUL_BOUND := ceil(3q/4),
+ * given that a fits inside int32_t (thus |a| <= R/2) and b is signed canonical
+ * (in the range -(Q-1)/2...(Q-1)/2).
+ *
+ * In Section 2.2 of https://eprint.iacr.org/2023/1962, they showed that b being
+ * signed canonical implies:
+ *
+ *   |montmul(a, b)| <= (|a| (q/2) + (R/2) q) / R = (q/2) (1 + |a|/R).
+ *
+ * From this, simple computation gives |montmul(a, b)| <= 3q/4 < ceil(3q/4).
+ *
+ * TODO: Use proper citation. Currently, citations within asm can cause linter
+ *       to complain about unused citation, because comments are not preserved
+ *       after simpasm.
+ */
 
 vmovdqa         %ymm4,  0+32*\off(%rdi)
 vmovdqa         %ymm5,128+32*\off(%rdi)

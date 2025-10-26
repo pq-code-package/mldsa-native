@@ -44,6 +44,16 @@ vpsrlq		$32,%ymm\r0,%ymm\r0
 vpblendd	$0xAA,%ymm\r1,%ymm\r0,%ymm\r3
 .endm
 
+/*
+ * Compute l' = l + montmul(h, zh), h' = l - montmul(h, zh).
+ *
+ * Bounds: |l'|, |h'| < |l| + MONTMUL_BOUND < |l| + q
+ *         (See the end of dev/x86_64/src/intt.S for the exact value of
+ *         MONTMUL_BOUND)
+ *
+ * In conclusion, the magnitudes of all coefficients grow by at most q after
+ * each layer.
+ */
 .macro butterfly l,h,zl0=1,zl1=1,zh0=2,zh1=2
 vpmuldq		%ymm\zl0,%ymm\h,%ymm13
 vmovshdup	%ymm\h,%ymm12
@@ -56,16 +66,30 @@ vpmuldq		%ymm0,%ymm13,%ymm13
 vpmuldq		%ymm0,%ymm14,%ymm14
 
 vmovshdup	%ymm\h,%ymm\h
-vpblendd	$0xAA,%ymm12,%ymm\h,%ymm\h
+vpblendd	$0xAA,%ymm12,%ymm\h,%ymm\h /* mulhi(h, zh) */
 
-vpsubd		%ymm\h,%ymm\l,%ymm12
-vpaddd		%ymm\h,%ymm\l,%ymm\l
+/*
+ * Originally, mulhi(h, zh) should be subtracted by mulhi(q, mullo(h, zl)) in
+ * order to complete computing
+ *
+ *   montmul(h, zh) = mulhi(h, zh) - mulhi(q, mullo(h, zl)).
+ *
+ * Here, since mulhi(q, mullo(h, zl)) has not been computed yet, this task is
+ * delayed until the end of the butterfly. Note that whether any of the
+ * remaining add/subs overflow or not doesn't affect the final value of h' or l'
+ * at all, because associativity holds unconditionally.
+ */
+vpsubd      %ymm\h,%ymm\l,%ymm12 /* l - mulhi(h, zh)
+                                  * = h' - mulhi(q, mullo(h, zl)) */
+vpaddd      %ymm\h,%ymm\l,%ymm\l /* l + mulhi(h, zh)
+                                  * = l' + mulhi(q, mullo(h, zl)) */
 
 vmovshdup	%ymm13,%ymm13
-vpblendd	$0xAA,%ymm14,%ymm13,%ymm13
+vpblendd	$0xAA,%ymm14,%ymm13,%ymm13 /* mulhi(q, mullo(h, zl)) */
 
-vpaddd		%ymm13,%ymm12,%ymm\h
-vpsubd		%ymm13,%ymm\l,%ymm\l
+/* Finish the delayed task mentioned above */
+vpaddd		%ymm13,%ymm12,%ymm\h /* h' */
+vpsubd		%ymm13,%ymm\l,%ymm\l /* l' */
 .endm
 
 .macro levels0t1 off
@@ -82,10 +106,14 @@ vmovdqa		640+32*\off(%rdi),%ymm9
 vmovdqa		768+32*\off(%rdi),%ymm10
 vmovdqa	 	896+32*\off(%rdi),%ymm11
 
+/* Bounds: |ymm{i}| < q */
+
 butterfly	4,8
 butterfly	5,9
 butterfly	6,10
 butterfly	7,11
+
+/* Bounds: |ymm{i}| < 2q */
 
 /* level 1 */
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+2)*4(%rsi),%ymm1
@@ -97,6 +125,8 @@ vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+3)*4(%rsi),%ymm1
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+3)*4(%rsi),%ymm2
 butterfly	8,10
 butterfly	9,11
+
+/* Bounds: |ymm{i}| < 3q */
 
 vmovdqa		%ymm4,  0+32*\off(%rdi)
 vmovdqa		%ymm5,128+32*\off(%rdi)
@@ -132,6 +162,8 @@ shuffle8	5,9,4,9
 shuffle8	6,10,5,10
 shuffle8	7,11,6,11
 
+/* Bounds: |ymm{i}| < 4q */
+
 /* level 3 */
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+8+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+8+8*\off)*4(%rsi),%ymm2
@@ -145,6 +177,8 @@ shuffle4	3,5,7,5
 shuffle4	8,10,3,10
 shuffle4	4,6,8,6
 shuffle4	9,11,4,11
+
+/* Bounds: |ymm{i}| < 5q */
 
 /* level 4 */
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+40+8*\off)*4(%rsi),%ymm1
@@ -160,6 +194,8 @@ shuffle2	5,6,7,6
 shuffle2	3,4,5,4
 shuffle2	10,11,3,11
 
+/* Bounds: |ymm{i}| < 6q */
+
 /* level 5 */
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+72+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+72+8*\off)*4(%rsi),%ymm2
@@ -170,6 +206,8 @@ butterfly	9,5,1,10,2,15
 butterfly	8,4,1,10,2,15
 butterfly	7,3,1,10,2,15
 butterfly	6,11,1,10,2,15
+
+/* Bounds: |ymm{i}| < 7q */
 
 /* level 6 */
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+104+8*\off)*4(%rsi),%ymm1
@@ -185,6 +223,8 @@ vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
 butterfly	5,3,1,10,2,15
 butterfly	4,11,1,10,2,15
+
+/* Bounds: |ymm{i}| < 8q */
 
 /* level 7 */
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168+8*\off)*4(%rsi),%ymm1
@@ -210,6 +250,8 @@ vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168+8*\off+96)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
 butterfly	3,11,1,10,2,15
+
+/* Bounds: |ymm{i}| < 9q */
 
 vmovdqa		%ymm9,256*\off+  0(%rdi)
 vmovdqa		%ymm8,256*\off+ 32(%rdi)
