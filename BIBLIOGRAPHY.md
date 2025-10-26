@@ -314,6 +314,8 @@ source code and documentation.
   - [examples/basic/test_only_rng/notrandombytes.h](examples/basic/test_only_rng/notrandombytes.h)
   - [examples/bring_your_own_fips202/test_only_rng/notrandombytes.c](examples/bring_your_own_fips202/test_only_rng/notrandombytes.c)
   - [examples/bring_your_own_fips202/test_only_rng/notrandombytes.h](examples/bring_your_own_fips202/test_only_rng/notrandombytes.h)
+  - [examples/bring_your_own_fips202_static/test_only_rng/notrandombytes.c](examples/bring_your_own_fips202_static/test_only_rng/notrandombytes.c)
+  - [examples/bring_your_own_fips202_static/test_only_rng/notrandombytes.h](examples/bring_your_own_fips202_static/test_only_rng/notrandombytes.h)
   - [test/notrandombytes/notrandombytes.c](test/notrandombytes/notrandombytes.c)
   - [test/notrandombytes/notrandombytes.h](test/notrandombytes/notrandombytes.h)
 
@@ -327,6 +329,8 @@ source code and documentation.
   - [FIPS202.md](FIPS202.md)
   - [README.md](README.md)
   - [examples/bring_your_own_fips202/README.md](examples/bring_your_own_fips202/README.md)
+  - [examples/bring_your_own_fips202_static/README.md](examples/bring_your_own_fips202_static/README.md)
+  - [examples/bring_your_own_fips202_static/custom_fips202/README.md](examples/bring_your_own_fips202_static/custom_fips202/README.md)
 
 ### `tweetfips`
 

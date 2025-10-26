@@ -314,6 +314,25 @@
 */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mldsa-native will be built without the
+ *              randomized API functions (crypto_sign_keypair,
+ *              crypto_sign, crypto_sign_signature, and
+ *              crypto_sign_signature_extmu).
+ *              This allows users to build mldsa-native without providing a
+ *              randombytes() implementation if they only need the
+ *              internal deterministic API
+ *              (crypto_sign_keypair_internal, crypto_sign_signature_internal).
+ *
+ *              NOTE: This option is incompatible with MLD_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires
+ *              crypto_sign_signature().
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_RANDOMIZED_API */
+
+/******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT
  *
  * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
