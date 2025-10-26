@@ -356,7 +356,7 @@ DEFINES ?=
 # object size to be CBMC_MAX_OBJECT_SIZE.  You are likely to get
 # unexpected results if you try to malloc an object larger than this
 # bound.
-CBMC_OBJECT_BITS ?= 8
+CBMC_OBJECT_BITS ?= 12
 
 # CBMC loop unwinding (Normally set in the proof Makefile)
 #

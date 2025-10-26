@@ -48,9 +48,6 @@ FUNCTION_NAME = mld_keccak_squeezeblocks_x4
 # documentation in Makefile.common under the "Job Pools" heading for details.
 # EXPENSIVE = true
 
-# This function is large enough to need...
-CBMC_OBJECT_BITS = 8
-
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
 # ("mlkem/poly.c") in PROJECT_SOURCES).
