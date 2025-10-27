@@ -48,6 +48,8 @@ MLD_ASM_FN_SYMBOL(pointwise_avx2)
 
         xor     eax, eax
 _looptop1:
+// Handle 24 = 3*8 coefficients per iteration
+
 // Load
         vmovdqa ymm2, [rsi]
         vmovdqa ymm4, [rsi + 32]
@@ -61,6 +63,12 @@ _looptop1:
         vpsrlq  ymm11, ymm10, 32
         vpsrlq  ymm13, ymm12, 32
         vmovshdup ymm15, ymm14
+        /*
+         * ymm{i} stores a's coefficients for i in 2...7, and b's coefficients
+         * for i in 10...15.
+         *
+         * Bounds: |ymm{i}| < 9q for i in 2...7, 10...15
+         */
 
 // Multiply
         vpmuldq ymm2, ymm2, ymm10
@@ -69,6 +77,10 @@ _looptop1:
         vpmuldq ymm5, ymm5, ymm13
         vpmuldq ymm6, ymm6, ymm14
         vpmuldq ymm7, ymm7, ymm15
+        /*
+         * Bounds: |ymm{i}| < 81q^2 < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX
+         *             for i in 2...7
+         */
 
 // Reduce
         vpmuldq ymm10, ymm0, ymm2
@@ -89,11 +101,18 @@ _looptop1:
         vpsubq  ymm5, ymm5, ymm13
         vpsubq  ymm6, ymm6, ymm14
         vpsubq  ymm7, ymm7, ymm15
+        /*
+         * All coefficients are Montgomery-reduced, resulting in
+         *
+         * Bounds: |ymm{i}| < q for i in 2...7
+         *
+         * See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
+         */
+
+// Store
         vpsrlq  ymm2, ymm2, 32
         vpsrlq  ymm4, ymm4, 32
         vmovshdup ymm6, ymm6
-
-// Store
         vpblendd ymm2, ymm2, ymm3, 0xAA
         vpblendd ymm4, ymm4, ymm5, 0xAA
         vpblendd ymm6, ymm6, ymm7, 0xAA
@@ -108,6 +127,10 @@ _looptop1:
         cmp     eax, 10
         jb      _looptop1
 
+
+// Handle the last 256 % 24 = 16 = 2*8 coefficients, left over by the loop
+
+// Load
         vmovdqa ymm2, [rsi]
         vmovdqa ymm4, [rsi + 32]
         vmovdqa ymm10, [rdx]
@@ -116,12 +139,22 @@ _looptop1:
         vpsrlq  ymm5, ymm4, 32
         vmovshdup ymm11, ymm10
         vmovshdup ymm13, ymm12
+        /*
+         * ymm{i} stores a's coefficients for i in 2...5, and b's coefficients
+         * for i in 10...13.
+         *
+         * Bounds: |ymm{i}| < 9q for i in 2...5, 10...13
+         */
 
 // Multiply
         vpmuldq ymm2, ymm2, ymm10
         vpmuldq ymm3, ymm3, ymm11
         vpmuldq ymm4, ymm4, ymm12
         vpmuldq ymm5, ymm5, ymm13
+        /*
+         * Bounds: |ymm{i}| < 81q^2 < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX
+         *             for i in 2...5
+         */
 
 // Reduce
         vpmuldq ymm10, ymm0, ymm2
@@ -136,10 +169,15 @@ _looptop1:
         vpsubq  ymm3, ymm3, ymm11
         vpsubq  ymm4, ymm4, ymm12
         vpsubq  ymm5, ymm5, ymm13
-        vpsrlq  ymm2, ymm2, 32
-        vmovshdup ymm4, ymm4
+        /*
+         * As explained in the loop.
+         *
+         * Bounds: |ymm{i}| < q for i in 2...5
+         */
 
 // Store
+        vpsrlq  ymm2, ymm2, 32
+        vmovshdup ymm4, ymm4
         vpblendd ymm2, ymm3, ymm2, 0x55
         vpblendd ymm4, ymm5, ymm4, 0x55
         vmovdqa [rdi], ymm2

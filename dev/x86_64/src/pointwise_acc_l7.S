@@ -37,12 +37,20 @@
         vpsrlq  ymm9, ymm8, 32
         vmovshdup ymm11, ymm10
         vmovshdup ymm13, ymm12
+        /*
+         * ymm{i} stores a's coefficients for i in 6...9, and b's coefficients
+         * for i in 10...13.
+         *
+         * Bounds: |ymm{i}| < q  for i in 6...9
+         *                  < 9q for i in 10...13
+         */
 
 // Multiply
         vpmuldq ymm6, ymm6, ymm10
         vpmuldq ymm7, ymm7, ymm11
         vpmuldq ymm8, ymm8, ymm12
         vpmuldq ymm9, ymm9, ymm13
+        /* Bounds: |ymm{i}| < 9q^2 for i in 6...9 */
 .endm
 
 .macro acc
@@ -80,24 +88,31 @@ _looptop2:
         vmovdqa ymm3, ymm7
         vmovdqa ymm4, ymm8
         vmovdqa ymm5, ymm9
+        /* Bounds: |ymm{i}| < 9q^2 */
 
         pointwise 1024
         acc
+        /* Bounds: |ymm{i}| < 18q^2 */
 
         pointwise 2048
         acc
+        /* Bounds: |ymm{i}| < 27q^2 */
 
         pointwise 3072
         acc
+        /* Bounds: |ymm{i}| < 36q^2 */
 
         pointwise 4096
         acc
+        /* Bounds: |ymm{i}| < 45q^2 */
 
         pointwise 5120
         acc
+        /* Bounds: |ymm{i}| < 54q^2 */
 
         pointwise 6144
         acc
+        /* Bounds: |ymm{i}| < 63q^2 < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX */
 
 // Reduce
         vpmuldq ymm6, ymm0, ymm2
@@ -112,10 +127,17 @@ _looptop2:
         vpsubq  ymm3, ymm3, ymm7
         vpsubq  ymm4, ymm4, ymm8
         vpsubq  ymm5, ymm5, ymm9
-        vpsrlq  ymm2, ymm2, 32
-        vmovshdup ymm4, ymm4
+        /*
+         * All coefficients are Montgomery-reduced, resulting in
+         *
+         * Bounds: |ymm{i}| < q for i in 2...5
+         *
+         * See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
+         */
 
 // Store
+        vpsrlq  ymm2, ymm2, 32
+        vmovshdup ymm4, ymm4
         vpblendd ymm2, ymm2, ymm3, 0xAA
         vpblendd ymm4, ymm4, ymm5, 0xAA
 
