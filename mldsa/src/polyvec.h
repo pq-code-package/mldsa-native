@@ -11,13 +11,20 @@
 #include "poly.h"
 #include "poly_kl.h"
 
+/* Parameter set namespacing
+ * This is to facilitate building multiple instances
+ * of mldsa-native (e.g. with varying parameter sets)
+ * within a single compilation unit. */
+#define mld_polyvecl MLD_ADD_PARAM_SET(mld_polyvecl)
+#define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
+/* End of parameter set namespacing */
+
 /* Vectors of polynomials of length MLDSA_L */
 typedef struct
 {
   mld_poly vec[MLDSA_L];
 } mld_polyvecl;
 
-#define mld_polyvecl MLD_ADD_PARAM_SET(mld_polyvecl)
 
 #define mld_polyvecl_uniform_gamma1 MLD_NAMESPACE_KL(polyvecl_uniform_gamma1)
 /*************************************************
@@ -223,8 +230,6 @@ typedef struct
 {
   mld_poly vec[MLDSA_K];
 } mld_polyveck;
-
-#define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
 
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
