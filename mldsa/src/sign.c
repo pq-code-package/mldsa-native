@@ -30,6 +30,7 @@
 #include "debug.h"
 #include "packing.h"
 #include "poly.h"
+#include "poly_kl.h"
 #include "polyvec.h"
 #include "prehash.h"
 #include "randombytes.h"

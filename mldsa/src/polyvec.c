@@ -18,6 +18,7 @@
 #include "common.h"
 #include "debug.h"
 #include "poly.h"
+#include "poly_kl.h"
 #include "polyvec.h"
 
 #if !defined(MLD_USE_NATIVE_NTT_CUSTOM_ORDER)

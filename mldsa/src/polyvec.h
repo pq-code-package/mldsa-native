@@ -9,6 +9,7 @@
 #include "cbmc.h"
 #include "common.h"
 #include "poly.h"
+#include "poly_kl.h"
 
 /* Vectors of polynomials of length MLDSA_L */
 typedef struct

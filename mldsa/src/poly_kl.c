@@ -23,7 +23,7 @@
 
 #include "ct.h"
 #include "debug.h"
-#include "poly.h"
+#include "poly_kl.h"
 #include "rounding.h"
 #include "symmetric.h"
 
