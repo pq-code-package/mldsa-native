@@ -37,6 +37,17 @@
 #include "sign.h"
 #include "symmetric.h"
 
+/* Parameter set namespacing
+ * This is to facilitate building multiple instances
+ * of mldsa-native (e.g. with varying parameter sets)
+ * within a single compilation unit. */
+#define mld_check_pct MLD_ADD_PARAM_SET(mld_check_pct)
+#define mld_sample_s1_s2 MLD_ADD_PARAM_SET(mld_sample_s1_s2)
+#define mld_H MLD_ADD_PARAM_SET(mld_H)
+#define mld_attempt_signature_generation \
+  MLD_ADD_PARAM_SET(mld_attempt_signature_generation)
+/* End of parameter set namespacing */
+
 
 static int mld_check_pct(uint8_t const pk[CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[CRYPTO_SECRETKEYBYTES])

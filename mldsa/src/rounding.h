@@ -21,6 +21,16 @@
 #include "ct.h"
 #include "debug.h"
 
+/* Parameter set namespacing
+ * This is to facilitate building multiple instances
+ * of mldsa-native (e.g. with varying parameter sets)
+ * within a single compilation unit. */
+#define mld_power2round MLD_ADD_PARAM_SET(mld_power2round)
+#define mld_decompose MLD_ADD_PARAM_SET(mld_decompose)
+#define mld_make_hint MLD_ADD_PARAM_SET(mld_make_hint)
+#define mld_use_hint MLD_ADD_PARAM_SET(mld_use_hint)
+/* End of parameter set namespacing */
+
 #define MLD_2_POW_D (1 << MLDSA_D)
 
 /*************************************************

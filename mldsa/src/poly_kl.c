@@ -27,6 +27,12 @@
 #include "rounding.h"
 #include "symmetric.h"
 
+/* Parameter set namespacing
+ * This is to facilitate building multiple instances
+ * of mldsa-native (e.g. with varying parameter sets)
+ * within a single compilation unit. */
+#define mld_rej_eta MLD_ADD_PARAM_SET(mld_rej_eta)
+/* End of parameter set namespacing */
 
 MLD_INTERNAL_API
 void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
