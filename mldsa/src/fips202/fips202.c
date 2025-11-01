@@ -38,6 +38,7 @@
 #include "../ct.h"
 #include "fips202.h"
 #include "keccakf1600.h"
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #define NROUNDS 24
 
@@ -261,3 +262,5 @@ void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
   mld_shake256_squeeze(out, outlen, &state);
   mld_shake256_release(&state);
 }
+
+#endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */

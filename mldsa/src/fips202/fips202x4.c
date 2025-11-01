@@ -14,6 +14,7 @@
  */
 
 #include "../common.h"
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <string.h>
 #include "../ct.h"
@@ -164,3 +165,5 @@ void mld_shake256x4_release(mld_shake256x4ctx *state)
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(state, sizeof(mld_shake256x4ctx));
 }
+
+#endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
