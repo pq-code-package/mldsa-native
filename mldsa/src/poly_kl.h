@@ -9,7 +9,7 @@
 #include "common.h"
 #include "poly.h"
 
-#define mld_poly_decompose MLD_NAMESPACE(poly_decompose)
+#define mld_poly_decompose MLD_NAMESPACE_KL(poly_decompose)
 /*************************************************
  * Name:        mld_poly_decompose
  *
@@ -40,7 +40,7 @@ __contract__(
 );
 
 
-#define mld_poly_make_hint MLD_NAMESPACE(poly_make_hint)
+#define mld_poly_make_hint MLD_NAMESPACE_KL(poly_make_hint)
 /*************************************************
  * Name:        mld_poly_make_hint
  *
@@ -66,7 +66,7 @@ __contract__(
   ensures(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
 );
 
-#define mld_poly_use_hint MLD_NAMESPACE(poly_use_hint)
+#define mld_poly_use_hint MLD_NAMESPACE_KL(poly_use_hint)
 /*************************************************
  * Name:        mld_poly_use_hint
  *
@@ -89,7 +89,7 @@ __contract__(
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 
-#define mld_poly_chknorm MLD_NAMESPACE(poly_chknorm)
+#define mld_poly_chknorm MLD_NAMESPACE_KL(poly_chknorm)
 /*************************************************
  * Name:        mld_poly_chknorm
  *

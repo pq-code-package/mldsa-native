@@ -25,7 +25,7 @@
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define mld_poly_permute_bitrev_to_custom \
-  MLD_NAMESPACE(mld_poly_permute_bitrev_to_custom)
+  MLD_NAMESPACE_KL(mld_poly_permute_bitrev_to_custom)
 
 static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
 {
