@@ -14,6 +14,9 @@ source code and documentation.
   - National Institute of Standards and Technology
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
+  - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
+  - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
+  - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
@@ -45,6 +48,9 @@ source code and documentation.
 * URL: https://csrc.nist.gov/pubs/fips/204/final
 * Referenced from:
   - [README.md](README.md)
+  - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
+  - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
+  - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
   - [mldsa/mldsa_native.h](mldsa/mldsa_native.h)
   - [mldsa/src/config.h](mldsa/src/config.h)
   - [mldsa/src/ct.h](mldsa/src/ct.h)
