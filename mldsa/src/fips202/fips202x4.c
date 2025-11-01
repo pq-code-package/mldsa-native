@@ -16,6 +16,7 @@
 #include "../common.h"
 
 #include <string.h>
+#include "../ct.h"
 #include "fips202.h"
 #include "fips202x4.h"
 #include "keccakf1600.h"

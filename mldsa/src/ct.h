@@ -7,6 +7,11 @@
 /* References
  * ==========
  *
+ * - [FIPS204]
+ *   FIPS 204 Module-Lattice-Based Digital Signature Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/204/final
+ *
  * - [libmceliece]
  *   libmceliece implementation of Classic McEliece
  *   Bernstein, Chou
@@ -231,6 +236,55 @@ __contract__(
 {
   return mld_ct_sel_int32(-x, x, mld_ct_cmask_neg_i32(x));
 }
+
+#if !defined(__ASSEMBLER__)
+#include <string.h>
+
+/*************************************************
+ * Name:        mld_zeroize
+ *
+ * Description: Force-zeroize a buffer.
+ *              @[FIPS204, Section 3.6.3] Destruction of intermediate
+ *values.
+ *
+ * Arguments:   void *ptr: pointer to buffer to be zeroed
+ *              size_t len: Amount of bytes to be zeroed
+ **************************************************/
+static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+__contract__(
+  requires(memory_no_alias(ptr, len))
+  assigns(memory_slice(ptr, len))
+);
+
+#if defined(MLD_CONFIG_CUSTOM_ZEROIZE)
+static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+{
+  mld_zeroize_native(ptr, len);
+}
+#elif defined(MLD_SYS_WINDOWS)
+#include <windows.h>
+static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+{
+  SecureZeroMemory(ptr, len);
+}
+#elif defined(MLD_HAVE_INLINE_ASM)
+static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+{
+  memset(ptr, 0, len);
+  /* This follows OpenSSL and seems sufficient to prevent the compiler
+   * from optimizing away the memset.
+   *
+   * If there was a reliable way to detect availability of memset_s(),
+   * that would be preferred. */
+  __asm__ __volatile__("" : : "r"(ptr) : "memory");
+}
+#else /* !MLD_CONFIG_CUSTOM_ZEROIZE && !MLD_SYS_WINDOWS && MLD_HAVE_INLINE_ASM \
+       */
+#error No plausibly-secure implementation of mld_zeroize available. Please provide your own using MLD_CONFIG_CUSTOM_ZEROIZE.
+#endif /* !MLD_CONFIG_CUSTOM_ZEROIZE && !MLD_SYS_WINDOWS && \
+          !MLD_HAVE_INLINE_ASM */
+
+#endif /* !__ASSEMBLER__ */
 
 
 #endif /* !MLD_CT_H */

@@ -34,6 +34,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../common.h"
+#include "../ct.h"
 #include "fips202.h"
 #include "keccakf1600.h"
 
