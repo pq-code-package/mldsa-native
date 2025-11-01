@@ -6,6 +6,7 @@
 #include "prehash.h"
 #include "symmetric.h"
 
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 #define MLD_PRE_HASH_OID_LEN 11
 
 /*************************************************
@@ -119,3 +120,5 @@ size_t mld_format_pre_hash_message(
   /* Return total formatted message length */
   return 2 + ctxlen + MLD_PRE_HASH_OID_LEN + phlen;
 }
+
+#endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */

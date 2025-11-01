@@ -45,6 +45,8 @@
 /*************************************************
  * Hash algorithm enumeration for pre-hash functions
  **************************************************/
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+/* TODO: is there a better way?*/
 typedef enum
 {
   MLD_SHA2_224,
@@ -60,6 +62,7 @@ typedef enum
   MLD_SHAKE_128,
   MLD_SHAKE_256
 } mld_hash_alg_t;
+#endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 /*************************************************
  * Name:        crypto_sign_keypair_internal
