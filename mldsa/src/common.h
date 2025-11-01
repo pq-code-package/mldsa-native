@@ -95,7 +95,7 @@
  * all source files are included, even those that are not needed.
  * Those files are appropriately guarded and will be empty when unneeded.
  * The following is to avoid compilers complaining about this. */
-#define MLD_EMPTY_CU(s) extern int MLD_NAMESPACE(empty_cu_##s);
+#define MLD_EMPTY_CU(s) extern int MLD_NAMESPACE_KL(empty_cu_##s);
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #include MLD_CONFIG_FIPS202_BACKEND_FILE
