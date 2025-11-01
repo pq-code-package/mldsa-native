@@ -815,3 +815,7 @@ void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
   }
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
 }
+
+/* To facilitate single-compilation-unit (SCU) builds, undefine all macros. */
+/* TODO: autogenerate */
+#undef POLY_UNIFORM_ETA_NBLOCKS
