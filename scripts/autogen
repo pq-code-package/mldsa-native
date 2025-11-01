@@ -93,31 +93,6 @@ def gen_yaml_header():
     yield ""
 
 
-def get_files(pattern):
-    return [str(p) for p in pathlib.Path().glob(pattern) if p.is_file()]
-
-
-def get_c_source_files(main_only=False):
-    if main_only is True:
-        return get_files("mldsa/**/*.c")
-    else:
-        return get_files("**/*.c")
-
-
-def get_asm_source_files(main_only=False):
-    if main_only is True:
-        return get_files("mldsa/**/*.S")
-    else:
-        return get_files("**/*.S")
-
-
-def get_header_files(main_only=False):
-    if main_only is True:
-        return get_files("mldsa/**/*.h")
-    else:
-        return get_files("**/*.h")
-
-
 def format_content(content):
     p = subprocess.run(
         ["clang-format"], capture_output=True, input=content, text=True, shell=True
@@ -1009,6 +984,391 @@ def gen_avx2_zeta_file(dry_run=False):
     update_file("dev/x86_64/src/x86_64_zetas.i", "\n".join(gen()), dry_run=dry_run)
 
 
+def get_c_source_files(main_only=False, core_only=False, strip_mldsa=False):
+    if main_only is True:
+        return get_files("mldsa/src/**/*.c", strip_mldsa=strip_mldsa)
+    elif core_only is True:
+        return get_files("mldsa/src/**/*.c", strip_mldsa=strip_mldsa) + get_files(
+            "dev/**/*.c"
+        )
+    else:
+        return get_files("**/*.c", strip_mldsa=strip_mldsa)
+
+
+def get_asm_source_files(main_only=False, core_only=False, strip_mldsa=False):
+    if main_only is True:
+        return get_files("mldsa/src/**/*.S", strip_mldsa=strip_mldsa)
+    elif core_only is True:
+        return get_files("mldsa/src/**/*.S", strip_mldsa=strip_mldsa) + get_files(
+            "dev/**/*.S", strip_mldsa=strip_mldsa
+        )
+    else:
+        return get_files("**/*.S", strip_mldsa=strip_mldsa)
+
+
+def get_header_files(main_only=False, core_only=False):
+    if main_only is True:
+        return get_files("mldsa/*.h") + get_files("mldsa/src/**/*.h")
+    elif core_only is True:
+        return (
+            get_files("mldsa/*.h")
+            + get_files("mldsa/src/**/*.h")
+            + get_files("dev/**/*.h")
+            + get_files("integration/**/*.h")
+        )
+    else:
+        return get_files("**/*.h")
+
+
+def get_markdown_files(main_only=False):
+    return get_files("**/*.md")
+
+
+def get_files(pattern, strip_mldsa=False):
+    return [
+        str(p).removeprefix("mldsa/") if strip_mldsa else str(p)
+        for p in pathlib.Path().glob(pattern)
+        if p.is_file() and not p.is_symlink()
+    ]
+
+
+def get_all_files():
+    # All git-tracked files, including symlinks
+    r = subprocess.run(["git", "ls-files"], capture_output=True, text=True)
+    assert r.returncode == 0
+    files = r.stdout.split("\n")
+    files = filter(lambda s: s != "" and pathlib.Path(s).is_symlink() is False, files)
+    return files
+
+
+def get_defines_from_file(c):
+    with open(c, "r") as f:
+        for l in f.read().split("\n"):
+            if l.lstrip().startswith("#define "):
+                yield (
+                    c,
+                    l.lstrip()
+                    .removeprefix("#define ")
+                    .split(" ")[0]
+                    .split("(")[0]
+                    .replace("'", ""),
+                )
+
+
+def get_defines(all=False):
+    if all is False:
+        files = get_header_files(main_only=True)
+    else:
+        files = get_header_files() + get_c_source_files() + get_asm_source_files()
+    for c in files:
+        yield from get_defines_from_file(c)
+
+
+def get_checked_defines():
+    allow_list = [("__contract__", "cbmc.h"), ("__loop__", "cbmc.h")]
+
+    def is_allowed(d, c):
+        for d0, c0 in allow_list:
+            if c.endswith(c0) is True and d0 == d:
+                return True
+        return False
+
+    for c, d in get_defines():
+        if d.startswith("_") and is_allowed(d, c) is False:
+            raise Exception(
+                f"{d} from {c}: starts with an underscore, which is not allowed for mldsa-native macros. "
+                f"If this is an mldsa-native specific macro, please pick a different name. "
+                f"If this is an external macro, it likely needs removing from `gen_monolithic_undef_all_core()` in `scripts/autogen` -- check this!"
+            )
+        yield (c, d)
+
+
+def gen_monolithic_undef_all_core(filt=None, desc=""):
+
+    if filt is None:
+        filt = lambda c: True
+
+    if desc != "":
+        yield "/*"
+        yield f" * Undefine macros from {desc}"
+        yield " */"
+
+    defines = list(set(get_checked_defines()))
+    defines.sort()
+
+    last_filename = None
+    for filename, d in defines:
+        if filt(filename) is False:
+            continue
+        if last_filename != filename:
+            yield f"/* {filename} */"
+            last_filename = filename
+        yield f"#undef {d}"
+
+
+def native(c):
+    return "/native/" in c
+
+
+def fips202(c):
+    return "/fips202/" in c
+
+
+def aarch64(c):
+    return "/aarch64/" in c
+
+
+def x86_64(c):
+    return "/x86_64/" in c
+
+
+def riscv64(c):
+    return "/riscv64/" in c
+
+
+def native_fips202(c):
+    return native(c) and fips202(c)
+
+
+def native_arith(c):
+    return native(c) and not fips202(c)
+
+
+def native_fips202_aarch64(c):
+    return native_fips202(c) and aarch64(c)
+
+
+def native_fips202_x86_64(c):
+    return native_fips202(c) and x86_64(c)
+
+
+def native_fips202_core(c):
+    return (
+        native_fips202(c)
+        and not native_fips202_x86_64(c)
+        and not native_fips202_aarch64(c)
+    )
+
+
+def native_arith_aarch64(c):
+    return native_arith(c) and aarch64(c)
+
+
+def native_arith_x86_64(c):
+    return native_arith(c) and x86_64(c)
+
+
+def native_arith_riscv64(c):
+    return native_arith(c) and riscv64(c)
+
+
+def native_arith_core(c):
+    return (
+        native_arith(c)
+        and not native_arith_x86_64(c)
+        and not native_arith_aarch64(c)
+        and not native_arith_riscv64(c)
+    )
+
+
+# List of level-specific source files
+# All other files only need including and building once
+# in multi-level build.
+def k_specific(c):
+    k_specific_sources = [
+        "mldsa_native.h",
+        "params.h",
+        # Deliberately omit config.h, which is not #undef'ed
+        "common.h",
+        "packing.c",
+        "packing.h",
+        "poly_kl.c",
+        "poly_kl.h",
+        "polyvec.c",
+        "polyvec.h",
+        "rounding.h",
+        "sign.c",
+        "sign.h",
+    ]
+    for f in k_specific_sources:
+        if c.endswith(f):
+            return True
+    return False
+
+
+def k_generic(c):
+    return not k_specific(c) and c != "mldsa/src/config.h"
+
+
+def gen_macro_undefs(extra_notes=None):
+    if extra_notes is None:
+        extra_notes = []
+
+    yield "/* Macro #undef's"
+    yield " *"
+    yield " * The following undefines macros from headers"
+    yield " * included by the source files imported above."
+    yield " *"
+    yield " * This is to allow building and linking multiple builds"
+    yield " * of mldsa-native for varying parameter sets through concatenation"
+    yield " * of this file, as if the files had been compiled separately."
+    yield " * If this is not relevant to you, you may remove the following."
+    for e in extra_notes:
+        yield f" * {e}"
+    yield " */"
+    yield ""
+    yield from gen_monolithic_undef_all_core(
+        filt=k_specific, desc="MLD_CONFIG_PARAMETER_SET-specific files"
+    )
+    yield ""
+    yield "#if !defined(MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)"
+    yield from gen_monolithic_undef_all_core(
+        filt=lambda c: not native(c)
+        and k_generic(c)
+        and not fips202(c)
+        and "cbmc.h" not in c,
+        desc="MLD_CONFIG_PARAMETER_SET-generic files",
+    )
+    # Handle cbmc.h manually -- most #define's therein are only defined when CBMC is set
+    # and need not be #undef'ed. In fact, #undef'ing them is risky since their names may
+    # well already be occupied.
+    yield "/* mldsa/src/cbmc.h */"
+    yield "#undef MLD_CBMC_H"
+    yield "#undef __contract__"
+    yield "#undef __loop__"
+    yield ""
+    yield "#if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER)"
+    yield from gen_monolithic_undef_all_core(
+        filt=lambda c: not native(c) and k_generic(c) and fips202(c),
+        desc="FIPS-202 files",
+    )
+    yield "#endif"
+    yield ""
+    yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
+    yield from gen_monolithic_undef_all_core(filt=native_fips202_core, desc="")
+    yield "#if defined(MLD_SYS_AARCH64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_aarch64, desc="native code (FIPS202, AArch64)"
+    )
+    yield "#endif"
+    yield "#if defined(MLD_SYS_X86_64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_x86_64, desc="native code (FIPS202, x86_64)"
+    )
+    yield "#endif"
+    yield "#endif"
+    yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
+    yield from gen_monolithic_undef_all_core(filt=native_arith_core, desc="")
+    yield "#if defined(MLD_SYS_AARCH64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_aarch64, desc="native code (Arith, AArch64)"
+    )
+    yield "#endif"
+    yield "#if defined(MLD_SYS_X86_64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
+    )
+    yield "#endif"
+    yield "#endif"
+    yield "#endif"
+    yield ""
+
+
+def gen_monolithic_source_file(dry_run=False):
+
+    def gen():
+        c_sources = get_c_source_files(main_only=True, strip_mldsa=True)
+        yield from gen_header()
+
+        yield "/******************************************************************************"
+        yield " *"
+        yield " * Single compilation unit (SCU) for fixed-level build of mldsa-native"
+        yield " *"
+        yield " * This compilation unit bundles together all source files for a build"
+        yield " * of mldsa-native for a fixed security level (MLDSA-44/65/87)."
+        yield " *"
+        yield " * # API"
+        yield " *"
+        yield " * The API exposed by this file is described in mldsa_native.h."
+        yield " *"
+        yield " * # Multi-level build"
+        yield " *"
+        yield " * If you want an SCU build of mldsa-native with support for multiple security"
+        yield " * levels, you need to include this file multiple times, and set"
+        yield " * MLD_CONFIG_MULTILEVEL_WITH_SHARED and MLD_CONFIG_MULTILEVEL_NO_SHARED"
+        yield " * appropriately. This is exemplified in examples/monolithic_build_multilevel"
+        yield " * and examples/monolithic_build_multilevel_native."
+        yield " *"
+        yield " * # Configuration"
+        yield " *"
+        yield " * The following options from the mldsa-native configuration are relevant:"
+        yield " *"
+        yield " * - MLD_CONFIG_FIPS202_CUSTOM_HEADER"
+        yield " *   Set this option if you use a custom FIPS202 implementation."
+        yield " *"
+        yield " * - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH"
+        yield " *   Set this option if you want to include the native arithmetic backends"
+        yield " *   in your build."
+        yield " *"
+        yield " * - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+        yield " *   Set this option if you want to include the native FIPS202 backends"
+        yield " *   in your build."
+        yield " *"
+        yield " * - MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS"
+        yield " *   Set this option if you want to keep the directives defined in"
+        yield " *   level-independent headers. This is needed for a multi-level build."
+        yield " */"
+        yield " "
+        yield " /* If parts of the mldsa-native source tree are not used,"
+        yield " * consider reducing this header via `unifdef`."
+        yield " *"
+        yield " * Example:"
+        yield " * ```bash"
+        yield " * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native.c"
+        yield " * ```"
+        yield " */"
+        yield ""
+        yield '#include "src/common.h"'
+        yield ""
+        for c in filter(lambda c: not native(c) and not fips202(c), c_sources):
+            yield f'#include "{c}"'
+        yield ""
+        yield "#if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER)"
+        for c in filter(lambda c: not native(c) and fips202(c), c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield ""
+        yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
+        yield "#if defined(MLD_SYS_AARCH64)"
+        for c in filter(native_arith_aarch64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_X86_64)"
+        for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#endif"
+        yield ""
+        yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
+        yield "#if defined(MLD_SYS_AARCH64)"
+        for c in filter(native_fips202_aarch64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_X86_64)"
+        for c in filter(native_fips202_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#endif"
+        yield ""
+        yield from gen_macro_undefs()
+
+    update_file(
+        "mldsa/mldsa_native.c",
+        "\n".join(gen()),
+        dry_run=dry_run,
+    )
+
+
 def update_via_simpasm(
     infile_full,
     outdir,
@@ -1895,6 +2255,8 @@ def _main():
     high_level_status("Generated header guards")
     gen_preprocessor_comments(args.dry_run)
     high_level_status("Generated preprocessor comments")
+    gen_monolithic_source_file(args.dry_run)
+    high_level_status("Generated monolithic source files")
 
     synchronize_backends(
         dry_run=args.dry_run,
