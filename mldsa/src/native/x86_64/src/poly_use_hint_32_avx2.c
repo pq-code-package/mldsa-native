@@ -38,10 +38,8 @@ void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a,
 {
   unsigned int i;
   __m256i f, f0, f1, h, t;
-  const __m256i q =
-      _mm256_load_si256(&mld_qdata.vec[MLD_AVX2_BACKEND_DATA_OFFSET_8XQ / 8]);
-  const __m256i hq = _mm256_srli_epi32(q, 1);
-  /* check-magic: 1025 == round((2**22*128) / ((MLDSA_Q - 1) / 16)) */
+  const __m256i q_bound = _mm256_set1_epi32(87 * MLDSA_GAMMA2);
+  /* check-magic: 1025 == floor(2**22 / 4092) */
   const __m256i v = _mm256_set1_epi32(1025);
   const __m256i alpha = _mm256_set1_epi32(2 * MLDSA_GAMMA2);
   const __m256i off = _mm256_set1_epi32(127);
@@ -54,26 +52,27 @@ void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a,
     f = _mm256_load_si256(&a[i]);
     h = _mm256_load_si256(&hint[i]);
 
-    /* Reference: The reference avx2 implementation calls poly_decompose to
-     * compute all a1, a0 before the loop.
+    /* Reference:
+     * - @[REF_AVX2] calls poly_decompose to compute all a1, a0 before the loop.
+     * - Our implementation of decompose() is slightly different from that in
+     *   @[REF_AVX2]. See poly_decompose_32_avx2.c for more information.
      */
-    /* decompose */
+    /* f1, f2 = decompose(f) */
     f1 = _mm256_add_epi32(f, off);
     f1 = _mm256_srli_epi32(f1, 7);
     f1 = _mm256_mulhi_epu16(f1, v);
     f1 = _mm256_mulhrs_epi16(f1, shift);
-    f1 = _mm256_and_si256(f1, mask);
+    t = _mm256_cmpgt_epi32(f, q_bound);
     f0 = _mm256_mullo_epi32(f1, alpha);
     f0 = _mm256_sub_epi32(f, f0);
-    f = _mm256_cmpgt_epi32(f0, hq);
-    f = _mm256_and_si256(f, q);
-    f0 = _mm256_sub_epi32(f0, f);
+    f1 = _mm256_andnot_si256(t, f1);
+    f0 = _mm256_add_epi32(f0, t);
 
     /* Reference: The reference avx2 implementation checks a0 >= 0, which is
      * different from the specification and the reference C implementation. We
      * follow the specification and check a0 > 0.
      */
-    /* t = (a0 > 0) ? h : -h */
+    /* t = (f0 > 0) ? h : -h */
     f0 = _mm256_cmpgt_epi32(f0, zero);
     t = _mm256_blendv_epi32(h, zero, f0);
     t = _mm256_slli_epi32(t, 1);
