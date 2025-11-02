@@ -36,30 +36,73 @@
 void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
 {
   unsigned int i;
-  __m256i f, f0, f1;
-  const __m256i q =
-      _mm256_load_si256(&mld_qdata.vec[MLD_AVX2_BACKEND_DATA_OFFSET_8XQ / 8]);
-  const __m256i hq = _mm256_srli_epi32(q, 1);
-  /* check-magic: 1025 == round((2**22*128) / ((MLDSA_Q - 1) / 16)) */
+  __m256i f, f0, f1, t;
+  const __m256i q_bound = _mm256_set1_epi32(31 * MLDSA_GAMMA2);
+  /* check-magic: 1025 == floor(2**22 / 4092) */
   const __m256i v = _mm256_set1_epi32(1025);
   const __m256i alpha = _mm256_set1_epi32(2 * MLDSA_GAMMA2);
   const __m256i off = _mm256_set1_epi32(127);
   const __m256i shift = _mm256_set1_epi32(512);
-  const __m256i mask = _mm256_set1_epi32(15);
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {
     f = _mm256_load_si256(&a[i]);
+
+    /* check-magic: 4092 == 2 * ((MLDSA_Q-1) // 32) // 128 */
+    /*
+     * The goal is to compute f1 = round-(f / (2*GAMMA2)), which can be computed
+     * alternatively as round-(f / (128B)) = round-(ceil(f / 128) / B) where
+     * B = 2*GAMMA2 / 128 = 4092. Here round-() denotes "round half down".
+     *
+     * range: 0 <= f <= Q-1 = 32*GAMMA2 = 16*128*B
+     */
+
+    /* Compute f1' = ceil(f / 128) as floor((f + 127) >> 7) */
     f1 = _mm256_add_epi32(f, off);
     f1 = _mm256_srli_epi32(f1, 7);
+    /*
+     * range: 0 <= f1' <= (Q-1)/128 = 16B
+     *
+     * Also, f1' <= (Q-1)/128 = 2^16 - 2^6 < 2^16 ensures that the odd-index
+     * 16-bit lanes are all 0, so no bits will be dropped in the input of the
+     * _mm256_mulhi_epu16() below.
+     */
+
+    /*
+     * Compute f1 = round-(f1' / B) ≈ round(f1' * 1025 / 2^22). This is exact
+     * for 0 <= f1' < 2^16. Note that half is rounded down since 1025 / 2^22 ≲
+     * 1 / 4092.
+     *
+     * The odd-index 16-bit lanes are still all 0 after this. As such, despite
+     * that the following steps use 32-bit lanes, the value of f1 is unaffected.
+     */
     f1 = _mm256_mulhi_epu16(f1, v);
     f1 = _mm256_mulhrs_epi16(f1, shift);
-    f1 = _mm256_and_si256(f1, mask);
+    /* range: 0 <= f1 <= 16 */
+
+    /*
+     * If f1 = 16, i.e. f > 31*GAMMA2, proceed as if f' = f - Q was given
+     * instead. (For f = 31*GAMMA2 + 1 thus f' = -GAMMA2, we still round it to 0
+     * like other "wrapped around" cases.)
+     */
+
+    /* Check for wrap-around */
+    t = _mm256_cmpgt_epi32(f, q_bound);
+
+    /* Compute remainder f0 */
     f0 = _mm256_mullo_epi32(f1, alpha);
     f0 = _mm256_sub_epi32(f, f0);
-    f = _mm256_cmpgt_epi32(f0, hq);
-    f = _mm256_and_si256(f, q);
-    f0 = _mm256_sub_epi32(f0, f);
+    /*
+     * range: -GAMMA2 < f0 <= GAMMA2
+     *
+     * This holds since f1 = round-(f / (2*GAMMA2)) was computed exactly.
+     */
+
+    /* If wrap-around is required, set f1 = 0 and f0 -= 1 */
+    f1 = _mm256_andnot_si256(t, f1);
+    f0 = _mm256_add_epi32(f0, t);
+    /* range: 0 <= f1 <= 15, -GAMMA2 <= f0 <= GAMMA2 */
+
     _mm256_store_si256(&a1[i], f1);
     _mm256_store_si256(&a0[i], f0);
   }
