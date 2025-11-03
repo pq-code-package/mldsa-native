@@ -159,7 +159,8 @@ __contract__(
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_keypair_internal(uint8_t *pk, uint8_t *sk,
+int crypto_sign_keypair_internal(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                                 uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                  const uint8_t seed[MLDSA_SEEDBYTES])
 {
   uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES];
@@ -231,7 +232,8 @@ int crypto_sign_keypair_internal(uint8_t *pk, uint8_t *sk,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_keypair(uint8_t *pk, uint8_t *sk)
+int crypto_sign_keypair(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                        uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
   uint8_t seed[MLDSA_SEEDBYTES];
   int result;
@@ -335,8 +337,9 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
-    uint8_t *sig, const uint8_t *mu, const uint8_t rhoprime[MLDSA_CRHBYTES],
-    uint16_t nonce, const mld_polyvecl mat[MLDSA_K], const mld_polyvecl *s1,
+    uint8_t sig[CRYPTO_BYTES], const uint8_t *mu,
+    const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce,
+    const mld_polyvecl mat[MLDSA_K], const mld_polyvecl *s1,
     const mld_polyveck *s2, const mld_polyveck *t0)
 __contract__(
   requires(memory_no_alias(sig, CRYPTO_BYTES))
@@ -486,11 +489,12 @@ cleanup:
 }
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_internal(uint8_t *sig, size_t *siglen,
+int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                    const uint8_t *m, size_t mlen,
                                    const uint8_t *pre, size_t prelen,
                                    const uint8_t rnd[MLDSA_RNDBYTES],
-                                   const uint8_t *sk, int externalmu)
+                                   const uint8_t sk[CRYPTO_SECRETKEYBYTES],
+                                   int externalmu)
 {
   uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
@@ -581,9 +585,10 @@ int crypto_sign_signature_internal(uint8_t *sig, size_t *siglen,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
-                          size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                          const uint8_t *sk)
+int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
+                          const uint8_t *m, size_t mlen, const uint8_t *ctx,
+                          size_t ctxlen,
+                          const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
   size_t i;
   uint8_t pre[257];
@@ -629,9 +634,9 @@ int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_extmu(uint8_t *sig, size_t *siglen,
+int crypto_sign_signature_extmu(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                 const uint8_t mu[MLDSA_CRHBYTES],
-                                const uint8_t *sk)
+                                const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
   uint8_t rnd[MLDSA_RNDBYTES];
   int result;
@@ -653,7 +658,8 @@ int crypto_sign_signature_extmu(uint8_t *sig, size_t *siglen,
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
-                const uint8_t *ctx, size_t ctxlen, const uint8_t *sk)
+                const uint8_t *ctx, size_t ctxlen,
+                const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
   int ret;
   size_t i;
@@ -677,7 +683,8 @@ MLD_EXTERNAL_API
 int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
                                 const uint8_t *m, size_t mlen,
                                 const uint8_t *pre, size_t prelen,
-                                const uint8_t *pk, int externalmu)
+                                const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                                int externalmu)
 {
   unsigned int i;
   uint8_t buf[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES];
@@ -785,7 +792,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                        size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                       const uint8_t *pk)
+                       const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
   size_t i;
   uint8_t pre[257];
@@ -820,7 +827,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_verify_extmu(const uint8_t *sig, size_t siglen,
                              const uint8_t mu[MLDSA_CRHBYTES],
-                             const uint8_t *pk)
+                             const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
   return crypto_sign_verify_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0,
                                      pk, 1);
@@ -829,7 +836,8 @@ int crypto_sign_verify_extmu(const uint8_t *sig, size_t siglen,
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
-                     const uint8_t *ctx, size_t ctxlen, const uint8_t *pk)
+                     const uint8_t *ctx, size_t ctxlen,
+                     const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
   size_t i;
 
@@ -876,12 +884,10 @@ badsig:
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_pre_hash_internal(uint8_t *sig, size_t *siglen,
-                                            const uint8_t *ph, size_t phlen,
-                                            const uint8_t *ctx, size_t ctxlen,
-                                            const uint8_t rnd[MLDSA_RNDBYTES],
-                                            const uint8_t *sk,
-                                            mld_hash_alg_t hashAlg)
+int crypto_sign_signature_pre_hash_internal(
+    uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *ph, size_t phlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES], mld_hash_alg_t hashAlg)
 {
   MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
   size_t fmsg_len;
@@ -910,11 +916,10 @@ int crypto_sign_signature_pre_hash_internal(uint8_t *sig, size_t *siglen,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_verify_pre_hash_internal(const uint8_t *sig, size_t siglen,
-                                         const uint8_t *ph, size_t phlen,
-                                         const uint8_t *ctx, size_t ctxlen,
-                                         const uint8_t *pk,
-                                         mld_hash_alg_t hashAlg)
+int crypto_sign_verify_pre_hash_internal(
+    const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+    mld_hash_alg_t hashAlg)
 {
   MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
   size_t fmsg_len;
@@ -941,11 +946,10 @@ int crypto_sign_verify_pre_hash_internal(const uint8_t *sig, size_t siglen,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_pre_hash_shake256(uint8_t *sig, size_t *siglen,
-                                            const uint8_t *m, size_t mlen,
-                                            const uint8_t *ctx, size_t ctxlen,
-                                            const uint8_t rnd[MLDSA_RNDBYTES],
-                                            const uint8_t *sk)
+int crypto_sign_signature_pre_hash_shake256(
+    uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
   MLD_ALIGN uint8_t ph[64];
   int result;
@@ -959,10 +963,9 @@ int crypto_sign_signature_pre_hash_shake256(uint8_t *sig, size_t *siglen,
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_verify_pre_hash_shake256(const uint8_t *sig, size_t siglen,
-                                         const uint8_t *m, size_t mlen,
-                                         const uint8_t *ctx, size_t ctxlen,
-                                         const uint8_t *pk)
+int crypto_sign_verify_pre_hash_shake256(
+    const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
   MLD_ALIGN uint8_t ph[64];
   int result;

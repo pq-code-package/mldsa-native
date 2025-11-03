@@ -448,9 +448,11 @@ typedef enum
  **************************************************/
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_internal)(
-    uint8_t *sig, size_t *siglen, const uint8_t *ph, size_t phlen,
-    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t *sk, mld_hash_alg_t hashAlg);
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    const uint8_t *ph, size_t phlen, const uint8_t *ctx, size_t ctxlen,
+    const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    mld_hash_alg_t hashAlg);
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_internal
@@ -480,7 +482,8 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
-    const uint8_t *ctx, size_t ctxlen, const uint8_t *pk,
+    const uint8_t *ctx, size_t ctxlen,
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
     mld_hash_alg_t hashAlg);
 
 /*************************************************
@@ -505,9 +508,10 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  **************************************************/
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
-    uint8_t *sig, size_t *siglen, const uint8_t *m, size_t mlen,
-    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t *sk);
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    const uint8_t *m, size_t mlen, const uint8_t *ctx, size_t ctxlen,
+    const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_shake256
@@ -528,11 +532,10 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
 MLD_API_MUST_CHECK_RETURN_VALUE
-int MLD_API_NAMESPACE(verify_pre_hash_shake256)(const uint8_t *sig,
-                                                size_t siglen, const uint8_t *m,
-                                                size_t mlen, const uint8_t *ctx,
-                                                size_t ctxlen,
-                                                const uint8_t *pk);
+int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
+    const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen,
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
 
 /****************************** SUPERCOP API *********************************/
 

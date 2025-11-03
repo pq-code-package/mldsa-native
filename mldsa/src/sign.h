@@ -85,7 +85,8 @@ typedef enum
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_keypair_internal(uint8_t *pk, uint8_t *sk,
+int crypto_sign_keypair_internal(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                                 uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                  const uint8_t seed[MLDSA_SEEDBYTES])
 __contract__(
   requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
@@ -115,7 +116,8 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_keypair(uint8_t *pk, uint8_t *sk)
+int crypto_sign_keypair(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                        uint8_t sk[CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
@@ -151,11 +153,12 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_internal(uint8_t *sig, size_t *siglen,
+int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                    const uint8_t *m, size_t mlen,
                                    const uint8_t *pre, size_t prelen,
                                    const uint8_t rnd[MLDSA_RNDBYTES],
-                                   const uint8_t *sk, int externalmu)
+                                   const uint8_t sk[CRYPTO_SECRETKEYBYTES],
+                                   int externalmu)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
@@ -196,9 +199,10 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
-                          size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                          const uint8_t *sk)
+int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
+                          const uint8_t *m, size_t mlen, const uint8_t *ctx,
+                          size_t ctxlen,
+                          const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sig, CRYPTO_BYTES))
@@ -234,9 +238,9 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_extmu(uint8_t *sig, size_t *siglen,
+int crypto_sign_signature_extmu(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                 const uint8_t mu[MLDSA_CRHBYTES],
-                                const uint8_t *sk)
+                                const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(sig, CRYPTO_BYTES))
   requires(memory_no_alias(siglen, sizeof(size_t)))
@@ -269,7 +273,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
-                const uint8_t *ctx, size_t ctxlen, const uint8_t *sk)
+                const uint8_t *ctx, size_t ctxlen,
+                const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sm, CRYPTO_BYTES + mlen))
@@ -307,7 +312,8 @@ MLD_EXTERNAL_API
 int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
                                 const uint8_t *m, size_t mlen,
                                 const uint8_t *pre, size_t prelen,
-                                const uint8_t *pk, int externalmu)
+                                const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                                int externalmu)
 __contract__(
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
@@ -343,7 +349,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                        size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                       const uint8_t *pk)
+                       const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
@@ -375,7 +381,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_verify_extmu(const uint8_t *sig, size_t siglen,
                              const uint8_t mu[MLDSA_CRHBYTES],
-                             const uint8_t *pk)
+                             const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 __contract__(
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sig, siglen))
@@ -403,7 +409,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
-                     const uint8_t *ctx, size_t ctxlen, const uint8_t *pk)
+                     const uint8_t *ctx, size_t ctxlen,
+                     const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 __contract__(
   requires(smlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(m, smlen))
@@ -447,12 +454,10 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_pre_hash_internal(uint8_t *sig, size_t *siglen,
-                                            const uint8_t *ph, size_t phlen,
-                                            const uint8_t *ctx, size_t ctxlen,
-                                            const uint8_t rnd[MLDSA_RNDBYTES],
-                                            const uint8_t *sk,
-                                            mld_hash_alg_t hashAlg)
+int crypto_sign_signature_pre_hash_internal(
+    uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *ph, size_t phlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES], mld_hash_alg_t hashAlg)
 __contract__(
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
@@ -495,11 +500,10 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_verify_pre_hash_internal(const uint8_t *sig, size_t siglen,
-                                         const uint8_t *ph, size_t phlen,
-                                         const uint8_t *ctx, size_t ctxlen,
-                                         const uint8_t *pk,
-                                         mld_hash_alg_t hashAlg)
+int crypto_sign_verify_pre_hash_internal(
+    const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+    mld_hash_alg_t hashAlg)
 __contract__(
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
@@ -533,11 +537,10 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_signature_pre_hash_shake256(uint8_t *sig, size_t *siglen,
-                                            const uint8_t *m, size_t mlen,
-                                            const uint8_t *ctx, size_t ctxlen,
-                                            const uint8_t rnd[MLDSA_RNDBYTES],
-                                            const uint8_t *sk)
+int crypto_sign_signature_pre_hash_shake256(
+    uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
@@ -573,10 +576,9 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int crypto_sign_verify_pre_hash_shake256(const uint8_t *sig, size_t siglen,
-                                         const uint8_t *m, size_t mlen,
-                                         const uint8_t *ctx, size_t ctxlen,
-                                         const uint8_t *pk)
+int crypto_sign_verify_pre_hash_shake256(
+    const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
