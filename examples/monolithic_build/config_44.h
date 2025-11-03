@@ -17,6 +17,24 @@
  *   https://csrc.nist.gov/pubs/fips/204/final
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mldsa-native repository.
+ *          Do not modify it directly.
+ */
+
+/*
+ * Test configuration: Monolithic build config for ML-DSA-44 (native backends
+ * disabled)
+ *
+ * This configuration differs from the default mldsa/src/config.h in the
+ * following places:
+ *   - MLD_CONFIG_PARAMETER_SET
+ *   - MLD_CONFIG_NAMESPACE_PREFIX
+ *   - MLD_CONFIG_INTERNAL_API_QUALIFIER
+ */
+
+
 #ifndef MLD_CONFIG_H
 #define MLD_CONFIG_H
 
@@ -98,7 +116,7 @@
  * Name:        MLD_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of the default configuration file mldsa/config.h.
+ *              of the default configuration file mldsa/src/config.h.
  *
  *              When you need to build mldsa-native in multiple configurations,
  *              using varying MLD_CONFIG_FILE can be more convenient
@@ -110,6 +128,7 @@
  *              on the command line.
  *
  *****************************************************************************/
+/* No need to set this -- we _are_ already in a custom config */
 /* #define MLD_CONFIG_FILE "config.h" */
 
 /******************************************************************************
@@ -158,7 +177,7 @@
  *              with mldsa-native.
  *
  *              If set, it must be the name of a file serving as the
- *              replacement for mldsa/fips202/fips202.h, and exposing
+ *              replacement for mldsa/src/fips202/fips202.h, and exposing
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
@@ -174,7 +193,7 @@
  *              with mldsa-native.
  *
  *              If set, it must be the name of a file serving as the
- *              replacement for mldsa/fips202/fips202x4.h, and exposing
+ *              replacement for mldsa/src/fips202/fips202x4.h, and exposing
  *              the same API (see FIPS202.md).
  *
  *****************************************************************************/
