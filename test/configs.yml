@@ -189,3 +189,11 @@ configs:
       MLD_CONFIG_INTERNAL_API_QUALIFIER: static
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_multilevel/multilevel_config.h
+    description: "Multilevel monolithic build config"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
