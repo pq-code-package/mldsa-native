@@ -156,12 +156,13 @@
  *              When MLD_CONFIG_KEYGEN_PCT is set, performs a Pairwise
  *              Consistency Test (PCT) as required by FIPS 140-3 IG.
  *
- * Arguments:   - uint8_t *pk:   pointer to output public key (allocated
- *                               array of MLDSA_PUBLICKEYBYTES bytes)
- *              - uint8_t *sk:   pointer to output private key (allocated
- *                               array of MLDSA_SECRETKEYBYTES bytes)
- *              - uint8_t *seed: pointer to input random seed (MLDSA_SEEDBYTES
- *                               bytes)
+ * Arguments:
+ *     - uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *           output public key
+ *     - uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *           output private key
+ *     - const uint8_t seed[MLDSA_SEEDBYTES]:
+ *           input random seed
  *
  * Returns 0 (success) or -1 (PCT failure)
  *
@@ -181,10 +182,11 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *              When MLD_CONFIG_KEYGEN_PCT is set, performs a Pairwise
  *              Consistency Test (PCT) as required by FIPS 140-3 IG.
  *
- * Arguments:   - uint8_t *pk:   pointer to output public key (allocated
- *                               array of MLDSA_PUBLICKEYBYTES bytes)
- *              - uint8_t *sk:   pointer to output private key (allocated
- *                               array of MLDSA_SECRETKEYBYTES bytes)
+ * Arguments:
+ *     - uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *           output public key
+ *     - uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *           output private key
  *
  * Returns 0 (success) or -1 (PCT failure)
  *
@@ -201,16 +203,19 @@ int MLD_API_NAMESPACE(keypair)(
  *
  * Description: Computes signature. Internal API.
  *
- * Arguments:   - uint8_t *sig:   pointer to output signature (of length
- *                                MLDSA{44,65,87}_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - uint8_t *m:     pointer to message to be signed
- *              - size_t mlen:    length of message
- *              - uint8_t *pre:   pointer to prefix string
- *              - size_t prelen:  length of prefix string
- *              - uint8_t *rnd:   pointer to random seed
- *              - uint8_t *sk:    pointer to bit-packed secret key
- *              - int externalmu: indicates input message m is processed as mu
+ * Arguments:
+ *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           output signature
+ *     - size_t *siglen:     pointer to output length of signature
+ *     - const uint8_t *m:   pointer to message to be signed
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *pre: pointer to prefix string
+ *     - size_t prelen:      length of prefix string
+ *     - const uint8_t rnd[MLDSA_RNDBYTES]:
+ *                           random seed
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed secret key
+ *     - int externalmu:     indicates input message m is processed as mu
  *
  * Returns 0 (success) or -1 (indicating nonce exhaustion)
  *
@@ -232,17 +237,22 @@ int MLD_API_NAMESPACE(signature_internal)(
 /*************************************************
  * Name:        crypto_sign_signature
  *
- * Description: Computes signature.
+ * Description: Computes signature. This function implements the randomized
+ *              variant of ML-DSA. If you require the deterministic variant,
+ *              use crypto_sign_signature_internal directly.
  *
- * Arguments:   - uint8_t *sig:   pointer to output signature (of length
- *                                MLDSA{44,65,87}_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - uint8_t *m:     pointer to message to be signed
- *              - size_t mlen:    length of message
- *              - uint8_t *ctx:   pointer to context string. May be NULL
- *                                iff ctxlen == 0
- *              - size_t ctxlen:  length of context string. Should be <= 255.
- *              - uint8_t *sk:    pointer to bit-packed secret key
+ * Arguments:
+ *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           output signature
+ *     - size_t *siglen:     pointer to output length of signature
+ *     - const uint8_t *m:   pointer to message to be signed
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *ctx: pointer to context string.
+ *                           May be NULL if ctxlen == 0.
+ *     - size_t ctxlen:      length of context string.
+ *                           Should be <= 255.
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed secret key
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
  *
@@ -260,11 +270,14 @@ int MLD_API_NAMESPACE(signature)(
  *
  * Description: Computes signature.
  *
- * Arguments:   - uint8_t *sig:   pointer to output signature (of length
- *                                MLDSA{44,65,87}_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - uint8_t mu:     input mu to be signed of size MLDSA_CRHBYTES
- *              - uint8_t *sk:    pointer to bit-packed secret key
+ * Arguments:
+ *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                       output signature
+ *     - size_t *siglen: pointer to output length of signature
+ *     - const uint8_t mu[MLDSA_CRHBYTES]:
+ *                       input mu to be signed
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                       bit-packed secret key
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
  *
@@ -281,18 +294,21 @@ int MLD_API_NAMESPACE(signature_extmu)(
 /*************************************************
  * Name:        crypto_sign
  *
- * Description: Compute signed message.
+ * Description: Computes signature. This function implements the randomized
+ *              variant of ML-DSA. If you require the deterministic variant,
+ *              use crypto_sign_signature_internal directly.
  *
- * Arguments:   - uint8_t *sm: pointer to output signed message (allocated
- *                             array with MLDSA{44,65,87}_BYTES + mlen bytes),
- *                             can be equal to m
- *              - size_t *smlen: pointer to output length of signed
- *                               message
- *              - const uint8_t *m: pointer to message to be signed
- *              - size_t mlen: length of message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *sk: pointer to bit-packed secret key
+ * Arguments:
+ *     - uint8_t *sm:        pointer to output signed message (allocated array
+ *                           with MLDSA{44,65,87}_BYTES + mlen bytes), can be
+ *                           equal to m
+ *     - size_t *smlen:      pointer to output length of signed message
+ *     - const uint8_t *m:   pointer to message to be signed
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *ctx: pointer to context string
+ *     - size_t ctxlen:      length of context string
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed secret key
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhausted)
  **************************************************/
@@ -306,14 +322,17 @@ int MLD_API_NAMESPACE(sign)(
  * Name:        crypto_sign_verify_internal
  *
  * Description: Verifies signature. Internal API.
- * Arguments:   - uint8_t *sig: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t *m: pointer to message
- *              - size_t mlen: length of message
- *              - const uint8_t *pre: pointer to prefix string
- *              - size_t prelen: length of prefix string
- *              - const uint8_t *pk: pointer to bit-packed public key
- *              - int externalmu: indicates input message m is processed as mu
+ *
+ * Arguments:
+ *     - const uint8_t *sig: pointer to input signature
+ *     - size_t siglen:      length of signature
+ *     - const uint8_t *m:   pointer to message
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *pre: pointer to prefix string
+ *     - size_t prelen:      length of prefix string
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed public key
+ *     - int externalmu:     indicates input message m is processed as mu
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  *
@@ -332,14 +351,16 @@ int MLD_API_NAMESPACE(verify_internal)(
  *
  * Description: Verifies signature.
  *
- * Arguments:   - uint8_t *sig: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t *m: pointer to message
- *              - size_t mlen: length of message
- *              - const uint8_t *ctx: pointer to context string
- *                                    May be NULL iff ctxlen == 0
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *pk: pointer to bit-packed public key
+ * Arguments:
+ *     - const uint8_t *sig: pointer to input signature
+ *     - size_t siglen:      length of signature
+ *     - const uint8_t *m:   pointer to message
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *ctx: pointer to context string.
+ *                           May be NULL if ctxlen == 0.
+ *     - size_t ctxlen:      length of context string
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed public key
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  *
@@ -357,10 +378,13 @@ int MLD_API_NAMESPACE(verify)(
  *
  * Description: Verifies signature.
  *
- * Arguments:   - uint8_t *sig: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t mu: input mu of size MLDSA_CRHBYTES
- *              - const uint8_t *pk: pointer to bit-packed public key
+ * Arguments:
+ *     - const uint8_t *sig: pointer to input signature
+ *     - size_t siglen:      length of signature
+ *     - const uint8_t mu[MLDSA_CRHBYTES]:
+ *                           input mu
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed public key
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  *
@@ -378,14 +402,16 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *
  * Description: Verify signed message.
  *
- * Arguments:   - uint8_t *m: pointer to output message (allocated
- *                            array with smlen bytes), can be equal to sm
- *              - size_t *mlen: pointer to output length of message
- *              - const uint8_t *sm: pointer to signed message
- *              - size_t smlen: length of signed message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *pk: pointer to bit-packed public key
+ * Arguments:
+ *     - uint8_t *m:         pointer to output message (allocated array with
+ *                           smlen bytes), can be equal to sm
+ *     - size_t *mlen:       pointer to output length of message
+ *     - const uint8_t *sm:  pointer to signed message
+ *     - size_t smlen:       length of signed message
+ *     - const uint8_t *ctx: pointer to context string
+ *     - size_t ctxlen:      length of context string
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed public key
  *
  * Returns 0 if signed message could be verified correctly and -1 otherwise
  **************************************************/
@@ -424,16 +450,19 @@ typedef enum
  * Description: FIPS 204: Algorithm 4 HashML-DSA.Sign.
  *              Computes signature with pre-hashed message.
  *
- * Arguments:   - uint8_t *sig: pointer to output signature (of length
- *                              CRYPTO_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - const uint8_t *ph: pointer to pre-hashed message
- *              - size_t phlen: length of pre-hashed message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *rnd: pointer to random seed
- *              - const uint8_t *sk: pointer to bit-packed secret key
- *              - mld_hash_alg_t hashAlg: hash algorithm enumeration
+ * Arguments:
+ *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                               output signature
+ *     - size_t *siglen:         pointer to output length of signature
+ *     - const uint8_t *ph:      pointer to pre-hashed message
+ *     - size_t phlen:           length of pre-hashed message
+ *     - const uint8_t *ctx:     pointer to context string
+ *     - size_t ctxlen:          length of context string
+ *     - const uint8_t rnd[MLDSA_RNDBYTES]:
+ *                               random seed
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                               bit-packed secret key
+ *     - mld_hash_alg_t hashAlg: hash algorithm enumeration
  *
  * The supported hash functions are: "SHA2-224", "SHA2-256", "SHA2-384",
  *                                   "SHA2-512", "SHA2-512/224", "SHA2-512/256",
@@ -460,14 +489,16 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  * Description: FIPS 204: Algorithm 5 HashML-DSA.Verify.
  *              Verifies signature with pre-hashed message.
  *
- * Arguments:   - const uint8_t *sig: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t *ph: pointer to pre-hashed message
- *              - size_t phlen: length of pre-hashed message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *pk: pointer to bit-packed public key
- *              - mld_hash_alg_t hashAlg: hash algorithm enumeration
+ * Arguments:
+ *     - const uint8_t *sig:     pointer to input signature
+ *     - size_t siglen:          length of signature
+ *     - const uint8_t *ph:      pointer to pre-hashed message
+ *     - size_t phlen:           length of pre-hashed message
+ *     - const uint8_t *ctx:     pointer to context string
+ *     - size_t ctxlen:          length of context string
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                               bit-packed public key
+ *     - mld_hash_alg_t hashAlg: hash algorithm enumeration
  *
  * The supported hash functions are: "SHA2-224", "SHA2-256", "SHA2-384",
  *                                   "SHA2-512", "SHA2-512/224", "SHA2-512/256",
@@ -492,17 +523,20 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  * Description: FIPS 204: Algorithm 4 HashML-DSA.Sign with SHAKE256.
  *              Computes signature with pre-hashed message using SHAKE256.
  *              This function computes the SHAKE256 hash of the message
- *internally.
+ *              internally.
  *
- * Arguments:   - uint8_t *sig: pointer to output signature (of length
- *                              CRYPTO_BYTES)
- *              - size_t *siglen: pointer to output length of signature
- *              - const uint8_t *m: pointer to message to be hashed and signed
- *              - size_t mlen: length of message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *rnd: pointer to random seed
- *              - const uint8_t *sk: pointer to bit-packed secret key
+ * Arguments:
+ *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           output signature
+ *     - size_t *siglen:     pointer to output length of signature
+ *     - const uint8_t *m:   pointer to message to be hashed and signed
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *ctx: pointer to context string
+ *     - size_t ctxlen:      length of context string
+ *     - const uint8_t rnd[MLDSA_RNDBYTES]:
+ *                           random seed
+ *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed secret key
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
  **************************************************/
@@ -521,13 +555,15 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *              This function computes the SHAKE256 hash of the message
  *internally.
  *
- * Arguments:   - const uint8_t *sig: pointer to input signature
- *              - size_t siglen: length of signature
- *              - const uint8_t *m: pointer to message to be hashed and verified
- *              - size_t mlen: length of message
- *              - const uint8_t *ctx: pointer to context string
- *              - size_t ctxlen: length of context string
- *              - const uint8_t *pk: pointer to bit-packed public key
+ * Arguments:
+ *     - const uint8_t *sig: pointer to input signature
+ *     - size_t siglen:      length of signature
+ *     - const uint8_t *m:   pointer to message to be hashed and verified
+ *     - size_t mlen:        length of message
+ *     - const uint8_t *ctx: pointer to context string
+ *     - size_t ctxlen:      length of context string
+ *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
+ *                           bit-packed public key
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
