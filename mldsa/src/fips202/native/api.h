@@ -16,6 +16,22 @@
 #include <stdint.h>
 #include "../../cbmc.h"
 
+/* Backends must return MLD_NATIVE_FUNC_SUCCESS upon success. */
+#define MLD_NATIVE_FUNC_SUCCESS (0)
+/* Backends may return MLD_NATIVE_FUNC_FALLBACK to signal to the frontend that
+ * the target/parameters are unsupported; typically, this would be because of
+ * dependencies on CPU features not detected on the host CPU. In this case,
+ * the frontend falls back to the default C implementation.
+ *
+ * IMPORTANT: Backend implementations must ensure that the decision of whether
+ * to fallback (return MLD_NATIVE_FUNC_FALLBACK) or not must never depend on
+ * the input data itself. Fallback decisions may only depend on system
+ * capabilities (e.g., CPU features) and, where present, length information.
+ * This requirement applies to all backend functions to maintain constant-time
+ * properties.
+ */
+#define MLD_NATIVE_FUNC_FALLBACK (-1)
+
 /*
  * This is the C<->native interface allowing for the drop-in
  * of custom Keccak-F1600 implementations.

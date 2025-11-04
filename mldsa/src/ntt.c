@@ -14,9 +14,7 @@
 
 #include "common.h"
 
-#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
-    (!defined(MLD_USE_NATIVE_NTT) || !defined(MLD_USE_NATIVE_INTT))
-
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 
@@ -41,8 +39,6 @@ __contract__(
 }
 
 #include "zetas.inc"
-
-#if !defined(MLD_USE_NATIVE_NTT)
 
 /* mld_ntt_butterfly_block()
  *
@@ -164,9 +160,7 @@ void mld_ntt(int32_t a[MLDSA_N])
   /* directly implies the postcondition in that coefficients */
   /* are bounded in magnitude by 9 * MLDSA_Q                 */
 }
-#endif /* !MLD_USE_NATIVE_NTT */
 
-#if !defined(MLD_USE_NATIVE_INTT)
 /*************************************************
  * Name:        mld_fqscale
  *
@@ -261,10 +255,7 @@ void mld_invntt_tomont(int32_t a[MLDSA_N])
     a[j] = mld_fqscale(a[j]);
   }
 }
-#endif /* !MLD_USE_NATIVE_INTT */
 
-#else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED && (!MLD_USE_NATIVE_NTT || \
-          !MLD_USE_NATIVE_INTT) */
+#else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 MLD_EMPTY_CU(mld_ntt)
-#endif /* !(!MLD_CONFIG_MULTILEVEL_NO_SHARED && (!MLD_USE_NATIVE_NTT || \
-          !MLD_USE_NATIVE_INTT)) */
+#endif /* MLD_CONFIG_MULTILEVEL_NO_SHARED */

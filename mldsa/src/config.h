@@ -345,6 +345,36 @@
    #endif
 */
 
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+ *
+ * Description: mldsa-native backends may rely on specific hardware features.
+ *              Those backends will only be included in an mldsa-native build
+ *              if support for the respective features is enabled at
+ *              compile-time. However, when building for a heteroneous set
+ *              of CPUs to run the resulting binary/library on, feature
+ *              detection at _runtime_ is needed to decided whether a backend
+ *              can be used or not.
+ *
+ *              Set this option and define `mld_sys_check_capability` if you
+ *              want to use a custom method to dispatch between implementations.
+ *
+ *              If this option is not set, mldsa-native uses compile-time
+ *              feature detection only to decide which backend to use.
+ *
+ *              If you compile mldsa-native on a system with different
+ *              capabilities than the system that the resulting binary/library
+ *              will be run on, you must use this option.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+   static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+   {
+       ... your implementation ...
+   }
+*/
+
 /******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
  *

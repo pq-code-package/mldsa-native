@@ -165,6 +165,86 @@ configs:
           }
           #endif
 
+  - path: test/custom_native_capability_config_0.h
+    description: "Test configuration with custom capability function returning 0"
+    defines:
+      MLD_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include "../mldsa/src/sys.h"
+          /* System capability enumeration */
+
+          static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+          {
+            (void)cap; /* Ignore parameter */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_1.h
+    description: "Test configuration with custom capability function returning 1"
+    defines:
+      MLD_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include "../mldsa/src/sys.h"
+
+          static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+          {
+            (void)cap; /* Ignore parameter */
+            return 1;
+          }
+          #endif /* !__ASSEMBLER__ */
+
+  - path: test/custom_native_capability_config_CPUID_AVX2.h
+    description: "Test configuration with CPUID-based AVX2 capability detection"
+    defines:
+      MLD_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "../mldsa/src/sys.h"
+
+          /* Assert this config is only used on Linux/x86_64 systems */
+          #if !defined(MLD_SYS_X86_64) || !defined(MLD_SYS_LINUX)
+          #error "This configuration is only supported on Linux/x86_64 systems"
+          #endif
+
+          static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+          {
+            if (cap == MLD_SYS_CAP_AVX2)
+            {
+              uint32_t eax, ebx, ecx, edx;
+
+              /* AVX2 support is queried using `cpuid` with EAX=7, ECX=0.
+               * Check first if `cpuid` supports EAX=7 by calling it with
+               * EAX=0, which gives the maximum supported value of EAX in
+               * EAX. */
+
+              __asm__ volatile("cpuid"
+                               : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                               : "a"(0));
+
+              if (eax < 7)
+              {
+                return 0; /* Extended features not supported */
+              }
+
+              __asm__ volatile("cpuid"
+                               : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx)
+                               : "a"(7), "c"(0));
+
+              /* AVX2 is bit 5 in EBX */
+              return (ebx & (1 << 5)) ? 1 : 0;
+            }
+
+            /* Default to 0 (conservative) for unknown capabilities */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
 
   # Example configs
 

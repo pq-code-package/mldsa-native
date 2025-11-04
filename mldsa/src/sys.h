@@ -67,6 +67,14 @@
 #define MLD_SYS_WINDOWS
 #endif
 
+#if defined(__linux__)
+#define MLD_SYS_LINUX
+#endif
+
+#if defined(__APPLE__)
+#define MLD_SYS_APPLE
+#endif
+
 /* If MLD_FORCE_AARCH64 is set, assert that we're indeed on an AArch64 system.
  */
 #if defined(MLD_FORCE_AARCH64) && !defined(MLD_SYS_AARCH64)
@@ -202,5 +210,33 @@
 #else
 #define MLD_MUST_CHECK_RETURN_VALUE
 #endif
+
+
+#if !defined(__ASSEMBLER__)
+/* System capability enumeration */
+typedef enum
+{
+  /* x86_64 */
+  MLD_SYS_CAP_AVX2,
+  /* AArch64 */
+  MLD_SYS_CAP_SHA3
+} mld_sys_cap;
+
+#if !defined(MLD_CONFIG_CUSTOM_CAPABILITY_FUNC)
+#include "cbmc.h"
+
+static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+{
+  /* By default, we rely on compile-time feature detection/specification:
+   * If a feature is enabled at compile-time, we assume it is supported by
+   * the host that the resulting library/binary will be built on.
+   * If this assumption is not true, you MUST overwrite this function.
+   * See the documentation of MLD_CONFIG_CUSTOM_CAPABILITY_FUNC in config.h
+   * for more information. */
+  (void)cap;
+  return 1;
+}
+#endif /* !MLD_CONFIG_CUSTOM_CAPABILITY_FUNC */
+#endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_SYS_H */

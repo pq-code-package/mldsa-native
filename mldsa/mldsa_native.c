@@ -416,8 +416,10 @@
 #undef MLD_RESTRICT
 #undef MLD_SYS_AARCH64
 #undef MLD_SYS_AARCH64_EB
+#undef MLD_SYS_APPLE
 #undef MLD_SYS_BIG_ENDIAN
 #undef MLD_SYS_H
+#undef MLD_SYS_LINUX
 #undef MLD_SYS_LITTLE_ENDIAN
 #undef MLD_SYS_PPC64LE
 #undef MLD_SYS_RISCV32
@@ -532,6 +534,8 @@
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mldsa/src/native/api.h */
 #undef MLD_NATIVE_API_H
+#undef MLD_NATIVE_FUNC_FALLBACK
+#undef MLD_NATIVE_FUNC_SUCCESS
 /* mldsa/src/native/meta.h */
 #undef MLD_NATIVE_META_H
 #if defined(MLD_SYS_AARCH64)
