@@ -12,8 +12,8 @@ void harness(void)
   const uint8_t *ctx;
   size_t ctxlen;
   const uint8_t *pk;
-  mld_hash_alg_t hashAlg;
+  int hashalg;
   int r;
   r = crypto_sign_verify_pre_hash_internal(sig, siglen, ph, phlen, ctx, ctxlen,
-                                           pk, hashAlg);
+                                           pk, hashalg);
 }

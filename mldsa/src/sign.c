@@ -887,7 +887,7 @@ MLD_EXTERNAL_API
 int crypto_sign_signature_pre_hash_internal(
     uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[CRYPTO_SECRETKEYBYTES], mld_hash_alg_t hashAlg)
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES], int hashalg)
 {
   MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
   size_t fmsg_len;
@@ -899,13 +899,13 @@ int crypto_sign_signature_pre_hash_internal(
     return -1;
   }
 
-  if (mld_validate_hash_length(hashAlg, phlen))
+  if (mld_validate_hash_length(hashalg, phlen))
   {
     *siglen = 0;
     return -1;
   }
 
-  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashAlg);
+  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result = crypto_sign_signature_internal(sig, siglen, fmsg, fmsg_len, NULL, 0,
                                           rnd, sk, 0);
@@ -919,7 +919,7 @@ MLD_EXTERNAL_API
 int crypto_sign_verify_pre_hash_internal(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
-    mld_hash_alg_t hashAlg)
+    int hashalg)
 {
   MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
   size_t fmsg_len;
@@ -930,12 +930,12 @@ int crypto_sign_verify_pre_hash_internal(
     return -1;
   }
 
-  if (mld_validate_hash_length(hashAlg, phlen))
+  if (mld_validate_hash_length(hashalg, phlen))
   {
     return -1;
   }
 
-  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashAlg);
+  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result =
       crypto_sign_verify_internal(sig, siglen, fmsg, fmsg_len, NULL, 0, pk, 0);
@@ -955,7 +955,7 @@ int crypto_sign_signature_pre_hash_shake256(
   int result;
   mld_shake256(ph, sizeof(ph), m, mlen);
   result = crypto_sign_signature_pre_hash_internal(
-      sig, siglen, ph, sizeof(ph), ctx, ctxlen, rnd, sk, MLD_SHAKE_256);
+      sig, siglen, ph, sizeof(ph), ctx, ctxlen, rnd, sk, MLD_PREHASH_SHAKE_256);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return result;
@@ -970,8 +970,8 @@ int crypto_sign_verify_pre_hash_shake256(
   MLD_ALIGN uint8_t ph[64];
   int result;
   mld_shake256(ph, sizeof(ph), m, mlen);
-  result = crypto_sign_verify_pre_hash_internal(sig, siglen, ph, sizeof(ph),
-                                                ctx, ctxlen, pk, MLD_SHAKE_256);
+  result = crypto_sign_verify_pre_hash_internal(
+      sig, siglen, ph, sizeof(ph), ctx, ctxlen, pk, MLD_PREHASH_SHAKE_256);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return result;

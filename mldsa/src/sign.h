@@ -43,26 +43,20 @@
   MLD_NAMESPACE_KL(verify_pre_hash_shake256)
 
 /*************************************************
- * Hash algorithm enumeration for pre-hash functions
+ * Hash algorithm constants for pre-hash functions
  **************************************************/
-#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
-/* TODO: is there a better way?*/
-typedef enum
-{
-  MLD_SHA2_224,
-  MLD_SHA2_256,
-  MLD_SHA2_384,
-  MLD_SHA2_512,
-  MLD_SHA2_512_224,
-  MLD_SHA2_512_256,
-  MLD_SHA3_224,
-  MLD_SHA3_256,
-  MLD_SHA3_384,
-  MLD_SHA3_512,
-  MLD_SHAKE_128,
-  MLD_SHAKE_256
-} mld_hash_alg_t;
-#endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#define MLD_PREHASH_SHA2_224 1
+#define MLD_PREHASH_SHA2_256 2
+#define MLD_PREHASH_SHA2_384 3
+#define MLD_PREHASH_SHA2_512 4
+#define MLD_PREHASH_SHA2_512_224 5
+#define MLD_PREHASH_SHA2_512_256 6
+#define MLD_PREHASH_SHA3_224 7
+#define MLD_PREHASH_SHA3_256 8
+#define MLD_PREHASH_SHA3_384 9
+#define MLD_PREHASH_SHA3_512 10
+#define MLD_PREHASH_SHAKE_128 11
+#define MLD_PREHASH_SHAKE_256 12
 
 /*************************************************
  * Name:        crypto_sign_keypair_internal
@@ -450,12 +444,14 @@ __contract__(
  *                                        random seed
  *              - const uint8_t sk[CRYPTO_SECRETKEYBYTES]:
  *                                        bit-packed secret key
- *              - mld_hash_alg_t hashAlg: hash algorithm enumeration
+ *              - int hashalg:            hash algorithm constant (one of
+ *                                        MLD_PREHASH_*)
  *
- * The supported hash functions are: "SHA2-224", "SHA2-256", "SHA2-384",
- *                                   "SHA2-512", "SHA2-512/224", "SHA2-512/256",
- *                                   "SHA3-224", "SHA3-256", "SHA3-384",
- *                                   "SHA3-512", "SHAKE-128", "SHAKE-256"
+ * Supported hash algorithm constants:
+ *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
+ *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
+ *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
+ *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_signature_pre_hash_shake256.
@@ -468,7 +464,7 @@ MLD_EXTERNAL_API
 int crypto_sign_signature_pre_hash_internal(
     uint8_t sig[CRYPTO_BYTES], size_t *siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[CRYPTO_SECRETKEYBYTES], mld_hash_alg_t hashAlg)
+    const uint8_t sk[CRYPTO_SECRETKEYBYTES], int hashalg)
 __contract__(
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
@@ -498,12 +494,14 @@ __contract__(
  *              - size_t ctxlen:          length of context string
  *              - const uint8_t pk[CRYPTO_PUBLICKEYBYTES]:
  *                                        bit-packed public key
- *              - mld_hash_alg_t hashAlg: hash algorithm enumeration
+ *              - int hashalg:            hash algorithm constant (one of
+ *                                        MLD_PREHASH_*)
  *
- * The supported hash functions are: "SHA2-224", "SHA2-256", "SHA2-384",
- *                                   "SHA2-512", "SHA2-512/224", "SHA2-512/256",
- *                                   "SHA3-224", "SHA3-256", "SHA3-384",
- *                                   "SHA3-512", "SHAKE-128", "SHAKE-256"
+ * Supported hash algorithm constants:
+ *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
+ *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
+ *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
+ *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_verify_pre_hash_shake256.
@@ -515,7 +513,7 @@ MLD_EXTERNAL_API
 int crypto_sign_verify_pre_hash_internal(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
-    mld_hash_alg_t hashAlg)
+    int hashalg)
 __contract__(
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)

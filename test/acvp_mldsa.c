@@ -354,55 +354,55 @@ static int acvp_mldsa_sigVerInternal_AFT(
   }
 }
 
-static mld_hash_alg_t str_to_hash_alg(const char *hashAlg)
+static int str_to_hash_alg(const char *hashAlg)
 {
   if (strcmp(hashAlg, "SHA2-224") == 0)
   {
-    return MLD_SHA2_224;
+    return MLD_PREHASH_SHA2_224;
   }
   if (strcmp(hashAlg, "SHA2-256") == 0)
   {
-    return MLD_SHA2_256;
+    return MLD_PREHASH_SHA2_256;
   }
   if (strcmp(hashAlg, "SHA2-384") == 0)
   {
-    return MLD_SHA2_384;
+    return MLD_PREHASH_SHA2_384;
   }
   if (strcmp(hashAlg, "SHA2-512") == 0)
   {
-    return MLD_SHA2_512;
+    return MLD_PREHASH_SHA2_512;
   }
   if (strcmp(hashAlg, "SHA2-512/224") == 0)
   {
-    return MLD_SHA2_512_224;
+    return MLD_PREHASH_SHA2_512_224;
   }
   if (strcmp(hashAlg, "SHA2-512/256") == 0)
   {
-    return MLD_SHA2_512_256;
+    return MLD_PREHASH_SHA2_512_256;
   }
   if (strcmp(hashAlg, "SHA3-224") == 0)
   {
-    return MLD_SHA3_224;
+    return MLD_PREHASH_SHA3_224;
   }
   if (strcmp(hashAlg, "SHA3-256") == 0)
   {
-    return MLD_SHA3_256;
+    return MLD_PREHASH_SHA3_256;
   }
   if (strcmp(hashAlg, "SHA3-384") == 0)
   {
-    return MLD_SHA3_384;
+    return MLD_PREHASH_SHA3_384;
   }
   if (strcmp(hashAlg, "SHA3-512") == 0)
   {
-    return MLD_SHA3_512;
+    return MLD_PREHASH_SHA3_512;
   }
   if (strcmp(hashAlg, "SHAKE-128") == 0)
   {
-    return MLD_SHAKE_128;
+    return MLD_PREHASH_SHAKE_128;
   }
   if (strcmp(hashAlg, "SHAKE-256") == 0)
   {
-    return MLD_SHAKE_256;
+    return MLD_PREHASH_SHAKE_256;
   }
   /* Invalid hash algorithm */
   fprintf(stderr, "Error: Unsupported hash algorithm: %s\n", hashAlg);

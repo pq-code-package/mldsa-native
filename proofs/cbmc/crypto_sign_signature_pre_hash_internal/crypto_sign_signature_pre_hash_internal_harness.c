@@ -13,8 +13,8 @@ void harness(void)
   size_t ctxlen;
   const uint8_t *rnd;
   const uint8_t *sk;
-  mld_hash_alg_t hashAlg;
+  int hashalg;
   int r;
   r = crypto_sign_signature_pre_hash_internal(sig, siglen, ph, phlen, ctx,
-                                              ctxlen, rnd, sk, hashAlg);
+                                              ctxlen, rnd, sk, hashalg);
 }
