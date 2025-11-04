@@ -96,7 +96,7 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N]);
  *
  * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
  **************************************************/
-static MLD_INLINE void mld_intt_native(int16_t p[MLDSA_N]);
+static MLD_INLINE void mld_intt_native(int32_t p[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_INTT */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM)
@@ -332,8 +332,8 @@ static MLD_INLINE void mld_poly_pointwise_montgomery_native(
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
 static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
-    int32_t w[MLDSA_N], const int32_t u[MLDSA_L][MLDSA_N],
-    const int32_t v[MLDSA_L][MLDSA_N]);
+    int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
+    const int32_t v[4][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5)
@@ -352,8 +352,8 @@ static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
 static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l5_native(
-    int32_t w[MLDSA_N], const int32_t u[MLDSA_L][MLDSA_N],
-    const int32_t v[MLDSA_L][MLDSA_N]);
+    int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
+    const int32_t v[5][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
@@ -372,8 +372,8 @@ static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l5_native(
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
 static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l7_native(
-    int32_t w[MLDSA_N], const int32_t u[MLDSA_L][MLDSA_N],
-    const int32_t v[MLDSA_L][MLDSA_N]);
+    int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
+    const int32_t v[7][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 #endif /* !MLD_NATIVE_API_H */
