@@ -182,3 +182,7 @@ run_size: \
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
 	-$(RM) -rf $(BUILD_DIR)
+	-make clean -C examples/bring_your_own_fips202 >/dev/null
+	-make clean -C examples/basic >/dev/null
+	-make clean -C examples/monolithic_build >/dev/null
+	-make clean -C examples/monolithic_build_multilevel >/dev/null
