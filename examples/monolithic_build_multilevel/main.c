@@ -24,19 +24,21 @@
     }                                                         \
   } while (0)
 
+#define TEST_MSG \
+  "This is a test message for ML-DSA digital signature algorithm!"
+#define TEST_MSG_LEN (sizeof(TEST_MSG) - 1)
+
 static int test_mldsa44(void)
 {
-  const char *test_msg =
-      "This is a test message for ML-DSA digital signature algorithm!";
+  const char test_msg[] = TEST_MSG;
   const char *test_ctx = "test_context_123";
-  size_t msglen = strlen(test_msg);
   size_t ctxlen = strlen(test_ctx);
 
   uint8_t pk[MLDSA44_PUBLICKEYBYTES];
   uint8_t sk[MLDSA44_SECRETKEYBYTES];
   uint8_t sig[MLDSA44_BYTES];
-  uint8_t sm[msglen + MLDSA44_BYTES]; /* signed message buffer */
-  uint8_t m2[msglen];                 /* recovered message buffer */
+  uint8_t sm[TEST_MSG_LEN + MLDSA44_BYTES]; /* signed message buffer */
+  uint8_t m2[TEST_MSG_LEN + MLDSA44_BYTES]; /* recovered message buffer */
   size_t siglen;
   size_t smlen;
   size_t mlen;
@@ -60,21 +62,21 @@ static int test_mldsa44(void)
   printf("Signing message... ");
 
   /* Alice signs the message */
-  CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                           (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
-  CHECK(mldsa44_verify(sig, siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa44_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                        (const uint8_t *)test_ctx, ctxlen, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                      (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
@@ -88,8 +90,8 @@ static int test_mldsa44(void)
   printf("Compare messages... ");
 
   /* Verify the recovered message matches the original */
-  CHECK(mlen == msglen);
-  CHECK(memcmp(test_msg, m2, msglen) == 0);
+  CHECK(mlen == TEST_MSG_LEN);
+  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
 
   printf("DONE\n\n");
 
@@ -98,9 +100,9 @@ static int test_mldsa44(void)
   printf("Public key size:  %d bytes\n", MLDSA44_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA44_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA44_BYTES);
-  printf("Message length:   %zu bytes\n", msglen);
-  printf("Signature length: %zu bytes\n", siglen);
-  printf("Signed msg length: %zu bytes\n", smlen);
+  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
+  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 
 #if !defined(MLD_CONFIG_KEYGEN_PCT)
   /* Check against expected signature to make sure that
@@ -126,17 +128,15 @@ static int test_mldsa44(void)
 
 static int test_mldsa65(void)
 {
-  const char *test_msg =
-      "This is a test message for ML-DSA digital signature algorithm!";
+  const char test_msg[] = TEST_MSG;
   const char *test_ctx = "test_context_123";
-  size_t msglen = strlen(test_msg);
   size_t ctxlen = strlen(test_ctx);
 
   uint8_t pk[MLDSA65_PUBLICKEYBYTES];
   uint8_t sk[MLDSA65_SECRETKEYBYTES];
   uint8_t sig[MLDSA65_BYTES];
-  uint8_t sm[msglen + MLDSA65_BYTES]; /* signed message buffer */
-  uint8_t m2[msglen];                 /* recovered message buffer */
+  uint8_t sm[TEST_MSG_LEN + MLDSA65_BYTES]; /* signed message buffer */
+  uint8_t m2[TEST_MSG_LEN + MLDSA65_BYTES]; /* recovered message buffer */
   size_t siglen;
   size_t smlen;
   size_t mlen;
@@ -160,21 +160,21 @@ static int test_mldsa65(void)
   printf("Signing message... ");
 
   /* Alice signs the message */
-  CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                           (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
-  CHECK(mldsa65_verify(sig, siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa65_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                        (const uint8_t *)test_ctx, ctxlen, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                      (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
@@ -188,8 +188,8 @@ static int test_mldsa65(void)
   printf("Compare messages... ");
 
   /* Verify the recovered message matches the original */
-  CHECK(mlen == msglen);
-  CHECK(memcmp(test_msg, m2, msglen) == 0);
+  CHECK(mlen == TEST_MSG_LEN);
+  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
 
   printf("DONE\n\n");
 
@@ -198,9 +198,9 @@ static int test_mldsa65(void)
   printf("Public key size:  %d bytes\n", MLDSA65_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA65_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA65_BYTES);
-  printf("Message length:   %zu bytes\n", msglen);
-  printf("Signature length: %zu bytes\n", siglen);
-  printf("Signed msg length: %zu bytes\n", smlen);
+  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
+  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 
 #if !defined(MLD_CONFIG_KEYGEN_PCT)
   /* Check against expected signature to make sure that
@@ -227,17 +227,15 @@ static int test_mldsa65(void)
 
 static int test_mldsa87(void)
 {
-  const char *test_msg =
-      "This is a test message for ML-DSA digital signature algorithm!";
+  const char test_msg[] = TEST_MSG;
   const char *test_ctx = "test_context_123";
-  size_t msglen = strlen(test_msg);
   size_t ctxlen = strlen(test_ctx);
 
   uint8_t pk[MLDSA87_PUBLICKEYBYTES];
   uint8_t sk[MLDSA87_SECRETKEYBYTES];
   uint8_t sig[MLDSA87_BYTES];
-  uint8_t sm[msglen + MLDSA87_BYTES]; /* signed message buffer */
-  uint8_t m2[msglen];                 /* recovered message buffer */
+  uint8_t sm[TEST_MSG_LEN + MLDSA87_BYTES]; /* signed message buffer */
+  uint8_t m2[TEST_MSG_LEN + MLDSA87_BYTES]; /* recovered message buffer */
   size_t siglen;
   size_t smlen;
   size_t mlen;
@@ -261,21 +259,21 @@ static int test_mldsa87(void)
   printf("Signing message... ");
 
   /* Alice signs the message */
-  CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                           (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
-  CHECK(mldsa87_verify(sig, siglen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa87_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                        (const uint8_t *)test_ctx, ctxlen, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)test_msg, msglen,
+  CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
                      (const uint8_t *)test_ctx, ctxlen, sk) == 0);
 
   printf("DONE\n");
@@ -289,8 +287,8 @@ static int test_mldsa87(void)
   printf("Compare messages... ");
 
   /* Verify the recovered message matches the original */
-  CHECK(mlen == msglen);
-  CHECK(memcmp(test_msg, m2, msglen) == 0);
+  CHECK(mlen == TEST_MSG_LEN);
+  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
 
   printf("DONE\n\n");
 
@@ -299,9 +297,9 @@ static int test_mldsa87(void)
   printf("Public key size:  %d bytes\n", MLDSA87_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA87_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA87_BYTES);
-  printf("Message length:   %zu bytes\n", msglen);
-  printf("Signature length: %zu bytes\n", siglen);
-  printf("Signed msg length: %zu bytes\n", smlen);
+  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
+  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 
 #if !defined(MLD_CONFIG_KEYGEN_PCT)
   /* Check against expected signature to make sure that
