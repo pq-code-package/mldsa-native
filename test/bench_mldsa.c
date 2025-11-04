@@ -114,7 +114,6 @@ static int bench(void)
     mld_randombytes(ctx, CTXLEN);
     mld_randombytes(m, MLEN);
 
-    /* TODO: shouldn't this be moved to be in the internal function? */
     pre[0] = 0;
     pre[1] = CTXLEN;
     memcpy(pre + 2, ctx, CTXLEN);
