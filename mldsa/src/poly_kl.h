@@ -161,6 +161,7 @@ __contract__(
   ensures(array_abs_bound(r3->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
 
+#if MLD_CONFIG_PARAMETER_SET == 65
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1
@@ -183,6 +184,7 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 */
 
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
 /*************************************************

@@ -408,9 +408,10 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(extseed, sizeof(extseed));
 }
 
-
 #define POLY_UNIFORM_GAMMA1_NBLOCKS \
   ((MLDSA_POLYZ_PACKEDBYTES + STREAM256_BLOCKBYTES - 1) / STREAM256_BLOCKBYTES)
+
+#if MLD_CONFIG_PARAMETER_SET == 65
 MLD_INTERNAL_API
 void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
                              uint16_t nonce)
@@ -437,6 +438,7 @@ void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 */
 
 MLD_INTERNAL_API
 void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
