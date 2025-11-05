@@ -239,7 +239,6 @@
 #undef MLD_POLYETA_UNPACK_LOWER_BOUND
 #undef MLD_POLY_KL_H
 #undef mld_poly_challenge
-#undef mld_poly_chknorm
 #undef mld_poly_decompose
 #undef mld_poly_make_hint
 #undef mld_poly_uniform_eta_4x
@@ -350,6 +349,7 @@
 #undef MLD_POLY_H
 #undef mld_poly_add
 #undef mld_poly_caddq
+#undef mld_poly_chknorm
 #undef mld_poly_invntt_tomont
 #undef mld_poly_ntt
 #undef mld_poly_pointwise_montgomery

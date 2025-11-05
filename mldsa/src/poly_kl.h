@@ -89,38 +89,6 @@ __contract__(
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 
-#define mld_poly_chknorm MLD_NAMESPACE_KL(poly_chknorm)
-/*************************************************
- * Name:        mld_poly_chknorm
- *
- * Description: Check infinity norm of polynomial against given bound.
- *              Assumes input coefficients were reduced by mld_reduce32().
- *
- * Arguments:   - const mld_poly *a: pointer to polynomial
- *              - int32_t B: norm bound
- *
- * Returns 0 if norm is strictly smaller than
- * B <= (MLDSA_Q - REDUCE32_RANGE_MAX) and 0xFFFFFFFF otherwise.
- *
- * Specification: The definition of this FIPS-204 requires signed canonical
- *                reduction prior to applying the bounds check.
- *                However, `-B < (a mod± MLDSA_Q) < B` is equivalent to
- *                `-B < a < B` under the assumption that
- *                `B <= MLDSA_Q - REDUCE32_RANGE_MAX` (cf. the assertion in
- *                the code). Hence, the present spec and implementation are
- *                correct without reduction.
- *
- **************************************************/
-MLD_INTERNAL_API
-uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
-__contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(0 <= B && B <= MLDSA_Q - REDUCE32_RANGE_MAX)
-  requires(array_bound(a->coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))
-  ensures(return_value == 0 || return_value == 0xFFFFFFFF)
-  ensures((return_value == 0) == array_abs_bound(a->coeffs, 0, MLDSA_N, B))
-);
-
 #define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
 /*************************************************
  * Name:        mld_poly_uniform_eta
