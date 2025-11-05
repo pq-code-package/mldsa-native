@@ -325,6 +325,9 @@ vpblendd	$0xAA,%ymm9,%ymm7,%ymm7
  *
  * From this, simple computation gives |montmul(a, b)| <= 3q/4 < ceil(3q/4).
  *
+ * See test/test_bounds.py for more empirical evidence (and some minor technical
+ * details).
+ *
  * TODO: Use proper citation. Currently, citations within asm can cause linter
  *       to complain about unused citation, because comments are not preserved
  *       after simpasm.
