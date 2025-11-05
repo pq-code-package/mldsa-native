@@ -18,8 +18,8 @@ jobs:
     with:
       name: CBMC (ML-DSA-44)
       ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-0d7f502261b31b27f # aarch64, ubuntu-latest, 64g
+      ec2_ami: ubuntu-latest (aarch64)
+      ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
       lint: false
@@ -40,8 +40,8 @@ jobs:
     with:
       name: CBMC (ML-DSA-65)
       ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-0d7f502261b31b27f # aarch64, ubuntu-latest, 64g
+      ec2_ami: ubuntu-latest (aarch64)
+      ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
       lint: false
@@ -62,8 +62,8 @@ jobs:
     with:
       name: CBMC (ML-DSA-87)
       ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (custom AMI)
-      ec2_ami_id: ami-0d7f502261b31b27f # aarch64, ubuntu-latest, 64g
+      ec2_ami: ubuntu-latest (aarch64)
+      ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
       lint: false

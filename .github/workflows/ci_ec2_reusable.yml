@@ -24,6 +24,9 @@ on:
         type: string
         description: AMI ID
         default: ami-0e8c824f386e1de06
+      ec2_volume_size:
+        type: string
+        default: ""
       cflags:
         type: string
         description: Custom CFLAGS for compilation
@@ -113,6 +116,7 @@ jobs:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
           ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
+          ec2-volume-size: ${{ inputs.ec2_volume_size }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
           subnet-id: subnet-094d73eb42eb6bf5b
           security-group-id: sg-0282706dbc92a1579
@@ -130,6 +134,7 @@ jobs:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
           ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
+          ec2-volume-size: ${{ inputs.ec2_volume_size }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
           subnet-id: subnet-094d73eb42eb6bf5b
           security-group-id: sg-0282706dbc92a1579
