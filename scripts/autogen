@@ -21,6 +21,11 @@ from functools import partial
 modulus = 8380417
 root_of_unity = 1753
 montgomery_factor = pow(2, 32, modulus)
+# Compiled regex patterns
+_RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
+_RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
+_RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
+_RE_INDENT_FIX = re.compile(r" \* (\w.*)")
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
@@ -504,7 +509,7 @@ def adjust_preprocessor_comments_for_filename(content, source_file, show_status=
     parser = CondParser()
 
     def format_condition(cond):
-        cond = re.sub(r"defined\(([^)]+)\)", r"\1", cond)
+        cond = _RE_DEFINED.sub(r"\1", cond)
         return parser.normalize_condition(cond)
 
     def format_conditions(conds, branch):
@@ -1875,7 +1880,7 @@ def gen_markdown_citations_for(filename, bibliography):
     # Lookup all citations in style `[^ID]`
     citations = {}
     for i, l in enumerate(content):
-        for m in re.finditer(r"\[\^(?P<id>\w+)\]", l):
+        for m in _RE_MARKDOWN_CITE.finditer(l):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             uses.append((filename, i))
@@ -1933,7 +1938,7 @@ def gen_c_citations_for(filename, bibliography):
     # Lookup all citations in style `@[ID]`
     citations = {}
     for i, l in enumerate(content):
-        for m in re.finditer(r"@\[(?P<id>\w+)", l):
+        for m in _RE_C_CITE.finditer(l):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1
@@ -1965,7 +1970,7 @@ def gen_c_citations_for(filename, bibliography):
     # likely here. Thus, we explicitly format and fix bad indentation manually.
     references = "\n".join(references)
     references = format_content(references)
-    references = re.sub(r" \* (\w.*)", r" *   \1", references)
+    references = _RE_INDENT_FIX.sub(r" *   \1", references)
     references = references.split("\n")
     references = [""] + references
 
