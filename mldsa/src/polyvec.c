@@ -21,17 +21,48 @@
 #include "poly_kl.h"
 #include "polyvec.h"
 
-#if !defined(MLD_USE_NATIVE_NTT_CUSTOM_ORDER)
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
-#define mld_poly_permute_bitrev_to_custom \
-  MLD_NAMESPACE_KL(mld_poly_permute_bitrev_to_custom)
+#define mld_matrix_permute_bitrev_to_custom \
+  MLD_NAMESPACE_KL(mld_matrix_permute_bitrev_to_custom)
 
-static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
+/* Helper function to ensure that the polynomial entries in the output
+ * of mld_polyvec_matrix_expand use the standard (bitreversed) ordering
+ * of coefficients.
+ * No-op unless a native backend with a custom ordering is used.
+ */
+static void mld_matrix_permute_bitrev_to_custom(mld_polyvecl mat[MLDSA_K])
+__contract__(
+  /* We don't specify that this should be a permutation, but only
+   * that it does not change the bound established at the end of
+   * mld_polyvec_matrix_expand.
+   */
+  requires(memory_no_alias(mat, MLDSA_K * sizeof(mld_polyvecl)))
+  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+    array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+  assigns(object_whole(mat))
+  ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+    array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+)
 {
-  ((void)data);
-}
+#if defined(MLD_USE_NATIVE_NTT_CUSTOM_ORDER)
+  /* TODO: proof */
+  unsigned int i, j;
+  for (i = 0; i < MLDSA_K; i++)
+  {
+    for (j = 0; j < MLDSA_L; j++)
+    {
+      mld_poly_permute_bitrev_to_custom(mat[i].vec[j].coeffs);
+    }
+  }
+
+#else /* MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
+
+  /* Nothing to do */
+  ((void)mat);
+
 #endif /* !MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
+}
 
 
 MLD_INTERNAL_API
@@ -112,17 +143,7 @@ void mld_polyvec_matrix_expand(mld_polyvecl mat[MLDSA_K],
     i++;
   }
 
-  /*
-   * The public matrix is generated in NTT domain. If the native backend
-   * uses a custom order in NTT domain, permute A accordingly.
-   */
-  for (i = 0; i < MLDSA_K; i++)
-  {
-    for (j = 0; j < MLDSA_L; j++)
-    {
-      mld_poly_permute_bitrev_to_custom(mat[i].vec[j].coeffs);
-    }
-  }
+  mld_matrix_permute_bitrev_to_custom(mat);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
