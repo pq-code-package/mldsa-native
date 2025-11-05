@@ -25,6 +25,8 @@ montgomery_factor = pow(2, 32, modulus)
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
 _RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
+_RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
+
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
@@ -1192,15 +1194,9 @@ def get_all_files():
 
 def get_defines_from_file(c):
     for l in read_file(c).split("\n"):
-        if l.lstrip().startswith("#define "):
-            yield (
-                c,
-                l.lstrip()
-                .removeprefix("#define ")
-                .split(" ")[0]
-                .split("(")[0]
-                .replace("'", ""),
-            )
+        m = _RE_DEFINE.match(l)
+        if m:
+            yield (c, m.group(1))
 
 
 def get_defines(all=False):
