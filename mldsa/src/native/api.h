@@ -296,7 +296,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B);
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
-static MLD_INLINE void mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a);
+static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a);
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_17 */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
@@ -310,7 +310,7 @@ static MLD_INLINE void mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a);
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
-static MLD_INLINE void mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a);
+static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a);
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)

@@ -750,15 +750,31 @@ void mld_polyz_pack(uint8_t *r, const mld_poly *a)
 MLD_INTERNAL_API
 void mld_polyz_unpack(mld_poly *r, const uint8_t *a)
 {
+  unsigned int i;
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) && MLD_CONFIG_PARAMETER_SET == 44
   /* TODO: proof */
-  mld_polyz_unpack_17_native(r->coeffs, a);
+  int ret;
+  ret = mld_polyz_unpack_17_native(r->coeffs, a);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+    return;
+  }
 #elif defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) && \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
   /* TODO: proof */
-  mld_polyz_unpack_19_native(r->coeffs, a);
-#elif MLD_CONFIG_PARAMETER_SET == 44
-  unsigned int i;
+  int ret;
+  ret = mld_polyz_unpack_19_native(r->coeffs, a);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+    return;
+  }
+#endif /* !(MLD_USE_NATIVE_POLYZ_UNPACK_17 && MLD_CONFIG_PARAMETER_SET == 44)  \
+          && MLD_USE_NATIVE_POLYZ_UNPACK_19 && (MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87) */
+
+#if MLD_CONFIG_PARAMETER_SET == 44
   for (i = 0; i < MLDSA_N / 4; ++i)
   __loop__(
     invariant(i <= MLDSA_N/4)
@@ -789,11 +805,7 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t *a)
     r->coeffs[4 * i + 2] = MLDSA_GAMMA1 - r->coeffs[4 * i + 2];
     r->coeffs[4 * i + 3] = MLDSA_GAMMA1 - r->coeffs[4 * i + 3];
   }
-#else  /* !(MLD_USE_NATIVE_POLYZ_UNPACK_17 && MLD_CONFIG_PARAMETER_SET == 44)   \
-          && !(MLD_USE_NATIVE_POLYZ_UNPACK_19 && (MLD_CONFIG_PARAMETER_SET ==   \
-          65 || MLD_CONFIG_PARAMETER_SET == 87)) && MLD_CONFIG_PARAMETER_SET == \
-          44 */
-  unsigned int i;
+#else  /* MLD_CONFIG_PARAMETER_SET == 44 */
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
     invariant(i <= MLDSA_N/2)
@@ -813,11 +825,7 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t *a)
     r->coeffs[2 * i + 0] = MLDSA_GAMMA1 - r->coeffs[2 * i + 0];
     r->coeffs[2 * i + 1] = MLDSA_GAMMA1 - r->coeffs[2 * i + 1];
   }
-#endif /* !(MLD_USE_NATIVE_POLYZ_UNPACK_17 && MLD_CONFIG_PARAMETER_SET == 44) \
-          && !(MLD_USE_NATIVE_POLYZ_UNPACK_19 && (MLD_CONFIG_PARAMETER_SET == \
-          65 || MLD_CONFIG_PARAMETER_SET == 87)) && MLD_CONFIG_PARAMETER_SET  \
-          != 44 */
-
+#endif /* MLD_CONFIG_PARAMETER_SET != 44 */
   mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
 }
 

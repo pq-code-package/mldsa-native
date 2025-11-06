@@ -150,16 +150,16 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   return mld_poly_chknorm_asm(a, B);
 }
 
-static MLD_INLINE void mld_polyz_unpack_17_native(int32_t *r,
-                                                  const uint8_t *buf)
+static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *buf)
 {
   mld_polyz_unpack_17_asm(r, buf, mld_polyz_unpack_17_indices);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_polyz_unpack_19_native(int32_t *r,
-                                                  const uint8_t *buf)
+static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
 {
   mld_polyz_unpack_19_asm(r, buf, mld_polyz_unpack_19_indices);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE void mld_poly_pointwise_montgomery_native(
