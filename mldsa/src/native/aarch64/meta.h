@@ -125,9 +125,10 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_caddq_native(int32_t a[MLDSA_N])
+static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
 {
   mld_poly_caddq_asm(a);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE void mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
