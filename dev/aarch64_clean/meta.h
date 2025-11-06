@@ -162,11 +162,12 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_pointwise_montgomery_native(
+static MLD_INLINE int mld_poly_pointwise_montgomery_native(
     int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
     const int32_t in1[MLDSA_N])
 {
   mld_poly_pointwise_montgomery_asm(out, in0, in1);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(

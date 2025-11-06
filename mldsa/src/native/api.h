@@ -327,7 +327,7 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a);
  *              - const int32_t a[MLDSA_N]: first input polynomial
  *              - const int32_t b[MLDSA_N]: second input polynomial
  **************************************************/
-static MLD_INLINE void mld_poly_pointwise_montgomery_native(
+static MLD_INLINE int mld_poly_pointwise_montgomery_native(
     int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 

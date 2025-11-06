@@ -184,18 +184,21 @@ MLD_INTERNAL_API
 void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
                                    const mld_poly *b)
 {
-#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
-  /* TODO: proof */
-  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
-  mld_assert_abs_bound(b->coeffs, MLDSA_N, MLD_NTT_BOUND);
-  mld_poly_pointwise_montgomery_native(c->coeffs, a->coeffs, b->coeffs);
-  mld_assert_abs_bound(c->coeffs, MLDSA_N, MLDSA_Q);
-#else  /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
   unsigned int i;
-
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
   mld_assert_abs_bound(b->coeffs, MLDSA_N, MLD_NTT_BOUND);
-
+#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+  {
+    /* TODO: proof */
+    int ret;
+    ret = mld_poly_pointwise_montgomery_native(c->coeffs, a->coeffs, b->coeffs);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(c->coeffs, MLDSA_N, MLDSA_Q);
+      return;
+    }
+  }
+#endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
@@ -206,7 +209,6 @@ void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
   }
 
   mld_assert_abs_bound(c->coeffs, MLDSA_N, MLDSA_Q);
-#endif /* !MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 }
 
 MLD_INTERNAL_API

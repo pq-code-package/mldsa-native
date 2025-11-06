@@ -215,11 +215,16 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_pointwise_montgomery_native(
+static MLD_INLINE int mld_poly_pointwise_montgomery_native(
     int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   mld_pointwise_avx2((__m256i *)c, (const __m256i *)a, (const __m256i *)b,
                      mld_qdata.vec);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
