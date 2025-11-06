@@ -249,8 +249,8 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N]);
  *              - const int32_t *a: pointer to input polynomial
  *              - const int32_t *h: pointer to input hint polynomial
  **************************************************/
-static MLD_INLINE void mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h);
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h);
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_32 */
 
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_88)
@@ -265,8 +265,8 @@ static MLD_INLINE void mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
  *              - const int32_t *a: pointer to input polynomial
  *              - const int32_t *h: pointer to input hint polynomial
  **************************************************/
-static MLD_INLINE void mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h);
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h);
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 */
 
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)

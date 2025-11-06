@@ -131,16 +131,18 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h)
 {
   mld_poly_use_hint_32_asm(b, a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h)
 {
   mld_poly_use_hint_88_asm(b, a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)

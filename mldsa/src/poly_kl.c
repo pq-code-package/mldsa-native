@@ -111,23 +111,37 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
 MLD_INTERNAL_API
 void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
 {
-#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) && MLD_CONFIG_PARAMETER_SET == 44
-  /* TODO: proof */
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  mld_poly_use_hint_88_native(b->coeffs, a->coeffs, h->coeffs);
-#elif defined(MLD_USE_NATIVE_POLY_USE_HINT_32) && \
-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  /* TODO: proof */
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  mld_poly_use_hint_32_native(b->coeffs, a->coeffs, h->coeffs);
-#else  /* !(MLD_USE_NATIVE_POLY_USE_HINT_88 && MLD_CONFIG_PARAMETER_SET == 44)  \
-          && MLD_USE_NATIVE_POLY_USE_HINT_32 && (MLD_CONFIG_PARAMETER_SET == 65 \
-          || MLD_CONFIG_PARAMETER_SET == 87) */
   unsigned int i;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
+#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) && MLD_CONFIG_PARAMETER_SET == 44
+  {
+    int ret;
+    /* TODO: proof */
+    ret = mld_poly_use_hint_88_native(b->coeffs, a->coeffs, h->coeffs);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_bound(b->coeffs, MLDSA_N, 0,
+                       (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+      return;
+    }
+  }
+#elif defined(MLD_USE_NATIVE_POLY_USE_HINT_32) && \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+  {
+    int ret;
+    /* TODO: proof */
+    ret = mld_poly_use_hint_32_native(b->coeffs, a->coeffs, h->coeffs);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_bound(b->coeffs, MLDSA_N, 0,
+                       (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+      return;
+    }
+  }
+#endif /* !(MLD_USE_NATIVE_POLY_USE_HINT_88 && MLD_CONFIG_PARAMETER_SET == 44) \
+          && MLD_USE_NATIVE_POLY_USE_HINT_32 && (MLD_CONFIG_PARAMETER_SET ==   \
+          65 || MLD_CONFIG_PARAMETER_SET == 87) */
 
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
@@ -137,10 +151,6 @@ void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
   {
     b->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
   }
-#endif /* !(MLD_USE_NATIVE_POLY_USE_HINT_88 && MLD_CONFIG_PARAMETER_SET == 44) \
-          && !(MLD_USE_NATIVE_POLY_USE_HINT_32 && (MLD_CONFIG_PARAMETER_SET == \
-          65 || MLD_CONFIG_PARAMETER_SET == 87)) */
-
   mld_assert_bound(b->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
 }
 

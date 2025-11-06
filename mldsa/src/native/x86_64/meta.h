@@ -162,18 +162,28 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   mld_poly_caddq_avx2(a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
-static MLD_INLINE void mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   mld_poly_use_hint_32_avx2((__m256i *)b, (const __m256i *)a,
                             (const __m256i *)h);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
-                                                   const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
+                                                  const int32_t *h)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   mld_poly_use_hint_88_avx2((__m256i *)b, (const __m256i *)a,
                             (const __m256i *)h);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
