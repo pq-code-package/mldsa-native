@@ -36,6 +36,9 @@
 #error Bad configuration: MLD_CONFIG_USE_NATIVE_BACKEND_ARITH is set, but MLD_CONFIG_ARITH_BACKEND_FILE is not.
 #endif
 
+#if defined(MLD_CONFIG_NO_RANDOMIZED_API) && defined(MLD_CONFIG_KEYGEN_PCT)
+#error Bad configuration: MLD_CONFIG_NO_RANDOMIZED_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_signature()
+#endif
 
 #define MLD_CONCAT_(x1, x2) x1##x2
 #define MLD_CONCAT(x1, x2) MLD_CONCAT_(x1, x2)

@@ -230,6 +230,7 @@ int crypto_sign_keypair_internal(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   return 0;
 }
 
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_keypair(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
@@ -245,6 +246,7 @@ int crypto_sign_keypair(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   mld_zeroize(seed, sizeof(seed));
   return result;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 /*************************************************
  * Name:        mld_H
@@ -583,6 +585,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   }
 }
 
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
@@ -631,7 +634,9 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
 
   return result;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign_signature_extmu(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
@@ -654,7 +659,9 @@ int crypto_sign_signature_extmu(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
 
   return result;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
@@ -677,6 +684,7 @@ int crypto_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
   *smlen += mlen;
   return ret;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
