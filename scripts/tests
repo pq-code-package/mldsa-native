@@ -11,12 +11,12 @@ See the command line interface for more information."""
 import platform
 import argparse
 import os
+import re
 import sys
 import time
 import logging
 import subprocess
 import json
-import re
 
 from enum import Enum
 from functools import reduce
@@ -582,6 +582,12 @@ class Tests:
             l = TEST_TYPES.examples()
         else:
             l = list(map(TEST_TYPES.from_string, self.args.l))
+
+        # Filter out excluded examples
+        if hasattr(self.args, "exclude_example") and self.args.exclude_example:
+            excluded = [TEST_TYPES.from_string(ex) for ex in self.args.exclude_example]
+            l = [e for e in l if e not in excluded]
+
         for e in l:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
@@ -648,6 +654,8 @@ class Tests:
         self.check_fail()
 
     def stack(self):
+        """Stack usage analysis"""
+
         def _stack(opt):
             self._compile_schemes(TEST_TYPES.STACK, opt)
             if self.args.run:
@@ -769,6 +777,7 @@ class Tests:
                         )
                         exit(1)
                     continue
+
                 end = time.time()
                 dur = int(end - start)
                 if p.returncode != 0:
@@ -944,6 +953,25 @@ def cli():
         dest="examples",
         help="Do not run examples",
     )
+    all_parser.add_argument(
+        "--exclude-example",
+        help="Exclude specific examples from running (can be used multiple times)",
+        choices=[
+            "bring_your_own_fips202",
+            # "bring_your_own_fips202_static",
+            # "custom_backend",
+            "basic",
+            "basic_deterministic",
+            "monolithic_build",
+            # "monolithic_build_native",
+            "monolithic_build_multilevel",
+            # "monolithic_build_multilevel_native",
+            # "multilevel_build",
+            # "multilevel_build_native",
+        ],
+        action="append",
+        default=[],
+    )
 
     stack_group = all_parser.add_mutually_exclusive_group()
     stack_group.add_argument(
@@ -964,7 +992,6 @@ def cli():
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
     )
-
     acvp_parser.add_argument(
         "--version",
         default="v1.1.0.40",
@@ -980,9 +1007,9 @@ def cli():
         "-l",
         help="Explicitly list the examples to run; can be called multiple times",
         choices=[
+            "bring_your_own_fips202",
             "basic",
             "basic_deterministic",
-            "bring_your_own_fips202",
             "monolithic_build",
             "monolithic_build_multilevel",
         ],
@@ -1123,6 +1150,8 @@ def cli():
         args.mac_taskpolicy = None
     if not hasattr(args, "l"):
         args.l = None
+
+    os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
     if args.cmd == "all":
         Tests(args).all()
