@@ -14,6 +14,7 @@ source code and documentation.
   - National Institute of Standards and Technology
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
+  - [examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h](examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h)
   - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
   - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
   - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
@@ -49,6 +50,7 @@ source code and documentation.
 * URL: https://csrc.nist.gov/pubs/fips/204/final
 * Referenced from:
   - [README.md](README.md)
+  - [examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h](examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h)
   - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
   - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
   - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
