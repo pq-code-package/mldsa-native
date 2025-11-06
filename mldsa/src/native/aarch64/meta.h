@@ -170,28 +170,31 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
     const int32_t v[4][MLDSA_N])
 {
   mld_polyvecl_pointwise_acc_montgomery_l4_asm(w, (const int32_t *)u,
                                                (const int32_t *)v);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l5_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
     const int32_t v[5][MLDSA_N])
 {
   mld_polyvecl_pointwise_acc_montgomery_l5_asm(w, (const int32_t *)u,
                                                (const int32_t *)v);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l7_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
     const int32_t v[7][MLDSA_N])
 {
   mld_polyvecl_pointwise_acc_montgomery_l7_asm(w, (const int32_t *)u,
                                                (const int32_t *)v);
+  return MLD_NATIVE_FUNC_SUCCESS;
 }
 
 #endif /* !__ASSEMBLER__ */

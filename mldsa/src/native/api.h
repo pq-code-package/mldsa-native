@@ -346,7 +346,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
     const int32_t v[4][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 */
@@ -366,7 +366,7 @@ static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l4_native(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l5_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
     const int32_t v[5][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 */
@@ -386,7 +386,7 @@ static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l5_native(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
-static MLD_INLINE void mld_polyvecl_pointwise_acc_montgomery_l7_native(
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
     const int32_t v[7][MLDSA_N]);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */

@@ -328,42 +328,57 @@ MLD_INTERNAL_API
 void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
                                            const mld_polyvecl *v)
 {
+  unsigned int i, j;
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) && \
     MLD_CONFIG_PARAMETER_SET == 44
-  /* TODO: proof */
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
-  mld_polyvecl_pointwise_acc_montgomery_l4_native(
-      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-      (const int32_t(*)[MLDSA_N])v->vec);
-  mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+  {
+    /* TODO: proof */
+    int ret;
+    ret = mld_polyvecl_pointwise_acc_montgomery_l4_native(
+        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+        (const int32_t(*)[MLDSA_N])v->vec);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+      return;
+    }
+  }
 #elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) && \
     MLD_CONFIG_PARAMETER_SET == 65
-  /* TODO: proof */
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
-  mld_polyvecl_pointwise_acc_montgomery_l5_native(
-      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-      (const int32_t(*)[MLDSA_N])v->vec);
-  mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+  {
+    /* TODO: proof */
+    int ret;
+    ret = mld_polyvecl_pointwise_acc_montgomery_l5_native(
+        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+        (const int32_t(*)[MLDSA_N])v->vec);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+      return;
+    }
+  }
 #elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) && \
     MLD_CONFIG_PARAMETER_SET == 87
-  /* TODO: proof */
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
-  mld_polyvecl_pointwise_acc_montgomery_l7_native(
-      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-      (const int32_t(*)[MLDSA_N])v->vec);
-  mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
-#else  /* !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 && \
+  {
+    /* TODO: proof */
+    int ret;
+    ret = mld_polyvecl_pointwise_acc_montgomery_l7_native(
+        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+        (const int32_t(*)[MLDSA_N])v->vec);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+      return;
+    }
+  }
+#endif /* !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 && \
           MLD_CONFIG_PARAMETER_SET == 44) &&                       \
           !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 && \
           MLD_CONFIG_PARAMETER_SET == 65) &&                       \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 &&   \
           MLD_CONFIG_PARAMETER_SET == 87 */
-  unsigned int i, j;
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
   /* The first input is bounded by [0, Q-1] inclusive
    * The second input is bounded by [-9Q+1, 9Q-1] inclusive . Hence, we can
    * safely accumulate in 64-bits without intermediate reductions as
@@ -398,12 +413,6 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
   }
 
   mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
-#endif /* !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 && \
-          MLD_CONFIG_PARAMETER_SET == 44) &&                       \
-          !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 && \
-          MLD_CONFIG_PARAMETER_SET == 65) &&                       \
-          !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 && \
-          MLD_CONFIG_PARAMETER_SET == 87) */
 }
 
 MLD_INTERNAL_API
