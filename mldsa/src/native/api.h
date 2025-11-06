@@ -200,8 +200,8 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
  *              - int32_t *a0: output polynomial with coefficients c0
  *              - const int32_t *a: input polynomial
  **************************************************/
-static MLD_INLINE void mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
-                                                    const int32_t *a);
+static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
+                                                   const int32_t *a);
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 */
 
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
@@ -221,8 +221,8 @@ static MLD_INLINE void mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
  *              - int32_t *a0: output polynomial with coefficients c0
  *              - const int32_t *a: input polynomial
  **************************************************/
-static MLD_INLINE void mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
-                                                    const int32_t *a);
+static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
+                                                   const int32_t *a);
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
 
 #if defined(MLD_USE_NATIVE_POLY_CADDQ)

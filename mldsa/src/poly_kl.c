@@ -37,19 +37,38 @@
 MLD_INTERNAL_API
 void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 {
-#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) && MLD_CONFIG_PARAMETER_SET == 44
-  /* TODO: proof */
+  unsigned int i;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_poly_decompose_88_native(a1->coeffs, a0->coeffs, a->coeffs);
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) && MLD_CONFIG_PARAMETER_SET == 44
+  {
+    int ret;
+    /* TODO: proof */
+    ret = mld_poly_decompose_88_native(a1->coeffs, a0->coeffs, a->coeffs);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
+      mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                       (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+      return;
+    }
+  }
 #elif defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) && \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  /* TODO: proof */
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_poly_decompose_32_native(a1->coeffs, a0->coeffs, a->coeffs);
-#else /* !(MLD_USE_NATIVE_POLY_DECOMPOSE_88 && MLD_CONFIG_PARAMETER_SET == 44) \
-         && MLD_USE_NATIVE_POLY_DECOMPOSE_32 && (MLD_CONFIG_PARAMETER_SET ==   \
-         65 || MLD_CONFIG_PARAMETER_SET == 87) */
-  unsigned int i;
+  {
+    int ret;
+    /* TODO: proof */
+    ret = mld_poly_decompose_32_native(a1->coeffs, a0->coeffs, a->coeffs);
+    if (ret == MLD_NATIVE_FUNC_SUCCESS)
+    {
+      mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
+      mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                       (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+      return;
+    }
+  }
+#endif /* !(MLD_USE_NATIVE_POLY_DECOMPOSE_88 && MLD_CONFIG_PARAMETER_SET ==    \
+          44) && MLD_USE_NATIVE_POLY_DECOMPOSE_32 && (MLD_CONFIG_PARAMETER_SET \
+          == 65 || MLD_CONFIG_PARAMETER_SET == 87) */
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
@@ -61,10 +80,6 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
   {
     mld_decompose(&a0->coeffs[i], &a1->coeffs[i], a->coeffs[i]);
   }
-#endif /* !(MLD_USE_NATIVE_POLY_DECOMPOSE_88 && MLD_CONFIG_PARAMETER_SET ==   \
-          44) && !(MLD_USE_NATIVE_POLY_DECOMPOSE_32 &&                        \
-          (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)) \
-        */
 
   mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
   mld_assert_bound(a1->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
