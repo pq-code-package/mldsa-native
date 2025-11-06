@@ -69,9 +69,10 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                              unsigned buflen)
 {
   /* AVX2 implementation assumes specific buffer lengths */
-  if (len != MLDSA_N || buflen != MLD_AVX2_REJ_UNIFORM_BUFLEN)
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2) || len != MLDSA_N ||
+      buflen != MLD_AVX2_REJ_UNIFORM_BUFLEN)
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
 
   /* Safety: outlen is at most MLDSA_N and, hence, this cast is safe. */
@@ -84,9 +85,10 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
 {
   unsigned int outlen;
   /* AVX2 implementation assumes specific buffer lengths */
-  if (len != MLDSA_N || buflen != MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN)
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2) || len != MLDSA_N ||
+      buflen != MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN)
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
 
   /* Constant time: Inputs and outputs to this function are secret.
@@ -109,9 +111,10 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
 {
   unsigned int outlen;
   /* AVX2 implementation assumes specific buffer lengths */
-  if (len != MLDSA_N || buflen != MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN)
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2) || len != MLDSA_N ||
+      buflen != MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN)
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
 
   /* Constant time: Inputs and outputs to this function are secret.

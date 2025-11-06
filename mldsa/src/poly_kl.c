@@ -192,8 +192,9 @@ __contract__(
 #if MLDSA_ETA == 2 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
   if (offset == 0)
   {
-    int ret = mld_rej_uniform_eta2_native(a, target, buf, buflen);
-    if (ret != -1)
+    int ret;
+    ret = mld_rej_uniform_eta2_native(a, target, buf, buflen);
+    if (ret != MLD_NATIVE_FUNC_FALLBACK)
     {
       unsigned res = (unsigned)ret;
       mld_assert_abs_bound(a, res, MLDSA_ETA + 1);
@@ -204,8 +205,9 @@ __contract__(
 #elif MLDSA_ETA == 4 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4)
   if (offset == 0)
   {
-    int ret = mld_rej_uniform_eta4_native(a, target, buf, buflen);
-    if (ret != -1)
+    int ret;
+    ret = mld_rej_uniform_eta4_native(a, target, buf, buflen);
+    if (ret != MLD_NATIVE_FUNC_FALLBACK)
     {
       unsigned res = (unsigned)ret;
       mld_assert_abs_bound(a, res, MLDSA_ETA + 1);

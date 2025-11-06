@@ -53,9 +53,10 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
 {
-  if (len != MLDSA_N || buflen % 24 != 0)
+  if (len != MLDSA_N ||
+      buflen % 24 != 0) /* NEON support is mandatory for AArch64 */
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
 
   /* Safety: outlen is at most MLDSA_N, hence, this cast is safe. */
@@ -70,7 +71,7 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
   /* AArch64 implementation assumes specific buffer lengths */
   if (len != MLDSA_N || buflen != MLD_AARCH64_REJ_UNIFORM_ETA2_BUFLEN)
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
   /* Constant time: Inputs and outputs to this function are secret.
    * It is safe to leak which coefficients are accepted/rejected.
@@ -94,7 +95,7 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   /* AArch64 implementation assumes specific buffer lengths */
   if (len != MLDSA_N || buflen != MLD_AARCH64_REJ_UNIFORM_ETA4_BUFLEN)
   {
-    return -1;
+    return MLD_NATIVE_FUNC_FALLBACK;
   }
   /* Constant time: Inputs and outputs to this function are secret.
    * It is safe to leak which coefficients are accepted/rejected.

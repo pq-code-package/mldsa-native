@@ -279,8 +279,9 @@ __contract__(
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM)
   if (offset == 0)
   {
-    int ret = mld_rej_uniform_native(a, target, buf, buflen);
-    if (ret != -1)
+    int ret;
+    ret = mld_rej_uniform_native(a, target, buf, buflen);
+    if (ret != MLD_NATIVE_FUNC_FALLBACK)
     {
       unsigned res = (unsigned)ret;
       mld_assert_bound(a, res, 0, MLDSA_Q);
