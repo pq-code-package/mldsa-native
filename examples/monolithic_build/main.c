@@ -37,11 +37,13 @@
   "This is a test message for ML-DSA digital signature algorithm!"
 #define TEST_MSG_LEN (sizeof(TEST_MSG) - 1)
 
+#define TEST_CTX "test_context_123"
+#define TEST_CTX_LEN (sizeof(TEST_CTX) - 1)
+
 int main(void)
 {
   const char test_msg[] = TEST_MSG;
-  const char *test_ctx = "test_context_123";
-  size_t ctxlen = strlen(test_ctx);
+  const char test_ctx[] = TEST_CTX;
 
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
@@ -72,29 +74,29 @@ int main(void)
 
   /* Alice signs the message */
   CHECK(crypto_sign_signature(sig, &siglen, (const uint8_t *)test_msg,
-                              TEST_MSG_LEN, (const uint8_t *)test_ctx, ctxlen,
-                              sk) == 0);
+                              TEST_MSG_LEN, (const uint8_t *)test_ctx,
+                              TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
   CHECK(crypto_sign_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                           (const uint8_t *)test_ctx, ctxlen, pk) == 0);
+                           (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
   CHECK(crypto_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                    (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                    (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Opening signed message... ");
 
   /* Bob opens the signed message to recover the original message */
   CHECK(crypto_sign_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
-                         ctxlen, pk) == 0);
+                         TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Compare messages... ");

@@ -28,11 +28,13 @@
   "This is a test message for ML-DSA digital signature algorithm!"
 #define TEST_MSG_LEN (sizeof(TEST_MSG) - 1)
 
+#define TEST_CTX "test_context_123"
+#define TEST_CTX_LEN (sizeof(TEST_CTX) - 1)
+
 static int test_mldsa44(void)
 {
   const char test_msg[] = TEST_MSG;
-  const char *test_ctx = "test_context_123";
-  size_t ctxlen = strlen(test_ctx);
+  const char test_ctx[] = TEST_CTX;
 
   uint8_t pk[MLDSA44_PUBLICKEYBYTES];
   uint8_t sk[MLDSA44_SECRETKEYBYTES];
@@ -63,28 +65,28 @@ static int test_mldsa44(void)
 
   /* Alice signs the message */
   CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
   CHECK(mldsa44_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, ctxlen, pk) == 0);
+                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
   CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Opening signed message... ");
 
   /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa44_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx, ctxlen,
-                     pk) == 0);
+  CHECK(mldsa44_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
+                     TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Compare messages... ");
@@ -129,8 +131,7 @@ static int test_mldsa44(void)
 static int test_mldsa65(void)
 {
   const char test_msg[] = TEST_MSG;
-  const char *test_ctx = "test_context_123";
-  size_t ctxlen = strlen(test_ctx);
+  const char test_ctx[] = TEST_CTX;
 
   uint8_t pk[MLDSA65_PUBLICKEYBYTES];
   uint8_t sk[MLDSA65_SECRETKEYBYTES];
@@ -161,28 +162,28 @@ static int test_mldsa65(void)
 
   /* Alice signs the message */
   CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
   CHECK(mldsa65_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, ctxlen, pk) == 0);
+                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
   CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Opening signed message... ");
 
   /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa65_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx, ctxlen,
-                     pk) == 0);
+  CHECK(mldsa65_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
+                     TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Compare messages... ");
@@ -228,8 +229,7 @@ static int test_mldsa65(void)
 static int test_mldsa87(void)
 {
   const char test_msg[] = TEST_MSG;
-  const char *test_ctx = "test_context_123";
-  size_t ctxlen = strlen(test_ctx);
+  const char test_ctx[] = TEST_CTX;
 
   uint8_t pk[MLDSA87_PUBLICKEYBYTES];
   uint8_t sk[MLDSA87_SECRETKEYBYTES];
@@ -260,28 +260,28 @@ static int test_mldsa87(void)
 
   /* Alice signs the message */
   CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Verifying signature... ");
 
   /* Bob verifies Alice's signature */
   CHECK(mldsa87_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, ctxlen, pk) == 0);
+                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Creating signed message... ");
 
   /* Alternative API: Create a signed message (signature + message combined) */
   CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, ctxlen, sk) == 0);
+                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
 
   printf("DONE\n");
   printf("Opening signed message... ");
 
   /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa87_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx, ctxlen,
-                     pk) == 0);
+  CHECK(mldsa87_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
+                     TEST_CTX_LEN, pk) == 0);
 
   printf("DONE\n");
   printf("Compare messages... ");
