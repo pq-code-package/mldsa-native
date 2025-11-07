@@ -28,6 +28,7 @@ _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
 _RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
 _RE_MACRO_CHECK = re.compile(r"[^_]((?:MLD_|MLDSA_)\w+)(.*)$", re.M)
+_RE_BYTECODE_START = re.compile(r"=== bytecode start: mldsa/([^/\s]+?)\.o")
 _RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
@@ -1717,6 +1718,31 @@ def update_via_simpasm(
     update_file(outfile_full, new_contents)
 
 
+def gen_hol_light_asm_file(job):
+    infile, outfile, indir, cflags = job
+    update_via_simpasm(
+        f"{indir}/{infile}",
+        "proofs/hol_light/x86_64/mldsa",
+        outfile=outfile,
+        cflags=cflags,
+        preserve_header=False,
+    )
+
+
+def gen_hol_light_asm():
+    joblist = [
+        (
+            "ntt.S",
+            "mldsa_ntt.S",
+            "dev/x86_64/src",
+            "-Imldsa/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+        ),
+    ]
+
+    with ThreadPoolExecutor() as executor:
+        _ = list(executor.map(partial(gen_hol_light_asm_file), joblist))
+
+
 def update_via_copy(infile_full, outfile_full, transform=None):
     status_update("copy", f"{infile_full} -> {outfile_full}")
 
@@ -2421,6 +2447,78 @@ def gen_citations():
     gen_bib_file(bibliography)
 
 
+def extract_bytecode_from_output(output_text):
+    """Convert output of proofs/hol_light/x86_64/proofs/dump_bytecode.native
+    into a dictionary mapping function names to byte code strings."""
+    bytecode_dict = {}
+
+    lines = output_text.split("\n")
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        match = _RE_BYTECODE_START.search(line)
+        if match:
+            filename = match.group(1)
+
+            # Collect bytecode until end marker
+            bytecode_lines = []
+            i += 1
+            while i < len(lines) and "==== bytecode end" not in lines[i]:
+                bytecode_lines.append(lines[i])
+                i += 1
+
+            bytecode = "\n".join(bytecode_lines).strip()
+            bytecode_dict[filename] = bytecode
+        i += 1
+
+    return bytecode_dict
+
+
+def update_bytecode_in_proof_script(filepath, bytecode):
+    content = read_file(filepath)
+
+    # Check if markers exist
+    start_marker = "(*** BYTECODE START ***)"
+    end_marker = "(*** BYTECODE END ***)"
+
+    if start_marker not in content or end_marker not in content:
+        raise Exception(f"Could not find BYTECODE START/END markers in {filepath}")
+
+    # Replace content between markers
+    pattern = rf"{re.escape(start_marker)}.*?{re.escape(end_marker)}"
+    replacement = f"{start_marker}\n{bytecode}\n{end_marker}"
+
+    updated_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+
+    update_file(filepath, updated_content)
+
+
+def update_hol_light_bytecode():
+    """Update HOL Light proof files with bytecode from make dump_bytecode."""
+    status_update(
+        "HOL Light bytecode",
+        "Running make dump_bytecode ... (this may take a few minutes)",
+    )
+
+    # Run make to get bytecode output
+    result = subprocess.run(
+        ["make", "-C", "proofs/hol_light/x86_64", "dump_bytecode"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    output_text = result.stdout
+
+    # Extract bytecode
+    bytecode_dict = extract_bytecode_from_output(output_text)
+
+    # Update each .ml file
+    for obj_name, bytecode in bytecode_dict.items():
+        ml_file = "proofs/hol_light/x86_64/proofs/" + obj_name + ".ml"
+        update_bytecode_in_proof_script(ml_file, bytecode)
+
+
 def gen_test_config(config_path, config_spec, default_config_content):
     """Generate a config file by modifying the default config."""
     status_update("test configs", config_path)
@@ -2554,6 +2652,9 @@ def _main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--dry-run", default=False, action="store_true")
+    parser.add_argument(
+        "--update-hol-light-bytecode", default=False, action="store_true"
+    )
     parser.add_argument("--aarch64-clean", default=True, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
     parser.add_argument("--force-cross", default=False, action="store_true")
@@ -2583,6 +2684,10 @@ def _main():
     gen_avx2_rej_uniform_table()
     high_level_status("Generated zeta and lookup tables")
 
+    if platform.machine().lower() not in ["arm64", "aarch64"]:
+        gen_hol_light_asm()
+        high_level_status("Generated HOL Light assembly")
+
     synchronize_backends(
         clean=args.aarch64_clean,
         no_simplify=args.no_simplify,
@@ -2602,6 +2707,10 @@ def _main():
         x86_64_syntax=args.x86_64_syntax,
     )
     high_level_status("Completed final backend synchronization")
+
+    if args.update_hol_light_bytecode:
+        update_hol_light_bytecode()
+        high_level_status("Updated HOL Light bytecode")
 
     gen_monolithic_source_file()
     high_level_status("Generated monolithic source files")

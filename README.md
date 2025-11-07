@@ -43,6 +43,13 @@ make test
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
 
+HOL-Light functional correctness proofs can be found in [proofs/hol_light/x86_64](proofs/hol_light/x86_64). So far, the following functions have been proven correct:
+
+- x86_64 NTT [ntt.S](mldsa/src/native/x86_64/src/ntt.S)
+
+
+These proofs are utilizing the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+
 ## Security
 
 All assembly in mldsa-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
