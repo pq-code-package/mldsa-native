@@ -46,10 +46,10 @@
  */
 
 #if defined(MLD_USE_FIPS202_X1_NATIVE)
-static MLD_INLINE void mld_keccak_f1600_x1_native(uint64_t *state);
+static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state);
 #endif
 #if defined(MLD_USE_FIPS202_X4_NATIVE)
-static MLD_INLINE void mld_keccak_f1600_x4_native(uint64_t *state);
+static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state);
 #endif
 
 #endif /* !MLD_FIPS202_NATIVE_API_H */

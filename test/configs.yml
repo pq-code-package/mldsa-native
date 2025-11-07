@@ -246,6 +246,40 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
+  - path: test/custom_native_capability_config_ID_AA64PFR1_EL1.h
+    description: "Test configuration with ARM system register capability detection"
+    defines:
+      MLD_CONFIG_CUSTOM_CAPABILITY_FUNC:
+        content: |
+          #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "../mldsa/src/sys.h"
+
+          #if !defined(MLD_SYS_AARCH64) || !defined(MLD_SYS_LINUX)
+          #error This configuration is only suitable for Linux/AArch64 systems
+          #endif
+
+          static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+          {
+            if (cap == MLD_SYS_CAP_SHA3)
+            {
+              uint64_t id_aa64pfr1_el1;
+
+              /* Read ID_AA64PFR1_EL1 system register */
+              __asm__ volatile("mrs %0, id_aa64pfr1_el1" : "=r"(id_aa64pfr1_el1));
+
+              /* Extract SHA3 field (bits 35:32) and check if SHA3 is supported */
+              /* SHA3 field: 0b0000 = not implemented, 0b0001 = SHA3 implemented */
+              uint64_t sha3_field = (id_aa64pfr1_el1 >> 32) & 0xF;
+
+              return (sha3_field == 1) ? 1 : 0;
+            }
+
+            /* Default to 0 (conservative) for unknown capabilities */
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
   # Example configs
 
   - path: examples/monolithic_build/config_44.h
