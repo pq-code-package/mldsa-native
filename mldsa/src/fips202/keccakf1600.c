@@ -114,15 +114,12 @@ void mld_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLD_USE_FIPS202_X4_NATIVE)
   mld_keccak_f1600_x4_native(state);
-#elif defined(MLD_USE_FIPS202_X2_NATIVE)
-  mld_keccak_f1600_x2_native(state + 0 * MLD_KECCAK_LANES);
-  mld_keccak_f1600_x2_native(state + 2 * MLD_KECCAK_LANES);
 #else
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 0);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 1);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 3);
-#endif /* !MLD_USE_FIPS202_X4_NATIVE && !MLD_USE_FIPS202_X2_NATIVE */
+#endif /* !MLD_USE_FIPS202_X4_NATIVE */
 }
 
 #if !defined(MLD_USE_FIPS202_X1_NATIVE)

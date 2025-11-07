@@ -12,15 +12,18 @@
 #endif
 
 /* Part of backend API */
-#define MLD_USE_FIPS202_X2_NATIVE
+#define MLD_USE_FIPS202_X4_NATIVE
 /* Guard for assembly file */
 #define MLD_FIPS202_AARCH64_NEED_X2_V84A
 
 #if !defined(__ASSEMBLER__)
 #include "src/fips202_native_aarch64.h"
-static MLD_INLINE void mld_keccak_f1600_x2_native(uint64_t *state)
+
+
+static MLD_INLINE void mld_keccak_f1600_x4_native(uint64_t *state)
 {
-  mld_keccak_f1600_x2_v84a_asm(state, mld_keccakf1600_round_constants);
+  mld_keccak_f1600_x2_v84a_asm(state + 0 * 25, mld_keccakf1600_round_constants);
+  mld_keccak_f1600_x2_v84a_asm(state + 2 * 25, mld_keccakf1600_round_constants);
 }
 #endif /* !__ASSEMBLER__ */
 
