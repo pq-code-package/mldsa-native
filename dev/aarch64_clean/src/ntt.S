@@ -35,24 +35,38 @@
         sqrdmulh t2.4s,      \src\().4s, \const\().s[\idx1\()]
         mul      \dst\().4s, \src\().4s, \const\().s[\idx0\()]
         mls      \dst\().4s, t2.4s,      consts.s[0]
+        // Bounds: |dst| < BARMUL_BOUND
+        //
+        // (See the end of dev/aarch64_clean/src/intt.S for the exact value of
+        // BARMUL_BOUND)
 .endm
 
 .macro mulmod dst, src, const, const_twisted
+        // Same as mulmodq, but with different multiplier across each lanes.
         sqrdmulh t2.4s,   \src\().4s, \const_twisted\().4s
         mul      \dst\().4s, \src\().4s, \const\().4s
         mls      \dst\().4s, t2.4s,   consts.s[0]
+        // Bounds: |dst| < BARMUL_BOUND
 .endm
 
 .macro ct_butterfly a, b, root, idx0, idx1
+        // Compute a' = a + barmul(b, zeta), b' = a - barmul(b, zeta), commonly
+        // known as the Cooley-Tukey butterfly.
         mulmodq tmp, \b, \root, \idx0, \idx1
         sub \b\().4s, \a\().4s, tmp.4s
         add \a\().4s, \a\().4s, tmp.4s
+        // Bounds: |a'|, |b'| < |a| + BARMUL_BOUND <= |a| + q
+        //
+        // In conclusion, the magnitudes of all coefficients grow by at most q
+        // after each layer.
 .endm
 
 .macro ct_butterfly_v a, b, root, root_twisted
+        // Same as ct_butterfly, but with different zetas across each lanes.
         mulmod tmp, \b, \root, \root_twisted
         sub \b\().4s, \a\().4s, tmp.4s
         add \a\().4s, \a\().4s, tmp.4s
+        // Bounds: |a'|, |b'| < |a| + BARMUL_BOUND <= |a| + q
 .endm
 
 .macro load_roots_123
@@ -180,9 +194,9 @@
 MLD_ASM_FN_SYMBOL(ntt_asm)
         push_stack
 
-        // load MLDSA_Q = 8380417
-        movz wtmp, #57345
-        movk wtmp, #127, lsl #16
+        // Load MLDSA_Q = 8380417
+        movz wtmp, #0xe001
+        movk wtmp, #0x7f, lsl #16
         dup consts.4s, wtmp
 
         mov inp, in
@@ -207,16 +221,19 @@ ntt_layer123_start:
         ct_butterfly data1, data5, root0, 0, 1
         ct_butterfly data2, data6, root0, 0, 1
         ct_butterfly data3, data7, root0, 0, 1
+        // Bounds: |data{i}| < 2q
 
         ct_butterfly data0, data2, root0, 2, 3
         ct_butterfly data1, data3, root0, 2, 3
         ct_butterfly data4, data6, root1, 0, 1
         ct_butterfly data5, data7, root1, 0, 1
+        // Bounds: |data{i}| < 3q
 
         ct_butterfly data0, data1, root1, 2, 3
         ct_butterfly data2, data3, root2, 0, 1
         ct_butterfly data4, data5, root2, 2, 3
         ct_butterfly data6, data7, root3, 0, 1
+        // Bounds: |data{i}| < 4q
 
         str q_data0, [in], #(16)
         str q_data1, [in, #(-16 + 1*(1024/8))]
@@ -251,16 +268,19 @@ ntt_layer45678_start:
         ct_butterfly data1, data5, root0, 0, 1
         ct_butterfly data2, data6, root0, 0, 1
         ct_butterfly data3, data7, root0, 0, 1
+        // Bounds: |data{i}| < 5q
 
         ct_butterfly data0, data2, root0, 2, 3
         ct_butterfly data1, data3, root0, 2, 3
         ct_butterfly data4, data6, root1, 0, 1
         ct_butterfly data5, data7, root1, 0, 1
+        // Bounds: |data{i}| < 6q
 
         ct_butterfly data0, data1, root1, 2, 3
         ct_butterfly data2, data3, root2, 0, 1
         ct_butterfly data4, data5, root2, 2, 3
         ct_butterfly data6, data7, root3, 0, 1
+        // Bounds: |data{i}| < 7q
 
         transpose4 data0, data1, data2, data3
         transpose4 data4, data5, data6, data7
@@ -270,6 +290,7 @@ ntt_layer45678_start:
         ct_butterfly_v data1, data3, root0, root0_tw
         ct_butterfly_v data0, data1, root1, root1_tw
         ct_butterfly_v data2, data3, root2, root2_tw
+        // Bounds: |data{i}| < 8q
 
         load_next_roots_78_2
 
@@ -277,6 +298,7 @@ ntt_layer45678_start:
         ct_butterfly_v data5, data7, root0, root0_tw
         ct_butterfly_v data4, data5, root1, root1_tw
         ct_butterfly_v data6, data7, root2, root2_tw
+        // Bounds: |data{i}| < 9q
 
         transpose4 data0, data1, data2, data3
         transpose4 data4, data5, data6, data7

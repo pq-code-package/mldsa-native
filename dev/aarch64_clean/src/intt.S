@@ -35,31 +35,45 @@
         sqrdmulh t2.4s,      \src\().4s, \const\().s[\idx1\()]
         mul      \dst\().4s, \src\().4s, \const\().s[\idx0\()]
         mls      \dst\().4s, t2.4s,      consts.s[0]
+        // Bounds: |dst| < BARMUL_BOUND
+        //
+        // (See the end of this file for the exact value of BARMUL_BOUND)
 .endm
 
 .macro mulmod dst, src, const, const_twisted
+        // Same as mulmodq, but with different multiplier across each lanes.
         sqrdmulh t2.4s,      \src\().4s, \const_twisted\().4s
         mul      \dst\().4s, \src\().4s, \const\().4s
         mls      \dst\().4s, t2.4s,      consts.s[0]
+        // Bounds: |dst| < BARMUL_BOUND
 .endm
 
 .macro gs_butterfly a, b, root, idx0, idx1
+        // Compute a' = a + b, b' = barmul(a - b, zeta), commonly known as the
+        // Gentleman-Sande butterfly.
         sub tmp.4s,   \a\().4s, \b\().4s
         add \a\().4s, \a\().4s, \b\().4s
         mulmodq  \b, tmp, \root, \idx0, \idx1
+        // Bounds: |a'| <= |a| + |b|
+        //         |b'| < BARMUL_BOUND
 .endm
 
 .macro gs_butterfly_v a, b, root, root_twisted
+        // Same as cs_butterfly, but with different zetas across each lanes.
         sub tmp.4s,   \a\().4s, \b\().4s
         add \a\().4s, \a\().4s, \b\().4s
         mulmod  \b, tmp, \root, \root_twisted
+        // Bounds: |a'| <= |a| + |b|
+        //         |b'| < BARMUL_BOUND
 .endm
 
 .macro mul_ninv dst0, dst1, dst2, dst3, src0, src1, src2, src3
+        // Scale by 1/256*R via Barrett multiplication
         mulmod \dst0, \src0, ninv, ninv_tw
         mulmod \dst1, \src1, ninv, ninv_tw
         mulmod \dst2, \src2, ninv, ninv_tw
         mulmod \dst3, \src3, ninv, ninv_tw
+        // Bounds: |dst{i}| < BARMUL_BOUND
 .endm
 
 .macro load_roots_1234
@@ -211,15 +225,20 @@
 MLD_ASM_FN_SYMBOL(intt_asm)
         push_stack
 
-
-        // Setup constants
-        movz wtmp, #57345
-        movk wtmp, #127, lsl #16
+        // Load MLDSA_Q = 8380417
+        movz wtmp, #0xe001
+        movk wtmp, #0x7f, lsl #16
         dup consts.4s, wtmp
+
+        /* check-magic: 16382 == pow(2, 32-8, MLDSA_Q) */
+        // Load scaling factor 1/256*R
         mov wtmp, #16382 // 2^(32 - 8) mod Q
         dup ninv.4s, wtmp
-        movz wtmp, #3587
-        movk wtmp, #64, lsl #16
+
+        /* check-magic: 4197891 == round(16382 * 2**31 / MLDSA_Q) */
+        // Load Barrett constant for 1/256*R
+        movz wtmp, #0x0e03
+        movk wtmp, #0x40, lsl #16
         dup ninv_tw.4s, wtmp
 
         mov inp, in
@@ -235,26 +254,49 @@ intt_layer5678_start:
 
         transpose4 data0, data1, data2, data3
 
+        // Bounds: |data{i}| < q
+
         load_next_roots_78
 
         // Layer 8
         gs_butterfly_v data0, data1, root1, root1_tw
         gs_butterfly_v data2, data3, root2, root2_tw
 
+        // Bounds: |data{i}| < 2q           for i in 0, 2
+        //                   < BARMUL_BOUND for i in 1, 3
+        //
+        // Note that since 2^31 / q ~ 256.25 > 256, the sum of all 256
+        // coefficients does not overflow. This allows us to greatly simplify
+        // the range analysis by relaxing and unifying the bounds of all
+        // coefficients on the same layer. As a concrete example, here we relax
+        // the bounds on data{1,3} and conclude that for all i
+        //
+        // Bounds: |data{i}| < 2q
+        //
+        // In all but last of the following levels of butterflies, we do the
+        // same relaxation without explicit mention.
+
         // Layer 7
         gs_butterfly_v data0, data2, root0, root0_tw
         gs_butterfly_v data1, data3, root0, root0_tw
+
+        // Bounds: |data{i}| < 4q
 
         transpose4 data0, data1, data2, data3
 
         load_next_roots_56
 
-        // Layer 5
+        // Layer 6
         gs_butterfly data0, data1, root0, 0, 1
         gs_butterfly data2, data3, root0, 2, 3
 
+        // Bounds: |data{i}| < 8q
+
+        // Layer 5
         gs_butterfly data0, data2, root1, 0, 1
         gs_butterfly data1, data3, root1, 0, 1
+
+        // Bounds: |data{i}| < 16q
 
         str q_data0, [inp], #(64)
         str q_data1, [inp, #(-64 + 16*1)]
@@ -300,6 +342,8 @@ intt_layer1234_start:
         gs_butterfly data12, data13, root6, 2, 3
         gs_butterfly data14, data15, root7, 0, 1
 
+        // Bounds: |data{i}| < 32q
+
         // Layer 3
         gs_butterfly data0, data2, root1, 2, 3
         gs_butterfly data1, data3, root1, 2, 3
@@ -309,6 +353,8 @@ intt_layer1234_start:
         gs_butterfly data9, data11, root2, 2, 3
         gs_butterfly data12, data14, root3, 0, 1
         gs_butterfly data13, data15, root3, 0, 1
+
+        // Bounds: |data{i}| < 64q
 
         // Layer 2
         gs_butterfly data0, data4, root0, 2, 3
@@ -320,6 +366,8 @@ intt_layer1234_start:
         gs_butterfly data10, data14, root1, 0, 1
         gs_butterfly data11, data15, root1, 0, 1
 
+        // Bounds: |data{i}| < 128q
+
         // Layer 1
         gs_butterfly data0, data8, root0, 0, 1
         gs_butterfly data1, data9, root0, 0, 1
@@ -329,6 +377,9 @@ intt_layer1234_start:
         gs_butterfly data5, data13, root0, 0, 1
         gs_butterfly data6, data14, root0, 0, 1
         gs_butterfly data7, data15, root0, 0, 1
+
+        // Bounds: |data{i}| < 256q         for i in 0...7
+        //                   < BARMUL_BOUND for i in 8...15
 
         str q_data8, [in, #(8*(512/8))]
         str q_data9, [in, #(9*(512/8))]
@@ -344,6 +395,24 @@ intt_layer1234_start:
         // for the other half, we scale explicitly.
         mul_ninv data0, data1, data2, data3, data0, data1, data2, data3
         mul_ninv data4, data5, data6, data7, data4, data5, data6, data7
+
+        // Bounds: |data{i}| < BARMUL_BOUND for i in 0...7
+
+        // In the following we show that |barmul(a, b)| < BARMUL_BOUND := q,
+        // given that a fits inside int32_t (thus |a| <= R/2) and b is signed
+        // canonical (in the range -(Q-1)/2...(Q-1)/2).
+        //
+        // (It's worth noting that if we allow BARMUL_BOUND to be parametric in
+        // a (more precisely, range of |a|) and/or b, it's possible to tighten
+        // the bound to be considerably smaller than q.)
+        //
+        // By Corollary 2 of @[NeonNTT], we have
+        //
+        //   |barmul(a, b)| <= |a| |bR mod⟦⟧ q| / R + q / 2,
+        //
+        // where ⟦⟧ denotes round-to-nearest-even-integer approximation (thus
+        // |bR mod⟦⟧ q| < q). From this, simple computation gives
+        // |barmul(a, b)| < q.
 
         str q_data0, [in], #(16)
         str q_data1, [in, #(-16 + 1*(512/8))]
