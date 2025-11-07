@@ -24,7 +24,7 @@
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define mld_matrix_permute_bitrev_to_custom \
-  MLD_NAMESPACE_KL(mld_matrix_permute_bitrev_to_custom)
+  MLD_ADD_PARAM_SET(mld_matrix_permute_bitrev_to_custom)
 
 /* Helper function to ensure that the polynomial entries in the output
  * of mld_polyvec_matrix_expand use the standard (bitreversed) ordering
