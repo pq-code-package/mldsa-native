@@ -198,6 +198,17 @@ int crypto_sign_keypair_internal(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   /* Add error vector s2 */
   mld_polyveck_add(&t1, &s2);
 
+  /* Reference: The following reduction is not present in the reference
+   *            implementation. Omitting this reduction requires the output of
+   *            the invntt to be small enough such that the addition of s2 does
+   *            not result in absolute values >= MLDSA_Q. While our C, x86_64,
+   *            and AArch64 invntt implementations produce small enough
+   *            values for this to work out, it complicates the bounds
+   *            reasoning. We instead add an additional reduction, and can
+   *            consequently, relax the bounds requirements for the invntt.
+   */
+  mld_polyveck_reduce(&t1);
+
   /* Extract t1 and write public key */
   mld_polyveck_caddq(&t1);
   mld_polyveck_power2round(&t2, &t0, &t1);
