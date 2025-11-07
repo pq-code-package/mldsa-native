@@ -126,10 +126,10 @@ int main(void)
     CHECK(memcmp(sig, expected_signature, siglen) == 0);
   }
   printf("DONE\n");
-#else
+#else  /* !MLD_CONFIG_KEYGEN_PCT */
   printf(
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif
+#endif /* MLD_CONFIG_KEYGEN_PCT */
 
   printf("Signature verification completed successfully!\n");
   printf("Custom FIPS-202 implementation is working correctly.\n");

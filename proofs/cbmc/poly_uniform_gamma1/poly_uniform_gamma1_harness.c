@@ -12,5 +12,5 @@ void harness(void)
   uint16_t nonce;
 
   mld_poly_uniform_gamma1(a, seed, nonce);
-#endif
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 */
 }

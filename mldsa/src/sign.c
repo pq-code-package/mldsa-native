@@ -8,7 +8,8 @@
  *
  * - [FIPS140_3_IG]
  *   Implementation Guidance for FIPS 140-3 and the Cryptographic Module
- *   Validation Program National Institute of Standards and Technology
+ *   Validation Program
+ *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
  *
  * - [FIPS204]
@@ -18,8 +19,8 @@
  *
  * - [Round3_Spec]
  *   CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation
- * (Version 3.1) Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler,
- *   Stehlé
+ *   (Version 3.1)
+ *   Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé
  *   https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
  */
 

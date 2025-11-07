@@ -125,5 +125,5 @@ void randombytes(uint8_t *buf, size_t n)
    * Valgrind will propagate this to everything derived from it.
    */
   VALGRIND_MAKE_MEM_UNDEFINED(buf_orig, n_orig);
-#endif
+#endif /* ENABLE_CT_TESTING */
 }

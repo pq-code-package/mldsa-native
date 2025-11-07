@@ -26,7 +26,7 @@
 #else
 #define MLD_INLINE static inline
 #endif
-#endif
+#endif /* !MLD_INLINE */
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136

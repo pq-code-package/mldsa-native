@@ -8,7 +8,8 @@
  *
  * - [FIPS140_3_IG]
  *   Implementation Guidance for FIPS 140-3 and the Cryptographic Module
- *   Validation Program National Institute of Standards and Technology
+ *   Validation Program
+ *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
  */
 
@@ -179,7 +180,7 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
 {
   OQS_randombytes(ptr, len);
 }
-#endif
+#endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT
@@ -258,7 +259,7 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
 #if !defined(__ASSEMBLER__)
 #include <oqs/common.h>
 #define MLD_CONFIG_EXTERNAL_API_QUALIFIER OQS_API
-#endif /* !__ASSEMBLER__ */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_NO_ASM_VALUE_BARRIER

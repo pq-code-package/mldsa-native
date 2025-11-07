@@ -39,7 +39,7 @@
 /* Ensure that syscall() is declared even when compiling with -std=c99 */
 #define _GNU_SOURCE
 #endif
-#endif
+#endif /* __linux__ */
 
 #include "hal.h"
 
@@ -95,9 +95,9 @@ uint64_t get_cyclecounter(void)
   return retval;
 }
 
-#else
+#else /* (!__x86_64__ && __AARCH64EL__) || _M_ARM64 */
 #error PMU_CYCLES option only supported on x86_64 and AArch64
-#endif
+#endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) */
 
 #elif defined(PERF_CYCLES)
 
@@ -305,10 +305,10 @@ uint64_t get_cyclecounter(void)
   return g_counters[2];
 }
 
-#else
+#else /* !PMU_CYCLES && !PERF_CYCLES && MAC_CYCLES */
 
 void enable_cyclecounter(void) { return; }
 void disable_cyclecounter(void) { return; }
 uint64_t get_cyclecounter(void) { return (0); }
 
-#endif
+#endif /* !PMU_CYCLES && !PERF_CYCLES && !MAC_CYCLES */

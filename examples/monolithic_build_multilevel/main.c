@@ -117,10 +117,10 @@ static int test_mldsa44(void)
     CHECK(memcmp(sig, expected_signature_44, siglen) == 0);
   }
   printf("DONE\n");
-#else
+#else  /* !MLD_CONFIG_KEYGEN_PCT */
   printf(
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif
+#endif /* MLD_CONFIG_KEYGEN_PCT */
 
   printf("Signature verification completed successfully!\n");
 
@@ -214,10 +214,10 @@ static int test_mldsa65(void)
     CHECK(memcmp(sig, expected_signature_65, siglen) == 0);
   }
   printf("DONE\n");
-#else
+#else  /* !MLD_CONFIG_KEYGEN_PCT */
   printf(
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif
+#endif /* MLD_CONFIG_KEYGEN_PCT */
 
   printf("Signature verification completed successfully!\n");
 
@@ -312,10 +312,10 @@ static int test_mldsa87(void)
     CHECK(memcmp(sig, expected_signature_87, siglen) == 0);
   }
   printf("DONE\n");
-#else
+#else  /* !MLD_CONFIG_KEYGEN_PCT */
   printf(
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif
+#endif /* MLD_CONFIG_KEYGEN_PCT */
 
   printf("Signature verification completed successfully!\n");
 
