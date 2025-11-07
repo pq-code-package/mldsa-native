@@ -23,15 +23,15 @@
 
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
-#define mld_matrix_permute_bitrev_to_custom \
-  MLD_ADD_PARAM_SET(mld_matrix_permute_bitrev_to_custom)
+#define mld_polymat_permute_bitrev_to_custom \
+  MLD_ADD_PARAM_SET(mld_polymat_permute_bitrev_to_custom)
 
 /* Helper function to ensure that the polynomial entries in the output
  * of mld_polyvec_matrix_expand use the standard (bitreversed) ordering
  * of coefficients.
  * No-op unless a native backend with a custom ordering is used.
  */
-static void mld_matrix_permute_bitrev_to_custom(mld_polyvecl mat[MLDSA_K])
+static void mld_polymat_permute_bitrev_to_custom(mld_polyvecl mat[MLDSA_K])
 __contract__(
   /* We don't specify that this should be a permutation, but only
    * that it does not change the bound established at the end of
@@ -143,7 +143,7 @@ void mld_polyvec_matrix_expand(mld_polyvecl mat[MLDSA_K],
     i++;
   }
 
-  mld_matrix_permute_bitrev_to_custom(mat);
+  mld_polymat_permute_bitrev_to_custom(mat);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
