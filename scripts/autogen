@@ -22,6 +22,7 @@ from functools import partial
 modulus = 8380417
 root_of_unity = 1753
 montgomery_factor = pow(2, 32, modulus)
+
 # Compiled regex patterns
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
@@ -180,7 +181,6 @@ def finalize(dry_run):
 # It currently covers:
 # - zeta values for the reference NTT and invNTT
 # - header guards
-
 
 # Standard color definitions
 GREEN = "\033[32m"
@@ -635,11 +635,7 @@ def gen_preprocessor_comments_for(parser, source_file):
 
 
 def gen_preprocessor_comments():
-    files = (
-        get_c_source_files()
-        + get_asm_source_files()
-        + get_header_files()
-    )
+    files = get_c_source_files() + get_asm_source_files() + get_header_files()
     parser = CondParser()
     with ThreadPoolExecutor() as executor:
         results = list(
@@ -987,10 +983,7 @@ def gen_aarch64_rej_uniform_table():
         yield "#endif"
         yield ""
 
-    update_file(
-        "dev/aarch64_clean/src/rej_uniform_table.c",
-        "\n".join(gen()),
-    )
+    update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
 
 
 def gen_avx2_rej_uniform_table_rows():
@@ -1228,6 +1221,7 @@ def get_defines(all=False):
         files = get_header_files(main_only=True)
     else:
         files = get_header_files() + get_c_source_files() + get_asm_source_files()
+
     with ThreadPoolExecutor() as executor:
         for results in executor.map(get_defines_from_file, files):
             yield from results
@@ -2384,14 +2378,17 @@ def _main():
         default="att",
         help="Assembly syntax for x86_64 disassembly output (att or intel)",
     )
+
     args = parser.parse_args()
 
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 
     gen_citations()
     high_level_status("Generated citations")
+
     gen_oqs_meta_files()
     high_level_status("Generated OQS META.yml files")
+
     gen_c_zeta_file()
     gen_aarch64_zeta_file()
     gen_aarch64_rej_uniform_table()
@@ -2410,10 +2407,6 @@ def _main():
 
     gen_header_guards()
     high_level_status("Generated header guards")
-    gen_preprocessor_comments()
-    high_level_status("Generated preprocessor comments")
-    gen_monolithic_source_file()
-    high_level_status("Generated monolithic source files")
 
     synchronize_backends(
         clean=args.aarch64_clean,
@@ -2423,6 +2416,10 @@ def _main():
         x86_64_syntax=args.x86_64_syntax,
     )
     high_level_status("Completed final backend synchronization")
+
+    gen_monolithic_source_file()
+    high_level_status("Generated monolithic source files")
+
     gen_test_configs()
     high_level_status("Generated test configs")
 
