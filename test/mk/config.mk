@@ -89,13 +89,8 @@ $(1)_FROM_ENV := $$($(1))
 endef
 $(foreach var,$(RETAINED_VARS),$(eval $(call CAPTURE_VAR,$(var))))
 
-AUTO ?= 1
 CYCLES ?=
 OPT ?= 1
-
-ifeq ($(AUTO),1)
-include test/mk/auto.mk
-endif
 
 BUILD_DIR ?= test/build
 

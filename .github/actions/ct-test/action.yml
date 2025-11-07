@@ -46,4 +46,5 @@ runs:
           # It may increase run-time of the valgrind tests.
           # TODO: Check with future versions of valgrind if this is still needed (both 3.24 and 3.25 fail without)
           # TODO: Check if this is still needed once the poly_chknorm intrinsics implementation is replaced by assembly
-          tests func --exec-wrapper="valgrind --vex-guest-max-insns=55 --error-exitcode=1 ${{ inputs.valgrind_flags }}" --cflags="-DMLD_CONFIG_CT_TESTING_ENABLED -DNTESTS=5 ${{ inputs.cflags }}"
+          # Disable the AArch64 SHA3 extension as it's not yet supported by valgrind
+          MK_COMPILER_SUPPORTS_SHA3=0 tests func --exec-wrapper="valgrind --vex-guest-max-insns=55 --error-exitcode=1 ${{ inputs.valgrind_flags }}" --cflags="-DMLD_CONFIG_CT_TESTING_ENABLED -DNTESTS=5 ${{ inputs.cflags }}"

@@ -17,7 +17,8 @@
 	build test all \
 	clean quickcheck check-defined-CYCLES \
 	size_44 size_65 size_87 size \
-	run_size_44 run_size_65 run_size_87 run_size
+	run_size_44 run_size_65 run_size_87 run_size \
+	host_info
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := build
@@ -38,6 +39,8 @@ $(error Neither 'shasum' nor 'sha256sum' found. Please install one of these tool
 endif
 
 include test/mk/config.mk
+include test/mk/compiler.mk
+include test/mk/auto.mk
 include test/mk/components.mk
 include test/mk/rules.mk
 
@@ -91,6 +94,15 @@ acvp_65:  $(MLDSA65_DIR)/bin/acvp_mldsa65
 acvp_87: $(MLDSA87_DIR)/bin/acvp_mldsa87
 	$(Q)echo "  ACVP       ML-DSA-87:  $^"
 acvp: acvp_44 acvp_65 acvp_87
+	
+ifeq ($(HOST_PLATFORM),Linux-aarch64)
+# valgrind does not work with the AArch64 SHA3 extension
+# Use armv8-a as the target architecture, overwriting a
+# potential earlier addition of armv8.4-a+sha3.
+$(MLDSA44_DIR)/bin/test_stack44:   CFLAGS += -march=armv8-a
+$(MLDSA65_DIR)/bin/test_stack65:   CFLAGS += -march=armv8-a
+$(MLDSA87_DIR)/bin/test_stack87: CFLAGS += -march=armv8-a
+endif
 
 stack_44: $(MLDSA44_DIR)/bin/test_stack44
 	$(Q)echo "  STACK      ML-DSA-44:   $^"
@@ -178,6 +190,29 @@ run_size: \
 	run_size_65 \
 	run_size_87
 
+# Display host and compiler feature detection information
+# Shows which architectural features are supported by both the compiler and host CPU
+# Usage: make host_info [AUTO=0|1] [CROSS_PREFIX=...]
+host_info:
+	@echo "=== Host and Compiler Feature Detection ==="
+	@echo "Host Platform: $(HOST_PLATFORM)"
+	@echo "Target Architecture: $(ARCH)"
+	@echo "Compiler: $(CC)"
+	@echo "Cross Prefix: $(if $(CROSS_PREFIX),$(CROSS_PREFIX),<none>)"
+	@echo "AUTO: $(AUTO)"
+	@echo ""
+ifeq ($(ARCH),x86_64)
+	@echo "=== x86_64 Feature Support ==="
+	@echo "AVX2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_AVX2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_AVX2)),✅,❌)"
+	@echo "SSE2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_SSE2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_SSE2)),✅,❌)"
+	@echo "BMI2: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_BMI2)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_BMI2)),✅,❌)"
+else ifeq ($(ARCH),aarch64)
+	@echo "=== AArch64 Feature Support ==="
+	@echo "SHA3: Host $(if $(filter 1,$(MK_HOST_SUPPORTS_SHA3)),✅,❌) Compiler $(if $(filter 1,$(MK_COMPILER_SUPPORTS_SHA3)),✅,❌)"
+else
+	@echo "=== Architecture Not Supported ==="
+	@echo "No specific feature detection available for $(ARCH)"
+endif
 
 clean:
 	-$(RM) -rf *.gcno *.gcda *.lcov *.o *.so
