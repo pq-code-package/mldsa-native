@@ -52,7 +52,7 @@ void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
   {
     f = _mm256_load_si256(&a[i]);
 
-    /* check-magic: 4092 == 2 * ((MLDSA_Q-1) // 32) // 128 */
+    /* check-magic: 4092 == intdiv(2 * intdiv(MLDSA_Q - 1, 32), 128) */
     /*
      * The goal is to compute f1 = round-(f / (2*GAMMA2)), which can be computed
      * alternatively as round-(f / (128B)) = round-(ceil(f / 128) / B) where
