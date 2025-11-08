@@ -93,7 +93,7 @@ gh_summary_failure()
 
 gh_error()
 {
-  if $IN_GITHUB_COgNTEXT; then
+  if $IN_GITHUB_CONTEXT; then
     echo "::error file=$1,line=${2:-1},title=$3::$4"
   fi
 }
@@ -112,9 +112,9 @@ gh_group_start "Linting nix files with nixpkgs-fmt"
 checkerr "Lint nix" "$(nixpkgs-fmt --check "$ROOT")"
 gh_group_end
 
-#gh_group_start "Linting shell scripts with shfmt"
-#checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/)))"
-#gh_group_end
+gh_group_start "Linting shell scripts with shfmt"
+checkerr "Lint shell" "$(shfmt -s -l -i 2 -ci -fn $(shfmt -f $(git grep -l '' :/)))"
+gh_group_end
 
 gh_group_start "Linting python scripts with black"
 if ! diff=$(black --check --diff -q --include "(scripts/tests|scripts/simpasm|scripts/cfify|scripts/autogen|scripts/check-namespace|\.py$)" "$ROOT"); then
