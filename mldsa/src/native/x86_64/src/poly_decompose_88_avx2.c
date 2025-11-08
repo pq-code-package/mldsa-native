@@ -15,6 +15,10 @@
 /*
  * This file is derived from the public domain
  * AVX2 Dilithium implementation @[REF_AVX2].
+ *
+ * The algorithm for Decompose(r) (more specifically the handling for the
+ * wrap-around cases) are modified. See the "Reference" section in the comments
+ * below for a more detailed comparison.
  */
 
 #include "../../../common.h"
@@ -85,6 +89,18 @@ void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
      * If f1 = 44, i.e. f > 87*GAMMA2, proceed as if f' = f - Q was given
      * instead. (For f = 87*GAMMA2 + 1 thus f' = -GAMMA2, we still round it to 0
      * like other "wrapped around" cases.)
+     *
+     * Reference: They handle wrap-around in a somewhat convoluted way. Most
+     *            notably, they compute remainder f0 with quotient f1 that's
+     *            already wrapped around, so is off by q (instead of by 1) from
+     *            what it should be ultimately. They detect the need for
+     *            correction by checking if f0 is abnormally large.
+     *
+     *            Our approach is closer to Algorithm 36 in the specification,
+     *            in that we compute f0 normally and correct f1, f0 in the way
+     *            they prescribed. The only real difference is that we check for
+     *            wrap-around by examining f directly, instead of some other
+     *            intermediates computed from it.
      */
 
     /* Check for wrap-around */
