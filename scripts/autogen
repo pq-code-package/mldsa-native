@@ -27,8 +27,8 @@ montgomery_factor = pow(2, 32, modulus)
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
 _RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
+_RE_MACRO_CHECK = re.compile(r"[^_]((?:MLD_|MLDSA_)\w+)(.*)$", re.M)
 _RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
-
 
 # File cache: {filename: {"content": str, "original": str, "force_format": bool}}
 # Caches content of files in preparation/modification to avoid repeated
@@ -1529,6 +1529,108 @@ def gen_monolithic_source_file():
     update_file("mldsa/mldsa_native.c", "\n".join(gen()))
 
 
+def get_config_options():
+    content = read_file("mldsa/src/config.h")
+    config_pattern = r"Name:\s*(MLD_CONFIG_\w+)"
+
+    configs = re.findall(config_pattern, content)
+
+    configs += [
+        "MLD_FORCE_AARCH64",
+        "MLD_FORCE_AARCH64_EB",
+        "MLD_FORCE_X86_64",
+        "MLD_FORCE_PPC64LE",
+        "MLD_FORCE_RISCV64",
+        "MLD_FORCE_RISCV32",
+        "MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER",
+        "MLDSA_DEBUG",  # TODO: Rename?
+        "MLD_BREAK_PCT",  # Use in PCT breakage test]
+        "MLD_CONFIG_NO_ASM_VALUE_BARRIER",  # TODO: Add to config?
+        "MLD_CHECK_APIS",
+        "MLD_CONFIG_API_XXX",
+        "MLD_USE_NATIVE_XXX",
+    ]
+
+    return configs
+
+
+def check_macro_typos_in_file(filename, macro_check):
+    """Checks for typos in MLD_XXX and MLDSA_XXX identifiers."""
+    status_update("check-macros", filename)
+    content = read_file(filename)
+
+    for m in _RE_MACRO_CHECK.finditer(content):
+        txt = m.group(1)
+        rest = m.group(2)
+        if macro_check(txt, rest, filename) is False:
+            line_no = content[: m.start()].count("\n") + 1
+            raise Exception(
+                f"Likely typo {txt} in {filename}:{line_no}? Not a defined macro."
+            )
+
+
+def get_syscaps():
+    return ["MLD_SYS_CAP_AVX2", "MLD_SYS_CAP_SHA3", "MLD_SYS_CAP_DUMMY"]
+
+
+def check_macro_typos():
+    files = get_all_files()
+    configs = get_config_options()
+    syscaps = get_syscaps()
+
+    macros = set(map(lambda t: t[1], get_defines(all=True)))
+
+    # Add configuration options to the list of allows macro names
+    macros.update(get_config_options())
+
+    def macro_check(m, rest, filename):
+        if m in macros:
+            return True
+
+        is_autogen = filename == "scripts/autogen"
+
+        # Exclude system capabilities, which are enum values
+        if m in syscaps:
+            return True
+
+        #
+        # Register some file-specific exceptions
+        #
+
+        # 1. Makefiles use MLD_SOURCE_XXX to list source files
+        if is_autogen or filename.endswith("/Makefile"):
+            if m.startswith("MLD_SOURCE") or m.startswith("MLD_OBJ"):
+                return True
+
+        # 2. libOQS specific identifier
+        if is_autogen or filename.startswith("integration/liboqs"):
+            if m.startswith("MLDSA_NATIVE_MLDSA") or m in ["MLDSA_DIR"]:
+                return True
+
+        # 3. Exclude HOL-Light proof scripts
+        if is_autogen or filename.startswith("proofs/hol_light"):
+            if filename.endswith(".ml"):
+                return True
+
+        # 4. Exclude regexp patterns in `autogen`
+        if is_autogen:
+            if rest.startswith("\\") or m in ["MLD_XXX", "MLD_SOURCE_XXX"]:
+                return True
+
+        # 5. AWS-LC importer patch
+        if is_autogen or filename == "integration/awslc/awslc.patch":
+            return True
+
+        return False
+
+    with ThreadPoolExecutor() as executor:
+        results = list(
+            executor.map(
+                partial(check_macro_typos_in_file, macro_check=macro_check), files
+            )
+        )
+
+
 def update_via_simpasm(
     infile_full,
     outdir,
@@ -2503,6 +2605,9 @@ def _main():
     high_level_status("Generated monolithic source files")
     gen_undefs()
     high_level_status("Generated undefs")
+
+    check_macro_typos()
+    high_level_status("Checked macro typos")
 
     gen_test_configs()
     high_level_status("Generated test configs")
