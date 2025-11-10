@@ -21,6 +21,35 @@ NQinv = pow(-Q, -1, R)
 
 
 #
+# Barrett multiplication via doubling
+#
+
+
+def round_even(x):
+    return 2 * round(x / 2)
+
+
+@lru_cache(maxsize=None)
+def barrett_twiddle(b):
+    """Compute twiddle required for Barrett multiplications
+    via doubling-high-multiply."""
+    return round_even(b * R / Q) // 2
+
+
+def sqrdmulh_i32(a, b):
+    """Doubling multiply high with rounding"""
+    # We cannot use round() here because of its behaviour
+    # on multiples of 0.5: round(-.5) = round(0.5) = 0
+    return (2 * a * b + 2**31) // 2**32
+
+
+def barmul(a, b):
+    """Compute doubling Barrett multiplication of a and b"""
+    b_twiddle = barrett_twiddle(b)
+    return a * b - Q * sqrdmulh_i32(a, b_twiddle)
+
+
+#
 # Montgomery multiplication
 #
 
@@ -66,6 +95,71 @@ def test_random(f, test_name, num_tests=10000000, bound_a=R // 2, bound_b=Q // 2
         a = random.randrange(-bound_a, bound_a)
         b = random.randrange(-bound_b, bound_b)
         f(a, b)
+
+
+#
+# Test bound on Barrett multiplication, as used in AArch64 [I]NTT
+#
+
+"""
+For Barrett multiplication implemented with sqrdmulh, Corollary 2 of @[NeonNTT]
+shows the bound
+
+  |barmul(a, b)| <= |a| |bR mod⟦⟧ q| / R + q / 2,
+
+where ⟦⟧ denotes round-to-nearest-even-integer approximation (thus
+|bR mod⟦⟧ q| < q). In particular, knowing that a fits inside int32_t (thus
+|a| <= R/2) already implies |barmul(a, b)| < q.
+"""
+
+
+@lru_cache(maxsize=None)
+def modq_even(a):
+    return a - Q * round_even(a / Q)
+
+
+def barmul_bound(a, b):
+    bp = modq_even(b * R)
+    return Fraction(abs(a) * abs(bp), R) + Fraction(Q, 2)
+
+
+def barmul_bound_test(a, b):
+    ab = barmul(a, b)
+    bound = barmul_bound(a, b)
+    if abs(ab) > bound:
+        print(f"barmul_bound_test failure for (a,b)={(a,b)}")
+        print(f"barmul(a,b): {ab}")
+        print(f"bound: {bound}")
+        assert False
+
+
+def barmul_bound_test_random():
+    test_random(
+        barmul_bound_test,
+        "bound on Barrett multiplication, as used in AArch64 [I]NTT",
+    )
+
+
+def barmul_bound_test_exceeds_3_quarters():
+    """
+    This example shows an extreme but legitimate case where the Barrett
+    multiplication in the last butterfly of AArch64 INTT computes an output with
+    magnitude larger than ceil(3q/4).
+
+    The specific zeta used in that butterly can be found at the 32nd to last
+    entry of the array mld_aarch64_intt_zetas_layer123456[] in
+    dev/aarch64_clean/src/aarch64_zetas.c.
+    """
+    zeta = -294725
+    a_worst = -2145337212
+    a_zeta_worst = 6390331
+    assert abs(a_worst) <= 256 * (Q - 1)
+    assert barmul(a_worst, zeta) == a_zeta_worst
+    assert abs(a_zeta_worst) > ceil(Fraction(3 * Q, 4))
+
+
+barmul_bound_test_random()
+barmul_bound_test_exceeds_3_quarters()
 
 
 #

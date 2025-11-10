@@ -413,6 +413,8 @@ intt_layer1234_start:
         // where ⟦⟧ denotes round-to-nearest-even-integer approximation (thus
         // |bR mod⟦⟧ q| < q). From this, simple computation gives
         // |barmul(a, b)| < q.
+        //
+        // See test/test_bounds.py for more empirical evidence.
 
         str q_data0, [in], #(16)
         str q_data1, [in, #(-16 + 1*(512/8))]
