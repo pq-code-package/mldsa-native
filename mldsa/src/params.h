@@ -13,7 +13,6 @@
 #define MLDSA_RNDBYTES 32
 #define MLDSA_N 256
 #define MLDSA_Q 8380417
-/* check-magic: 4190209 == round(MLDSA_Q/2) */
 #define MLDSA_Q_HALF ((MLDSA_Q + 1) / 2)
 #define MLDSA_D 13
 
