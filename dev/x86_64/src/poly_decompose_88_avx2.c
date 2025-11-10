@@ -78,12 +78,29 @@ void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
      * for 0 <= f1' < 2^16. Note that half is rounded down since 11275 / 2^24 ≲
      * 1 / 1488.
      *
-     * The odd-index 16-bit lanes are still all 0 after this. As such, despite
-     * that the following steps use 32-bit lanes, the value of f1 is unaffected.
+     * round(f1' * 11275 / 2^24) is in turn computed in 2 steps as
+     * round(floor(f1' * 11275 / 2^16) / 2^8). The mulhi computes f1'' =
+     * floor(f1' * 11275 / 2^16). As for the next step f1 = round(f1'' / 2^8),
+     * because AVX2 doesn't have rounding right-shift (e.g. urshr in Neon), we
+     * simulate it using mulhrs with a power of 2, in this case mulhrs(f1'',
+     * 2^7) = round(f1'' * 2^7 / 2^15). (Note that the denominator is 2^15,
+     * not 2^16 as in mulhi.)
      */
     f1 = _mm256_mulhi_epu16(f1, v);
+    /*
+     * range: 0 <= f1'' < floor(2^16 * 11275 / 2^16) = 11275
+     *
+     * Because 0 <= f1'' < 2^15, the multiplication in mulhrs is unsigned, that
+     * is, no erroneous sign-extension occurs.
+     */
     f1 = _mm256_mulhrs_epi16(f1, shift);
-    /* range: 0 <= f1 <= 44 */
+    /*
+     * range: 0 <= f1 = round-(f1' / B) <= round-(44B / B) = 44
+     *
+     * Note that the odd-index 16-bit lanes are still all 0 right now, so
+     * reinterpreting f1 as 8 lanes of int32_t (as done in the following) does
+     * not affect its value.
+     */
 
     /*
      * If f1 = 44, i.e. f > 87*GAMMA2, proceed as if f' = f - Q was given
