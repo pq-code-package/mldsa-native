@@ -20,7 +20,7 @@
 	run_size_44 run_size_65 run_size_87 run_size \
 	host_info
 
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 .DEFAULT_GOAL := build
 
 all: build
