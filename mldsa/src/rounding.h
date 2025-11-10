@@ -93,20 +93,46 @@ __contract__(
   ensures((*a1 * 2 * MLDSA_GAMMA2 + *a0 - a) % MLDSA_Q == 0)
 )
 {
+  /*
+   * The goal is to compute f1 = round-(f / (2*GAMMA2)), which can be computed
+   * alternatively as round-(f / (128B)) = round-(ceil(f / 128) / B) where
+   * B = 2*GAMMA2 / 128. Here round-() denotes "round half down".
+   *
+   * The equality round-(f / (128B)) = round-(ceil(f / 128) / B) can deduced
+   * as follows. Since changing f to align-up(f, 128) can move f onto but not
+   * across a rounding boundary for division by 128*B (note that we need B to be
+   * even for this to work), and round- rounds down on the boundary, we have
+   *
+   *   round-(f / (128B)) = round-(align-up(f, 128) / (128B))
+   *                      = round-((align-up(f, 128) / 128) / B)
+   *                      = round-(ceil(f / 128) / B).
+   */
   *a1 = (a + 127) >> 7;
   /* We know a >= 0 and a < MLDSA_Q, so... */
   /* check-magic: 65472 == round((MLDSA_Q-1)/128) */
   mld_assert(*a1 >= 0 && *a1 <= 65472);
 
 #if MLD_CONFIG_PARAMETER_SET == 44
-  /* check-magic: 11275 == round((2**24*128) / ((MLDSA_Q - 1) / 44)) */
+  /* check-magic: 1488 == 2 * intdiv(intdiv(MLDSA_Q - 1, 88), 128) */
+  /* check-magic: 11275 == floor(2**24 / 1488) */
+  /*
+   * Compute f1 = round-(f1' / B) ≈ round(f1' * 11275 / 2^24). This is exact
+   * for 0 <= f1' < 2^16. Note that half is rounded down since 11275 / 2^24 ≲
+   * 1 / 1488.
+   */
   *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
   mld_assert(*a1 >= 0 && *a1 <= 44);
 
   *a1 = mld_ct_sel_int32(0, *a1, mld_ct_cmask_neg_i32(43 - *a1));
   mld_assert(*a1 >= 0 && *a1 <= 43);
 #else /* MLD_CONFIG_PARAMETER_SET == 44 */
-  /* check-magic: 1025 == round((2**22*128) / ((MLDSA_Q - 1) / 16)) */
+  /* check-magic: 4092 == 2 * intdiv(intdiv(MLDSA_Q - 1, 32), 128) */
+  /* check-magic: 1025 == floor(2**22 / 4092) */
+  /*
+   * Compute f1 = round-(f1' / B) ≈ round(f1' * 1025 / 2^22). This is exact
+   * for 0 <= f1' < 2^16. Note that half is rounded down since 1025 / 2^22 ≲
+   * 1 / 4092.
+   */
   *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
   mld_assert(*a1 >= 0 && *a1 <= 16);
 

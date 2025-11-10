@@ -55,9 +55,9 @@ void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
 
     /* check-magic: 1488 == intdiv(2 * intdiv(MLDSA_Q - 1, 88), 128) */
     /*
-     * The goal is to compute f1 = round-(f / (2*GAMMA2)), which can be computed
-     * alternatively as round-(f / (128B)) = round-(ceil(f / 128) / B) where
-     * B = 2*GAMMA2 / 128 = 1488. Here round-() denotes "round half down".
+     * Compute f1 = round-(f / (2*GAMMA2)) as round-(f / (128B)) =
+     * round-(ceil(f / 128) / B) where B = 2*GAMMA2 / 128 = 1488. See
+     * mld_decompose() in mldsa/src/rounding.h for more details.
      *
      * range: 0 <= f <= Q-1 = 88*GAMMA2 = 44*128*B
      */
