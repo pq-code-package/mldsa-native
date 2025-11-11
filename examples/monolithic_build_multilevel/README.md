@@ -70,7 +70,7 @@ would lead to name-clashes upon multiple use.
 #undef MLD_CONFIG_API_NAMESPACE_PREFIX
 #undef MLD_H
 
-/* API for MLDSA_87 */
+/* API for MLDSA-87 */
 #define MLD_CONFIG_API_PARAMETER_SET 87
 #define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa87
 #include <mldsa_native.h>
