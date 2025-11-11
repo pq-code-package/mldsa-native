@@ -65,7 +65,7 @@ jobs:
         with:
           cache: true
           verbose: true
-          save_cache: true
+          save_cache: ${{ github.ref == 'refs/heads/main' }}
           devShell: ci
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
