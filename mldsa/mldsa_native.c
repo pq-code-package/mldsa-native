@@ -187,6 +187,8 @@
 #undef MLD_COMMON_H
 #undef MLD_CONCAT
 #undef MLD_CONCAT_
+#undef MLD_CONFIG_API_NAMESPACE_PREFIX
+#undef MLD_CONFIG_API_PARAMETER_SET
 #undef MLD_EMPTY_CU
 #undef MLD_EXTERNAL_API
 #undef MLD_FIPS202X4_HEADER_FILE
@@ -295,6 +297,7 @@
 #undef mld_power2round
 #undef mld_use_hint
 /* mldsa/src/sign.h */
+#undef MLD_CONFIG_API_NO_SUPERCOP
 #undef MLD_PREHASH_SHA2_224
 #undef MLD_PREHASH_SHA2_256
 #undef MLD_PREHASH_SHA2_384

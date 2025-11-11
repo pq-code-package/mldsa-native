@@ -23,6 +23,27 @@
 #include "polyvec.h"
 #include "sys.h"
 
+#if defined(MLD_CHECK_APIS)
+/* Include to ensure consistency between internal sign.h
+ * and external mldsa_native.h. */
+#define MLD_CONFIG_API_NO_SUPERCOP
+#include "mldsa_native.h"
+#undef MLD_CONFIG_API_NO_SUPERCOP
+
+#if CRYPTO_SECRETKEYBYTES != MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
+#error Mismatch for SECRETKEYBYTES between sign.h and mldsa_native.h
+#endif
+
+#if CRYPTO_PUBLICKEYBYTES != MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
+#error Mismatch for PUBLICKEYBYTES between sign.h and mldsa_native.h
+#endif
+
+#if CRYPTO_BYTES != MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)
+#error Mismatch for CRYPTO_BYTES between sign.h and mldsa_native.h
+#endif
+
+#endif /* MLD_CHECK_APIS */
+
 #define crypto_sign_keypair_internal MLD_NAMESPACE_KL(keypair_internal)
 #define crypto_sign_keypair MLD_NAMESPACE_KL(keypair)
 #define crypto_sign_signature_internal MLD_NAMESPACE_KL(signature_internal)

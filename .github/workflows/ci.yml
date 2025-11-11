@@ -471,6 +471,37 @@ jobs:
           kat: true
           acvp: true
           nix-shell: ${{ matrix.compiler.shell }}
+  # ensure that sign.h and mldsa_native.h; api.h and native backends are compatible
+  check-apis:
+    strategy:
+      fail-fast: false
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+         - runner: pqcp-arm64
+           name: 'aarch64'
+         - runner: ubuntu-latest
+           name: 'x86_64'
+        exclude:
+          - {external: true,
+             target: {
+               runner: pqcp-arm64,
+               name: 'aarch64'
+             }}
+    name: Check API consistency
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: make quickcheck
+        run: |
+          OPT=0 CFLAGS="-Imldsa -DMLD_CHECK_APIS -Wno-redundant-decls" make quickcheck
+          make clean >/dev/null
+          OPT=1 CFLAGS="-Imldsa -DMLD_CHECK_APIS -Wno-redundant-decls" make quickcheck
+      - uses: ./.github/actions/setup-apt
+      - name: tests func
+        run: |
+          ./scripts/tests func --cflags="-Imldsa -DMLD_CHECK_APIS -Wno-redundant-decls"
   ec2_functests:
     strategy:
       fail-fast: false

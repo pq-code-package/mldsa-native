@@ -72,7 +72,15 @@
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #include MLD_CONFIG_ARITH_BACKEND_FILE
+/* Include to enforce consistency of API and implementation,
+ * and conduct sanity checks on the backend.
+ *
+ * Keep this _after_ the inclusion of the backend; otherwise,
+ * the sanity checks won't have an effect. */
+#if defined(MLD_CHECK_APIS) && !defined(__ASSEMBLER__)
+#include "native/api.h"
 #endif
+#endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
@@ -102,7 +110,15 @@
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #include MLD_CONFIG_FIPS202_BACKEND_FILE
+/* Include to enforce consistency of API and implementation,
+ * and conduct sanity checks on the backend.
+ *
+ * Keep this _after_ the inclusion of the backend; otherwise,
+ * the sanity checks won't have an effect. */
+#if defined(MLD_CHECK_APIS) && !defined(__ASSEMBLER__)
+#include "fips202/native/api.h"
 #endif
+#endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 #if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLD_FIPS202_HEADER_FILE "fips202/fips202.h"
@@ -129,6 +145,20 @@
 #endif
 #endif /* !__ASSEMBLER__ */
 
+/* Just in case we want to include mldsa_native.h, set the configuration
+ * for that header in accordance with the configuration used here. */
 
+/* Double-check that this is not conflicting with pre-existing definitions. */
+#if defined(MLD_CONFIG_API_PARAMETER_SET) ||    \
+    defined(MLD_CONFIG_API_NAMESPACE_PREFIX) || \
+    defined(MLD_CONFIG_API_NO_SUPERCOP) ||      \
+    defined(MLD_CONFIG_API_CONSTANTS_ONLY)
+#error Pre-existing MLD_CONFIG_API_XXX configuration is neither useful nor allowed during an mldsa-native build
+#endif /* MLD_CONFIG_API_PARAMETER_SET || MLD_CONFIG_API_NAMESPACE_PREFIX || \
+          MLD_CONFIG_API_NO_SUPERCOP || MLD_CONFIG_API_CONSTANTS_ONLY */
+
+#define MLD_CONFIG_API_PARAMETER_SET MLD_CONFIG_PARAMETER_SET
+#define MLD_CONFIG_API_NAMESPACE_PREFIX \
+  MLD_ADD_PARAM_SET(MLD_CONFIG_NAMESPACE_PREFIX)
 
 #endif /* !MLD_COMMON_H */
