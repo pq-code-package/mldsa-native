@@ -7,6 +7,15 @@
 This file lists the citations made throughout the mldsa-native 
 source code and documentation.
 
+### `ACVP`
+
+* Automated Cryptographic Validation Protocol (ACVP) Server
+* Author(s):
+  - National Institute of Standards and Technology
+* URL: https://github.com/usnistgov/ACVP-Server
+* Referenced from:
+  - [README.md](README.md)
+
 ### `FIPS140_3_IG`
 
 * Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program

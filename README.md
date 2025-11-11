@@ -58,6 +58,49 @@ performance-sensitive routines, and can be implemented in C or native code (asse
 [mldsa/src/fips202/native/api.h](mldsa/src/fips202/native/api.h) for the FIPS-202 backend. mldsa-native currently
 offers backends for C, AArch64, and x86_64 - if you'd like contribute new backends, please reach out or just open a PR.
 
+## ACVP Testing
+
+mldsa-native is tested against all official ACVP ML-DSA test vectors[^ACVP].
+
+You can run ACVP tests using the [`tests`](./scripts/tests) script or the [ACVP client](./test/acvp_client.py) directly:
+
+```bash
+# Using the tests script
+./scripts/tests acvp
+# Using a specific ACVP release
+./scripts/tests acvp --version v1.1.0.40
+
+# Using the ACVP client directly
+python3 ./test/acvp_client.py
+python3 ./test/acvp_client.py --version v1.1.0.40
+
+# Using specific ACVP test vector files (downloaded from the ACVP-Server)
+# python3 ./test/acvp_client.py -p {PROMPT}.json -e {EXPECTED_RESULT}.json
+# For example, assuming you have run the above
+python3 ./test/acvp_client.py \
+  -p ./test/.acvp-data/v1.1.0.40/files/ML-DSA-sigVer-FIPS204/prompt.json \
+  -e ./test/.acvp-data/v1.1.0.40/files/ML-DSA-sigVer-FIPS204/expectedResults.json
+```
+
+## Benchmarking
+
+You can measure performance, memory usage, and binary size using the [`tests`](./scripts/tests) script:
+
+```bash
+# Speed benchmarks (-c selects cycle counter: NO, PMU, PERF, or MAC)
+# Note: PERF/MAC may require the -r flag to run benchmarking binaries using sudo
+./scripts/tests bench -c PMU
+./scripts/tests bench -c PERF -r
+
+# Stack usage analysis
+./scripts/tests stack
+
+# Binary size measurement
+./scripts/tests size
+```
+
+For CI benchmark results and historical performance data, see the [benchmarking page](https://pq-code-package.github.io/mldsa-native/dev/bench/).
+
 ## Usage
 
 Once mldsa-native reaches production readiness, you will be able to import [mldsa](mldsa) into your project's source tree and build using your preferred build system. The build system provided in this repository is for development purposes only.
@@ -120,6 +163,7 @@ If you want to help us build mldsa-native, please reach out. You can contact the
 through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R).
 
 <!--- bibliography --->
+[^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
 [^FIPS202]: National Institute of Standards and Technology: FIPS202 SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions, [https://csrc.nist.gov/pubs/fips/202/final](https://csrc.nist.gov/pubs/fips/202/final)
 [^FIPS204]: National Institute of Standards and Technology: FIPS 204 Module-Lattice-Based Digital Signature Standard, [https://csrc.nist.gov/pubs/fips/204/final](https://csrc.nist.gov/pubs/fips/204/final)
 [^NIST_FAQ]: National Institute of Standards and Technology: Post-Quantum Cryptography FAQs, [https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7](https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7)
