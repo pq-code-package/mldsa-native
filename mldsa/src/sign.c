@@ -76,9 +76,9 @@ __contract__(
 static int mld_check_pct(uint8_t const pk[CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[CRYPTO_SECRETKEYBYTES])
 {
-  uint8_t message[1] = {0};
-  uint8_t signature[CRYPTO_BYTES];
-  uint8_t pk_test[CRYPTO_PUBLICKEYBYTES];
+  MLD_ALIGN uint8_t message[1] = {0};
+  MLD_ALIGN uint8_t signature[CRYPTO_BYTES];
+  MLD_ALIGN uint8_t pk_test[CRYPTO_PUBLICKEYBYTES];
   size_t siglen;
   int ret;
 
@@ -179,9 +179,9 @@ int crypto_sign_keypair_internal(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
                                  uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                  const uint8_t seed[MLDSA_SEEDBYTES])
 {
-  uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES];
-  uint8_t inbuf[MLDSA_SEEDBYTES + 2];
-  uint8_t tr[MLDSA_TRBYTES];
+  MLD_ALIGN uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES];
+  MLD_ALIGN uint8_t inbuf[MLDSA_SEEDBYTES + 2];
+  MLD_ALIGN uint8_t tr[MLDSA_TRBYTES];
   const uint8_t *rho, *rhoprime, *key;
   mld_polyvecl mat[MLDSA_K];
   mld_polyvecl s1, s1hat;
@@ -263,7 +263,7 @@ MLD_EXTERNAL_API
 int crypto_sign_keypair(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
                         uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
-  uint8_t seed[MLDSA_SEEDBYTES];
+  MLD_ALIGN uint8_t seed[MLDSA_SEEDBYTES];
   int result;
   mld_randombytes(seed, MLDSA_SEEDBYTES);
   MLD_CT_TESTING_SECRET(seed, sizeof(seed));
@@ -388,7 +388,7 @@ __contract__(
   ensures(return_value == 0 || return_value == -1)
 )
 {
-  uint8_t challenge_bytes[MLDSA_CTILDEBYTES];
+  MLD_ALIGN uint8_t challenge_bytes[MLDSA_CTILDEBYTES];
   unsigned int n;
   mld_polyvecl y, z;
   mld_polyveck w, w1, w0, h;
@@ -526,7 +526,8 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                    int externalmu)
 {
   int result;
-  uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
+  MLD_ALIGN uint8_t
+      seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   mld_polyvecl mat[MLDSA_K], s1;
   mld_polyveck t0, s2;
@@ -632,8 +633,8 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                           size_t ctxlen,
                           const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
-  uint8_t pre[257];
-  uint8_t rnd[MLDSA_RNDBYTES];
+  MLD_ALIGN uint8_t pre[257];
+  MLD_ALIGN uint8_t rnd[MLDSA_RNDBYTES];
   int result;
 
   if (ctxlen > 255)
@@ -678,7 +679,7 @@ int crypto_sign_signature_extmu(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                 const uint8_t mu[MLDSA_CRHBYTES],
                                 const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
-  uint8_t rnd[MLDSA_RNDBYTES];
+  MLD_ALIGN uint8_t rnd[MLDSA_RNDBYTES];
   int result;
 
   /* Randomized variant of ML-DSA. If you need the deterministic variant,
@@ -731,11 +732,11 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 {
   unsigned int i;
   int res;
-  uint8_t buf[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES];
-  uint8_t rho[MLDSA_SEEDBYTES];
-  uint8_t mu[MLDSA_CRHBYTES];
-  uint8_t c[MLDSA_CTILDEBYTES];
-  uint8_t c2[MLDSA_CTILDEBYTES];
+  MLD_ALIGN uint8_t buf[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES];
+  MLD_ALIGN uint8_t rho[MLDSA_SEEDBYTES];
+  MLD_ALIGN uint8_t mu[MLDSA_CRHBYTES];
+  MLD_ALIGN uint8_t c[MLDSA_CTILDEBYTES];
+  MLD_ALIGN uint8_t c2[MLDSA_CTILDEBYTES];
   mld_poly cp;
   mld_polyvecl mat[MLDSA_K], z;
   mld_polyveck t1, w1, tmp, h;
@@ -761,7 +762,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   if (!externalmu)
   {
     /* Compute CRH(H(rho, t1), pre, msg) */
-    uint8_t hpk[MLDSA_CRHBYTES];
+    MLD_ALIGN uint8_t hpk[MLDSA_CRHBYTES];
     mld_H(hpk, MLDSA_TRBYTES, pk, CRYPTO_PUBLICKEYBYTES, NULL, 0, NULL, 0);
     mld_H(mu, MLDSA_CRHBYTES, hpk, MLDSA_TRBYTES, pre, prelen, m, mlen);
 
@@ -844,7 +845,7 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                        size_t mlen, const uint8_t *ctx, size_t ctxlen,
                        const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
-  uint8_t pre[257];
+  MLD_ALIGN uint8_t pre[257];
   int result;
 
   if (ctxlen > 255)
