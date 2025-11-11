@@ -2,21 +2,24 @@
 
 # mldsa-native
 
-![CI](https://github.com/pq-code-package/mldsa-native/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/pq-code-package/mldsa-native/actions/workflows/all.yml/badge.svg)
+![Proof: HOL-Light](https://github.com/pq-code-package/mldsa-native/actions/workflows/hol_light.yml/badge.svg)
 ![Benchmarks](https://github.com/pq-code-package/mldsa-native/actions/workflows/bench.yml/badge.svg)
+![C90](https://img.shields.io/badge/language-C90-blue.svg)
+
 [![License: Apache](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-mldsa-native is a work-in-progress implementation of the ML-DSA[^FIPS204] post-quantum signature standard. It is a fork of the ML-DSA reference implementation[^REF].
+mldsa-native is a secure, fast, and portable C90 implementation of the ML-DSA[^FIPS204] post-quantum signature standard. It is a fork of the ML-DSA reference implementation[^REF].
 
-The goal of mldsa-native is to be a secure, fast and portable C90 implementation of ML-DSA, paralleling [mlkem-native](https://github.com/pq-code-package/mlkem-native) for ML-KEM.
+The goal of mldsa-native is paralleling [mlkem-native](https://github.com/pq-code-package/mlkem-native) for ML-KEM.
+All C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
+using [CBMC](https://github.com/diffblue/cbmc).
 
-## Status
+mldsa-native includes native backends for Arm (64-bit, Neon), and Intel/AMD (64-bit, AVX2). See [benchmarks](https://pq-code-package.github.io/mldsa-native/dev/bench/) for performance data.
 
-mldsa-native is work in progress. **WE DO NOT CURRENTLY RECOMMEND RELYING ON THIS LIBRARY IN A
-PRODUCTION ENVIRONMENT OR TO PROTECT ANY SENSITIVE DATA.** Once we have the first stable version,
-this notice will be removed.
+mldsa-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
 ## Quickstart for Ubuntu
 
@@ -56,14 +59,24 @@ All assembly in mldsa-native is constant-time in the sense that it is free of se
 and instructions that are commonly variable-time, thwarting most timing side channels. C code is hardened against compiler-introduced
 timing side channels through suitable barriers and constant-time patterns.
 
+Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
+with various combinations of compilers and compilation options.
+
 ## Design
 
 mldsa-native is split into a _frontend_ and two _backends_ for arithmetic and FIPS202 / SHA3. The frontend is
 fixed, written in C, and covers all routines that are not critical to performance. The backends are flexible, take care of
 performance-sensitive routines, and can be implemented in C or native code (assembly/intrinsics); see
 [mldsa/src/native/api.h](mldsa/src/native/api.h) for the arithmetic backend and
-[mldsa/src/fips202/native/api.h](mldsa/src/fips202/native/api.h) for the FIPS-202 backend. mldsa-native currently
-offers backends for C, AArch64, and x86_64 - if you'd like contribute new backends, please reach out or just open a PR.
+[mldsa/src/fips202/native/api.h](mldsa/src/fips202/native/api.h) for the FIPS-202 backend. 
+
+mldsa-native currently offers the following backends:
+
+* Default portable C backend
+* 64-bit Arm backend (using Neon)
+* 64-bit Intel/AMD backend (using AVX2)
+
+If you'd like contribute new backends, please reach out!
 
 ## ACVP Testing
 
@@ -118,17 +131,21 @@ mldsa-native relies on and comes with an implementation of FIPS-202[^FIPS202]. I
 can use it instead of the one shipped with mldsa-native. See [FIPS202.md](FIPS202.md), and [examples/bring_your_own_fips202](examples/bring_your_own_fips202)
 for an example using tiny_sha3[^tiny_sha3].
 
-### Will I need to use the assembly backends?
+### Do I need to use the assembly backends?
 
-No. If you want a C-only build, you will be able to omit the native backend directories from your import and configure the build accordingly in your config.h.
+No. If you want a C-only build, just omit the directories [mldsa/src/native](mldsa/src/native) and/or [mldsa/src/fips202/native](mldsa/src/fips202/native) from your import
+and unset `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [config.h](mldsa/src/config.h).
 
 ### Do I need to setup CBMC to use mldsa-native?
 
-No. While we recommend considering formal verification for security-critical applications, mldsa-native will build and run without CBMC. Function contracts and loop invariants will be ignored unless `CBMC` is defined during compilation.
+No. While we recommend that you consider using it, mldsa-native will build + run fine without CBMC -- just make sure to
+include [cbmc.h](mldsa/src/cbmc.h) and have `CBMC` undefined. In particular, you do _not_ need to remove all function
+contracts and loop invariants from the code; they will be ignored unless `CBMC` is set.
+
 
 ### Does mldsa-native support all security levels of ML-DSA?
 
-Yes. mldsa-native supports all three ML-DSA security levels (ML-DSA-44, ML-DSA-65, ML-DSA-87) as defined in FIPS 204. The security level is a compile-time parameter.
+Yes. mldsa-native supports all three ML-DSA security levels (ML-DSA-44, ML-DSA-65, ML-DSA-87) as defined in FIPS 204. The security level is a compile-time parameter configured by setting `MLD_CONFIG_PARAMETER_SET=44/65/87` in [config.h](mldsa/src/config.h).
 
 ### Does mldsa-native use hedged or deterministic signing?
 
@@ -152,10 +169,6 @@ mldsa-native provides two levels of API:
 - `crypto_sign_signature_pre_hash_internal` and `crypto_sign_verify_pre_hash_internal` - Low-level functions that accept a pre-hashed message digest. This function supports all 12 allowed hash functions.
 - `crypto_sign_signature_pre_hash_shake256` and `crypto_sign_verify_pre_hash_shake256` - High-level functions that perform SHAKE256 pre-hashing internally for convenience. Currently, only SHAKE256 is supported. If you require another hash function, use the `*_pre_hash_internal` functions or open an issue.
 
-### Will I be able to bring my own backend?
-
-Yes, you will be able to add custom backends for ML-DSA native arithmetic and/or for FIPS-202. You will be able to follow the existing backends as templates.
-
 ## Have a Question?
 
 If you think you have found a security bug in mldsa-native, please report the vulnerability through
@@ -167,7 +180,7 @@ If you have any other question / non-security related issue / feature request, p
 ## Contributing
 
 If you want to help us build mldsa-native, please reach out. You can contact the mldsa-native team
-through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R).
+through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
 <!--- bibliography --->
 [^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)
