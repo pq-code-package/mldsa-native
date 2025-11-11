@@ -20,8 +20,8 @@ MLD_ASM_FN_SYMBOL(polyvecl_pointwise_acc_montgomery_l5_asm)
         mov	w3, #0xe001             // =57345
         movk	w3, #0x7f, lsl #16
         dup	v0.4s, w3
-        mov	w3, #0xdfff             // =57343
-        movk	w3, #0xfc7f, lsl #16
+        mov	w3, #0x2001             // =8193
+        movk	w3, #0x380, lsl #16
         dup	v1.4s, w3
         mov	x3, #0x40               // =64
 
@@ -108,23 +108,23 @@ Ll5_loop_start:
         smlal2	v31.2d, v19.4s, v23.4s
         uzp1	v16.4s, v24.4s, v25.4s
         mul	v16.4s, v16.4s, v1.4s
-        smlal	v24.2d, v16.2s, v0.2s
-        smlal2	v25.2d, v16.4s, v0.4s
+        smlsl	v24.2d, v16.2s, v0.2s
+        smlsl2	v25.2d, v16.4s, v0.4s
         uzp2	v16.4s, v24.4s, v25.4s
         uzp1	v17.4s, v26.4s, v27.4s
         mul	v17.4s, v17.4s, v1.4s
-        smlal	v26.2d, v17.2s, v0.2s
-        smlal2	v27.2d, v17.4s, v0.4s
+        smlsl	v26.2d, v17.2s, v0.2s
+        smlsl2	v27.2d, v17.4s, v0.4s
         uzp2	v17.4s, v26.4s, v27.4s
         uzp1	v18.4s, v28.4s, v29.4s
         mul	v18.4s, v18.4s, v1.4s
-        smlal	v28.2d, v18.2s, v0.2s
-        smlal2	v29.2d, v18.4s, v0.4s
+        smlsl	v28.2d, v18.2s, v0.2s
+        smlsl2	v29.2d, v18.4s, v0.4s
         uzp2	v18.4s, v28.4s, v29.4s
         uzp1	v19.4s, v30.4s, v31.4s
         mul	v19.4s, v19.4s, v1.4s
-        smlal	v30.2d, v19.2s, v0.2s
-        smlal2	v31.2d, v19.4s, v0.4s
+        smlsl	v30.2d, v19.2s, v0.2s
+        smlsl2	v31.2d, v19.4s, v0.4s
         uzp2	v19.4s, v30.4s, v31.4s
         str	q17, [x0, #0x10]
         str	q18, [x0, #0x20]

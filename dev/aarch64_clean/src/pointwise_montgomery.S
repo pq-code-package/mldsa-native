@@ -9,8 +9,8 @@
 .macro montgomery_reduce_long res, inl, inh
     uzp1   \res\().4s, \inl\().4s, \inh\().4s
     mul    \res\().4s, \res\().4s, modulus_twisted.4s
-    smlal  \inl\().2d, \res\().2s, modulus.2s
-    smlal2 \inh\().2d, \res\().4s, modulus.4s
+    smlsl  \inl\().2d, \res\().2s, modulus.2s
+    smlsl2 \inh\().2d, \res\().4s, modulus.4s
     uzp2   \res\().4s, \inl\().4s, \inh\().4s
 .endm
 
@@ -32,14 +32,15 @@ modulus_twisted .req v1
 .global MLD_ASM_NAMESPACE(poly_pointwise_montgomery_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_asm)
-    // load q = 8380417
-    movz wtmp, #57345
-    movk wtmp, #127, lsl #16
+    // Load MLDSA_Q = 8380417
+    movz wtmp, #0xe001
+    movk wtmp, #0x7f, lsl #16
     dup modulus.4s, wtmp
 
-    // load -q^-1 = 4236238847
-    movz wtmp, #57343
-    movk wtmp, #64639, lsl #16
+    /* check-magic: 58728449 == unsigned_mod(pow(MLDSA_Q, -1, 2**32), 2**32) */
+    // Load MLDSA_Q^-1 = 58728449
+    movz wtmp, #0x2001
+    movk wtmp, #0x380, lsl #16
     dup modulus_twisted.4s, wtmp
 
     mov count, #(MLDSA_N / 4)
@@ -54,16 +55,26 @@ loop_start:
     ldr q22, [b_ptr, #2*16]
     ldr q23, [b_ptr, #3*16]
     ldr q20, [b_ptr], #4*16
+    // q{i} stores a's coefficients for i in 16...19, and b's coefficients
+    // for i in 20...23.
+    //
+    // Bounds: |q{i}| < 9q for i in 16...19, 20...23
 
     pmull v24, v25, v16, v20
     pmull v26, v27, v17, v21
     pmull v28, v29, v18, v22
     pmull v30, v31, v19, v23
+    // Bounds: |q{i}| < 81q^2 < qR/2 for i in 24...31
 
     montgomery_reduce_long v16, v24, v25
     montgomery_reduce_long v17, v26, v27
     montgomery_reduce_long v18, v28, v29
     montgomery_reduce_long v19, v30, v31
+    // All coefficients are Montgomery-reduced, resulting in
+    //
+    // Bounds: |q{i}| < q for i in 16...19
+    //
+    // See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
 
     str q17, [out_ptr, #1*16]
     str q18, [out_ptr, #2*16]
