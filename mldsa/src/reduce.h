@@ -21,41 +21,30 @@
 /* check-magic: 6283009 == (REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
 #define REDUCE32_RANGE_MAX 6283009
 
-/* Absolute bound for domain of mld_montgomery_reduce() */
-#define MONTGOMERY_REDUCE_DOMAIN_MAX ((int64_t)INT32_MIN * INT32_MIN)
-
-/* Absolute bound for tight domain of mld_montgomery_reduce() */
-#define MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX ((int64_t)INT32_MIN * -MLDSA_Q)
-
 /*************************************************
  * Name:        mld_montgomery_reduce
  *
- * Description:
- *      For finite field element a with
- *        -MONTGOMERY_REDUCE_DOMAIN_MAX <= a <= MONTGOMERY_REDUCE_DOMAIN_MAX,
- *      compute r == a*2^{-32} (mod MLDSA_Q) such that
- *        INT32_MIN <= r < REDUCE32_DOMAIN_MAX
+ * Description: Generic Montgomery reduction; given a 64-bit integer a, computes
+ *              32-bit integer congruent to a * R^-1 mod q, where R=2^32
  *
- *      The upper-bound on the result ensures that a result from this
- *      function can be used as an input to mld_reduce32() declared below.
+ * Arguments:   - int64_t a: input integer to be reduced, of absolute value
+ *                smaller or equal to INT64_MAX - 2^31 * MLDSA_Q.
  *
- *      Additionally, as a special case, if the input a is in range
- *        -MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX < a <
- *          MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX
- *      then the result satisfies -MLDSA_Q < r < MLDSA_Q.
+ * Returns:     Integer congruent to a * R^-1 modulo q, with absolute value
+ *                <= |a| / 2^32 + MLDSA_Q / 2
  *
- * Arguments:   - int64_t: finite field element a
- *
- * Returns r.
+ *              In particular, if |a| < 2^31 * MLDSA_Q, the absolute value
+ *              of the return value is < MLDSA_Q.
  **************************************************/
 static MLD_INLINE int32_t mld_montgomery_reduce(int64_t a)
 __contract__(
-  requires(a >= -MONTGOMERY_REDUCE_DOMAIN_MAX && a <= MONTGOMERY_REDUCE_DOMAIN_MAX)
-  ensures(return_value >= INT32_MIN && return_value < REDUCE32_DOMAIN_MAX)
-
-  /* Special case - for stronger input bounds, we can ensure stronger bounds on the output */
-  ensures((a >= -MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX && a < MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX) ==>
-          (return_value > -MLDSA_Q && return_value < MLDSA_Q))
+  /* We don't attempt to express an input-dependent output bound
+   * as the post-condition here, as all call-sites satisfy the
+   * absolute input bound 2^31 * MLDSA_Q and higher-level
+   * reasoning can be conducted using |return_value| < MLDSA_Q. */
+  requires(a > -(((int64_t)1 << 31) * MLDSA_Q) &&
+           a <  (((int64_t)1 << 31) * MLDSA_Q))
+  ensures(return_value > -MLDSA_Q && return_value < MLDSA_Q)
 )
 {
   /* check-magic: 58728449 == unsigned_mod(pow(MLDSA_Q, -1, 2^32), 2^32) */
@@ -70,7 +59,10 @@ __contract__(
 
   int64_t r;
 
-  r = a - ((int64_t)t * MLDSA_Q);
+  mld_assert(a < +(INT64_MAX - (((int64_t)1 << 31) * MLDSA_Q)) &&
+             a > -(INT64_MAX - (((int64_t)1 << 31) * MLDSA_Q)));
+
+  r = a - (int64_t)t * MLDSA_Q;
 
   /*
    * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
@@ -78,6 +70,19 @@ __contract__(
    * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
    */
   r = r >> 32;
+
+  /* Bounds:
+   *
+   * By construction of the Montgomery multiplication, by the time we
+   * compute r >> 32, r is divisible by 2^32, and hence
+   *
+   *   |r >> 32|  = |r| / 2^32
+   *             <= |a| / 2^32 + MLDSA_Q / 2
+   *
+   * (In general, we would only have |x >> n| <= ceil(|x| / 2^n)).
+   *
+   * In particular, if |a| < 2^31 * MLDSA_Q, then |return_value| < MLDSA_Q.
+   */
   return (int32_t)r;
 }
 

@@ -27,8 +27,15 @@ __contract__(
   ensures(return_value > -MLDSA_Q && return_value < MLDSA_Q)
 )
 {
+  /* Bounds: We argue in mld_montgomery_reduce() that the reult
+   * of Montgomery reduction is < MLDSA_Q if the input is smaller
+   * than 2^31 * MLDSA_Q in absolute value. Indeed, we have:
+   *
+   *    |a * b|   = |a| * |b|
+   *              < 2^31 * MLDSA_Q_HALF
+   *              < 2^31 * MLDSA_Q
+   */
   return mld_montgomery_reduce((int64_t)a * (int64_t)b);
-  /* TODO: reason about bounds */
 }
 
 /*************************************************
@@ -50,8 +57,9 @@ __contract__(
 {
   /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
   const int32_t f = 41978;
+  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bounds reasoning is just
+   * a special case of that in mld_fqmul(). */
   return mld_montgomery_reduce((int64_t)a * f);
-  /* TODO: reason about bounds */
 }
 
 #include "zetas.inc"

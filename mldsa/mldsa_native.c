@@ -374,8 +374,6 @@
 /* mldsa/src/reduce.h */
 #undef MLD_REDUCE_H
 #undef MONT
-#undef MONTGOMERY_REDUCE_DOMAIN_MAX
-#undef MONTGOMERY_REDUCE_STRONG_DOMAIN_MAX
 #undef REDUCE32_DOMAIN_MAX
 #undef REDUCE32_RANGE_MAX
 /* mldsa/src/symmetric.h */
