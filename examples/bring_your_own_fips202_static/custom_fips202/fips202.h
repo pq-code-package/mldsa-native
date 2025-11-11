@@ -26,7 +26,7 @@
 #else
 #define MLD_INLINE static inline
 #endif
-#endif
+#endif /* !MLD_INLINE */
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136
@@ -259,4 +259,4 @@ static MLD_INLINE void mld_shake256(uint8_t *out, size_t outlen,
   shake_out(&c, out, outlen);
 }
 
-#endif /* FIPS202_H */
+#endif /* !FIPS202_H */

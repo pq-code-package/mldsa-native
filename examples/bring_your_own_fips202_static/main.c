@@ -80,10 +80,10 @@ int main(void)
   CHECK(siglen == sizeof(expected_signature));
   CHECK(memcmp(sig, expected_signature, siglen) == 0);
   printf("DONE\n");
-#else
+#else  /* !MLD_CONFIG_KEYGEN_PCT */
   printf(
       "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif
+#endif /* MLD_CONFIG_KEYGEN_PCT */
 
   printf("OK\n");
 
