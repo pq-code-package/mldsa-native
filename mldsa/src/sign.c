@@ -828,7 +828,8 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
 
   if (ctxlen > 255)
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   pre[0] = 0;
@@ -842,6 +843,8 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
   result =
       crypto_sign_verify_internal(sig, siglen, m, mlen, pre, 2 + ctxlen, pk, 0);
 
+
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(pre, sizeof(pre));
 
