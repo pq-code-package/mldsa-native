@@ -49,7 +49,7 @@ jobs:
 
   build_nix_cache:
     needs: [ check_modified_files ]
-    if: ${{ needs.check_modified_files.outputs.run_needed == '1' }}
+    if: ${{ needs.check_modified_files.outputs.run_needed == '1' && github.ref == 'refs/heads/main' }}
     permissions:
       actions: 'write'
       contents: 'read'
@@ -65,7 +65,7 @@ jobs:
         with:
           cache: true
           verbose: true
-          save_cache: ${{ github.ref == 'refs/heads/main' }}
+          save_cache: true
           devShell: ci
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
