@@ -914,19 +914,22 @@ int crypto_sign_signature_pre_hash_internal(
   if (ctxlen > 255)
   {
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   if (mld_validate_hash_length(hashalg, phlen))
   {
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result = crypto_sign_signature_internal(sig, siglen, fmsg, fmsg_len, NULL, 0,
                                           rnd, sk, 0);
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(fmsg, sizeof(fmsg));
   return result;
@@ -945,18 +948,22 @@ int crypto_sign_verify_pre_hash_internal(
 
   if (ctxlen > 255)
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   if (mld_validate_hash_length(hashalg, phlen))
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result =
       crypto_sign_verify_internal(sig, siglen, fmsg, fmsg_len, NULL, 0, pk, 0);
+
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(fmsg, sizeof(fmsg));
   return result;
