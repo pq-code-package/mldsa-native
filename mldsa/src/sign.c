@@ -716,6 +716,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
                                 int externalmu)
 {
   unsigned int i;
+  int res = 0;
   uint8_t buf[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES];
   uint8_t rho[MLDSA_SEEDBYTES];
   uint8_t mu[MLDSA_CRHBYTES];
@@ -727,17 +728,20 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   if (siglen != CRYPTO_BYTES)
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
 
   mld_unpack_pk(rho, &t1, pk);
   if (mld_unpack_sig(c, &z, &h, sig))
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
   if (mld_polyvecl_chknorm(&z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
 
   if (!externalmu)
@@ -797,10 +801,12 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   {
     if (c[i] != c2[i])
     {
-      return -1;
+      res = -1;
+      goto cleanup;
     }
   }
 
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(rho, sizeof(rho));
@@ -813,8 +819,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_zeroize(&tmp, sizeof(tmp));
   mld_zeroize(&h, sizeof(h));
   mld_zeroize(mat, sizeof(mat));
-
-  return 0;
+  return res;
 }
 
 MLD_MUST_CHECK_RETURN_VALUE
