@@ -525,6 +525,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                    const uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                    int externalmu)
 {
+  int result;
   uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   mld_polyvecl mat[MLDSA_K], s1;
@@ -580,8 +581,6 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
   {
-    int result;
-
     /* Reference: this code explicitly checks for exhaustion of nonce     */
     /* values to provide predictable termination and results in that case */
     /* Checking here also means that incrementing nonce below can also    */
@@ -592,7 +591,8 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
       /* *siglen in case of error.                                        */
       *siglen = 0;
       mld_memset(sig, 0, CRYPTO_BYTES);
-      return -1;
+      result = -1;
+      goto cleanup;
     }
 
     result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat,
@@ -601,15 +601,20 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     if (result == 0)
     {
       *siglen = CRYPTO_BYTES;
-      /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-      mld_zeroize(seedbuf, sizeof(seedbuf));
-      mld_zeroize(mat, sizeof(mat));
-      mld_zeroize(&s1, sizeof(s1));
-      mld_zeroize(&s2, sizeof(s2));
-      mld_zeroize(&t0, sizeof(t0));
-      return 0;
+
+      result = 0;
+      goto cleanup;
     }
   }
+
+cleanup:
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(seedbuf, sizeof(seedbuf));
+  mld_zeroize(mat, sizeof(mat));
+  mld_zeroize(&s1, sizeof(s1));
+  mld_zeroize(&s2, sizeof(s2));
+  mld_zeroize(&t0, sizeof(t0));
+  return result;
 }
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
