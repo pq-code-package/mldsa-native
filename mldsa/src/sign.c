@@ -629,7 +629,8 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     /* To be on the safe-side, make sure *siglen has a well-defined */
     /* value, even in the case of error.                            */
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   /* Prepare pre = (0, ctxlen, ctx) */
@@ -649,6 +650,7 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   result = crypto_sign_signature_internal(sig, siglen, m, mlen, pre, 2 + ctxlen,
                                           rnd, sk, 0);
 
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(pre, sizeof(pre));
   mld_zeroize(rnd, sizeof(rnd));
