@@ -70,7 +70,7 @@ void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a, const __m256i *h);
 void mld_poly_use_hint_88_avx2(__m256i *b, const __m256i *a, const __m256i *h);
 
 #define mld_poly_chknorm_avx2 MLD_NAMESPACE(mld_poly_chknorm_avx2)
-uint32_t mld_poly_chknorm_avx2(const __m256i *a, int32_t B);
+int mld_poly_chknorm_avx2(const __m256i *a, int32_t B);
 
 #define mld_polyz_unpack_17_avx2 MLD_NAMESPACE(mld_polyz_unpack_17_avx2)
 void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a);

@@ -136,7 +136,7 @@ static MLD_INLINE void mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
   mld_poly_use_hint_88_asm(b, a, h);
 }
 
-static MLD_INLINE uint32_t mld_poly_chknorm_native(const int32_t *a, int32_t B)
+static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 {
   return mld_poly_chknorm_asm(a, B);
 }

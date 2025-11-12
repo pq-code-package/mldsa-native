@@ -83,7 +83,7 @@ void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h);
 void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_chknorm_asm MLD_NAMESPACE(poly_chknorm_asm)
-uint32_t mld_poly_chknorm_asm(const int32_t *a, int32_t B);
+int mld_poly_chknorm_asm(const int32_t *a, int32_t B);
 
 #define mld_polyz_unpack_17_asm MLD_NAMESPACE(polyz_unpack_17_asm)
 void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,

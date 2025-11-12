@@ -48,9 +48,10 @@ poly_chknorm_loop:
         subs count, count, #1
         bne poly_chknorm_loop
 
-        // Return 0xffffffff if any of the 4 lanes is 0xffffffff
+        // Return 1 if any of the 4 lanes is 0xffffffff
         umaxv s21, flags.4s
         fmov w0, s21
+        and w0, w0, #1
 
         ret
 

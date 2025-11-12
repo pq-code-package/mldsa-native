@@ -43,6 +43,7 @@ Lpoly_chknorm_loop:
         b.ne	Lpoly_chknorm_loop
         umaxv	s21, v21.4s
         fmov	w0, s21
+        and	w0, w0, #0x1
         ret
         .cfi_endproc
 

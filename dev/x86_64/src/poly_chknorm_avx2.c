@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include "arith_native_x86_64.h"
 
-uint32_t mld_poly_chknorm_avx2(const __m256i *a, int32_t B)
+int mld_poly_chknorm_avx2(const __m256i *a, int32_t B)
 {
   unsigned int i;
   __m256i f, t;
@@ -41,7 +41,7 @@ uint32_t mld_poly_chknorm_avx2(const __m256i *a, int32_t B)
     t = _mm256_or_si256(t, f);
   }
 
-  return (uint32_t)(_mm256_testz_si256(t, t) - 1);
+  return 1 - _mm256_testz_si256(t, t);
 }
 
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

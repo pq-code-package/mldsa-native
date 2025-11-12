@@ -589,8 +589,11 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
   /* TODO: proof */
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
-  return mld_poly_chknorm_native(a->coeffs, B);
-#else
+
+  /* The native backend returns 0 if all coeffs within the bound, 1 otherwise */
+  /* Convert to 0 / 0xFFFFFFFF here */
+  return 0U - (uint32_t)mld_poly_chknorm_native(a->coeffs, B);
+#else  /* MLD_USE_NATIVE_POLY_CHKNORM */
   unsigned int i;
   uint32_t t = 0;
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
