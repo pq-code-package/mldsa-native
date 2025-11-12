@@ -181,6 +181,7 @@ __contract__(
 );
 #endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1_4x
@@ -215,6 +216,7 @@ __contract__(
   ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mld_poly_challenge MLD_NAMESPACE_KL(poly_challenge)
 /*************************************************
