@@ -525,6 +525,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                                    const uint8_t sk[CRYPTO_SECRETKEYBYTES],
                                    int externalmu)
 {
+  int result;
   uint8_t seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   mld_polyvecl mat[MLDSA_K], s1;
@@ -562,12 +563,19 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   mld_polyveck_ntt(&s2);
   mld_polyveck_ntt(&t0);
 
+  /* By default, return failure. Flip to success and write output
+   * once signature generation succeeds.
+   *
+   * This is required to satisfy the initial loop invariant. */
+  *siglen = 0;
+  result = -1;
+
   /* Reference: This code is re-structured using a while(1),  */
   /* with explicit "continue" statements (rather than "goto") */
   /* to implement rejection of invalid signatures.            */
   while (1)
   __loop__(
-    assigns(nonce, object_whole(siglen), memory_slice(sig, CRYPTO_BYTES))
+    assigns(nonce, result, object_whole(siglen), memory_slice(sig, CRYPTO_BYTES))
     invariant(nonce <= NONCE_UB)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
@@ -578,38 +586,42 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant((result == 0 && *siglen == CRYPTO_BYTES) ||
+              (result == -1 && *siglen == 0))
   )
   {
-    int result;
-
+    int attempt_result;
     /* Reference: this code explicitly checks for exhaustion of nonce     */
     /* values to provide predictable termination and results in that case */
     /* Checking here also means that incrementing nonce below can also    */
     /* be proven to be type-safe.                                         */
     if (nonce == NONCE_UB)
     {
-      /* To be on the safe-side, give well-defined values to *sig and     */
-      /* *siglen in case of error.                                        */
-      *siglen = 0;
+      /* To be on the safe-side, we zeroize the signature buffer.
+       * Note that *siglen == 0 and result == -1 by default, so we
+       * don't need to set them here. */
       mld_memset(sig, 0, CRYPTO_BYTES);
-      return -1;
+      break;
     }
 
-    result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat,
-                                              &s1, &s2, &t0);
+    attempt_result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce,
+                                                      mat, &s1, &s2, &t0);
     nonce++;
-    if (result == 0)
+    if (attempt_result == 0)
     {
       *siglen = CRYPTO_BYTES;
-      /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-      mld_zeroize(seedbuf, sizeof(seedbuf));
-      mld_zeroize(mat, sizeof(mat));
-      mld_zeroize(&s1, sizeof(s1));
-      mld_zeroize(&s2, sizeof(s2));
-      mld_zeroize(&t0, sizeof(t0));
-      return 0;
+      result = 0;
+      break;
     }
   }
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(seedbuf, sizeof(seedbuf));
+  mld_zeroize(mat, sizeof(mat));
+  mld_zeroize(&s1, sizeof(s1));
+  mld_zeroize(&s2, sizeof(s2));
+  mld_zeroize(&t0, sizeof(t0));
+  return result;
 }
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
@@ -629,7 +641,8 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     /* To be on the safe-side, make sure *siglen has a well-defined */
     /* value, even in the case of error.                            */
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   /* Prepare pre = (0, ctxlen, ctx) */
@@ -649,6 +662,7 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   result = crypto_sign_signature_internal(sig, siglen, m, mlen, pre, 2 + ctxlen,
                                           rnd, sk, 0);
 
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(pre, sizeof(pre));
   mld_zeroize(rnd, sizeof(rnd));
@@ -716,6 +730,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
                                 int externalmu)
 {
   unsigned int i;
+  int res;
   uint8_t buf[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES];
   uint8_t rho[MLDSA_SEEDBYTES];
   uint8_t mu[MLDSA_CRHBYTES];
@@ -727,17 +742,20 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   if (siglen != CRYPTO_BYTES)
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
 
   mld_unpack_pk(rho, &t1, pk);
   if (mld_unpack_sig(c, &z, &h, sig))
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
   if (mld_polyvecl_chknorm(&z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
-    return -1;
+    res = -1;
+    goto cleanup;
   }
 
   if (!externalmu)
@@ -797,10 +815,14 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   {
     if (c[i] != c2[i])
     {
-      return -1;
+      res = -1;
+      goto cleanup;
     }
   }
 
+  res = 0;
+
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(rho, sizeof(rho));
@@ -813,8 +835,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_zeroize(&tmp, sizeof(tmp));
   mld_zeroize(&h, sizeof(h));
   mld_zeroize(mat, sizeof(mat));
-
-  return 0;
+  return res;
 }
 
 MLD_MUST_CHECK_RETURN_VALUE
@@ -828,7 +849,8 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
 
   if (ctxlen > 255)
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   pre[0] = 0;
@@ -842,6 +864,8 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
   result =
       crypto_sign_verify_internal(sig, siglen, m, mlen, pre, 2 + ctxlen, pk, 0);
 
+
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(pre, sizeof(pre));
 
@@ -914,19 +938,22 @@ int crypto_sign_signature_pre_hash_internal(
   if (ctxlen > 255)
   {
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   if (mld_validate_hash_length(hashalg, phlen))
   {
     *siglen = 0;
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result = crypto_sign_signature_internal(sig, siglen, fmsg, fmsg_len, NULL, 0,
                                           rnd, sk, 0);
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(fmsg, sizeof(fmsg));
   return result;
@@ -945,18 +972,22 @@ int crypto_sign_verify_pre_hash_internal(
 
   if (ctxlen > 255)
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   if (mld_validate_hash_length(hashalg, phlen))
   {
-    return -1;
+    result = -1;
+    goto cleanup;
   }
 
   fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result =
       crypto_sign_verify_internal(sig, siglen, fmsg, fmsg_len, NULL, 0, pk, 0);
+
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(fmsg, sizeof(fmsg));
   return result;
