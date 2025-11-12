@@ -563,12 +563,19 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   mld_polyveck_ntt(&s2);
   mld_polyveck_ntt(&t0);
 
+  /* By default, return failure. Flip to success and write output
+   * once signature generation succeeds.
+   *
+   * This is required to satisfy the initial loop invariant. */
+  *siglen == 0;
+  result = -1;
+
   /* Reference: This code is re-structured using a while(1),  */
   /* with explicit "continue" statements (rather than "goto") */
   /* to implement rejection of invalid signatures.            */
   while (1)
   __loop__(
-    assigns(nonce, object_whole(siglen), memory_slice(sig, CRYPTO_BYTES))
+    assigns(nonce, result, object_whole(siglen), memory_slice(sig, CRYPTO_BYTES))
     invariant(nonce <= NONCE_UB)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
@@ -579,31 +586,38 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant((result == 0 && *siglen == CRYPTO_BYTES) ||
+              (result == -1 && *siglen == 0))
   )
   {
+    int attempt_result;
     /* Reference: this code explicitly checks for exhaustion of nonce     */
     /* values to provide predictable termination and results in that case */
     /* Checking here also means that incrementing nonce below can also    */
     /* be proven to be type-safe.                                         */
     if (nonce == NONCE_UB)
     {
-      /* To be on the safe-side, give well-defined values to *sig and     */
-      /* *siglen in case of error.                                        */
-      *siglen = 0;
+      /* To be on the safe-side, give well-defined values to *sig and
+       * *siglen in case of error.
+       *
+       * Strictly speaking, we don't have to set *siglen and result again
+       * as they default to 0 and -1, respectively, but to be sure we don't
+       * erroneously return success, we write them again.
+       */
       mld_memset(sig, 0, CRYPTO_BYTES);
+      *siglen == 0;
       result = -1;
-      goto cleanup;
+      break;
     }
 
-    result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat,
-                                              &s1, &s2, &t0);
+    attempt_result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce,
+                                                      mat, &s1, &s2, &t0);
     nonce++;
-    if (result == 0)
+    if (attempt_result == 0)
     {
       *siglen = CRYPTO_BYTES;
-
       result = 0;
-      goto cleanup;
+      break;
     }
   }
 
