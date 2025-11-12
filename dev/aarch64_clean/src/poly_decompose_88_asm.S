@@ -9,12 +9,15 @@
 
 // a aliased with a0
 .macro decompose88 a1, a, temp
-        // Compute a1 = round-(a / 190464) ≈ round(a * 1477838209 /
-        // 2^48), where round-() denotes "round half down". This is
-        // exact for 0 <= a < Q. Note that half is rounded down since
-        // 1477838209 / 2^48 ≲ 1 / 190464.
+        // range: 0 <= a <= Q-1 = 88*GAMMA2
+
+        // Compute a1 = round-(a / (2*GAMMA2)) = round-(a / 190464) ≈
+        // round(a * 1477838209 / 2^48), where round-() denotes "round half
+        // down". This is exact for 0 <= a < Q. Note that half is rounded down
+        // since 1477838209 / 2^48 ≲ 1 / 190464.
         sqdmulh \a1\().4s, \a\().4s, barrett_const.4s
         srshr \a1\().4s, \a1\().4s, #17
+        // range: 0 <= a1 <= 44
 
         // If a1 = 44, i.e. a > 87*GAMMA2, proceed as if a' = a - Q was
         // given instead. (For a = 87*GAMMA2 + 1 thus a' = -GAMMA2, we
@@ -25,10 +28,14 @@
 
         // Compute remainder a0
         mls \a\().4s, \a1\().4s, gamma2_2x.4s
+        // range: -GAMMA2 < a0 <= GAMMA2
+        //
+        // This holds since a1 = round-(a / (2*GAMMA2)) was computed exactly.
 
         // If wrap-around is required, set a1 = 0 and a0 -= 1
         bic \a1\().16b, \a1\().16b, \temp\().16b
         add \a\().4s, \a\().4s, \temp\().4s
+        // range: 0 <= a1 <= 43, -GAMMA2 <= a0 <= GAMMA2
 .endm
 
         /* Parameters */
