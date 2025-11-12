@@ -134,6 +134,29 @@
 /* #define MLD_CONFIG_FILE "config.h" */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+ *
+ * Description: Determines whether an native arithmetic backend should be used.
+ *
+ *              The arithmetic backend covers performance critical functions
+ *              such as the number-theoretic transform (NTT).
+ *
+ *              If this option is unset, the C backend will be used.
+ *
+ *              If this option is set, the arithmetic backend to be use is
+ *              determined by MLD_CONFIG_ARITH_BACKEND_FILE: If the latter is
+ *              unset, the default backend for your the target architecture
+ *              will be used. If set, it must be the name of a backend metadata
+ *              file.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+#endif
+
+/******************************************************************************
  * Name:        MLD_CONFIG_ARITH_BACKEND_FILE
  *
  * Description: The arithmetic backend to use.
@@ -151,6 +174,29 @@
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH) && \
     !defined(MLD_CONFIG_ARITH_BACKEND_FILE)
 #define MLD_CONFIG_ARITH_BACKEND_FILE "native/meta.h"
+#endif
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+ *
+ * Description: Determines whether an native FIPS202 backend should be used.
+ *
+ *              The FIPS202 backend covers 1x/2x/4x-fold Keccak-f1600, which is
+ *              the performance bottleneck of SHA3 and SHAKE.
+ *
+ *              If this option is unset, the C backend will be used.
+ *
+ *              If this option is set, the FIPS202 backend to be use is
+ *              determined by MLD_CONFIG_FIPS202_BACKEND_FILE: If the latter is
+ *              unset, the default backend for your the target architecture
+ *              will be used. If set, it must be the name of a backend metadata
+ *              file.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #endif
 
 /******************************************************************************
