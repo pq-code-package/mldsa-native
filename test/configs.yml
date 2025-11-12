@@ -38,9 +38,9 @@ configs:
           #include <stdint.h>
           #include "../mldsa/src/sys.h"
           #include "notrandombytes/notrandombytes.h"
-          static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+          static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
           {
-            randombytes(ptr, len);
+            return randombytes(ptr, len);
           }
           #endif /* !__ASSEMBLER__ */
 
@@ -350,9 +350,9 @@ configs:
           #include <stdint.h>
           #include "src/sys.h"
           #include "test_only_rng/notrandombytes.h"
-          static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+          static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
           {
-            randombytes(ptr, len);
+            return randombytes(ptr, len);
           }
           #endif /* !__ASSEMBLER__ */
 

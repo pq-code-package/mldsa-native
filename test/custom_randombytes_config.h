@@ -405,7 +405,7 @@
  *              consumer.
  *
  *              If this option is not set, mldsa-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
+ *              int randombytes(uint8_t *out, size_t outlen).
  *
  *              Set this option and define `mld_randombytes` if you want to
  *              use a custom method to sample randombytes with a different name
@@ -417,9 +417,9 @@
 #include <stdint.h>
 #include "../mldsa/src/sys.h"
 #include "notrandombytes/notrandombytes.h"
-static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
 {
-  randombytes(ptr, len);
+  return randombytes(ptr, len);
 }
 #endif /* !__ASSEMBLER__ */
 

@@ -99,6 +99,7 @@
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_RNG_FAIL: Random number generation failed.
  *              - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
  *                  if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
@@ -117,7 +118,7 @@ __contract__(
   assigns(object_whole(pk))
   assigns(object_whole(sk))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
-          return_value == MLD_ERR_OUT_OF_MEMORY)
+          return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL)
 );
 
 /*************************************************
@@ -133,6 +134,7 @@ __contract__(
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_RNG_FAIL: Random number generation failed.
  *              - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
  *                  if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
@@ -149,7 +151,7 @@ __contract__(
   assigns(object_whole(pk))
   assigns(object_whole(sk))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
-          return_value == MLD_ERR_OUT_OF_MEMORY)
+          return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL)
 );
 
 /*************************************************
@@ -230,7 +232,8 @@ __contract__(
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *              - MLD_ERR_FAIL: Other kinds of failure
+ *              - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *              - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)].
  *
@@ -252,7 +255,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL) && *siglen == 0))
 );
 
 /*************************************************
@@ -273,7 +276,8 @@ __contract__(
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *              - MLD_ERR_FAIL: Other kinds of failure
+ *              - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *              - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu
  *                variant)]
@@ -292,7 +296,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL) && *siglen == 0))
 );
 
 /*************************************************
@@ -333,7 +337,9 @@ __contract__(
   assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
   assigns(object_whole(smlen))
   ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
-          (return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY))
+          (return_value == MLD_ERR_FAIL
+           || return_value == MLD_ERR_OUT_OF_MEMORY
+           || return_value == MLD_ERR_RNG_FAIL))
 );
 
 /*************************************************

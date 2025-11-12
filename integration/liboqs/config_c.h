@@ -178,9 +178,10 @@
 #include <oqs/rand.h>
 #include <stdint.h>
 #include "../../mldsa/src/sys.h"
-static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
 {
   OQS_randombytes(ptr, len);
+  return 0;
 }
 #endif /* !__ASSEMBLER__ */
 

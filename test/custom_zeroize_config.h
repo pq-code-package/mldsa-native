@@ -406,7 +406,7 @@ static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
  *              consumer.
  *
  *              If this option is not set, mldsa-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
+ *              int randombytes(uint8_t *out, size_t outlen).
  *
  *              Set this option and define `mld_randombytes` if you want to
  *              use a custom method to sample randombytes with a different name
@@ -417,9 +417,10 @@ static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
    #include "src/src.h"
-   static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+   static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
    {
        ... your implementation ...
+       return 0;
    }
    #endif
 */

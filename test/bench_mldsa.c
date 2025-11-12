@@ -91,8 +91,8 @@ static int bench(void)
   for (i = 0; i < NTESTS; i++)
   {
     int ret = 0;
-    mld_randombytes(kg_rand, sizeof(kg_rand));
-    mld_randombytes(sig_rand, sizeof(sig_rand));
+    CHECK(mld_randombytes(kg_rand, sizeof(kg_rand)) == 0);
+    CHECK(mld_randombytes(sig_rand, sizeof(sig_rand)) == 0);
 
 
     /* Key-pair generation */
@@ -111,8 +111,8 @@ static int bench(void)
 
 
     /* Signing */
-    mld_randombytes(ctx, CTXLEN);
-    mld_randombytes(m, MLEN);
+    CHECK(mld_randombytes(ctx, CTXLEN) == 0);
+    CHECK(mld_randombytes(m, MLEN) == 0);
 
     pre[0] = 0;
     pre[1] = CTXLEN;

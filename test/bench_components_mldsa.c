@@ -17,32 +17,44 @@
 #define NITERATIONS 300
 #define NTESTS 20
 
+#define CHECK(x)                                              \
+  do                                                          \
+  {                                                           \
+    int rc;                                                   \
+    rc = (x);                                                 \
+    if (!rc)                                                  \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      return 1;                                               \
+    }                                                         \
+  } while (0)
+
 static int cmp_uint64_t(const void *a, const void *b)
 {
   return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
 }
 
-#define BENCH(txt, code)                                         \
-  for (i = 0; i < NTESTS; i++)                                   \
-  {                                                              \
-    mld_randombytes((uint8_t *)data0, sizeof(data0));            \
-    mld_randombytes((uint8_t *)&polyvecl_a, sizeof(polyvecl_a)); \
-    mld_randombytes((uint8_t *)&polyvecl_b, sizeof(polyvecl_b)); \
-    mld_randombytes((uint8_t *)&polymat, sizeof(polymat));       \
-    for (j = 0; j < NWARMUP; j++)                                \
-    {                                                            \
-      code;                                                      \
-    }                                                            \
-                                                                 \
-    t0 = get_cyclecounter();                                     \
-    for (j = 0; j < NITERATIONS; j++)                            \
-    {                                                            \
-      code;                                                      \
-    }                                                            \
-    t1 = get_cyclecounter();                                     \
-    (cyc)[i] = t1 - t0;                                          \
-  }                                                              \
-  qsort((cyc), NTESTS, sizeof(uint64_t), cmp_uint64_t);          \
+#define BENCH(txt, code)                                                     \
+  for (i = 0; i < NTESTS; i++)                                               \
+  {                                                                          \
+    CHECK(mld_randombytes((uint8_t *)data0, sizeof(data0)) == 0);            \
+    CHECK(mld_randombytes((uint8_t *)&polyvecl_a, sizeof(polyvecl_a)) == 0); \
+    CHECK(mld_randombytes((uint8_t *)&polyvecl_b, sizeof(polyvecl_b)) == 0); \
+    CHECK(mld_randombytes((uint8_t *)&polymat, sizeof(polymat)) == 0);       \
+    for (j = 0; j < NWARMUP; j++)                                            \
+    {                                                                        \
+      code;                                                                  \
+    }                                                                        \
+                                                                             \
+    t0 = get_cyclecounter();                                                 \
+    for (j = 0; j < NITERATIONS; j++)                                        \
+    {                                                                        \
+      code;                                                                  \
+    }                                                                        \
+    t1 = get_cyclecounter();                                                 \
+    (cyc)[i] = t1 - t0;                                                      \
+  }                                                                          \
+  qsort((cyc), NTESTS, sizeof(uint64_t), cmp_uint64_t);                      \
   printf(txt " cycles=%" PRIu64 "\n", (cyc)[NTESTS >> 1] / NITERATIONS);
 
 static int bench(void)

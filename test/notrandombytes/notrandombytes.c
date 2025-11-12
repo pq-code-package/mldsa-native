@@ -90,7 +90,7 @@ static void surf(void)
   }
 }
 
-void randombytes(uint8_t *buf, size_t n)
+int randombytes(uint8_t *buf, size_t n)
 {
 #ifdef ENABLE_CT_TESTING
   uint8_t *buf_orig = buf;
@@ -126,4 +126,5 @@ void randombytes(uint8_t *buf, size_t n)
    */
   VALGRIND_MAKE_MEM_UNDEFINED(buf_orig, n_orig);
 #endif /* ENABLE_CT_TESTING */
+  return 0;
 }

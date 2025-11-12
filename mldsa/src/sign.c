@@ -61,7 +61,8 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   ensures(return_value == 0
 	  || return_value == MLD_ERR_FAIL
-	  || return_value == MLD_ERR_OUT_OF_MEMORY)
+	  || return_value == MLD_ERR_OUT_OF_MEMORY
+    || return_value == MLD_ERR_RNG_FAIL)
 );
 
 #if defined(MLD_CONFIG_KEYGEN_PCT)
@@ -360,10 +361,15 @@ int crypto_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 {
   MLD_ALIGN uint8_t seed[MLDSA_SEEDBYTES];
   int ret;
-  mld_randombytes(seed, MLDSA_SEEDBYTES);
+  if (mld_randombytes(seed, MLDSA_SEEDBYTES) != 0)
+  {
+    ret = MLD_ERR_RNG_FAIL;
+    goto cleanup;
+  }
   MLD_CT_TESTING_SECRET(seed, sizeof(seed));
   ret = crypto_sign_keypair_internal(pk, sk, seed);
 
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed, sizeof(seed));
   return ret;
@@ -789,7 +795,11 @@ int crypto_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 
   /* Randomized variant of ML-DSA. If you need the deterministic variant,
    * call crypto_sign_signature_internal directly with all-zero rnd. */
-  mld_randombytes(rnd, MLDSA_RNDBYTES);
+  if (mld_randombytes(rnd, MLDSA_RNDBYTES) != 0)
+  {
+    ret = MLD_ERR_RNG_FAIL;
+    goto cleanup;
+  }
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
   ret = crypto_sign_signature_internal(sig, siglen, m, mlen, pre, pre_len, rnd,
@@ -828,12 +838,18 @@ int crypto_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 
   /* Randomized variant of ML-DSA. If you need the deterministic variant,
    * call crypto_sign_signature_internal directly with all-zero rnd. */
-  mld_randombytes(rnd, MLDSA_RNDBYTES);
+  if (mld_randombytes(rnd, MLDSA_RNDBYTES) != 0)
+  {
+    *siglen = 0;
+    ret = MLD_ERR_RNG_FAIL;
+    goto cleanup;
+  }
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
   ret = crypto_sign_signature_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0,
                                        rnd, sk, 1);
 
+cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(rnd, sizeof(rnd));
 

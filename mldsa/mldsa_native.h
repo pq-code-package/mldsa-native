@@ -129,6 +129,9 @@
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
 #define MLD_ERR_OUT_OF_MEMORY -2
+/* An rng failure occured. Might be due to insufficient entropy or
+ * system misconfiguration. */
+#define MLD_ERR_RNG_FAIL -3
 
 /****************************** Function API **********************************/
 
@@ -215,6 +218,7 @@
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_RNG_FAIL: Random number generation failed.
  *     - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
  *         if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
@@ -242,10 +246,11 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *           output private key
  *
  * Returns: - 0: Success
- *          - MLD_ERR_FAIL: If MLD_CONFIG_KEYGEN_PCT is enabled and the
- *              PCT check failed.
  *          - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *              used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *          - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *          - MLD_ERR_FAIL: If MLD_CONFIG_KEYGEN_PCT is enabled and the
+ *              PCT check failed.
  *
  * Specification: Implements @[FIPS204 Algorithm 1 (ML-DSA.KeyGen)]
  *
@@ -321,7 +326,8 @@ int MLD_API_NAMESPACE(signature_internal)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *     - MLD_ERR_FAIL: Other kinds of failure
+ *     - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *     - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)]
  *
@@ -351,7 +357,8 @@ int MLD_API_NAMESPACE(signature)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *     - MLD_ERR_FAIL: Other kinds of failure
+ *     - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *     - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu
  *                variant)]

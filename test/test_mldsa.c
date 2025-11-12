@@ -42,9 +42,9 @@ static int test_sign_core(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(ctx, CTXLEN);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, CTXLEN);
-  randombytes(m, MLEN);
+  CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, MLEN);
 
   CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
@@ -116,7 +116,7 @@ static int test_sign_extmu(void)
   size_t siglen;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(mu, MLDSA_CRHBYTES);
+  CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
   MLD_CT_TESTING_SECRET(mu, sizeof(mu));
 
   CHECK(crypto_sign_signature_extmu(sig, &siglen, mu, sk) == 0);
@@ -138,11 +138,11 @@ static int test_sign_pre_hash(void)
 
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(ctx, CTXLEN);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
-  randombytes(m, MLEN);
+  CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
-  randombytes(rnd, MLDSA_RNDBYTES);
+  CHECK(randombytes(rnd, MLDSA_RNDBYTES) == 0);
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
   CHECK(crypto_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN, ctx,
@@ -227,15 +227,15 @@ static int test_wrong_pk(void)
   size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(ctx, CTXLEN);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
-  randombytes(m, MLEN);
+  CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
   CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in public key */
-  randombytes((uint8_t *)&idx, sizeof(size_t));
+  CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
   idx %= MLDSA_CRYPTO_PUBLICKEYBYTES;
 
   pk[idx] ^= 1;
@@ -278,15 +278,15 @@ static int test_wrong_sig(void)
   size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(ctx, CTXLEN);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
-  randombytes(m, MLEN);
+  CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
   CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in signed message */
-  randombytes((uint8_t *)&idx, sizeof(size_t));
+  CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
   idx %= MLEN + MLDSA_CRYPTO_BYTES;
 
   sm[idx] ^= 1;
@@ -330,15 +330,15 @@ static int test_wrong_ctx(void)
   size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  randombytes(ctx, CTXLEN);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
-  randombytes(m, MLEN);
+  CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
   CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in ctx */
-  randombytes((uint8_t *)&idx, sizeof(size_t));
+  CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
   idx %= CTXLEN;
 
   ctx[idx] ^= 1;
