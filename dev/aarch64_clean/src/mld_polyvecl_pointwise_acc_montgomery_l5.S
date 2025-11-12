@@ -38,14 +38,53 @@
     smlal2 \dh\().2d, \a\().4s, \b\().4s
 .endm
 
-out_ptr .req x0
-a_ptr   .req x1
-b_ptr   .req x2
-count   .req x3
-wtmp    .req w3
+    out_ptr .req x0
+    a_ptr   .req x1
+    b_ptr   .req x2
+    count   .req x3
+    wtmp    .req w3
 
-modulus         .req v0
-modulus_twisted .req v1
+    modulus         .req v0
+    modulus_twisted .req v1
+
+    a_0      .req v16
+    a_1      .req v17
+    a_2      .req v18
+    a_3      .req v19
+
+    b_0      .req v20
+    b_1      .req v21
+    b_2      .req v22
+    b_3      .req v23
+
+    c_0_lo   .req v24
+    c_0_hi   .req v25
+    c_1_lo   .req v26
+    c_1_hi   .req v27
+    c_2_lo   .req v28
+    c_2_hi   .req v29
+    c_3_lo   .req v30
+    c_3_hi   .req v31
+
+    c_0      .req v16
+    c_1      .req v17
+    c_2      .req v18
+    c_3      .req v19
+
+    q_a_0    .req q16
+    q_a_1    .req q17
+    q_a_2    .req q18
+    q_a_3    .req q19
+
+    q_b_0    .req q20
+    q_b_1    .req q21
+    q_b_2    .req q22
+    q_b_3    .req q23
+
+    q_c_0    .req q16
+    q_c_1    .req q17
+    q_c_2    .req q18
+    q_c_3    .req q19
 
 .text
 .global MLD_ASM_NAMESPACE(polyvecl_pointwise_acc_montgomery_l5_asm)
@@ -65,82 +104,115 @@ MLD_ASM_FN_SYMBOL(polyvecl_pointwise_acc_montgomery_l5_asm)
     mov count, #(MLDSA_N / 4)
 
 l5_loop_start:
-    load_polys q16, q17, q18, q19, a_ptr, 0
-    load_polys q20, q21, q22, q23, b_ptr, 0
-    // q{i} stores a's coefficients for i in 16...19, and b's coefficients
-    // for i in 20...23. This applies to all load_polys below.
-    //
-    // Bounds: |q{i}| < q  for i in 16...19
-    //                < 9q for i in 20...23
+    load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 0
+    load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 0
+    // Bounds: |a_{i}| < q, |b_{i}| < 9q
 
-    pmull v24, v25, v16, v20
-    pmull v26, v27, v17, v21
-    pmull v28, v29, v18, v22
-    pmull v30, v31, v19, v23
-    // Bounds: |q{i}| < 9q^2 for i in 24...31
+    pmull c_0_lo, c_0_hi, a_0, b_0
+    pmull c_1_lo, c_1_hi, a_1, b_1
+    pmull c_2_lo, c_2_hi, a_2, b_2
+    pmull c_3_lo, c_3_hi, a_3, b_3
+    // Bounds: |c_{i}_lo|, |c_{i}_hi| < 9q^2
 
-    load_polys q16, q17, q18, q19, a_ptr, 1
-    load_polys q20, q21, q22, q23, b_ptr, 1
-    // Bounds: |q{i}| < q  for i in 16...19
-    //                < 9q for i in 20...23
+    load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 1
+    load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 1
+    // Bounds: |a_{i}| < q, |b_{i}| < 9q
 
-    pmlal v24, v25, v16, v20
-    pmlal v26, v27, v17, v21
-    pmlal v28, v29, v18, v22
-    pmlal v30, v31, v19, v23
-    // Bounds: |q{i}| < 18q^2 for i in 24...31
+    pmlal c_0_lo, c_0_hi, a_0, b_0
+    pmlal c_1_lo, c_1_hi, a_1, b_1
+    pmlal c_2_lo, c_2_hi, a_2, b_2
+    pmlal c_3_lo, c_3_hi, a_3, b_3
+    // Bounds: |c_{i}_lo|, |c_{i}_hi| < 18q^2
 
-    load_polys q16, q17, q18, q19, a_ptr, 2
-    load_polys q20, q21, q22, q23, b_ptr, 2
-    // Bounds: |q{i}| < q  for i in 16...19
-    //                < 9q for i in 20...23
+    load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 2
+    load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 2
+    // Bounds: |a_{i}| < q, |b_{i}| < 9q
 
-    pmlal v24, v25, v16, v20
-    pmlal v26, v27, v17, v21
-    pmlal v28, v29, v18, v22
-    pmlal v30, v31, v19, v23
-    // Bounds: |q{i}| < 27q^2 for i in 24...31
+    pmlal c_0_lo, c_0_hi, a_0, b_0
+    pmlal c_1_lo, c_1_hi, a_1, b_1
+    pmlal c_2_lo, c_2_hi, a_2, b_2
+    pmlal c_3_lo, c_3_hi, a_3, b_3
+    // Bounds: |c_{i}_lo|, |c_{i}_hi| < 27q^2
 
-    load_polys q16, q17, q18, q19, a_ptr, 3
-    load_polys q20, q21, q22, q23, b_ptr, 3
-    // Bounds: |q{i}| < q  for i in 16...19
-    //                < 9q for i in 20...23
+    load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 3
+    load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 3
+    // Bounds: |a_{i}| < q, |b_{i}| < 9q
 
-    pmlal v24, v25, v16, v20
-    pmlal v26, v27, v17, v21
-    pmlal v28, v29, v18, v22
-    pmlal v30, v31, v19, v23
-    // Bounds: |q{i}| < 36q^2 for i in 24...31
+    pmlal c_0_lo, c_0_hi, a_0, b_0
+    pmlal c_1_lo, c_1_hi, a_1, b_1
+    pmlal c_2_lo, c_2_hi, a_2, b_2
+    pmlal c_3_lo, c_3_hi, a_3, b_3
+    // Bounds: |c_{i}_lo|, |c_{i}_hi| < 36q^2
 
-    load_polys q16, q17, q18, q19, a_ptr, 4
-    load_polys q20, q21, q22, q23, b_ptr, 4
-    // Bounds: |q{i}| < q  for i in 16...19
-    //                < 9q for i in 20...23
+    load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 4
+    load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 4
+    // Bounds: |a_{i}| < q, |b_{i}| < 9q
 
-    pmlal v24, v25, v16, v20
-    pmlal v26, v27, v17, v21
-    pmlal v28, v29, v18, v22
-    pmlal v30, v31, v19, v23
-    // Bounds: |q{i}| < 45q^2 < qR/2 for i in 24...31
+    pmlal c_0_lo, c_0_hi, a_0, b_0
+    pmlal c_1_lo, c_1_hi, a_1, b_1
+    pmlal c_2_lo, c_2_hi, a_2, b_2
+    pmlal c_3_lo, c_3_hi, a_3, b_3
+    // Bounds: |c_{i}_lo|, |c_{i}_hi| < 45q^2 < qR/2
 
-    montgomery_reduce_long v16, v24, v25
-    montgomery_reduce_long v17, v26, v27
-    montgomery_reduce_long v18, v28, v29
-    montgomery_reduce_long v19, v30, v31
+    montgomery_reduce_long c_0, c_0_lo, c_0_hi
+    montgomery_reduce_long c_1, c_1_lo, c_1_hi
+    montgomery_reduce_long c_2, c_2_lo, c_2_hi
+    montgomery_reduce_long c_3, c_3_lo, c_3_hi
     // All coefficients are Montgomery-reduced, resulting in
     //
-    // Bounds: |q{i}| < q for i in 16...19
+    // Bounds: |c_{i}| < q
     //
     // See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
 
-    str q17, [out_ptr, #1*16]
-    str q18, [out_ptr, #2*16]
-    str q19, [out_ptr, #3*16]
-    str q16, [out_ptr], #4*16
+    str q_c_1, [out_ptr, #1*16]
+    str q_c_2, [out_ptr, #2*16]
+    str q_c_3, [out_ptr, #3*16]
+    str q_c_0, [out_ptr], #4*16
 
     subs count, count, #4
     cbnz count, l5_loop_start
 
     ret
+
+    .unreq out_ptr
+    .unreq a_ptr
+    .unreq b_ptr
+    .unreq count
+    .unreq wtmp
+    .unreq modulus
+    .unreq modulus_twisted
+    .unreq a_0
+    .unreq a_1
+    .unreq a_2
+    .unreq a_3
+    .unreq b_0
+    .unreq b_1
+    .unreq b_2
+    .unreq b_3
+    .unreq c_0_lo
+    .unreq c_0_hi
+    .unreq c_1_lo
+    .unreq c_1_hi
+    .unreq c_2_lo
+    .unreq c_2_hi
+    .unreq c_3_lo
+    .unreq c_3_hi
+    .unreq c_0
+    .unreq c_1
+    .unreq c_2
+    .unreq c_3
+    .unreq q_a_0
+    .unreq q_a_1
+    .unreq q_a_2
+    .unreq q_a_3
+    .unreq q_b_0
+    .unreq q_b_1
+    .unreq q_b_2
+    .unreq q_b_3
+    .unreq q_c_0
+    .unreq q_c_1
+    .unreq q_c_2
+    .unreq q_c_3
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 */
