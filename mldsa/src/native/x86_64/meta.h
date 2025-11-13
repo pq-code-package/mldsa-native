@@ -188,6 +188,10 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
 
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   return mld_poly_chknorm_avx2((const __m256i *)a, B);
 }
 
