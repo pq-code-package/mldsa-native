@@ -26,7 +26,9 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2 --slice-formula
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
+CBMCFLAGS += --slice-formula
+CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = polyvecl_pointwise_acc_montgomery
 
