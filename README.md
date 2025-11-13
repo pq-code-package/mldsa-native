@@ -13,13 +13,17 @@
 
 mldsa-native is a secure, fast, and portable C90 implementation of the ML-DSA[^FIPS204] post-quantum signature standard. It is a fork of the ML-DSA reference implementation[^REF].
 
-The goal of mldsa-native is paralleling [mlkem-native](https://github.com/pq-code-package/mlkem-native) for ML-KEM.
-All C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) is proved memory-safe (no memory overflow) and type-safe (no integer overflow)
-using [CBMC](https://github.com/diffblue/cbmc).
-
-mldsa-native includes native backends for Arm (64-bit, Neon), and Intel/AMD (64-bit, AVX2). See [benchmarks](https://pq-code-package.github.io/mldsa-native/dev/bench/) for performance data.
-
 mldsa-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
+
+## Why mldsa-native?
+
+mldsa-native allows developers to support ML-DSA with minimal performance and maintenance cost.
+
+**Minimal Dependencies:** mldsa-native is written in portable C90 with minimal and configurable dependencies on the standard library.
+
+**Maintainability and Safety:** Memory safety, type safety and absence of various classes of timing leakage are automatically checked on every change, using a combination of static model checking (using CBMC) and dynamic instrumentation (using valgrind). This reduces review and maintenance burden and accelerates safe code delivery. See [Formal Verification](#formal-verification) and [Security](#security).
+
+**Architecture Support:** Native backends are added under a unified interface, minimizing duplicated code and reasoning. mldsa-native comes with backends for AArch64 and x86-64. See [Design](#design).
 
 ## Quickstart for Ubuntu
 
@@ -68,7 +72,7 @@ mldsa-native is split into a _frontend_ and two _backends_ for arithmetic and FI
 fixed, written in C, and covers all routines that are not critical to performance. The backends are flexible, take care of
 performance-sensitive routines, and can be implemented in C or native code (assembly/intrinsics); see
 [mldsa/src/native/api.h](mldsa/src/native/api.h) for the arithmetic backend and
-[mldsa/src/fips202/native/api.h](mldsa/src/fips202/native/api.h) for the FIPS-202 backend. 
+[mldsa/src/fips202/native/api.h](mldsa/src/fips202/native/api.h) for the FIPS-202 backend.
 
 mldsa-native currently offers the following backends:
 
