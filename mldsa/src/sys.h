@@ -50,6 +50,10 @@
 #define MLD_SYS_RISCV64
 #endif
 
+#if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
+#define MLD_SYS_RISCV32
+#endif
+
 #if defined(_WIN64) || defined(_WIN32)
 #define MLD_SYS_WINDOWS
 #endif
@@ -78,6 +82,10 @@
 
 #if defined(MLD_FORCE_RISCV64) && !defined(MLD_SYS_RISCV64)
 #error "MLD_FORCE_RISCV64 is set, but we don't seem to be on a RISCV64 system."
+#endif
+
+#if defined(MLD_FORCE_RISCV32) && !defined(MLD_SYS_RISCV32)
+#error "MLD_FORCE_RISCV32 is set, but we don't seem to be on a RISCV32 system."
 #endif
 
 /*
