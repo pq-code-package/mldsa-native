@@ -102,7 +102,7 @@ static int test_mldsa44(void)
   printf("Public key size:  %d bytes\n", MLDSA44_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA44_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA44_BYTES);
-  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
   printf("Signature length: %lu bytes\n", (unsigned long)siglen);
   printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 
@@ -199,7 +199,7 @@ static int test_mldsa65(void)
   printf("Public key size:  %d bytes\n", MLDSA65_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA65_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA65_BYTES);
-  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
   printf("Signature length: %lu bytes\n", (unsigned long)siglen);
   printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 
@@ -297,7 +297,7 @@ static int test_mldsa87(void)
   printf("Public key size:  %d bytes\n", MLDSA87_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", MLDSA87_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", MLDSA87_BYTES);
-  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
   printf("Signature length: %lu bytes\n", (unsigned long)siglen);
   printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
 

@@ -109,7 +109,7 @@ int main(void)
   printf("Public key size:  %d bytes\n", CRYPTO_PUBLICKEYBYTES);
   printf("Secret key size:  %d bytes\n", CRYPTO_SECRETKEYBYTES);
   printf("Signature size:   %d bytes\n", CRYPTO_BYTES);
-  printf("Message length:   %lu bytes\n", TEST_MSG_LEN);
+  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
   printf("Signature length: %lu bytes\n", (unsigned long)siglen);
 
   /* Check against expected signature to make sure that
