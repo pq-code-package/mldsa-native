@@ -58,7 +58,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -73,7 +73,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -88,7 +88,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -103,7 +103,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -200,7 +200,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -215,7 +215,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -230,7 +230,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -245,7 +245,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -342,7 +342,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -357,7 +357,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -372,7 +372,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -387,7 +387,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -484,7 +484,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -499,7 +499,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -514,7 +514,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -529,7 +529,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -626,7 +626,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -641,7 +641,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -656,7 +656,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -671,7 +671,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -766,7 +766,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm7, %ymm12
-        vpaddd	%ymm8, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm8, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -891,7 +891,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm6, %ymm12
-        vpaddd	%ymm11, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm11, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -959,7 +959,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm4, %ymm12
-        vpaddd	%ymm11, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm11, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1035,7 +1035,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm3, %ymm12
-        vpaddd	%ymm11, %ymm3, %ymm3
+        vpaddd	%ymm3, %ymm11, %ymm3
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1068,7 +1068,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -1083,7 +1083,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -1098,7 +1098,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -1113,7 +1113,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1208,7 +1208,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm7, %ymm12
-        vpaddd	%ymm8, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm8, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -1333,7 +1333,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm6, %ymm12
-        vpaddd	%ymm11, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm11, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1401,7 +1401,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm4, %ymm12
-        vpaddd	%ymm11, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm11, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1477,7 +1477,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm3, %ymm12
-        vpaddd	%ymm11, %ymm3, %ymm3
+        vpaddd	%ymm3, %ymm11, %ymm3
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1510,7 +1510,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -1525,7 +1525,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -1540,7 +1540,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -1555,7 +1555,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1650,7 +1650,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm7, %ymm12
-        vpaddd	%ymm8, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm8, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -1775,7 +1775,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm6, %ymm12
-        vpaddd	%ymm11, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm11, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1843,7 +1843,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm4, %ymm12
-        vpaddd	%ymm11, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm11, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1919,7 +1919,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm3, %ymm12
-        vpaddd	%ymm11, %ymm3, %ymm3
+        vpaddd	%ymm3, %ymm11, %ymm3
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -1952,7 +1952,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm4, %ymm12
-        vpaddd	%ymm8, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm8, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -1967,7 +1967,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm9, %ymm9    # ymm9 = ymm9[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm9, %ymm9 # ymm9 = ymm9[0],ymm12[1],ymm9[2],ymm12[3],ymm9[4],ymm12[5],ymm9[6],ymm12[7]
         vpsubd	%ymm9, %ymm5, %ymm12
-        vpaddd	%ymm9, %ymm5, %ymm5
+        vpaddd	%ymm5, %ymm9, %ymm5
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm9
@@ -1982,7 +1982,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm10, %ymm10  # ymm10 = ymm10[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm10, %ymm10 # ymm10 = ymm10[0],ymm12[1],ymm10[2],ymm12[3],ymm10[4],ymm12[5],ymm10[6],ymm12[7]
         vpsubd	%ymm10, %ymm6, %ymm12
-        vpaddd	%ymm10, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm10, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm10
@@ -1997,7 +1997,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm7, %ymm12
-        vpaddd	%ymm11, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm11, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -2092,7 +2092,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm8, %ymm8    # ymm8 = ymm8[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm8, %ymm8 # ymm8 = ymm8[0],ymm12[1],ymm8[2],ymm12[3],ymm8[4],ymm12[5],ymm8[6],ymm12[7]
         vpsubd	%ymm8, %ymm7, %ymm12
-        vpaddd	%ymm8, %ymm7, %ymm7
+        vpaddd	%ymm7, %ymm8, %ymm7
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm8
@@ -2217,7 +2217,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm6, %ymm12
-        vpaddd	%ymm11, %ymm6, %ymm6
+        vpaddd	%ymm6, %ymm11, %ymm6
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -2285,7 +2285,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm4, %ymm12
-        vpaddd	%ymm11, %ymm4, %ymm4
+        vpaddd	%ymm4, %ymm11, %ymm4
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11
@@ -2361,7 +2361,7 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_avx2:
         vmovshdup	%ymm11, %ymm11  # ymm11 = ymm11[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm12, %ymm11, %ymm11 # ymm11 = ymm11[0],ymm12[1],ymm11[2],ymm12[3],ymm11[4],ymm12[5],ymm11[6],ymm12[7]
         vpsubd	%ymm11, %ymm3, %ymm12
-        vpaddd	%ymm11, %ymm3, %ymm3
+        vpaddd	%ymm3, %ymm11, %ymm3
         vmovshdup	%ymm13, %ymm13  # ymm13 = ymm13[1,1,3,3,5,5,7,7]
         vpblendd	$0xaa, %ymm14, %ymm13, %ymm13 # ymm13 = ymm13[0],ymm14[1],ymm13[2],ymm14[3],ymm13[4],ymm14[5],ymm13[6],ymm14[7]
         vpaddd	%ymm13, %ymm12, %ymm11

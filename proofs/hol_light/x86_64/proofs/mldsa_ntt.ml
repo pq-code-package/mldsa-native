@@ -58,8 +58,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -88,8 +87,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -118,8 +116,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -148,8 +145,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -333,8 +329,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -363,8 +358,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -393,8 +387,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -423,8 +416,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -609,8 +601,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -639,8 +630,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -669,8 +659,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -699,8 +688,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -885,8 +873,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -915,8 +902,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -945,8 +931,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -975,8 +960,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1160,8 +1144,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1190,8 +1173,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1220,8 +1202,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1250,8 +1231,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1428,8 +1408,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm8) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xf8;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm8) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1655,8 +1634,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm11) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf3;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm11) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1777,8 +1755,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm11) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe3;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1917,8 +1894,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x65; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm3) (%_% ymm11) *)
-  0xc4; 0xc1; 0x65; 0xfe; 0xdb;
-                           (* VPADDD (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xdb;  (* VPADDD (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -1982,8 +1958,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2012,8 +1987,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2042,8 +2016,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2072,8 +2045,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2250,8 +2222,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm8) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xf8;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm8) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2477,8 +2448,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm11) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf3;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm11) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2599,8 +2569,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm11) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe3;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2739,8 +2708,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x65; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm3) (%_% ymm11) *)
-  0xc4; 0xc1; 0x65; 0xfe; 0xdb;
-                           (* VPADDD (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xdb;  (* VPADDD (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2805,8 +2773,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2835,8 +2802,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2865,8 +2831,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -2895,8 +2860,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3073,8 +3037,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm8) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xf8;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm8) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3300,8 +3263,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm11) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf3;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm11) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3422,8 +3384,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm11) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe3;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3562,8 +3523,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x65; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm3) (%_% ymm11) *)
-  0xc4; 0xc1; 0x65; 0xfe; 0xdb;
-                           (* VPADDD (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xdb;  (* VPADDD (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3628,8 +3588,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm8) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe0;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3658,8 +3617,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm9) (%_% ymm9) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x55; 0xfa; 0xe1;
                            (* VPSUBD (%_% ymm12) (%_% ymm5) (%_% ymm9) *)
-  0xc4; 0xc1; 0x55; 0xfe; 0xe9;
-                           (* VPADDD (%_% ymm5) (%_% ymm5) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xed;  (* VPADDD (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3688,8 +3646,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm10) (%_% ymm10) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe2;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf2;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm10) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3718,8 +3675,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xfb;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm11) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -3896,8 +3852,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm8) (%_% ymm8) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x45; 0xfa; 0xe0;
                            (* VPSUBD (%_% ymm12) (%_% ymm7) (%_% ymm8) *)
-  0xc4; 0xc1; 0x45; 0xfe; 0xf8;
-                           (* VPADDD (%_% ymm7) (%_% ymm7) (%_% ymm8) *)
+  0xc5; 0xbd; 0xfe; 0xff;  (* VPADDD (%_% ymm7) (%_% ymm8) (%_% ymm7) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -4123,8 +4078,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x4d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm6) (%_% ymm11) *)
-  0xc4; 0xc1; 0x4d; 0xfe; 0xf3;
-                           (* VPADDD (%_% ymm6) (%_% ymm6) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xf6;  (* VPADDD (%_% ymm6) (%_% ymm11) (%_% ymm6) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -4245,8 +4199,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x5d; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm4) (%_% ymm11) *)
-  0xc4; 0xc1; 0x5d; 0xfe; 0xe3;
-                           (* VPADDD (%_% ymm4) (%_% ymm4) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xe4;  (* VPADDD (%_% ymm4) (%_% ymm11) (%_% ymm4) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -4385,8 +4338,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
                            (* VPBLENDD (%_% ymm11) (%_% ymm11) (%_% ymm12) (Imm8 (word 170)) *)
   0xc4; 0x41; 0x65; 0xfa; 0xe3;
                            (* VPSUBD (%_% ymm12) (%_% ymm3) (%_% ymm11) *)
-  0xc4; 0xc1; 0x65; 0xfe; 0xdb;
-                           (* VPADDD (%_% ymm3) (%_% ymm3) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xdb;  (* VPADDD (%_% ymm3) (%_% ymm11) (%_% ymm3) *)
   0xc4; 0x41; 0x7e; 0x16; 0xed;
                            (* VMOVSHDUP (%_% ymm13) (%_% ymm13) *)
   0xc4; 0x43; 0x15; 0x02; 0xee; 0xaa;
@@ -4523,8 +4475,8 @@ let MLDSA_NTT_CORRECT = prove
   (`!a zetas (zetas_list:int32 list) x pc.
     aligned 32 a /\
     aligned 32 zetas /\
-    nonoverlapping (word pc,0x3079) (a, 1024) /\
-    nonoverlapping (word pc,0x3079) (zetas, 2496) /\
+    nonoverlapping (word pc,0x3049) (a, 1024) /\
+    nonoverlapping (word pc,0x3049) (zetas, 2496) /\
     nonoverlapping (a, 1024) (zetas, 2496)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) (BUTLAST mldsa_ntt_tmc) /\
@@ -4535,7 +4487,7 @@ let MLDSA_NTT_CORRECT = prove
               !i. i < 256
                   ==> read(memory :> bytes32(word_add a (word(4 * i)))) s =
                       x i)
-          (\s. read RIP s = word(pc + 0x3078) /\
+          (\s. read RIP s = word(pc + 0x3048) /\
               (!i. i < 256
                         ==> let zi =
                       read(memory :> bytes32(word_add a (word(4 * i)))) s in
