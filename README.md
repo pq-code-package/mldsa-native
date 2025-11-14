@@ -127,7 +127,7 @@ For CI benchmark results and historical performance data, see the [benchmarking 
 
 ## Usage
 
-Once mldsa-native reaches production readiness, you will be able to import [mldsa](mldsa) into your project's source tree and build using your preferred build system. The build system provided in this repository is for development purposes only.
+If you want to use mldsa-native, import [mldsa](mldsa) into your project's source tree and build using your favourite build system. See [examples/basic](examples/basic) for a simple example. The build system provided in this repository is for development purposes only.
 
 ### Can I bring my own FIPS-202?
 
