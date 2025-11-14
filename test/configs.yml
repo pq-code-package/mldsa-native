@@ -379,6 +379,20 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
+  - path: examples/custom_backend/mldsa_native/custom_config.h
+    description: "Custom backend config with tiny SHA3"
+    defines:
+      MLD_CONFIG_PARAMETER_SET:
+        comment: "/* This is set on the command line */"
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH:
+        comment: "/* No native arithmetic backend */"
+        value: false
+      MLD_CONFIG_NAMESPACE_PREFIX: CUSTOM_TINY_SHA3
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h
     description: "Config without randomized API"
     defines:

@@ -24,6 +24,7 @@ source code and documentation.
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
   - [examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h](examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h)
+  - [examples/custom_backend/mldsa_native/custom_config.h](examples/custom_backend/mldsa_native/custom_config.h)
   - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
   - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
   - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
@@ -69,6 +70,7 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
   - [examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h](examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h)
+  - [examples/custom_backend/mldsa_native/custom_config.h](examples/custom_backend/mldsa_native/custom_config.h)
   - [examples/monolithic_build/config_44.h](examples/monolithic_build/config_44.h)
   - [examples/monolithic_build/config_65.h](examples/monolithic_build/config_65.h)
   - [examples/monolithic_build/config_87.h](examples/monolithic_build/config_87.h)
@@ -363,6 +365,7 @@ source code and documentation.
   - [examples/bring_your_own_fips202/README.md](examples/bring_your_own_fips202/README.md)
   - [examples/bring_your_own_fips202_static/README.md](examples/bring_your_own_fips202_static/README.md)
   - [examples/bring_your_own_fips202_static/custom_fips202/README.md](examples/bring_your_own_fips202_static/custom_fips202/README.md)
+  - [examples/custom_backend/README.md](examples/custom_backend/README.md)
 
 ### `tweetfips`
 
