@@ -1,8 +1,8 @@
 /*
  * Copyright (c) The mldsa-native project authors
+ * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
-
 #ifndef MLD_COMMON_H
 #define MLD_COMMON_H
 
@@ -30,23 +30,13 @@
 #define MLD_EXTERNAL_API MLD_CONFIG_EXTERNAL_API_QUALIFIER
 #endif
 
-
-#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH) && \
-    !defined(MLD_CONFIG_ARITH_BACKEND_FILE)
-#error Bad configuration: MLD_CONFIG_USE_NATIVE_BACKEND_ARITH is set, but MLD_CONFIG_ARITH_BACKEND_FILE is not.
-#endif
-
-#if defined(MLD_CONFIG_NO_RANDOMIZED_API) && defined(MLD_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLD_CONFIG_NO_RANDOMIZED_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_signature()
-#endif
-
-#define MLD_CONCAT_(x1, x2) x1##x2
-#define MLD_CONCAT(x1, x2) MLD_CONCAT_(x1, x2)
-
 #if defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) || \
     defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED)
 #define MLD_MULTILEVEL_BUILD
 #endif
+
+#define MLD_CONCAT_(x1, x2) x1##x2
+#define MLD_CONCAT(x1, x2) MLD_CONCAT_(x1, x2)
 
 #if defined(MLD_MULTILEVEL_BUILD)
 #define MLD_ADD_PARAM_SET(s) MLD_CONCAT(s, MLD_CONFIG_PARAMETER_SET)
@@ -69,18 +59,6 @@
  */
 #define MLD_NAMESPACE(s) MLD_CONCAT(MLD_NAMESPACE_PREFIX, s)
 #define MLD_NAMESPACE_KL(s) MLD_CONCAT(MLD_NAMESPACE_PREFIX_KL, s)
-
-#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
-#include MLD_CONFIG_ARITH_BACKEND_FILE
-/* Include to enforce consistency of API and implementation,
- * and conduct sanity checks on the backend.
- *
- * Keep this _after_ the inclusion of the backend; otherwise,
- * the sanity checks won't have an effect. */
-#if defined(MLD_CHECK_APIS) && !defined(__ASSEMBLER__)
-#include "native/api.h"
-#endif
-#endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate
@@ -107,6 +85,38 @@
  * Those files are appropriately guarded and will be empty when unneeded.
  * The following is to avoid compilers complaining about this. */
 #define MLD_EMPTY_CU(s) extern int MLD_NAMESPACE_KL(empty_cu_##s);
+
+/* MLD_CONFIG_NO_ASM takes precedence over MLD_USE_NATIVE_XXX */
+#if defined(MLD_CONFIG_NO_ASM)
+#undef MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+#undef MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+#endif
+
+#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH) && \
+    !defined(MLD_CONFIG_ARITH_BACKEND_FILE)
+#error Bad configuration: MLD_CONFIG_USE_NATIVE_BACKEND_ARITH is set, but MLD_CONFIG_ARITH_BACKEND_FILE is not.
+#endif
+
+#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202) && \
+    !defined(MLD_CONFIG_FIPS202_BACKEND_FILE)
+#error Bad configuration: MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 is set, but MLD_CONFIG_FIPS202_BACKEND_FILE is not.
+#endif
+
+#if defined(MLD_CONFIG_NO_RANDOMIZED_API) && defined(MLD_CONFIG_KEYGEN_PCT)
+#error Bad configuration: MLD_CONFIG_NO_RANDOMIZED_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_signature()
+#endif
+
+#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
+#include MLD_CONFIG_ARITH_BACKEND_FILE
+/* Include to enforce consistency of API and implementation,
+ * and conduct sanity checks on the backend.
+ *
+ * Keep this _after_ the inclusion of the backend; otherwise,
+ * the sanity checks won't have an effect. */
+#if defined(MLD_CHECK_APIS) && !defined(__ASSEMBLER__)
+#include "native/api.h"
+#endif
+#endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #include MLD_CONFIG_FIPS202_BACKEND_FILE
