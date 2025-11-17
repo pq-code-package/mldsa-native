@@ -14,7 +14,9 @@
 
 #include "common.h"
 
-#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (!defined(MLD_USE_NATIVE_NTT) || !defined(MLD_USE_NATIVE_INTT))
+
 
 #include <stdint.h>
 
@@ -38,32 +40,9 @@ __contract__(
   return mld_montgomery_reduce((int64_t)a * (int64_t)b);
 }
 
-/*************************************************
- * Name:        mld_fqsacle
- *
- * Description: Scales a field element by mont/256 , i.e., performs Montgomery
- *              multiplication by mont^2/256.
- *              Input is expected to have absolute value smaller than
- *              256 * MLDSA_Q.
- *              Output has absolute value smaller than MLD_INTT_BOUND.
- *
- * Arguments:   - int32_t a: Field element to be scaled.
- **************************************************/
-static int32_t mld_fqscale(int32_t a)
-__contract__(
-  requires(a > -256*MLDSA_Q && a < 256*MLDSA_Q)
-  ensures(return_value > -MLD_INTT_BOUND && return_value < MLD_INTT_BOUND)
-)
-{
-  /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
-  const int32_t f = 41978;
-  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bounds reasoning is just
-   * a special case of that in mld_fqmul(). */
-  return mld_montgomery_reduce((int64_t)a * f);
-}
-
 #include "zetas.inc"
 
+#if !defined(MLD_USE_NATIVE_NTT)
 
 /* mld_ntt_butterfly_block()
  *
@@ -185,6 +164,32 @@ void mld_ntt(int32_t a[MLDSA_N])
   /* directly implies the postcondition in that coefficients */
   /* are bounded in magnitude by 9 * MLDSA_Q                 */
 }
+#endif /* !MLD_USE_NATIVE_NTT */
+
+#if !defined(MLD_USE_NATIVE_INTT)
+/*************************************************
+ * Name:        mld_fqscale
+ *
+ * Description: Scales a field element by mont/256 , i.e., performs Montgomery
+ *              multiplication by mont^2/256.
+ *              Input is expected to have absolute value smaller than
+ *              256 * MLDSA_Q.
+ *              Output has absolute value smaller than MLD_INTT_BOUND.
+ *
+ * Arguments:   - int32_t a: Field element to be scaled.
+ **************************************************/
+static int32_t mld_fqscale(int32_t a)
+__contract__(
+  requires(a > -256*MLDSA_Q && a < 256*MLDSA_Q)
+  ensures(return_value > -MLD_INTT_BOUND && return_value < MLD_INTT_BOUND)
+)
+{
+  /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
+  const int32_t f = 41978;
+  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bounds reasoning is just
+   * a special case of that in mld_fqmul(). */
+  return mld_montgomery_reduce((int64_t)a * f);
+}
 
 /* Reference: Embedded into `invntt_tomont()` in the reference implementation
  * @[REF] */
@@ -256,7 +261,10 @@ void mld_invntt_tomont(int32_t a[MLDSA_N])
     a[j] = mld_fqscale(a[j]);
   }
 }
+#endif /* !MLD_USE_NATIVE_INTT */
 
-#else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED && (!MLD_USE_NATIVE_NTT || \
+          !MLD_USE_NATIVE_INTT) */
 MLD_EMPTY_CU(mld_ntt)
-#endif /* MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* !(!MLD_CONFIG_MULTILEVEL_NO_SHARED && (!MLD_USE_NATIVE_NTT || \
+          !MLD_USE_NATIVE_INTT)) */

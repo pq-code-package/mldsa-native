@@ -24,6 +24,7 @@
 /* Absolute exclusive upper bound for the output of the inverse NTT*/
 #define MLD_INTT_BOUND MLDSA_Q
 
+#if !defined(MLD_USE_NATIVE_NTT)
 #define mld_ntt MLD_NAMESPACE(ntt)
 /*************************************************
  * Name:        mld_ntt
@@ -53,7 +54,9 @@ __contract__(
   assigns(memory_slice(a, MLDSA_N * sizeof(int32_t)))
   ensures(array_abs_bound(a, 0, MLDSA_N, MLD_NTT_BOUND))
 );
+#endif /* !MLD_USE_NATIVE_NTT */
 
+#if !defined(MLD_USE_NATIVE_INTT)
 #define mld_invntt_tomont MLD_NAMESPACE(invntt_tomont)
 /*************************************************
  * Name:        mld_invntt_tomont
@@ -76,5 +79,6 @@ __contract__(
   assigns(memory_slice(a, MLDSA_N * sizeof(int32_t)))
   ensures(array_abs_bound(a, 0, MLDSA_N, MLD_INTT_BOUND))
 );
+#endif /* !MLD_USE_NATIVE_INTT */
 
 #endif /* !MLD_NTT_H */
