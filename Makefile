@@ -221,3 +221,4 @@ clean:
 	-make clean -C examples/basic >/dev/null
 	-make clean -C examples/monolithic_build >/dev/null
 	-make clean -C examples/monolithic_build_multilevel >/dev/null
+	-make clean -C examples/monolithic_build_native >/dev/null

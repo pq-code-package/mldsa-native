@@ -1529,6 +1529,7 @@ def gen_monolithic_source_file():
 
     update_file("mldsa/mldsa_native.c", "\n".join(gen()))
 
+
 def gen_monolithic_asm_file():
 
     def gen():

@@ -195,6 +195,39 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/monolithic_build_native/config_44.h
+    description: "Monolithic build config for ML-DSA-44 (native backends disabled)"
+    defines:
+      MLD_CONFIG_PARAMETER_SET: 44
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_native/config_65.h
+    description: "Monolithic build config for ML-DSA-65 (native backends disabled)"
+    defines:
+      MLD_CONFIG_PARAMETER_SET: 65
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_native/config_87.h
+    description: "Monolithic build config for ML-DSA-87 (native backends disabled)"
+    defines:
+      MLD_CONFIG_PARAMETER_SET: 87
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: examples/monolithic_build_multilevel/multilevel_config.h
     description: "Multilevel monolithic build config"
     defines:
