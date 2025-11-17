@@ -93,7 +93,7 @@ void mld_poly_use_hint_88_avx2(__m256i *b, const __m256i *a,
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
-MLD_EMPTY_CU(avx2_poly_use_hint)
+MLD_EMPTY_CU(avx2_poly_use_hint_88)
 
 #endif /* !(MLD_ARITH_BACKEND_X86_64_DEFAULT && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

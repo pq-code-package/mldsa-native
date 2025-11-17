@@ -146,7 +146,7 @@ void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
-MLD_EMPTY_CU(avx2_poly_decompose)
+MLD_EMPTY_CU(avx2_poly_decompose_32)
 
 #endif /* !(MLD_ARITH_BACKEND_X86_64_DEFAULT && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

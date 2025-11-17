@@ -98,7 +98,7 @@ void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a)
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
-MLD_EMPTY_CU(avx2_polyz_unpack)
+MLD_EMPTY_CU(avx2_polyz_unpack_17)
 
 #endif /* !(MLD_ARITH_BACKEND_X86_64_DEFAULT && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED) */
