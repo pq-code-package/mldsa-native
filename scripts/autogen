@@ -1529,6 +1529,100 @@ def gen_monolithic_source_file():
 
     update_file("mldsa/mldsa_native.c", "\n".join(gen()))
 
+def gen_monolithic_asm_file():
+
+    def gen():
+        asm_sources = get_asm_source_files(main_only=True)
+        yield from gen_header()
+        yield "/******************************************************************************"
+        yield " *"
+        yield " * Single assembly unit for fixed-level build of mldsa-native"
+        yield " *"
+        yield " * This assembly unit bundles together all assembly files for a build"
+        yield " * of mldsa-native for a fixed security level (MLDSA-44/65/87)."
+        yield " *"
+        yield " * # Multi-level build"
+        yield " *"
+        yield " * If you want an SCU build of mldsa-native with support for multiple security"
+        yield " * levels, you should include this file once with MLD_CONFIG_MULTILEVEL_WITH_SHARED set."
+        yield " *"
+        yield " * (You could also follow the same pattern as for mldsa_native_monobuild.c"
+        yield " *  and include it for every level, setting MLD_CONFIG_MULTILEVEL_NO_SHARED"
+        yield " *  for all but one. For builds with MLD_CONFIG_MULTILEVEL_NO_SHARED, this"
+        yield " *  file will then be ignored.)"
+        yield " *"
+        yield " * # Configuration"
+        yield " *"
+        yield " * The following options from the mldsa-native configuration are relevant:"
+        yield " *"
+        yield " * - MLD_CONFIG_FIPS202_CUSTOM_HEADER"
+        yield " *   Set this option if you use a custom FIPS202 implementation."
+        yield " *"
+        yield " * - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH"
+        yield " *   Set this option if you want to include the native arithmetic backends"
+        yield " *   in your build."
+        yield " *"
+        yield " * - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+        yield " *   Set this option if you want to include the native FIPS202 backends"
+        yield " *   in your build."
+        yield " *"
+        yield " * - MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS"
+        yield " *   Set this option if you want to keep the directives defined in"
+        yield " *   level-independent headers. This is needed for a multi-level build."
+        yield " */"
+        yield ""
+        yield "/* If parts of the mldsa-native source tree are not used,"
+        yield " * consider reducing this header via `unifdef`."
+        yield " *"
+        yield " * Example:"
+        yield " * ```bash"
+        yield " * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native.S"
+        yield " * ```"
+        yield " */"
+        yield ""
+        yield '#include "src/common.h"'
+        yield ""
+        yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
+        yield "#if defined(MLD_SYS_AARCH64)"
+        for c in filter(native_arith_aarch64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_X86_64)"
+        for c in filter(native_arith_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#endif"
+        yield ""
+        yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
+        yield "#if defined(MLD_SYS_AARCH64)"
+        for c in filter(native_fips202_aarch64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_X86_64)"
+        for c in filter(native_fips202_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#endif"
+        yield ""
+        # We generate #undef's for all headers, even though most are not
+        # included by the assembly files. This does not harm, and avoids
+        # having to trace which headers are being pulled in from common.h
+        # included from the assembly files.
+        yield ""
+        extra = [
+            "",
+            "NOTE: This is not needed for the assembly SCU since, at present,",
+            "there is no need to include it multiple times.",
+            "We keep it for uniformity with mldsa_native.c only.",
+            "",
+            "NOTE: To avoid having to distinguish between which headers are included",
+            "from the assembly files, we #undef the same set of directives",
+            "as in mldsa_native.c",
+        ]
+        yield from gen_macro_undefs(extra_notes=extra)
+
+    update_file("mldsa/mldsa_native.S", "\n".join(gen()), force_format=True)
+
 
 def get_config_options():
     content = read_file("mldsa/src/config.h")
@@ -2713,6 +2807,7 @@ def _main():
         high_level_status("Updated HOL Light bytecode")
 
     gen_monolithic_source_file()
+    gen_monolithic_asm_file()
     high_level_status("Generated monolithic source files")
     gen_undefs()
     high_level_status("Generated undefs")
