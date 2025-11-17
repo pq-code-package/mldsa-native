@@ -57,7 +57,7 @@ jobs:
       - uses: ./.github/actions/setup-os
       - name: tests func
         run: |
-          ./scripts/tests func
+          ./scripts/tests func --check-namespace
   quickcheck-acvp:
     strategy:
       fail-fast: false
@@ -161,7 +161,7 @@ jobs:
       - uses: ./.github/actions/setup-apt
       - name: tests func
         run: |
-          ./scripts/tests func --cflags="-std=c90"
+          ./scripts/tests func --cflags="-std=c90" --check-namespace
       - name: tests bench
         run: |
           ./scripts/tests bench -c NO --cflags="-std=c90"

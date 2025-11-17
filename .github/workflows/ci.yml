@@ -153,6 +153,7 @@ jobs:
           compile_mode: native
           cflags: "-DMLDSA_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          check_namespace: 'false'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
     strategy:
@@ -173,6 +174,7 @@ jobs:
           examples: 'false'
           cflags: "-DMLDSA_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          check_namespace: 'false'
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
   compiler_tests:
     name: Compiler tests  (${{ matrix.compiler.name }}, ${{ matrix.target.name }}, ${{ matrix.cflags }})
@@ -415,6 +417,7 @@ jobs:
           acvp: false
           examples: false
           stack: true
+          check_namespace: false
   config_variations:
     name: Non-standard configurations
     strategy:

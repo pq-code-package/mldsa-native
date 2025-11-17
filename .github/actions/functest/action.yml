@@ -48,6 +48,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  check_namespace:
+    description: Determine whether to check namespacing or not
+    default: "true"
   stack:
     description: Determine whether to run stack analysis or not
     default: "false"
@@ -101,7 +104,7 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           make clean
-          ./scripts/tests all --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} -v ${{ inputs.extra_args }}
+          ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.EXAMPLES }} --${{ env.STACK }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

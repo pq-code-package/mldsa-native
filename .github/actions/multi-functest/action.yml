@@ -45,6 +45,9 @@ inputs:
   examples:
     description: Determine whether to run examples or not
     default: "true"
+  check_namespace:
+    description: Determine whether to check namespacing or not
+    default: "true"
   stack:
     description: Determine whether to run stack analysis or not
     default: "false"
@@ -70,6 +73,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross x86_64 Tests
@@ -90,6 +94,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross aarch64 Tests
@@ -110,6 +115,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross ppc64le Tests
@@ -130,6 +136,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross aarch64_be Tests
@@ -150,6 +157,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv64 Tests (RVV, VLEN=128)
@@ -170,6 +178,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv64 Tests (RVV, VLEN=256)
@@ -189,6 +198,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv64 Tests (RVV, VLEN=512)
@@ -208,6 +218,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv64 Tests (RVV, VLEN=1024)
@@ -227,6 +238,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
       - name: Cross riscv32 Tests
@@ -247,6 +259,7 @@ runs:
           kat: ${{ inputs.kat }}
           acvp: ${{ inputs.acvp }}
           examples: ${{ inputs.examples }}
+          check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           extra_args: ${{ inputs.extra_args }}
 
