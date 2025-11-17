@@ -17,7 +17,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c $(SRCDIR)/mldsa/src/prehash.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_pre_hash_internal
 USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_internal \

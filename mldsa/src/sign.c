@@ -33,7 +33,6 @@
 #include "poly.h"
 #include "poly_kl.h"
 #include "polyvec.h"
-#include "prehash.h"
 #include "randombytes.h"
 #include "sign.h"
 #include "symmetric.h"
@@ -44,6 +43,8 @@
  * within a single compilation unit. */
 #define mld_check_pct MLD_ADD_PARAM_SET(mld_check_pct)
 #define mld_sample_s1_s2 MLD_ADD_PARAM_SET(mld_sample_s1_s2)
+#define mld_validate_hash_length MLD_ADD_PARAM_SET(mld_validate_hash_length)
+#define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
 #define mld_attempt_signature_generation \
   MLD_ADD_PARAM_SET(mld_attempt_signature_generation)
@@ -633,11 +634,15 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
                           size_t ctxlen,
                           const uint8_t sk[CRYPTO_SECRETKEYBYTES])
 {
-  MLD_ALIGN uint8_t pre[257];
+  MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
   MLD_ALIGN uint8_t rnd[MLDSA_RNDBYTES];
+  size_t pre_len;
   int result;
 
-  if (ctxlen > 255)
+  /* Prepare domain separation prefix for pure ML-DSA */
+  pre_len = mld_prepare_domain_separation_prefix(pre, NULL, 0, ctx, ctxlen,
+                                                 MLD_PREHASH_NONE);
+  if (pre_len == 0)
   {
     /* To be on the safe-side, make sure *siglen has a well-defined */
     /* value, even in the case of error.                            */
@@ -646,21 +651,12 @@ int crypto_sign_signature(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     goto cleanup;
   }
 
-  /* Prepare pre = (0, ctxlen, ctx) */
-  pre[0] = 0;
-  /* Safety: Truncation is safe due to the check above. */
-  pre[1] = (uint8_t)ctxlen;
-  if (ctxlen > 0)
-  {
-    mld_memcpy(pre + 2, ctx, ctxlen);
-  }
-
   /* Randomized variant of ML-DSA. If you need the deterministic variant,
    * call crypto_sign_signature_internal directly with all-zero rnd. */
   mld_randombytes(rnd, MLDSA_RNDBYTES);
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
-  result = crypto_sign_signature_internal(sig, siglen, m, mlen, pre, 2 + ctxlen,
+  result = crypto_sign_signature_internal(sig, siglen, m, mlen, pre, pre_len,
                                           rnd, sk, 0);
 
 cleanup:
@@ -845,26 +841,20 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                        size_t mlen, const uint8_t *ctx, size_t ctxlen,
                        const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
 {
-  MLD_ALIGN uint8_t pre[257];
+  MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  size_t pre_len;
   int result;
 
-  if (ctxlen > 255)
+  pre_len = mld_prepare_domain_separation_prefix(pre, NULL, 0, ctx, ctxlen,
+                                                 MLD_PREHASH_NONE);
+  if (pre_len == 0)
   {
     result = -1;
     goto cleanup;
   }
 
-  pre[0] = 0;
-  /* Safety: Truncation is safe due to the check above. */
-  pre[1] = (uint8_t)ctxlen;
-  if (ctxlen > 0)
-  {
-    mld_memcpy(pre + 2, ctx, ctxlen);
-  }
-
   result =
-      crypto_sign_verify_internal(sig, siglen, m, mlen, pre, 2 + ctxlen, pk, 0);
-
+      crypto_sign_verify_internal(sig, siglen, m, mlen, pre, pre_len, pk, 0);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -932,31 +922,24 @@ int crypto_sign_signature_pre_hash_internal(
     const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
     const uint8_t sk[CRYPTO_SECRETKEYBYTES], int hashalg)
 {
-  MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
-  size_t fmsg_len;
+  MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  size_t pre_len;
   int result;
 
-  if (ctxlen > 255)
+  pre_len = mld_prepare_domain_separation_prefix(pre, ph, phlen, ctx, ctxlen,
+                                                 hashalg);
+  if (pre_len == 0)
   {
     *siglen = 0;
     result = -1;
     goto cleanup;
   }
 
-  if (mld_validate_hash_length(hashalg, phlen))
-  {
-    *siglen = 0;
-    result = -1;
-    goto cleanup;
-  }
-
-  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
-
-  result = crypto_sign_signature_internal(sig, siglen, fmsg, fmsg_len, NULL, 0,
+  result = crypto_sign_signature_internal(sig, siglen, pre, pre_len, NULL, 0,
                                           rnd, sk, 0);
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(fmsg, sizeof(fmsg));
+  mld_zeroize(pre, sizeof(pre));
   return result;
 }
 
@@ -967,30 +950,24 @@ int crypto_sign_verify_pre_hash_internal(
     const uint8_t *ctx, size_t ctxlen, const uint8_t pk[CRYPTO_PUBLICKEYBYTES],
     int hashalg)
 {
-  MLD_ALIGN uint8_t fmsg[MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES];
-  size_t fmsg_len;
+  MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  size_t pre_len;
   int result;
 
-  if (ctxlen > 255)
+  pre_len = mld_prepare_domain_separation_prefix(pre, ph, phlen, ctx, ctxlen,
+                                                 hashalg);
+  if (pre_len == 0)
   {
     result = -1;
     goto cleanup;
   }
-
-  if (mld_validate_hash_length(hashalg, phlen))
-  {
-    result = -1;
-    goto cleanup;
-  }
-
-  fmsg_len = mld_format_pre_hash_message(fmsg, ph, phlen, ctx, ctxlen, hashalg);
 
   result =
-      crypto_sign_verify_internal(sig, siglen, fmsg, fmsg_len, NULL, 0, pk, 0);
+      crypto_sign_verify_internal(sig, siglen, pre, pre_len, NULL, 0, pk, 0);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(fmsg, sizeof(fmsg));
+  mld_zeroize(pre, sizeof(pre));
   return result;
 }
 
@@ -1027,10 +1004,139 @@ int crypto_sign_verify_pre_hash_shake256(
   return result;
 }
 
+
+#define MLD_PRE_HASH_OID_LEN 11
+
+/*************************************************
+ * Name:        mld_get_hash_oid
+ *
+ * Description: Returns the OID of a given SHA-2/SHA-3 hash function.
+ *
+ * Arguments:   - uint8_t oid[11]: pointer to output oid
+ *              - int hashalg: hash algorithm constant (MLD_PREHASH_*)
+ *
+ ***************************************************/
+static void mld_get_hash_oid(uint8_t oid[MLD_PRE_HASH_OID_LEN], int hashalg)
+{
+  unsigned int i;
+  static const struct
+  {
+    int alg;
+    uint8_t oid[MLD_PRE_HASH_OID_LEN];
+  } oid_map[] = {
+      {MLD_PREHASH_SHA2_224,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04}},
+      {MLD_PREHASH_SHA2_256,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01}},
+      {MLD_PREHASH_SHA2_384,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02}},
+      {MLD_PREHASH_SHA2_512,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03}},
+      {MLD_PREHASH_SHA2_512_224,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x05}},
+      {MLD_PREHASH_SHA2_512_256,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x06}},
+      {MLD_PREHASH_SHA3_224,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x07}},
+      {MLD_PREHASH_SHA3_256,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x08}},
+      {MLD_PREHASH_SHA3_384,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x09}},
+      {MLD_PREHASH_SHA3_512,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x0A}},
+      {MLD_PREHASH_SHAKE_128,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x0B}},
+      {MLD_PREHASH_SHAKE_256,
+       {0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x0C}}};
+
+  for (i = 0; i < sizeof(oid_map) / sizeof(oid_map[0]); i++)
+  __loop__(
+    invariant(i <= sizeof(oid_map) / sizeof(oid_map[0]))
+  )
+  {
+    if (oid_map[i].alg == hashalg)
+    {
+      mld_memcpy(oid, oid_map[i].oid, MLD_PRE_HASH_OID_LEN);
+      return;
+    }
+  }
+}
+
+static int mld_validate_hash_length(int hashalg, size_t len)
+{
+  switch (hashalg)
+  {
+    case MLD_PREHASH_SHA2_224:
+      return (len == 224 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA2_256:
+      return (len == 256 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA2_384:
+      return (len == 384 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA2_512:
+      return (len == 512 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA2_512_224:
+      return (len == 224 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA2_512_256:
+      return (len == 256 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA3_224:
+      return (len == 224 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA3_256:
+      return (len == 256 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA3_384:
+      return (len == 384 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHA3_512:
+      return (len == 512 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHAKE_128:
+      return (len == 256 / 8) ? 0 : -1;
+    case MLD_PREHASH_SHAKE_256:
+      return (len == 512 / 8) ? 0 : -1;
+  }
+  return -1;
+}
+
+size_t mld_prepare_domain_separation_prefix(
+    uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
+    size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg)
+{
+  if (ctxlen > 255)
+  {
+    return 0;
+  }
+
+  if (hashalg != MLD_PREHASH_NONE)
+  {
+    if (ph == NULL || mld_validate_hash_length(hashalg, phlen) != 0)
+    {
+      return 0;
+    }
+  }
+
+  /* Common prefix: 0x00/0x01 || ctxlen || ctx */
+  prefix[0] = (hashalg == MLD_PREHASH_NONE) ? 0 : 1;
+  prefix[1] = (uint8_t)ctxlen;
+  if (ctxlen > 0)
+  {
+    mld_memcpy(prefix + 2, ctx, ctxlen);
+  }
+
+  if (hashalg == MLD_PREHASH_NONE)
+  {
+    return 2 + ctxlen;
+  }
+
+  /* HashML-DSA: append oid || ph */
+  mld_get_hash_oid(prefix + 2 + ctxlen, hashalg);
+  mld_memcpy(prefix + 2 + ctxlen + MLD_PRE_HASH_OID_LEN, ph, phlen);
+  return 2 + ctxlen + MLD_PRE_HASH_OID_LEN + phlen;
+}
+
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_check_pct
 #undef mld_sample_s1_s2
+#undef mld_validate_hash_length
+#undef mld_get_hash_oid
 #undef mld_H
 #undef mld_attempt_signature_generation
 #undef NONCE_UB
+#undef MLD_PRE_HASH_OID_LEN

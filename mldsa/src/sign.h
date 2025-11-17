@@ -62,10 +62,13 @@
   MLD_NAMESPACE_KL(signature_pre_hash_shake256)
 #define crypto_sign_verify_pre_hash_shake256 \
   MLD_NAMESPACE_KL(verify_pre_hash_shake256)
+#define mld_prepare_domain_separation_prefix \
+  MLD_NAMESPACE_KL(prepare_domain_separation_prefix)
 
 /*************************************************
- * Hash algorithm constants for pre-hash functions
+ * Hash algorithm constants for domain separation
  **************************************************/
+#define MLD_PREHASH_NONE 0
 #define MLD_PREHASH_SHA2_224 1
 #define MLD_PREHASH_SHA2_256 2
 #define MLD_PREHASH_SHA2_384 3
@@ -623,6 +626,64 @@ __contract__(
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == -1)
+);
+
+/* Maximum formatted domain separation message length:
+ * - Pure ML-DSA: 0x00 || ctxlen || ctx (max 255)
+ * - HashML-DSA: 0x01 || ctxlen || ctx (max 255) || oid (11) || ph (max 64) */
+#define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
+
+/*************************************************
+ * Name:        mld_prepare_domain_separation_prefix
+ *
+ * Description: Prepares domain separation prefix for ML-DSA signing.
+ *              For pure ML-DSA (hashalg == MLD_PREHASH_NONE):
+ *                Format: 0x00 || ctxlen (1 byte) || ctx
+ *              For HashML-DSA (hashalg != MLD_PREHASH_NONE):
+ *                Format: 0x01 || ctxlen (1 byte) || ctx || oid (11 bytes) || ph
+ *
+ * Arguments:   - uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES]:
+ *                output domain separation prefix buffer
+ *              - const uint8_t *ph: pointer to pre-hashed message
+ *                (ignored for pure ML-DSA)
+ *              - size_t phlen: length of pre-hashed message
+ *                (ignored for pure ML-DSA)
+ *              - const uint8_t *ctx: pointer to context string (may be NULL)
+ *              - size_t ctxlen: length of context string
+ *              - int hashalg: hash algorithm constant
+ *                (MLD_PREHASH_NONE for pure ML-DSA, or MLD_PREHASH_* for
+ *                 HashML-DSA)
+ *
+ * Returns the total length of the formatted prefix, or 0 on error.
+ *
+ * This function is useful for building incremental signing APIs.
+ *
+ * Specification:
+ * - For HashML-DSA (hashalg != MLD_PREHASH_NONE), implements
+ *   @[FIPS204, Algorithm 4, L23]
+ * - For Pure ML-DSA (hashalg == MLD_PREHASH_NONE), implements
+ *    ```
+ *       M' <- BytesToBits(IntegerToBytes(0, 1)
+ *              || IntegerToBytes(|ctx|, 1)
+ *              || ctx
+ *    ```
+ *    which is part of @[FIPS204, Algorithm 2 (ML-DSA.Sign), L10] and
+ *    @[FIPS204, Algorithm 3 (ML-DSA.Verify), L5].
+ *
+ **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
+MLD_EXTERNAL_API
+size_t mld_prepare_domain_separation_prefix(
+    uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
+    size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg)
+__contract__(
+  requires(ctxlen <= 255)
+  requires(phlen <= MLD_MAX_BUFFER_SIZE)
+  requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
+  requires(hashalg == MLD_PREHASH_NONE || memory_no_alias(ph, phlen))
+  requires(memory_no_alias(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
+  assigns(memory_slice(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
+  ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
 );
 
 #endif /* !MLD_SIGN_H */

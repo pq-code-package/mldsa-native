@@ -164,7 +164,9 @@
 #undef MLD_API_CONCAT_UNDERSCORE
 #undef MLD_API_MUST_CHECK_RETURN_VALUE
 #undef MLD_API_NAMESPACE
+#undef MLD_DOMAIN_SEPARATION_MAX_BYTES
 #undef MLD_H
+#undef MLD_PREHASH_NONE
 #undef MLD_PREHASH_SHA2_224
 #undef MLD_PREHASH_SHA2_256
 #undef MLD_PREHASH_SHA2_384
@@ -300,6 +302,8 @@
 #undef mld_use_hint
 /* mldsa/src/sign.h */
 #undef MLD_CONFIG_API_NO_SUPERCOP
+#undef MLD_DOMAIN_SEPARATION_MAX_BYTES
+#undef MLD_PREHASH_NONE
 #undef MLD_PREHASH_SHA2_224
 #undef MLD_PREHASH_SHA2_256
 #undef MLD_PREHASH_SHA2_384
@@ -327,6 +331,7 @@
 #undef crypto_sign_verify_internal
 #undef crypto_sign_verify_pre_hash_internal
 #undef crypto_sign_verify_pre_hash_shake256
+#undef mld_prepare_domain_separation_prefix
 
 #if !defined(MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)
 /*
@@ -369,11 +374,6 @@
 #undef mld_polyt0_unpack
 #undef mld_polyt1_pack
 #undef mld_polyt1_unpack
-/* mldsa/src/prehash.h */
-#undef MLD_PREHASH_H
-#undef MLD_PRE_HASH_MAX_FORMATTED_MESSAGE_BYTES
-#undef mld_format_pre_hash_message
-#undef mld_validate_hash_length
 /* mldsa/src/randombytes.h */
 #undef MLD_RANDOMBYTES_H
 /* mldsa/src/reduce.h */

@@ -32,9 +32,9 @@ implementations:
     mldsa/src/cbmc.h mldsa/src/common.h mldsa/src/ct.c mldsa/src/ct.h mldsa/src/debug.c
     mldsa/src/debug.h mldsa/src/ntt.c mldsa/src/ntt.h mldsa/src/packing.c mldsa/src/packing.h
     mldsa/src/params.h mldsa/src/poly.c mldsa/src/poly.h mldsa/src/poly_kl.c mldsa/src/poly_kl.h
-    mldsa/src/polyvec.c mldsa/src/polyvec.h mldsa/src/prehash.c mldsa/src/prehash.h
-    mldsa/src/randombytes.h mldsa/src/reduce.h mldsa/src/rounding.h mldsa/src/sign.c
-    mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h mldsa/src/zetas.inc
+    mldsa/src/polyvec.c mldsa/src/polyvec.h mldsa/src/randombytes.h mldsa/src/reduce.h
+    mldsa/src/rounding.h mldsa/src/sign.c mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h
+    mldsa/src/zetas.inc
 - name: x86_64
   version: FIPS204
   folder_name: .
@@ -48,9 +48,8 @@ implementations:
     mldsa/src/debug.h mldsa/src/native/api.h mldsa/src/native/meta.h mldsa/src/ntt.c
     mldsa/src/ntt.h mldsa/src/packing.c mldsa/src/packing.h mldsa/src/params.h mldsa/src/poly.c
     mldsa/src/poly.h mldsa/src/poly_kl.c mldsa/src/poly_kl.h mldsa/src/polyvec.c mldsa/src/polyvec.h
-    mldsa/src/prehash.c mldsa/src/prehash.h mldsa/src/randombytes.h mldsa/src/reduce.h
-    mldsa/src/rounding.h mldsa/src/sign.c mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h
-    mldsa/src/zetas.inc mldsa/src/native/x86_64
+    mldsa/src/randombytes.h mldsa/src/reduce.h mldsa/src/rounding.h mldsa/src/sign.c
+    mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h mldsa/src/zetas.inc mldsa/src/native/x86_64
   supported_platforms:
   - architecture: x86_64
     operating_systems:
@@ -72,9 +71,8 @@ implementations:
     mldsa/src/debug.h mldsa/src/native/api.h mldsa/src/native/meta.h mldsa/src/ntt.c
     mldsa/src/ntt.h mldsa/src/packing.c mldsa/src/packing.h mldsa/src/params.h mldsa/src/poly.c
     mldsa/src/poly.h mldsa/src/poly_kl.c mldsa/src/poly_kl.h mldsa/src/polyvec.c mldsa/src/polyvec.h
-    mldsa/src/prehash.c mldsa/src/prehash.h mldsa/src/randombytes.h mldsa/src/reduce.h
-    mldsa/src/rounding.h mldsa/src/sign.c mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h
-    mldsa/src/zetas.inc mldsa/src/native/aarch64
+    mldsa/src/randombytes.h mldsa/src/reduce.h mldsa/src/rounding.h mldsa/src/sign.c
+    mldsa/src/sign.h mldsa/src/symmetric.h mldsa/src/sys.h mldsa/src/zetas.inc mldsa/src/native/aarch64
   supported_platforms:
   - architecture: arm_8
     operating_systems:
