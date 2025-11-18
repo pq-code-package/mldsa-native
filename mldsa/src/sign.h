@@ -64,6 +64,7 @@
   MLD_NAMESPACE_KL(verify_pre_hash_shake256)
 #define mld_prepare_domain_separation_prefix \
   MLD_NAMESPACE_KL(prepare_domain_separation_prefix)
+#define crypto_sign_pk_from_sk MLD_NAMESPACE_KL(pk_from_sk)
 
 /*************************************************
  * Hash algorithm constants for domain separation
@@ -686,4 +687,28 @@ __contract__(
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
 );
 
+/*************************************************
+ * Name:        crypto_sign_pk_from_sk
+ *
+ * Description: Derives public key from secret key with validation.
+ *              Checks that t0 and tr stored in sk match recomputed values.
+ *
+ * Arguments:   - uint8_t pk[CRYPTO_PUBLICKEYBYTES]: output public key
+ *              - const uint8_t sk[CRYPTO_SECRETKEYBYTES]: input secret key
+ *
+ * Returns 0 on success, -1 if validation fails (invalid secret key)
+ *
+ * Note: This function leaks whether the secret key is valid or invalid
+ *       through its return value and timing.
+ **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
+MLD_EXTERNAL_API
+int crypto_sign_pk_from_sk(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+                           const uint8_t sk[CRYPTO_SECRETKEYBYTES])
+__contract__(
+  requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
+  requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
+  assigns(memory_slice(pk, CRYPTO_PUBLICKEYBYTES))
+  ensures(return_value == 0 || return_value == -1)
+);
 #endif /* !MLD_SIGN_H */

@@ -4,41 +4,31 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = crypto_sign_keypair_internal_harness
+HARNESS_FILE = value_barrier_u8_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = crypto_sign_keypair_internal
+PROOF_UID = mld_value_barrier_u8
 
-DEFINES +=
+DEFINES += -DMLD_CONFIG_NO_ASM_VALUE_BARRIER
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/ct.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)keypair_internal
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)shake256
-USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)polyvec_matrix_expand
-USE_FUNCTION_CONTRACTS+=mld_sample_s1_s2
-USE_FUNCTION_CONTRACTS+=mld_compute_t0_t1_tr_from_sk_components
-USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)pack_pk
-USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)pack_sk
-USE_FUNCTION_CONTRACTS+=mld_zeroize
-USE_FUNCTION_CONTRACTS+=mld_check_pct
-
+CHECK_FUNCTION_CONTRACTS=mld_value_barrier_u8
+USE_FUNCTION_CONTRACTS=mld_ct_get_optblocker_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
-CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = crypto_sign_keypair_internal
+FUNCTION_NAME = mld_value_barrier_u8
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -47,7 +37,7 @@ FUNCTION_NAME = crypto_sign_keypair_internal
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

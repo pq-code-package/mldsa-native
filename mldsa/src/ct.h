@@ -92,12 +92,18 @@ __contract__(ensures(return_value == 0)) { return (int64_t)mld_ct_get_optblocker
 static MLD_INLINE uint32_t mld_ct_get_optblocker_u32(void)
 __contract__(ensures(return_value == 0)) { return (uint32_t)mld_ct_get_optblocker_u64(); }
 
+static MLD_INLINE uint8_t mld_ct_get_optblocker_u8(void)
+__contract__(ensures(return_value == 0)) { return (uint8_t)mld_ct_get_optblocker_u64(); }
+
 /* Opt-blocker based implementation of value barriers */
 static MLD_INLINE int64_t mld_value_barrier_i64(int64_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mld_ct_get_optblocker_i64()); }
 
 static MLD_INLINE uint32_t mld_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b)) { return (b ^ mld_ct_get_optblocker_u32()); }
+
+static MLD_INLINE uint8_t mld_value_barrier_u8(uint8_t b)
+__contract__(ensures(return_value == b)) { return (b ^ mld_ct_get_optblocker_u8()); }
 
 
 #else  /* !MLD_USE_ASM_VALUE_BARRIER */
@@ -109,6 +115,13 @@ __contract__(ensures(return_value == b))
 }
 
 static MLD_INLINE uint32_t mld_value_barrier_u32(uint32_t b)
+__contract__(ensures(return_value == b))
+{
+  __asm__("" : "+r"(b));
+  return b;
+}
+
+static MLD_INLINE uint8_t mld_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
   __asm__("" : "+r"(b));
@@ -239,6 +252,48 @@ __contract__(
 
 #if !defined(__ASSEMBLER__)
 #include <string.h>
+
+/*************************************************
+ * Name:        mld_ct_memcmp
+ *
+ * Description: Compare two arrays for equality in constant time.
+ *
+ * Arguments:   const void *a: pointer to first byte array
+ *              const void *b: pointer to second byte array
+ *              size_t len:    length of the byte arrays
+ *
+ * Returns 0 if the byte arrays are equal, a non-zero value otherwise
+ **************************************************/
+static MLD_INLINE uint8_t mld_ct_memcmp(const void *a, const void *b,
+                                        const size_t len)
+__contract__(
+  requires(len <= UINT16_MAX)
+  requires(memory_no_alias(a, len))
+  requires(memory_no_alias(b, len))
+  ensures((return_value == 0) == forall(i, 0, len, (((const uint8_t *)a)[i] == ((const uint8_t *)b)[i])))
+)
+{
+  const uint8_t *a_bytes = (const uint8_t *)a;
+  const uint8_t *b_bytes = (const uint8_t *)b;
+  uint8_t r = 0, s = 0;
+  unsigned i;
+
+  for (i = 0; i < len; i++)
+  __loop__(
+    invariant(i <= len)
+    invariant((r == 0) == (forall(k, 0, i, (a_bytes[k] == b_bytes[k])))))
+  {
+    r |= a_bytes[i] ^ b_bytes[i];
+    /* s is useless, but prevents the loop from being aborted once r=0xff. */
+    s ^= a_bytes[i] ^ b_bytes[i];
+  }
+
+  /*
+   * XOR twice with s, separated by a value barrier, to prevent the compile
+   * from dropping the s computation in the loop.
+   */
+  return (uint8_t)((mld_value_barrier_u32((uint32_t)r) ^ s) ^ s);
+}
 
 /*************************************************
  * Name:        mld_zeroize

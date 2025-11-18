@@ -321,6 +321,7 @@
 #undef crypto_sign_keypair
 #undef crypto_sign_keypair_internal
 #undef crypto_sign_open
+#undef crypto_sign_pk_from_sk
 #undef crypto_sign_signature
 #undef crypto_sign_signature_extmu
 #undef crypto_sign_signature_internal

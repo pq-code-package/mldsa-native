@@ -615,6 +615,25 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg);
 
+/*************************************************
+ * Name:        crypto_sign_pk_from_sk
+ *
+ * Description: Derives public key from secret key with validation.
+ *              Checks that t0 and tr stored in sk match recomputed values.
+ *
+ * Arguments:   - uint8_t pk[CRYPTO_PUBLICKEYBYTES]: output public key
+ *              - const uint8_t sk[CRYPTO_SECRETKEYBYTES]: input secret key
+ *
+ * Returns 0 on success, -1 if validation fails (invalid secret key)
+ *
+ * Note: This function leaks whether the secret key is valid or invalid
+ *       through its return value and timing.
+ **************************************************/
+MLD_API_MUST_CHECK_RETURN_VALUE
+int MLD_API_NAMESPACE(pk_from_sk)(
+    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+
 /****************************** SUPERCOP API *********************************/
 
 #if !defined(MLD_CONFIG_API_NO_SUPERCOP)

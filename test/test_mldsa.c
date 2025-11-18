@@ -151,6 +151,65 @@ static int test_sign_pre_hash(void)
   return 0;
 }
 
+static int test_pk_from_sk(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t pk_derived[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sk_corrupted[CRYPTO_SECRETKEYBYTES];
+  int rc;
+
+  /* Generate a keypair */
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+
+  /* Derive public key from secret key */
+  CHECK(crypto_sign_pk_from_sk(pk_derived, sk) == 0);
+
+  /* Verify derived public key matches original */
+  if (memcmp(pk, pk_derived, CRYPTO_PUBLICKEYBYTES) != 0)
+  {
+    printf("ERROR: pk_from_sk - derived public key does not match original\n");
+    return 1;
+  }
+
+  /* Test with corrupted t0 in secret key - should fail validation */
+  memcpy(sk_corrupted, sk, CRYPTO_SECRETKEYBYTES);
+  /* Corrupt a byte in the t0 portion of the secret key */
+  sk_corrupted[MLDSA_SEEDBYTES + MLDSA_TRBYTES + MLDSA_SEEDBYTES + 10] ^= 1;
+
+  rc = crypto_sign_pk_from_sk(pk_derived, sk_corrupted);
+
+  /* Constant time: Declassify to check result */
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
+
+  if (rc != -1)
+  {
+    printf("ERROR: pk_from_sk - should fail with corrupted t0 in secret key\n");
+    return 1;
+  }
+
+  /* Test with corrupted tr in secret key - should fail validation */
+  memcpy(sk_corrupted, sk, CRYPTO_SECRETKEYBYTES);
+  /* Corrupt a byte in the tr portion of the secret key */
+  /* tr starts at offset 2 * MLDSA_SEEDBYTES (after rho and key) */
+  sk_corrupted[2 * MLDSA_SEEDBYTES + 10] ^= 1;
+
+  rc = crypto_sign_pk_from_sk(pk_derived, sk_corrupted);
+
+  /* Constant time: Declassify to check result */
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
+
+  if (rc != -1)
+  {
+    printf(
+        "ERROR: crypto_sign_pk_from_sk - should fail with corrupted tr in "
+        "secret key\n");
+    return 1;
+  }
+
+  return 0;
+}
+
 static int test_wrong_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -323,6 +382,7 @@ int main(void)
     r |= test_wrong_ctx();
     r |= test_sign_extmu();
     r |= test_sign_pre_hash();
+    r |= test_pk_from_sk();
     if (r)
     {
       return 1;
