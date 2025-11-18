@@ -11,7 +11,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
 #include "arith_native_aarch64.h"
@@ -224,8 +225,8 @@ MLD_ALIGN const int32_t mld_aarch64_intt_zetas_layer123456[] = {
     601683,   154181397,  0,        0,
 };
 
-#else /* MLD_ARITH_BACKEND_AARCH64 */
+#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLD_EMPTY_CU(aarch64_zetas)
 
-#endif /* !MLD_ARITH_BACKEND_AARCH64 */
+#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

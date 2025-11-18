@@ -854,7 +854,8 @@ def gen_aarch64_zeta_file():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLD_ARITH_BACKEND_AARCH64)"
+        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
