@@ -236,6 +236,35 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/monolithic_build_multilevel_native/multilevel_config.h
+    description: "Multilevel monolithic build config with native backends"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_EXTERNAL_API_QUALIFIER: static
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+      MLD_CONFIG_CUSTOM_RANDOMBYTES:
+        comment: |
+          /* Even though we use the default randombytes signature here, registering it
+           * as a custom implementation avoids double-declaration of randombytes via
+           * mldsa/src/randombytes.h and test_only_rng/notrandombytes.h: The former is by
+           * default included by mldsa-native, and the latter is needed for this example
+           * since we rely on the additional randombytes_reset() API. */
+        content: |
+          #define MLD_CONFIG_CUSTOM_RANDOMBYTES
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          #include "sys.h"
+          #include "test_only_rng/notrandombytes.h"
+          static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+          {
+            randombytes(ptr, len);
+          }
+          #endif /* !__ASSEMBLER__ */
+
   - path: examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h
     description: "Config without randomized API"
     defines:

@@ -207,6 +207,7 @@ class TEST_TYPES(Enum):
     BASIC_DETERMINISTIC = 12
     BRING_YOUR_OWN_FIPS202_STATIC = 13
     MONOLITHIC_BUILD_NATIVE = 14
+    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 15
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -224,6 +225,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
             TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC,
             TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
+            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
         ]
 
     @staticmethod
@@ -267,6 +269,8 @@ class TEST_TYPES(Enum):
             return "Example (bring your own FIPS-202, static)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
             return "Example (monobuild with native)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+            return "Example (monobuild, multilevel with native)"
 
     def make_dir(self):
         if self == TEST_TYPES.BASIC:
@@ -283,6 +287,8 @@ class TEST_TYPES(Enum):
             return "examples/bring_your_own_fips202_static"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
             return "examples/monolithic_build_native"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+            return "examples/monolithic_build_multilevel_native"
         return ""
 
     def make_target(self):
@@ -313,6 +319,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return ""
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
             return ""
 
     def make_run_target(self, scheme):
@@ -1064,7 +1072,7 @@ def cli():
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
-            # "monolithic_build_multilevel_native",
+            "monolithic_build_multilevel_native",
             # "multilevel_build",
             # "multilevel_build_native",
         ],
@@ -1113,6 +1121,7 @@ def cli():
             "monolithic_build_multilevel",
             "bring_your_own_fips202_static",
             "monolithic_build_native",
+            "monolithic_build_multilevel_native",
         ],
         action="append",
     )
