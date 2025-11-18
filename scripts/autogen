@@ -1534,7 +1534,7 @@ def gen_monolithic_source_file():
 def gen_monolithic_asm_file():
 
     def gen():
-        asm_sources = get_asm_source_files(main_only=True)
+        asm_sources = get_asm_source_files(main_only=True, strip_mldsa=True)
         yield from gen_header()
         yield "/******************************************************************************"
         yield " *"

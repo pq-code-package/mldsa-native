@@ -60,42 +60,42 @@
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #if defined(MLD_SYS_AARCH64)
-#include "mldsa/src/native/aarch64/src/intt.S"
-#include "mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l4.S"
-#include "mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l5.S"
-#include "mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l7.S"
-#include "mldsa/src/native/aarch64/src/ntt.S"
-#include "mldsa/src/native/aarch64/src/pointwise_montgomery.S"
-#include "mldsa/src/native/aarch64/src/poly_caddq_asm.S"
-#include "mldsa/src/native/aarch64/src/poly_chknorm_asm.S"
-#include "mldsa/src/native/aarch64/src/poly_decompose_32_asm.S"
-#include "mldsa/src/native/aarch64/src/poly_decompose_88_asm.S"
-#include "mldsa/src/native/aarch64/src/poly_use_hint_32_asm.S"
-#include "mldsa/src/native/aarch64/src/poly_use_hint_88_asm.S"
-#include "mldsa/src/native/aarch64/src/polyz_unpack_17_asm.S"
-#include "mldsa/src/native/aarch64/src/polyz_unpack_19_asm.S"
-#include "mldsa/src/native/aarch64/src/rej_uniform_asm.S"
-#include "mldsa/src/native/aarch64/src/rej_uniform_eta2_asm.S"
-#include "mldsa/src/native/aarch64/src/rej_uniform_eta4_asm.S"
+#include "src/native/aarch64/src/intt.S"
+#include "src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l4.S"
+#include "src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l5.S"
+#include "src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l7.S"
+#include "src/native/aarch64/src/ntt.S"
+#include "src/native/aarch64/src/pointwise_montgomery.S"
+#include "src/native/aarch64/src/poly_caddq_asm.S"
+#include "src/native/aarch64/src/poly_chknorm_asm.S"
+#include "src/native/aarch64/src/poly_decompose_32_asm.S"
+#include "src/native/aarch64/src/poly_decompose_88_asm.S"
+#include "src/native/aarch64/src/poly_use_hint_32_asm.S"
+#include "src/native/aarch64/src/poly_use_hint_88_asm.S"
+#include "src/native/aarch64/src/polyz_unpack_17_asm.S"
+#include "src/native/aarch64/src/polyz_unpack_19_asm.S"
+#include "src/native/aarch64/src/rej_uniform_asm.S"
+#include "src/native/aarch64/src/rej_uniform_eta2_asm.S"
+#include "src/native/aarch64/src/rej_uniform_eta4_asm.S"
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
-#include "mldsa/src/native/x86_64/src/intt.S"
-#include "mldsa/src/native/x86_64/src/ntt.S"
-#include "mldsa/src/native/x86_64/src/nttunpack.S"
-#include "mldsa/src/native/x86_64/src/pointwise.S"
-#include "mldsa/src/native/x86_64/src/pointwise_acc_l4.S"
-#include "mldsa/src/native/x86_64/src/pointwise_acc_l5.S"
-#include "mldsa/src/native/x86_64/src/pointwise_acc_l7.S"
+#include "src/native/x86_64/src/intt.S"
+#include "src/native/x86_64/src/ntt.S"
+#include "src/native/x86_64/src/nttunpack.S"
+#include "src/native/x86_64/src/pointwise.S"
+#include "src/native/x86_64/src/pointwise_acc_l4.S"
+#include "src/native/x86_64/src/pointwise_acc_l5.S"
+#include "src/native/x86_64/src/pointwise_acc_l7.S"
 #endif /* MLD_SYS_X86_64 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 #if defined(MLD_SYS_AARCH64)
-#include "mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S"
-#include "mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S"
-#include "mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S"
-#include "mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S"
-#include "mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x1_scalar_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
 #endif
