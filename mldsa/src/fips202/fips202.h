@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../cbmc.h"
+#include "../common.h"
 
 #define SHAKE128_RATE 168
 #define SHAKE256_RATE 136
@@ -17,7 +18,6 @@
 #define SHA3_256_HASHBYTES 32
 #define SHA3_512_HASHBYTES 64
 
-#define FIPS202_NAMESPACE(s) mldsa_fips202_ref_##s
 
 typedef struct
 {
@@ -31,7 +31,7 @@ typedef struct
   unsigned int pos;
 } mld_shake256ctx;
 
-#define mld_shake128_init FIPS202_NAMESPACE(shake128_init)
+#define mld_shake128_init MLD_NAMESPACE(shake128_init)
 /*************************************************
  * Name:        mld_shake128_init
  *
@@ -46,7 +46,7 @@ __contract__(
   ensures(state->pos == 0)
 );
 
-#define mld_shake128_absorb FIPS202_NAMESPACE(shake128_absorb)
+#define mld_shake128_absorb MLD_NAMESPACE(shake128_absorb)
 /*************************************************
  * Name:        mld_shake128_absorb
  *
@@ -68,7 +68,7 @@ __contract__(
   ensures(state->pos <= SHAKE128_RATE)
 );
 
-#define mld_shake128_finalize FIPS202_NAMESPACE(shake128_finalize)
+#define mld_shake128_finalize MLD_NAMESPACE(shake128_finalize)
 /*************************************************
  * Name:        mld_shake128_finalize
  *
@@ -84,7 +84,7 @@ __contract__(
   ensures(state->pos <= SHAKE128_RATE)
 );
 
-#define mld_shake128_squeeze FIPS202_NAMESPACE(shake128_squeeze)
+#define mld_shake128_squeeze MLD_NAMESPACE(shake128_squeeze)
 /*************************************************
  * Name:        mld_shake128_squeeze
  *
@@ -107,7 +107,7 @@ __contract__(
   ensures(state->pos <= SHAKE128_RATE)
 );
 
-#define mld_shake128_release FIPS202_NAMESPACE(shake128_release)
+#define mld_shake128_release MLD_NAMESPACE(shake128_release)
 /*************************************************
  * Name:        mld_shake128_release
  *
@@ -121,7 +121,7 @@ __contract__(
   assigns(memory_slice(state, sizeof(mld_shake128ctx)))
 );
 
-#define mld_shake256_init FIPS202_NAMESPACE(shake256_init)
+#define mld_shake256_init MLD_NAMESPACE(shake256_init)
 /*************************************************
  * Name:        mld_shake256_init
  *
@@ -136,7 +136,7 @@ __contract__(
   ensures(state->pos == 0)
 );
 
-#define mld_shake256_absorb FIPS202_NAMESPACE(shake256_absorb)
+#define mld_shake256_absorb MLD_NAMESPACE(shake256_absorb)
 /*************************************************
  * Name:        mld_shake256_absorb
  *
@@ -158,7 +158,7 @@ __contract__(
   ensures(state->pos <= SHAKE256_RATE)
 );
 
-#define mld_shake256_finalize FIPS202_NAMESPACE(shake256_finalize)
+#define mld_shake256_finalize MLD_NAMESPACE(shake256_finalize)
 /*************************************************
  * Name:        mld_shake256_finalize
  *
@@ -174,7 +174,7 @@ __contract__(
   ensures(state->pos <= SHAKE256_RATE)
 );
 
-#define mld_shake256_squeeze FIPS202_NAMESPACE(shake256_squeeze)
+#define mld_shake256_squeeze MLD_NAMESPACE(shake256_squeeze)
 /*************************************************
  * Name:        mld_shake256_squeeze
  *
@@ -197,7 +197,7 @@ __contract__(
   ensures(state->pos <= SHAKE256_RATE)
 );
 
-#define mld_shake256_release FIPS202_NAMESPACE(shake256_release)
+#define mld_shake256_release MLD_NAMESPACE(shake256_release)
 /*************************************************
  * Name:        mld_shake256_release
  *
@@ -211,7 +211,7 @@ __contract__(
   assigns(memory_slice(state, sizeof(mld_shake256ctx)))
 );
 
-#define mld_shake256 FIPS202_NAMESPACE(shake256)
+#define mld_shake256 MLD_NAMESPACE(shake256)
 /*************************************************
  * Name:        mld_shake256
  *

@@ -438,7 +438,6 @@
  * Undefine macros from FIPS-202 files
  */
 /* mldsa/src/fips202/fips202.h */
-#undef FIPS202_NAMESPACE
 #undef MLD_FIPS202_FIPS202_H
 #undef MLD_KECCAK_LANES
 #undef SHA3_256_HASHBYTES
