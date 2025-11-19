@@ -221,9 +221,8 @@ jobs:
         backend:
            - arg: '--aarch64-clean'
              name: Clean
-          # TODO: add backend option after we have optimized/clean seperation
-          #  - arg: ''
-          #    name: Optimized
+           - arg: ''
+             name: Optimized
         simplify:
            - arg: ''
              name: Simplified

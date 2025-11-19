@@ -166,6 +166,9 @@ source code and documentation.
 * Referenced from:
   - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
   - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
+  - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
+  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
+  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
   - [mldsa/src/native/aarch64/src/intt.S](mldsa/src/native/aarch64/src/intt.S)
   - [mldsa/src/native/aarch64/src/ntt.S](mldsa/src/native/aarch64/src/ntt.S)
 
@@ -274,6 +277,9 @@ source code and documentation.
 * Referenced from:
   - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
   - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
+  - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
+  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
+  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
   - [mldsa/src/native/aarch64/src/intt.S](mldsa/src/native/aarch64/src/intt.S)
   - [mldsa/src/native/aarch64/src/ntt.S](mldsa/src/native/aarch64/src/ntt.S)
 

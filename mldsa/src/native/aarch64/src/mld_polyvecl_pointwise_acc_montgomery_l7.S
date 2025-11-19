@@ -7,7 +7,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/aarch64_clean/src/mld_polyvecl_pointwise_acc_montgomery_l7.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/mld_polyvecl_pointwise_acc_montgomery_l7.S using scripts/simpasm. Do not modify it directly.
  */
 
 

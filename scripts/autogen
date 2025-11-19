@@ -185,6 +185,9 @@ def finalize(dry_run):
 #
 # It currently covers:
 # - zeta values for the reference NTT and invNTT
+# - lookup tables used for fast rejection sampling
+# - source files for monolithic single-CU build
+# - simplified assembly sources
 # - header guards
 # - #undef's for CU-local macros
 
@@ -889,6 +892,8 @@ def gen_aarch64_zeta_file():
         yield "#endif"
         yield ""
 
+    update_file("dev/aarch64_opt/src/aarch64_zetas.c", "\n".join(gen()))
+
     update_file("dev/aarch64_clean/src/aarch64_zetas.c", "\n".join(gen()))
 
 
@@ -939,6 +944,8 @@ def gen_aarch64_rej_uniform_eta_table():
         yield "#endif"
         yield ""
 
+    update_file("dev/aarch64_opt/src/rej_uniform_eta_table.c", "\n".join(gen()))
+
     update_file("dev/aarch64_clean/src/rej_uniform_eta_table.c", "\n".join(gen()))
 
 
@@ -987,6 +994,8 @@ def gen_aarch64_rej_uniform_table():
         yield ""
         yield "#endif"
         yield ""
+
+    update_file("dev/aarch64_opt/src/rej_uniform_table.c", "\n".join(gen()))
 
     update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
 
@@ -2229,14 +2238,28 @@ def gen_undefs():
         )
 
 
-def get_markdown_files():
-    return get_files("**/*.md")
+def gen_slothy(funcs):
+    if not isinstance(funcs, list):
+        return
 
+    targets = list(map(lambda s: s + ".S", funcs))
 
-def gen_yaml_header():
-    yield "# Copyright (c) The mldsa-native project authors"
-    yield "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
-    yield ""
+    for t in targets:
+        status_update("SLOTHY", f"Regenerating {t}")
+
+        if t.startswith("keccak"):
+            base = "dev/fips202/aarch64/src"
+        else:
+            base = "dev/aarch64_opt/src"
+
+        # Remove file(s) to be re-generated
+        if t.endswith(".S"):
+            subprocess.run(["rm", "-f", f"{base}/{t}"])
+
+        p = subprocess.run(["make", t] + ["-C", base])
+        if p.returncode != 0:
+            print(f"Failed to run SLOTHY on {t}!")
+            exit(1)
 
 
 class BibliographyEntry:
@@ -2824,6 +2847,26 @@ def gen_test_configs():
 
 
 def _main():
+    slothy_choices = [
+        "ntt",
+        "intt",
+        "mld_polyvecl_pointwise_acc_montgomery_l4",
+        "mld_polyvecl_pointwise_acc_montgomery_l5",
+        "mld_polyvecl_pointwise_acc_montgomery_l7",
+        "pointwise_montgomery",
+        "poly_caddq_asm",
+        "poly_chknorm_asm",
+        "poly_decompose_32_asm",
+        "poly_decompose_88_asm",
+        "poly_use_hint_32_asm",
+        "poly_use_hint_88_asm",
+        "polyz_unpack_17_asm",
+        "polyz_unpack_19_asm",
+        "rej_uniform_asm",
+        "rej_uniform_eta2_asm",
+        "rej_uniform_eta4_asm",
+    ]
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -2831,7 +2874,8 @@ def _main():
     parser.add_argument(
         "--update-hol-light-bytecode", default=False, action="store_true"
     )
-    parser.add_argument("--aarch64-clean", default=True, action="store_true")
+    parser.add_argument("--slothy", nargs="*", default=None, choices=slothy_choices)
+    parser.add_argument("--aarch64-clean", default=False, action="store_true")
     parser.add_argument("--no-simplify", default=False, action="store_true")
     parser.add_argument("--force-cross", default=False, action="store_true")
     parser.add_argument(
@@ -2854,6 +2898,12 @@ def _main():
 
     normalize_asm_macro_syntax()
     high_level_status("Normalize assembly macro syntax")
+
+    if args.slothy == []:
+        args.slothy = slothy_choices
+    if args.slothy is not None and args.dry_run is not None:
+        gen_slothy(args.slothy)
+        high_level_status("Generated SLOTHY optimized assembly")
 
     gen_c_zeta_file()
     gen_aarch64_zeta_file()

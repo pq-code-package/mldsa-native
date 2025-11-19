@@ -9,7 +9,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/aarch64_clean/src/polyz_unpack_17_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/polyz_unpack_17_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 
