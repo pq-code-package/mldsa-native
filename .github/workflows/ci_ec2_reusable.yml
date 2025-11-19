@@ -192,16 +192,24 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
           mldsa_parameter_set: ${{ inputs.cbmc_mldsa_parameter_set }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-      # - name: SLOTHY
-      #   if: ${{ inputs.slothy }}
-      #   uses: ./.github/actions/setup-shell
-      #   with:
-      #     gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
-      #     nix-cache: true
-      #     nix-shell: ci-slothy
-      #     script: |
-      #       autogen --slothy
-      #       tests all --opt opt
+      - name: SLOTHY
+        if: ${{ inputs.slothy }}
+        uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
+          nix-cache: true
+          nix-shell: ci-slothy
+          script: |
+            autogen --slothy
+            tests all --opt opt
+            # Force testing of SLOTHY-optimized Keccak variants
+            # We can't run the examples here because some of them also specify the backend
+            make clean
+            tests all --no-examples --opt opt --cflags="-DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x1_scalar.h\\\""
+            make clean
+            tests all --no-examples --opt opt --cflags="-DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
+            make clean
+            tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:
