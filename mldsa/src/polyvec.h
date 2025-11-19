@@ -81,21 +81,21 @@ __contract__(
  *              No modular reduction is performed.
  *
  * Arguments:   - mld_polyveck *u: pointer to input-output vector of polynomials
- *to be added to
+ *                                 to be added to
  *              - const mld_polyveck *v: pointer to second input vector of
- *              polynomials
+ *                                       polynomials
  **************************************************/
 MLD_INTERNAL_API
 void mld_polyvecl_add(mld_polyvecl *u, const mld_polyvecl *v)
 __contract__(
   requires(memory_no_alias(u, sizeof(mld_polyvecl)))
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  requires(forall(k0, 0, MLDSA_L, forall(k1, 0, MLDSA_N, (int64_t) u->vec[k0].coeffs[k1] + v->vec[k0].coeffs[k1] < REDUCE32_DOMAIN_MAX)))
-  requires(forall(k2, 0, MLDSA_L, forall(k3, 0, MLDSA_N, (int64_t) u->vec[k2].coeffs[k3] + v->vec[k2].coeffs[k3] >= INT32_MIN)))
+  requires(forall(p0, 0, MLDSA_L, array_abs_bound(u->vec[p0].coeffs, 0 , MLDSA_N, MLD_INTT_BOUND)))
+  requires(forall(p1, 0, MLDSA_L,
+                  array_bound(v->vec[p1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
   assigns(memory_slice(u, sizeof(mld_polyvecl)))
-  ensures(forall(k4, 0, MLDSA_L, forall(k5, 0, MLDSA_N, u->vec[k4].coeffs[k5] == old(*u).vec[k4].coeffs[k5] + v->vec[k4].coeffs[k5])))
-  ensures(forall(k6, 0, MLDSA_L,
-                 array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
+  ensures(forall(q2, 0, MLDSA_L,
+                 array_bound(u->vec[q2].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
 );
 
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
@@ -279,21 +279,21 @@ __contract__(
  *              No modular reduction is performed.
  *
  * Arguments:   - mld_polyveck *u: pointer to input-output vector of polynomials
- *to be added to
+ *                                 to be added to
  *              - const mld_polyveck *v: pointer to second input vector of
- *              polynomials
+ *                                       polynomials
  **************************************************/
 MLD_INTERNAL_API
 void mld_polyveck_add(mld_polyveck *u, const mld_polyveck *v)
 __contract__(
   requires(memory_no_alias(u, sizeof(mld_polyveck)))
   requires(memory_no_alias(v, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K, forall(k1, 0, MLDSA_N, (int64_t) u->vec[k0].coeffs[k1] + v->vec[k0].coeffs[k1] < REDUCE32_DOMAIN_MAX)))
-  requires(forall(k2, 0, MLDSA_K, forall(k3, 0, MLDSA_N, (int64_t) u->vec[k2].coeffs[k3] + v->vec[k2].coeffs[k3] >= INT32_MIN)))
+  requires(forall(p0, 0, MLDSA_K, array_abs_bound(u->vec[p0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
+  requires(forall(p1, 0, MLDSA_K,
+    array_bound(v->vec[p1].coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX)))
   assigns(memory_slice(u, sizeof(mld_polyveck)))
-  ensures(forall(k4, 0, MLDSA_K, forall(k5, 0, MLDSA_N, u->vec[k4].coeffs[k5] == old(*u).vec[k4].coeffs[k5] + v->vec[k4].coeffs[k5])))
-  ensures(forall(k6, 0, MLDSA_L,
-                array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
+  ensures(forall(q2, 0, MLDSA_K,
+                array_bound(u->vec[q2].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
 );
 
 #define mld_polyveck_sub MLD_NAMESPACE_KL(polyveck_sub)
