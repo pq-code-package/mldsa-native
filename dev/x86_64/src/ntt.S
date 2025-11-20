@@ -25,17 +25,17 @@
 
 #include "consts.h"
 
-.macro shuffle8 r0,r1,r2,r3
+.macro shuffle8 r0, r1, r2, r3
 vperm2i128	$0x20,%ymm\r1,%ymm\r0,%ymm\r2
 vperm2i128	$0x31,%ymm\r1,%ymm\r0,%ymm\r3
 .endm
 
-.macro shuffle4 r0,r1,r2,r3
+.macro shuffle4 r0, r1, r2, r3
 vpunpcklqdq	%ymm\r1,%ymm\r0,%ymm\r2
 vpunpckhqdq	%ymm\r1,%ymm\r0,%ymm\r3
 .endm
 
-.macro shuffle2 r0,r1,r2,r3
+.macro shuffle2 r0, r1, r2, r3
 #vpsllq		$32,%ymm\r1,%ymm\r2
 vmovsldup	%ymm\r1,%ymm\r2
 vpblendd	$0xAA,%ymm\r2,%ymm\r0,%ymm\r2
@@ -54,7 +54,7 @@ vpblendd	$0xAA,%ymm\r1,%ymm\r0,%ymm\r3
  * In conclusion, the magnitudes of all coefficients grow by at most q after
  * each layer.
  */
-.macro butterfly l,h,zl0=1,zl1=1,zh0=2,zh1=2
+.macro butterfly l, h, zl0=1, zl1=1, zh0=2, zh1=2
 vpmuldq		%ymm\zl0,%ymm\h,%ymm13
 vmovshdup	%ymm\h,%ymm12
 vpmuldq		%ymm\zl1,%ymm12,%ymm14
@@ -133,23 +133,23 @@ vmovdqa	 	896+32*\off(%rdi),%ymm11
 
 /* Bounds: |ymm{i}| < q */
 
-butterfly	4,8
-butterfly	5,9
-butterfly	6,10
-butterfly	7,11
+butterfly	4, 8
+butterfly	5, 9
+butterfly	6, 10
+butterfly	7, 11
 
 /* Bounds: |ymm{i}| < 2q */
 
 /* level 1 */
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+2)*4(%rsi),%ymm1
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+2)*4(%rsi),%ymm2
-butterfly	4,6
-butterfly	5,7
+butterfly	4, 6
+butterfly	5, 7
 
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+3)*4(%rsi),%ymm1
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+3)*4(%rsi),%ymm2
-butterfly	8,10
-butterfly	9,11
+butterfly	8, 10
+butterfly	9, 11
 
 /* Bounds: |ymm{i}| < 3q */
 
@@ -177,15 +177,15 @@ vmovdqa	 	256*\off+224(%rdi),%ymm11
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+4+\off)*4(%rsi),%ymm1
 vpbroadcastd	(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+4+\off)*4(%rsi),%ymm2
 
-butterfly	4,8
-butterfly	5,9
-butterfly	6,10
-butterfly	7,11
+butterfly	4, 8
+butterfly	5, 9
+butterfly	6, 10
+butterfly	7, 11
 
-shuffle8	4,8,3,8
-shuffle8	5,9,4,9
-shuffle8	6,10,5,10
-shuffle8	7,11,6,11
+shuffle8	4, 8, 3, 8
+shuffle8	5, 9, 4, 9
+shuffle8	6, 10, 5, 10
+shuffle8	7, 11, 6, 11
 
 /* Bounds: |ymm{i}| < 4q */
 
@@ -193,15 +193,15 @@ shuffle8	7,11,6,11
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+8+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+8+8*\off)*4(%rsi),%ymm2
 
-butterfly	3,5
-butterfly	8,10
-butterfly	4,6
-butterfly	9,11
+butterfly	3, 5
+butterfly	8, 10
+butterfly	4, 6
+butterfly	9, 11
 
-shuffle4	3,5,7,5
-shuffle4	8,10,3,10
-shuffle4	4,6,8,6
-shuffle4	9,11,4,11
+shuffle4	3, 5, 7, 5
+shuffle4	8, 10, 3, 10
+shuffle4	4, 6, 8, 6
+shuffle4	9, 11, 4, 11
 
 /* Bounds: |ymm{i}| < 5q */
 
@@ -209,15 +209,15 @@ shuffle4	9,11,4,11
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+40+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+40+8*\off)*4(%rsi),%ymm2
 
-butterfly	7,8
-butterfly	5,6
-butterfly	3,4
-butterfly	10,11
+butterfly	7, 8
+butterfly	5, 6
+butterfly	3, 4
+butterfly	10, 11
 
-shuffle2	7,8,9,8
-shuffle2	5,6,7,6
-shuffle2	3,4,5,4
-shuffle2	10,11,3,11
+shuffle2	7, 8, 9, 8
+shuffle2	5, 6, 7, 6
+shuffle2	3, 4, 5, 4
+shuffle2	10, 11, 3, 11
 
 /* Bounds: |ymm{i}| < 6q */
 
@@ -227,10 +227,10 @@ vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+72+8*\off)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
 
-butterfly	9,5,1,10,2,15
-butterfly	8,4,1,10,2,15
-butterfly	7,3,1,10,2,15
-butterfly	6,11,1,10,2,15
+butterfly	9, 5, 1, 10, 2, 15
+butterfly	8, 4, 1, 10, 2, 15
+butterfly	7, 3, 1, 10, 2, 15
+butterfly	6, 11, 1, 10, 2, 15
 
 /* Bounds: |ymm{i}| < 7q */
 
@@ -239,15 +239,15 @@ vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+104+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+104+8*\off)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	9,7,1,10,2,15
-butterfly	8,6,1,10,2,15
+butterfly	9, 7, 1, 10, 2, 15
+butterfly	8, 6, 1, 10, 2, 15
 
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+104+8*\off+32)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+104+8*\off+32)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	5,3,1,10,2,15
-butterfly	4,11,1,10,2,15
+butterfly	5, 3, 1, 10, 2, 15
+butterfly	4, 11, 1, 10, 2, 15
 
 /* Bounds: |ymm{i}| < 8q */
 
@@ -256,25 +256,25 @@ vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168+8*\off)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168+8*\off)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	9,8,1,10,2,15
+butterfly	9, 8, 1, 10, 2, 15
 
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168+8*\off+32)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168+8*\off+32)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	7,6,1,10,2,15
+butterfly	7, 6, 1, 10, 2, 15
 
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168+8*\off+64)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168+8*\off+64)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	5,4,1,10,2,15
+butterfly	5, 4, 1, 10, 2, 15
 
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV+168+8*\off+96)*4(%rsi),%ymm1
 vmovdqa		(MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS+168+8*\off+96)*4(%rsi),%ymm2
 vpsrlq		$32,%ymm1,%ymm10
 vmovshdup	%ymm2,%ymm15
-butterfly	3,11,1,10,2,15
+butterfly	3, 11, 1, 10, 2, 15
 
 /* Bounds: |ymm{i}| < 9q */
 
