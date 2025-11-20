@@ -194,42 +194,42 @@ jobs:
            c17: False
            c23: False
            opt: all
-           examples: False
+           examples: true
          - name: gcc-4.9
            shell: ci_gcc49
            darwin: False
            c17: False
            c23: False
            opt: all
-           examples: False
+           examples: true
          - name: gcc-7
            shell: ci_gcc7
            darwin: False
            c17: False
            c23: False
            opt: all
-           examples: False
+           examples: true
          - name: gcc-11
            shell: ci_gcc11
            darwin: True
            c17: True
            c23: False
            opt: all
-           examples: False
+           examples: true
          - name: gcc-13
            shell: ci_gcc13
            darwin: True
            c17: True
            c23: False
            opt: all
-           examples: False
+           examples: true
          - name: gcc-14
            shell: ci_gcc14
            darwin: True
            c17: True
            c23: True
            opt: all
-           examples: False
+           examples: true
          - name: gcc-15
            shell: ci_gcc15
            # TODO: Add this once gcc15 is supported in nix on aarch64-Darwin
@@ -244,28 +244,28 @@ jobs:
            c17: True
            c23: True
            opt: all
-           examples: False
+           examples: true
          - name: clang-19
            shell: ci_clang19
            darwin: True
            c17: True
            c23: True
            opt: all
-           examples: False
+           examples: true
          - name: clang-20
            shell: ci_clang20
            darwin: True
            c17: True
            c23: True
            opt: all
-           examples: False
+           examples: true
          - name: clang-21
            shell: ci_clang21
            darwin: True
            c17: True
            c23: True
            opt: all
-           examples: False
+           examples: true
          # CPU flags are not correctly passed to the zig assembler
          # https://github.com/ziglang/zig/issues/23576
          # We therefore only test the C backend
