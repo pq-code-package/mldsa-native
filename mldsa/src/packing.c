@@ -23,15 +23,14 @@ void mld_pack_pk(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   unsigned int i;
 
   mld_memcpy(pk, rho, MLDSA_SEEDBYTES);
-  pk += MLDSA_SEEDBYTES;
-
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
     assigns(i, memory_slice(pk, CRYPTO_PUBLICKEYBYTES))
     invariant(i <= MLDSA_K)
   )
   {
-    mld_polyt1_pack(pk + i * MLDSA_POLYT1_PACKEDBYTES, &t1->vec[i]);
+    mld_polyt1_pack(pk + MLDSA_SEEDBYTES + i * MLDSA_POLYT1_PACKEDBYTES,
+                    &t1->vec[i]);
   }
 }
 
