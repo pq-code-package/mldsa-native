@@ -61,7 +61,7 @@ void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0)
      * range: 0 <= f <= Q-1 = 32*GAMMA2 = 16*128*B
      */
 
-    /* Compute f1' = ceil(f / 128) as floor((f + 127) >> 7) */
+    /* Compute f1' = ceil(f / 128) as floor((f + 127) / 2^7) */
     f1 = _mm256_add_epi32(f, off);
     f1 = _mm256_srli_epi32(f1, 7);
     /*
@@ -87,7 +87,9 @@ void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0)
      */
     f1 = _mm256_mulhi_epu16(f1, v);
     /*
-     * range: 0 <= f1'' < floor(2^16 * 1025 / 2^16) = 1025
+     * range: 0 <= f1''  = floor(f1' * 1025 / 2^16)
+     *                  <= f1' * 1025 / 2^16
+     *                   < 2^16 * 1025 / 2^16 = 1025
      *
      * Because 0 <= f1'' < 2^15, the multiplication in mulhrs is unsigned, that
      * is, no erroneous sign-extension occurs.
