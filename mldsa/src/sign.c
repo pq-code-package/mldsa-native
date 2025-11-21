@@ -827,11 +827,12 @@ cleanup:
   mld_zeroize(c, sizeof(c));
   mld_zeroize(c2, sizeof(c2));
   mld_zeroize(&cp, sizeof(cp));
+  mld_zeroize(mat, sizeof(mat));
   mld_zeroize(&z, sizeof(z));
+  mld_zeroize(&t1, sizeof(t1));
   mld_zeroize(&w1, sizeof(w1));
   mld_zeroize(&tmp, sizeof(tmp));
   mld_zeroize(&h, sizeof(h));
-  mld_zeroize(mat, sizeof(mat));
   return res;
 }
 
