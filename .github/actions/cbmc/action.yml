@@ -54,5 +54,5 @@ runs:
         shell: ${{ env.SHELL }}
         run: |
           echo "::group::cbmc_${{ inputs.mldsa_parameter_set }}"
-          tests cbmc --mldsa_parameter_set ${{ inputs.mldsa_parameter_set }};
+          tests cbmc --mldsa_parameter_set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800;
           echo "::endgroup::"

@@ -811,6 +811,8 @@ class Tests:
                             "run-cbmc-proofs.py",
                             "--summarize",
                             "--no-coverage",
+                            "--per-proof-timeout",
+                            str(self.args.per_proof_timeout),
                             "-p",
                             func,
                         ]
@@ -867,7 +869,15 @@ class Tests:
                 return
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             p = subprocess.run(
-                ["python3", "run-cbmc-proofs.py", "--summarize", "--no-coverage", "-p"]
+                [
+                    "python3",
+                    "run-cbmc-proofs.py",
+                    "--summarize",
+                    "--no-coverage",
+                    "--per-proof-timeout",
+                    str(self.args.per_proof_timeout),
+                    "-p",
+                ]
                 + proofs
                 + self.make_j(),
                 cwd="proofs/cbmc",
@@ -1229,6 +1239,13 @@ def cli():
         help="Timeout for individual CBMC proofs, in seconds",
         type=int,
         default=3600,
+    )
+
+    cbmc_parser.add_argument(
+        "--per-proof-timeout",
+        help="Timeout for each individual CBMC proof passed to run-cbmc-proofs.py, in seconds (default: 1800)",
+        type=int,
+        default=1800,
     )
 
     cbmc_parser.add_argument(
