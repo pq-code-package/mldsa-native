@@ -135,6 +135,10 @@
 #endif /* inline */
 #endif /* !MLD_INLINE */
 
+#ifndef MLD_STATIC_TESTABLE
+#define MLD_STATIC_TESTABLE static
+#endif
+
 /*
  * C90 does not have the restrict compiler directive yet.
  * We don't use it in C90 builds.

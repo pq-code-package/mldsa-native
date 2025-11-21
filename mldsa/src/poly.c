@@ -142,23 +142,33 @@ void mld_poly_shiftl(mld_poly *a)
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
 }
 
+MLD_STATIC_TESTABLE void mld_poly_ntt_c(mld_poly *a)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+)
+{
+  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
+  mld_ntt(a->coeffs);
+  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
+}
+
 MLD_INTERNAL_API
 void mld_poly_ntt(mld_poly *a)
 {
-  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
 #if defined(MLD_USE_NATIVE_NTT)
+  int ret;
+  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
+  ret = mld_ntt_native(a->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
-    int ret;
-    ret = mld_ntt_native(a->coeffs);
-    if (ret == MLD_NATIVE_FUNC_SUCCESS)
-    {
-      mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
-      return;
-    }
+    mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
+    return;
   }
 #endif /* MLD_USE_NATIVE_NTT */
-  mld_ntt(a->coeffs);
-  mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
+  mld_poly_ntt_c(a);
 }
 
 MLD_INTERNAL_API
