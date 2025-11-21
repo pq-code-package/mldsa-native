@@ -310,7 +310,7 @@ __contract__(
   requires(memory_no_alias(r, MLDSA_POLYZ_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_POLYZ_PACKEDBYTES))
 );
 
 
@@ -350,7 +350,7 @@ __contract__(
   requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES))
 );
 
 #endif /* !MLD_POLY_KL_H */

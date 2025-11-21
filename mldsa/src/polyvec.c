@@ -40,7 +40,7 @@ __contract__(
   requires(memory_no_alias(mat, MLDSA_K * sizeof(mld_polyvecl)))
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
     array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  assigns(object_whole(mat))
+  assigns(memory_slice(mat, sizeof(mld_polyvecl)*MLDSA_K))
   ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
     array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 )
@@ -390,7 +390,7 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
 
   for (i = 0; i < MLDSA_N; i++)
   __loop__(
-    assigns(i, j, object_whole(w))
+    assigns(i, j, memory_slice(w, sizeof(mld_poly)))
     invariant(i <= MLDSA_N)
     invariant(array_abs_bound(w->coeffs, 0, i, MLDSA_Q))
   )
@@ -686,7 +686,7 @@ unsigned int mld_polyveck_make_hint(mld_polyveck *h, const mld_polyveck *v0,
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, s, object_whole(h))
+    assigns(i, s, memory_slice(h, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(s <= i * MLDSA_N)
     invariant(forall(k1, 0, i, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
@@ -733,7 +733,7 @@ void mld_polyveck_pack_w1(uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
     invariant(i <= MLDSA_K)
   )
   {
@@ -749,7 +749,7 @@ void mld_polyveck_pack_eta(uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES],
   mld_assert_abs_bound_2d(p->vec, MLDSA_K, MLDSA_N, MLDSA_ETA + 1);
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
     invariant(i <= MLDSA_K)
   )
   {
@@ -765,7 +765,7 @@ void mld_polyvecl_pack_eta(uint8_t r[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES],
   mld_assert_abs_bound_2d(p->vec, MLDSA_L, MLDSA_N, MLDSA_ETA + 1);
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
     invariant(i <= MLDSA_L)
   )
   {
@@ -782,7 +782,7 @@ void mld_polyvecl_pack_z(uint8_t r[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES],
                       MLDSA_GAMMA1 + 1);
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
     invariant(i <= MLDSA_L)
   )
   {
@@ -799,7 +799,7 @@ void mld_polyveck_pack_t0(uint8_t r[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES],
                       (1 << (MLDSA_D - 1)) + 1);
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, object_whole(r))
+    assigns(i, memory_slice(r, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
     invariant(i <= MLDSA_K)
   )
   {

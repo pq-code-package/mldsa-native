@@ -27,7 +27,7 @@ void mld_pack_pk(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, object_whole(pk))
+    assigns(i, memory_slice(pk, CRYPTO_PUBLICKEYBYTES))
     invariant(i <= MLDSA_K)
   )
   {
@@ -186,7 +186,7 @@ static int mld_unpack_hints(
 __contract__(
   requires(memory_no_alias(packed_hints, MLDSA_POLYVECH_PACKEDBYTES))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  assigns(object_whole(h))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
   /* All returned coefficients are either 0 or 1 */
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))

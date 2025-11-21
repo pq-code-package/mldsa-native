@@ -92,7 +92,7 @@ __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
   requires(forall(k0, 0, MLDSA_L, forall(k1, 0, MLDSA_N, (int64_t) u->vec[k0].coeffs[k1] + v->vec[k0].coeffs[k1] < REDUCE32_DOMAIN_MAX)))
   requires(forall(k2, 0, MLDSA_L, forall(k3, 0, MLDSA_N, (int64_t) u->vec[k2].coeffs[k3] + v->vec[k2].coeffs[k3] >= INT32_MIN)))
-  assigns(object_whole(u))
+  assigns(memory_slice(u, sizeof(mld_polyvecl)))
   ensures(forall(k4, 0, MLDSA_L, forall(k5, 0, MLDSA_N, u->vec[k4].coeffs[k5] == old(*u).vec[k4].coeffs[k5] + v->vec[k4].coeffs[k5])))
   ensures(forall(k6, 0, MLDSA_L,
                  array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
@@ -290,7 +290,7 @@ __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K, forall(k1, 0, MLDSA_N, (int64_t) u->vec[k0].coeffs[k1] + v->vec[k0].coeffs[k1] < REDUCE32_DOMAIN_MAX)))
   requires(forall(k2, 0, MLDSA_K, forall(k3, 0, MLDSA_N, (int64_t) u->vec[k2].coeffs[k3] + v->vec[k2].coeffs[k3] >= INT32_MIN)))
-  assigns(object_whole(u))
+  assigns(memory_slice(u, sizeof(mld_polyveck)))
   ensures(forall(k4, 0, MLDSA_K, forall(k5, 0, MLDSA_N, u->vec[k4].coeffs[k5] == old(*u).vec[k4].coeffs[k5] + v->vec[k4].coeffs[k5])))
   ensures(forall(k6, 0, MLDSA_L,
                 array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
@@ -314,7 +314,7 @@ __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K, array_abs_bound(u->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
   requires(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(object_whole(u))
+  assigns(memory_slice(u, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_K,
                  array_bound(u->vec[k0].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
 );
@@ -507,7 +507,7 @@ __contract__(
   requires(memory_no_alias(h,  sizeof(mld_polyveck)))
   requires(memory_no_alias(v0, sizeof(mld_polyveck)))
   requires(memory_no_alias(v1, sizeof(mld_polyveck)))
-  assigns(object_whole(h))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
   ensures(return_value <= MLDSA_N * MLDSA_K)
   ensures(forall(k1, 0, MLDSA_K, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
 );
@@ -559,7 +559,7 @@ __contract__(
   requires(memory_no_alias(w1, sizeof(mld_polyveck)))
   requires(forall(k1, 0, MLDSA_K,
     array_bound(w1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
 );
 
 #define mld_polyveck_pack_eta MLD_NAMESPACE_KL(polyveck_pack_eta)
@@ -581,7 +581,7 @@ __contract__(
   requires(memory_no_alias(p, sizeof(mld_polyveck)))
   requires(forall(k1, 0, MLDSA_K,
     array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
 );
 
 #define mld_polyvecl_pack_eta MLD_NAMESPACE_KL(polyvecl_pack_eta)
@@ -603,7 +603,7 @@ __contract__(
   requires(memory_no_alias(p, sizeof(mld_polyvecl)))
   requires(forall(k1, 0, MLDSA_L,
     array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
 );
 
 #define mld_polyvecl_pack_z MLD_NAMESPACE_KL(polyvecl_pack_z)
@@ -625,7 +625,7 @@ __contract__(
   requires(memory_no_alias(p, sizeof(mld_polyvecl)))
   requires(forall(k1, 0, MLDSA_L,
                   array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
 );
 
 #define mld_polyveck_pack_t0 MLD_NAMESPACE_KL(polyveck_pack_t0)
@@ -647,7 +647,7 @@ __contract__(
   requires(memory_no_alias(p, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K,
     array_bound(p->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
-  assigns(object_whole(r))
+  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
 );
 
 #define mld_polyvecl_unpack_eta MLD_NAMESPACE_KL(polyvecl_unpack_eta)
@@ -667,7 +667,7 @@ void mld_polyvecl_unpack_eta(
 __contract__(
   requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
   requires(memory_no_alias(p, sizeof(mld_polyvecl)))
-  assigns(object_whole(p))
+  assigns(memory_slice(p, sizeof(mld_polyvecl)))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
@@ -689,7 +689,7 @@ void mld_polyvecl_unpack_z(mld_polyvecl *z,
 __contract__(
   requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
   requires(memory_no_alias(z, sizeof(mld_polyvecl)))
-  assigns(object_whole(z))
+  assigns(memory_slice(z, sizeof(mld_polyvecl)))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(z->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
@@ -711,7 +711,7 @@ void mld_polyveck_unpack_eta(
 __contract__(
   requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
   requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  assigns(object_whole(p))
+  assigns(memory_slice(p, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
@@ -733,7 +733,7 @@ void mld_polyveck_unpack_t0(mld_polyveck *p,
 __contract__(
   requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
   requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  assigns(object_whole(p))
+  assigns(memory_slice(p, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
@@ -795,7 +795,7 @@ __contract__(
                                          array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(l1, 0, MLDSA_L,
                   array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(object_whole(t))
+  assigns(memory_slice(t, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );

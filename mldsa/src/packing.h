@@ -27,7 +27,7 @@ __contract__(
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K,
     array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
-  assigns(object_whole(pk))
+  assigns(memory_slice(pk, CRYPTO_PUBLICKEYBYTES))
 );
 
 
@@ -65,7 +65,7 @@ __contract__(
     array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   requires(forall(k2, 0, MLDSA_K,
     array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(object_whole(sk))
+  assigns(memory_slice(sk, CRYPTO_SECRETKEYBYTES))
 );
 
 
@@ -121,8 +121,8 @@ __contract__(
   requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
-  assigns(object_whole(rho))
-  assigns(object_whole(t1))
+  assigns(memory_slice(rho, MLDSA_SEEDBYTES))
+  assigns(memory_slice(t1, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
 );
@@ -155,12 +155,12 @@ __contract__(
   requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
   requires(memory_no_alias(s2, sizeof(mld_polyveck)))
   requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
-  assigns(object_whole(rho))
-  assigns(object_whole(tr))
-  assigns(object_whole(key))
-  assigns(object_whole(t0))
-  assigns(object_whole(s1))
-  assigns(object_whole(s2))
+  assigns(memory_slice(rho, MLDSA_SEEDBYTES))
+  assigns(memory_slice(tr, MLDSA_TRBYTES))
+  assigns(memory_slice(key, MLDSA_SEEDBYTES))
+  assigns(memory_slice(t0, sizeof(mld_polyveck)))
+  assigns(memory_slice(s1, sizeof(mld_polyvecl)))
+  assigns(memory_slice(s2, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t0->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
   ensures(forall(k1, 0, MLDSA_L,
@@ -191,9 +191,9 @@ __contract__(
   requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
   requires(memory_no_alias(z, sizeof(mld_polyvecl)))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  assigns(object_whole(c))
-  assigns(object_whole(z))
-  assigns(object_whole(h))
+  assigns(memory_slice(c, MLDSA_CTILDEBYTES))
+  assigns(memory_slice(z, sizeof(mld_polyvecl)))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(z->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
   ensures(forall(k1, 0, MLDSA_K,
