@@ -286,7 +286,7 @@ __contract__(
  *              - const mld_poly *a: pointer to input polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyt1_pack(uint8_t *r, const mld_poly *a)
+void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLDSA_POLYT1_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
@@ -305,7 +305,7 @@ __contract__(
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyt1_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(mld_poly)))
   requires(memory_no_alias(a, MLDSA_POLYT1_PACKEDBYTES))
@@ -325,7 +325,7 @@ __contract__(
  *              - const mld_poly *a: pointer to input polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyt0_pack(uint8_t *r, const mld_poly *a)
+void mld_polyt0_pack(uint8_t r[MLDSA_POLYT0_PACKEDBYTES], const mld_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLDSA_POLYT0_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
@@ -345,7 +345,7 @@ __contract__(
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyt0_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 __contract__(
   requires(memory_no_alias(r, sizeof(mld_poly)))
   requires(memory_no_alias(a, MLDSA_POLYT0_PACKEDBYTES))

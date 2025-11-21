@@ -603,7 +603,7 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
 }
 
 MLD_INTERNAL_API
-void mld_polyeta_pack(uint8_t *r, const mld_poly *a)
+void mld_polyeta_pack(uint8_t r[MLDSA_POLYETA_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
   uint8_t t[8];
@@ -648,7 +648,7 @@ void mld_polyeta_pack(uint8_t *r, const mld_poly *a)
 #endif /* MLDSA_ETA != 2 && MLDSA_ETA != 4 */
 }
 
-void mld_polyeta_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
 {
   unsigned int i;
 
@@ -697,7 +697,7 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t *a)
 
 
 MLD_INTERNAL_API
-void mld_polyz_pack(uint8_t *r, const mld_poly *a)
+void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
   uint32_t t[4];
@@ -748,7 +748,7 @@ void mld_polyz_pack(uint8_t *r, const mld_poly *a)
 }
 
 MLD_INTERNAL_API
-void mld_polyz_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 {
   unsigned int i;
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) && MLD_CONFIG_PARAMETER_SET == 44

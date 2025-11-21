@@ -425,7 +425,7 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 MLD_INTERNAL_API
-void mld_polyt1_pack(uint8_t *r, const mld_poly *a)
+void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, 1 << 10);
@@ -449,7 +449,7 @@ void mld_polyt1_pack(uint8_t *r, const mld_poly *a)
 }
 
 MLD_INTERNAL_API
-void mld_polyt1_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
 {
   unsigned int i;
 
@@ -472,7 +472,7 @@ void mld_polyt1_unpack(mld_poly *r, const uint8_t *a)
 }
 
 MLD_INTERNAL_API
-void mld_polyt0_pack(uint8_t *r, const mld_poly *a)
+void mld_polyt0_pack(uint8_t r[MLDSA_POLYT0_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
   uint32_t t[8];
@@ -519,7 +519,7 @@ void mld_polyt0_pack(uint8_t *r, const mld_poly *a)
 }
 
 MLD_INTERNAL_API
-void mld_polyt0_unpack(mld_poly *r, const uint8_t *a)
+void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 {
   unsigned int i;
 
