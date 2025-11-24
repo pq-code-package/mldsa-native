@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_pointwise_acc_montgomery_harness
+HARNESS_FILE = polyvecl_pointwise_acc_montgomery_c_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_pointwise_acc_montgomery
+PROOF_UID = polyvecl_pointwise_acc_montgomery_c
 
 DEFINES +=
 INCLUDES +=
@@ -19,18 +19,18 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvecl_pointwise_acc_montgomery
-USE_FUNCTION_CONTRACTS= mld_polyvecl_pointwise_acc_montgomery_c
+CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery_c
+USE_FUNCTION_CONTRACTS=mld_montgomery_reduce
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 CBMCFLAGS += --slice-formula
 CBMCFLAGS += --no-array-field-sensitivity
 
-FUNCTION_NAME = polyvecl_pointwise_acc_montgomery
+FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

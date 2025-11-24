@@ -25,6 +25,8 @@
  * with native backends, which are currently not yet namespaced. */
 #define mld_polymat_permute_bitrev_to_custom \
   MLD_ADD_PARAM_SET(mld_polymat_permute_bitrev_to_custom)
+#define mld_polyvecl_pointwise_acc_montgomery_c \
+  MLD_ADD_PARAM_SET(mld_polyvecl_pointwise_acc_montgomery_c)
 
 /* Helper function to ensure that the polynomial entries in the output
  * of mld_polyvec_matrix_expand use the standard (bitreversed) ordering
@@ -323,70 +325,23 @@ void mld_polyvecl_pointwise_poly_montgomery(mld_polyvecl *r, const mld_poly *a,
   mld_assert_abs_bound_2d(r->vec, MLDSA_L, MLDSA_N, MLDSA_Q);
 }
 
-MLD_INTERNAL_API
-void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
-                                           const mld_polyvecl *v)
+MLD_STATIC_TESTABLE void mld_polyvecl_pointwise_acc_montgomery_c(
+    mld_poly *w, const mld_polyvecl *u, const mld_polyvecl *v)
+__contract__(
+  requires(memory_no_alias(w, sizeof(mld_poly)))
+  requires(memory_no_alias(u, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(forall(l0, 0, MLDSA_L,
+                  array_bound(u->vec[l0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+  requires(forall(l1, 0, MLDSA_L,
+    array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(w, sizeof(mld_poly)))
+  ensures(array_abs_bound(w->coeffs, 0, MLDSA_N, MLDSA_Q))
+)
 {
   unsigned int i, j;
   mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
   mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
-#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) && \
-    MLD_CONFIG_PARAMETER_SET == 44
-  {
-    /* TODO: proof */
-    int ret;
-    ret = mld_polyvecl_pointwise_acc_montgomery_l4_native(
-        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-        (const int32_t(*)[MLDSA_N])v->vec);
-    if (ret == MLD_NATIVE_FUNC_SUCCESS)
-    {
-      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
-      return;
-    }
-  }
-#elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) && \
-    MLD_CONFIG_PARAMETER_SET == 65
-  {
-    /* TODO: proof */
-    int ret;
-    ret = mld_polyvecl_pointwise_acc_montgomery_l5_native(
-        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-        (const int32_t(*)[MLDSA_N])v->vec);
-    if (ret == MLD_NATIVE_FUNC_SUCCESS)
-    {
-      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
-      return;
-    }
-  }
-#elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) && \
-    MLD_CONFIG_PARAMETER_SET == 87
-  {
-    /* TODO: proof */
-    int ret;
-    ret = mld_polyvecl_pointwise_acc_montgomery_l7_native(
-        w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
-        (const int32_t(*)[MLDSA_N])v->vec);
-    if (ret == MLD_NATIVE_FUNC_SUCCESS)
-    {
-      mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
-      return;
-    }
-  }
-#endif /* !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 && \
-          MLD_CONFIG_PARAMETER_SET == 44) &&                       \
-          !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 && \
-          MLD_CONFIG_PARAMETER_SET == 65) &&                       \
-          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 &&   \
-          MLD_CONFIG_PARAMETER_SET == 87 */
-  /* The first input is bounded by [0, Q-1] inclusive
-   * The second input is bounded by [-9Q+1, 9Q-1] inclusive . Hence, we can
-   * safely accumulate in 64-bits without intermediate reductions as
-   * MLDSA_L * (MLD_NTT_BOUND-1) * (Q-1) < INT64_MAX
-   *
-   * The worst case is ML-DSA-87: 7 * (9Q-1) * (Q-1) < 2**52
-   * (and likewise for negative values)
-   */
-
   for (i = 0; i < MLDSA_N; i++)
   __loop__(
     assigns(i, j, memory_slice(w, sizeof(mld_poly)))
@@ -412,6 +367,69 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
   }
 
   mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+}
+
+MLD_INTERNAL_API
+void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
+                                           const mld_polyvecl *v)
+{
+#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) && \
+    MLD_CONFIG_PARAMETER_SET == 44
+  /* TODO: proof */
+  int ret;
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
+  ret = mld_polyvecl_pointwise_acc_montgomery_l4_native(
+      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+      (const int32_t(*)[MLDSA_N])v->vec);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+    return;
+  }
+#elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) && \
+    MLD_CONFIG_PARAMETER_SET == 65
+  /* TODO: proof */
+  int ret;
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
+  ret = mld_polyvecl_pointwise_acc_montgomery_l5_native(
+      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+      (const int32_t(*)[MLDSA_N])v->vec);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+    return;
+  }
+#elif defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) && \
+    MLD_CONFIG_PARAMETER_SET == 87
+  /* TODO: proof */
+  int ret;
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
+  ret = mld_polyvecl_pointwise_acc_montgomery_l7_native(
+      w->coeffs, (const int32_t(*)[MLDSA_N])u->vec,
+      (const int32_t(*)[MLDSA_N])v->vec);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_abs_bound(w->coeffs, MLDSA_N, MLDSA_Q);
+    return;
+  }
+#endif /* !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 && \
+          MLD_CONFIG_PARAMETER_SET == 44) &&                       \
+          !(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 && \
+          MLD_CONFIG_PARAMETER_SET == 65) &&                       \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 &&   \
+          MLD_CONFIG_PARAMETER_SET == 87 */
+  /* The first input is bounded by [0, Q-1] inclusive
+   * The second input is bounded by [-9Q+1, 9Q-1] inclusive . Hence, we can
+   * safely accumulate in 64-bits without intermediate reductions as
+   * MLDSA_L * (MLD_NTT_BOUND-1) * (Q-1) < INT64_MAX
+   *
+   * The worst case is ML-DSA-87: 7 * (9Q-1) * (Q-1) < 2**52
+   * (and likewise for negative values)
+   */
+  mld_polyvecl_pointwise_acc_montgomery_c(w, u, v);
 }
 
 MLD_INTERNAL_API
@@ -864,3 +882,4 @@ void mld_polyveck_unpack_t0(mld_polyveck *p,
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_polymat_permute_bitrev_to_custom
+#undef mld_polyvecl_pointwise_acc_montgomery_c
