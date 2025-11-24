@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE =poly_chknorm_harness
+HARNESS_FILE =poly_chknorm_c_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_chknorm
+PROOF_UID = poly_chknorm_c
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_chknorm
-USE_FUNCTION_CONTRACTS=mld_poly_chknorm_c
+CHECK_FUNCTION_CONTRACTS=mld_poly_chknorm_c
+USE_FUNCTION_CONTRACTS=mld_ct_abs_i32 mld_ct_cmask_neg_i32
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = poly_chknorm
+FUNCTION_NAME = mld_poly_chknorm_c
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

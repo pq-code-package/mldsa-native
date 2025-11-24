@@ -648,50 +648,18 @@ void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
                    (1 << (MLDSA_D - 1)) + 1);
 }
 
-/* Reference: explicitly checks the bound B to be <= (MLDSA_Q - 1) / 8).
- * This is unnecessary as it's always a compile-time constant.
- * We instead model it as a precondition.
- * Checking the bound is performed using a conditional arguing
- * that it is okay to leak which coefficient violates the bound (while the
- * coefficient itself must remain secret).
- * We instead perform everything in constant-time.
- * Also it is sufficient to check that it is smaller than
- * MLDSA_Q - REDUCE32_RANGE_MAX > (MLDSA_Q - 1) / 8).
- */
-MLD_INTERNAL_API
-uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
+MLD_STATIC_TESTABLE uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(0 <= B && B <= MLDSA_Q - REDUCE32_RANGE_MAX)
+  requires(array_bound(a->coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))
+  ensures(return_value == 0 || return_value == 0xFFFFFFFF)
+  ensures((return_value == 0) == array_abs_bound(a->coeffs, 0, MLDSA_N, B))
+)
 {
   unsigned int i;
   uint32_t t = 0;
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
-#if defined(MLD_USE_NATIVE_POLY_CHKNORM)
-  {
-    /* TODO: proof */
-    int ret;
-    int success;
-    /* The native backend returns 0 if all coefficients are within the bound,
-     * 1 if at least one coefficient exceeds the bound, and
-     * -1 (MLD_NATIVE_FUNC_FALLBACK) if the platform does not have the
-     * required capabilities to run the native function.
-     */
-    ret = mld_poly_chknorm_native(a->coeffs, B);
-
-    success = (ret != MLD_NATIVE_FUNC_FALLBACK);
-    /* Constant-time: It would be fine to leak the return value of chknorm
-     * entirely (as it is fine to leak if any coefficient exceeded the bound or
-     * not). However, it is cleaner to perform declassification in sign.c.
-     * Hence, here we only declassify if the native function returned
-     * MLD_NATIVE_FUNC_FALLBACK or not (which solely depends on system
-     * capabilities).
-     */
-    MLD_CT_TESTING_DECLASSIFY(&success, sizeof(int));
-    if (success)
-    {
-      /* Convert 0 / 1 to 0 / 0xFFFFFFFF here */
-      return 0U - (uint32_t)ret;
-    }
-  }
-#endif /* MLD_USE_NATIVE_POLY_CHKNORM */
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
@@ -720,6 +688,49 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
   }
 
   return t;
+}
+
+/* Reference: explicitly checks the bound B to be <= (MLDSA_Q - 1) / 8).
+ * This is unnecessary as it's always a compile-time constant.
+ * We instead model it as a precondition.
+ * Checking the bound is performed using a conditional arguing
+ * that it is okay to leak which coefficient violates the bound (while the
+ * coefficient itself must remain secret).
+ * We instead perform everything in constant-time.
+ * Also it is sufficient to check that it is smaller than
+ * MLDSA_Q - REDUCE32_RANGE_MAX > (MLDSA_Q - 1) / 8).
+ */
+MLD_INTERNAL_API
+uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
+{
+#if defined(MLD_USE_NATIVE_POLY_CHKNORM)
+  /* TODO: proof */
+  int ret;
+  int success;
+  mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
+  /* The native backend returns 0 if all coefficients are within the bound,
+   * 1 if at least one coefficient exceeds the bound, and
+   * -1 (MLD_NATIVE_FUNC_FALLBACK) if the platform does not have the
+   * required capabilities to run the native function.
+   */
+  ret = mld_poly_chknorm_native(a->coeffs, B);
+
+  success = (ret != MLD_NATIVE_FUNC_FALLBACK);
+  /* Constant-time: It would be fine to leak the return value of chknorm
+   * entirely (as it is fine to leak if any coefficient exceeded the bound or
+   * not). However, it is cleaner to perform declassification in sign.c.
+   * Hence, here we only declassify if the native function returned
+   * MLD_NATIVE_FUNC_FALLBACK or not (which solely depends on system
+   * capabilities).
+   */
+  MLD_CT_TESTING_DECLASSIFY(&success, sizeof(int));
+  if (success)
+  {
+    /* Convert 0 / 1 to 0 / 0xFFFFFFFF here */
+    return 0U - (uint32_t)ret;
+  }
+#endif /* MLD_USE_NATIVE_POLY_CHKNORM */
+  return mld_poly_chknorm_c(a, B);
 }
 
 #else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
