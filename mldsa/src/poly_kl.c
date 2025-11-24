@@ -34,6 +34,7 @@
 #define mld_rej_eta MLD_ADD_PARAM_SET(mld_rej_eta)
 #define mld_poly_decompose_c MLD_ADD_PARAM_SET(mld_poly_decompose_c)
 #define mld_poly_use_hint_c MLD_ADD_PARAM_SET(mld_poly_use_hint_c)
+#define mld_polyz_unpack_c MLD_ADD_PARAM_SET(mld_polyz_unpack_c)
 /* End of parameter set namespacing */
 
 
@@ -776,33 +777,16 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
 }
 
-MLD_INTERNAL_API
-void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
+MLD_STATIC_TESTABLE void mld_polyz_unpack_c(
+    mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(r, sizeof(mld_poly)))
+  ensures(array_bound(r->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+)
 {
   unsigned int i;
-#if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) && MLD_CONFIG_PARAMETER_SET == 44
-  /* TODO: proof */
-  int ret;
-  ret = mld_polyz_unpack_17_native(r->coeffs, a);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
-    return;
-  }
-#elif defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) && \
-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  /* TODO: proof */
-  int ret;
-  ret = mld_polyz_unpack_19_native(r->coeffs, a);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
-    return;
-  }
-#endif /* !(MLD_USE_NATIVE_POLYZ_UNPACK_17 && MLD_CONFIG_PARAMETER_SET == 44)  \
-          && MLD_USE_NATIVE_POLYZ_UNPACK_19 && (MLD_CONFIG_PARAMETER_SET == 65 \
-          || MLD_CONFIG_PARAMETER_SET == 87) */
-
 #if MLD_CONFIG_PARAMETER_SET == 44
   for (i = 0; i < MLDSA_N / 4; ++i)
   __loop__(
@@ -859,6 +843,35 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 }
 
 MLD_INTERNAL_API
+void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
+{
+#if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) && MLD_CONFIG_PARAMETER_SET == 44
+  /* TODO: proof */
+  int ret;
+  ret = mld_polyz_unpack_17_native(r->coeffs, a);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+    return;
+  }
+#elif defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) && \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+  /* TODO: proof */
+  int ret;
+  ret = mld_polyz_unpack_19_native(r->coeffs, a);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(r->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+    return;
+  }
+#endif /* !(MLD_USE_NATIVE_POLYZ_UNPACK_17 && MLD_CONFIG_PARAMETER_SET == 44)  \
+          && MLD_USE_NATIVE_POLYZ_UNPACK_19 && (MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87) */
+
+  mld_polyz_unpack_c(r, a);
+}
+
+MLD_INTERNAL_API
 void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
@@ -895,6 +908,7 @@ void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
 #undef mld_rej_eta
 #undef mld_poly_decompose_c
 #undef mld_poly_use_hint_c
+#undef mld_polyz_unpack_c
 #undef POLY_UNIFORM_ETA_NBLOCKS
 #undef POLY_UNIFORM_ETA_NBLOCKS
 #undef POLY_UNIFORM_GAMMA1_NBLOCKS
