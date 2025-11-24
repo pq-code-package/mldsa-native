@@ -280,35 +280,18 @@ void mld_poly_power2round(mld_poly *a1, mld_poly *a0, const mld_poly *a)
   mld_assert_bound(a1->coeffs, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1);
 }
 
-
-/*************************************************
- * Name:        mld_rej_uniform
- *
- * Description: Sample uniformly random coefficients in [0, MLDSA_Q-1] by
- *              performing rejection sampling on array of random bytes.
- *
- * Arguments:   - int32_t *a: pointer to output array (allocated)
- *              - unsigned int target:  requested number of coefficients to
- *sample
- *              - unsigned int offset:  number of coefficients already sampled
- *              - const uint8_t *buf: array of random bytes to sample from
- *              - unsigned int buflen: length of array of random bytes (must be
- *                multiple of 3)
- *
- * Returns number of sampled coefficients. Can be smaller than len if not enough
- * random bytes were given.
- **************************************************/
-
+#define POLY_UNIFORM_NBLOCKS \
+  ((768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES)
 /* Reference: `mld_rej_uniform()` in the reference implementation @[REF].
  *            - Our signature differs from the reference implementation
  *              in that it adds the offset and always expects the base of the
  *              target buffer. This avoids shifting the buffer base in the
  *              caller, which appears tricky to reason about. */
-#define POLY_UNIFORM_NBLOCKS \
-  ((768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES)
-static unsigned int mld_rej_uniform(int32_t *a, unsigned int target,
-                                    unsigned int offset, const uint8_t *buf,
-                                    unsigned int buflen)
+MLD_STATIC_TESTABLE unsigned int mld_rej_uniform_c(int32_t *a,
+                                                   unsigned int target,
+                                                   unsigned int offset,
+                                                   const uint8_t *buf,
+                                                   unsigned int buflen)
 __contract__(
   requires(offset <= target && target <= MLDSA_N)
   requires(buflen <= (POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES) && buflen % 3 == 0)
@@ -323,21 +306,6 @@ __contract__(
   unsigned int ctr, pos;
   uint32_t t;
   mld_assert_bound(a, offset, 0, MLDSA_Q);
-
-/* TODO: CBMC proof based on mld_rej_uniform_native */
-#if defined(MLD_USE_NATIVE_REJ_UNIFORM)
-  if (offset == 0)
-  {
-    int ret;
-    ret = mld_rej_uniform_native(a, target, buf, buflen);
-    if (ret != MLD_NATIVE_FUNC_FALLBACK)
-    {
-      unsigned res = (unsigned)ret;
-      mld_assert_bound(a, res, 0, MLDSA_Q);
-      return res;
-    }
-  }
-#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
 
   ctr = offset;
   pos = 0;
@@ -362,6 +330,61 @@ __contract__(
   mld_assert_bound(a, ctr, 0, MLDSA_Q);
 
   return ctr;
+}
+/*************************************************
+ * Name:        mld_rej_uniform
+ *
+ * Description: Sample uniformly random coefficients in [0, MLDSA_Q-1] by
+ *              performing rejection sampling on array of random bytes.
+ *
+ * Arguments:   - int32_t *a: pointer to output array (allocated)
+ *              - unsigned int target:  requested number of coefficients to
+ *sample
+ *              - unsigned int offset:  number of coefficients already sampled
+ *              - const uint8_t *buf: array of random bytes to sample from
+ *              - unsigned int buflen: length of array of random bytes (must be
+ *                multiple of 3)
+ *
+ * Returns number of sampled coefficients. Can be smaller than len if not enough
+ * random bytes were given.
+ **************************************************/
+
+/* Reference: `mld_rej_uniform()` in the reference implementation @[REF].
+ *            - Our signature differs from the reference implementation
+ *              in that it adds the offset and always expects the base of the
+ *              target buffer. This avoids shifting the buffer base in the
+ *              caller, which appears tricky to reason about. */
+static unsigned int mld_rej_uniform(int32_t *a, unsigned int target,
+                                    unsigned int offset, const uint8_t *buf,
+                                    unsigned int buflen)
+__contract__(
+  requires(offset <= target && target <= MLDSA_N)
+  requires(buflen <= (POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES) && buflen % 3 == 0)
+  requires(memory_no_alias(a, sizeof(int32_t) * target))
+  requires(memory_no_alias(buf, buflen))
+  requires(array_bound(a, 0, offset, 0, MLDSA_Q))
+  assigns(memory_slice(a, sizeof(int32_t) * target))
+  ensures(offset <= return_value && return_value <= target)
+  ensures(array_bound(a, 0, return_value, 0, MLDSA_Q))
+)
+{
+/* TODO: CBMC proof based on mld_rej_uniform_native */
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM)
+  int ret;
+  mld_assert_bound(a, offset, 0, MLDSA_Q);
+  if (offset == 0)
+  {
+    ret = mld_rej_uniform_native(a, target, buf, buflen);
+    if (ret != MLD_NATIVE_FUNC_FALLBACK)
+    {
+      unsigned res = (unsigned)ret;
+      mld_assert_bound(a, res, 0, MLDSA_Q);
+      return res;
+    }
+  }
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
+
+  return mld_rej_uniform_c(a, target, offset, buf, buflen);
 }
 
 /* Reference: poly_uniform() in the reference implementation @[REF].
