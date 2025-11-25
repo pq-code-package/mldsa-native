@@ -753,6 +753,21 @@ __contract__(
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
 
+#define mld_polymat_get_row MLD_NAMESPACE_KL(polymat_get_row)
+/*************************************************
+ * Name:        mld_polymat_get_row
+ *
+ * Description: Retrieve a pointer to a specific row of the matrix.
+ *
+ * Arguments:   - const mld_polymat *mat: pointer to matrix
+ *              - unsigned int row: row index (must be < MLDSA_K)
+ *
+ * Returns pointer to the row (mld_polyvecl)
+ **************************************************/
+MLD_INTERNAL_API
+const mld_polyvecl *mld_polymat_get_row(const mld_polymat *mat,
+                                        unsigned int row);
+
 #define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)
 /*************************************************
  * Name:        mld_polyvec_matrix_expand

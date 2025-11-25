@@ -66,6 +66,12 @@ __contract__(
 #endif /* !MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
 }
 
+MLD_INTERNAL_API
+const mld_polyvecl *mld_polymat_get_row(const mld_polymat *mat,
+                                        unsigned int row)
+{
+  return &mat->vec[row];
+}
 
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand(mld_polymat *mat,
@@ -172,7 +178,8 @@ void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t,
                      array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
   )
   {
-    mld_polyvecl_pointwise_acc_montgomery(&t->vec[i], &mat->vec[i], v);
+    const mld_polyvecl *row = mld_polymat_get_row(mat, i);
+    mld_polyvecl_pointwise_acc_montgomery(&t->vec[i], row, v);
   }
 
   mld_assert_abs_bound_2d(t->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
