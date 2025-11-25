@@ -215,16 +215,17 @@ __contract__(
   ensures(forall(k2, 0, MLDSA_K, array_bound(t1->vec[k2].coeffs, 0, MLDSA_N, 0, 1 << 10)))
 )
 {
-  mld_polyvecl mat[MLDSA_K], s1hat;
+  mld_polymat mat;
+  mld_polyvecl s1hat;
   mld_polyveck t;
 
   /* Expand matrix */
-  mld_polyvec_matrix_expand(mat, rho);
+  mld_polyvec_matrix_expand(&mat, rho);
 
   /* Matrix-vector multiplication */
   s1hat = *s1;
   mld_polyvecl_ntt(&s1hat);
-  mld_polyvec_matrix_pointwise_montgomery(&t, mat, &s1hat);
+  mld_polyvec_matrix_pointwise_montgomery(&t, &mat, &s1hat);
   mld_polyveck_reduce(&t);
   mld_polyveck_invntt_tomont(&t);
 
@@ -251,7 +252,7 @@ __contract__(
   mld_shake256(tr, MLDSA_TRBYTES, pk, CRYPTO_PUBLICKEYBYTES);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(mat, sizeof(mat));
+  mld_zeroize(&mat, sizeof(mat));
   mld_zeroize(&s1hat, sizeof(s1hat));
   mld_zeroize(&t, sizeof(t));
 }
@@ -407,7 +408,7 @@ __contract__(
  *                                   of exactly MLDSA_CRHBYTES bytes
  *              - const uint8_t *rhoprime: pointer to randomness seed
  *              - uint16_t nonce: current nonce value
- *              - const polyvecl mat[MLDSA_K]: expanded matrix
+ *              - const mld_polymat *mat: expanded matrix
  *              - const polyvecl *s1: secret vector s1
  *              - const polyveck *s2: secret vector s2
  *              - const polyveck *t0: vector t0
@@ -423,19 +424,19 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce,
-    const mld_polyvecl mat[MLDSA_K], const mld_polyvecl *s1,
-    const mld_polyveck *s2, const mld_polyveck *t0)
+    const mld_polymat *mat, const mld_polyvecl *s1, const mld_polyveck *s2,
+    const mld_polyveck *t0)
 __contract__(
   requires(memory_no_alias(sig, CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
-  requires(memory_no_alias(mat, MLDSA_K * sizeof(mld_polyvecl)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat)))
   requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
   requires(memory_no_alias(s2, sizeof(mld_polyveck)))
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
   requires(nonce <= NONCE_UB)
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-                                         array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+                                         array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
@@ -584,7 +585,8 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   MLD_ALIGN uint8_t
       seedbuf[2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES];
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
-  mld_polyvecl mat[MLDSA_K], s1;
+  mld_polymat mat;
+  mld_polyvecl s1;
   mld_polyveck t0, s2;
 
   uint16_t nonce = 0;
@@ -614,7 +616,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
   /* Constant time: rho is part of the public key and, hence, public. */
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
   /* Expand matrix and transform vectors */
-  mld_polyvec_matrix_expand(mat, rho);
+  mld_polyvec_matrix_expand(&mat, rho);
   mld_polyvecl_ntt(&s1);
   mld_polyveck_ntt(&s2);
   mld_polyveck_ntt(&t0);
@@ -638,7 +640,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     /* loop. We can therefore re-assert their bounds here as part of the     */
     /* loop invariant. This makes proof noticeably faster with CBMC          */
     invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-              array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+              array_bound(mat.vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
     invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
@@ -661,7 +663,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
     }
 
     attempt_result = mld_attempt_signature_generation(sig, mu, rhoprime, nonce,
-                                                      mat, &s1, &s2, &t0);
+                                                      &mat, &s1, &s2, &t0);
     nonce++;
     if (attempt_result == 0)
     {
@@ -673,7 +675,7 @@ int crypto_sign_signature_internal(uint8_t sig[CRYPTO_BYTES], size_t *siglen,
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seedbuf, sizeof(seedbuf));
-  mld_zeroize(mat, sizeof(mat));
+  mld_zeroize(&mat, sizeof(mat));
   mld_zeroize(&s1, sizeof(s1));
   mld_zeroize(&s2, sizeof(s2));
   mld_zeroize(&t0, sizeof(t0));
@@ -788,7 +790,8 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   MLD_ALIGN uint8_t c[MLDSA_CTILDEBYTES];
   MLD_ALIGN uint8_t c2[MLDSA_CTILDEBYTES];
   mld_poly cp;
-  mld_polyvecl mat[MLDSA_K], z;
+  mld_polymat mat;
+  mld_polyvecl z;
   mld_polyveck t1, w1, tmp, h;
 
   if (siglen != CRYPTO_BYTES)
@@ -827,10 +830,10 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
   mld_poly_challenge(&cp, c);
-  mld_polyvec_matrix_expand(mat, rho);
+  mld_polyvec_matrix_expand(&mat, rho);
 
   mld_polyvecl_ntt(&z);
-  mld_polyvec_matrix_pointwise_montgomery(&w1, mat, &z);
+  mld_polyvec_matrix_pointwise_montgomery(&w1, &mat, &z);
 
   mld_poly_ntt(&cp);
   mld_polyveck_shiftl(&t1);
@@ -881,7 +884,7 @@ cleanup:
   mld_zeroize(c, sizeof(c));
   mld_zeroize(c2, sizeof(c2));
   mld_zeroize(&cp, sizeof(cp));
-  mld_zeroize(mat, sizeof(mat));
+  mld_zeroize(&mat, sizeof(mat));
   mld_zeroize(&z, sizeof(z));
   mld_zeroize(&t1, sizeof(t1));
   mld_zeroize(&w1, sizeof(w1));

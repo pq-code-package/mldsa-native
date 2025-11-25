@@ -256,6 +256,7 @@
 #undef mld_polyz_unpack
 /* mldsa/src/polyvec.h */
 #undef MLD_POLYVEC_H
+#undef mld_polymat
 #undef mld_polyvec_matrix_expand
 #undef mld_polyvec_matrix_pointwise_montgomery
 #undef mld_polyveck

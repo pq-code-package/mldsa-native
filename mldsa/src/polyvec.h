@@ -17,6 +17,7 @@
  * within a single compilation unit. */
 #define mld_polyvecl MLD_ADD_PARAM_SET(mld_polyvecl)
 #define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
+#define mld_polymat MLD_ADD_PARAM_SET(mld_polymat)
 /* End of parameter set namespacing */
 
 /* Vectors of polynomials of length MLDSA_L */
@@ -230,6 +231,12 @@ typedef struct
 {
   mld_poly vec[MLDSA_K];
 } mld_polyveck;
+
+/* Matrix of polynomials (K x L) */
+typedef struct
+{
+  mld_polyvecl vec[MLDSA_K];
+} mld_polymat;
 
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
@@ -746,18 +753,18 @@ __contract__(
  *              random coefficients a_{i,j} by performing rejection
  *              sampling on the output stream of SHAKE128(rho|j|i)
  *
- * Arguments:   - mld_polyvecl mat[MLDSA_K]: output matrix
+ * Arguments:   - mld_polymat *mat: pointer to output matrix
  *              - const uint8_t rho[]: byte array containing seed rho
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyvec_matrix_expand(mld_polyvecl mat[MLDSA_K],
+void mld_polyvec_matrix_expand(mld_polymat *mat,
                                const uint8_t rho[MLDSA_SEEDBYTES])
 __contract__(
-  requires(memory_no_alias(mat, MLDSA_K * sizeof(mld_polyvecl)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat)))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  assigns(memory_slice(mat, MLDSA_K * sizeof(mld_polyvecl)))
+  assigns(memory_slice(mat, sizeof(mld_polymat)))
   ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-    array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+    array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 );
 
 
@@ -780,19 +787,19 @@ __contract__(
  *              inclusive.
  *
  * Arguments:   - mld_polyveck *t: pointer to output vector t
- *              - const mld_polyvecl mat[MLDSA_K]: pointer to input matrix
+ *              - const mld_polymat *mat: pointer to input matrix
  *              - const mld_polyvecl *v: pointer to input vector v
  **************************************************/
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t,
-                                             const mld_polyvecl mat[MLDSA_K],
+                                             const mld_polymat *mat,
                                              const mld_polyvecl *v)
 __contract__(
   requires(memory_no_alias(t, sizeof(mld_polyveck)))
-  requires(memory_no_alias(mat, MLDSA_K*sizeof(mld_polyvecl)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat)))
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-                                         array_bound(mat[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+                                         array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(l1, 0, MLDSA_L,
                   array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(t, sizeof(mld_polyveck)))

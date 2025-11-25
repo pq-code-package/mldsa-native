@@ -3,10 +3,12 @@
 
 #include "sign.h"
 
-int mld_attempt_signature_generation(
-    uint8_t *sig, const uint8_t *mu, const uint8_t rhoprime[MLDSA_CRHBYTES],
-    uint16_t nonce, const mld_polyvecl mat[MLDSA_K], const mld_polyvecl *s1,
-    const mld_polyveck *s2, const mld_polyveck *t0);
+int mld_attempt_signature_generation(uint8_t *sig, const uint8_t *mu,
+                                     const uint8_t rhoprime[MLDSA_CRHBYTES],
+                                     uint16_t nonce, mld_polymat *mat,
+                                     const mld_polyvecl *s1,
+                                     const mld_polyveck *s2,
+                                     const mld_polyveck *t0);
 
 void harness(void)
 {
@@ -14,7 +16,7 @@ void harness(void)
   uint8_t *mu;
   uint8_t *rhoprime;
   uint16_t nonce;
-  mld_polyvecl *mat;
+  mld_polymat *mat;
   mld_polyvecl *s1;
   mld_polyveck *s2;
   mld_polyveck *t0;
