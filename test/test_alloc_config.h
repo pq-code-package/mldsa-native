@@ -681,14 +681,10 @@ void custom_free(void *p, size_t sz, const char *file, int line,
  * Name:        MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
  *
  * Description: Set this to reduce RAM usage.
+ *              This trades memory for performance.
  *
- *              This configuration option is work in progress.
- *
- *              At present it results the following memory saving in signing
- *              with no impact on performance:
- *               - ML-DSA-44: 4 KiB
- *               - ML-DSA-65: 5 KiB
- *               - ML-DSA-87: 7 KiB
+ *              For detailed expected memory savings, see the
+ *              mldsa-native README.
  *
  *              This option is useful for embedded systems with tight RAM
  *              constraints but relaxed performance requirements.
@@ -699,7 +695,6 @@ void custom_free(void *p, size_t sz, const char *file, int line,
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_REDUCE_RAM */
-
 
 /*************************  Config internals  ********************************/
 

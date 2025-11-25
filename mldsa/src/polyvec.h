@@ -237,7 +237,12 @@ typedef struct
 /* Matrix of polynomials (K x L) */
 typedef struct
 {
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  mld_polyvecl row_buffer;
+  uint8_t rho[MLDSA_SEEDBYTES];
+#else
   mld_polyvecl vec[MLDSA_K];
+#endif
 } mld_polymat;
 
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
@@ -758,15 +763,15 @@ __contract__(
  * Name:        mld_polymat_get_row
  *
  * Description: Retrieve a pointer to a specific row of the matrix.
+ *              In MLD_CONFIG_REDUCE_RAM mode, generates the row on-demand.
  *
- * Arguments:   - const mld_polymat *mat: pointer to matrix
+ * Arguments:   - mld_polymat *mat: pointer to matrix
  *              - unsigned int row: row index (must be < MLDSA_K)
  *
  * Returns pointer to the row (mld_polyvecl)
  **************************************************/
 MLD_INTERNAL_API
-const mld_polyvecl *mld_polymat_get_row(const mld_polymat *mat,
-                                        unsigned int row);
+const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row);
 
 #define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)
 /*************************************************
@@ -809,13 +814,15 @@ __contract__(
  *              hence must have coefficients bounded by [-9q+1, +9q-1]
  *              inclusive.
  *
+ *              Note: In MLD_CONFIG_REDUCE_RAM mode, mat cannot be const
+ *              as rows are generated on-demand.
+ *
  * Arguments:   - mld_polyveck *t: pointer to output vector t
- *              - const mld_polymat *mat: pointer to input matrix
+ *              - mld_polymat *mat: pointer to input matrix
  *              - const mld_polyvecl *v: pointer to input vector v
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t,
-                                             const mld_polymat *mat,
+void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
                                              const mld_polyvecl *v)
 __contract__(
   requires(memory_no_alias(t, sizeof(mld_polyveck)))

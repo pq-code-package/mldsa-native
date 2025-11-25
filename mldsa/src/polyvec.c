@@ -28,6 +28,7 @@
 #define mld_polyvecl_pointwise_acc_montgomery_c \
   MLD_ADD_PARAM_SET(mld_polyvecl_pointwise_acc_montgomery_c)
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 /* Helper function to ensure that the polynomial entries in the output
  * of mld_polyvec_matrix_expand use the standard (bitreversed) ordering
  * of coefficients.
@@ -65,18 +66,50 @@ __contract__(
 
 #endif /* !MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
 }
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 MLD_INTERNAL_API
-const mld_polyvecl *mld_polymat_get_row(const mld_polymat *mat,
-                                        unsigned int row)
+const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row)
 {
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  unsigned int i;
+  MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+
+  mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
+
+  /* Generate row on-demand */
+  for (i = 0; i < MLDSA_L; i++)
+  {
+    uint8_t x = (uint8_t)row;
+    uint8_t y = (uint8_t)i;
+
+    seed_ext[MLDSA_SEEDBYTES + 0] = y;
+    seed_ext[MLDSA_SEEDBYTES + 1] = x;
+
+    mld_poly_uniform(&mat->row_buffer.vec[i], seed_ext);
+
+#if defined(MLD_USE_NATIVE_NTT_CUSTOM_ORDER)
+    mld_poly_permute_bitrev_to_custom(mat->row_buffer.vec[i].coeffs);
+#endif
+  }
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(seed_ext, sizeof(seed_ext));
+
+  return &mat->row_buffer;
+#else  /* MLD_CONFIG_REDUCE_RAM */
   return &mat->vec[row];
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 }
 
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand(mld_polymat *mat,
                                const uint8_t rho[MLDSA_SEEDBYTES])
 {
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  /* In REDUCE_RAM mode, just copy the seed for later on-demand generation */
+  mld_memcpy(mat->rho, rho, MLDSA_SEEDBYTES);
+#else
   unsigned int i, j;
   /*
    * We generate four separate seed arrays rather than a single one to work
@@ -160,11 +193,11 @@ void mld_polyvec_matrix_expand(mld_polymat *mat,
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 }
 
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t,
-                                             const mld_polymat *mat,
+void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
                                              const mld_polyvecl *v)
 {
   unsigned int i;

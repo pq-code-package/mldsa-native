@@ -465,9 +465,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
-    const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce,
-    const mld_polymat *mat, const mld_polyvecl *s1, const mld_polyveck *s2,
-    const mld_polyveck *t0)
+    const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
+    const mld_polyvecl *s1, const mld_polyveck *s2, const mld_polyveck *t0)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
