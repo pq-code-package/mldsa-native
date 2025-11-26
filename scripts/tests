@@ -209,6 +209,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_NATIVE = 14
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 15
     CUSTOM_BACKEND = 16
+    MULTILEVEL_BUILD = 17
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -228,6 +229,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.CUSTOM_BACKEND,
+            TEST_TYPES.MULTILEVEL_BUILD,
         ]
 
     @staticmethod
@@ -275,6 +277,8 @@ class TEST_TYPES(Enum):
             return "Example (monobuild, multilevel with native)"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "Example (Custom Backend)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "Example (multilevel build)"
 
     def make_dir(self):
         if self == TEST_TYPES.BASIC:
@@ -295,6 +299,8 @@ class TEST_TYPES(Enum):
             return "examples/monolithic_build_multilevel_native"
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return "examples/custom_backend"
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return "examples/multilevel_build"
         return ""
 
     def make_target(self):
@@ -329,6 +335,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
             return ""
         if self == TEST_TYPES.CUSTOM_BACKEND:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD:
             return ""
 
     def make_run_target(self, scheme):
@@ -1115,7 +1123,7 @@ def cli():
             "monolithic_build_native",
             "monolithic_build_multilevel",
             "monolithic_build_multilevel_native",
-            # "multilevel_build",
+            "multilevel_build",
             # "multilevel_build_native",
         ],
         action="append",
@@ -1165,6 +1173,7 @@ def cli():
             "monolithic_build_native",
             "monolithic_build_multilevel_native",
             "custom_backend",
+            "multilevel_build",
         ],
         action="append",
     )
