@@ -3,7 +3,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -119,4 +119,4 @@ Ll4_loop_start:
         ret
         .cfi_endproc
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

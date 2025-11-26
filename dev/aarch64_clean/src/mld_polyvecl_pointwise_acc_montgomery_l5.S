@@ -3,7 +3,7 @@
  */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 .macro montgomery_reduce_long res, inl, inh
@@ -215,4 +215,4 @@ l5_loop_start:
     .unreq q_c_3
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
