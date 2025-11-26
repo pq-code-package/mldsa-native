@@ -210,6 +210,7 @@ class TEST_TYPES(Enum):
     MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 15
     CUSTOM_BACKEND = 16
     MULTILEVEL_BUILD = 17
+    MULTILEVEL_BUILD_NATIVE = 18
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -230,6 +231,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.MULTILEVEL_BUILD,
+            TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
         ]
 
     @staticmethod
@@ -279,6 +281,8 @@ class TEST_TYPES(Enum):
             return "Example (Custom Backend)"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "Example (multilevel build)"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "Example (multilevel build, native)"
 
     def make_dir(self):
         if self == TEST_TYPES.BASIC:
@@ -301,6 +305,8 @@ class TEST_TYPES(Enum):
             return "examples/custom_backend"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "examples/multilevel_build"
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
+            return "examples/multilevel_build_native"
         return ""
 
     def make_target(self):
@@ -337,6 +343,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD:
+            return ""
+        if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
 
     def make_run_target(self, scheme):
@@ -1124,7 +1132,7 @@ def cli():
             "monolithic_build_multilevel",
             "monolithic_build_multilevel_native",
             "multilevel_build",
-            # "multilevel_build_native",
+            "multilevel_build_native",
         ],
         action="append",
         default=[],
@@ -1174,6 +1182,7 @@ def cli():
             "monolithic_build_multilevel_native",
             "custom_backend",
             "multilevel_build",
+            "multilevel_build_native",
         ],
         action="append",
     )
