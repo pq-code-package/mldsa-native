@@ -54,6 +54,24 @@
 #endif
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_FILE
+ *
+ * Description: If defined, this is a header that will be included instead
+ *              of the default configuration file mldsa/src/config.h.
+ *
+ *              When you need to build mldsa-native in multiple configurations,
+ *              using varying MLD_CONFIG_FILE can be more convenient
+ *              then configuring everything through CFLAGS.
+ *
+ *              To use, MLD_CONFIG_FILE _must_ be defined prior
+ *              to the inclusion of any mldsa-native headers. For example,
+ *              it can be set by passing `-DMLD_CONFIG_FILE="..."`
+ *              on the command line.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_FILE "config.h" */
+
+/******************************************************************************
  * Name:        MLD_CONFIG_NAMESPACE_PREFIX
  *
  * Description: The prefix to use to namespace global symbols from mldsa/.
@@ -116,23 +134,6 @@
  *****************************************************************************/
 /* #define MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
-/******************************************************************************
- * Name:        MLD_CONFIG_FILE
- *
- * Description: If defined, this is a header that will be included instead
- *              of the default configuration file mldsa/src/config.h.
- *
- *              When you need to build mldsa-native in multiple configurations,
- *              using varying MLD_CONFIG_FILE can be more convenient
- *              then configuring everything through CFLAGS.
- *
- *              To use, MLD_CONFIG_FILE _must_ be defined prior
- *              to the inclusion of any mldsa-native headers. For example,
- *              it can be set by passing `-DMLD_CONFIG_FILE="..."`
- *              on the command line.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_FILE "config.h" */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -216,6 +217,7 @@
     !defined(MLD_CONFIG_FIPS202_BACKEND_FILE)
 #define MLD_CONFIG_FIPS202_BACKEND_FILE "fips202/native/auto.h"
 #endif
+
 /******************************************************************************
  * Name:        MLD_CONFIG_FIPS202_CUSTOM_HEADER
  *
@@ -290,52 +292,6 @@
 */
 
 /******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_MEMCPY
- *
- * Description: Set this option and define `mld_memcpy` if you want to
- *              use a custom method to copy memory instead of the standard
- *              library memcpy function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memcpy function:
- *              void *mld_memcpy(void *dest, const void *src, size_t n)
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_MEMCPY
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_MEMSET
- *
- * Description: Set this option and define `mld_memset` if you want to
- *              use a custom method to set memory instead of the standard
- *              library memset function.
- *
- *              The custom implementation must have the same signature and
- *              behavior as the standard memset function:
- *              void *mld_memset(void *s, int c, size_t n)
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_MEMSET
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "sys.h"
-   static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_RANDOMBYTES
  *
  * Description: mldsa-native does not provide a secure randombytes
@@ -360,7 +316,6 @@
    }
    #endif
 */
-
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
@@ -416,58 +371,47 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 
 
 /******************************************************************************
- * Name:        MLD_CONFIG_NO_RANDOMIZED_API
+ * Name:        MLD_CONFIG_CUSTOM_MEMCPY
  *
- * Description: If this option is set, mldsa-native will be built without the
- *              randomized API functions (crypto_sign_keypair,
- *              crypto_sign, crypto_sign_signature, and
- *              crypto_sign_signature_extmu).
- *              This allows users to build mldsa-native without providing a
- *              randombytes() implementation if they only need the
- *              internal deterministic API
- *              (crypto_sign_keypair_internal, crypto_sign_signature_internal).
+ * Description: Set this option and define `mld_memcpy` if you want to
+ *              use a custom method to copy memory instead of the standard
+ *              library memcpy function.
  *
- *              NOTE: This option is incompatible with MLD_CONFIG_KEYGEN_PCT
- *              as the current PCT implementation requires
- *              crypto_sign_signature().
+ *              The custom implementation must have the same signature and
+ *              behavior as the standard memcpy function:
+ *              void *mld_memcpy(void *dest, const void *src, size_t n)
  *
  *****************************************************************************/
-/* #define MLD_CONFIG_NO_RANDOMIZED_API */
-
-/******************************************************************************
- * Name:        MLD_CONFIG_KEYGEN_PCT
- *
- * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
- *              Pairwise Consistency Test (PCT) to be carried out on a freshly
- *              generated keypair before it can be exported.
- *
- *              Set this option if such a check should be implemented.
- *              In this case, crypto_sign_keypair_internal and
- *              crypto_sign_keypair will return a non-zero error code if the
- *              PCT failed.
- *
- *              NOTE: This feature will drastically lower the performance of
- *              key generation.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_KEYGEN_PCT */
-
-/******************************************************************************
- * Name:        MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
- *
- * Description: If this option is set, the user must provide a runtime
- *              function `static inline int mld_break_pct() { ... }` to
- *              indicate whether the PCT should be made fail.
- *
- *              This option only has an effect if MLD_CONFIG_KEYGEN_PCT is set.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+/* #define MLD_CONFIG_CUSTOM_MEMCPY
    #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
    #include "sys.h"
-   static MLD_INLINE int mld_break_pct(void)
+   static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
    {
-       ... return 0/1 depending on whether PCT should be broken ...
+       ... your implementation ...
+   }
+   #endif
+*/
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_MEMSET
+ *
+ * Description: Set this option and define `mld_memset` if you want to
+ *              use a custom method to set memory instead of the standard
+ *              library memset function.
+ *
+ *              The custom implementation must have the same signature and
+ *              behavior as the standard memset function:
+ *              void *mld_memset(void *s, int c, size_t n)
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_MEMSET
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
+   {
+       ... your implementation ...
    }
    #endif
 */
@@ -547,6 +491,63 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_NO_ASM_VALUE_BARRIER */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mldsa-native will be built without the
+ *              randomized API functions (crypto_sign_keypair,
+ *              crypto_sign, crypto_sign_signature, and
+ *              crypto_sign_signature_extmu).
+ *              This allows users to build mldsa-native without providing a
+ *              randombytes() implementation if they only need the
+ *              internal deterministic API
+ *              (crypto_sign_keypair_internal, crypto_sign_signature_internal).
+ *
+ *              NOTE: This option is incompatible with MLD_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires
+ *              crypto_sign_signature().
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_RANDOMIZED_API */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_KEYGEN_PCT
+ *
+ * Description: Compliance with @[FIPS140_3_IG, p.87] requires a
+ *              Pairwise Consistency Test (PCT) to be carried out on a freshly
+ *              generated keypair before it can be exported.
+ *
+ *              Set this option if such a check should be implemented.
+ *              In this case, crypto_sign_keypair_internal and
+ *              crypto_sign_keypair will return a non-zero error code if the
+ *              PCT failed.
+ *
+ *              NOTE: This feature will drastically lower the performance of
+ *              key generation.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_KEYGEN_PCT */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+ *
+ * Description: If this option is set, the user must provide a runtime
+ *              function `static inline int mld_break_pct() { ... }` to
+ *              indicate whether the PCT should be made fail.
+ *
+ *              This option only has an effect if MLD_CONFIG_KEYGEN_PCT is set.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+   #if !defined(__ASSEMBLER__)
+   #include "sys.h"
+   static MLD_INLINE int mld_break_pct(void)
+   {
+       ... return 0/1 depending on whether PCT should be broken ...
+   }
+   #endif
+*/
 
 /******************************************************************************
  * Name:        MLD_CONFIG_SERIAL_FIPS202_ONLY
