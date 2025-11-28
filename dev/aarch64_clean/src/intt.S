@@ -230,17 +230,6 @@ MLD_ASM_FN_SYMBOL(intt_asm)
         movk wtmp, #0x7f, lsl #16
         dup consts.4s, wtmp
 
-        /* check-magic: 16382 == pow(2, 32-8, MLDSA_Q) */
-        // Load scaling factor 1/256*R
-        mov wtmp, #16382 // 2^(32 - 8) mod Q
-        dup ninv.4s, wtmp
-
-        /* check-magic: 4197891 == round(16382 * 2**31 / MLDSA_Q) */
-        // Load Barrett constant for 1/256*R
-        movz wtmp, #0x0e03
-        movk wtmp, #0x40, lsl #16
-        dup ninv_tw.4s, wtmp
-
         mov inp, in
         mov count, #16
 
@@ -307,6 +296,17 @@ intt_layer5678_start:
         cbnz count, intt_layer5678_start
 
         // ---------------------------------------------------------------------
+
+        /* check-magic: 16382 == pow(2, 32-8, MLDSA_Q) */
+        // Load scaling factor 1/256*R
+        mov wtmp, #16382 // 2^(32 - 8) mod Q
+        dup ninv.4s, wtmp
+
+        /* check-magic: 4197891 == round(16382 * 2**31 / MLDSA_Q) */
+        // Load Barrett constant for 1/256*R
+        movz wtmp, #0x0e03
+        movk wtmp, #0x40, lsl #16
+        dup ninv_tw.4s, wtmp
 
         mov count, #4
         load_roots_1234

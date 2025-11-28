@@ -28,7 +28,6 @@ SLOTHY_FLAGS_SPLIT= -c inputs_are_outputs \
                     -c variable_size \
                     -c constraints.stalls_first_attempt=64 \
                     -c split_heuristic=true \
-                    -c split_heuristic_factor=1.5 \
                     -c split_heuristic_repeat=2 \
                     -c sw_pipelining.enabled=true \
                     -c sw_pipelining.halving_heuristic=True \
@@ -67,11 +66,15 @@ ntt.S: ../../aarch64_clean/src/ntt.S
 	$(eval TMPFILE := $(shell mktemp))
 	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l ntt_layer123_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 	# optimize second loop using split heuristic
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l ntt_layer45678_start $(SLOTHY_FLAGS_SPLIT) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l ntt_layer45678_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=1.5 $(RESERVE_X_ONLY_FLAG)
 
 # Copy remaining files without optimization for now
 intt.S: ../../aarch64_clean/src/intt.S
-	cp $< $@
+	# optimize first loop in one go and write to temp file
+	$(eval TMPFILE := $(shell mktemp))
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l intt_layer5678_start $(SLOTHY_FLAGS) -c reserved_regs="[x0,x18--x30,sp]"
+	# optimize second loop using split heuristic
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l intt_layer1234_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=2.5 $(RESERVE_X_ONLY_FLAG)
 
 mld_polyvecl_pointwise_acc_montgomery_l4.S: ../../aarch64_clean/src/mld_polyvecl_pointwise_acc_montgomery_l4.S
 	cp $< $@
