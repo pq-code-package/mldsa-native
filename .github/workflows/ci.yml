@@ -52,17 +52,17 @@ jobs:
            arch: ppc64le
            mode: cross-ppc64le
            nix_shell: ci-cross-ppc64le
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: x86_64
            mode: native
            nix_shell: ci
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64
            mode: cross-aarch64
            nix_shell: ci-cross-aarch64
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
            arch: aarch64_be
            mode: cross-aarch64_be
@@ -110,7 +110,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: x86_64,
                mode: native,
@@ -118,7 +118,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64,
                mode: cross-aarch64,
@@ -126,7 +126,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
                arch: aarch64_be,
                mode: cross-aarch64_be,
@@ -413,7 +413,7 @@ jobs:
         external:
          - ${{ github.repository_owner != 'pq-code-package' }}
         target:
-          - runner: pqcp-x64
+          - runner: ubuntu-latest
             name: x86_64
           - runner: ubuntu-24.04-arm
             name: aarch64
@@ -448,7 +448,7 @@ jobs:
         target:
          - runner: ubuntu-24.04-arm
            name: 'ubuntu-latest (aarch64)'
-         - runner: pqcp-x64
+         - runner: ubuntu-latest
            name: 'ubuntu-latest (x86_64)'
         exclude:
           - {external: true,
@@ -458,7 +458,7 @@ jobs:
              }}
           - {external: true,
              target: {
-               runner: pqcp-x64,
+               runner: ubuntu-latest,
                name: 'ubuntu-latest (x86_64)',
              }}
     runs-on: ${{ matrix.target.runner }}
