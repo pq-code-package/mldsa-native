@@ -18,7 +18,7 @@ jobs:
     name: Linting
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: ./.github/actions/lint
         with:
           nix-shell: ci-linter
@@ -48,7 +48,7 @@ jobs:
     name: Quickcheck (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: make quickcheck
         run: |
           OPT=0 make quickcheck
@@ -79,7 +79,7 @@ jobs:
     name: Quickcheck ACVP (${{ matrix.target.name }}, ${{ matrix.acvp-version }})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Run ACVP test
         run: |
           ./scripts/tests acvp --version ${{ matrix.acvp-version }}
@@ -109,7 +109,7 @@ jobs:
     name: Quickcheck bench (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: "tests bench (cycles: NO)"
         run: |
           ./scripts/tests bench -c NO
@@ -152,7 +152,7 @@ jobs:
     name: Quickcheck C90 (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS=-std=c90 make quickcheck
@@ -176,7 +176,7 @@ jobs:
     name: Quickcheck ${{ matrix.system }}
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - name: Build test
         shell: powershell
@@ -193,7 +193,7 @@ jobs:
     name: Quickcheck (Mingw-w64 ${{ matrix.mingw-version }})
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
         shell: cmd
@@ -210,7 +210,7 @@ jobs:
         system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
     runs-on: ${{ matrix.system }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: make lib
         run: |
           make lib
@@ -231,7 +231,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     name: AArch64 dev backend (${{ matrix.simplify.name }})
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Reinstate and test backend
         uses: ./.github/actions/setup-shell
         with:
@@ -245,7 +245,7 @@ jobs:
     name: x86_64 Intel syntax
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Generate with Intel syntax and test
         uses: ./.github/actions/setup-shell
         with:
@@ -269,7 +269,7 @@ jobs:
     name: scan-build (${{ matrix.target.name }})
     runs-on: ${{ matrix.target.runner }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - uses: ./.github/actions/setup-apt
         with:
           packages: clang-tools clang
