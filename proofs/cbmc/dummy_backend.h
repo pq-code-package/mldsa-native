@@ -14,6 +14,7 @@
 #define MLD_USE_NATIVE_REJ_UNIFORM_ETA4
 #define MLD_USE_NATIVE_POLY_DECOMPOSE_32
 #define MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#define MLD_USE_NATIVE_POLY_CADDQ
 
 #include "../../mldsa/src/native/api.h"
 

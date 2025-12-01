@@ -317,7 +317,16 @@ __contract__(
  *
  * Arguments:   - int32_t *a: pointer to input/output polynomial
  **************************************************/
-static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N]);
+static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLY_CADDQ */
 
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
