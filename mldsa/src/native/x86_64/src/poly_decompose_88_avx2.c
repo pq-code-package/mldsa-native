@@ -75,8 +75,8 @@ void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0)
 
     /*
      * Compute f1 = round-(f1' / B) ≈ round(f1' * 11275 / 2^24). This is exact
-     * for 0 <= f1' < 2^16. Note that half is rounded down since 11275 / 2^24 ≲
-     * 1 / 1488.
+     * for 0 <= f1' < 2^16. See mld_decompose() in mldsa/src/rounding.h for the
+     * proof.
      *
      * round(f1' * 11275 / 2^24) is in turn computed in 2 steps as
      * round(floor(f1' * 11275 / 2^16) / 2^8). The mulhi computes f1'' =
