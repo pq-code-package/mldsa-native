@@ -20,6 +20,7 @@
 #define MLD_USE_NATIVE_POLY_CHKNORM
 #define MLD_USE_NATIVE_POLYZ_UNPACK_17
 #define MLD_USE_NATIVE_POLYZ_UNPACK_19
+#define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
 
 #include "../../mldsa/src/native/api.h"
 

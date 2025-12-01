@@ -244,7 +244,6 @@ void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
                                    const mld_poly *b)
 {
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
-  /* TODO: proof */
   int ret;
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
   mld_assert_abs_bound(b->coeffs, MLDSA_N, MLD_NTT_BOUND);
