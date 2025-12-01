@@ -44,6 +44,12 @@
  * in sync. */
 #define MLD_NTT_BOUND (9 * MLDSA_Q)
 
+/* Absolute exclusive upper bound for the output of the inverse NTT
+ *
+ * NOTE: This is the same bound as in ntt.h and has to be kept
+ * in sync. */
+#define MLD_INTT_BOUND MLDSA_Q
+
 /*
  * This is the C<->native interface allowing for the drop-in of
  * native code for performance critical arithmetic components of ML-DSA.
@@ -126,7 +132,16 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N]);
  *
  * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
  **************************************************/
-static MLD_INLINE int mld_intt_native(int32_t p[MLDSA_N]);
+static MLD_INLINE int mld_intt_native(int32_t p[MLDSA_N])
+__contract__(
+  requires(memory_no_alias(p, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(p, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(p, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLDSA_N, MLD_INTT_BOUND))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(p, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(p, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_INTT */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM)

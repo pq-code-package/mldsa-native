@@ -8,7 +8,7 @@
 
 
 #define MLD_USE_NATIVE_NTT
-
+#define MLD_USE_NATIVE_INTT
 
 
 #include "../../mldsa/src/native/api.h"
