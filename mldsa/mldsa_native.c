@@ -547,6 +547,7 @@
 #undef MLD_NATIVE_API_H
 #undef MLD_NATIVE_FUNC_FALLBACK
 #undef MLD_NATIVE_FUNC_SUCCESS
+#undef MLD_NTT_BOUND
 /* mldsa/src/native/meta.h */
 #undef MLD_NATIVE_META_H
 #if defined(MLD_SYS_AARCH64)
