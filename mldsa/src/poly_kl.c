@@ -313,7 +313,6 @@ __contract__(
   ensures(array_abs_bound(a, 0, return_value, MLDSA_ETA + 1))
 )
 {
-/* TODO: CBMC proof based on mld_rej_uniform_eta2_native */
 #if MLDSA_ETA == 2 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
   int ret;
   mld_assert_abs_bound(a, offset, MLDSA_ETA + 1);
@@ -327,7 +326,6 @@ __contract__(
       return res;
     }
   }
-/* TODO: CBMC proof based on mld_rej_uniform_eta4_native */
 #elif MLDSA_ETA == 4 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4)
   int ret;
   mld_assert_abs_bound(a, offset, MLDSA_ETA + 1);

@@ -196,7 +196,16 @@ __contract__(
  **************************************************/
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
-                                                  unsigned buflen);
+                                                  unsigned buflen)
+__contract__(
+  requires(len <= MLDSA_N)
+  requires(buflen <= (2 * 136))
+  requires(memory_no_alias(r, sizeof(int32_t) * len))
+  requires(memory_no_alias(buf, buflen))
+  assigns(memory_slice(r, sizeof(int32_t) * len))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
+);
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA2 */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4)
@@ -219,7 +228,16 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
  **************************************************/
 static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
-                                                  unsigned buflen);
+                                                  unsigned buflen)
+__contract__(
+  requires(len <= MLDSA_N)
+  requires(buflen <= (2 * 136))
+  requires(memory_no_alias(r, sizeof(int32_t) * len))
+  requires(memory_no_alias(buf, buflen))
+  assigns(memory_slice(r, sizeof(int32_t) * len))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
+);
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
 
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
