@@ -164,7 +164,16 @@ __contract__(
  **************************************************/
 static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                              const uint8_t *buf,
-                                             unsigned buflen);
+                                             unsigned buflen)
+__contract__(
+  requires(len <= MLDSA_N)
+  requires(buflen <= ( 5 * 168) && buflen % 3 == 0)
+  requires(memory_no_alias(r, sizeof(int32_t) * len))
+  requires(memory_no_alias(buf, buflen))
+  assigns(memory_slice(r, sizeof(int32_t) * len))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> array_bound(r, 0, (unsigned) return_value, 0, MLDSA_Q))
+);
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)

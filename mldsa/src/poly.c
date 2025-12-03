@@ -368,7 +368,6 @@ __contract__(
   ensures(array_bound(a, 0, return_value, 0, MLDSA_Q))
 )
 {
-/* TODO: CBMC proof based on mld_rej_uniform_native */
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM)
   int ret;
   mld_assert_bound(a, offset, 0, MLDSA_Q);
