@@ -75,7 +75,6 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) && MLD_CONFIG_PARAMETER_SET == 44
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  /* TODO: proof */
   ret = mld_poly_decompose_88_native(a1->coeffs, a0->coeffs, a->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
@@ -88,7 +87,6 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0, const mld_poly *a)
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  /* TODO: proof */
   ret = mld_poly_decompose_32_native(a1->coeffs, a0->coeffs, a->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
