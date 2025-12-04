@@ -504,7 +504,20 @@ __contract__(
  **************************************************/
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
-    const int32_t v[4][MLDSA_N]);
+    const int32_t v[4][MLDSA_N])
+__contract__(
+  requires(memory_no_alias(w, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(u, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(memory_no_alias(v, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(forall(l0, 0, 4,
+                  array_bound(u[l0], 0, MLDSA_N, 0, MLDSA_Q)))
+  requires(forall(l1, 0, 4,
+    array_abs_bound(v[l1], 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(w, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5)
@@ -524,7 +537,20 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
  **************************************************/
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
-    const int32_t v[5][MLDSA_N]);
+    const int32_t v[5][MLDSA_N])
+__contract__(
+  requires(memory_no_alias(w, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(u, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(memory_no_alias(v, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(forall(l0, 0, 5,
+                  array_bound(u[l0], 0, MLDSA_N, 0, MLDSA_Q)))
+  requires(forall(l1, 0, 5,
+    array_abs_bound(v[l1], 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(w, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
@@ -544,7 +570,20 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
  **************************************************/
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
-    const int32_t v[7][MLDSA_N]);
+    const int32_t v[7][MLDSA_N])
+__contract__(
+  requires(memory_no_alias(w, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(u, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(memory_no_alias(v, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(forall(l0, 0, 7,
+                  array_bound(u[l0], 0, MLDSA_N, 0, MLDSA_Q)))
+  requires(forall(l1, 0, 7,
+    array_abs_bound(v[l1], 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(w, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 #endif /* !MLD_NATIVE_API_H */
