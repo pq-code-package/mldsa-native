@@ -55,7 +55,13 @@ __contract__(
 );
 #endif /* MLD_USE_FIPS202_X1_NATIVE */
 #if defined(MLD_USE_FIPS202_X4_NATIVE)
-static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state);
-#endif
+static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
+    assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+    ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4))
+);
+#endif /* MLD_USE_FIPS202_X4_NATIVE */
 
 #endif /* !MLD_FIPS202_NATIVE_API_H */
