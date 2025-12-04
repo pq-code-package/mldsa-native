@@ -18,6 +18,8 @@
 #define MLD_USE_NATIVE_POLY_USE_HINT_32
 #define MLD_USE_NATIVE_POLY_USE_HINT_88
 #define MLD_USE_NATIVE_POLY_CHKNORM
+#define MLD_USE_NATIVE_POLYZ_UNPACK_17
+#define MLD_USE_NATIVE_POLYZ_UNPACK_19
 
 #include "../../mldsa/src/native/api.h"
 

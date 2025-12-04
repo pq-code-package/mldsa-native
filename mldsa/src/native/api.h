@@ -423,7 +423,15 @@ __contract__(
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
-static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a);
+static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(r, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(r, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_17 */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
@@ -437,7 +445,15 @@ static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a);
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
-static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a);
+static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(r, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(r, MLDSA_N))
+);
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)

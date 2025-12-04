@@ -861,7 +861,6 @@ MLD_INTERNAL_API
 void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 {
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) && MLD_CONFIG_PARAMETER_SET == 44
-  /* TODO: proof */
   int ret;
   ret = mld_polyz_unpack_17_native(r->coeffs, a);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
@@ -871,7 +870,6 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
   }
 #elif defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) && \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  /* TODO: proof */
   int ret;
   ret = mld_polyz_unpack_19_native(r->coeffs, a);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
