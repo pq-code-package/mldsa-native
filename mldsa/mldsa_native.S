@@ -552,6 +552,7 @@
 #undef MLD_NATIVE_FUNC_FALLBACK
 #undef MLD_NATIVE_FUNC_SUCCESS
 #undef MLD_NTT_BOUND
+#undef REDUCE32_RANGE_MAX
 /* mldsa/src/native/meta.h */
 #undef MLD_NATIVE_META_H
 #if defined(MLD_SYS_AARCH64)

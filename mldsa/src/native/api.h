@@ -50,6 +50,12 @@
  * in sync. */
 #define MLD_INTT_BOUND MLDSA_Q
 
+/* Absolute bound for range of mld_reduce32()
+ *
+ * NOTE: This is the same bound as in reduce.h and has to be kept
+ * in sync. */
+/* check-magic: 6283009 == (REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
+#define REDUCE32_RANGE_MAX 6283009
 /*
  * This is the C<->native interface allowing for the drop-in of
  * native code for performance critical arithmetic components of ML-DSA.
@@ -396,7 +402,14 @@ __contract__(
  * Returns 0 if the infinity norm is strictly smaller than B, and 1
  * otherwise. B must not be larger than MLDSA_Q - REDUCE32_RANGE_MAX.
  **************************************************/
-static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B);
+static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(0 <= B && B <= MLDSA_Q - REDUCE32_RANGE_MAX)
+  requires(array_bound(a, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
+);
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17)

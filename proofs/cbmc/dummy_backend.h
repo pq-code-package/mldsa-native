@@ -17,6 +17,7 @@
 #define MLD_USE_NATIVE_POLY_CADDQ
 #define MLD_USE_NATIVE_POLY_USE_HINT_32
 #define MLD_USE_NATIVE_POLY_USE_HINT_88
+#define MLD_USE_NATIVE_POLY_CHKNORM
 
 #include "../../mldsa/src/native/api.h"
 

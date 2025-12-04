@@ -703,7 +703,6 @@ MLD_INTERNAL_API
 uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
 {
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
-  /* TODO: proof */
   int ret;
   int success;
   mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
