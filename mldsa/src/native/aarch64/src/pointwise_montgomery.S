@@ -10,6 +10,9 @@
  *   dev/aarch64_opt/src/pointwise_montgomery.S using scripts/simpasm. Do not modify it directly.
  */
 
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
 
 .text
 .balign 4

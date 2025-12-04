@@ -10,6 +10,9 @@
  *   dev/aarch64_opt/src/mld_polyvecl_pointwise_acc_montgomery_l7.S using scripts/simpasm. Do not modify it directly.
  */
 
+#if defined(__ELF__)
+.section .note.GNU-stack,"",@progbits
+#endif
 
 .text
 .balign 4
