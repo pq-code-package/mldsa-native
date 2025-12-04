@@ -158,7 +158,6 @@ void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  /* TODO: proof */
   ret = mld_poly_use_hint_88_native(b->coeffs, a->coeffs, h->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
@@ -170,7 +169,6 @@ void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  /* TODO: proof */
   ret = mld_poly_use_hint_32_native(b->coeffs, a->coeffs, h->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
