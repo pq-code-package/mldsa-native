@@ -110,21 +110,21 @@ __contract__(ensures(return_value == b)) { return (b ^ mld_ct_get_optblocker_u8(
 static MLD_INLINE int64_t mld_value_barrier_i64(int64_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLD_INLINE uint32_t mld_value_barrier_u32(uint32_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 
 static MLD_INLINE uint8_t mld_value_barrier_u8(uint8_t b)
 __contract__(ensures(return_value == b))
 {
-  __asm__("" : "+r"(b));
+  __asm__ volatile("" : "+r"(b));
   return b;
 }
 #endif /* MLD_USE_ASM_VALUE_BARRIER */
