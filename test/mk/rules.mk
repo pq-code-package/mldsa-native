@@ -52,3 +52,34 @@ $(BUILD_DIR)/mldsa87/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+
+$(BUILD_DIR)/mldsa44/unit/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa44/unit/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/unit/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/unit/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/unit/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/unit/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<

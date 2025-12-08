@@ -2,14 +2,14 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp stack \
-	func_44 kat_44 acvp_44 stack_44 \
-	func_65 kat_65 acvp_65 stack_65 \
-	func_87 kat_87 acvp_87 stack_87 \
-	run_func run_kat run_acvp run_stack \
-	run_func_44 run_kat_44 run_stack_44 \
-	run_func_65 run_kat_65 run_stack_65 \
-	run_func_87 run_kat_87 run_stack_87 \
+.PHONY: func kat acvp stack unit \
+	func_44 kat_44 acvp_44 stack_44 unit_44 \
+	func_65 kat_65 acvp_65 stack_65 unit_65 \
+	func_87 kat_87 acvp_87 stack_87 unit_87 \
+	run_func run_kat run_acvp run_stack run_unit \
+	run_func_44 run_kat_44 run_stack_44 run_unit_44 \
+	run_func_65 run_kat_65 run_stack_65 run_unit_65 \
+	run_func_87 run_kat_87 run_stack_87 run_unit_87 \
 	bench_44 bench_65 bench_87 bench \
 	run_bench_44 run_bench_65 run_bench_87 run_bench \
 	bench_components_44 bench_components_65 bench_components_87 bench_components \
@@ -49,7 +49,7 @@ quickcheck: test
 build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp
+test: run_kat run_func run_acvp run_unit
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
@@ -68,6 +68,14 @@ run_func_87: func_87
 	$(W) $(MLDSA87_DIR)/bin/test_mldsa87
 run_func: run_func_44 run_func_65 run_func_87
 
+run_unit_44: unit_44
+	$(W) $(MLDSA44_DIR)/bin/test_unit44
+run_unit_65: unit_65
+	$(W) $(MLDSA65_DIR)/bin/test_unit65
+run_unit_87: unit_87
+	$(W) $(MLDSA87_DIR)/bin/test_unit87
+run_unit: run_unit_44 run_unit_65 run_unit_87
+
 run_acvp: acvp
 	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
 
@@ -78,6 +86,14 @@ func_65: $(MLDSA65_DIR)/bin/test_mldsa65
 func_87: $(MLDSA87_DIR)/bin/test_mldsa87
 	$(Q)echo "  FUNC       ML-DSA-87:  $^"
 func: func_44 func_65 func_87
+
+unit_44:  $(MLDSA44_DIR)/bin/test_unit44
+	$(Q)echo "  UNIT       ML-DSA-44:   $^"
+unit_65:  $(MLDSA65_DIR)/bin/test_unit65
+	$(Q)echo "  UNIT       ML-DSA-65:   $^"
+unit_87: $(MLDSA87_DIR)/bin/test_unit87
+	$(Q)echo "  UNIT       ML-DSA-87:  $^"
+unit: unit_44 unit_65 unit_87
 
 kat_44: $(MLDSA44_DIR)/bin/gen_KAT44
 	$(Q)echo "  KAT        ML-DSA-44:   $^"

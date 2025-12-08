@@ -14,7 +14,7 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mldsa acvp_mldsa bench_mldsa bench_components_mldsa gen_KAT test_stack
+ALL_TESTS = test_mldsa test_unit acvp_mldsa bench_mldsa bench_components_mldsa gen_KAT test_stack
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -27,12 +27,27 @@ $(MLDSA65_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
 MLDSA87_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR),$(SOURCES) $(FIPS202_SRCS))
 $(MLDSA87_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
 
+# Unit test object files - same sources but with MLD_STATIC_TESTABLE=
+MLDSA44_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA44_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+MLDSA65_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA65_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+MLDSA87_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA87_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+
+
 
 CFLAGS += -Imldsa
 
 $(BUILD_DIR)/libmldsa44.a: $(MLDSA44_OBJS)
 $(BUILD_DIR)/libmldsa65.a: $(MLDSA65_OBJS)
 $(BUILD_DIR)/libmldsa87.a: $(MLDSA87_OBJS)
+
+# Unit libraries with exposed internal functions
+$(BUILD_DIR)/libmldsa44_unit.a: $(MLDSA44_UNIT_OBJS)
+$(BUILD_DIR)/libmldsa65_unit.a: $(MLDSA65_UNIT_OBJS)
+$(BUILD_DIR)/libmldsa87_unit.a: $(MLDSA87_UNIT_OBJS)
+
 
 $(BUILD_DIR)/libmldsa.a: $(MLDSA44_OBJS) $(MLDSA65_OBJS) $(MLDSA87_OBJS)
 
@@ -47,6 +62,16 @@ $(MLDSA44_DIR)/bin/test_stack44: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA65_DIR)/bin/test_stack65: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA87_DIR)/bin/test_stack87: CFLAGS += -Imldsa -fstack-usage
 
+$(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA87_DIR)/bin/test_unit87: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+
+# Unit library object files compiled with MLD_STATIC_TESTABLE=
+$(MLDSA44_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA65_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA87_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+
+
 $(MLDSA44_DIR)/bin/bench_mldsa44: $(MLDSA44_DIR)/test/hal/hal.c.o
 $(MLDSA65_DIR)/bin/bench_mldsa65: $(MLDSA65_DIR)/test/hal/hal.c.o
 $(MLDSA87_DIR)/bin/bench_mldsa87: $(MLDSA87_DIR)/test/hal/hal.c.o
@@ -58,16 +83,28 @@ $(MLDSA44_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44
 $(MLDSA65_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
 $(MLDSA87_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
 
-# Link tests with respective library
+# Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): LDLIBS += -L$(BUILD_DIR) -l$(1)
 $(BUILD_DIR)/$(1)/bin/$(2)$(shell echo $(1) | tr -d -c 0-9): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
+
+# Special rule for test_unit - link against unit libraries with exposed internal functions
+define ADD_SOURCE_UNIT
+$(BUILD_DIR)/$(1)/bin/test_unit$(shell echo $(1) | tr -d -c 0-9): LDLIBS += -L$(BUILD_DIR) -l$(1)_unit
+$(BUILD_DIR)/$(1)/bin/test_unit$(shell echo $(1) | tr -d -c 0-9): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+endef
+
+
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
-	$(foreach test,$(ALL_TESTS), \
+	$(foreach test,$(filter-out test_unit,$(ALL_TESTS)), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
 	) \
+)
+
+$(foreach scheme,mldsa44 mldsa65 mldsa87, \
+	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 )
 
 $(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44): $(call MAKE_OBJS, $(MLDSA44_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
