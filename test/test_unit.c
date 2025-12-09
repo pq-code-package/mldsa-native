@@ -10,6 +10,7 @@
 
 #include "../mldsa/src/poly.h"
 #include "../mldsa/src/poly_kl.h"
+#include "../mldsa/src/polyvec.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLDSA_DEBUG
@@ -40,14 +41,19 @@ void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
                                      const mld_poly *b);
-#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
-    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
-    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                        \
-    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *w, const mld_polyvecl *u,
+                                             const mld_polyvecl *v);
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                           \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                     \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                     \
+    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                         \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) ||                 \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -430,6 +436,51 @@ static int test_native_pointwise_montgomery(void)
 }
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 
+#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
+static int test_polyvecl_pointwise_acc_montgomery_core(const mld_polyvecl *u,
+                                                       const mld_polyvecl *v,
+                                                       const char *test_name)
+{
+  mld_poly test_w, ref_w;
+
+  mld_polyvecl_pointwise_acc_montgomery(&test_w, u, v);
+  mld_polyvecl_pointwise_acc_montgomery_c(&ref_w, u, v);
+
+  CHECK(compare_i32_arrays(test_w.coeffs, ref_w.coeffs, MLDSA_N, test_name,
+                           NULL));
+  return 0;
+}
+
+static int test_native_polyvecl_pointwise_acc_montgomery(void)
+{
+  mld_polyvecl u, v;
+  unsigned int i;
+
+  /* Test with zeros */
+  generate_i32_array_zeros((int32_t *)&u, MLDSA_L * MLDSA_N);
+  generate_i32_array_zeros((int32_t *)&v, MLDSA_L * MLDSA_N);
+  CHECK(test_polyvecl_pointwise_acc_montgomery_core(&u, &v,
+                                                    "polyvecl_acc_zeros") == 0);
+
+  /* Test with random values */
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    generate_i32_array_ranged((int32_t *)&u, MLDSA_L * MLDSA_N, 0, MLDSA_Q);
+    generate_i32_array_ranged((int32_t *)&v, MLDSA_L * MLDSA_N,
+                              -MLD_NTT_BOUND + 1, MLD_NTT_BOUND);
+    CHECK(test_polyvecl_pointwise_acc_montgomery_core(
+              &u, &v, "polyvecl_acc_random") == 0);
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 || \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 || \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
+
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -466,13 +517,22 @@ static int test_backend_units(void)
   CHECK(test_native_pointwise_montgomery() == 0);
 #endif
 
+#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
+  CHECK(test_native_polyvecl_pointwise_acc_montgomery() == 0);
+#endif
+
   return 0;
 }
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
           MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM ||    \
-          MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY ||                               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 int main(void)
 {
@@ -481,20 +541,26 @@ int main(void)
   randombytes_reset();
 
   /* Run backend unit tests */
-#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
-    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
-    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                        \
-    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                           \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                     \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                     \
+    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                         \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) ||                 \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
           MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM ||    \
-          MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY ||                               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 
   return 0;
