@@ -32,8 +32,10 @@
 
 /* Declarations for _c functions exposed by MLD_STATIC_TESTABLE= */
 void mld_poly_ntt_c(mld_poly *a);
+void mld_poly_invntt_tomont_c(mld_poly *a);
+
 void mld_poly_caddq_c(mld_poly *a);
-#if defined(MLD_USE_NATIVE_NTT)
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT)
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -166,6 +168,57 @@ static int test_native_ntt(void)
 }
 #endif /* MLD_USE_NATIVE_NTT */
 
+#ifdef MLD_USE_NATIVE_INTT
+static int test_invntt_tomont_core(const int32_t *input, const char *test_name)
+{
+  mld_poly test_poly, ref_poly;
+
+  memcpy(test_poly.coeffs, input, MLDSA_N * sizeof(int32_t));
+  memcpy(ref_poly.coeffs, input, MLDSA_N * sizeof(int32_t));
+
+#ifdef MLD_USE_NATIVE_NTT_CUSTOM_ORDER
+  mld_poly_permute_bitrev_to_custom(test_poly.coeffs);
+#endif
+
+  mld_poly_invntt_tomont(&test_poly);
+  mld_poly_invntt_tomont_c(&ref_poly);
+
+  /* Normalize */
+  mld_poly_reduce(&ref_poly);
+  mld_poly_reduce(&test_poly);
+
+  mld_poly_caddq_c(&ref_poly);
+  mld_poly_caddq_c(&test_poly);
+
+  CHECK(compare_i32_arrays(test_poly.coeffs, ref_poly.coeffs, MLDSA_N,
+                           test_name, input));
+  return 0;
+}
+
+static int test_native_invntt_tomont(void)
+{
+  int32_t test_data[MLDSA_N];
+  int pos, i;
+
+  generate_i32_array_zeros(test_data, MLDSA_N);
+  CHECK(test_invntt_tomont_core(test_data, "invntt_tomont_zeros") == 0);
+
+  for (pos = 0; pos < MLDSA_N; pos += MLDSA_N / 8)
+  {
+    generate_i32_array_single(test_data, MLDSA_N, (size_t)pos, 1);
+    CHECK(test_invntt_tomont_core(test_data, "invntt_tomont_single") == 0);
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    generate_i32_array_ranged(test_data, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
+    CHECK(test_invntt_tomont_core(test_data, "invntt_tomont_random") == 0);
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_NATIVE_INTT */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -176,9 +229,14 @@ static int test_backend_units(void)
   CHECK(test_native_ntt() == 0);
 #endif
 
+#ifdef MLD_USE_NATIVE_INTT
+  CHECK(test_native_invntt_tomont() == 0);
+#endif
+
   return 0;
 }
-#endif /* MLD_USE_NATIVE_NTT */
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT */
+
 int main(void)
 {
   /* WARNING: Test-only
@@ -186,7 +244,7 @@ int main(void)
   randombytes_reset();
 
   /* Run backend unit tests */
-#if defined(MLD_USE_NATIVE_NTT)
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT)
   CHECK(test_backend_units() == 0);
 #endif
 
