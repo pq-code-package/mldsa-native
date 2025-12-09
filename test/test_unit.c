@@ -37,12 +37,14 @@ void mld_poly_invntt_tomont_c(mld_poly *a);
 void mld_poly_caddq_c(mld_poly *a);
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0, const mld_poly *a);
 void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
+uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
     defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CHKNORM)
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -336,6 +338,48 @@ static int test_native_use_hint(void)
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 || MLD_USE_NATIVE_POLY_USE_HINT_32 \
         */
 
+#if defined(MLD_USE_NATIVE_POLY_CHKNORM)
+static int test_poly_chknorm_core(const mld_poly *input_poly, int32_t B,
+                                  const char *test_name)
+{
+  uint32_t test_result, ref_result;
+
+  test_result = mld_poly_chknorm(input_poly, B);
+  ref_result = mld_poly_chknorm_c(input_poly, B);
+
+  if (test_result != ref_result)
+  {
+    fprintf(stderr, "FAIL: %s - result mismatch: native=%u, ref=%u\n",
+            test_name, test_result, ref_result);
+    return 1;
+  }
+
+  return 0;
+}
+
+static int test_native_poly_chknorm(void)
+{
+  mld_poly test_poly;
+  int i;
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    generate_i32_array_ranged(test_poly.coeffs, MLDSA_N, -REDUCE32_RANGE_MAX,
+                              REDUCE32_RANGE_MAX);
+    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_Q - REDUCE32_RANGE_MAX,
+                                 "poly_chknorm_MAX_B") == 0);
+    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_GAMMA1 - MLDSA_BETA,
+                                 "poly_chknorm_gamma1_minus_beta") == 0);
+    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_GAMMA2 - MLDSA_BETA,
+                                 "poly_chknorm_gamma2_minus_beta") == 0);
+    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_GAMMA2,
+                                 "poly_chknorm_gamma2") == 0);
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_NATIVE_POLY_CHKNORM */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -364,12 +408,16 @@ static int test_backend_units(void)
   CHECK(test_native_use_hint() == 0);
 #endif
 
+#if defined(MLD_USE_NATIVE_POLY_CHKNORM)
+  CHECK(test_native_poly_chknorm() == 0);
+#endif
+
   return 0;
 }
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
-          MLD_USE_NATIVE_POLY_USE_HINT_32 */
+          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM */
 
 int main(void)
 {
@@ -383,12 +431,13 @@ int main(void)
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
     defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CHKNORM)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
-          MLD_USE_NATIVE_POLY_USE_HINT_32 */
+          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM */
 
 
   return 0;
