@@ -38,13 +38,16 @@ void mld_poly_caddq_c(mld_poly *a);
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0, const mld_poly *a);
 void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
+void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
+                                     const mld_poly *b);
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
     defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
-    defined(MLD_USE_NATIVE_POLY_CHKNORM)
+    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                        \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -380,6 +383,53 @@ static int test_native_poly_chknorm(void)
 }
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 
+#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+static int test_poly_pointwise_montgomery_core(const mld_poly *poly_a,
+                                               const mld_poly *poly_b,
+                                               const char *test_name)
+{
+  mld_poly test_poly_c, ref_poly_c;
+
+  mld_poly_pointwise_montgomery(&test_poly_c, poly_a, poly_b);
+  mld_poly_pointwise_montgomery_c(&ref_poly_c, poly_a, poly_b);
+
+  CHECK(compare_i32_arrays(test_poly_c.coeffs, ref_poly_c.coeffs, MLDSA_N,
+                           test_name, poly_a->coeffs));
+  return 0;
+}
+
+static int test_native_pointwise_montgomery(void)
+{
+  mld_poly test_poly_a, test_poly_b;
+  int pos, i;
+
+  generate_i32_array_zeros(test_poly_a.coeffs, MLDSA_N);
+  generate_i32_array_zeros(test_poly_b.coeffs, MLDSA_N);
+  CHECK(test_poly_pointwise_montgomery_core(&test_poly_a, &test_poly_b,
+                                            "pointwise_montgomery_zeros") == 0);
+
+  for (pos = 0; pos < MLDSA_N; pos += MLDSA_N / 8)
+  {
+    generate_i32_array_single(test_poly_a.coeffs, MLDSA_N, (size_t)pos, 1);
+    generate_i32_array_single(test_poly_b.coeffs, MLDSA_N, (size_t)pos, 1);
+    CHECK(test_poly_pointwise_montgomery_core(
+              &test_poly_a, &test_poly_b, "pointwise_montgomery_single") == 0);
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    generate_i32_array_ranged(test_poly_a.coeffs, MLDSA_N, -(MLD_NTT_BOUND - 1),
+                              MLD_NTT_BOUND);
+    generate_i32_array_ranged(test_poly_b.coeffs, MLDSA_N, -(MLD_NTT_BOUND - 1),
+                              MLD_NTT_BOUND);
+    CHECK(test_poly_pointwise_montgomery_core(
+              &test_poly_a, &test_poly_b, "pointwise_montgomery_random") == 0);
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -412,12 +462,17 @@ static int test_backend_units(void)
   CHECK(test_native_poly_chknorm() == 0);
 #endif
 
+#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+  CHECK(test_native_pointwise_montgomery() == 0);
+#endif
+
   return 0;
 }
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
-          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM */
+          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM ||    \
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 
 int main(void)
 {
@@ -432,12 +487,14 @@ int main(void)
     defined(MLD_USE_NATIVE_POLY_CADDQ) ||                          \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                    \
     defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                    \
-    defined(MLD_USE_NATIVE_POLY_CHKNORM)
+    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                        \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
-          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM */
+          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM ||    \
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 
 
   return 0;
