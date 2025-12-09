@@ -34,12 +34,12 @@
 /* Declarations for _c functions exposed by MLD_STATIC_TESTABLE= */
 void mld_poly_ntt_c(mld_poly *a);
 void mld_poly_invntt_tomont_c(mld_poly *a);
-
 void mld_poly_caddq_c(mld_poly *a);
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0, const mld_poly *a);
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
+    defined(MLD_USE_NATIVE_POLY_CADDQ)
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -258,6 +258,45 @@ static int test_native_decompose(void)
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
         */
 
+#if defined(MLD_USE_NATIVE_POLY_CADDQ)
+static int test_caddq_core(const int32_t *input, const char *test_name)
+{
+  mld_poly test_poly, ref_poly;
+
+  memcpy(test_poly.coeffs, input, MLDSA_N * sizeof(int32_t));
+  memcpy(ref_poly.coeffs, input, MLDSA_N * sizeof(int32_t));
+
+  mld_poly_caddq(&test_poly);
+  mld_poly_caddq_c(&ref_poly);
+
+  CHECK(compare_i32_arrays(test_poly.coeffs, ref_poly.coeffs, MLDSA_N,
+                           test_name, input));
+  return 0;
+}
+static int test_native_caddq(void)
+{
+  int32_t test_data[MLDSA_N];
+  int pos, i;
+
+  generate_i32_array_zeros(test_data, MLDSA_N);
+  CHECK(test_caddq_core(test_data, "poly_caddq_zeros") == 0);
+
+  for (pos = 0; pos < MLDSA_N; pos += MLDSA_N / 8)
+  {
+    generate_i32_array_single(test_data, MLDSA_N, (size_t)pos, 1);
+    CHECK(test_caddq_core(test_data, "poly_caddq_single") == 0);
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    generate_i32_array_ranged(test_data, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
+    CHECK(test_caddq_core(test_data, "poly_caddq_random") == 0);
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_NATIVE_POLY_CADDQ */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -277,10 +316,15 @@ static int test_backend_units(void)
   CHECK(test_native_decompose() == 0);
 #endif
 
+#ifdef MLD_USE_NATIVE_POLY_CADDQ
+  CHECK(test_native_caddq() == 0);
+#endif
+
   return 0;
 }
-#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                     \
-          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
+          || MLD_USE_NATIVE_POLY_CADDQ */
 
 int main(void)
 {
@@ -291,11 +335,12 @@ int main(void)
   /* Run backend unit tests */
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) || \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                   \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                   \
+    defined(MLD_USE_NATIVE_POLY_CADDQ)
   CHECK(test_backend_units() == 0);
-#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                     \
-          MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_DECOMPOSE_32 || \
-          MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
+          || MLD_USE_NATIVE_POLY_CADDQ */
 
 
   return 0;
