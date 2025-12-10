@@ -30,49 +30,33 @@ void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a)
 {
   unsigned int i;
   __m256i f;
-  const __m256i shufbidx =
-      _mm256_set_epi8(-1, 9, 8, 7, -1, 7, 6, 5, -1, 5, 4, 3, -1, 3, 2, 1, -1, 8,
-                      7, 6, -1, 6, 5, 4, -1, 4, 3, 2, -1, 2, 1, 0);
+  __m128i low, high;
+
+  const __m256i shufbidx = _mm256_set_epi8(
+      -1, 31, 30, 29, -1, 29, 28, 27, -1, 27, 26, 25, -1, 25, 24, 23, -1, 8, 7,
+      6, -1, 6, 5, 4, -1, 4, 3, 2, -1, 2, 1, 0);
   const __m256i srlvdidx = _mm256_set_epi32(6, 4, 2, 0, 6, 4, 2, 0);
   const __m256i mask = _mm256_set1_epi32(0x3FFFF);
   const __m256i gamma1 = _mm256_set1_epi32(MLDSA_GAMMA1);
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {
-    f = _mm256_loadu_si256((__m256i *)&a[18 * i]);
-
-    /* Permute 64-bit lanes
-     * 0x94 = 10010100b rearranges 64-bit lanes as: [3,2,1,0] -> [2,1,1,0]
-     *
-     * ╔═══════════════════════════════════════════════════════════════════════╗
-     * ║                         Original Layout                               ║
-     * ╚═══════════════════════════════════════════════════════════════════════╝
-     * ┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐
-     * │     Lane 0      │     Lane 1      │     Lane 2      │     Lane 3      │
-     * │   bytes 0..7    │   bytes 8..15   │   bytes 16..23  │   bytes 24..31  │
-     * └─────────────────┴─────────────────┴─────────────────┴─────────────────┘
-     *
-     * ╔═══════════════════════════════════════════════════════════════════════╗
-     * ║                        Layout after permute                           ║
-     * ║        Byte indices in high half shifted down by 8 positions          ║
-     * ╚═══════════════════════════════════════════════════════════════════════╝
-     * ┌───────────────┬─────────────────┐ ┌─────────────────┬─────────────────┐
-     * │   Lane 0      │     Lane 1      │ │     Lane 2      │     Lane 3      │
-     * │ bytes 0..7    │   bytes 8..15   │ │   bytes 8..15   │   bytes 16..23  │
-     * └───────────────┴─────────────────┘ └─────────────────┴─────────────────┘
-     *   Lower 128-bit lane (bytes 0-15)      Upper 128-bit lane (bytes 16-31)
-     */
-    f = _mm256_permute4x64_epi64(f, 0x94);
+    /* Load bytes 0..15 into low 128-bit vector */
+    low = _mm_loadu_si128((__m128i *)&a[18 * i]);
+    /* Load bytes 2..17 into high 128-bit vector */
+    high = _mm_loadu_si128((__m128i *)&a[18 * i + 2]);
+    /* Combine into 256-bit vector */
+    f = _mm256_inserti128_si256(_mm256_castsi128_si256(low), high, 1);
 
     /* Shuffling 8-bit lanes
      *
-     * ┌─ Indices 0-8 into low 128-bit half of permuted vector ────────────────┐
+     * ┌─ Indices 0-8 into low 128-bit half ───────────────────────────────────┐
      * │ Shuffle: [-1, 8, 7, 6, -1, 6, 5, 4, -1, 4, 3, 2, -1, 2, 1, 0]         │
      * │ Result:  [0, byte8, byte7, byte6, ..., 0, byte2, byte1, byte0]        │
      * └───────────────────────────────────────────────────────────────────────┘
      *
-     * ┌─ Indices 1-9 into high 128-bit half of permuted vector ───────────────┐
-     * │ Shuffle: [-1, 9, 8, 7, -1, 7, 6, 5, -1, 5, 4, 3, -1, 3, 2, 1]         │
+     * ┌─ Indices 16-31 into high 128-bit half ────────────────────────────────┐
+     * │ Shuffle: [-1,31, 30, 29, -1,29, 28, 27, -1,27, 26, 25, -1,25, 24, 23] │
      * │ Result:  [0, byte17, byte16, byte15, ..., 0, byte11, byte10, byte9]   │
      * └───────────────────────────────────────────────────────────────────────┘
      */
@@ -94,7 +78,6 @@ void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a)
     _mm256_store_si256(&r[i], f);
   }
 }
-
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
        */
 
