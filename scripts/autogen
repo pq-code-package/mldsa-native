@@ -1655,6 +1655,7 @@ def get_config_options():
         "MLD_CHECK_APIS",
         "MLD_CONFIG_API_XXX",
         "MLD_USE_NATIVE_XXX",
+        "MLD_CONFIG_XXX",
         "MLD_CONFIG_API_CONSTANTS_ONLY",
         "MLD_PREHASH_",
     ]

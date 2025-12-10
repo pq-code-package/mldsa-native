@@ -6,6 +6,8 @@
 #ifndef MLD_COMMON_H
 #define MLD_COMMON_H
 
+#define MLD_BUILD_INTERNAL
+
 #if defined(MLD_CONFIG_FILE)
 #include MLD_CONFIG_FILE
 #else

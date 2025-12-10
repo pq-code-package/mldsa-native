@@ -15,19 +15,30 @@
 #ifndef MLD_H
 #define MLD_H
 
-/******************************************************************************
- *
+/*
  * Public API for mldsa-native
  *
  * This header defines the public API of a single build of mldsa-native.
  *
- * # Examples
+ * Make sure the configuration file is in the include path
+ * (this is "mldsa_native_config.h" by default, or MLD_CONFIG_FILE if defined).
  *
- * See [examples/basic] for examples of how to use this header.
+ * # Multi-level builds
  *
- * # Usage
+ * This header specifies a build of mldsa-native for a fixed security level.
+ * If you need multiple security levels, leave the security level unspecified
+ * in the configuration file and include this header multiple times, setting
+ * MLD_CONFIG_PARAMETER_SET accordingly for each, and #undef'ing the MLD_H
+ * guard to allow multiple inclusions.
  *
- * To use this header, configure the following options:
+ * # Legacy configuration (deprecated)
+ *
+ * Instead of providing the config file used for the build, you can
+ * alternatively set the following configuration options prior to
+ * including this header.
+ *
+ * This method of configuration is deprecated.
+ * It will be removed in mldsa-native-v2.
  *
  * - MLD_CONFIG_API_PARAMETER_SET [required]
  *
@@ -55,14 +66,9 @@
  *   MLD_CONFIG_API_PARAMETER_SET or MLD_CONFIG_API_NAMESPACE_PREFIX,
  *   nor include a configuration.
  *
- * # Multi-level builds
+ * - MLD_CONFIG_API_QUALIFIER [optional]
  *
- * This header specifies a build of mldsa-native for a fixed security level.
- * If you need multiple builds, e.g. to build a library offering multiple
- * security levels, you need multiple instances of this header.
- *
- * NOTE: In this case, you must rename or #undef the MLD_H header guard
- *       prior to subsequent inclusions of this file.
+ *   Qualifier to apply to external API.
  *
  ******************************************************************************/
 
@@ -118,25 +124,50 @@
 
 /****************************** Function API **********************************/
 
-#if !defined(MLD_CONFIG_API_CONSTANTS_ONLY)
-
-#if !defined(MLD_CONFIG_API_PARAMETER_SET)
-#error MLD_CONFIG_API_PARAMETER_SET not defined
-#endif
-#if !defined(MLD_CONFIG_API_NAMESPACE_PREFIX)
-#error MLD_CONFIG_API_NAMESPACE_PREFIX not defined
-#endif
-
-/* Validate parameter set */
-#if MLD_CONFIG_API_PARAMETER_SET != 44 && \
-    MLD_CONFIG_API_PARAMETER_SET != 65 && MLD_CONFIG_API_PARAMETER_SET != 87
-#error MLD_CONFIG_API_PARAMETER_SET must be 44, 65, or 87
-#endif
-
-/* Derive namespacing macro */
 #define MLD_API_CONCAT_(x, y) x##y
 #define MLD_API_CONCAT(x, y) MLD_API_CONCAT_(x, y)
 #define MLD_API_CONCAT_UNDERSCORE(x, y) MLD_API_CONCAT(MLD_API_CONCAT(x, _), y)
+
+#if !defined(MLD_CONFIG_API_PARAMETER_SET)
+/* Recommended configuration via same config file as used for the build. */
+
+/* For now, we derive the legacy API configuration MLD_CONFIG_API_XXX from
+ * the config file. In mldsa-native-v2, this will be removed and we will
+ * exclusively work with MLD_CONFIG_XXX. */
+
+/* You need to make sure the config file is in the include path. */
+#if defined(MLD_CONFIG_FILE)
+#include MLD_CONFIG_FILE
+#else
+#include "mldsa_native_config.h"
+#endif
+
+#define MLD_CONFIG_API_PARAMETER_SET MLD_CONFIG_PARAMETER_SET
+
+#if defined(MLD_CONFIG_MULTILEVEL_BUILD)
+#define MLD_CONFIG_API_NAMESPACE_PREFIX \
+  MLD_API_CONCAT(MLD_CONFIG_NAMESPACE_PREFIX, MLD_CONFIG_PARAMETER_SET)
+#else
+#define MLD_CONFIG_API_NAMESPACE_PREFIX MLD_CONFIG_NAMESPACE_PREFIX
+#endif
+
+#if defined(MLD_CONFIG_NO_SUPERCOP)
+#define MLD_CONFIG_API_NO_SUPERCOP
+#endif
+
+#if defined(MLD_CONFIG_CONSTANTS_ONLY)
+#define MLD_CONFIG_API_CONSTANTS_ONLY
+#endif
+
+#if defined(MLD_CONFIG_EXTERNAL_API_QUALIFIER)
+#define MLD_CONFIG_API_QUALIFIER MLD_CONFIG_EXTERNAL_API_QUALIFIER
+#endif
+
+#else /* !MLD_CONFIG_API_PARAMETER_SET */
+#define MLD_API_LEGACY_CONFIG
+
+#endif /* MLD_CONFIG_API_PARAMETER_SET */
+
 #define MLD_API_NAMESPACE(sym) \
   MLD_API_CONCAT_UNDERSCORE(MLD_CONFIG_API_NAMESPACE_PREFIX, sym)
 
@@ -145,6 +176,14 @@
 #else
 #define MLD_API_MUST_CHECK_RETURN_VALUE
 #endif
+
+#if defined(MLD_CONFIG_API_QUALIFIER)
+#define MLD_API_QUALIFIER MLD_CONFIG_API_QUALIFIER
+#else
+#define MLD_API_QUALIFIER
+#endif
+
+#if !defined(MLD_CONFIG_API_CONSTANTS_ONLY)
 
 #include <stddef.h>
 #include <stdint.h>
@@ -169,6 +208,7 @@
  * Specification: Implements @[FIPS204 Algorithm 6 (ML-DSA.KeyGen_internal)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair_internal)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
@@ -193,6 +233,7 @@ int MLD_API_NAMESPACE(keypair_internal)(
  * Specification: Implements @[FIPS204 Algorithm 1 (ML-DSA.KeyGen)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
@@ -226,6 +267,7 @@ int MLD_API_NAMESPACE(keypair)(
  *            in that it adds an explicit check for nonce exhaustion
  *            and can return -1 in that case.
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_internal)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
@@ -259,6 +301,7 @@ int MLD_API_NAMESPACE(signature_internal)(
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
@@ -285,6 +328,7 @@ int MLD_API_NAMESPACE(signature)(
  *                variant)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_extmu)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
@@ -312,6 +356,7 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhausted)
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(sign)(
     uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
@@ -339,6 +384,7 @@ int MLD_API_NAMESPACE(sign)(
  * Specification: Implements @[FIPS204 Algorithm 8 (ML-DSA.Verify_internal)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
@@ -367,6 +413,7 @@ int MLD_API_NAMESPACE(verify_internal)(
  * Specification: Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
@@ -392,6 +439,7 @@ int MLD_API_NAMESPACE(verify)(
  *                variant)]
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_extmu)(
     const uint8_t *sig, size_t siglen, const uint8_t mu[MLDSA_CRHBYTES],
@@ -415,6 +463,7 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *
  * Returns 0 if signed message could be verified correctly and -1 otherwise
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(open)(
     uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
@@ -470,6 +519,7 @@ int MLD_API_NAMESPACE(open)(
  * Returns 0 (success) or -1 (context string too long OR invalid phlen OR nonce
  * exhaustion)
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_internal)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
@@ -506,6 +556,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
@@ -536,6 +587,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *
  * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
@@ -563,6 +615,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *
  * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
@@ -610,6 +663,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  *    @[FIPS204, Algorithm 3 (ML-DSA.Verify), L5].
  *
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
@@ -629,6 +683,7 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
  * Note: This function leaks whether the secret key is valid or invalid
  *       through its return value and timing.
  **************************************************/
+MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(pk_from_sk)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
@@ -652,11 +707,21 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 
 /* If the SUPERCOP API is not needed, we can undefine the various helper macros
  * above. Otherwise, they are needed for lazy evaluation of crypto_sign_xxx. */
+#if !defined(MLD_API_LEGACY_CONFIG)
+#undef MLD_CONFIG_API_PARAMETER_SET
+#undef MLD_CONFIG_API_NAMESPACE_PREFIX
+#undef MLD_CONFIG_API_NO_SUPERCOP
+#undef MLD_CONFIG_API_CONSTANTS_ONLY
+#undef MLD_CONFIG_API_QUALIFIER
+#endif /* !MLD_API_LEGACY_CONFIG */
+
 #undef MLD_API_CONCAT
 #undef MLD_API_CONCAT_
 #undef MLD_API_CONCAT_UNDERSCORE
 #undef MLD_API_NAMESPACE
 #undef MLD_API_MUST_CHECK_RETURN_VALUE
+#undef MLD_API_QUALIFIER
+#undef MLD_API_LEGACY_CONFIG
 
 #endif /* MLD_CONFIG_API_NO_SUPERCOP */
 #endif /* !MLD_CONFIG_API_CONSTANTS_ONLY */

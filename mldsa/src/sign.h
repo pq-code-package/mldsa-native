@@ -26,19 +26,19 @@
 #if defined(MLD_CHECK_APIS)
 /* Include to ensure consistency between internal sign.h
  * and external mldsa_native.h. */
-#define MLD_CONFIG_API_NO_SUPERCOP
+#define MLD_CONFIG_NO_SUPERCOP
 #include "mldsa_native.h"
-#undef MLD_CONFIG_API_NO_SUPERCOP
+#undef MLD_CONFIG_NO_SUPERCOP
 
-#if CRYPTO_SECRETKEYBYTES != MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
+#if CRYPTO_SECRETKEYBYTES != MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)
 #error Mismatch for SECRETKEYBYTES between sign.h and mldsa_native.h
 #endif
 
-#if CRYPTO_PUBLICKEYBYTES != MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
+#if CRYPTO_PUBLICKEYBYTES != MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)
 #error Mismatch for PUBLICKEYBYTES between sign.h and mldsa_native.h
 #endif
 
-#if CRYPTO_BYTES != MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)
+#if CRYPTO_BYTES != MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)
 #error Mismatch for CRYPTO_BYTES between sign.h and mldsa_native.h
 #endif
 

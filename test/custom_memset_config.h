@@ -44,6 +44,11 @@
  *              - MLD_CONFIG_PARAMETER_SET=65 corresponds to ML-DSA-65
  *              - MLD_CONFIG_PARAMETER_SET=87 corresponds to ML-DSA-87
  *
+ *              If you want to support multiple parameter sets, build the
+ *              library multiple times and set MLD_CONFIG_MULTILEVEL_BUILD.
+ *              See MLD_CONFIG_MULTILEVEL_BUILD for how to do this while
+ *              minimizing code duplication.
+ *
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
@@ -75,11 +80,8 @@
  *
  * Description: The prefix to use to namespace global symbols from mldsa/.
  *
- *              In a multi-level build (that is, if either
- *              - MLD_CONFIG_MULTILEVEL_WITH_SHARED, or
- *              - MLD_CONFIG_MULTILEVEL_NO_SHARED,
- *              are set, level-dependent symbols will additionally be prefixed
- *              with the parameter set (44/65/87).
+ *              In a multi-level build, level-dependent symbols will
+ *              additionally be prefixed with the parameter set (44/65/87).
  *
  *              This can also be set using CFLAGS.
  *
@@ -88,6 +90,96 @@
 #define MLD_CONFIG_NAMESPACE_PREFIX MLD_DEFAULT_NAMESPACE_PREFIX
 #endif
 
+/******************************************************************************
+ * Name:        MLD_CONFIG_MULTILEVEL_BUILD
+ *
+ * Description: Set this if the build is part of a multi-level build supporting
+ *              multiple parameter sets.
+ *
+ *              If you need only a single parameter set, keep this unset.
+ *
+ *              To build mldsa-native with support for all parameter sets,
+ *              build it three times -- once per parameter set -- and set the
+ *              option MLD_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
+ *              them, and MLD_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ *              MLD_CONFIG_MULTILEVEL_BUILD should be set for all of them.
+ *
+ *              See examples/multilevel_build for an example.
+ *
+ *              This can also be set using CFLAGS.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_MULTILEVEL_BUILD */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_EXTERNAL_API_QUALIFIER
+ *
+ * Description: If set, this option provides an additional function
+ *              qualifier to be added to declarations of mldsa-native's
+ *              public API.
+ *
+ *              The primary use case for this option are single-CU builds
+ *              where the public API exposed by mldsa-native is wrapped by
+ *              another API in the consuming application. In this case,
+ *              even mldsa-native's public API can be marked `static`.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_RANDOMIZED_API
+ *
+ * Description: If this option is set, mldsa-native will be built without the
+ *              randomized API functions (crypto_sign_keypair,
+ *              crypto_sign, crypto_sign_signature, and
+ *              crypto_sign_signature_extmu).
+ *              This allows users to build mldsa-native without providing a
+ *              randombytes() implementation if they only need the
+ *              internal deterministic API
+ *              (crypto_sign_keypair_internal, crypto_sign_signature_internal).
+ *
+ *              NOTE: This option is incompatible with MLD_CONFIG_KEYGEN_PCT
+ *              as the current PCT implementation requires
+ *              crypto_sign_signature().
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_RANDOMIZED_API */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_SUPERCOP
+ *
+ * Description: By default, mldsa_native.h exposes the mldsa-native API in the
+ *              SUPERCOP naming convention (crypto_sign_xxx). If you don't need
+ *              this, set MLD_CONFIG_NO_SUPERCOP.
+ *
+ *              NOTE: You must set this for a multi-level build as the SUPERCOP
+ *              naming does not disambiguate between the parameter sets.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_SUPERCOP */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CONSTANTS_ONLY
+ *
+ * Description: If you only need the size constants (MLDSA_PUBLICKEYBYTES, etc.)
+ *              but no function declarations, set MLD_CONFIG_CONSTANTS_ONLY.
+ *
+ *              This only affects the public header mldsa_native.h, not
+ *              the implementation.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CONSTANTS_ONLY */
+
+/******************************************************************************
+ *
+ * Build-only configuration options
+ *
+ * The remaining configurations are build-options only.
+ * They do not affect the API described in mldsa_native.h.
+ *
+ *****************************************************************************/
+
+#if defined(MLD_BUILD_INTERNAL)
 /******************************************************************************
  * Name:        MLD_CONFIG_MULTILEVEL_WITH_SHARED
  *
@@ -426,21 +518,6 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
 /* #define MLD_CONFIG_INTERNAL_API_QUALIFIER */
 
 /******************************************************************************
- * Name:        MLD_CONFIG_EXTERNAL_API_QUALIFIER
- *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of mldsa-native's
- *              public API.
- *
- *              The primary use case for this option are single-CU builds
- *              where the public API exposed by mldsa-native is wrapped by
- *              another API in the consuming application. In this case,
- *              even mldsa-native's public API can be marked `static`.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
-
-/******************************************************************************
  * Name:        MLD_CONFIG_CT_TESTING_ENABLED
  *
  * Description: If set, mldsa-native annotates data as secret / public using
@@ -488,25 +565,6 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_NO_ASM_VALUE_BARRIER */
-
-/******************************************************************************
- * Name:        MLD_CONFIG_NO_RANDOMIZED_API
- *
- * Description: If this option is set, mldsa-native will be built without the
- *              randomized API functions (crypto_sign_keypair,
- *              crypto_sign, crypto_sign_signature, and
- *              crypto_sign_signature_extmu).
- *              This allows users to build mldsa-native without providing a
- *              randombytes() implementation if they only need the
- *              internal deterministic API
- *              (crypto_sign_keypair_internal, crypto_sign_signature_internal).
- *
- *              NOTE: This option is incompatible with MLD_CONFIG_KEYGEN_PCT
- *              as the current PCT implementation requires
- *              crypto_sign_signature().
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_NO_RANDOMIZED_API */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT
@@ -570,6 +628,8 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
 /* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 /*************************  Config internals  ********************************/
+
+#endif /* MLD_BUILD_INTERNAL */
 
 /* Default namespace
  *
