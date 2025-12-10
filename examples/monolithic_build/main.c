@@ -16,7 +16,6 @@
  * The parameter set is configured on the command line
  */
 
-#define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa
 #include <mldsa_native.h>
 #include "expected_signatures.h"
 #include "test_only_rng/notrandombytes.h"
@@ -58,7 +57,7 @@ int main(void)
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
   randombytes_reset();
 
-  printf("ML-DSA-%d monolithic_build Example\n", MLD_CONFIG_API_PARAMETER_SET);
+  printf("ML-DSA-%d monolithic_build Example\n", MLD_CONFIG_PARAMETER_SET);
   printf("======================\n\n");
 
   printf("Message: %s\n", test_msg);

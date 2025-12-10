@@ -84,17 +84,6 @@ APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLD_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
-#
-# Configuration adjustments
-#
-
-# Pick prefix
-CFLAGS += -DMLD_CONFIG_NAMESPACE_PREFIX=mldsa
-# Tell mldsa-native to use serial-FIPS202 only
-CFLAGS += -DMLD_CONFIG_SERIAL_FIPS202_ONLY
-# Tell mldsa-native where to find the header for the custom FIPS202
-CFLAGS += -DMLD_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
-
 BUILD_DIR=build
 BIN=test_binary
 

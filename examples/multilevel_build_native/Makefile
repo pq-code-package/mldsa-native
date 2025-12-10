@@ -26,7 +26,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
-	-Imldsa_native/mldsa \
+	-Imldsa_native/ \
 	-DMLD_CONFIG_NAMESPACE_PREFIX=mldsa \
 	-std=c99 \
 	-pedantic \
@@ -56,16 +56,16 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mldsa_native.c.
 # See examples/monolithic_build for that.
 MLD_SOURCE := $(wildcard \
-	mldsa_native/mldsa/src/*.c \
-	mldsa_native/mldsa/src/**/*.c \
-	mldsa_native/mldsa/src/**/**/*.c \
-	mldsa_native/mldsa/src/**/**/**/*.c \
-	mldsa_native/mldsa/src/**/**/**/**/*.c \
-	mldsa_native/mldsa/src/*.S \
-	mldsa_native/mldsa/src/**/*.S \
-	mldsa_native/mldsa/src/**/**/*.S \
-	mldsa_native/mldsa/src/**/**/**/*.S \
-	mldsa_native/mldsa/src/**/**/**/**/*.S)
+	mldsa_native/src/*.c \
+	mldsa_native/src/**/*.c \
+	mldsa_native/src/**/**/*.c \
+	mldsa_native/src/**/**/**/*.c \
+	mldsa_native/src/**/**/**/**/*.c \
+	mldsa_native/src/*.S \
+	mldsa_native/src/**/*.S \
+	mldsa_native/src/**/**/*.S \
+	mldsa_native/src/**/**/**/*.S \
+	mldsa_native/src/**/**/**/**/*.S)
 
 BUILD_DIR=build
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
@@ -79,17 +79,17 @@ MLDSA87_OBJS=$(patsubst %,$(MLDSA87_DIR)/%.o,$(MLD_SOURCE))
 $(MLDSA44_OBJS): $(MLDSA44_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLD_CONFIG_MULTILEVEL_WITH_SHARED -DMLD_CONFIG_PARAMETER_SET=44 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLD_CONFIG_MULTILEVEL_WITH_SHARED -DMLD_CONFIG_PARAMETER_SET=44 $(CFLAGS) -c $^ -o $@
 
 $(MLDSA65_OBJS): $(MLDSA65_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLD_CONFIG_MULTILEVEL_NO_SHARED -DMLD_CONFIG_PARAMETER_SET=65 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLD_CONFIG_MULTILEVEL_NO_SHARED -DMLD_CONFIG_PARAMETER_SET=65 $(CFLAGS) -c $^ -o $@
 
 $(MLDSA87_OBJS): $(MLDSA87_DIR)/%.o: %
 	$(Q)echo "  CC      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLD_CONFIG_MULTILEVEL_NO_SHARED -DMLD_CONFIG_PARAMETER_SET=87 $(CFLAGS) -c $^ -o $@
+	$(Q)$(CC) -DMLD_CONFIG_MULTILEVEL_NO_SHARED -DMLD_CONFIG_PARAMETER_SET=87 $(CFLAGS) -c $^ -o $@
 
 mldsa44_objs: $(MLDSA44_OBJS)
 mldsa65_objs: $(MLDSA65_OBJS)

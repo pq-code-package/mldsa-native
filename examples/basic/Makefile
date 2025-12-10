@@ -55,13 +55,13 @@ endif
 # In this example, we compile the individual mldsa-native source files directly.
 # Alternatively, you can compile the 'monobuild' source file mldsa_native.c.
 # See examples/monolithic_build for that.
-MLD_SOURCE=$(wildcard					\
-	mldsa_native/mldsa/src/*.c				\
-	mldsa_native/mldsa/src/**/*.c			\
-	mldsa_native/mldsa/src/**/**/*.c		\
-	mldsa_native/mldsa/src/**/**/**/*.c)
+MLD_SOURCE=$(wildcard				\
+	mldsa_native/src/*.c			\
+	mldsa_native/src/**/*.c			\
+	mldsa_native/src/**/**/*.c		\
+	mldsa_native/src/**/**/**/*.c)
 
-INC=-Imldsa_native/mldsa/
+INC=-Imldsa_native
 
 # Part B:
 #

@@ -52,11 +52,11 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mldsa_native.c.
 # See examples/monolithic_build for that.
 MLD_SOURCE=$(wildcard \
-    mldsa_native/mldsa/src/*.c \
-    mldsa_native/mldsa/src/**/*.c \
-    mldsa_native/mldsa/src/**/**/*.c \
-    mldsa_native/mldsa/src/**/**/**/*.c \
-    mldsa_native/mldsa/src/**/**/**/**/*.c)
+    mldsa_native/src/*.c \
+    mldsa_native/src/**/*.c \
+    mldsa_native/src/**/**/*.c \
+    mldsa_native/src/**/**/**/*.c \
+    mldsa_native/src/**/**/**/**/*.c)
 
 INC=-Imldsa_native -Imldsa_native/mldsa
 
@@ -78,14 +78,6 @@ RNG_SOURCE=$(wildcard test_only_rng/*.c)
 APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLD_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
-
-
-#
-# Configuration adjustments
-#
-
-# Pick custom config file
-CFLAGS+=-DMLD_CONFIG_FILE="\"custom_config.h\""
 
 BUILD_DIR=build
 BIN=test_binary

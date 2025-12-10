@@ -54,7 +54,7 @@ endif
 
 MLD_SOURCE=mldsa_native_all.c
 
-INC=-Imldsa/ -I./
+INC=-Imldsa_native/ -I./
 
 # Part B:
 #

@@ -16,7 +16,6 @@
  * The parameter set is configured on the command line
  */
 
-#define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa
 #include <mldsa_native.h>
 #include "expected_signatures.h"
 #include "test_only_rng/notrandombytes.h"

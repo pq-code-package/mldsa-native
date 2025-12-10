@@ -58,9 +58,9 @@ Q ?= @
 #
 # Here, we use just a single C and assembly unit.
 
-MLD_SOURCE=mldsa/mldsa_native.c mldsa/mldsa_native.S
+MLD_SOURCE=mldsa_native/mldsa_native.c mldsa_native/mldsa_native.S
 
-INC=-Imldsa/ -I./
+INC=-Imldsa_native/ -I./
 
 # Part B:
 #
@@ -98,41 +98,41 @@ LIB87_FULL=$(BUILD_DIR)/$(LIB87)
 $(LIB44_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_44.h\"" $(INC) mldsa/mldsa_native.c -o $(BUILD_DIR)/mldsa_native44.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_44.h\"" $(INC) mldsa/mldsa_native.S -o $(BUILD_DIR)/mldsa_native44.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) mldsa_native/mldsa_native.c -o $(BUILD_DIR)/mldsa_native44.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) mldsa_native/mldsa_native.S -o $(BUILD_DIR)/mldsa_native44.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native44.c.o $(BUILD_DIR)/mldsa_native44.S.o
 	$(Q)strip -S $@
 
 $(LIB65_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_65.h\"" $(INC) mldsa/mldsa_native.c -o $(BUILD_DIR)/mldsa_native65.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_65.h\"" $(INC) mldsa/mldsa_native.S -o $(BUILD_DIR)/mldsa_native65.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) mldsa_native/mldsa_native.c -o $(BUILD_DIR)/mldsa_native65.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) mldsa_native/mldsa_native.S -o $(BUILD_DIR)/mldsa_native65.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native65.c.o $(BUILD_DIR)/mldsa_native65.S.o
 	$(Q)strip -S $@
 
 $(LIB87_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_87.h\"" $(INC) mldsa/mldsa_native.c -o $(BUILD_DIR)/mldsa_native87.c.o
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_87.h\"" $(INC) mldsa/mldsa_native.S -o $(BUILD_DIR)/mldsa_native87.S.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) mldsa_native/mldsa_native.c -o $(BUILD_DIR)/mldsa_native87.c.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) mldsa_native/mldsa_native.S -o $(BUILD_DIR)/mldsa_native87.S.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native87.c.o $(BUILD_DIR)/mldsa_native87.S.o
 	$(Q)strip -S $@
 
 $(BIN44_FULL): $(APP_SOURCE) $(LIB44_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=44 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) $^ -o $@
 
 $(BIN65_FULL): $(APP_SOURCE) $(LIB65_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=65 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) $^ -o $@
 
 $(BIN87_FULL): $(APP_SOURCE) $(LIB87_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=87 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) $^ -o $@
 
 all: build
 

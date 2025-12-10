@@ -26,7 +26,7 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
-	-Imldsa_native/mldsa \
+	-Imldsa_native/ \
 	-DMLD_CONFIG_NAMESPACE_PREFIX=mldsa \
 	-std=c99 \
 	-pedantic \
@@ -56,10 +56,10 @@ endif
 # Alternatively, you can compile the 'monobuild' source file mldsa_native.c.
 # See examples/monolithic_build for that.
 MLD_SOURCE_ALL := $(wildcard \
-	mldsa_native/mldsa/src/*.c \
-	mldsa_native/mldsa/src/**/*.c \
-	mldsa_native/mldsa/src/**/**/*.c \
-	mldsa_native/mldsa/src/**/**/**/*.c)
+	mldsa_native/src/*.c \
+	mldsa_native/src/**/*.c \
+	mldsa_native/src/**/**/*.c \
+	mldsa_native/src/**/**/**/*.c)
 MLD_SOURCE:=$(foreach S,$(MLD_SOURCE_ALL),\
   $(if $(findstring /native/,$S),,$S))
 

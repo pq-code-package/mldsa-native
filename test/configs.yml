@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 # Metadata for test configuration files
-# Each entry describes how a test config differs from mldsa/config.h
+# Each entry describes how a test config differs from mldsa/mldsa_native_config.h
 
 configs:
   - path: test/no_asm_config.h
@@ -280,79 +280,56 @@ configs:
             return 0;
           }
           #endif /* !__ASSEMBLER__ */
+
+
   # Example configs
-
-  - path: examples/monolithic_build/mldsa/config_44.h
-    description: "Monolithic build config for ML-DSA-44 (native backends disabled)"
+  - path: examples/monolithic_build/mldsa_native/mldsa_native_config.h
+    description: "Monolithic build config"
     defines:
-      MLD_CONFIG_PARAMETER_SET: 44
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_INTERNAL_API_QUALIFIER: static
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/mldsa/config_65.h
-    description: "Monolithic build config for ML-DSA-65 (native backends disabled)"
+  - path: examples/monolithic_build_native/mldsa_native/mldsa_native_config.h
+    description: "Monolithic build config (native backends disabled)"
     defines:
-      MLD_CONFIG_PARAMETER_SET: 65
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_INTERNAL_API_QUALIFIER: static
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/mldsa/config_87.h
-    description: "Monolithic build config for ML-DSA-87 (native backends disabled)"
-    defines:
-      MLD_CONFIG_PARAMETER_SET: 87
-      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
-      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLD_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/mldsa/config_44.h
-    description: "Monolithic build config for ML-DSA-44 (native backends disabled)"
-    defines:
-      MLD_CONFIG_PARAMETER_SET: 44
-      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
-      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
-      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
-      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLD_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/mldsa/config_65.h
-    description: "Monolithic build config for ML-DSA-65 (native backends disabled)"
-    defines:
-      MLD_CONFIG_PARAMETER_SET: 65
-      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
-      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
-      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
-      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLD_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_native/mldsa/config_87.h
-    description: "Monolithic build config for ML-DSA-87 (native backends disabled)"
-    defines:
-      MLD_CONFIG_PARAMETER_SET: 87
-      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
-      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
-      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
-      MLD_CONFIG_INTERNAL_API_QUALIFIER: static
-      MLD_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/monolithic_build_multilevel/mldsa/multilevel_config.h
+  - path: examples/monolithic_build_multilevel/mldsa_native/mldsa_native_config.h
     description: "Multilevel monolithic build config"
     defines:
+      MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_INTERNAL_API_QUALIFIER: static
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_multilevel_native/mldsa/multilevel_config.h
+  - path: examples/multilevel_build/mldsa_native/mldsa_native_config.h
+    description: "Multilevel build config"
+    defines:
+      MLD_CONFIG_MULTILEVEL_BUILD: true
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/multilevel_build_native/mldsa_native/mldsa_native_config.h
+    description: "Multilevel build config"
+    defines:
+      MLD_CONFIG_MULTILEVEL_BUILD: true
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/monolithic_build_multilevel_native/mldsa_native/mldsa_native_config.h
     description: "Multilevel monolithic build config with native backends"
     defines:
+      MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
       MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
@@ -371,7 +348,7 @@ configs:
           #define MLD_CONFIG_CUSTOM_RANDOMBYTES
           #if !defined(__ASSEMBLER__)
           #include <stdint.h>
-          #include "sys.h"
+          #include "src/sys.h"
           #include "test_only_rng/notrandombytes.h"
           static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
           {
@@ -379,7 +356,7 @@ configs:
           }
           #endif /* !__ASSEMBLER__ */
 
-  - path: examples/custom_backend/mldsa_native/custom_config.h
+  - path: examples/custom_backend/mldsa_native/mldsa_native_config.h
     description: "Custom backend config with tiny SHA3"
     defines:
       MLD_CONFIG_PARAMETER_SET:
@@ -390,5 +367,32 @@ configs:
       MLD_CONFIG_NAMESPACE_PREFIX: CUSTOM_TINY_SHA3
       MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
       MLD_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h
+    description: "Configuration for custom FIPS202 implementation"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_FIPS202_CUSTOM_HEADER: "\"../custom_fips202/fips202.h\""
+      MLD_CONFIG_FIPS202X4_CUSTOM_HEADER: "\"../custom_fips202/fips202x4.h\""
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h
+    description: "Configuration for custom serial FIPS202 implementation"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_SERIAL_FIPS202_ONLY: true
+      MLD_CONFIG_FIPS202_CUSTOM_HEADER: "\"../custom_fips202/fips202.h\""
+      MLD_CONFIG_FIPS202X4_CUSTOM_HEADER: "\"../custom_fips202/fips202x4.h\""
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/basic_deterministic/mldsa_native/mldsa_native_config.h
+    description: "Configuration for deterministic-only build of mldsa-native"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_NO_RANDOMIZED_API: true
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"

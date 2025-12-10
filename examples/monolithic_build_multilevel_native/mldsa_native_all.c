@@ -6,8 +6,6 @@
 
 /* Three instances of mldsa-native for all security levels */
 
-#define MLD_CONFIG_FILE "multilevel_config.h"
-
 /* Include level-independent code */
 #define MLD_CONFIG_MULTILEVEL_WITH_SHARED 1
 /* Keep level-independent headers at the end of monobuild file */

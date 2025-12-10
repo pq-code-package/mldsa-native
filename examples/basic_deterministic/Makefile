@@ -55,13 +55,13 @@ endif
 # In this example, we compile the individual mldsa-native source files directly.
 # Alternatively, you can compile the 'monobuild' source file mldsa_native.c.
 # See examples/monolithic_build for that.
-MLD_SOURCE=$(wildcard					\
-	mldsa_native/mldsa/src/*.c				\
-	mldsa_native/mldsa/src/**/*.c			\
-	mldsa_native/mldsa/src/**/**/*.c		\
-	mldsa_native/mldsa/src/**/**/**/*.c)
+MLD_SOURCE=$(wildcard				\
+	mldsa_native/src/*.c			\
+	mldsa_native/src/**/*.c			\
+	mldsa_native/src/**/**/*.c		\
+	mldsa_native/src/**/**/**/*.c)
 
-INC=-Imldsa_native/mldsa/
+INC=-Imldsa_native
 
 # Part B:
 #
@@ -72,15 +72,6 @@ ALL_SOURCE=$(MLD_SOURCE) $(APP_SOURCE)
 
 BUILD_DIR=build
 BIN=test_binary
-
-#
-# Configuration adjustments
-#
-
-# Pick prefix
-CFLAGS += -DMLD_CONFIG_NAMESPACE_PREFIX=mldsa
-# Set configuration option for deterministic build
-CFLAGS += -DMLD_CONFIG_NO_RANDOMIZED_API
 
 BINARY_NAME_FULL_44=$(BUILD_DIR)/$(BIN)44
 BINARY_NAME_FULL_65=$(BUILD_DIR)/$(BIN)65

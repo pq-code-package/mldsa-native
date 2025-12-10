@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#define MLD_CONFIG_FILE "multilevel_config.h"
-
 /* Three instances of mldsa-native for all security levels */
 
 /* Include level-independent code */

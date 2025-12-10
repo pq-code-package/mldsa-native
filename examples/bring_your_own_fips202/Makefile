@@ -84,18 +84,6 @@ APP_SOURCE=$(wildcard *.c)
 
 ALL_SOURCE=$(MLD_SOURCE) $(FIPS202_SOURCE) $(RNG_SOURCE) $(APP_SOURCE)
 
-#
-# Configuration adjustments
-#
-
-# Pick prefix
-CFLAGS += -DMLD_CONFIG_NAMESPACE_PREFIX=mldsa
-# Tell mldsa-native where to find the header for the custom FIPS202
-# The structure names and function signatures exposed in those headers must
-# match those from the standard FIPS202 implementation. See FIPS202.md.
-CFLAGS += -DMLD_CONFIG_FIPS202_CUSTOM_HEADER="\"../custom_fips202/fips202.h\""
-CFLAGS += -DMLD_CONFIG_FIPS202X4_CUSTOM_HEADER="\"../custom_fips202/fips202x4.h\""
-
 BUILD_DIR=build
 BIN=test_binary
 

@@ -57,9 +57,9 @@ endif
 #
 # Here, the monolithic C file for mldsa-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
-MLD_SOURCE_ASM = mldsa/mldsa_native.S
+MLD_SOURCE_ASM = mldsa_native/mldsa_native.S
 
-INC=-Imldsa/ -Imldsa/src -I./
+INC=-Imldsa_native/ -I./
 
 # Part B:
 #
@@ -85,8 +85,7 @@ BIN=test_binary
 # Configuration adjustments
 #
 
-ASMFLAGS = -DMLD_CONFIG_FILE=\"multilevel_config.h\"
-ASMFLAGS += -DMLD_CONFIG_MULTILEVEL_WITH_SHARED
+ASMFLAGS = -DMLD_CONFIG_MULTILEVEL_WITH_SHARED
 
 BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 

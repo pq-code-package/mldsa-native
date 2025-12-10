@@ -374,7 +374,7 @@
 /* #define MLD_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/src.h"
    static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
    {
        ... your implementation ...
@@ -400,7 +400,7 @@
 /* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/src.h"
    static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
    {
        ... your implementation ...
@@ -452,7 +452,7 @@
 /* #define MLD_CONFIG_CUSTOM_MEMCPY
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/src.h"
    static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
    {
        ... your implementation ...
@@ -475,7 +475,7 @@
 /* #define MLD_CONFIG_CUSTOM_MEMSET
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "sys.h"
+   #include "src/src.h"
    static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
    {
        ... your implementation ...
@@ -574,7 +574,7 @@
  *****************************************************************************/
 /* #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
    #if !defined(__ASSEMBLER__)
-   #include "sys.h"
+   #include "src/src.h"
    static MLD_INLINE int mld_break_pct(void)
    {
        ... return 0/1 depending on whether PCT should be broken ...

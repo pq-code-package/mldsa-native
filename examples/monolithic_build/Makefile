@@ -53,9 +53,9 @@ Q ?= @
 # Here, we use just a single monolithic compilation unit to include
 # multiple instances of mldsa-native.
 
-MLD_SOURCE=mldsa/mldsa_native.c
+MLD_SOURCE=mldsa_native/mldsa_native.c
 
-INC=-Imldsa/ -I./
+INC=-Imldsa_native/ -I./
 
 # Part B:
 #
@@ -93,38 +93,38 @@ LIB87_FULL=$(BUILD_DIR)/$(LIB87)
 $(LIB44_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_44.h\"" $(INC) $^ -o $(BUILD_DIR)/mldsa_native44.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) $^ -o $(BUILD_DIR)/mldsa_native44.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native44.o
 	$(Q)strip -S $@
 
 $(LIB65_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_65.h\"" $(INC) $^ -o $(BUILD_DIR)/mldsa_native65.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) $^ -o $(BUILD_DIR)/mldsa_native65.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native65.o
 	$(Q)strip -S $@
 
 $(LIB87_FULL): $(MLD_SOURCE)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_FILE="\"config_87.h\"" $(INC) $^ -o $(BUILD_DIR)/mldsa_native87.o
+	$(Q)$(CC) -c $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) $^ -o $(BUILD_DIR)/mldsa_native87.o
 	$(Q)$(AR) rcs $@ $(BUILD_DIR)/mldsa_native87.o
 	$(Q)strip -S $@
 
 $(BIN44_FULL): $(APP_SOURCE) $(LIB44_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=44 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) $^ -o $@
 
 $(BIN65_FULL): $(APP_SOURCE) $(LIB65_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=65 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) $^ -o $@
 
 $(BIN87_FULL): $(APP_SOURCE) $(LIB87_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_API_PARAMETER_SET=87 $(INC) $^ -o $@
+	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) $^ -o $@
 
 all: build
 
