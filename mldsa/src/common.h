@@ -51,7 +51,7 @@
 /* Functions are prefixed by MLD_CONFIG_NAMESPACE_PREFIX.
  *
  * If multiple parameter sets are used, functions depending on the parameter
- * set are additionally prefixed with 44/65/87. See config.h.
+ * set are additionally prefixed with 44/65/87. See mldsa_native_config.h.
  *
  * Example: If MLD_CONFIG_NAMESPACE_PREFIX is PQCP_MLDSA_NATIVE, then
  * MLD_NAMESPACE_KL(keypair) becomes PQCP_MLDSA_NATIVE44_keypair/

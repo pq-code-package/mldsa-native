@@ -60,7 +60,7 @@
  * Name:        MLD_CONFIG_FILE
  *
  * Description: If defined, this is a header that will be included instead
- *              of the default configuration file mldsa/src/config.h.
+ *              of the default configuration file mldsa/mldsa_native_config.h.
  *
  *              When you need to build mldsa-native in multiple configurations,
  *              using varying MLD_CONFIG_FILE can be more convenient
@@ -73,7 +73,7 @@
  *
  *****************************************************************************/
 /* No need to set this -- we _are_ already in a custom config */
-/* #define MLD_CONFIG_FILE "config.h" */
+/* #define MLD_CONFIG_FILE "mldsa_native_config.h" */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_NAMESPACE_PREFIX
