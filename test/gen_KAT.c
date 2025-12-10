@@ -47,9 +47,9 @@ int main(void)
 {
   unsigned i;
   int rc;
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t s[CRYPTO_BYTES];
+  uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES];
+  uint8_t s[MLDSA_CRYPTO_BYTES];
   uint8_t *m;
   /* empty ctx */
   uint8_t pre[2] = {0, 0};
@@ -85,8 +85,8 @@ int main(void)
 
     CHECK(crypto_sign_keypair_internal(pk, sk, coins) == 0);
 
-    print_hex(pk, CRYPTO_PUBLICKEYBYTES);
-    print_hex(sk, CRYPTO_SECRETKEYBYTES);
+    print_hex(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
+    print_hex(sk, MLDSA_CRYPTO_SECRETKEYBYTES);
 
     CHECK(crypto_sign_signature_internal(s, &slen, m, i, pre, sizeof(pre),
                                          coins + MLDSA_SEEDBYTES, sk, 0) == 0);

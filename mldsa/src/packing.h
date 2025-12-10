@@ -19,15 +19,15 @@
  *              - const mld_polyveck *t1: pointer to vector t1
  **************************************************/
 MLD_INTERNAL_API
-void mld_pack_pk(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
+void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                  const uint8_t rho[MLDSA_SEEDBYTES], const mld_polyveck *t1)
 __contract__(
-  requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
+  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K,
     array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
-  assigns(memory_slice(pk, CRYPTO_PUBLICKEYBYTES))
+  assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
 );
 
 
@@ -46,13 +46,13 @@ __contract__(
  *              - const mld_polyveck *s2: pointer to vector s2
  **************************************************/
 MLD_INTERNAL_API
-void mld_pack_sk(uint8_t sk[CRYPTO_SECRETKEYBYTES],
+void mld_pack_sk(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                  const uint8_t rho[MLDSA_SEEDBYTES],
                  const uint8_t tr[MLDSA_TRBYTES],
                  const uint8_t key[MLDSA_SEEDBYTES], const mld_polyveck *t0,
                  const mld_polyvecl *s1, const mld_polyveck *s2)
 __contract__(
-  requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
+  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(tr, MLDSA_TRBYTES))
   requires(memory_no_alias(key, MLDSA_SEEDBYTES))
@@ -65,7 +65,7 @@ __contract__(
     array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   requires(forall(k2, 0, MLDSA_K,
     array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(sk, CRYPTO_SECRETKEYBYTES))
+  assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
 
 
@@ -88,11 +88,11 @@ __contract__(
  * proof of type safety.
  **************************************************/
 MLD_INTERNAL_API
-void mld_pack_sig(uint8_t sig[CRYPTO_BYTES], const uint8_t c[MLDSA_CTILDEBYTES],
-                  const mld_polyvecl *z, const mld_polyveck *h,
-                  const unsigned int number_of_hints)
+void mld_pack_sig(uint8_t sig[MLDSA_CRYPTO_BYTES],
+                  const uint8_t c[MLDSA_CTILDEBYTES], const mld_polyvecl *z,
+                  const mld_polyveck *h, const unsigned int number_of_hints)
 __contract__(
-  requires(memory_no_alias(sig, CRYPTO_BYTES))
+  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
   requires(memory_no_alias(z, sizeof(mld_polyvecl)))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
@@ -101,7 +101,7 @@ __contract__(
   requires(forall(k1, 0, MLDSA_K,
     array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
   requires(number_of_hints <= MLDSA_OMEGA)
-  assigns(memory_slice(sig, CRYPTO_BYTES))
+  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
 );
 
 #define mld_unpack_pk MLD_NAMESPACE_KL(unpack_pk)
@@ -116,9 +116,9 @@ __contract__(
  **************************************************/
 MLD_INTERNAL_API
 void mld_unpack_pk(uint8_t rho[MLDSA_SEEDBYTES], mld_polyveck *t1,
-                   const uint8_t pk[CRYPTO_PUBLICKEYBYTES])
+                   const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
 __contract__(
-  requires(memory_no_alias(pk, CRYPTO_PUBLICKEYBYTES))
+  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
   assigns(memory_slice(rho, MLDSA_SEEDBYTES))
@@ -146,7 +146,7 @@ MLD_INTERNAL_API
 void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
                    uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
                    mld_polyvecl *s1, mld_polyveck *s2,
-                   const uint8_t sk[CRYPTO_SECRETKEYBYTES])
+                   const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(tr, MLDSA_TRBYTES))
@@ -154,7 +154,7 @@ __contract__(
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
   requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
   requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(memory_no_alias(sk, CRYPTO_SECRETKEYBYTES))
+  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(rho, MLDSA_SEEDBYTES))
   assigns(memory_slice(tr, MLDSA_TRBYTES))
   assigns(memory_slice(key, MLDSA_SEEDBYTES))
@@ -185,9 +185,9 @@ __contract__(
  **************************************************/
 MLD_INTERNAL_API
 int mld_unpack_sig(uint8_t c[MLDSA_CTILDEBYTES], mld_polyvecl *z,
-                   mld_polyveck *h, const uint8_t sig[CRYPTO_BYTES])
+                   mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
 __contract__(
-  requires(memory_no_alias(sig, CRYPTO_BYTES))
+  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
   requires(memory_no_alias(z, sizeof(mld_polyvecl)))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))

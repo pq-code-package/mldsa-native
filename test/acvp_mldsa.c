@@ -249,8 +249,8 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 
 static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
 {
-  unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-  unsigned char sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
+  unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
 
   CHECK(crypto_sign_keypair_internal(pk, sk, seed) == 0);
 
@@ -258,12 +258,13 @@ static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
   print_hex("sk", sk, sizeof(sk));
 }
 
-static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
-                                  const unsigned char rnd[MLDSA_SEEDBYTES],
-                                  const unsigned char sk[CRYPTO_SECRETKEYBYTES],
-                                  const unsigned char *context, size_t ctxlen)
+static void acvp_mldsa_sigGen_AFT(
+    const unsigned char *message, size_t mlen,
+    const unsigned char rnd[MLDSA_SEEDBYTES],
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+    const unsigned char *context, size_t ctxlen)
 {
-  unsigned char sig[CRYPTO_BYTES];
+  unsigned char sig[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   unsigned char pre[MAX_CTX_LENGTH + 2];
 
@@ -281,9 +282,9 @@ static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
 static void acvp_mldsa_sigGenInternal_AFT(
     const unsigned char *message, size_t mlen,
     const unsigned char rnd[MLDSA_SEEDBYTES],
-    const unsigned char sk[CRYPTO_SECRETKEYBYTES], int externalMu)
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES], int externalMu)
 {
-  unsigned char sig[CRYPTO_BYTES];
+  unsigned char sig[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   CHECK(crypto_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0,
                                        rnd, sk, externalMu) == 0);
@@ -294,10 +295,10 @@ static void acvp_mldsa_sigGenInternal_AFT(
 
 static void acvp_mldsa_sigGenDeterministic_AFT(
     const unsigned char *message, size_t mlen,
-    const unsigned char sk[CRYPTO_SECRETKEYBYTES], const unsigned char *context,
-    size_t ctxlen)
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+    const unsigned char *context, size_t ctxlen)
 {
-  unsigned char sig[CRYPTO_BYTES];
+  unsigned char sig[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   unsigned char rnd[MLDSA_SEEDBYTES] = {0}; /* Zero rnd for deterministic */
 
@@ -316,9 +317,9 @@ static void acvp_mldsa_sigGenDeterministic_AFT(
 
 static void acvp_mldsa_sigGenInternalDeterministic_AFT(
     const unsigned char *message, size_t mlen,
-    const unsigned char sk[CRYPTO_SECRETKEYBYTES], int externalMu)
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES], int externalMu)
 {
-  unsigned char sig[CRYPTO_BYTES];
+  unsigned char sig[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   unsigned char rnd[MLDSA_SEEDBYTES] = {0}; /* Zero rnd for deterministic */
 
@@ -328,29 +329,29 @@ static void acvp_mldsa_sigGenInternalDeterministic_AFT(
 }
 
 
-static int acvp_mldsa_sigVer_AFT(const unsigned char *message, size_t mlen,
-                                 const unsigned char *context, size_t ctxlen,
-                                 const unsigned char signature[CRYPTO_BYTES],
-                                 const unsigned char pk[CRYPTO_PUBLICKEYBYTES])
+static int acvp_mldsa_sigVer_AFT(
+    const unsigned char *message, size_t mlen, const unsigned char *context,
+    size_t ctxlen, const unsigned char signature[MLDSA_CRYPTO_BYTES],
+    const unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
 {
-  return crypto_sign_verify(signature, CRYPTO_BYTES, message, mlen, context,
-                            ctxlen, pk);
+  return crypto_sign_verify(signature, MLDSA_CRYPTO_BYTES, message, mlen,
+                            context, ctxlen, pk);
 }
 
 
 static int acvp_mldsa_sigVerInternal_AFT(
     const unsigned char *message, size_t mlen,
-    const unsigned char signature[CRYPTO_BYTES],
-    const unsigned char pk[CRYPTO_PUBLICKEYBYTES], int externalMu)
+    const unsigned char signature[MLDSA_CRYPTO_BYTES],
+    const unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int externalMu)
 {
   if (externalMu)
   {
-    return crypto_sign_verify_extmu(signature, CRYPTO_BYTES, message, pk);
+    return crypto_sign_verify_extmu(signature, MLDSA_CRYPTO_BYTES, message, pk);
   }
   else
   {
-    return crypto_sign_verify_internal(signature, CRYPTO_BYTES, message, mlen,
-                                       NULL, 0, pk, 0);
+    return crypto_sign_verify_internal(signature, MLDSA_CRYPTO_BYTES, message,
+                                       mlen, NULL, 0, pk, 0);
   }
 }
 
@@ -412,9 +413,9 @@ static int str_to_hash_alg(const char *hashAlg)
 static int acvp_mldsa_sigGenPreHash_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char rng[MLDSA_RNDBYTES],
-    const unsigned char sk[CRYPTO_SECRETKEYBYTES], const char *hashAlg)
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES], const char *hashAlg)
 {
-  unsigned char signature[CRYPTO_BYTES];
+  unsigned char signature[MLDSA_CRYPTO_BYTES];
   size_t siglen;
 
   if (crypto_sign_signature_pre_hash_internal(signature, &siglen, ph, phlen,
@@ -430,10 +431,10 @@ static int acvp_mldsa_sigGenPreHash_AFT(
 
 static int acvp_mldsa_sigVerPreHash_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
-    size_t ctxlen, const unsigned char signature[CRYPTO_BYTES],
-    const unsigned char pk[CRYPTO_PUBLICKEYBYTES], const char *hashAlg)
+    size_t ctxlen, const unsigned char signature[MLDSA_CRYPTO_BYTES],
+    const unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES], const char *hashAlg)
 {
-  return crypto_sign_verify_pre_hash_internal(signature, CRYPTO_BYTES, ph,
+  return crypto_sign_verify_pre_hash_internal(signature, MLDSA_CRYPTO_BYTES, ph,
                                               phlen, context, ctxlen, pk,
                                               str_to_hash_alg(hashAlg));
 }
@@ -441,9 +442,9 @@ static int acvp_mldsa_sigVerPreHash_AFT(
 static int acvp_mldsa_sigGenPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char rnd[MLDSA_RNDBYTES],
-    const unsigned char sk[CRYPTO_SECRETKEYBYTES])
+    const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 {
-  unsigned char signature[CRYPTO_BYTES];
+  unsigned char signature[MLDSA_CRYPTO_BYTES];
   size_t siglen;
 
   if (crypto_sign_signature_pre_hash_shake256(signature, &siglen, message, mlen,
@@ -458,20 +459,20 @@ static int acvp_mldsa_sigGenPreHashShake256_AFT(
 
 static int acvp_mldsa_sigVerPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
-    size_t ctxlen, const unsigned char signature[CRYPTO_BYTES],
-    const unsigned char pk[CRYPTO_PUBLICKEYBYTES])
+    size_t ctxlen, const unsigned char signature[MLDSA_CRYPTO_BYTES],
+    const unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
 {
-  return crypto_sign_verify_pre_hash_shake256(signature, CRYPTO_BYTES, message,
-                                              mlen, context, ctxlen, pk);
+  return crypto_sign_verify_pre_hash_shake256(
+      signature, MLDSA_CRYPTO_BYTES, message, mlen, context, ctxlen, pk);
 }
 
 /* Deterministic prehash signing functions */
 static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
-    size_t ctxlen, const unsigned char sk[CRYPTO_SECRETKEYBYTES],
+    size_t ctxlen, const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES],
     const char *hashAlg)
 {
-  unsigned char signature[CRYPTO_BYTES];
+  unsigned char signature[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   unsigned char rnd[MLDSA_RNDBYTES] = {0}; /* Zero rnd for deterministic */
 
@@ -488,9 +489,9 @@ static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
 
 static int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
-    size_t ctxlen, const unsigned char sk[CRYPTO_SECRETKEYBYTES])
+    size_t ctxlen, const unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 {
-  unsigned char signature[CRYPTO_BYTES];
+  unsigned char signature[MLDSA_CRYPTO_BYTES];
   size_t siglen;
   unsigned char rnd[MLDSA_RNDBYTES] = {0}; /* Zero rnd for deterministic */
 
@@ -600,7 +601,7 @@ int main(int argc, char *argv[])
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char rnd[MLDSA_RNDBYTES];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -651,7 +652,7 @@ int main(int argc, char *argv[])
     {
       unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
       unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       int externalMu;
       size_t mlen;
 
@@ -701,7 +702,7 @@ int main(int argc, char *argv[])
     {
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -745,7 +746,7 @@ int main(int argc, char *argv[])
     case sigGenInternalDeterministic:
     {
       unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       int externalMu;
       size_t mlen;
 
@@ -787,8 +788,8 @@ int main(int argc, char *argv[])
     {
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char signature[MLDSA_CRYPTO_BYTES];
+      unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -843,8 +844,8 @@ int main(int argc, char *argv[])
     case sigVerInternal:
     {
       unsigned char message[MAX_MSG_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char signature[MLDSA_CRYPTO_BYTES];
+      unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
       size_t mlen;
       int externalMu;
 
@@ -898,7 +899,7 @@ int main(int argc, char *argv[])
       unsigned char ph[64];
       unsigned char context[MAX_CTX_LENGTH];
       unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -959,8 +960,8 @@ int main(int argc, char *argv[])
     {
       unsigned char ph[64];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char signature[MLDSA_CRYPTO_BYTES];
+      unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -1026,7 +1027,7 @@ int main(int argc, char *argv[])
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char context[MAX_CTX_LENGTH];
       unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       size_t mlen;
       size_t ctxlen;
 
@@ -1079,7 +1080,7 @@ int main(int argc, char *argv[])
     {
       unsigned char ph[64];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -1133,7 +1134,7 @@ int main(int argc, char *argv[])
     {
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
       size_t mlen;
       size_t ctxlen;
 
@@ -1179,8 +1180,8 @@ int main(int argc, char *argv[])
     {
       unsigned char message[MAX_MSG_LENGTH];
       unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char signature[MLDSA_CRYPTO_BYTES];
+      unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
       size_t mlen;
       size_t ctxlen;
 

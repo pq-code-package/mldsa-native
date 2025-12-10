@@ -3,8 +3,8 @@
 
 #include "sign.h"
 
-int crypto_sign_pk_from_sk(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
-                           const uint8_t sk[CRYPTO_SECRETKEYBYTES]);
+int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                           const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]);
 
 void harness(void)
 {

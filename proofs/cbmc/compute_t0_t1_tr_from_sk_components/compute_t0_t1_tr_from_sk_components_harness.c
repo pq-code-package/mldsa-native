@@ -3,12 +3,10 @@
 
 #include "sign.h"
 
-void mld_compute_t0_t1_tr_from_sk_components(mld_polyveck *t0, mld_polyveck *t1,
-                                             uint8_t tr[MLDSA_TRBYTES],
-                                             uint8_t pk[CRYPTO_PUBLICKEYBYTES],
-                                             const uint8_t rho[MLDSA_SEEDBYTES],
-                                             const mld_polyvecl *s1,
-                                             const mld_polyveck *s2);
+void mld_compute_t0_t1_tr_from_sk_components(
+    mld_polyveck *t0, mld_polyveck *t1, uint8_t tr[MLDSA_TRBYTES],
+    uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], const uint8_t rho[MLDSA_SEEDBYTES],
+    const mld_polyvecl *s1, const mld_polyveck *s2);
 
 void harness(void)
 {

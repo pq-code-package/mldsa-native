@@ -4,8 +4,8 @@
 
 #include "sign.h"
 
-int mld_check_pct(uint8_t const pk[CRYPTO_PUBLICKEYBYTES],
-                  uint8_t const sk[CRYPTO_SECRETKEYBYTES]);
+int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                  uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES]);
 
 void harness(void)
 {

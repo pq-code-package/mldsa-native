@@ -74,9 +74,9 @@ static void print_percentiles(const char *txt, uint64_t cyc[NTESTS])
 
 static int bench(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES];
+  uint8_t sig[MLDSA_CRYPTO_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
   unsigned char kg_rand[MLDSA_SEEDBYTES], sig_rand[MLDSA_SEEDBYTES];
