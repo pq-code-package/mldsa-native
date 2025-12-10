@@ -27,8 +27,8 @@
 /*
  * Test configuration: Test configuration with custom memset
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
  *   - MLD_CONFIG_CUSTOM_MEMSET
  */
 

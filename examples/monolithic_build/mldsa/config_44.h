@@ -25,16 +25,14 @@
  */
 
 /*
- * Test configuration: Multilevel monolithic build config with native backends
+ * Test configuration: Monolithic build config for ML-DSA-44 (native backends
+ * disabled)
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
+ *   - MLD_CONFIG_PARAMETER_SET
  *   - MLD_CONFIG_NAMESPACE_PREFIX
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *   - MLD_CONFIG_INTERNAL_API_QUALIFIER
- *   - MLD_CONFIG_EXTERNAL_API_QUALIFIER
- *   - MLD_CONFIG_CUSTOM_RANDOMBYTES
  */
 
 
@@ -52,10 +50,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#ifndef MLD_CONFIG_PARAMETER_SET
-#define MLD_CONFIG_PARAMETER_SET \
-  44 /* Change this for different security strengths */
-#endif
+#define MLD_CONFIG_PARAMETER_SET 44
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FILE
@@ -172,7 +167,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_ARITH_BACKEND_FILE
@@ -213,7 +210,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FIPS202_BACKEND_FILE
@@ -320,23 +319,16 @@
  *              or signature.
  *
  *****************************************************************************/
-/* Even though we use the default randombytes signature here, registering it
- * as a custom implementation avoids double-declaration of randombytes via
- * mldsa/src/randombytes.h and test_only_rng/notrandombytes.h: The former is by
- * default included by mldsa-native, and the latter is needed for this example
- * since we rely on the additional randombytes_reset() API. */
-
-#define MLD_CONFIG_CUSTOM_RANDOMBYTES
-#if !defined(__ASSEMBLER__)
-#include <stdint.h>
-#include "sys.h"
-#include "test_only_rng/notrandombytes.h"
-static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
-{
-  randombytes(ptr, len);
-}
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "sys.h"
+   static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
@@ -438,7 +430,7 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
  *              even mldsa-native's public API can be marked `static`.
  *
  *****************************************************************************/
-#define MLD_CONFIG_EXTERNAL_API_QUALIFIER static
+/* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CT_TESTING_ENABLED

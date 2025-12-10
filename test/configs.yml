@@ -282,7 +282,7 @@ configs:
           #endif /* !__ASSEMBLER__ */
   # Example configs
 
-  - path: examples/monolithic_build/config_44.h
+  - path: examples/monolithic_build/mldsa/config_44.h
     description: "Monolithic build config for ML-DSA-44 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 44
@@ -291,7 +291,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/config_65.h
+  - path: examples/monolithic_build/mldsa/config_65.h
     description: "Monolithic build config for ML-DSA-65 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 65
@@ -300,7 +300,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build/config_87.h
+  - path: examples/monolithic_build/mldsa/config_87.h
     description: "Monolithic build config for ML-DSA-87 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 87
@@ -309,7 +309,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_native/config_44.h
+  - path: examples/monolithic_build_native/mldsa/config_44.h
     description: "Monolithic build config for ML-DSA-44 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 44
@@ -320,7 +320,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_native/config_65.h
+  - path: examples/monolithic_build_native/mldsa/config_65.h
     description: "Monolithic build config for ML-DSA-65 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 65
@@ -331,7 +331,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_native/config_87.h
+  - path: examples/monolithic_build_native/mldsa/config_87.h
     description: "Monolithic build config for ML-DSA-87 (native backends disabled)"
     defines:
       MLD_CONFIG_PARAMETER_SET: 87
@@ -342,7 +342,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_multilevel/multilevel_config.h
+  - path: examples/monolithic_build_multilevel/mldsa/multilevel_config.h
     description: "Multilevel monolithic build config"
     defines:
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
@@ -350,7 +350,7 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
-  - path: examples/monolithic_build_multilevel_native/multilevel_config.h
+  - path: examples/monolithic_build_multilevel_native/mldsa/multilevel_config.h
     description: "Multilevel monolithic build config with native backends"
     defines:
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
@@ -390,12 +390,5 @@ configs:
       MLD_CONFIG_NAMESPACE_PREFIX: CUSTOM_TINY_SHA3
       MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
       MLD_CONFIG_FIPS202_BACKEND_FILE: '"fips202/native/custom/custom.h"'
-      MLD_CONFIG_FILE:
-        comment: "/* No need to set this -- we _are_ already in a custom config */"
-
-  - path: examples/basic_deterministic/mldsa_native/custom_no_randomized_config.h
-    description: "Config without randomized API"
-    defines:
-      MLD_CONFIG_NO_RANDOMIZED_API: true
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"

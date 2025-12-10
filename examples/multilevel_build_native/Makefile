@@ -26,7 +26,8 @@ CFLAGS := \
 	-Wno-unused-command-line-argument \
 	-O3 \
 	-fomit-frame-pointer \
-    -DMLD_CONFIG_NAMESPACE_PREFIX=mldsa \
+	-Imldsa_native/mldsa \
+	-DMLD_CONFIG_NAMESPACE_PREFIX=mldsa \
 	-std=c99 \
 	-pedantic \
 	-MMD \

@@ -27,8 +27,8 @@
 /*
  * Test configuration: Test configuration with no assembly code
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
  *   - MLD_CONFIG_NO_ASM
  *   - MLD_CONFIG_CUSTOM_ZEROIZE
  */

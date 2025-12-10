@@ -1355,7 +1355,6 @@ def k_specific(c):
     k_specific_sources = [
         "mldsa_native.h",
         "params.h",
-        # Deliberately omit config.h, which is not #undef'ed
         "common.h",
         "packing.c",
         "packing.h",
@@ -1374,7 +1373,7 @@ def k_specific(c):
 
 
 def k_generic(c):
-    return not k_specific(c) and c != "mldsa/src/config.h"
+    return not k_specific(c) and c != "mldsa/mldsa_native_config.h"
 
 
 def gen_macro_undefs(extra_notes=None):
@@ -1638,7 +1637,7 @@ def gen_monolithic_asm_file():
 
 
 def get_config_options():
-    content = read_file("mldsa/src/config.h")
+    content = read_file("mldsa/mldsa_native_config.h")
     config_pattern = r"Name:\s*(MLD_CONFIG_\w+)"
 
     configs = re.findall(config_pattern, content)
@@ -1833,6 +1832,10 @@ def update_via_simpasm(
     if outfile is None:
         outfile = infile
     outfile_full = os.path.join(outdir, outfile)
+
+    if cflags is None:
+        cflags = ""
+    cflags += " -Imldsa"
 
     # Check if we need to use a cross-compiler
     if "aarch64" in infile_full:
@@ -2082,7 +2085,10 @@ def adjust_header_guard_for_filename(content, header_file):
     status_update("header guards", header_file)
 
     content = content.split("\n")
-    exceptions = {"mldsa/mldsa_native.h": "MLD_H"}
+    exceptions = {
+        "mldsa/mldsa_native.h": "MLD_H",
+        "mldsa/mldsa_native_config.h": "MLD_CONFIG_H",
+    }
 
     # Use full filename as the header guard, with '/' and '.' replaced by '_'
     guard_name = (
@@ -2542,8 +2548,6 @@ def get_oqs_shared_sources(backend):
             for f in os.listdir(f"{mldsa_dir}/native")
             if os.path.isfile(f"{mldsa_dir}/native/{f}")
         ]
-    # We use a custom config
-    sources.remove("mldsa/src/config.h")
     # Add FIPS202 glue code
     sources += [
         "integration/liboqs/fips202_glue.h",
@@ -2751,7 +2755,7 @@ def gen_test_config(config_path, config_spec, default_config_content):
     header.append(f" * Test configuration: {config_spec['description']}")
     header.append(" *")
     header.append(
-        " * This configuration differs from the default mldsa/src/config.h in the following places:"
+        " * This configuration differs from the default mldsa/mldsa_native_config.h in the following places:"
     )
 
     def spec_has_value(opt_value):
@@ -2838,7 +2842,7 @@ def gen_test_configs():
     metadata = yaml.safe_load(read_file("test/configs.yml"))
 
     # Load default config
-    default_config = read_file("mldsa/src/config.h")
+    default_config = read_file("mldsa/mldsa_native_config.h")
 
     # Generate each test config
     for config_spec in metadata["configs"]:

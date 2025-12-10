@@ -25,11 +25,14 @@
  */
 
 /*
- * Test configuration: Config without randomized API
+ * Test configuration: Monolithic build config for ML-DSA-87 (native backends
+ * disabled)
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
- *   - MLD_CONFIG_NO_RANDOMIZED_API
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
+ *   - MLD_CONFIG_PARAMETER_SET
+ *   - MLD_CONFIG_NAMESPACE_PREFIX
+ *   - MLD_CONFIG_INTERNAL_API_QUALIFIER
  */
 
 
@@ -47,10 +50,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#ifndef MLD_CONFIG_PARAMETER_SET
-#define MLD_CONFIG_PARAMETER_SET \
-  44 /* Change this for different security strengths */
-#endif
+#define MLD_CONFIG_PARAMETER_SET 87
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FILE
@@ -85,9 +85,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#if !defined(MLD_CONFIG_NAMESPACE_PREFIX)
-#define MLD_CONFIG_NAMESPACE_PREFIX MLD_DEFAULT_NAMESPACE_PREFIX
-#endif
+#define MLD_CONFIG_NAMESPACE_PREFIX mldsa
 
 /******************************************************************************
  * Name:        MLD_CONFIG_MULTILEVEL_WITH_SHARED
@@ -417,7 +415,7 @@
  *              in which case this option can be set to `static`.
  *
  *****************************************************************************/
-/* #define MLD_CONFIG_INTERNAL_API_QUALIFIER */
+#define MLD_CONFIG_INTERNAL_API_QUALIFIER static
 
 /******************************************************************************
  * Name:        MLD_CONFIG_EXTERNAL_API_QUALIFIER
@@ -500,7 +498,7 @@
  *              crypto_sign_signature().
  *
  *****************************************************************************/
-#define MLD_CONFIG_NO_RANDOMIZED_API
+/* #define MLD_CONFIG_NO_RANDOMIZED_API */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT

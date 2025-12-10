@@ -27,8 +27,8 @@
 /*
  * Test configuration: Custom backend config with tiny SHA3
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
  *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
  *   - MLD_CONFIG_NAMESPACE_PREFIX
  *   - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202

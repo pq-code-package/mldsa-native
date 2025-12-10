@@ -9,7 +9,7 @@
 #if defined(MLD_CONFIG_FILE)
 #include MLD_CONFIG_FILE
 #else
-#include "config.h"
+#include "mldsa_native_config.h"
 #endif
 
 #include "cbmc.h"

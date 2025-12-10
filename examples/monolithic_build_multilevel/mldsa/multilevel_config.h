@@ -25,15 +25,11 @@
  */
 
 /*
- * Test configuration: Monolithic build config for ML-DSA-65 (native backends
- * disabled)
+ * Test configuration: Multilevel monolithic build config
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
- *   - MLD_CONFIG_PARAMETER_SET
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
  *   - MLD_CONFIG_NAMESPACE_PREFIX
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *   - MLD_CONFIG_INTERNAL_API_QUALIFIER
  */
 
@@ -52,7 +48,10 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_PARAMETER_SET 65
+#ifndef MLD_CONFIG_PARAMETER_SET
+#define MLD_CONFIG_PARAMETER_SET \
+  44 /* Change this for different security strengths */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FILE
@@ -169,7 +168,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_ARITH_BACKEND_FILE
@@ -210,7 +211,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FIPS202_BACKEND_FILE

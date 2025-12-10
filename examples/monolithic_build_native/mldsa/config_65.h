@@ -25,11 +25,11 @@
  */
 
 /*
- * Test configuration: Monolithic build config for ML-DSA-87 (native backends
+ * Test configuration: Monolithic build config for ML-DSA-65 (native backends
  * disabled)
  *
- * This configuration differs from the default mldsa/src/config.h in the
- * following places:
+ * This configuration differs from the default mldsa/mldsa_native_config.h in
+ * the following places:
  *   - MLD_CONFIG_PARAMETER_SET
  *   - MLD_CONFIG_NAMESPACE_PREFIX
  *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -52,7 +52,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_PARAMETER_SET 87
+#define MLD_CONFIG_PARAMETER_SET 65
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FILE
