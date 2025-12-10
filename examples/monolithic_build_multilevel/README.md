@@ -1,38 +1,55 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Multi-level mldsa-native in a single compilation unit
+# Monolithic Multi-Level Build (C Backend)
 
-This directory contains a minimal example for how to build multiple instances of mldsa-native in a single compilation
-unit. Only the C-backend is exercised.
+This directory contains a minimal example for building all three ML-DSA security levels in a single
+compilation unit, with shared code deduplicated.
 
-The auto-generated source file [mldsa_native.c](mldsa/mldsa_native.c) includes all mldsa-native C source
-files. Moreover, it clears all `#define`s clauses set by mldsa-native at the end, and is hence amenable to multiple
-inclusion in another compilation unit.
+## Use Case
 
-The manually written source file [mldsa_native_all.c](mldsa_native_all.c) includes
-[mldsa_native.c](mldsa/mldsa_native.c) three times, each time using the fixed config
-[multilevel_config.h](multilevel_config.h), but changing the security level (specified
-by `MLD_CONFIG_PARAMETER_SET`) every time.
-```C
+Use this approach when:
+- You need all ML-DSA security levels in one application
+- You want the simplest possible multi-level integration (one `.c` file)
+- You're using only C (no native backend)
+
+## Components
+
+An application using mldsa-native as a monolithic multi-level build needs:
+
+1. Source tree [mldsa_native/*](mldsa_native), including top-level compilation unit
+   [mldsa_native.c](mldsa_native/mldsa_native.c) (gathering all C sources)
+   and the mldsa-native API [mldsa_native.h](mldsa_native/mldsa_native.h).
+2. Manually provided wrapper file [mldsa_native_all.c](mldsa_native_all.c),
+   including `mldsa_native.c` three times.
+3. Manually provided header file [mldsa_native_all.h](mldsa_native_all.h),
+   including `mldsa_native.h` three times)
+4. A secure random number generator implementing [`randombytes.h`](../../mldsa/src/randombytes.h)
+5. Your application source code
+
+## Configuration
+
+The configuration file [multilevel_config.h](mldsa_native/multilevel_config.h) sets:
+- `MLD_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
+- `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix
+- `MLD_CONFIG_INTERNAL_API_QUALIFIER=static`: Makes internal functions static
+
+The wrapper [mldsa_native_all.c](mldsa_native_all.c) includes `mldsa_native.c` three times:
+```c
 #define MLD_CONFIG_FILE "multilevel_config.h"
 
-/* Three instances of mldsa-native for all security levels */
-
-/* Include level-independent code */
+/* Include level-independent code with first level */
 #define MLD_CONFIG_MULTILEVEL_WITH_SHARED
-/* Keep level-independent headers at the end of monobuild file */
 #define MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 #define MLD_CONFIG_PARAMETER_SET 44
 #include "mldsa_native.c"
 #undef MLD_CONFIG_PARAMETER_SET
 #undef MLD_CONFIG_MULTILEVEL_WITH_SHARED
 
-/* Exclude level-independent code */
+/* Exclude level-independent code for subsequent levels */
 #define MLD_CONFIG_MULTILEVEL_NO_SHARED
 #define MLD_CONFIG_PARAMETER_SET 65
 #include "mldsa_native.c"
 #undef MLD_CONFIG_PARAMETER_SET
-/* `#undef` all headers at the and of the monobuild file */
 #undef MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 
 #define MLD_CONFIG_PARAMETER_SET 87
@@ -40,48 +57,40 @@ by `MLD_CONFIG_PARAMETER_SET`) every time.
 #undef MLD_CONFIG_PARAMETER_SET
 ```
 
-Note the setting `MLD_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
-code in the MLDSA-44 build, and the setting `MLD_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
-level-independent code in the subsequent builds. Finally, `MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
-`mldsa_native.c` does not `#undefine` the `#define` clauses from level-independent files.
+The header [mldsa_native_all.h](mldsa_native_all.h) exposes all APIs:
+```c
+#define MLD_CONFIG_NO_SUPERCOP
 
-To make the monolithic multi-level build accessible from the application source [main.c](main.c), we provide
-[mldsa_native_all.h](mldsa_native_all.h), which includes [mldsa_native.h](../../mldsa/mldsa_native.h) once per
-configuration. Note that we don't refer to the configuration using `MLD_CONFIG_FILE`, but by setting
-`MLD_CONFIG_API_XXX` explicitly. Otherwise, [mldsa_native.h](../../mldsa/mldsa_native.h) would include the confg, which
-would lead to name-clashes upon multiple use.
-
-```C
-#define MLD_CONFIG_API_NO_SUPERCOP
-
-/* API for MLDSA-44 */
-#define MLD_CONFIG_API_PARAMETER_SET 44
-#define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa44
+#define MLD_CONFIG_PARAMETER_SET 44
 #include <mldsa_native.h>
-#undef MLD_CONFIG_API_PARAMETER_SET
-#undef MLD_CONFIG_API_NAMESPACE_PREFIX
+#undef MLD_CONFIG_PARAMETER_SET
 #undef MLD_H
 
-/* API for MLDSA-65*/
-#define MLD_CONFIG_API_PARAMETER_SET 65
-#define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa65
+#define MLD_CONFIG_PARAMETER_SET 65
 #include <mldsa_native.h>
-#undef MLD_CONFIG_API_PARAMETER_SET
-#undef MLD_CONFIG_API_NAMESPACE_PREFIX
+#undef MLD_CONFIG_PARAMETER_SET
 #undef MLD_H
 
-/* API for MLDSA-87 */
-#define MLD_CONFIG_API_PARAMETER_SET 87
-#define MLD_CONFIG_API_NAMESPACE_PREFIX mldsa87
+#define MLD_CONFIG_PARAMETER_SET 87
 #include <mldsa_native.h>
-#undef MLD_CONFIG_API_PARAMETER_SET
-#undef MLD_CONFIG_API_NAMESPACE_PREFIX
+#undef MLD_CONFIG_PARAMETER_SET
 #undef MLD_H
 ```
 
+## Notes
+
+- `MLD_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
+- `MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` prevents cleanup of shared headers between inclusions
+- `MLD_CONFIG_NO_SUPERCOP` is required to avoid conflicting `CRYPTO_*` macro definitions
+
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.

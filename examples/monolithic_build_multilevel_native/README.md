@@ -1,38 +1,53 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Multi-level mldsa-native in a single compilation unit, with native code
+# Monolithic Multi-Level Build (Native Backend)
 
-This directory contains a minimal example for how to build multiple instances of mldsa-native in a single compilation
-unit, while additionally linking assembly sources from native code.
+This directory contains a minimal example for building all three ML-DSA security levels in a single
+compilation unit with native assembly backends, with shared code deduplicated.
 
-The auto-generated source file [mldsa_native.c](mldsa/mldsa_native.c) includes all mldsa-native C source
-files. Moreover, it clears all `#define`s clauses set by mldsa-native at the end, and is hence amenable to multiple
-inclusion in another compilation unit.
+## Use Case
 
-The manually written source file [mldsa_native_all.c](mldsa_native_all.c) includes
-[mldsa_native.c](mldsa/mldsa_native.c) three times, each time using the fixed config
-[multilevel_config.h](multilevel_config.h), but changing the security level (specified
-by `MLD_CONFIG_PARAMETER_SET`) every time. For each inclusion, it sets `MLD_CONFIG_FILE`
-appropriately first, and then includes the monobuild:
-```C
-/* Three instances of mldsa-native for all security levels */
+Use this approach when:
+- You need all ML-DSA security levels in one application
+- You want optimal performance via native assembly
+- You want the simplest possible multi-level native integration
 
+## Components
+
+1. Source tree [mldsa_native/*](mldsa_native), including top-level compilation unit
+   [mldsa_native.c](mldsa_native/mldsa_native.c) (gathering all C sources),
+   [mldsa_native.S](mldsa_native/mldsa_native.S) (gathering all assembly sources),
+   and the mldsa-native API [mldsa_native.h](mldsa_native/mldsa_native.h).
+2. Manually provided wrapper file [mldsa_native_all.c](mldsa_native_all.c),
+   including `mldsa_native.c` three times (in this example, we don't use a
+   wrapper header since we directly include `mldsa_native_all.c` into `main.c`).
+3. A secure random number generator implementing [`randombytes.h`](../../mldsa/src/randombytes.h)
+4. Your application source code
+
+## Configuration
+
+The configuration file [multilevel_config.h](multilevel_config.h) sets:
+- `MLD_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
+- `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix
+- `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH`: Enables native arithmetic backend
+- `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202`: Enables native FIPS-202 backend
+
+The wrapper [mldsa_native_all.c](mldsa_native_all.c) includes `mldsa_native.c` three times:
+```c
 #define MLD_CONFIG_FILE "multilevel_config.h"
 
-/* Include level-independent code */
+/* Include level-independent code with first level */
 #define MLD_CONFIG_MULTILEVEL_WITH_SHARED 1
-/* Keep level-independent headers at the end of monobuild file */
 #define MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 #define MLD_CONFIG_PARAMETER_SET 44
 #include "mldsa_native.c"
 #undef MLD_CONFIG_MULTILEVEL_WITH_SHARED
 #undef MLD_CONFIG_PARAMETER_SET
 
-/* Exclude level-independent code */
+/* Exclude level-independent code for subsequent levels */
 #define MLD_CONFIG_MULTILEVEL_NO_SHARED
 #define MLD_CONFIG_PARAMETER_SET 65
 #include "mldsa_native.c"
-/* `#undef` all headers at the and of the monobuild file */
 #undef MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
 #undef MLD_CONFIG_PARAMETER_SET
 
@@ -41,26 +56,29 @@ appropriately first, and then includes the monobuild:
 #undef MLD_CONFIG_PARAMETER_SET
 ```
 
-Note the setting `MLD_CONFIG_MULTILEVEL_WITH_SHARED` which forces the inclusion of all level-independent
-code in the ML_DSA-44 build, and the setting `MLD_CONFIG_MULTILEVEL_NO_SHARED`, which drops all
-level-independent code in the subsequent builds. Finally, `MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` entails that
-[mldsa_native.c](mldsa/mldsa_native.c) does not `#undefine` the `#define` clauses from level-independent files.
-
-Since we embed [mldsa_native_all.c](mldsa_native_all.c) directly into the application source [main.c](main.c), we don't
-need a header for function declarations. However, we still import [mldsa_native.h](../../mldsa/mldsa_native.h) once
-with `MLD_CONFIG_API_CONSTANTS_ONLY`, for definitions of the sizes of the key material and signatures.
-Excerpt from [main.c](main.c):
-
+The application [main.c](main.c) embeds the wrapper and imports constants:
 ```c
 #include "mldsa_native_all.c"
 
-#define MLD_CONFIG_API_CONSTANTS_ONLY
+#define MLD_CONFIG_CONSTANTS_ONLY
 #include <mldsa_native.h>
 ```
 
+## Notes
+
+- Both `mldsa_native_all.c` and `mldsa_native.S` must be compiled and linked
+- `MLD_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
+- `MLD_CONFIG_CONSTANTS_ONLY` imports size constants without function declarations
+- Native backends are auto-selected based on target architecture
+
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.

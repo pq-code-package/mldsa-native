@@ -1,35 +1,54 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Bring your own FIPS-202 (Static State Variant)
+# Bring Your Own FIPS-202 (Static State Variant)
 
-This directory contains a minimal example for how to use mldsa-native with external FIPS-202
-HW/SW-implementations that use a single global state (for example, some hardware accelerators).
-Specifically, this example demonstrates the use of the serial-only FIPS-202 configuration
-`MLD_CONFIG_SERIAL_FIPS202_ONLY`.
+This directory contains a minimal example for using mldsa-native with a custom FIPS-202 implementation
+that uses a single global state. This is common for hardware accelerators that can only hold one
+Keccak state at a time.
 
-**WARNING:** This example is EXPECTED TO PRODUCE INCORRECT RESULTS because ML-DSA requires
-multiple independent FIPS-202 contexts to be active simultaneously. This example demonstrates
-what happens when only a single global state is available.
+## Use Case
+
+Use this approach when:
+- You need only one ML-DSA parameter set (44, 65, or 87)
+- Your application already has a FIPS-202 software/hardware implementation you want to reuse
+- Your FIPS-202 implementation does not support multiple active SHA3/SHAKE computations.
 
 ## Components
 
-An application using mldsa-native with a custom FIPS-202 implementation needs the following:
+1. Arithmetic part of mldsa-native: [`mldsa/src/`](../../mldsa/src) (excluding `fips202/`)
+2. A secure random number generator implementing [`randombytes.h`](../../mldsa/src/randombytes.h)
+3. Custom FIPS-202 implementation with headers compatible with [`fips202.h`](../../mldsa/src/fips202/fips202.h)
+4. Your application source code
 
-1. Arithmetic part of the mldsa-native source tree: [`mldsa/src/`](../../mldsa/src)
-2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mldsa/src/randombytes.h).
-3. A custom FIPS-202 with `fips202.h` header compatible with [`mldsa/fips202/fips202.h`](../../mldsa/src/fips202/fips202.h).
-   With `MLD_CONFIG_SERIAL_FIPS202_ONLY`, the FIPS-202x4 parallel API is not used.
-4. The application source code
+## Configuration
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
+- `MLD_CONFIG_SERIAL_FIPS202_ONLY`: Disables batched Keccak; matrix entries generated one at a time
+- `MLD_CONFIG_FIPS202_CUSTOM_HEADER`: Path to your custom `fips202.h`
+
+Your custom FIPS-202 implementation must provide:
+- `mld_shake128_init()`, `mld_shake128_absorb()`, `mld_shake128_finalize()`, `mld_shake128_squeeze()`, `mld_shake128_release()`
+- `mld_shake256_init()`, `mld_shake256_absorb()`, `mld_shake256_finalize()`, `mld_shake256_squeeze()`, `mld_shake256_release()`
+- `mld_shake256`
+- Structure definitions for `mld_shake128ctx` and `mld_shake256ctx`
+
+## Notes
+
+- `MLD_CONFIG_SERIAL_FIPS202_ONLY` may reduce performance on CPUs with SIMD support
+- Matrix and vector generation becomes sequential instead of batched (4 entries at a time)
+- Only enable this when your hardware requires it
 
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
 
-You should see verification failures, which is the expected behavior demonstrating that a single
-global FIPS-202 state is insufficient for ML-DSA.
+## Warning
+
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.
 
 <!--- bibliography --->
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)

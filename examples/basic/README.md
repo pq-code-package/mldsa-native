@@ -1,40 +1,38 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# Building mldsa-native
+# Basic build
 
-This directory contains a minimal example for how to build mldsa-native.
+This directory contains a minimal example for how to build mldsa-native for a single security level.
+
+## Use Case
+
+Use this approach when:
+- You need only one ML-DSA parameter set (44, 65, or 87)
+- You want to build the mldsa-native C files separately, not as a single compilation unit.
+- You're using C only, no native backends.
 
 ## Components
 
-An application using mldsa-native as-is needs to include the following components:
+1. mldsa-native source tree: [`mldsa/src/`](../../mldsa/src) and [`mldsa/src/fips202/`](../../mldsa/src/fips202)
+2. A secure random number generator implementing [`randombytes.h`](../../mldsa/src/randombytes.h)
+3. Your application source code
 
-1. mldsa-native source tree, including [`mldsa/src/`](../../mldsa/src) and [`mldsa/src/fips202/`](../../mldsa/src/fips202).
-2. A secure pseudo random number generator, implementing [`randombytes.h`](../../mldsa/src/randombytes.h).
-3. The application source code
+## Configuration
 
-**WARNING:** The `randombytes()` implementation used here is for TESTING ONLY. You MUST NOT use this implementation
-outside of testing.
+The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
+- `MLD_CONFIG_PARAMETER_SET`: Security level (44, 65, or 87). Default is 65.
+- `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix for the API. Set to `mldsa` in this example.
+
+To change the security level, modify `MLD_CONFIG_PARAMETER_SET` in the config file or pass it via CFLAGS.
 
 ## Usage
 
-Build this example with `make build`, run with `make run`.
+```bash
+make build   # Build the example
+make run     # Run the example
+```
 
-## What this example demonstrates
+## Warning
 
-This basic example shows how to use the ML-DSA (Module-Lattice-Based Digital Signature Algorithm) for:
-
-1. **Key Generation**: Generate a public/private key pair
-2. **Signing**: Sign a message with a private key and optional context
-3. **Signature Verification**: Verify a signature using the public key
-4. **Signed Messages**: Create and open signed messages (signature + message combined)
-
-The example demonstrates both the detached signature API (`crypto_sign_signature`/`crypto_sign_verify`) and the combined signature API (`crypto_sign`/`crypto_sign_open`).
-
-## Parameter Sets
-
-ML-DSA supports three parameter sets:
-- **ML-DSA-44**
-- **ML-DSA-65**
-- **ML-DSA-87**
-
-The example builds and runs all three parameter sets to demonstrate the different security levels and their corresponding key/signature sizes.
+The `randombytes()` implementation in `test_only_rng/` is for TESTING ONLY.
+You MUST provide a cryptographically secure RNG for production use.
