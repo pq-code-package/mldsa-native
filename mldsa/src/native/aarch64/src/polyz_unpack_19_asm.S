@@ -34,7 +34,7 @@ MLD_ASM_FN_SYMBOL(polyz_unpack_19_asm)
 
 Lpolyz_unpack_19_loop:
         ldr	q1, [x1, #0x10]
-        ldr	q2, [x1, #0x20]
+        ldr	d2, [x1, #0x20]
         ldr	q0, [x1], #0x28
         tbl	v4.16b, { v0.16b }, v24.16b
         tbl	v5.16b, { v0.16b, v1.16b }, v25.16b
