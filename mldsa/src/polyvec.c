@@ -191,7 +191,7 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
 #endif
 
   /* Safety: nonce is at most ((UINT16_MAX - MLDSA_L) / MLDSA_L), and, hence,
-   * this cast is safe. See NONCE_UB comment in sign.c. */
+   * this cast is safe. See MLD_NONCE_UB comment in sign.c. */
   nonce = (uint16_t)(MLDSA_L * nonce);
   /* Now, nonce <= UINT16_MAX - (MLDSA_L - 1), so the casts below are safe. */
 #if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
@@ -228,7 +228,8 @@ MLD_INTERNAL_API
 void mld_polyvecl_reduce(mld_polyvecl *v)
 {
   unsigned int i;
-  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, INT32_MIN,
+                      MLD_REDUCE32_DOMAIN_MAX);
 
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
@@ -236,13 +237,13 @@ void mld_polyvecl_reduce(mld_polyvecl *v)
     invariant(i <= MLDSA_L)
     invariant(forall(k0, i, MLDSA_L, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
     invariant(forall(k2, 0, i,
-      array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))))
+      array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX))))
   {
     mld_poly_reduce(&v->vec[i]);
   }
 
-  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -REDUCE32_RANGE_MAX,
-                      REDUCE32_RANGE_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                      MLD_REDUCE32_RANGE_MAX);
 }
 
 /* Reference: We use destructive version (output=first input) to avoid
@@ -258,12 +259,13 @@ void mld_polyvecl_add(mld_polyvecl *u, const mld_polyvecl *v)
     invariant(i <= MLDSA_L)
     invariant(forall(k0, i, MLDSA_L,
               forall(k1, 0, MLDSA_N, u->vec[k0].coeffs[k1] == loop_entry(*u).vec[k0].coeffs[k1])))
-    invariant(forall(k6, 0, i, array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
+    invariant(forall(k6, 0, i, array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
   )
   {
     mld_poly_add(&u->vec[i], &v->vec[i]);
   }
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, INT32_MIN,
+                      MLD_REDUCE32_DOMAIN_MAX);
 }
 
 MLD_INTERNAL_API
@@ -434,8 +436,8 @@ uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
 {
   unsigned int i;
   uint32_t t = 0;
-  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -REDUCE32_RANGE_MAX,
-                      REDUCE32_RANGE_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                      MLD_REDUCE32_RANGE_MAX);
 
   for (i = 0; i < MLDSA_L; ++i)
   __loop__(
@@ -460,7 +462,8 @@ MLD_INTERNAL_API
 void mld_polyveck_reduce(mld_polyveck *v)
 {
   unsigned int i;
-  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, INT32_MIN,
+                      MLD_REDUCE32_DOMAIN_MAX);
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
@@ -468,14 +471,14 @@ void mld_polyveck_reduce(mld_polyveck *v)
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
     invariant(forall(k2, 0, i,
-      array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX)))
+      array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
   )
   {
     mld_poly_reduce(&v->vec[i]);
   }
 
-  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, -REDUCE32_RANGE_MAX,
-                      REDUCE32_RANGE_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                      MLD_REDUCE32_RANGE_MAX);
 }
 
 MLD_INTERNAL_API
@@ -510,12 +513,13 @@ void mld_polyveck_add(mld_polyveck *u, const mld_polyveck *v)
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K,
               forall(k1, 0, MLDSA_N, u->vec[k0].coeffs[k1] == loop_entry(*u).vec[k0].coeffs[k1])))
-    invariant(forall(k6, 0, i, array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
+    invariant(forall(k6, 0, i, array_bound(u->vec[k6].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
   )
   {
     mld_poly_add(&u->vec[i], &v->vec[i]);
   }
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, INT32_MIN,
+                      MLD_REDUCE32_DOMAIN_MAX);
 }
 
 MLD_INTERNAL_API
@@ -530,14 +534,15 @@ void mld_polyveck_sub(mld_polyveck *u, const mld_polyveck *v)
     assigns(i, memory_slice(u, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, 0, i,
-                     array_bound(u->vec[k0].coeffs, 0, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX)))
+                     array_bound(u->vec[k0].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
     invariant(forall(k1, i, MLDSA_K,
              forall(n1, 0, MLDSA_N, u->vec[k1].coeffs[n1] == loop_entry(*u).vec[k1].coeffs[n1]))))
   {
     mld_poly_sub(&u->vec[i], &v->vec[i]);
   }
 
-  mld_assert_bound_2d(u->vec, MLDSA_K, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound_2d(u->vec, MLDSA_K, MLDSA_N, INT32_MIN,
+                      MLD_REDUCE32_DOMAIN_MAX);
 }
 
 MLD_INTERNAL_API
@@ -622,8 +627,8 @@ uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t bound)
 {
   unsigned int i;
   uint32_t t = 0;
-  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, -REDUCE32_RANGE_MAX,
-                      REDUCE32_RANGE_MAX);
+  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                      MLD_REDUCE32_RANGE_MAX);
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(

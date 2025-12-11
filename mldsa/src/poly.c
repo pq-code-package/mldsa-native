@@ -36,18 +36,19 @@ MLD_INTERNAL_API
 void mld_poly_reduce(mld_poly *a)
 {
   unsigned int i;
-  mld_assert_bound(a->coeffs, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound(a->coeffs, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX);
 
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
     invariant(forall(k0, i, MLDSA_N, a->coeffs[k0] == loop_entry(*a).coeffs[k0]))
-    invariant(array_bound(a->coeffs, 0, i, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX)))
+    invariant(array_bound(a->coeffs, 0, i, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
   {
     a->coeffs[i] = mld_reduce32(a->coeffs[i]);
   }
 
-  mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
+  mld_assert_bound(a->coeffs, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                   MLD_REDUCE32_RANGE_MAX);
 }
 
 MLD_STATIC_TESTABLE void mld_poly_caddq_c(mld_poly *a)
@@ -102,7 +103,7 @@ void mld_poly_add(mld_poly *r, const mld_poly *b)
     invariant(i <= MLDSA_N)
     invariant(forall(k0, i, MLDSA_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
     invariant(forall(k1, 0, i, r->coeffs[k1] == loop_entry(*r).coeffs[k1] + b->coeffs[k1]))
-    invariant(forall(k2, 0, i, r->coeffs[k2] < REDUCE32_DOMAIN_MAX))
+    invariant(forall(k2, 0, i, r->coeffs[k2] < MLD_REDUCE32_DOMAIN_MAX))
     invariant(forall(k2, 0, i, r->coeffs[k2] >= INT32_MIN))
   )
   {
@@ -122,14 +123,14 @@ void mld_poly_sub(mld_poly *r, const mld_poly *b)
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
-    invariant(array_bound(r->coeffs, 0, i, INT32_MIN, REDUCE32_DOMAIN_MAX))
+    invariant(array_bound(r->coeffs, 0, i, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX))
     invariant(forall(k0, i, MLDSA_N, r->coeffs[k0] == loop_entry(*r).coeffs[k0]))
   )
   {
     r->coeffs[i] = r->coeffs[i] - b->coeffs[i];
   }
 
-  mld_assert_bound(r->coeffs, MLDSA_N, INT32_MIN, REDUCE32_DOMAIN_MAX);
+  mld_assert_bound(r->coeffs, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX);
 }
 
 MLD_INTERNAL_API
@@ -508,8 +509,8 @@ void mld_poly_power2round(mld_poly *a1, mld_poly *a0, const mld_poly *a)
   mld_assert_bound(a1->coeffs, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1);
 }
 
-#define POLY_UNIFORM_NBLOCKS \
-  ((768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES)
+#define MLD_POLY_UNIFORM_NBLOCKS \
+  ((768 + MLD_STREAM128_BLOCKBYTES - 1) / MLD_STREAM128_BLOCKBYTES)
 /* Reference: `mld_rej_uniform()` in the reference implementation @[REF].
  *            - Our signature differs from the reference implementation
  *              in that it adds the offset and always expects the base of the
@@ -522,7 +523,7 @@ MLD_STATIC_TESTABLE unsigned int mld_rej_uniform_c(int32_t *a,
                                                    unsigned int buflen)
 __contract__(
   requires(offset <= target && target <= MLDSA_N)
-  requires(buflen <= (POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES) && buflen % 3 == 0)
+  requires(buflen <= (MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES) && buflen % 3 == 0)
   requires(memory_no_alias(a, sizeof(int32_t) * target))
   requires(memory_no_alias(buf, buflen))
   requires(array_bound(a, 0, offset, 0, MLDSA_Q))
@@ -538,7 +539,7 @@ __contract__(
   ctr = offset;
   pos = 0;
   /* pos + 3 cannot overflow due to the assumption
-  buflen <= (POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES) */
+  buflen <= (MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES) */
   while (ctr < target && pos + 3 <= buflen)
   __loop__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
@@ -587,7 +588,7 @@ static unsigned int mld_rej_uniform(int32_t *a, unsigned int target,
                                     unsigned int buflen)
 __contract__(
   requires(offset <= target && target <= MLDSA_N)
-  requires(buflen <= (POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES) && buflen % 3 == 0)
+  requires(buflen <= (MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES) && buflen % 3 == 0)
   requires(memory_no_alias(a, sizeof(int32_t) * target))
   requires(memory_no_alias(buf, buflen))
   requires(array_bound(a, 0, offset, 0, MLDSA_Q))
@@ -616,8 +617,8 @@ __contract__(
 
 /* Reference: poly_uniform() in the reference implementation @[REF].
  *           - Simplified from reference by removing buffer tail handling
- *             since buflen % 3 = 0 always holds true (STREAM128_BLOCKBYTES =
- *             168).
+ *             since buflen % 3 = 0 always holds true (MLD_STREAM128_BLOCKBYTES
+ * = 168).
  *           - Modified rej_uniform interface to track offset directly.
  *           - Pass nonce packed in the extended seed array instead of a third
  *             argument.
@@ -626,16 +627,16 @@ MLD_INTERNAL_API
 void mld_poly_uniform(mld_poly *a, const uint8_t seed[MLDSA_SEEDBYTES + 2])
 {
   unsigned int ctr;
-  unsigned int buflen = POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES;
-  MLD_ALIGN uint8_t buf[POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES];
+  unsigned int buflen = MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES;
+  MLD_ALIGN uint8_t buf[MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES];
   mld_xof128_ctx state;
 
   mld_xof128_init(&state);
   mld_xof128_absorb_once(&state, seed, MLDSA_SEEDBYTES + 2);
-  mld_xof128_squeezeblocks(buf, POLY_UNIFORM_NBLOCKS, &state);
+  mld_xof128_squeezeblocks(buf, MLD_POLY_UNIFORM_NBLOCKS, &state);
 
   ctr = mld_rej_uniform(a->coeffs, MLDSA_N, 0, buf, buflen);
-  buflen = STREAM128_BLOCKBYTES;
+  buflen = MLD_STREAM128_BLOCKBYTES;
   while (ctr < MLDSA_N)
   __loop__(
     assigns(ctr, state, memory_slice(a, sizeof(mld_poly)), object_whole(buf))
@@ -662,7 +663,7 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
 {
   /* Temporary buffers for XOF output before rejection sampling */
   MLD_ALIGN uint8_t
-      buf[4][MLD_ALIGN_UP(POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES)];
+      buf[4][MLD_ALIGN_UP(MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES)];
 
   /* Tracks the number of coefficients we have already sampled */
   unsigned ctr[4];
@@ -673,12 +674,12 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
   mld_xof128_x4_absorb(&state, seed, MLDSA_SEEDBYTES + 2);
 
   /*
-   * Initially, squeeze heuristic number of POLY_UNIFORM_NBLOCKS.
+   * Initially, squeeze heuristic number of MLD_POLY_UNIFORM_NBLOCKS.
    * This should generate the matrix entries with high probability.
    */
 
-  mld_xof128_x4_squeezeblocks(buf, POLY_UNIFORM_NBLOCKS, &state);
-  buflen = POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES;
+  mld_xof128_x4_squeezeblocks(buf, MLD_POLY_UNIFORM_NBLOCKS, &state);
+  buflen = MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES;
   ctr[0] = mld_rej_uniform(vec0->coeffs, MLDSA_N, 0, buf[0], buflen);
   ctr[1] = mld_rej_uniform(vec1->coeffs, MLDSA_N, 0, buf[1], buflen);
   ctr[2] = mld_rej_uniform(vec2->coeffs, MLDSA_N, 0, buf[2], buflen);
@@ -688,7 +689,7 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
    * So long as not all matrix entries have been generated, squeeze
    * one more block a time until we're done.
    */
-  buflen = STREAM128_BLOCKBYTES;
+  buflen = MLD_STREAM128_BLOCKBYTES;
   while (ctr[0] < MLDSA_N || ctr[1] < MLDSA_N || ctr[2] < MLDSA_N ||
          ctr[3] < MLDSA_N)
   __loop__(
@@ -878,15 +879,16 @@ void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 MLD_STATIC_TESTABLE uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(0 <= B && B <= MLDSA_Q - REDUCE32_RANGE_MAX)
-  requires(array_bound(a->coeffs, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))
+  requires(0 <= B && B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX)
+  requires(array_bound(a->coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX))
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
   ensures((return_value == 0) == array_abs_bound(a->coeffs, 0, MLDSA_N, B))
 )
 {
   unsigned int i;
   uint32_t t = 0;
-  mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
+  mld_assert_bound(a->coeffs, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                   MLD_REDUCE32_RANGE_MAX);
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
@@ -895,8 +897,8 @@ __contract__(
   )
   {
     /*
-     * Since we know that -REDUCE32_RANGE_MAX <= a < REDUCE32_RANGE_MAX,
-     * and B <= MLDSA_Q - REDUCE32_RANGE_MAX, to check if
+     * Since we know that -MLD_REDUCE32_RANGE_MAX <= a < MLD_REDUCE32_RANGE_MAX,
+     * and B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX, to check if
      * -B < (a mod± MLDSA_Q) < B, it suffices to check if -B < a < B.
      *
      * We prove this to be true using the following CBMC assertions.
@@ -925,7 +927,7 @@ __contract__(
  * coefficient itself must remain secret).
  * We instead perform everything in constant-time.
  * Also it is sufficient to check that it is smaller than
- * MLDSA_Q - REDUCE32_RANGE_MAX > (MLDSA_Q - 1) / 8).
+ * MLDSA_Q - MLD_REDUCE32_RANGE_MAX > (MLDSA_Q - 1) / 8).
  */
 MLD_INTERNAL_API
 uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
@@ -933,7 +935,8 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
   int ret;
   int success;
-  mld_assert_bound(a->coeffs, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX);
+  mld_assert_bound(a->coeffs, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
+                   MLD_REDUCE32_RANGE_MAX);
   /* The native backend returns 0 if all coefficients are within the bound,
    * 1 if at least one coefficient exceeds the bound, and
    * -1 (MLD_NATIVE_FUNC_FALLBACK) if the platform does not have the
@@ -965,4 +968,4 @@ MLD_EMPTY_CU(mld_poly)
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef POLY_UNIFORM_NBLOCKS
+#undef MLD_POLY_UNIFORM_NBLOCKS

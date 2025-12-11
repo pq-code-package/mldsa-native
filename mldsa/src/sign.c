@@ -396,7 +396,7 @@ __contract__(
 /* type-safety. Note that FIPS204 explicitly allows an upper-    */
 /* bound this loop of 814 (< (UINT16_MAX - L)/L) - see           */
 /* @[FIPS204, Appendix C].                                        */
-#define NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
+#define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
  * Name:        attempt_signature_generation
@@ -434,7 +434,7 @@ __contract__(
   requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
   requires(memory_no_alias(s2, sizeof(mld_polyveck)))
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
-  requires(nonce <= NONCE_UB)
+  requires(nonce <= MLD_NONCE_UB)
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
                                          array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
@@ -633,7 +633,7 @@ int crypto_sign_signature_internal(
   while (1)
   __loop__(
     assigns(nonce, result, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
-    invariant(nonce <= NONCE_UB)
+    invariant(nonce <= MLD_NONCE_UB)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
     /* loop. We can therefore re-assert their bounds here as part of the     */
@@ -652,7 +652,7 @@ int crypto_sign_signature_internal(
     /* values to provide predictable termination and results in that case */
     /* Checking here also means that incrementing nonce below can also    */
     /* be proven to be type-safe.                                         */
-    if (nonce == NONCE_UB)
+    if (nonce == MLD_NONCE_UB)
     {
       /* To be on the safe-side, we zeroize the signature buffer.
        * Note that *siglen == 0 and result == -1 by default, so we
@@ -1247,5 +1247,5 @@ int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 #undef mld_H
 #undef mld_attempt_signature_generation
 #undef mld_compute_t0_t1_tr_from_sk_components
-#undef NONCE_UB
+#undef MLD_NONCE_UB
 #undef MLD_PRE_HASH_OID_LEN

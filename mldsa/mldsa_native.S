@@ -381,14 +381,14 @@
 /* mldsa/src/randombytes.h */
 #undef MLD_RANDOMBYTES_H
 /* mldsa/src/reduce.h */
+#undef MLD_MONT
+#undef MLD_REDUCE32_DOMAIN_MAX
+#undef MLD_REDUCE32_RANGE_MAX
 #undef MLD_REDUCE_H
-#undef MONT
-#undef REDUCE32_DOMAIN_MAX
-#undef REDUCE32_RANGE_MAX
 /* mldsa/src/symmetric.h */
+#undef MLD_STREAM128_BLOCKBYTES
+#undef MLD_STREAM256_BLOCKBYTES
 #undef MLD_SYMMETRIC_H
-#undef STREAM128_BLOCKBYTES
-#undef STREAM256_BLOCKBYTES
 #undef mld_xof128_absorb_once
 #undef mld_xof128_ctx
 #undef mld_xof128_init

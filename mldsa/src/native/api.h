@@ -54,7 +54,7 @@
  *
  * NOTE: This is the same bound as in reduce.h and has to be kept
  * in sync. */
-/* check-magic: 6283009 == (REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
+/* check-magic: 6283009 == (MLD_REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
 #define REDUCE32_RANGE_MAX 6283009
 /*
  * This is the C<->native interface allowing for the drop-in of
@@ -400,7 +400,7 @@ __contract__(
  *              - int32_t B: norm bound
  *
  * Returns 0 if the infinity norm is strictly smaller than B, and 1
- * otherwise. B must not be larger than MLDSA_Q - REDUCE32_RANGE_MAX.
+ * otherwise. B must not be larger than MLDSA_Q - MLD_REDUCE32_RANGE_MAX.
  **************************************************/
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 __contract__(
