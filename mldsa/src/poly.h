@@ -8,9 +8,13 @@
 #include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
-#include "ntt.h"
 #include "reduce.h"
 #include "rounding.h"
+
+/* Absolute exclusive upper bound for the output of the forward NTT */
+#define MLD_NTT_BOUND (9 * MLDSA_Q)
+/* Absolute exclusive upper bound for the output of the inverse NTT*/
+#define MLD_INTT_BOUND MLDSA_Q
 
 typedef struct
 {

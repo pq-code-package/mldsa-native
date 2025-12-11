@@ -84,7 +84,6 @@ source code and documentation.
   - [mldsa/src/ct.h](mldsa/src/ct.h)
   - [mldsa/src/fips202/fips202.c](mldsa/src/fips202/fips202.c)
   - [mldsa/src/fips202/fips202x4.c](mldsa/src/fips202/fips202x4.c)
-  - [mldsa/src/ntt.h](mldsa/src/ntt.h)
   - [mldsa/src/poly.c](mldsa/src/poly.c)
   - [mldsa/src/poly_kl.c](mldsa/src/poly_kl.c)
   - [mldsa/src/polyvec.c](mldsa/src/polyvec.c)
@@ -189,7 +188,6 @@ source code and documentation.
 * URL: https://github.com/pq-crystals/dilithium/tree/master/ref
 * Referenced from:
   - [README.md](README.md)
-  - [mldsa/src/ntt.c](mldsa/src/ntt.c)
   - [mldsa/src/poly.c](mldsa/src/poly.c)
   - [mldsa/src/poly_kl.c](mldsa/src/poly_kl.c)
 

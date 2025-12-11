@@ -1,7 +1,7 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "ntt.h"
+#include "poly.h"
 
 int32_t mld_fqscale(int32_t a);
 void harness(void)

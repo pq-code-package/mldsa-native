@@ -61,7 +61,6 @@
 
 #include "src/ct.c"
 #include "src/debug.c"
-#include "src/ntt.c"
 #include "src/packing.c"
 #include "src/poly.c"
 #include "src/poly_kl.c"
@@ -355,13 +354,9 @@
 #undef mld_assert_bound_2d
 #undef mld_debug_check_assert
 #undef mld_debug_check_bounds
-/* mldsa/src/ntt.h */
+/* mldsa/src/poly.h */
 #undef MLD_INTT_BOUND
 #undef MLD_NTT_BOUND
-#undef MLD_NTT_H
-#undef mld_invntt_tomont
-#undef mld_ntt
-/* mldsa/src/poly.h */
 #undef MLD_POLY_H
 #undef mld_poly_add
 #undef mld_poly_caddq
