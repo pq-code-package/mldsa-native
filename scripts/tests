@@ -198,19 +198,19 @@ class TEST_TYPES(Enum):
     KAT = 3
     BENCH_COMPONENTS = 4
     ACVP = 5
-    STACK = 6
-    SIZE = 7
-    BASIC = 8
-    BRING_YOUR_OWN_FIPS202 = 9
+    BRING_YOUR_OWN_FIPS202 = 6
+    BRING_YOUR_OWN_FIPS202_STATIC = 7
+    CUSTOM_BACKEND = 8
+    BASIC = 9
     MONOLITHIC_BUILD = 10
     MONOLITHIC_BUILD_MULTILEVEL = 11
-    BASIC_DETERMINISTIC = 12
-    BRING_YOUR_OWN_FIPS202_STATIC = 13
-    MONOLITHIC_BUILD_NATIVE = 14
-    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 15
-    CUSTOM_BACKEND = 16
-    MULTILEVEL_BUILD = 17
-    MULTILEVEL_BUILD_NATIVE = 18
+    MULTILEVEL_BUILD = 12
+    MULTILEVEL_BUILD_NATIVE = 13
+    MONOLITHIC_BUILD_MULTILEVEL_NATIVE = 14
+    MONOLITHIC_BUILD_NATIVE = 15
+    STACK = 16
+    SIZE = 17
+    BASIC_DETERMINISTIC = 18
     UNIT = 19
 
     def is_benchmark(self):
@@ -222,17 +222,17 @@ class TEST_TYPES(Enum):
     @staticmethod
     def examples():
         return [
-            TEST_TYPES.BASIC,
-            TEST_TYPES.BASIC_DETERMINISTIC,
             TEST_TYPES.BRING_YOUR_OWN_FIPS202,
-            TEST_TYPES.MONOLITHIC_BUILD,
-            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
             TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC,
-            TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
-            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.CUSTOM_BACKEND,
+            TEST_TYPES.BASIC,
+            TEST_TYPES.MONOLITHIC_BUILD,
+            TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
+            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
+            TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE,
             TEST_TYPES.MULTILEVEL_BUILD,
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
+            TEST_TYPES.BASIC_DETERMINISTIC,
         ]
 
     @staticmethod
@@ -260,52 +260,52 @@ class TEST_TYPES(Enum):
             return "ACVP Test"
         if self == TEST_TYPES.STACK:
             return "Stack Usage Test"
-        if self == TEST_TYPES.SIZE:
-            return "Measurement Code Size"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "Example (Bring-Your-Own-FIPS202)"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
+            return "Example (Bring-Your-Own-FIPS202, static)"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
             return "Example (mldsa-native as code package)"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "Example (mldsa-native as code package without randombytes() implementation)"
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
-            return "Example (bring your own FIPS-202 implementation)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
+            return "Example (monobuild, native)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return "Example (monobuild, multilevel)"
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
-            return "Example (bring your own FIPS-202, static)"
-        if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
-            return "Example (monobuild with native)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
-            return "Example (monobuild, multilevel with native)"
-        if self == TEST_TYPES.CUSTOM_BACKEND:
-            return "Example (Custom Backend)"
+            return "Example (monobuild, multilevel, native)"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "Example (multilevel build)"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return "Example (multilevel build, native)"
+        if self == TEST_TYPES.SIZE:
+            return "Measurement Code Size"
         if self == TEST_TYPES.UNIT:
             return "Unit Test"
 
     def make_dir(self):
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return "examples/bring_your_own_fips202"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
+            return "examples/bring_your_own_fips202_static"
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
             return "examples/basic"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "examples/basic_deterministic"
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
-            return "examples/bring_your_own_fips202"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
-            return "examples/monolithic_build_multilevel"
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
-            return "examples/bring_your_own_fips202_static"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
             return "examples/monolithic_build_native"
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
+            return "examples/monolithic_build_multilevel"
         if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
             return "examples/monolithic_build_multilevel_native"
-        if self == TEST_TYPES.CUSTOM_BACKEND:
-            return "examples/custom_backend"
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return "examples/multilevel_build"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
@@ -325,30 +325,30 @@ class TEST_TYPES(Enum):
             return "acvp"
         if self == TEST_TYPES.STACK:
             return "stack"
-        if self == TEST_TYPES.SIZE:
-            return "size"
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
+            return ""
+        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
+            return ""
+        if self == TEST_TYPES.CUSTOM_BACKEND:
+            return ""
         if self == TEST_TYPES.BASIC:
             return ""
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return ""
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
-            return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
-            return ""
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
-            return ""
-        if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
             return ""
-        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL:
             return ""
-        if self == TEST_TYPES.CUSTOM_BACKEND:
+        if self == TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL_NATIVE:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return ""
+        if self == TEST_TYPES.SIZE:
+            return "size"
         if self == TEST_TYPES.UNIT:
             return "unit"
 
@@ -893,8 +893,6 @@ class Tests:
         def run_cbmc(mldsa_parameter_set):
             all_proofs = list_proofs()
             proofs = all_proofs
-            scheme = SCHEME.from_mode(mldsa_parameter_set)
-            log = logger(f"Run CBMC", scheme, None, None)
             if self.args.start_with is not None:
                 try:
                     idx = proofs.index(self.args.start_with)
@@ -946,18 +944,27 @@ class Tests:
 
     def hol_light(self):
 
-        def list_proofs():
-            cmd_str = ["./proofs/hol_light/x86_64/list_proofs.sh"]
+        if platform.machine().lower() in ["arm64", "aarch64"]:
+            # TODO: Skip HOL-Light proofs on arm64/aarch64 until the first proof is added
+            # arm_or_x86 = "arm"
+            return
+        elif platform.machine().lower() in ["x86_64"]:
+            arm_or_x86 = "x86"
+        else:
+            return
+
+        def list_proofs(arm_or_x86):
+            cmd_str = ["./proofs/hol_light/" + arm_or_x86 + "/list_proofs.sh"]
             p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
             proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
             return list(proofs)
 
         if self.args.list_functions:
-            for p in list_proofs():
+            for p in list_proofs(arm_or_x86):
                 print(p)
             exit(0)
 
-        def run_hol_light_single_step(proofs):
+        def run_hol_light_single_step(proofs, arm_or_x86):
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
                 log = logger(f"HOL_LIGHT ({i+1}/{num_proofs})", None, None, None)
@@ -965,7 +972,7 @@ class Tests:
                 start = time.time()
                 proof_bin = f"mldsa/{func}.native"
                 proof_target = f"mldsa/{func}.correct"
-                proof_dir = "proofs/hol_light/x86_64"
+                proof_dir = "proofs/hol_light/" + arm_or_x86
                 # Remove intermediate proof files to force-rerun
                 try:
                     os.remove(os.path.join(proof_dir, proof_bin))
@@ -978,7 +985,7 @@ class Tests:
                         f"mldsa/{func}.correct",
                     ]
                     + self.make_j(),
-                    cwd="proofs/hol_light/x86_64",
+                    cwd="proofs/hol_light/" + arm_or_x86,
                     env=os.environ.copy(),
                     capture_output=(self.args.verbose is False),
                 )
@@ -993,11 +1000,11 @@ class Tests:
                 else:
                     log.info(f"   SUCCESS (after {dur}s)")
 
-        proofs = list_proofs()
+        proofs = list_proofs(arm_or_x86)
         if self.args.proof is not None:
             proofs = self.args.proof
 
-        run_hol_light_single_step(proofs)
+        run_hol_light_single_step(proofs, arm_or_x86)
         self.check_fail()
 
 
@@ -1149,6 +1156,7 @@ def cli():
         dest="examples",
         help="Do not run examples",
     )
+
     all_parser.add_argument(
         "--exclude-example",
         help="Exclude specific examples from running (can be used multiple times)",
@@ -1204,14 +1212,14 @@ def cli():
         help="Explicitly list the examples to run; can be called multiple times",
         choices=[
             "bring_your_own_fips202",
+            "bring_your_own_fips202_static",
+            "custom_backend",
             "basic",
             "basic_deterministic",
             "monolithic_build",
-            "monolithic_build_multilevel",
-            "bring_your_own_fips202_static",
             "monolithic_build_native",
+            "monolithic_build_multilevel",
             "monolithic_build_multilevel_native",
-            "custom_backend",
             "multilevel_build",
             "multilevel_build_native",
         ],
@@ -1326,7 +1334,7 @@ def cli():
     # hol_light arguments
     hol_light_parser = cmd_subparsers.add_parser(
         "hol_light",
-        help="Run the HOL Light proofs for x86_64 assembly functions",
+        help="Run the HOL_LIGHT proofs for all parameter sets",
         parents=[common_parser],
     )
 
@@ -1334,14 +1342,14 @@ def cli():
         "-p",
         "--proof",
         nargs="+",
-        help="Space separated list of functions for which to run the HOL Light proofs.",
+        help="Space separated list of functions for which to run the HOL_LIGHT proofs.",
         default=None,
     )
 
     hol_light_parser.add_argument(
         "-l",
         "--list-functions",
-        help="Don't run any proofs, but list all functions for which HOL Light proofs are available",
+        help="Don't run any proofs, but list all functions for which HOL_LIGHT proofs are available",
         action="store_true",
         default=False,
     )
@@ -1352,7 +1360,6 @@ def cli():
         help="Run the functional tests for all parameter sets",
         parents=[common_parser],
     )
-
     func_parser.add_argument(
         "--check-namespace",
         help="Check namespacing of binaries",
