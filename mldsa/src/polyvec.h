@@ -216,6 +216,7 @@ __contract__(
  * Returns 0 if norm of all polynomials is strictly smaller than B <=
  * (MLDSA_Q-1)/8 and 0xFFFFFFFF otherwise.
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 MLD_INTERNAL_API
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t B)
 __contract__(
@@ -423,6 +424,7 @@ __contract__(
  * Returns 0 if norm of all polynomials are strictly smaller than B <=
  *(MLDSA_Q-1)/8 and 0xFFFFFFFF otherwise.
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 MLD_INTERNAL_API
 uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t B)
 __contract__(
@@ -512,6 +514,7 @@ __contract__(
  *
  * Returns number of 1 bits.
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 MLD_INTERNAL_API
 unsigned int mld_polyveck_make_hint(mld_polyveck *h, const mld_polyveck *v0,
                                     const mld_polyveck *v1)

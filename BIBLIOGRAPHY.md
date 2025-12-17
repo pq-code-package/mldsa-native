@@ -39,6 +39,7 @@ source code and documentation.
   - [mldsa/mldsa_native_config.h](mldsa/mldsa_native_config.h)
   - [mldsa/src/sign.c](mldsa/src/sign.c)
   - [test/break_pct_config.h](test/break_pct_config.h)
+  - [test/custom_heap_alloc_config.h](test/custom_heap_alloc_config.h)
   - [test/custom_memcpy_config.h](test/custom_memcpy_config.h)
   - [test/custom_memset_config.h](test/custom_memset_config.h)
   - [test/custom_native_capability_config_0.h](test/custom_native_capability_config_0.h)

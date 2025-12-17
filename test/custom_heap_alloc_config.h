@@ -11,11 +11,6 @@
  *   Validation Program
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
- *
- * - [FIPS204]
- *   FIPS 204 Module-Lattice-Based Digital Signature Standard
- *   National Institute of Standards and Technology
- *   https://csrc.nist.gov/pubs/fips/204/final
  */
 
 /*
@@ -25,17 +20,11 @@
  */
 
 /*
- * Test configuration: Multilevel monolithic build config with native backends
+ * Test configuration: Test configuration with heap-based allocation
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
- *   - MLD_CONFIG_MULTILEVEL_BUILD
- *   - MLD_CONFIG_NAMESPACE_PREFIX
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
- *   - MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
- *   - MLD_CONFIG_INTERNAL_API_QUALIFIER
- *   - MLD_CONFIG_EXTERNAL_API_QUALIFIER
- *   - MLD_CONFIG_CUSTOM_RANDOMBYTES
+ *   - MLD_CONFIG_CUSTOM_ALLOC_FREE
  */
 
 
@@ -79,7 +68,6 @@
  *              on the command line.
  *
  *****************************************************************************/
-/* No need to set this -- we _are_ already in a custom config */
 /* #define MLD_CONFIG_FILE "mldsa_native_config.h" */
 
 /******************************************************************************
@@ -93,7 +81,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_NAMESPACE_PREFIX mldsa
+#if !defined(MLD_CONFIG_NAMESPACE_PREFIX)
+#define MLD_CONFIG_NAMESPACE_PREFIX MLD_DEFAULT_NAMESPACE_PREFIX
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_MULTILEVEL_BUILD
@@ -114,7 +104,7 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_MULTILEVEL_BUILD
+/* #define MLD_CONFIG_MULTILEVEL_BUILD */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_EXTERNAL_API_QUALIFIER
@@ -129,7 +119,7 @@
  *              even mldsa-native's public API can be marked `static`.
  *
  *****************************************************************************/
-#define MLD_CONFIG_EXTERNAL_API_QUALIFIER static
+/* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
@@ -265,7 +255,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_ARITH_BACKEND_FILE
@@ -306,7 +298,9 @@
  *              This can also be set using CFLAGS.
  *
  *****************************************************************************/
-#define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+#if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
+/* #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
+#endif
 
 /******************************************************************************
  * Name:        MLD_CONFIG_FIPS202_BACKEND_FILE
@@ -358,109 +352,6 @@
 /* #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_ZEROIZE
- *
- * Description: In compliance with @[FIPS204, Section 3.6.3], mldsa-native,
- *              zeroizes intermediate stack buffers before returning from
- *              function calls.
- *
- *              Set this option and define `mld_zeroize_native` if you want to
- *              use a custom method to zeroize intermediate stack buffers.
- *              The default implementation uses SecureZeroMemory on Windows
- *              and a memset + compiler barrier otherwise. If neither of those
- *              is available on the target platform, compilation will fail,
- *              and you will need to use MLD_CONFIG_CUSTOM_ZEROIZE to provide
- *              a custom implementation of `mld_zeroize_native()`.
- *
- *              WARNING:
- *              The explicit stack zeroization conducted by mldsa-native
- *              reduces the likelihood of data leaking on the stack, but
- *              does not eliminate it! The C standard makes no guarantee about
- *              where a compiler allocates structures and whether/where it makes
- *              copies of them. Also, in addition to entire structures, there
- *              may also be potentially exploitable leakage of individual values
- *              on the stack.
- *
- *              If you need bullet-proof zeroization of the stack, you need to
- *              consider additional measures instead of what this feature
- *              provides. In this case, you can set mld_zeroize_native to a
- *              no-op.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_ZEROIZE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/src.h"
-   static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_RANDOMBYTES
- *
- * Description: mldsa-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
- *              consumer.
- *
- *              If this option is not set, mldsa-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
- *
- *              Set this option and define `mld_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
- *
- *****************************************************************************/
-/* Even though we use the default randombytes signature here, registering it
- * as a custom implementation avoids double-declaration of randombytes via
- * mldsa/src/randombytes.h and test_only_rng/notrandombytes.h: The former is by
- * default included by mldsa-native, and the latter is needed for this example
- * since we rely on the additional randombytes_reset() API. */
-
-#define MLD_CONFIG_CUSTOM_RANDOMBYTES
-#if !defined(__ASSEMBLER__)
-#include <stdint.h>
-#include "src/sys.h"
-#include "test_only_rng/notrandombytes.h"
-static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
-{
-  randombytes(ptr, len);
-}
-#endif /* !__ASSEMBLER__ */
-
-
-/******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
- *
- * Description: mldsa-native backends may rely on specific hardware features.
- *              Those backends will only be included in an mldsa-native build
- *              if support for the respective features is enabled at
- *              compile-time. However, when building for a heteroneous set
- *              of CPUs to run the resulting binary/library on, feature
- *              detection at _runtime_ is needed to decided whether a backend
- *              can be used or not.
- *
- *              Set this option and define `mld_sys_check_capability` if you
- *              want to use a custom method to dispatch between implementations.
- *
- *              If this option is not set, mldsa-native uses compile-time
- *              feature detection only to decide which backend to use.
- *
- *              If you compile mldsa-native on a system with different
- *              capabilities than the system that the resulting binary/library
- *              will be run on, you must use this option.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
-   static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
-   {
-       ... your implementation ...
-   }
-*/
-
-/******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
  *
  * Description: Set this option and define `MLD_CUSTOM_ALLOC` and
@@ -495,14 +386,68 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
  *              code will handle this case and invoke MLD_CUSTOM_FREE.
  *
  *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_ALLOC_FREE
+#define MLD_CONFIG_CUSTOM_ALLOC_FREE
+#if !defined(__ASSEMBLER__)
+#include <stdlib.h>
+#define MLD_CUSTOM_ALLOC(v, T, N) \
+  T *v = (T *)aligned_alloc(MLD_DEFAULT_ALIGN, MLD_ALIGN_UP(sizeof(T) * (N)))
+#define MLD_CUSTOM_FREE(v, T, N) free(v)
+#endif /* !__ASSEMBLER__ */
+
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_RANDOMBYTES
+ *
+ * Description: mldsa-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mldsa-native expects a function
+ *              void randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mld_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
    #if !defined(__ASSEMBLER__)
-   #include <stdlib.h>
-   #define MLD_CUSTOM_ALLOC(v, T, N)                              \
-     T* (v) = (T *)aligned_alloc(MLD_DEFAULT_ALIGN,               \
-                                 MLD_ALIGN_UP(sizeof(T) * (N)))
-   #define MLD_CUSTOM_FREE(v, T, N) free(v)
+   #include <stdint.h>
+   #include "src/src.h"
+   static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
+   {
+       ... your implementation ...
+   }
    #endif
+*/
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+ *
+ * Description: mldsa-native backends may rely on specific hardware features.
+ *              Those backends will only be included in an mldsa-native build
+ *              if support for the respective features is enabled at
+ *              compile-time. However, when building for a heteroneous set
+ *              of CPUs to run the resulting binary/library on, feature
+ *              detection at _runtime_ is needed to decided whether a backend
+ *              can be used or not.
+ *
+ *              Set this option and define `mld_sys_check_capability` if you
+ *              want to use a custom method to dispatch between implementations.
+ *
+ *              If this option is not set, mldsa-native uses compile-time
+ *              feature detection only to decide which backend to use.
+ *
+ *              If you compile mldsa-native on a system with different
+ *              capabilities than the system that the resulting binary/library
+ *              will be run on, you must use this option.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+   static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+   {
+       ... your implementation ...
+   }
 */
 
 /******************************************************************************
@@ -561,7 +506,7 @@ static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
  *              in which case this option can be set to `static`.
  *
  *****************************************************************************/
-#define MLD_CONFIG_INTERNAL_API_QUALIFIER static
+/* #define MLD_CONFIG_INTERNAL_API_QUALIFIER */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CT_TESTING_ENABLED

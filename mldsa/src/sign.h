@@ -96,7 +96,11 @@
  *              - uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:   output private key
  *              - const uint8_t seed[MLDSA_SEEDBYTES]: input random seed
  *
- * Returns 0 (success) or -1 (PCT failure)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
+ *                  if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
  * Specification: Implements @[FIPS204 Algorithm 6 (ML-DSA.KeyGen_internal)]
  *
@@ -112,7 +116,8 @@ __contract__(
   requires(memory_no_alias(seed, MLDSA_SEEDBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
+          return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -125,7 +130,11 @@ __contract__(
  * Arguments:   - uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]: output public key
  *              - uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]: output private key
  *
- * Returns 0 (success) or -1 (PCT failure)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
+ *                  if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
  * Specification: Implements @[FIPS204 Algorithm 1 (ML-DSA.KeyGen)]
  *
@@ -139,7 +148,8 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
+          return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -161,14 +171,17 @@ __contract__(
  *              - int externalmu:            indicates input message m is
  *                                           processed as mu
  *
- * Returns 0 (success) or -1 (indicating nonce exhaustion)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
  *
- * If the returned value is -1, then the values of *sig and
+ * If the returned value is non-zero, then the values of *sig and
  * *siglen should not be referenced.
  *
  * Reference: This code differs from the reference implementation
  *            in that it adds an explicit check for nonce exhaustion
- *            and can return -1 in that case.
+ *            and can return MLD_ERR_FAIL in that case.
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -189,8 +202,10 @@ __contract__(
            (externalmu == 1 && mlen == MLDSA_CRHBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
-  ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          (return_value == -1 && *siglen == 0))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
+          return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 ==> *siglen == MLDSA_CRYPTO_BYTES)
+  ensures(return_value != 0 ==> *siglen == 0)
 );
 
 /*************************************************
@@ -212,7 +227,10 @@ __contract__(
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                           bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)].
  *
@@ -234,7 +252,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          (return_value == -1 && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
 
 /*************************************************
@@ -252,7 +270,10 @@ __contract__(
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                           bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu
  *                variant)]
@@ -271,7 +292,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          (return_value == -1 && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
 
 /*************************************************
@@ -290,7 +311,11 @@ __contract__(
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                    bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhausted)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
+ *
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -308,7 +333,7 @@ __contract__(
   assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
   assigns(object_whole(smlen))
   ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
-          (return_value == -1))
+          (return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY))
 );
 
 /*************************************************
@@ -327,7 +352,10 @@ __contract__(
  *              - int externalmu:     indicates input message m is processed as
  *                                    mu
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 8 (ML-DSA.Verify_internal)]
  *
@@ -348,7 +376,7 @@ __contract__(
   requires(externalmu == 0 || (externalmu == 1 && mlen == MLDSA_CRHBYTES))
   requires(externalmu == 1 || prelen == 0 || memory_no_alias(pre, prelen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -366,7 +394,10 @@ __contract__(
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify)]
  *
@@ -384,7 +415,7 @@ __contract__(
   requires(memory_no_alias(m, mlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -399,7 +430,10 @@ __contract__(
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify external mu
  *                variant)]
@@ -415,7 +449,7 @@ __contract__(
   requires(memory_no_alias(sig, siglen))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -433,7 +467,11 @@ __contract__(
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
  *
- * Returns 0 if signed message could be verified correctly and -1 otherwise
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
+ *
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -450,7 +488,7 @@ __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   assigns(memory_slice(m, smlen))
   assigns(memory_slice(mlen, sizeof(size_t)))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -473,6 +511,11 @@ __contract__(
  *              - int hashalg:            hash algorithm constant (one of
  *                                        MLD_PREHASH_*)
  *
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
+ *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
@@ -481,9 +524,6 @@ __contract__(
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_signature_pre_hash_shake256.
- *
- * Returns 0 (success) or -1 (context string too long OR invalid phlen OR nonce
- * exhaustion)
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -504,7 +544,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          (return_value == -1 && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
 
 /*************************************************
@@ -524,6 +564,11 @@ __contract__(
  *              - int hashalg:            hash algorithm constant (one of
  *                                        MLD_PREHASH_*)
  *
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
+ *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
@@ -532,8 +577,6 @@ __contract__(
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_verify_pre_hash_shake256.
- *
- * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -549,7 +592,7 @@ __contract__(
   requires(memory_no_alias(ph, phlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /*************************************************
@@ -572,7 +615,11 @@ __contract__(
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                    bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Other kinds of failure
+ *
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -593,7 +640,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          (return_value == -1 && *siglen == 0))
+          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
 
 /*************************************************
@@ -614,7 +661,11 @@ __contract__(
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
+ *
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -630,7 +681,7 @@ __contract__(
   requires(memory_no_alias(m, mlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 /* Maximum formatted domain separation message length:
@@ -699,9 +750,12 @@ __contract__(
  *
  * Arguments:   - uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]: output public key
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]: input secret
- *key
+ *                key
  *
- * Returns 0 on success, -1 if validation fails (invalid secret key)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Secret key validation failed
  *
  * Note: This function leaks whether the secret key is valid or invalid
  *       through its return value and timing.
@@ -714,6 +768,6 @@ __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == -1)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_SIGN_H */

@@ -460,6 +460,51 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
+ *
+ * Description: Set this option and define `MLD_CUSTOM_ALLOC` and
+ *              `MLD_CUSTOM_FREE` if you want to use custom allocation for
+ *              large local structures or buffers.
+ *
+ *              By default, all buffers/structures are allocated on the stack.
+ *              If this option is set, most of them will be allocated via
+ *              MLD_CUSTOM_ALLOC.
+ *
+ *              Parameters to MLD_CUSTOM_ALLOC:
+ *              - T* v: Target pointer to declare.
+ *              - T: Type of structure to be allocated
+ *              - N: Number of elements to be allocated.
+ *
+ *              Parameters to MLD_CUSTOM_FREE:
+ *              - T* v: Target pointer to free. May be NULL.
+ *              - T: Type of structure to be freed.
+ *              - N: Number of elements to be freed.
+ *
+ *              WARNING: This option is experimental!
+ *              Its scope, configuration and function/macro signatures may
+ *              change at any time. We expect a stable API for v2.
+ *
+ *              NOTE: Even if this option is set, some allocations further down
+ *              the call stack will still be made from the stack. Those will
+ *              likely be added to the scope of this option in the future.
+ *
+ *              NOTE: MLD_CUSTOM_ALLOC need not guarantee a successful
+ *              allocation nor include error handling. Upon failure, the
+ *              target pointer should simply be set to NULL. The calling
+ *              code will handle this case and invoke MLD_CUSTOM_FREE.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_ALLOC_FREE
+   #if !defined(__ASSEMBLER__)
+   #include <stdlib.h>
+   #define MLD_CUSTOM_ALLOC(v, T, N)                              \
+     T* (v) = (T *)aligned_alloc(MLD_DEFAULT_ALIGN,               \
+                                 MLD_ALIGN_UP(sizeof(T) * (N)))
+   #define MLD_CUSTOM_FREE(v, T, N) free(v)
+   #endif
+*/
+
+/******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_MEMCPY
  *
  * Description: Set this option and define `mld_memcpy` if you want to

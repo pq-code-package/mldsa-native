@@ -122,6 +122,14 @@
 #define MLDSA_PUBLICKEYBYTES(LVL) MLDSA_PUBLICKEYBYTES_(LVL)
 #define MLDSA_BYTES(LVL) MLDSA_BYTES_(LVL)
 
+/****************************** Error codes ***********************************/
+
+/* Generic failure condition */
+#define MLD_ERR_FAIL -1
+/* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
+ * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
+#define MLD_ERR_OUT_OF_MEMORY -2
+
 /****************************** Function API **********************************/
 
 #define MLD_API_CONCAT_(x, y) x##y
@@ -203,7 +211,12 @@
  *     - const uint8_t seed[MLDSA_SEEDBYTES]:
  *           input random seed
  *
- * Returns 0 (success) or -1 (PCT failure)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
+ *         if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
  * Specification: Implements @[FIPS204 Algorithm 6 (ML-DSA.KeyGen_internal)]
  *
@@ -228,7 +241,11 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *     - uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *           output private key
  *
- * Returns 0 (success) or -1 (PCT failure)
+ * Returns: - 0: Success
+ *          - MLD_ERR_FAIL: If MLD_CONFIG_KEYGEN_PCT is enabled and the
+ *              PCT check failed.
+ *          - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *              used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS204 Algorithm 1 (ML-DSA.KeyGen)]
  *
@@ -258,9 +275,13 @@ int MLD_API_NAMESPACE(keypair)(
  *                           bit-packed secret key
  *     - int externalmu:     indicates input message m is processed as mu
  *
- * Returns 0 (success) or -1 (indicating nonce exhaustion)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
  *
- * If the returned value is -1, then the values of *sig and
+ * If the returned value is non-zero, then the values of *sig and
  * *siglen should not be referenced.
  *
  * Reference: This code differs from the reference implementation
@@ -296,7 +317,11 @@ int MLD_API_NAMESPACE(signature_internal)(
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)]
  *
@@ -322,7 +347,11 @@ int MLD_API_NAMESPACE(signature)(
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                       bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu
  *                variant)]
@@ -354,7 +383,11 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhausted)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -379,7 +412,11 @@ int MLD_API_NAMESPACE(sign)(
  *                           bit-packed public key
  *     - int externalmu:     indicates input message m is processed as mu
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 8 (ML-DSA.Verify_internal)]
  *
@@ -408,7 +445,11 @@ int MLD_API_NAMESPACE(verify_internal)(
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify)]
  *
@@ -433,7 +474,11 @@ int MLD_API_NAMESPACE(verify)(
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Signature verification failed
  *
  * Specification: Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify external mu
  *                variant)]
@@ -461,7 +506,11 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
  *
- * Returns 0 if signed message could be verified correctly and -1 otherwise
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Signature verification failed
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -507,6 +556,12 @@ int MLD_API_NAMESPACE(open)(
  *                               bit-packed secret key
  *     - int hashalg:            hash algorithm constant (one of MLD_PREHASH_*)
  *
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
+ *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
@@ -515,9 +570,6 @@ int MLD_API_NAMESPACE(open)(
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_signature_pre_hash_shake256.
- *
- * Returns 0 (success) or -1 (context string too long OR invalid phlen OR nonce
- * exhaustion)
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -545,6 +597,11 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *                               bit-packed public key
  *     - int hashalg:            hash algorithm constant (one of MLD_PREHASH_*)
  *
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Signature verification failed
+ *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
@@ -553,8 +610,6 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *
  * Warning: This is an unstable API that may change in the future. If you need
  * a stable API use crypto_sign_verify_pre_hash_shake256.
- *
- * Returns 0 if signature could be verified correctly and -1 otherwise
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -585,7 +640,11 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed secret key
  *
- * Returns 0 (success) or -1 (context string too long OR nonce exhaustion)
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Other kinds of failure
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -613,7 +672,11 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
  *
- * Returns 0 if signature could be verified correctly and -1 otherwise
+ * Returns:
+ *     - 0: Success
+ *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_FAIL: Signature verification failed
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -678,7 +741,10 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
  * Arguments:   - uint8_t pk[CRYPTO_PUBLICKEYBYTES]: output public key
  *              - const uint8_t sk[CRYPTO_SECRETKEYBYTES]: input secret key
  *
- * Returns 0 on success, -1 if validation fails (invalid secret key)
+ * Returns:     - 0: Success
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *              - MLD_ERR_FAIL: Secret key validation failed
  *
  * Note: This function leaks whether the secret key is valid or invalid
  *       through its return value and timing.

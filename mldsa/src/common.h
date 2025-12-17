@@ -155,6 +155,65 @@
 #include <string.h>
 #define mld_memset memset
 #endif
+
+/* Allocation macros for large local structures
+ *
+ * MLD_ALLOC(v, T, N) declares T *v and attempts to point it to an T[N]
+ * MLD_FREE(v, T, N) zeroizes and frees the allocation
+ *
+ * Default implementation uses stack allocation.
+ * Can be overridden by setting the config option MLD_CONFIG_CUSTOM_ALLOC_FREE
+ * and defining MLD_CUSTOM_ALLOC and MLD_CUSTOM_FREE.
+ */
+#if defined(MLD_CONFIG_CUSTOM_ALLOC_FREE) != \
+    (defined(MLD_CUSTOM_ALLOC) && defined(MLD_CUSTOM_FREE))
+#error Bad configuration: MLD_CONFIG_CUSTOM_ALLOC_FREE must be set together with MLD_CUSTOM_ALLOC and MLD_CUSTOM_FREE
+#endif
+
+#if !defined(MLD_CONFIG_CUSTOM_ALLOC_FREE)
+/* Default: stack allocation */
+
+#define MLD_ALLOC(v, T, N)      \
+  MLD_ALIGN T mld_alloc_##v[N]; \
+  T *v = mld_alloc_##v
+
+/* TODO: This leads to a circular dependency between common and ct.h
+ * It just works out before we're at the end of the file, but it's still
+ * prone to issues in the future. */
+#include "ct.h"
+#define MLD_FREE(v, T, N)                              \
+  do                                                   \
+  {                                                    \
+    mld_zeroize(mld_alloc_##v, sizeof(mld_alloc_##v)); \
+    (v) = NULL;                                        \
+  } while (0)
+
+#else /* !MLD_CONFIG_CUSTOM_ALLOC_FREE */
+
+/* Custom allocation */
+
+#define MLD_ALLOC(v, T, N) MLD_CUSTOM_ALLOC(v, T, N)
+#define MLD_FREE(v, T, N)              \
+  do                                   \
+  {                                    \
+    if (v != NULL)                     \
+    {                                  \
+      mld_zeroize(v, sizeof(T) * (N)); \
+      MLD_CUSTOM_FREE(v, T, N);        \
+      v = NULL;                        \
+    }                                  \
+  } while (0)
+
+#endif /* MLD_CONFIG_CUSTOM_ALLOC_FREE */
+
+/****************************** Error codes ***********************************/
+
+/* Generic failure condition */
+#define MLD_ERR_FAIL -1
+/* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
+ * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
+#define MLD_ERR_OUT_OF_MEMORY -2
+
 #endif /* !__ASSEMBLER__ */
 
 /* Just in case we want to include mldsa_native.h, set the configuration
