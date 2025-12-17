@@ -40,8 +40,7 @@
 
         /* Parameters */
         a1_ptr          .req x0     // Output polynomial with coefficients c1
-        a0_ptr          .req x1     // Output polynomial with coefficients c0
-        a_ptr           .req x2     // Input polynomial
+        a0_ptr          .req x1     // Input/Output polynomial with coefficients c0
 
         count           .req x3
 
@@ -76,10 +75,10 @@ MLD_ASM_FN_SYMBOL(poly_decompose_32_asm)
         mov count, #(64/4)
 
 poly_decompose_32_loop:
-        ldr q1, [a_ptr, #1*16]
-        ldr q2, [a_ptr, #2*16]
-        ldr q3, [a_ptr, #3*16]
-        ldr q0, [a_ptr], #4*16
+        ldr q0, [a0_ptr, #0*16]
+        ldr q1, [a0_ptr, #1*16]
+        ldr q2, [a0_ptr, #2*16]
+        ldr q3, [a0_ptr, #3*16]
 
         decompose32 v5, v1, v24
         decompose32 v6, v2, v24
@@ -102,7 +101,6 @@ poly_decompose_32_loop:
 
         .unreq a1_ptr
         .unreq a0_ptr
-        .unreq a_ptr
         .unreq count
         .unreq q
         .unreq q_bound

@@ -447,7 +447,7 @@ __contract__(
   MLD_ALIGN uint8_t challenge_bytes[MLDSA_CTILDEBYTES];
   unsigned int n;
   mld_polyvecl y, z;
-  mld_polyveck w, w1, w0, h;
+  mld_polyveck w1, w0, h;
   mld_poly cp;
   uint32_t z_invalid, w0_invalid, h_invalid;
   int res;
@@ -458,13 +458,13 @@ __contract__(
   /* Matrix-vector multiplication */
   z = y;
   mld_polyvecl_ntt(&z);
-  mld_polyvec_matrix_pointwise_montgomery(&w, mat, &z);
-  mld_polyveck_reduce(&w);
-  mld_polyveck_invntt_tomont(&w);
+  mld_polyvec_matrix_pointwise_montgomery(&w0, mat, &z);
+  mld_polyveck_reduce(&w0);
+  mld_polyveck_invntt_tomont(&w0);
 
   /* Decompose w and call the random oracle */
-  mld_polyveck_caddq(&w);
-  mld_polyveck_decompose(&w1, &w0, &w);
+  mld_polyveck_caddq(&w0);
+  mld_polyveck_decompose(&w1, &w0);
   mld_polyveck_pack_w1(sig, &w1);
 
   mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
@@ -564,7 +564,6 @@ cleanup:
   mld_zeroize(challenge_bytes, MLDSA_CTILDEBYTES);
   mld_zeroize(&y, sizeof(y));
   mld_zeroize(&z, sizeof(z));
-  mld_zeroize(&w, sizeof(w));
   mld_zeroize(&w1, sizeof(w1));
   mld_zeroize(&w0, sizeof(w0));
   mld_zeroize(&h, sizeof(h));

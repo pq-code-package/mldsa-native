@@ -672,11 +672,10 @@ void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
 }
 
 MLD_INTERNAL_API
-void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0,
-                            const mld_polyveck *v)
+void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
 {
   unsigned int i;
-  mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound_2d(v0->vec, MLDSA_K, MLDSA_N, 0, MLDSA_Q);
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
@@ -686,9 +685,11 @@ void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0,
                      array_bound(v1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
     invariant(forall(k2, 0, i,
                      array_abs_bound(v0->vec[k2].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
+    invariant(forall(k3, i, MLDSA_K,
+                     array_bound(v0->vec[k3].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   )
   {
-    mld_poly_decompose(&v1->vec[i], &v0->vec[i], &v->vec[i]);
+    mld_poly_decompose(&v1->vec[i], &v0->vec[i]);
   }
 
   mld_assert_bound_2d(v1->vec, MLDSA_K, MLDSA_N, 0,

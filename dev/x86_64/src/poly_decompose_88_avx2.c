@@ -32,7 +32,13 @@
 #include "arith_native_x86_64.h"
 #include "consts.h"
 
-void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
+/*
+ * Reference: The reference implementation has the input polynomial as a
+ *            separate argument that may be aliased with either of the outputs.
+ *            Removing the aliasing eases CBMC proofs.
+ */
+
+void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0)
 {
   unsigned int i;
   __m256i f, f0, f1, t;
@@ -45,7 +51,7 @@ void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0, const __m256i *a)
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {
-    f = _mm256_load_si256(&a[i]);
+    f = _mm256_load_si256(&a0[i]);
 
     /* check-magic: 1488 == intdiv(2 * intdiv(MLDSA_Q - 1, 88), 128) */
     /*

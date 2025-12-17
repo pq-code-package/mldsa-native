@@ -475,20 +475,23 @@ __contract__(
  * to be standard representatives.
  *
  * Arguments:   - mld_polyveck *v1: pointer to output vector of polynomials with
- *                              coefficients a1
- *              - mld_polyveck *v0: pointer to output vector of polynomials with
- *                              coefficients a0
- *              - const mld_polyveck *v: pointer to input vector
+ *                                  coefficients a1
+ *              - mld_polyveck *v0: pointer to input/output vector of
+ *                                  polynomials with. Output polynomial has
+ *                                  coefficients a0
+ *
+ * Reference: The reference implementation has the input polynomial as a
+ *            separate argument that may be aliased with either of the outputs.
+ *            Removing the aliasing eases CBMC proofs.
+ *
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0,
-                            const mld_polyveck *v)
+void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
 __contract__(
   requires(memory_no_alias(v1,  sizeof(mld_polyveck)))
   requires(memory_no_alias(v0, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K,
-    array_bound(v->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+    array_bound(v0->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   assigns(memory_slice(v1, sizeof(mld_polyveck)))
   assigns(memory_slice(v0, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K,

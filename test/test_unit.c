@@ -36,7 +36,7 @@
 void mld_poly_ntt_c(mld_poly *a);
 void mld_poly_invntt_tomont_c(mld_poly *a);
 void mld_poly_caddq_c(mld_poly *a);
-void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0, const mld_poly *a);
+void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0);
 void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
@@ -247,8 +247,11 @@ static int test_poly_decompose_core(const mld_poly *input_poly,
 {
   mld_poly test_a1, test_a0, ref_a1, ref_a0;
 
-  mld_poly_decompose(&test_a1, &test_a0, input_poly);
-  mld_poly_decompose_c(&ref_a1, &ref_a0, input_poly);
+  mld_memcpy(&test_a0, input_poly, sizeof(mld_poly));
+  mld_memcpy(&ref_a0, input_poly, sizeof(mld_poly));
+
+  mld_poly_decompose(&test_a1, &test_a0);
+  mld_poly_decompose_c(&ref_a1, &ref_a0);
 
   CHECK(compare_i32_arrays(test_a1.coeffs, ref_a1.coeffs, MLDSA_N, test_name,
                            input_poly->coeffs));

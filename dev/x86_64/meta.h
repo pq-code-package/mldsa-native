@@ -131,25 +131,23 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   return (int)outlen;
 }
 
-static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0,
-                                                   const int32_t *a)
+static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_32_avx2((__m256i *)a1, (__m256i *)a0, (const __m256i *)a);
+  mld_poly_decompose_32_avx2((__m256i *)a1, (__m256i *)a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0,
-                                                   const int32_t *a)
+static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_88_avx2((__m256i *)a1, (__m256i *)a0, (const __m256i *)a);
+  mld_poly_decompose_88_avx2((__m256i *)a1, (__m256i *)a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 

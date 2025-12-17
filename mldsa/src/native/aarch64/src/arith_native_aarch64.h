@@ -68,10 +68,10 @@ unsigned mld_rej_uniform_eta4_asm(int32_t *r, const uint8_t *buf,
                                   unsigned buflen, const uint8_t *table);
 
 #define mld_poly_decompose_32_asm MLD_NAMESPACE(poly_decompose_32_asm)
-void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0, const int32_t *a);
+void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0);
 
 #define mld_poly_decompose_88_asm MLD_NAMESPACE(poly_decompose_88_asm)
-void mld_poly_decompose_88_asm(int32_t *a1, int32_t *a0, const int32_t *a);
+void mld_poly_decompose_88_asm(int32_t *a1, int32_t *a0);
 
 #define mld_poly_caddq_asm MLD_NAMESPACE(poly_caddq_asm)
 void mld_poly_caddq_asm(int32_t *a);
