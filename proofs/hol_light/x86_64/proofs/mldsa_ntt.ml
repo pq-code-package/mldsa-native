@@ -4548,6 +4548,9 @@ let MLDSA_NTT_CORRECT = prove
 (* Subroutine correctness theorems.                                          *)
 (* ------------------------------------------------------------------------- *)
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mldsa/src/native/x86_64/src/arith_native_x86_64.h *)
+
 let MLDSA_NTT_NOIBT_SUBROUTINE_CORRECT = prove
  (`!a zetas (zetas_list:int32 list) x pc stackpointer returnaddress.
     aligned 32 a /\

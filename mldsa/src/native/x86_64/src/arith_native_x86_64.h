@@ -33,7 +33,18 @@
 extern const uint8_t mld_rej_uniform_table[256][8];
 
 #define mld_ntt_avx2 MLD_NAMESPACE(ntt_avx2)
-void mld_ntt_avx2(int32_t *r, const int32_t *mld_qdata);
+void mld_ntt_avx2(int32_t *r, const int32_t *qdata)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_ntt.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  requires(qdata == mld_qdata)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: off */
+  ensures(array_abs_bound(r, 0, MLDSA_N, 42035262))
+  /* check-magic: on */
+);
 
 #define mld_invntt_avx2 MLD_NAMESPACE(invntt_avx2)
 void mld_invntt_avx2(int32_t *r, const int32_t *mld_qdata);
