@@ -37,7 +37,7 @@
  *            separate argument that may be aliased with either of the outputs.
  *            Removing the aliasing eases CBMC proofs.
  */
-void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0)
+void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0)
 {
   unsigned int i;
   __m256i f, f0, f1, t;
@@ -50,7 +50,7 @@ void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0)
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {
-    f = _mm256_load_si256(&a0[i]);
+    f = _mm256_load_si256((__m256i *)&a0[8 * i]);
 
     /* check-magic: 4092 == intdiv(2 * intdiv(MLDSA_Q - 1, 32), 128) */
     /*
@@ -136,8 +136,8 @@ void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0)
     f0 = _mm256_add_epi32(f0, t);
     /* range: 0 <= f1 <= 15, -GAMMA2 <= f0 <= GAMMA2 */
 
-    _mm256_store_si256(&a1[i], f1);
-    _mm256_store_si256(&a0[i], f0);
+    _mm256_store_si256((__m256i *)&a1[8 * i], f1);
+    _mm256_store_si256((__m256i *)&a0[8 * i], f0);
   }
 }
 

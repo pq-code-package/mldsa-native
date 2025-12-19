@@ -7,7 +7,6 @@
 #define MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
 #include "../../../common.h"
 
-#include <immintrin.h>
 #include <stdint.h>
 #include "consts.h"
 
@@ -34,13 +33,13 @@
 extern const uint8_t mld_rej_uniform_table[256][8];
 
 #define mld_ntt_avx2 MLD_NAMESPACE(ntt_avx2)
-void mld_ntt_avx2(__m256i *r, const __m256i *mld_qdata);
+void mld_ntt_avx2(int32_t *r, const int32_t *mld_qdata);
 
 #define mld_invntt_avx2 MLD_NAMESPACE(invntt_avx2)
-void mld_invntt_avx2(__m256i *r, const __m256i *mld_qdata);
+void mld_invntt_avx2(int32_t *r, const int32_t *mld_qdata);
 
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
-void mld_nttunpack_avx2(__m256i *r);
+void mld_nttunpack_avx2(int32_t *r);
 
 #define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
 unsigned mld_rej_uniform_avx2(int32_t *r,
@@ -55,43 +54,46 @@ unsigned mld_rej_uniform_eta4_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
 
 #define mld_poly_decompose_32_avx2 MLD_NAMESPACE(mld_poly_decompose_32_avx2)
-void mld_poly_decompose_32_avx2(__m256i *a1, __m256i *a0);
+void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0);
 
 #define mld_poly_decompose_88_avx2 MLD_NAMESPACE(mld_poly_decompose_88_avx2)
-void mld_poly_decompose_88_avx2(__m256i *a1, __m256i *a0);
+void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0);
 
 #define mld_poly_caddq_avx2 MLD_NAMESPACE(poly_caddq_avx2)
 void mld_poly_caddq_avx2(int32_t *r);
 
 #define mld_poly_use_hint_32_avx2 MLD_NAMESPACE(mld_poly_use_hint_32_avx2)
-void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a, const __m256i *h);
+void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_use_hint_88_avx2 MLD_NAMESPACE(mld_poly_use_hint_88_avx2)
-void mld_poly_use_hint_88_avx2(__m256i *b, const __m256i *a, const __m256i *h);
+void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_chknorm_avx2 MLD_NAMESPACE(mld_poly_chknorm_avx2)
-int mld_poly_chknorm_avx2(const __m256i *a, int32_t B);
+int mld_poly_chknorm_avx2(const int32_t *a, int32_t B);
 
 #define mld_polyz_unpack_17_avx2 MLD_NAMESPACE(mld_polyz_unpack_17_avx2)
-void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a);
+void mld_polyz_unpack_17_avx2(int32_t *r, const uint8_t *a);
 
 #define mld_polyz_unpack_19_avx2 MLD_NAMESPACE(mld_polyz_unpack_19_avx2)
-void mld_polyz_unpack_19_avx2(__m256i *r, const uint8_t *a);
+void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a);
 
 #define mld_pointwise_avx2 MLD_NAMESPACE(pointwise_avx2)
-void mld_pointwise_avx2(__m256i *c, const __m256i *a, const __m256i *b,
-                        const __m256i *qdata);
+void mld_pointwise_avx2(int32_t *c, const int32_t *a, const int32_t *b,
+                        const int32_t *qdata);
 
 #define mld_pointwise_acc_l4_avx2 MLD_NAMESPACE(pointwise_acc_l4_avx2)
-void mld_pointwise_acc_l4_avx2(__m256i *c, const __m256i *a, const __m256i *b,
-                               const __m256i *qdata);
+void mld_pointwise_acc_l4_avx2(int32_t c[MLDSA_N], const int32_t a[4][MLDSA_N],
+                               const int32_t b[4][MLDSA_N],
+                               const int32_t *qdata);
 
 #define mld_pointwise_acc_l5_avx2 MLD_NAMESPACE(pointwise_acc_l5_avx2)
-void mld_pointwise_acc_l5_avx2(__m256i *c, const __m256i *a, const __m256i *b,
-                               const __m256i *qdata);
+void mld_pointwise_acc_l5_avx2(int32_t c[MLDSA_N], const int32_t a[5][MLDSA_N],
+                               const int32_t b[5][MLDSA_N],
+                               const int32_t *qdata);
 
 #define mld_pointwise_acc_l7_avx2 MLD_NAMESPACE(pointwise_acc_l7_avx2)
-void mld_pointwise_acc_l7_avx2(__m256i *c, const __m256i *a, const __m256i *b,
-                               const __m256i *qdata);
+void mld_pointwise_acc_l7_avx2(int32_t c[MLDSA_N], const int32_t a[7][MLDSA_N],
+                               const int32_t b[7][MLDSA_N],
+                               const int32_t *qdata);
 
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */

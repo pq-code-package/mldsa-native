@@ -206,7 +206,6 @@ source code and documentation.
   - Damien Stehlé
 * URL: https://github.com/pq-crystals/dilithium/tree/master/avx2
 * Referenced from:
-  - [dev/x86_64/src/align.h](dev/x86_64/src/align.h)
   - [dev/x86_64/src/consts.c](dev/x86_64/src/consts.c)
   - [dev/x86_64/src/consts.h](dev/x86_64/src/consts.h)
   - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
@@ -227,7 +226,6 @@ source code and documentation.
   - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta2_avx2.c](dev/x86_64/src/rej_uniform_eta2_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta4_avx2.c](dev/x86_64/src/rej_uniform_eta4_avx2.c)
-  - [mldsa/src/native/x86_64/src/align.h](mldsa/src/native/x86_64/src/align.h)
   - [mldsa/src/native/x86_64/src/consts.c](mldsa/src/native/x86_64/src/consts.c)
   - [mldsa/src/native/x86_64/src/consts.h](mldsa/src/native/x86_64/src/consts.h)
   - [mldsa/src/native/x86_64/src/intt.S](mldsa/src/native/x86_64/src/intt.S)

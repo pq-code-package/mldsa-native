@@ -14,7 +14,6 @@
 #include "mldsa_native_config.h"
 #endif
 
-#include "cbmc.h"
 #include "params.h"
 #include "sys.h"
 

@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include "arith_native_x86_64.h"
 
-int mld_poly_chknorm_avx2(const __m256i *a, int32_t B)
+int mld_poly_chknorm_avx2(const int32_t *a, int32_t B)
 {
   unsigned int i;
   __m256i f, t;
@@ -35,7 +35,7 @@ int mld_poly_chknorm_avx2(const __m256i *a, int32_t B)
   t = _mm256_setzero_si256();
   for (i = 0; i < MLDSA_N / 8; i++)
   {
-    f = _mm256_load_si256(&a[i]);
+    f = _mm256_load_si256((const __m256i *)&a[8 * i]);
     f = _mm256_abs_epi32(f);
     f = _mm256_cmpgt_epi32(f, bound);
     t = _mm256_or_si256(t, f);

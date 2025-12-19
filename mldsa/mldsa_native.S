@@ -636,9 +636,6 @@
 #undef MLD_USE_NATIVE_REJ_UNIFORM
 #undef MLD_USE_NATIVE_REJ_UNIFORM_ETA2
 #undef MLD_USE_NATIVE_REJ_UNIFORM_ETA4
-/* mldsa/src/native/x86_64/src/align.h */
-#undef MLD_ALIGNED_INT32
-#undef MLD_NATIVE_X86_64_SRC_ALIGN_H
 /* mldsa/src/native/x86_64/src/arith_native_x86_64.h */
 #undef MLD_AVX2_REJ_UNIFORM_BUFLEN
 #undef MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN

@@ -30,10 +30,8 @@
 
 
 #ifndef __ASSEMBLER__
-#include "align.h"
-typedef MLD_ALIGNED_INT32(624) qdata_t;
 #define mld_qdata MLD_NAMESPACE(qdata)
-extern const qdata_t mld_qdata;
-#endif /* !__ASSEMBLER__ */
+extern const int32_t mld_qdata[624];
+#endif
 
 #endif /* !MLD_NATIVE_X86_64_SRC_CONSTS_H */

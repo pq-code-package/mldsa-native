@@ -40,7 +40,7 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
 {
   if (mld_sys_check_capability(MLD_SYS_CAP_AVX2))
   {
-    mld_nttunpack_avx2((__m256i *)(data));
+    mld_nttunpack_avx2(data);
   }
 }
 
@@ -51,7 +51,7 @@ static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
     return MLD_NATIVE_FUNC_FALLBACK;
   }
 
-  mld_ntt_avx2((__m256i *)data, mld_qdata.vec);
+  mld_ntt_avx2(data, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
@@ -60,7 +60,7 @@ static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_invntt_avx2((__m256i *)data, mld_qdata.vec);
+  mld_invntt_avx2(data, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -137,7 +137,7 @@ static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_32_avx2((__m256i *)a1, (__m256i *)a0);
+  mld_poly_decompose_32_avx2(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -147,7 +147,7 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_88_avx2((__m256i *)a1, (__m256i *)a0);
+  mld_poly_decompose_88_avx2(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -167,8 +167,7 @@ static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_use_hint_32_avx2((__m256i *)b, (const __m256i *)a,
-                            (const __m256i *)h);
+  mld_poly_use_hint_32_avx2(b, a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -179,8 +178,7 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_use_hint_88_avx2((__m256i *)b, (const __m256i *)a,
-                            (const __m256i *)h);
+  mld_poly_use_hint_88_avx2(b, a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -190,7 +188,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  return mld_poly_chknorm_avx2((const __m256i *)a, B);
+  return mld_poly_chknorm_avx2(a, B);
 }
 
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
@@ -199,7 +197,7 @@ static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_polyz_unpack_17_avx2((__m256i *)r, a);
+  mld_polyz_unpack_17_avx2(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -209,7 +207,7 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_polyz_unpack_19_avx2((__m256i *)r, a);
+  mld_polyz_unpack_19_avx2(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -220,8 +218,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_avx2((__m256i *)c, (const __m256i *)a, (const __m256i *)b,
-                     mld_qdata.vec);
+  mld_pointwise_avx2(c, a, b, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -233,8 +230,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l4_avx2((__m256i *)w, (const __m256i *)u,
-                            (const __m256i *)v, mld_qdata.vec);
+  mld_pointwise_acc_l4_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -246,8 +242,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l5_avx2((__m256i *)w, (const __m256i *)u,
-                            (const __m256i *)v, mld_qdata.vec);
+  mld_pointwise_acc_l5_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -259,8 +254,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l7_avx2((__m256i *)w, (const __m256i *)u,
-                            (const __m256i *)v, mld_qdata.vec);
+  mld_pointwise_acc_l7_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 

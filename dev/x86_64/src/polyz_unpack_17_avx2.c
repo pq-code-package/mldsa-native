@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include "arith_native_x86_64.h"
 
-void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a)
+void mld_polyz_unpack_17_avx2(int32_t *r, const uint8_t *a)
 {
   unsigned int i;
   __m256i f;
@@ -75,7 +75,7 @@ void mld_polyz_unpack_17_avx2(__m256i *r, const uint8_t *a)
     /* Map [0, 1, ..., 2^18-1] to [2^17, 2^17-1, ..., -2^17+1] */
     f = _mm256_sub_epi32(gamma1, f);
 
-    _mm256_store_si256(&r[i], f);
+    _mm256_store_si256((__m256i *)&r[8 * i], f);
   }
 }
 #else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

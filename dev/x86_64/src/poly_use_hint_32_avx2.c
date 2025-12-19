@@ -33,8 +33,8 @@
                                        _mm256_castsi256_ps(b), \
                                        _mm256_castsi256_ps(mask)))
 
-void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a,
-                               const __m256i *hint)
+void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a,
+                               const int32_t *hint)
 {
   unsigned int i;
   __m256i f, f0, f1, h, t;
@@ -49,8 +49,8 @@ void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a,
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {
-    f = _mm256_load_si256(&a[i]);
-    h = _mm256_load_si256(&hint[i]);
+    f = _mm256_load_si256((const __m256i *)&a[8 * i]);
+    h = _mm256_load_si256((const __m256i *)&hint[8 * i]);
 
     /* Reference:
      * - @[REF_AVX2] calls poly_decompose to compute all a1, a0 before the loop.
@@ -82,7 +82,7 @@ void mld_poly_use_hint_32_avx2(__m256i *b, const __m256i *a,
     f1 = _mm256_add_epi32(f1, h);
     f1 = _mm256_and_si256(f1, mask);
 
-    _mm256_store_si256(&b[i], f1);
+    _mm256_store_si256((__m256i *)&b[8 * i], f1);
   }
 }
 
