@@ -28,7 +28,7 @@ An application using mldsa-native as a monolithic multi-level build needs:
 
 ## Configuration
 
-The configuration file [multilevel_config.h](mldsa_native/multilevel_config.h) sets:
+The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
 - `MLD_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
 - `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix
 - `MLD_CONFIG_INTERNAL_API_QUALIFIER=static`: Makes internal functions static

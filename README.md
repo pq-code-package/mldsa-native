@@ -138,7 +138,7 @@ for an example using tiny_sha3[^tiny_sha3].
 ### Do I need to use the assembly backends?
 
 No. If you want a C-only build, just omit the directories [mldsa/src/native](mldsa/src/native) and/or [mldsa/src/fips202/native](mldsa/src/fips202/native) from your import
-and unset `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [config.h](mldsa/src/config.h).
+and unset `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH` and/or `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202` in your [mldsa_native_config.h](mldsa/mldsa_native_config.h).
 
 ### Do I need to setup CBMC to use mldsa-native?
 
@@ -149,7 +149,7 @@ contracts and loop invariants from the code; they will be ignored unless `CBMC` 
 
 ### Does mldsa-native support all security levels of ML-DSA?
 
-Yes. mldsa-native supports all three ML-DSA security levels (ML-DSA-44, ML-DSA-65, ML-DSA-87) as defined in FIPS 204. The security level is a compile-time parameter configured by setting `MLD_CONFIG_PARAMETER_SET=44/65/87` in [config.h](mldsa/src/config.h).
+Yes. mldsa-native supports all three ML-DSA security levels (ML-DSA-44, ML-DSA-65, ML-DSA-87) as defined in FIPS 204. The security level is a compile-time parameter configured by setting `MLD_CONFIG_PARAMETER_SET=44/65/87` in [mldsa_native_config.h](mldsa/mldsa_native_config.h).
 
 ### Does mldsa-native use hedged or deterministic signing?
 
