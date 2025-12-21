@@ -396,3 +396,21 @@ configs:
       MLD_CONFIG_NO_RANDOMIZED_API: true
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: test/test_alloc_config.h
+    description: "Using custom allocation that can be made fail at specific invocation"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mld
+      MLD_CONFIG_KEYGEN_PCT: true
+      MLD_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          #define MLD_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #include <stdlib.h>
+          void * custom_alloc(size_t sz, const char *file, int line, const char *var, const char *type);
+          void custom_free(void *p, size_t sz, const char *file, int line, const char *var, const char *type);
+          #define MLD_CUSTOM_ALLOC(v, T, N) T *v = custom_alloc(sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
+          #define MLD_CUSTOM_FREE(v, T, N) custom_free(v, sizeof(T)*(N), __FILE__, __LINE__, #v, #T)
+          #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"

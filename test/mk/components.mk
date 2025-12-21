@@ -14,7 +14,7 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mldsa test_unit acvp_mldsa bench_mldsa bench_components_mldsa gen_KAT test_stack
+ALL_TESTS = test_mldsa test_unit acvp_mldsa bench_mldsa bench_components_mldsa gen_KAT test_stack test_alloc
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -35,6 +35,14 @@ $(MLDSA65_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_STATIC_TESTA
 MLDSA87_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
 $(MLDSA87_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
 
+# Alloc test object files - same sources but with custom alloc config
+MLDSA44_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA44_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
+MLDSA65_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA65_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
+MLDSA87_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
+$(MLDSA87_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
+
 
 
 CFLAGS += -Imldsa
@@ -47,6 +55,11 @@ $(BUILD_DIR)/libmldsa87.a: $(MLDSA87_OBJS)
 $(BUILD_DIR)/libmldsa44_unit.a: $(MLDSA44_UNIT_OBJS)
 $(BUILD_DIR)/libmldsa65_unit.a: $(MLDSA65_UNIT_OBJS)
 $(BUILD_DIR)/libmldsa87_unit.a: $(MLDSA87_UNIT_OBJS)
+
+# Alloc test libraries with custom alloc config
+$(BUILD_DIR)/libmldsa44_alloc.a: $(MLDSA44_ALLOC_OBJS)
+$(BUILD_DIR)/libmldsa65_alloc.a: $(MLDSA65_ALLOC_OBJS)
+$(BUILD_DIR)/libmldsa87_alloc.a: $(MLDSA87_ALLOC_OBJS)
 
 
 $(BUILD_DIR)/libmldsa.a: $(MLDSA44_OBJS) $(MLDSA65_OBJS) $(MLDSA87_OBJS)
@@ -61,6 +74,10 @@ $(MLDSA87_DIR)/bin/bench_components_mldsa87: CFLAGS += -Itest/hal
 $(MLDSA44_DIR)/bin/test_stack44: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA65_DIR)/bin/test_stack65: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA87_DIR)/bin/test_stack87: CFLAGS += -Imldsa -fstack-usage
+
+$(MLDSA44_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLDSA65_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
+$(MLDSA87_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/test_alloc_config.h\"
 
 $(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -96,15 +113,25 @@ $(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l
 $(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
+# Special rule for test_alloc - link against alloc libraries with custom alloc config
+define ADD_SOURCE_ALLOC
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_alloc
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+endef
+
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
-	$(foreach test,$(filter-out test_unit,$(ALL_TESTS)), \
+	$(foreach test,$(filter-out test_unit test_alloc,$(ALL_TESTS)), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
 	) \
 )
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
+)
+
+$(foreach scheme,mldsa44 mldsa65 mldsa87, \
+	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
 )
 
 $(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44): $(call MAKE_OBJS, $(MLDSA44_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))

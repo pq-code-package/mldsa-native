@@ -2,14 +2,14 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp stack unit \
-	func_44 kat_44 acvp_44 stack_44 unit_44 \
-	func_65 kat_65 acvp_65 stack_65 unit_65 \
-	func_87 kat_87 acvp_87 stack_87 unit_87 \
-	run_func run_kat run_acvp run_stack run_unit \
-	run_func_44 run_kat_44 run_stack_44 run_unit_44 \
-	run_func_65 run_kat_65 run_stack_65 run_unit_65 \
-	run_func_87 run_kat_87 run_stack_87 run_unit_87 \
+.PHONY: func kat acvp stack unit alloc \
+	func_44 kat_44 acvp_44 stack_44 unit_44 alloc_44 \
+	func_65 kat_65 acvp_65 stack_65 unit_65 alloc_65 \
+	func_87 kat_87 acvp_87 stack_87 unit_87 alloc_87 \
+	run_func run_kat run_acvp run_stack run_unit run_alloc \
+	run_func_44 run_kat_44 run_stack_44 run_unit_44 run_alloc_44 \
+	run_func_65 run_kat_65 run_stack_65 run_unit_65 run_alloc_65 \
+	run_func_87 run_kat_87 run_stack_87 run_unit_87 run_alloc_87 \
 	bench_44 bench_65 bench_87 bench \
 	run_bench_44 run_bench_65 run_bench_87 run_bench \
 	bench_components_44 bench_components_65 bench_components_87 bench_components \
@@ -48,7 +48,7 @@ quickcheck: test
 build: func kat acvp
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_unit
+test: run_kat run_func run_acvp run_unit run_alloc
 	$(Q)echo "  Everything checks fine!"
 
 # Detect available SHA256 command
@@ -115,7 +115,7 @@ acvp_65:  $(MLDSA65_DIR)/bin/acvp_mldsa65
 acvp_87: $(MLDSA87_DIR)/bin/acvp_mldsa87
 	$(Q)echo "  ACVP       ML-DSA-87:  $^"
 acvp: acvp_44 acvp_65 acvp_87
-	
+
 ifeq ($(HOST_PLATFORM),Linux-aarch64)
 # valgrind does not work with the AArch64 SHA3 extension
 # Use armv8-a as the target architecture, overwriting a
@@ -140,6 +140,22 @@ run_stack_65: stack_65
 run_stack_87: stack_87
 	$(Q)python3 scripts/stack $(MLDSA87_DIR)/bin/test_stack87 --build-dir $(MLDSA87_DIR) $(STACK_ANALYSIS_FLAGS)
 run_stack: run_stack_44 run_stack_65 run_stack_87
+
+alloc_44: $(MLDSA44_DIR)/bin/test_alloc44
+	$(Q)echo "  ALLOC   ML-DSA-44:   $^"
+alloc_65: $(MLDSA65_DIR)/bin/test_alloc65
+	$(Q)echo "  ALLOC   ML-DSA-65:   $^"
+alloc_87: $(MLDSA87_DIR)/bin/test_alloc87
+	$(Q)echo "  ALLOC   ML-DSA-87:  $^"
+alloc: alloc_44 alloc_65 alloc_87
+
+run_alloc_44: alloc_44
+	$(W) $(MLDSA44_DIR)/bin/test_alloc44
+run_alloc_65: alloc_65
+	$(W) $(MLDSA65_DIR)/bin/test_alloc65
+run_alloc_87: alloc_87
+	$(W) $(MLDSA87_DIR)/bin/test_alloc87
+run_alloc: run_alloc_44 run_alloc_65 run_alloc_87
 
 lib: $(BUILD_DIR)/libmldsa.a $(BUILD_DIR)/libmldsa44.a $(BUILD_DIR)/libmldsa65.a $(BUILD_DIR)/libmldsa87.a
 

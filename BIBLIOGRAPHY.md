@@ -51,6 +51,7 @@ source code and documentation.
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
   - [test/no_asm_config.h](test/no_asm_config.h)
   - [test/serial_fips202_config.h](test/serial_fips202_config.h)
+  - [test/test_alloc_config.h](test/test_alloc_config.h)
 
 ### `FIPS202`
 
@@ -103,6 +104,7 @@ source code and documentation.
   - [test/custom_zeroize_config.h](test/custom_zeroize_config.h)
   - [test/no_asm_config.h](test/no_asm_config.h)
   - [test/serial_fips202_config.h](test/serial_fips202_config.h)
+  - [test/test_alloc_config.h](test/test_alloc_config.h)
 
 ### `HYBRID`
 

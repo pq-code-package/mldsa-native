@@ -215,16 +215,4 @@
 
 #endif /* !__ASSEMBLER__ */
 
-/* Just in case we want to include mldsa_native.h, set the configuration
- * for that header in accordance with the configuration used here. */
-
-/* Double-check that this is not conflicting with pre-existing definitions. */
-#if defined(MLD_CONFIG_API_PARAMETER_SET) ||    \
-    defined(MLD_CONFIG_API_NAMESPACE_PREFIX) || \
-    defined(MLD_CONFIG_API_NO_SUPERCOP) ||      \
-    defined(MLD_CONFIG_API_CONSTANTS_ONLY)
-#error Pre-existing MLD_CONFIG_API_XXX configuration is neither useful nor allowed during an mldsa-native build
-#endif /* MLD_CONFIG_API_PARAMETER_SET || MLD_CONFIG_API_NAMESPACE_PREFIX || \
-          MLD_CONFIG_API_NO_SUPERCOP || MLD_CONFIG_API_CONSTANTS_ONLY */
-
 #endif /* !MLD_COMMON_H */

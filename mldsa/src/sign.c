@@ -119,8 +119,8 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(signature, uint8_t, MLDSA_CRYPTO_BYTES);
   MLD_FREE(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES);
+  MLD_FREE(signature, uint8_t, MLDSA_CRYPTO_BYTES);
 
   return ret;
 }
@@ -274,9 +274,9 @@ __contract__(
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(mat, mld_polymat, 1);
-  MLD_FREE(s1hat, mld_polyvecl, 1);
   MLD_FREE(t, mld_polyveck, 1);
+  MLD_FREE(s1hat, mld_polyvecl, 1);
+  MLD_FREE(mat, mld_polymat, 1);
   return ret;
 }
 
@@ -332,19 +332,24 @@ int crypto_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Constant time: pk is the public key, inherently public data */
   MLD_CT_TESTING_DECLASSIFY(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
 
-  /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
-  ret = mld_check_pct(pk, sk);
-
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES);
-  MLD_FREE(inbuf, uint8_t, MLDSA_SEEDBYTES + 2);
-  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(s1, mld_polyvecl, 1);
-  MLD_FREE(s2, mld_polyveck, 1);
-  MLD_FREE(t1, mld_polyveck, 1);
   MLD_FREE(t0, mld_polyveck, 1);
-  return ret;
+  MLD_FREE(t1, mld_polyveck, 1);
+  MLD_FREE(s2, mld_polyveck, 1);
+  MLD_FREE(s1, mld_polyvecl, 1);
+  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
+  MLD_FREE(inbuf, uint8_t, MLDSA_SEEDBYTES + 2);
+  MLD_FREE(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES);
+
+  if (ret != 0)
+  {
+    return ret;
+  }
+
+  /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
+  /* Do this after freeing all temporaries. */
+  return mld_check_pct(pk, sk);
 }
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
@@ -610,13 +615,13 @@ __contract__(
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_FREE(y, mld_polyvecl, 1);
-  MLD_FREE(z, mld_polyvecl, 1);
-  MLD_FREE(w1, mld_polyveck, 1);
-  MLD_FREE(w0, mld_polyveck, 1);
-  MLD_FREE(h, mld_polyveck, 1);
   MLD_FREE(cp, mld_poly, 1);
+  MLD_FREE(h, mld_polyveck, 1);
+  MLD_FREE(w0, mld_polyveck, 1);
+  MLD_FREE(w1, mld_polyveck, 1);
+  MLD_FREE(z, mld_polyvecl, 1);
+  MLD_FREE(y, mld_polyvecl, 1);
+  MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
 
   return ret;
 }
@@ -735,12 +740,12 @@ cleanup:
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(seedbuf, uint8_t,
-           2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES);
-  MLD_FREE(mat, mld_polymat, 1);
-  MLD_FREE(s1, mld_polyvecl, 1);
   MLD_FREE(s2, mld_polyveck, 1);
   MLD_FREE(t0, mld_polyveck, 1);
+  MLD_FREE(s1, mld_polyvecl, 1);
+  MLD_FREE(mat, mld_polymat, 1);
+  MLD_FREE(seedbuf, uint8_t,
+           2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES);
   return ret;
 }
 
@@ -794,8 +799,8 @@ cleanup:
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES);
   MLD_FREE(rnd, uint8_t, MLDSA_RNDBYTES);
+  MLD_FREE(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES);
 
   return ret;
 }
@@ -971,18 +976,18 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
-  MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES);
-  MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_FREE(cp, mld_poly, 1);
-  MLD_FREE(mat, mld_polymat, 1);
-  MLD_FREE(z, mld_polyvecl, 1);
-  MLD_FREE(t1, mld_polyveck, 1);
-  MLD_FREE(w1, mld_polyveck, 1);
-  MLD_FREE(tmp, mld_polyveck, 1);
   MLD_FREE(h, mld_polyveck, 1);
+  MLD_FREE(tmp, mld_polyveck, 1);
+  MLD_FREE(w1, mld_polyveck, 1);
+  MLD_FREE(t1, mld_polyveck, 1);
+  MLD_FREE(z, mld_polyvecl, 1);
+  MLD_FREE(mat, mld_polymat, 1);
+  MLD_FREE(cp, mld_poly, 1);
+  MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES);
+  MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES);
+  MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES);
+  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
+  MLD_FREE(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
   return ret;
 }
 
@@ -1350,15 +1355,15 @@ cleanup:
   MLD_CT_TESTING_DECLASSIFY(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
-  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(tr_computed, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(key, uint8_t, MLDSA_SEEDBYTES);
-  MLD_FREE(s1, mld_polyvecl, 1);
-  MLD_FREE(s2, mld_polyveck, 1);
-  MLD_FREE(t0, mld_polyveck, 1);
-  MLD_FREE(t0_computed, mld_polyveck, 1);
   MLD_FREE(t1, mld_polyveck, 1);
+  MLD_FREE(t0_computed, mld_polyveck, 1);
+  MLD_FREE(t0, mld_polyveck, 1);
+  MLD_FREE(s2, mld_polyveck, 1);
+  MLD_FREE(s1, mld_polyvecl, 1);
+  MLD_FREE(key, uint8_t, MLDSA_SEEDBYTES);
+  MLD_FREE(tr_computed, uint8_t, MLDSA_TRBYTES);
+  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
+  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
 
   return ret;
 }
