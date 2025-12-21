@@ -9,6 +9,11 @@ void mld_H(uint8_t *out, size_t outlen, const uint8_t *in1, size_t in1len,
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   uint8_t *out;
   size_t outlen;
   const uint8_t *in1;

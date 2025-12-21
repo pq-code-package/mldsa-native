@@ -8,6 +8,11 @@ static void mld_sample_s1_s2(mld_polyvecl *s1, mld_polyveck *s2,
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   mld_polyvecl *s1;
   mld_polyveck *s2;
   uint8_t *seed;

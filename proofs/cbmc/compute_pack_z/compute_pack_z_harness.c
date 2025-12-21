@@ -10,6 +10,11 @@ int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *cp,
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   uint8_t *sig;
   mld_poly *cp;
   mld_sk_s1hat *s1;

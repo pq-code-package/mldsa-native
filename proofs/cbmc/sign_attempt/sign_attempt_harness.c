@@ -5,6 +5,11 @@
 
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   uint16_t attempt;
   int rc;
   /* `context` is consumed by the call macro (the CBMC config has no context

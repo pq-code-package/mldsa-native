@@ -7,6 +7,11 @@
  * parameter), exactly as at the call sites in sign.c. */
 void harness(void)
 {
+  {
+    /* Dummy use of `free` to work around CBMC issue #8814. */
+    free(NULL);
+  }
+
   uint16_t attempt;
   mld_sign_finish(attempt, context);
 }
