@@ -1264,7 +1264,8 @@ def cli():
     )
 
     cbmc_parser.add_argument(
-        "--mldsa_parameter_set",
+        "-kl",
+        "--mldsa-parameter-set",
         help="MLDSA parameter set (MLD_CONFIG_PARAMETER_SET)",
         choices=["44", "65", "87", "ALL"],
         type=str.upper,
