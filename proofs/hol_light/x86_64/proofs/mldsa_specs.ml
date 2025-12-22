@@ -31,8 +31,8 @@ let bitreverse8 = define
 (* AVX2-optimized ordering for ML-DSA NTT (swaps bit fields then reverses)   *)
 (* ------------------------------------------------------------------------- *)
 
-let avx2_ntt_order = define
- `avx2_ntt_order i = 
+let mldsa_avx2_ntt_order = define
+ `mldsa_avx2_ntt_order i =
     bitreverse8(64 * (i DIV 64) + ((i MOD 64) DIV 8) + 8 * (i MOD 8))`;;
 
 (* ------------------------------------------------------------------------- *)
@@ -48,7 +48,7 @@ let tomont_8380417 = define
 
 let mldsa_forward_ntt = define
  `mldsa_forward_ntt f k =
-    isum (0..255) (\j. f j * &1753 pow ((2 * avx2_ntt_order k + 1) * j))
+    isum (0..255) (\j. f j * &1753 pow ((2 * mldsa_avx2_ntt_order k + 1) * j))
     rem &8380417`;;
 
 (* ------------------------------------------------------------------------- *)
@@ -56,8 +56,8 @@ let mldsa_forward_ntt = define
 (* ------------------------------------------------------------------------- *)
 
 let MLDSA_FORWARD_NTT = prove
- (`mldsa_forward_ntt f k = 
-   isum (0..255) (\j. f j * &1753 pow ((2 * avx2_ntt_order k + 1) * j)) rem &8380417`,
+ (`mldsa_forward_ntt f k =
+   isum (0..255) (\j. f j * &1753 pow ((2 * mldsa_avx2_ntt_order k + 1) * j)) rem &8380417`,
   REWRITE_TAC[mldsa_forward_ntt]);;
 
 (* ------------------------------------------------------------------------- *)
@@ -68,16 +68,16 @@ let BITREVERSE8_CLAUSES = end_itlist CONJ (map
  (GEN_REWRITE_CONV I [bitreverse8] THENC DEPTH_CONV WORD_NUM_RED_CONV)
  (map (curry mk_comb `bitreverse8` o mk_small_numeral) (0--255)));;
 
-let AVX2_NTT_ORDER_CLAUSES = end_itlist CONJ (map
- (GEN_REWRITE_CONV I [avx2_ntt_order] THENC DEPTH_CONV WORD_NUM_RED_CONV THENC
+let MLDSA_AVX2_NTT_ORDER_CLAUSES = end_itlist CONJ (map
+ (GEN_REWRITE_CONV I [mldsa_avx2_ntt_order] THENC DEPTH_CONV WORD_NUM_RED_CONV THENC
   GEN_REWRITE_CONV I [BITREVERSE8_CLAUSES])
- (map (curry mk_comb `avx2_ntt_order` o mk_small_numeral) (0--255)));;
+ (map (curry mk_comb `mldsa_avx2_ntt_order` o mk_small_numeral) (0--255)));;
 
 let MLDSA_FORWARD_NTT_ALT = prove
  (`mldsa_forward_ntt f k =
    isum (0..255)
         (\j. f j *
-             (&1753 pow ((2 * avx2_ntt_order k + 1) * j)) rem &8380417)
+             (&1753 pow ((2 * mldsa_avx2_ntt_order k + 1) * j)) rem &8380417)
     rem &8380417`,
   REWRITE_TAC[mldsa_forward_ntt] THEN MATCH_MP_TAC
    (REWRITE_RULE[] (ISPEC
@@ -93,7 +93,7 @@ let MLDSA_FORWARD_NTT_CONV =
   GEN_REWRITE_CONV I [MLDSA_FORWARD_NTT_ALT] THENC
   LAND_CONV EXPAND_ISUM_CONV THENC
   DEPTH_CONV NUM_RED_CONV THENC
-  GEN_REWRITE_CONV ONCE_DEPTH_CONV [AVX2_NTT_ORDER_CLAUSES] THENC
+  GEN_REWRITE_CONV ONCE_DEPTH_CONV [MLDSA_AVX2_NTT_ORDER_CLAUSES] THENC
   DEPTH_CONV NUM_RED_CONV THENC
   GEN_REWRITE_CONV DEPTH_CONV [INT_OF_NUM_POW; INT_OF_NUM_REM] THENC
   ONCE_DEPTH_CONV EXP_MOD_CONV THENC INT_REDUCE_CONV;;
@@ -292,6 +292,20 @@ let CONGBOUND_WORD_SX = prove
             ==> (ival(word_sx x:N word) == x') (mod p) /\
                 l <= ival(word_sx x:N word) /\ ival(word_sx x:N word) <= u`,
   REWRITE_TAC[word_sx; CONGBOUND_IWORD]);;
+
+let CONGBOUND_WORD_NEG = prove
+ (`!x:N word.
+        ((ival x == x') (mod p) /\ lx <= ival x /\ ival x <= ux)
+        ==> --lx <= &2 pow (dimindex(:N) - 1) - &1
+            ==> (ival(word_neg x) == --x') (mod p) /\
+                --ux <= ival(word_neg x) /\
+                ival(word_neg x) <= --lx`,
+  GEN_TAC THEN STRIP_TAC THEN STRIP_TAC THEN
+  SUBGOAL_THEN `ival(word_neg x:N word) = --(ival x)` SUBST1_TAC THENL
+   [REPEAT(POP_ASSUM MP_TAC) THEN WORD_ARITH_TAC;
+    ASM_SIMP_TAC[INTEGER_RULE
+     `(x:int == x') (mod p) ==> (--x == --x') (mod p)`] THEN
+    ASM_ARITH_TAC]);;
 
 let CONGBOUND_WORD_ADD = prove
  (`!x y:N word.
@@ -547,9 +561,7 @@ let CONCL_BOUNDS_RULE =
 let SIDE_ELIM_RULE th =
   MP th (EQT_ELIM(DIMINDEX_INT_REDUCE_CONV(lhand(concl th))));;
 
-let GEN_CONGBOUND_RULE aboths =
-  let lfn = PROCESS_BOUND_ASSUMPTIONS aboths in
-  let rec rule tm =
+let rec ASM_CONGBOUND_RULE lfn tm =
     try apply lfn tm with Failure _ ->
     match tm with
       Comb(Const("word",_),n) when is_numeral n ->
@@ -562,36 +574,105 @@ let GEN_CONGBOUND_RULE aboths =
         let th2 = WORD_RED_CONV(lhand(lhand(snd(strip_forall(concl th1))))) in
         SUBS[SYM th0] (MATCH_MP th1 th2)
     | Comb(Const("mldsa_montred",_),t) ->
-        let th1 = WEAKEN_INTCONG_RULE (num 8380417) (rule t) in
+        let th1 = WEAKEN_INTCONG_RULE (num 8380417)
+                   (ASM_CONGBOUND_RULE lfn t) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE(MATCH_MP CONGBOUND_MLDSA_MONTRED th1))
     | Comb(Const("mldsa_barred",_),t) ->
-        let th1 = WEAKEN_INTCONG_RULE (num 8380417) (rule t) in
+        let th1 = WEAKEN_INTCONG_RULE (num 8380417)
+                     (ASM_CONGBOUND_RULE lfn t) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE(MATCH_MP CONGBOUND_MLDSA_BARRED th1))
     | Comb(Comb(Const("mldsa_montmul",_),ab),t) ->
-        let atm,btm = dest_pair ab and th0 = rule t in
+        let atm,btm = dest_pair ab and th0 = ASM_CONGBOUND_RULE lfn t in
         let th0' = WEAKEN_INTCONG_RULE (num 8380417) th0 in
         let th1 = SPECL [atm;btm] (MATCH_MP CONGBOUND_MLDSA_MONTMUL th0') in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Const("word_sx",_),t) ->
-        let th0 = rule t in
+        let th0 = ASM_CONGBOUND_RULE lfn t in
         let tyin = type_match
          (type_of(rator(rand(lhand(funpow 4 rand (snd(dest_forall
             (concl CONGBOUND_WORD_SX)))))))) (type_of(rator tm)) [] in
         let th1 = MATCH_MP (INST_TYPE tyin CONGBOUND_WORD_SX) th0 in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
+    | Comb(Const("word_neg",_),t) ->
+        let th0 = ASM_CONGBOUND_RULE lfn t in
+        let th1 = MATCH_MP CONGBOUND_WORD_NEG th0 in
+        CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_add",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_ADD (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_sub",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_SUB (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
     | Comb(Comb(Const("word_mul",_),ltm),rtm) ->
-        let lth = rule ltm and rth = rule rtm in
+        let lth = ASM_CONGBOUND_RULE lfn ltm
+        and rth = ASM_CONGBOUND_RULE lfn rtm in
         let th1 = MATCH_MP CONGBOUND_WORD_MUL (UNIFY_INTCONG_RULE lth rth) in
         CONCL_BOUNDS_RULE(SIDE_ELIM_RULE th1)
-    | _ -> CONCL_BOUNDS_RULE(ISPEC tm CONGBOUND_ATOM) in
-  rule;;
+    | _ -> CONCL_BOUNDS_RULE(ISPEC tm CONGBOUND_ATOM);;
+
+let GEN_CONGBOUND_RULE aboths =
+  ASM_CONGBOUND_RULE (PROCESS_BOUND_ASSUMPTIONS aboths);;
 
 let CONGBOUND_RULE = GEN_CONGBOUND_RULE [];;
+
+let rec LOCAL_CONGBOUND_RULE lfn asms =
+  match asms with
+    [] -> lfn
+  | th::ths ->
+      let bod,var = dest_eq (concl th) in
+      let th1 = ASM_CONGBOUND_RULE lfn bod in
+      let th2 = SUBS[th] th1 in
+      let lfn' = (var |-> th2) lfn in
+      LOCAL_CONGBOUND_RULE lfn' ths;;
+
+(* ------------------------------------------------------------------------- *)
+(* Simplify SIMD cruft and fold relevant definitions when encountered.       *)
+(* The ABBREV form also introduces abbreviations for relevant subterms.      *)
+(* ------------------------------------------------------------------------- *)
+
+let SIMD_SIMPLIFY_CONV unfold_defs =
+  TOP_DEPTH_CONV
+   (REWR_CONV WORD_SUBWORD_AND ORELSEC WORD_SIMPLE_SUBWORD_CONV) THENC
+  DEPTH_CONV WORD_NUM_RED_CONV THENC
+  REWRITE_CONV (map GSYM unfold_defs);;
+
+let SIMD_SIMPLIFY_TAC unfold_defs =
+  let arm_simdable = can (term_match [] `read X (s:armstate):int128 = whatever`) in
+  let x86_simdable = can (term_match [] `read X (s:x86state):int256 = whatever`) in
+  let simdable tm = arm_simdable tm || x86_simdable tm in
+  TRY(FIRST_X_ASSUM
+   (ASSUME_TAC o
+    CONV_RULE(RAND_CONV (SIMD_SIMPLIFY_CONV unfold_defs)) o
+    check (simdable o concl)));;
+
+let is_local_definition unfold_defs =
+  let pats = map (lhand o snd o strip_forall o concl) unfold_defs in
+  let pam t = exists (fun p -> can(term_match [] p) t) pats in
+  fun tm -> is_eq tm && is_var(rand tm) && pam(lhand tm);;
+
+let AUTO_ABBREV_TAC tm =
+  let gv = genvar(type_of tm) in
+  ABBREV_TAC(mk_eq(gv,tm));;
+
+let SIMD_SIMPLIFY_ABBREV_TAC =
+  let arm_simdable =
+    can (term_match [] `read X (s:armstate):int128 = whatever`)
+  and x86_simdable =
+    can (term_match [] `read X (s:x86state):int256 = whatever`) in
+  let simdable tm = arm_simdable tm || x86_simdable tm in
+  fun unfold_defs unfold_aux ->
+    let pats = map (lhand o snd o strip_forall o concl) unfold_defs in
+    let pam t = exists (fun p -> can(term_match [] p) t) pats in
+    let ttac th (asl,w) =
+      let th' = CONV_RULE(RAND_CONV
+                 (SIMD_SIMPLIFY_CONV (unfold_defs @ unfold_aux))) th in
+      let asms =
+        map snd (filter (is_local_definition unfold_defs o concl o snd) asl) in
+      let th'' = GEN_REWRITE_RULE (RAND_CONV o TOP_DEPTH_CONV) asms th' in
+      let tms = sort free_in (find_terms pam (rand(concl th''))) in
+      (MP_TAC th'' THEN MAP_EVERY AUTO_ABBREV_TAC tms THEN DISCH_TAC) (asl,w) in
+  TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
