@@ -1165,31 +1165,46 @@ def gen_avx2_fwd_ntt_zetas(mult=False):
             yield from gen_twiddles_many(7, i * 4 + k, range(1), 1, mult)
 
 
+def gen_avx2_zetas_qdata():
+    def cmod(a, mod):
+        """Return signed canonical representative of a mod b"""
+        c = a % mod
+        if c >= mod / 2:
+            c -= mod
+        return c
+
+    # MLD_AVX2_Q
+    q_dup = [modulus] * 8
+    # MLD_AVX2_QINV
+    qinv_dup = [pow(modulus, -1, 2**32)] * 8
+    # MLD_AVX2_DIV_QINV
+    div_qinv_dup = [cmod(pow(modulus, -1, 2**32) * pow(2, 64 - 8, modulus), 2**32)] * 8
+    # MLD_AVX2_DIV
+    div_dup = [pow(2, 64 - 8, modulus)] * 8
+
+    zetas_qinv = list(gen_avx2_fwd_ntt_zetas(mult=True))
+    zetas = list(gen_avx2_fwd_ntt_zetas(mult=False))
+
+    q_idx = 0
+    qinv_idx = q_idx + len(q_dup)
+    div_qinv_idx = qinv_idx + len(qinv_dup)
+    div_idx = div_qinv_idx + len(div_qinv_dup)
+    zetas_qinv_idx = div_idx + len(div_dup)
+    zetas_idx = zetas_qinv_idx + len(zetas_qinv)
+
+    constants = q_dup + qinv_dup + div_qinv_dup + div_dup + zetas_qinv + zetas
+    offsets = {
+        "q": q_idx,
+        "qinv": qinv_idx,
+        "div_qinv": div_qinv_idx,
+        "div": div_idx,
+        "zetas_qinv": zetas_qinv_idx,
+        "zetas": zetas_idx,
+    }
+    return constants, offsets
+
+
 def gen_avx2_hol_light_zeta_file():
-    def qdata():
-        def unsigned_mod(x, y):
-            return x % y
-
-        def signed_mod(x, y):
-            r = unsigned_mod(x, y)
-            if r >= y // 2:
-                r -= y
-            return r
-
-        # MLD_AVX2_Q
-        yield from [modulus] * 8
-        # MLD_AVX2_QINV
-        yield from [pow(modulus, -1, 2**32)] * 8
-        # MLD_AVX2_DIV_QINV
-        yield from [
-            signed_mod(pow(modulus, -1, 2**32) * pow(2, 64 - 8, modulus), 2**32)
-        ] * 8
-        # MLD_AVX2_DIV_QINV
-        yield from ([pow(2, 64 - 8, modulus)] * 8)
-
-        yield from gen_avx2_fwd_ntt_zetas(mult=True)
-        yield from gen_avx2_fwd_ntt_zetas(mult=False)
-
     def gen():
         yield from gen_hol_light_header()
         yield "(*"
@@ -1198,7 +1213,8 @@ def gen_avx2_hol_light_zeta_file():
         yield " *)"
         yield ""
         yield "let mldsa_complete_qdata = define `mldsa_complete_qdata:int list = ["
-        yield from print_hol_light_array(qdata())
+        constants, _ = gen_avx2_zetas_qdata()
+        yield from print_hol_light_array(constants)
         yield "]`;;"
         yield ""
 
@@ -1206,20 +1222,54 @@ def gen_avx2_hol_light_zeta_file():
 
 
 def gen_avx2_zeta_file():
-    def gen():
+    constants, offsets = gen_avx2_zetas_qdata()
+
+    def gen_c():
         yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "consts.h"'
+        yield ""
         yield "/*"
-        yield " * Table of zeta values used in the AVX2 NTTs"
+        yield " * Table of zeta values used in the AVX2 forward and inverse NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "/* twiddles * q^-1 */"
-        yield from map(lambda t: str(t) + ",", gen_avx2_fwd_ntt_zetas(mult=True))
-        yield "/* twiddles */"
+        yield f"MLD_ALIGN const int32_t mld_qdata[{len(constants)}] = {{"
+        yield from map(lambda t: str(t) + ",", constants)
+        yield "};"
         yield ""
-        yield from map(lambda t: str(t) + ",", gen_avx2_fwd_ntt_zetas(mult=False))
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(avx2_consts)"
+        yield ""
+        yield "#endif"
         yield ""
 
-    update_file("dev/x86_64/src/x86_64_zetas.i", "\n".join(gen()))
+    def gen_h():
+        yield from gen_header()
+        yield "#ifndef MLD_NATIVE_X86_64_SRC_CONSTS_H"
+        yield "#define MLD_NATIVE_X86_64_SRC_CONSTS_H"
+        yield '#include "../../../common.h"'
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_8XQ {offsets['q']}"
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV {offsets['qinv']}"
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV_QINV {offsets['div_qinv']}"
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV {offsets['div']}"
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV {offsets['zetas_qinv']}"
+        yield f"#define MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS {offsets['zetas']}"
+        yield ""
+        yield "#ifndef __ASSEMBLER__"
+        yield "#define mld_qdata MLD_NAMESPACE(qdata)"
+        yield f"extern const int32_t mld_qdata[{len(constants)}];"
+        yield "#endif"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/x86_64/src/consts.c", "\n".join(gen_c()))
+    update_file("dev/x86_64/src/consts.h", "\n".join(gen_h()))
 
 
 def get_c_source_files(main_only=False, core_only=False, strip_mldsa=False):

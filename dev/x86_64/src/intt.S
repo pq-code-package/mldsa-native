@@ -258,7 +258,7 @@ vmovdqa         %ymm11,896+32*\off(%rdi)
  * For ymm{8,9,10,11}, the scaling has been merged into the last butterfly, so
  * only ymm{4,5,6,7} need to be scaled explicitly.
  *
- * The scaling is achieved by computing montmul(-, MLD_AVX2_DIV).
+ * The scaling is achieved by computing montmul(-, 41978 = 2**(64-8) mod q)).
  *
  * Bounds: |ymm{i}| < 256q for i in 4...7
  */
