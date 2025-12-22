@@ -73,7 +73,7 @@ jobs:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
           - name: mldsa_ntt
-            needs: ["mldsa_specs.ml", "mldsa_utils.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
     name: HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork

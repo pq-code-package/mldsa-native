@@ -274,6 +274,20 @@ def gen_header():
     yield ""
 
 
+def gen_hol_light_header():
+    yield "(*"
+    yield " * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved."
+    yield " * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT-0"
+    yield " *)"
+    yield ""
+    yield "(*"
+    yield " * WARNING: This file is auto-generated from scripts/autogen"
+    yield " *          in the mldsa-native repository."
+    yield " *          Do not modify it directly."
+    yield " *)"
+    yield ""
+
+
 def gen_yaml_header():
     yield "# Copyright (c) The mldsa-native project authors"
     yield "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT"
@@ -854,6 +868,28 @@ def gen_aarch64_intt_zetas_layer123456():
     yield from (0, 0)  # Padding
 
 
+def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
+
+    # Format of integer list entries, including `;` separator:
+    # - Positive numbers: &42;
+    # - Negative numbers: -- &42;
+    # If as_int is false, we omit `&` and emit constant as numerals.
+    def format_hol_light_int(n):
+        prefix = ""
+        if n < 0:
+            prefix = "-- "
+            n = -n
+        c = "&" if as_int is True else ""
+        return f"{prefix}{c}{n:>{pad}};"
+
+    l = list(map(format_hol_light_int, g))
+    # Remove `;` from end of last entry
+    l[-1] = l[-1][:-1]
+
+    for i in range(0, len(l), entries_per_line):
+        yield "  " + " ".join(l[i : i + entries_per_line])
+
+
 def gen_aarch64_zeta_file():
     def gen():
         yield from gen_header()
@@ -1127,6 +1163,46 @@ def gen_avx2_fwd_ntt_zetas(mult=False):
     for k in range(4):
         for i in range(32):
             yield from gen_twiddles_many(7, i * 4 + k, range(1), 1, mult)
+
+
+def gen_avx2_hol_light_zeta_file():
+    def qdata():
+        def unsigned_mod(x, y):
+            return x % y
+
+        def signed_mod(x, y):
+            r = unsigned_mod(x, y)
+            if r >= y // 2:
+                r -= y
+            return r
+
+        # MLD_AVX2_Q
+        yield from [modulus] * 8
+        # MLD_AVX2_QINV
+        yield from [pow(modulus, -1, 2**32)] * 8
+        # MLD_AVX2_DIV_QINV
+        yield from [
+            signed_mod(pow(modulus, -1, 2**32) * pow(2, 64 - 8, modulus), 2**32)
+        ] * 8
+        # MLD_AVX2_DIV_QINV
+        yield from ([pow(2, 64 - 8, modulus)] * 8)
+
+        yield from gen_avx2_fwd_ntt_zetas(mult=True)
+        yield from gen_avx2_fwd_ntt_zetas(mult=False)
+
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Table of zeta values used in the AVX2 NTTs"
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mldsa_complete_qdata = define `mldsa_complete_qdata:int list = ["
+        yield from print_hol_light_array(qdata())
+        yield "]`;;"
+        yield ""
+
+    update_file("proofs/hol_light/x86_64/proofs/mldsa_zetas.ml", "\n".join(gen()))
 
 
 def gen_avx2_zeta_file():
@@ -2913,6 +2989,7 @@ def _main():
     gen_aarch64_zeta_file()
     gen_aarch64_rej_uniform_table()
     gen_aarch64_rej_uniform_eta_table()
+    gen_avx2_hol_light_zeta_file()
     gen_avx2_zeta_file()
     gen_avx2_rej_uniform_table()
     high_level_status("Generated zeta and lookup tables")
