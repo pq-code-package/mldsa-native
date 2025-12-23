@@ -85,7 +85,7 @@ MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_asm)
 
     mov count, #(MLDSA_N / 4)
 
-loop_start:
+poly_pointwise_montgomery_loop_start:
     ldr q_a_1, [a_ptr, #1*16]
     ldr q_a_2, [a_ptr, #2*16]
     ldr q_a_3, [a_ptr, #3*16]
@@ -119,7 +119,7 @@ loop_start:
     str q_c_0, [out_ptr], #4*16
 
     subs count, count, #4
-    cbnz count, loop_start
+    cbnz count, poly_pointwise_montgomery_loop_start
 
     ret
 

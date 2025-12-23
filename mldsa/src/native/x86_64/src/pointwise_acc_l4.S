@@ -40,7 +40,7 @@ MLD_ASM_FN_SYMBOL(pointwise_acc_l4_avx2)
         vmovdqa	(%rcx), %ymm1
         xorl	%eax, %eax
 
-L_looptop2:
+Lpointwise_acc_l4_avx2_looptop2:
         vmovdqa	(%rsi), %ymm6
         vmovdqa	0x20(%rsi), %ymm8
         vmovdqa	(%rdx), %ymm10
@@ -128,7 +128,7 @@ L_looptop2:
         addq	$0x40, %rdi
         addl	$0x1, %eax
         cmpl	$0x10, %eax
-        jb	L_looptop2
+        jb	Lpointwise_acc_l4_avx2_looptop2
         retq
         .cfi_endproc
 

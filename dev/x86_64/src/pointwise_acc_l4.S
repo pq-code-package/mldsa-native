@@ -80,7 +80,7 @@ MLD_ASM_FN_SYMBOL(pointwise_acc_l4_avx2)
         vmovdqa ymm1, [rcx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQ)*4]
 
         xor     eax, eax
-_looptop2:
+pointwise_acc_l4_avx2_looptop2:
         pointwise 0
 
 // Move
@@ -137,7 +137,7 @@ _looptop2:
         add     rdi, 64
         add     eax, 1
         cmp     eax, 16
-        jb      _looptop2
+        jb      pointwise_acc_l4_avx2_looptop2
 
         ret
 /* simpasm: footer-start */

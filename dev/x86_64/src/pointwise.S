@@ -47,7 +47,7 @@ MLD_ASM_FN_SYMBOL(pointwise_avx2)
         vmovdqa ymm1, [rcx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQ)*4]
 
         xor     eax, eax
-_looptop1:
+pointwise_avx2_looptop1:
 // Handle 24 = 3*8 coefficients per iteration
 
 // Load
@@ -125,7 +125,7 @@ _looptop1:
         add     rdx, 96
         add     eax, 1
         cmp     eax, 10
-        jb      _looptop1
+        jb      pointwise_avx2_looptop1
 
 
 // Handle the last 256 % 24 = 16 = 2*8 coefficients, left over by the loop

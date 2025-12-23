@@ -28,7 +28,7 @@ MLD_ASM_FN_SYMBOL(polyvecl_pointwise_acc_montgomery_l5_asm)
         dup	v1.4s, w3
         mov	x3, #0x40               // =64
 
-Ll5_loop_start:
+Lpolyvecl_pointwise_acc_montgomery_l5_loop_start:
         ldr	q17, [x1, #0x10]
         ldr	q18, [x1, #0x20]
         ldr	q19, [x1, #0x30]
@@ -134,7 +134,7 @@ Ll5_loop_start:
         str	q19, [x0, #0x30]
         str	q16, [x0], #0x40
         subs	x3, x3, #0x4
-        cbnz	x3, Ll5_loop_start
+        cbnz	x3, Lpolyvecl_pointwise_acc_montgomery_l5_loop_start
         ret
         .cfi_endproc
 

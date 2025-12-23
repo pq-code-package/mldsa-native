@@ -103,7 +103,7 @@ MLD_ASM_FN_SYMBOL(polyvecl_pointwise_acc_montgomery_l4_asm)
 
     mov count, #(MLDSA_N / 4)
 
-l4_loop_start:
+polyvecl_pointwise_acc_montgomery_l4_loop_start:
     load_polys q_a_0, q_a_1, q_a_2, q_a_3, a_ptr, 0
     load_polys q_b_0, q_b_1, q_b_2, q_b_3, b_ptr, 0
     // Bounds: |a_{i}| < q, |b_{i}| < 9q
@@ -160,7 +160,7 @@ l4_loop_start:
     str q_c_0, [out_ptr], #4*16
 
     subs count, count, #4
-    cbnz count, l4_loop_start
+    cbnz count, polyvecl_pointwise_acc_montgomery_l4_loop_start
 
     ret
 
