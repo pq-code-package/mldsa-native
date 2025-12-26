@@ -48,6 +48,7 @@ _RE_BYTECODE_START = re.compile(
 )
 _RE_FUNC_SYMBOL = re.compile(r"MLD_ASM_FN_SYMBOL\((.*)\)")
 _RE_MACRO_CHECK = re.compile(r"[^_]((?:MLD_|MLDSA_)\w+)(.*)$", re.M)
+_RE_MLKEM_MACRO_CHECK = re.compile(r"[^_]((?:MLK_|MLKEM_)\w+)(.*)$", re.M)
 _RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
 _RE_ARGS_COMMENT = re.compile(r"(.*?)(\s*//.*)?$")
 _RE_MACRO_DEF = re.compile(r"^\s*\.macro\s+(\w+)")
@@ -1825,6 +1826,17 @@ def check_macro_typos_in_file(filename, macro_check):
     """Checks for typos in MLD_XXX and MLDSA_XXX identifiers."""
     content = read_file(filename)
 
+    # Separate check for wrongly ported MLK/MLKEM macros
+    for m in _RE_MLKEM_MACRO_CHECK.finditer(content):
+        txt = m.group(1)
+        rest = m.group(2)
+        line_no = content[: m.start()].count("\n") + 1
+        if filename != "scripts/autogen":
+            raise Exception(
+                f"Likely typo {txt} in {filename}:{line_no}? wrongly ported MLK_XXX / MLKEM_XXX macros from mlkem-native."
+            )
+
+    # Check MLD/MLDSA macros
     for m in _RE_MACRO_CHECK.finditer(content):
         txt = m.group(1)
         rest = m.group(2)
