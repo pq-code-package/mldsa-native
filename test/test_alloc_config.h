@@ -626,7 +626,10 @@ void custom_free(void *p, size_t sz, const char *file, int line,
  *              key generation.
  *
  *****************************************************************************/
+#if !defined(MLD_CONFIG_KEYGEN_PCT)
 #define MLD_CONFIG_KEYGEN_PCT
+#endif
+
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST

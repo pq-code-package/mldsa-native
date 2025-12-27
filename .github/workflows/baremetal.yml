@@ -35,3 +35,4 @@ jobs:
           acvp: true
           examples: false
           stack: false
+          alloc: false
