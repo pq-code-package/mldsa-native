@@ -113,3 +113,34 @@ $(BUILD_DIR)/mldsa87/alloc/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa44/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa44/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/rng_fail/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/rng_fail/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
