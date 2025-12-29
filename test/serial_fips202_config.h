@@ -665,6 +665,30 @@
  *****************************************************************************/
 #define MLD_CONFIG_SERIAL_FIPS202_ONLY
 
+/******************************************************************************
+ * Name:        MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
+ *
+ * Description: Set this to reduce RAM usage.
+ *
+ *              This configuration option is work in progress.
+ *
+ *              At present it results the following memory saving in signing
+ *              with no impact on performance:
+ *               - ML-DSA-44: 4 KiB
+ *               - ML-DSA-65: 5 KiB
+ *               - ML-DSA-87: 7 KiB
+ *
+ *              This option is useful for embedded systems with tight RAM
+ *              constraints but relaxed performance requirements.
+ *
+ *              WARNING: This option is experimental!
+ *              CBMC proofs do not currently cover this configuration option.
+ *              Its scope and configuration may change at any time.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_REDUCE_RAM */
+
+
 /*************************  Config internals  ********************************/
 
 #endif /* MLD_BUILD_INTERNAL */

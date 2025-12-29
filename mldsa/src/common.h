@@ -205,6 +205,20 @@
 
 #endif /* MLD_CONFIG_CUSTOM_ALLOC_FREE */
 
+/*
+ * We are facing severe CBMC performance issues when using unions.
+ * As a temporary workaround, we use unions only when MLD_CONFIG_REDUCE_RAM is
+ * set.
+ * TODO: Remove the workaround once
+ * https://github.com/diffblue/cbmc/issues/8813
+ * is resolved
+ */
+#if defined(MLD_CONFIG_REDUCE_RAM)
+#define MLK_UNION_OR_STRUCT union
+#else
+#define MLK_UNION_OR_STRUCT struct
+#endif
+
 /****************************** Error codes ***********************************/
 
 /* Generic failure condition */

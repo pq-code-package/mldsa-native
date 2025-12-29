@@ -211,6 +211,7 @@
 #undef MLD_NAMESPACE_KL
 #undef MLD_NAMESPACE_PREFIX
 #undef MLD_NAMESPACE_PREFIX_KL
+#undef MLK_UNION_OR_STRUCT
 #undef mld_memcpy
 #undef mld_memset
 /* mldsa/src/packing.h */

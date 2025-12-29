@@ -490,20 +490,32 @@ __contract__(
   unsigned int n;
   uint32_t z_invalid, w0_invalid, h_invalid;
   int ret;
+  /* TODO: Remove the following workaround for
+   * https://github.com/diffblue/cbmc/issues/8813 */
+  typedef MLK_UNION_OR_STRUCT
+  {
+    mld_polyvecl y;
+    mld_polyveck h;
+  }
+  yh_u;
+  mld_polyvecl *y;
+  mld_polyveck *h;
+
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_ALLOC(y, mld_polyvecl, 1);
+  MLD_ALLOC(yh, yh_u, 1);
   MLD_ALLOC(z, mld_polyvecl, 1);
   MLD_ALLOC(w1, mld_polyveck, 1);
   MLD_ALLOC(w0, mld_polyveck, 1);
-  MLD_ALLOC(h, mld_polyveck, 1);
   MLD_ALLOC(cp, mld_poly, 1);
 
-  if (challenge_bytes == NULL || y == NULL || z == NULL || w1 == NULL ||
-      w0 == NULL || h == NULL || cp == NULL)
+  if (challenge_bytes == NULL || yh == NULL || z == NULL || w1 == NULL ||
+      w0 == NULL || cp == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
+  y = &yh->y;
+  h = &yh->h;
 
   /* Sample intermediate vector y */
   mld_polyvecl_uniform_gamma1(y, rhoprime, nonce);
@@ -616,11 +628,10 @@ __contract__(
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(cp, mld_poly, 1);
-  MLD_FREE(h, mld_polyveck, 1);
   MLD_FREE(w0, mld_polyveck, 1);
   MLD_FREE(w1, mld_polyveck, 1);
   MLD_FREE(z, mld_polyvecl, 1);
-  MLD_FREE(y, mld_polyvecl, 1);
+  MLD_FREE(yh, yh_u, 1);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
 
   return ret;
