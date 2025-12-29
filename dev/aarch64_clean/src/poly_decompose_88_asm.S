@@ -11,10 +11,37 @@
 .macro decompose88 a1, a, temp
         // range: 0 <= a <= Q-1 = 88*GAMMA2
 
+        /* check-magic: 190464 == 2 * intdiv(MLDSA_Q - 1, 88) */
+        /* check-magic: 1477838209 == floor(2**48 / 190464) */
+        /* check-magic: 26177172834091008 == 35 / (1 / 190464 - 1477838209 / 2^48) */
         // Compute a1 = round-(a / (2*GAMMA2)) = round-(a / 190464) ≈
         // round(a * 1477838209 / 2^48), where round-() denotes "round half
-        // down". This is exact for 0 <= a < Q. Note that half is rounded down
-        // since 1477838209 / 2^48 ≲ 1 / 190464.
+        // down". This is exact for 0 <= a < Q. We'll prove this in the
+        // following paragraphs, in which we denote 2*GAMMA2 as B to avoid
+        // clutter.
+        //
+        // Consider the (signed) error a * (1 / B - 1477838209 / 2^48) between
+        // a / B and the (under-)approximation a * 1477838209 / 2^48. Because
+        // eps := 1 / B - 1477838209 / 2^48 is 35 / 26177172834091008 ≈
+        // 2^(-49.41) < 2^(-49), we have 0 <= a * eps < 2^23 * 2^(-49) =
+        // 1 / 2^26 < 1 / 2^18 < 1 / B (note that a is non-negative).
+        //
+        // On the other hand, 1 / B is the spacing between the integral
+        // multiples of 1 / B, which includes all rounding boundaries n + 0.5
+        // (since B is even). Hence, if a / B is not of the form n + 0.5, then
+        // it is at least 1 / B away from the nearest rounding boundary, so
+        // moving from a / B to a * 1477838209 / 2^48 does not affect the
+        // rounding result, no matter the type of rounding used in either side.
+        // In particular, we have round-(a / B) = round(a * 1477838209 / 2^48)
+        // as claimed.
+        //
+        // As for the remaining case where a / B _is_ of the form n + 0.5,
+        // because a * 1477838209 / 2^48 is slightly but strictly below a / B =
+        // n + 0.5 (note that a and thus the error a * eps cannot be 0 here), it
+        // is always rounded down to n. More precisely, we have round-(a / B) =
+        // round(a * 1477838209 / 2^48), where the round-down on the LHS is
+        // essential, and on the RHS the type of rounding again does not matter.
+        // This concludes the proof.
         sqdmulh \a1\().4s, \a\().4s, barrett_const.4s
         srshr \a1\().4s, \a1\().4s, #17
         // range: 0 <= a1 <= 44
