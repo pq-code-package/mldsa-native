@@ -122,7 +122,16 @@ set if there are native implementations for NTT and INTT."
  * Arguments:   - int32_t p[MLDSA_N]: pointer to in/output polynomial
  *
  **************************************************/
-static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N]);
+static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t p[MLDSA_N])
+__contract__(
+  /* We don't specify that this should be a permutation, but only
+   * that it does not change the bound established at the end of
+   * mld_polyvec_matrix_expand.
+   */
+  requires(memory_no_alias(p, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(p, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(p, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(p, 0, MLDSA_N, 0, MLDSA_Q)));
 #endif /* MLD_USE_NATIVE_NTT_CUSTOM_ORDER */
 
 

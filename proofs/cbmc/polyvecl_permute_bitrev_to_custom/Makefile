@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polymat_permute_bitrev_to_custom_harness
+HARNESS_FILE = polyvecl_permute_bitrev_to_custom_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polymat_permute_bitrev_to_custom
+PROOF_UID = polyvecl_permute_bitrev_to_custom
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
-CHECK_FUNCTION_CONTRACTS=mld_polymat_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=mld_polyvecl_permute_bitrev_to_custom
+CHECK_FUNCTION_CONTRACTS=mld_polyvecl_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2 --slice-formula --no-array-field-sensitivity
 
-FUNCTION_NAME = polymat_permute_bitrev_to_custom
+FUNCTION_NAME = polyvecl_permute_bitrev_to_custom
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

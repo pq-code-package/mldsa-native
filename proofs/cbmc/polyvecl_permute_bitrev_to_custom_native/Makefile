@@ -1,26 +1,27 @@
+# Copyright (c) The mlkem-native project authors
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polymat_permute_bitrev_to_custom_harness
+HARNESS_FILE = polyvecl_permute_bitrev_to_custom_native_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polymat_permute_bitrev_to_custom
+PROOF_UID = mld_polyvecl_permute_bitrev_to_custom_native
 
-DEFINES +=
+DEFINES += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_ARITH_BACKEND_FILE="\"dummy_backend.h\""
 INCLUDES +=
+UNWINDSET +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
-CHECK_FUNCTION_CONTRACTS=mld_polymat_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=mld_polyvecl_permute_bitrev_to_custom
+CHECK_FUNCTION_CONTRACTS=mld_polyvecl_permute_bitrev_to_custom
+USE_FUNCTION_CONTRACTS= mld_poly_permute_bitrev_to_custom
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,16 +29,14 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2 --slice-formula --no-array-field-sensitivity
 
-FUNCTION_NAME = polymat_permute_bitrev_to_custom
+FUNCTION_NAME = mld_polyvecl_permute_bitrev_to_custom_native
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
 # restrict the number of EXPENSIVE CBMC jobs running at once. See the
 # documentation in Makefile.common under the "Job Pools" heading for details.
 # EXPENSIVE = true
-
-# This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
