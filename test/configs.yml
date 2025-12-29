@@ -397,6 +397,14 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/basic_lowram/mldsa_native/mldsa_native_config.h
+    description: "Configuration for low RAM build of mldsa-native"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_REDUCE_RAM: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: test/test_alloc_config.h
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:

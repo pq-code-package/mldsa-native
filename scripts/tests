@@ -213,6 +213,7 @@ class TEST_TYPES(Enum):
     BASIC_DETERMINISTIC = 18
     UNIT = 19
     ALLOC = 20
+    BASIC_LOWRAM = 21
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -234,6 +235,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MULTILEVEL_BUILD,
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
             TEST_TYPES.BASIC_DETERMINISTIC,
+            TEST_TYPES.BASIC_LOWRAM,
         ]
 
     @staticmethod
@@ -271,6 +273,8 @@ class TEST_TYPES(Enum):
             return "Example (mldsa-native as code package)"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "Example (mldsa-native as code package without randombytes() implementation)"
+        if self == TEST_TYPES.BASIC_LOWRAM:
+            return "Example (mldsa-native with reduced RAM usage)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -301,6 +305,8 @@ class TEST_TYPES(Enum):
             return "examples/basic"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "examples/basic_deterministic"
+        if self == TEST_TYPES.BASIC_LOWRAM:
+            return "examples/basic_lowram"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -337,6 +343,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.BASIC:
             return ""
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
+            return ""
+        if self == TEST_TYPES.BASIC_LOWRAM:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
@@ -1189,6 +1197,7 @@ def cli():
             "custom_backend",
             "basic",
             "basic_deterministic",
+            "basic_lowram",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
@@ -1254,6 +1263,7 @@ def cli():
             "custom_backend",
             "basic",
             "basic_deterministic",
+            "basic_lowram",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",

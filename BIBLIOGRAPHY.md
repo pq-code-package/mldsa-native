@@ -24,6 +24,7 @@ source code and documentation.
 * URL: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 * Referenced from:
   - [examples/basic_deterministic/mldsa_native/mldsa_native_config.h](examples/basic_deterministic/mldsa_native/mldsa_native_config.h)
+  - [examples/basic_lowram/mldsa_native/mldsa_native_config.h](examples/basic_lowram/mldsa_native/mldsa_native_config.h)
   - [examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h)
   - [examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h)
   - [examples/custom_backend/mldsa_native/mldsa_native_config.h](examples/custom_backend/mldsa_native/mldsa_native_config.h)
@@ -72,6 +73,7 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
   - [examples/basic_deterministic/mldsa_native/mldsa_native_config.h](examples/basic_deterministic/mldsa_native/mldsa_native_config.h)
+  - [examples/basic_lowram/mldsa_native/mldsa_native_config.h](examples/basic_lowram/mldsa_native/mldsa_native_config.h)
   - [examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h)
   - [examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h)
   - [examples/custom_backend/mldsa_native/mldsa_native_config.h](examples/custom_backend/mldsa_native/mldsa_native_config.h)

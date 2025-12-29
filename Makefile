@@ -257,6 +257,7 @@ EXAMPLE_DIRS := \
 	examples/custom_backend \
 	examples/basic \
 	examples/basic_deterministic \
+	examples/basic_lowram \
 	examples/monolithic_build \
 	examples/monolithic_build_native \
 	examples/monolithic_build_multilevel \

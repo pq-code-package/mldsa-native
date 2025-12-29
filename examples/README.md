@@ -11,6 +11,11 @@ See [basic](basic) for a basic example of how to build a single instance of mlds
 ## Basic_deterministic
 
 See [basic_deterministic](basic_deterministic) for a basic example of how to build a single instance of mldsa-native without `randombytes()` implementation. This allows users to build mldsa-native using only the deterministic API when randomized functions are not required.
+
+## Basic_lowram
+
+See [basic_lowram](basic_lowram) for a basic example of how to build a single instance of mldsa-native with reduced RAM usage (`MLD_CONFIG_REDUCE_RAM`). This is useful for embedded systems with tight RAM constraints.
+
 ## Multi-level build (C only)
 
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mldsa-native per security level,
