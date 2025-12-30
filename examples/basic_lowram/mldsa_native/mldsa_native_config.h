@@ -437,6 +437,9 @@
  *              Set this option and define `mld_sys_check_capability` if you
  *              want to use a custom method to dispatch between implementations.
  *
+ *              Return value 1 indicates that a capability is supported.
+ *              Return value 0 indicates that a capability is not supported.
+ *
  *              If this option is not set, mldsa-native uses compile-time
  *              feature detection only to decide which backend to use.
  *
