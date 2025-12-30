@@ -230,6 +230,9 @@ typedef enum
 #include "cbmc.h"
 
 static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+__contract__(
+  ensures(return_value == 0 || return_value == 1)
+)
 {
   /* By default, we rely on compile-time feature detection/specification:
    * If a feature is enabled at compile-time, we assume it is supported by
