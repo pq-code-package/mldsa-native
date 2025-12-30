@@ -980,7 +980,7 @@ class Tests:
             # arm_or_x86 = "arm"
             return
         elif platform.machine().lower() in ["x86_64"]:
-            arm_or_x86 = "x86"
+            arm_or_x86 = "x86_64"
         else:
             return
 
