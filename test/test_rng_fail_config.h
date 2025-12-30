@@ -436,6 +436,9 @@ int mld_randombytes(uint8_t *out, size_t outlen);
  *              Set this option and define `mld_sys_check_capability` if you
  *              want to use a custom method to dispatch between implementations.
  *
+ *              Return value 1 indicates that a capability is supported.
+ *              Return value 0 indicates that a capability is not supported.
+ *
  *              If this option is not set, mldsa-native uses compile-time
  *              feature detection only to decide which backend to use.
  *
@@ -668,14 +671,10 @@ int mld_randombytes(uint8_t *out, size_t outlen);
  * Name:        MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
  *
  * Description: Set this to reduce RAM usage.
+ *              This trades memory for performance.
  *
- *              This configuration option is work in progress.
- *
- *              At present it results the following memory saving in signing
- *              with no impact on performance:
- *               - ML-DSA-44: 4 KiB
- *               - ML-DSA-65: 5 KiB
- *               - ML-DSA-87: 7 KiB
+ *              For detailed expected memory savings, see the
+ *              mldsa-native README.
  *
  *              This option is useful for embedded systems with tight RAM
  *              constraints but relaxed performance requirements.
@@ -686,7 +685,6 @@ int mld_randombytes(uint8_t *out, size_t outlen);
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_REDUCE_RAM */
-
 
 /*************************  Config internals  ********************************/
 

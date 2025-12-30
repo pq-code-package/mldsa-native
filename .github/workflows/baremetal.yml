@@ -36,3 +36,4 @@ jobs:
           examples: false
           stack: false
           alloc: false
+          rng_fail: false

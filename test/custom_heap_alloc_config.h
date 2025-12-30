@@ -403,7 +403,7 @@
  *              consumer.
  *
  *              If this option is not set, mldsa-native expects a function
- *              void randombytes(uint8_t *out, size_t outlen).
+ *              int randombytes(uint8_t *out, size_t outlen).
  *
  *              Set this option and define `mld_randombytes` if you want to
  *              use a custom method to sample randombytes with a different name
