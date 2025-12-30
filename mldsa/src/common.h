@@ -278,9 +278,9 @@
  * is resolved
  */
 #if defined(MLD_CONFIG_REDUCE_RAM)
-#define MLK_UNION_OR_STRUCT union
+#define MLD_UNION_OR_STRUCT union
 #else
-#define MLK_UNION_OR_STRUCT struct
+#define MLD_UNION_OR_STRUCT struct
 #endif
 
 /****************************** Error codes ***********************************/
