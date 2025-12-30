@@ -219,7 +219,8 @@
 /* mldsa/src/packing.h */
 #undef MLD_PACKING_H
 #undef mld_pack_pk
-#undef mld_pack_sig
+#undef mld_pack_sig_c_h
+#undef mld_pack_sig_z
 #undef mld_pack_sk
 #undef mld_unpack_pk
 #undef mld_unpack_sig
@@ -294,15 +295,10 @@
 #undef mld_polyveck_unpack_t0
 #undef mld_polyveck_use_hint
 #undef mld_polyvecl
-#undef mld_polyvecl_add
 #undef mld_polyvecl_chknorm
-#undef mld_polyvecl_invntt_tomont
 #undef mld_polyvecl_ntt
 #undef mld_polyvecl_pack_eta
-#undef mld_polyvecl_pack_z
 #undef mld_polyvecl_pointwise_acc_montgomery
-#undef mld_polyvecl_pointwise_poly_montgomery
-#undef mld_polyvecl_reduce
 #undef mld_polyvecl_uniform_gamma1
 #undef mld_polyvecl_unpack_eta
 #undef mld_polyvecl_unpack_z

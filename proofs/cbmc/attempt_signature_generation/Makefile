@@ -31,18 +31,14 @@ USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvecl_uniform_gamma1 \
                        mld_H \
                        $(MLD_NAMESPACE)poly_challenge \
                        $(MLD_NAMESPACE)poly_ntt \
-                       $(MLD_NAMESPACE)polyvecl_pointwise_poly_montgomery \
-                       $(MLD_NAMESPACE)polyvecl_invntt_tomont \
-                       $(MLD_NAMESPACE)polyvecl_add \
-                       $(MLD_NAMESPACE)polyvecl_reduce \
-                       $(MLD_NAMESPACE)polyvecl_chknorm \
                        $(MLD_NAMESPACE)polyveck_pointwise_poly_montgomery \
                        $(MLD_NAMESPACE)polyveck_sub \
                        $(MLD_NAMESPACE)polyveck_reduce \
                        $(MLD_NAMESPACE)polyveck_chknorm \
                        $(MLD_NAMESPACE)polyveck_add \
                        $(MLD_NAMESPACE)polyveck_make_hint \
-                       $(MLD_NAMESPACE)pack_sig
+                       $(MLD_NAMESPACE)pack_sig_c_h \
+                       mld_compute_pack_z
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on

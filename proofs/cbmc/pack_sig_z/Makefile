@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_pack_z_harness
+HARNESS_FILE = pack_sig_z_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_pack_z
+PROOF_UID = pack_sig_z
 
 DEFINES +=
 INCLUDES +=
@@ -16,9 +16,9 @@ INCLUDES +=
 REMOVE_FUNCTION_BODY +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/packing.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvecl_pack_z
+CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)pack_sig_z
 USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyz_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -26,9 +26,9 @@ USE_DYNAMIC_FRAMES=1
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
-CBMCFLAGS += --slice-formula
+CBMCFLAGS+=--slice-formula
 
-FUNCTION_NAME = polyvecl_pack_z
+FUNCTION_NAME = pack_sig_z
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -37,7 +37,7 @@ FUNCTION_NAME = polyvecl_pack_z
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 9
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

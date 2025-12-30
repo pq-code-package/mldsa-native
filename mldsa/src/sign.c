@@ -47,6 +47,7 @@
 #define mld_validate_hash_length MLD_ADD_PARAM_SET(mld_validate_hash_length)
 #define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
+#define mld_compute_pack_z MLD_ADD_PARAM_SET(mld_compute_pack_z)
 #define mld_attempt_signature_generation \
   MLD_ADD_PARAM_SET(mld_attempt_signature_generation)
 #define mld_compute_t0_t1_tr_from_sk_components \
@@ -432,15 +433,93 @@ __contract__(
   mld_zeroize(&state, sizeof(state));
 }
 
-/* Reference: The reference implementation does not explicitly   */
-/* check the maximum nonce value, but instead loops indefinitely */
-/* (even when the nonce would overflow). Internally,             */
-/* sampling of y uses (nonceL), (nonceL+1), ... (nonce*L+L-1).   */
-/* Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.  */
-/* Explicitly checking for this explicitly allows us to prove    */
-/* type-safety. Note that FIPS204 explicitly allows an upper-    */
-/* bound this loop of 814 (< (UINT16_MAX - L)/L) - see           */
-/* @[FIPS204, Appendix C].                                        */
+/*************************************************
+ * Name:        mld_compute_pack_z
+ *
+ * Description: Computes z = y + s1*c, checks that z has coefficients smaller
+ *              than MLDSA_GAMMA1 - MLDSA_BETA, and packs z into the
+ *              signature buffer.
+ *
+ * Arguments:   - uint8_t *sig: output signature
+ *              - const mld_poly *cp: challenge polynomial
+ *              - const polyvecl *s1: secret vector s1
+ *              - const polyvecl *y: masking vector y
+ *
+ * Returns:     - 0: Success (z has coefficients smaller than
+ *                   MLDSA_GAMMA1 - MLDSA_BETA,)
+ *              - MLD_ERR_FAIL: z rejected (norm check failed)
+ *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
+ *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *
+ * Reference: This function is inlined into crypto_sign_signature in the
+ *            reference implementation.
+ **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
+static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
+                              const mld_poly *cp, const mld_polyvecl *s1,
+                              const mld_polyvecl *y, mld_poly *z)
+__contract__(
+  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
+  requires(memory_no_alias(cp, sizeof(mld_poly)))
+  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(y, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(z, sizeof(mld_poly)))
+  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  requires(forall(k0, 0, MLDSA_L,
+    array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  assigns(memory_slice(z, sizeof(mld_poly)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
+          return_value == MLD_ERR_OUT_OF_MEMORY)
+)
+{
+  unsigned int i;
+  uint32_t z_invalid;
+  for (i = 0; i < MLDSA_L; i++)
+  __loop__(
+    assigns(i, memory_slice(z, sizeof(mld_poly)), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    invariant(i <= MLDSA_L)
+  )
+  {
+    mld_poly_pointwise_montgomery(z, cp, &s1->vec[i]);
+    mld_poly_invntt_tomont(z);
+    mld_poly_add(z, &y->vec[i]);
+    mld_poly_reduce(z);
+
+    z_invalid = mld_poly_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA);
+    /* Constant time: It is fine (and prohibitively expensive to avoid)
+     * to leak the result of the norm check and which polynomial in z caused a
+     * rejection. It would even be okay to leak which coefficient led to
+     * rejection as the candidate signature will be discarded anyway.
+     * See Section 5.5 of @[Round3_Spec]. */
+    MLD_CT_TESTING_DECLASSIFY(&z_invalid, sizeof(uint32_t));
+    if (z_invalid)
+    {
+      return MLD_ERR_FAIL; /* reject */
+    }
+    /* If z is valid, then its coefficients are bounded by
+     * MLDSA_GAMMA1 - MLDSA_BETA. This will be needed below
+     * to prove the pre-condition of pack_sig_z() */
+    mld_assert_abs_bound(z, MLDSA_N, (MLDSA_GAMMA1 - MLDSA_BETA));
+
+    /* After the norm check, the distribution of each coefficient of z is
+     * independent of the secret key and it can, hence, be considered
+     * public. It is, hence, okay to immediately pack it into the user-provided
+     * signature buffer. */
+    mld_pack_sig_z(sig, z, i);
+  }
+  return 0;
+}
+
+/* Reference: The reference implementation does not explicitly check the
+ * maximum nonce value, but instead loops indefinitely (even when the nonce
+ * would overflow). Internally, sampling of y uses
+ * (nonceL), (nonceL+1), ... (nonce*L+L-1).
+ * Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.
+ * Explicitly checking for this explicitly allows us to prove type-safety.
+ * Note that FIPS204 explicitly allows an upper-bound this loop of
+ * 814 (< (UINT16_MAX - L)/L) - see @[FIPS204, Appendix C]. */
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
@@ -493,7 +572,7 @@ __contract__(
 )
 {
   unsigned int n;
-  uint32_t z_invalid, w0_invalid, h_invalid;
+  uint32_t w0_invalid, h_invalid;
   int ret;
   /* TODO: Remove the following workaround for
    * https://github.com/diffblue/cbmc/issues/8813 */
@@ -506,29 +585,43 @@ __contract__(
   mld_polyvecl *y;
   mld_polyveck *h;
 
+  /* TODO: Remove the following workaround for
+   * https://github.com/diffblue/cbmc/issues/8813 */
+  typedef MLK_UNION_OR_STRUCT
+  {
+    mld_polyveck w1;
+    mld_polyvecl tmp;
+  }
+  w1tmp_u;
+  mld_polyveck *w1;
+  mld_polyvecl *tmp;
+
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
   MLD_ALLOC(yh, yh_u, 1);
-  MLD_ALLOC(z, mld_polyvecl, 1);
-  MLD_ALLOC(w1, mld_polyveck, 1);
+  MLD_ALLOC(z, mld_poly, 1);
+  MLD_ALLOC(w1tmp, w1tmp_u, 1);
   MLD_ALLOC(w0, mld_polyveck, 1);
   MLD_ALLOC(cp, mld_poly, 1);
+  MLD_ALLOC(t, mld_poly, 1);
 
-  if (challenge_bytes == NULL || yh == NULL || z == NULL || w1 == NULL ||
-      w0 == NULL || cp == NULL)
+  if (challenge_bytes == NULL || yh == NULL || z == NULL || w1tmp == NULL ||
+      w0 == NULL || cp == NULL || t == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
   y = &yh->y;
   h = &yh->h;
+  w1 = &w1tmp->w1;
+  tmp = &w1tmp->tmp;
 
   /* Sample intermediate vector y */
   mld_polyvecl_uniform_gamma1(y, rhoprime, nonce);
 
   /* Matrix-vector multiplication */
-  *z = *y;
-  mld_polyvecl_ntt(z);
-  mld_polyvec_matrix_pointwise_montgomery(w0, mat, z);
+  *tmp = *y;
+  mld_polyvecl_ntt(tmp);
+  mld_polyvec_matrix_pointwise_montgomery(w0, mat, tmp);
   mld_polyveck_reduce(w0);
   mld_polyveck_invntt_tomont(w0);
 
@@ -548,29 +641,11 @@ __contract__(
   mld_poly_ntt(cp);
 
   /* Compute z, reject if it reveals secret */
-  mld_polyvecl_pointwise_poly_montgomery(z, cp, s1);
-  mld_polyvecl_invntt_tomont(z);
-  mld_polyvecl_add(z, y);
-  mld_polyvecl_reduce(z);
-
-  z_invalid = mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA);
-  /* Constant time: It is fine (and prohibitively expensive to avoid)
-   * leaking the result of the norm check. In case of rejection it
-   * would even be okay to leak which coefficient led to rejection
-   * as the candidate signature will be discarded anyway.
-   * See Section 5.5 of @[Round3_Spec]. */
-  MLD_CT_TESTING_DECLASSIFY(&z_invalid, sizeof(uint32_t));
-  if (z_invalid)
+  ret = mld_compute_pack_z(sig, cp, s1, y, t);
+  if (ret)
   {
-    ret = MLD_ERR_FAIL; /* reject */
     goto cleanup;
   }
-
-  /* If z is valid, then its coefficients are bounded by  */
-  /* MLDSA_GAMMA1 - MLDSA_BETA. This will be needed below */
-  /* to prove the pre-condition of pack_sig()             */
-  mld_assert_abs_bound_2d(z->vec, MLDSA_L, MLDSA_N,
-                          (MLDSA_GAMMA1 - MLDSA_BETA));
 
   /* Check that subtracting cs2 does not change high bits of w and low bits
    * do not reveal secret information */
@@ -622,20 +697,19 @@ __contract__(
   }
 
   /* All is well - write signature */
+  mld_pack_sig_c_h(sig, challenge_bytes, h, n);
   /* Constant time: At this point it is clear that the signature is valid - it
    * can, hence, be considered public. */
-  MLD_CT_TESTING_DECLASSIFY(h, sizeof(*h));
-  MLD_CT_TESTING_DECLASSIFY(z, sizeof(*z));
-  mld_pack_sig(sig, challenge_bytes, z, h, n);
-
+  MLD_CT_TESTING_DECLASSIFY(sig, MLDSA_CRYPTO_BYTES);
   ret = 0; /* success */
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  MLD_FREE(t, mld_poly, 1);
   MLD_FREE(cp, mld_poly, 1);
   MLD_FREE(w0, mld_polyveck, 1);
-  MLD_FREE(w1, mld_polyveck, 1);
-  MLD_FREE(z, mld_polyvecl, 1);
+  MLD_FREE(w1tmp, w1tmp_u, 1);
+  MLD_FREE(z, mld_poly, 1);
   MLD_FREE(yh, yh_u, 1);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
 
@@ -1390,6 +1464,7 @@ cleanup:
 #undef mld_validate_hash_length
 #undef mld_get_hash_oid
 #undef mld_H
+#undef mld_compute_pack_z
 #undef mld_attempt_signature_generation
 #undef mld_compute_t0_t1_tr_from_sk_components
 #undef MLD_NONCE_UB

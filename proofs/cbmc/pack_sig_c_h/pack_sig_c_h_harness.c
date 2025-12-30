@@ -1,11 +1,13 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "polyvec.h"
+#include "packing.h"
+
 
 void harness(void)
 {
-  mld_polyvecl *a, *b;
-  mld_poly *c;
-  mld_polyvecl_pointwise_poly_montgomery(a, c, b);
+  uint8_t *a, *b;
+  mld_polyveck *h;
+  unsigned int nh;
+  mld_pack_sig_c_h(a, b, h, nh);
 }
