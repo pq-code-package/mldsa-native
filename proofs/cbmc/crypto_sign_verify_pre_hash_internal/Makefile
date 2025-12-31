@@ -20,14 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_pre_hash_internal
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_internal \
-                       $(MLD_NAMESPACE)unpack_pk \
-                       $(MLD_NAMESPACE)unpack_sig \
-                       $(MLD_NAMESPACE)polyvec_matrix_expand \
-                       $(MLD_NAMESPACE)polyvecl_invntt_tomont \
-                       $(MLD_NAMESPACE)polyveck_invntt_tomont \
-                       $(MLD_NAMESPACE)polyveck_sub \
-                       $(MLD_NAMESPACE)polyveck_use_hint
+USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_internal
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on
