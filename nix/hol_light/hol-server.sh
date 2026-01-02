@@ -15,8 +15,8 @@ PORT=${1:-2012}
 HOL_LIGHT_DIR="@hol_light@/lib/hol_light"
 HOL_SERVER_SRC="@hol_server_src@"
 
-# cd to x86_64 proofs directory if in mldsa-native repo
-PROOF_DIR="$(git rev-parse --show-toplevel 2>/dev/null)/proofs/hol_light/x86_64"
+# cd to proofs directory if in mldsa-native repo
+PROOF_DIR="$(git rev-parse --show-toplevel 2>/dev/null)/proofs/hol_light"
 [ -d "$PROOF_DIR" ] && cd "$PROOF_DIR"
 
 echo "Starting HOL Light server on port $PORT..."

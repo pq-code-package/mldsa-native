@@ -61,12 +61,12 @@ We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to
 
 **Note:** The `MLD_CONFIG_REDUCE_RAM` configuration option is not currently covered by CBMC proofs.
 
-HOL-Light functional correctness proofs can be found in [proofs/hol_light/x86_64](proofs/hol_light/x86_64). So far, the following functions have been proven correct:
+HOL-Light functional correctness proofs can be found in [proofs/hol_light](proofs/hol_light). So far, the following functions have been proven correct:
 
+- AArch64 poly_caddq [poly_caddq_asm.S](mldsa/src/native/aarch64/src/poly_caddq_asm.S)
 - x86_64 NTT [ntt.S](mldsa/src/native/x86_64/src/ntt.S)
 
-
-These proofs are utilizing the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+These proofs utilize the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 ## Security
 

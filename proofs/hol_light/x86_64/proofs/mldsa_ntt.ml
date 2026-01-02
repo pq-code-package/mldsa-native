@@ -8,14 +8,14 @@
 (* ========================================================================= *)
 
 needs "x86/proofs/base.ml";;
-needs "proofs/mldsa_specs.ml";;
-needs "proofs/mldsa_utils.ml";;
-needs "proofs/mldsa_zetas.ml";;
+needs "x86_64/proofs/mldsa_specs.ml";;
+needs "x86_64/proofs/mldsa_utils.ml";;
+needs "x86_64/proofs/mldsa_zetas.ml";;
 
-(*** print_literal_from_elf "mldsa/mldsa_ntt.o";;
+(*** print_literal_from_elf "x86_64/mldsa/mldsa_ntt.o";;
  ***)
 
-let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "mldsa/mldsa_ntt.o"
+let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "x86_64/mldsa/mldsa_ntt.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)

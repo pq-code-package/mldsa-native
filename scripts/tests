@@ -1004,9 +1004,7 @@ class Tests:
     def hol_light(self):
 
         if platform.machine().lower() in ["arm64", "aarch64"]:
-            # TODO: Skip HOL-Light proofs on arm64/aarch64 until the first proof is added
-            # arch = "aarch64"
-            return
+            arch = "aarch64"
         elif platform.machine().lower() in ["x86_64"]:
             arch = "x86_64"
         else:

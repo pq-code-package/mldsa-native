@@ -2170,6 +2170,17 @@ def gen_hol_light_asm_file(job):
 
 
 def gen_hol_light_asm():
+    aarch64_flags = "-march=armv8.4-a+sha3"
+    joblist_aarch64 = [
+        (
+            "poly_caddq_asm.S",
+            "mldsa_poly_caddq.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+    ]
+
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
     joblist_x86_64 = [
         (
@@ -2181,7 +2192,8 @@ def gen_hol_light_asm():
         ),
     ]
 
-    run_parallel(joblist_x86_64, gen_hol_light_asm_file)
+    joblist = joblist_aarch64 + joblist_x86_64
+    run_parallel(joblist, gen_hol_light_asm_file)
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
@@ -2965,8 +2977,7 @@ def update_hol_light_bytecode_for_arch(arch, force_cross=False):
 
 def update_hol_light_bytecode(force_cross=False):
     """Update HOL Light proof files with bytecode from make dump_bytecode."""
-    # NOTE: The following line is commented out until there are hol_light aarch64 proofs.
-    # update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
+    update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
     update_hol_light_bytecode_for_arch("x86_64", force_cross=force_cross)
 
 
@@ -3174,7 +3185,11 @@ def _main():
         gen_monolithic_source_file()
         gen_monolithic_asm_file()
 
-    hol_light_asm_supported = platform.machine().lower() in ["x86_64"]
+    hol_light_asm_supported = platform.machine().lower() in [
+        "arm64",
+        "aarch64",
+        "x86_64",
+    ]
 
     # Build step list: (description, function, enabled)
     # If enabled is False, step is skipped

@@ -9,12 +9,12 @@ hol_light.overrideAttrs (old: {
     export HOLLIGHT_DIR="$1/lib/hol_light"
     export PATH="$1/lib/hol_light:$PATH"
   '';
-  version = "unstable-2025-09-22";
+  version = "unstable-2026-01-17";
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "bed58fa74649fa74015176f8f90e77f7af5cf8e3";
-    hash = "sha256-QDubbUUChvv04239BdcKPSU+E2gdSzqAWfAETK2Xtg0=";
+    rev = "e960dd0f636c36d48f79664c7cf11a59ba6f66a3";
+    hash = "sha256-ZgOzAYokQsgO1Ua3m50shxvU9dVSzocuFHRLdIrINmU=";
   };
   patches = [
     ./0005-Configure-hol-sh-for-mldsa-native.patch
@@ -22,8 +22,8 @@ hol_light.overrideAttrs (old: {
   ];
   propagatedBuildInputs = old.propagatedBuildInputs ++ old.nativeBuildInputs ++ [ ocamlPackages.pcre2 ledit ];
   buildPhase = ''
+    patchShebangs .
     HOLLIGHT_USE_MODULE=1 make hol.sh
-    patchShebangs hol.sh
     HOLLIGHT_USE_MODULE=1 make
   '';
   installPhase = ''

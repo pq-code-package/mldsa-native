@@ -1,11 +1,12 @@
 #############################################################################
+# Copyright (c) The mlkem-native project authors
 # Copyright (c) The mldsa-native project authors
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT-0
 #############################################################################
 
 #
-# This Makefile is derived from the Makefile x86/Makefile in s2n-bignum.
+# This Makefile is derived from the Makefile arm/Makefile in s2n-bignum.
 # - Remove all s2n-bignum proofs and tutorial, add mldsa-native proofs
 # - Minor path modifications to support base theories from s2n-bignum
 #   to reside in a separate read-only directory
@@ -17,23 +18,25 @@ OSTYPE_RESULT=$(shell uname -s)
 ARCHTYPE_RESULT=$(shell uname -m)
 
 SRC ?= $(S2N_BIGNUM_DIR)
-SRC_X86 ?= $(SRC)/x86
+SRC_ARM ?= $(SRC)/arm
 
-# If actually on an x86_64 machine, just use the assembler (as). Otherwise
+ARCHFLAGS=-march=armv8.4-a+sha3
+
+# If actually on an AArch64 machine, just use the assembler (as). Otherwise
 # use a cross-assembling version so that the code can still be assembled
 # and the proofs checked against the object files (though you won't be able
 # to run code without additional emulation infrastructure).
-ifeq ($(filter $(ARCHTYPE_RESULT),x86_64),)
-CROSS_PREFIX=x86_64-unknown-linux-gnu-
+ifeq ($(filter $(ARCHTYPE_RESULT),aarch64 arm64),)
+CROSS_PREFIX=aarch64-unknown-linux-gnu-
 ifeq ($(shell command -v $(ASSEMBLE) >/dev/null 2>&1 && echo yes || echo no),no)
-$(error Cross-toolchain not found. Please run in the 'hol_light-cross-x86_64' nix shell via: nix develop .#hol_light-cross-x86_64)
+$(error Cross-toolchain not found. Please run in the 'hol_light-cross-aarch64' nix shell via: nix develop .#hol_light-cross-aarch64)
 endif
 endif
 ASSEMBLE=$(CROSS_PREFIX)as $(ARCHFLAGS)
 OBJDUMP=$(CROSS_PREFIX)objdump -d
 
 # Add explicit language input parameter to cpp, otherwise the use of #n for
-# numeric literals in x86 code is a problem when used inside #define macros
+# numeric literals in ARM code is a problem when used inside #define macros
 # since normally that means stringization.
 #
 # Some clang-based preprocessors seem to behave differently, and get confused
@@ -50,14 +53,18 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mldsa/mldsa_ntt.o
+OBJ = mldsa/mldsa_poly_caddq.o
 
-# Build object files from assembly sources
+# According to
+# https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,
+# x18 should not be used for Apple platforms. Check this using grep.
 $(OBJ): %.o : %.S
 	@echo "Preparing $@ ..."
 	@echo "AS: `$(ASSEMBLE) --version`"
 	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	cat $< | $(PREPROCESS) | $(SPLIT) | grep -v -E '^\s+.quad\s+0x[0-9a-f]+$$' | $(ASSEMBLE) -o $@ -
+	$(OBJDUMP) $@ | ( ( ! grep --ignore-case -E 'w18|[^0]x18' ) || ( rm $@ ; exit 1 ) )
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 	# MacOS may generate relocations in non-text sections that break
 	# the object file parser in HOL-Light
@@ -96,7 +103,7 @@ proofs/dump_bytecode.native: proofs/dump_bytecode.ml $(OBJ)
 
 # Run them and print the standard output+error at *.correct
 %.correct: %.native
-	cd .. ; ./x86_64/$< 2>&1 | tee ./x86_64/$@
+	cd .. ; ./aarch64/$< 2>&1 | tee ./aarch64/$@
 	@if (grep -i "error:\|exception:" "$@" >/dev/null); then  \
 		echo "$< had errors!";			          \
 		exit 1;					          \
@@ -110,6 +117,6 @@ run_proofs: build_proofs $(PROOF_LOGS);
 proofs: run_proofs ; $(SRC)/tools/count-proofs.sh .
 
 dump_bytecode: proofs/dump_bytecode.native
-	cd .. ; ./x86_64/$<
+	cd .. ; ./aarch64/$<
 
 .PHONY: proofs build_proofs run_proofs clean dump_bytecode
