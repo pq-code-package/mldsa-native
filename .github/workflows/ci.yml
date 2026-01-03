@@ -416,7 +416,11 @@ jobs:
             name: x86_64
           - runner: ubuntu-24.04-arm
             name: aarch64
-        cflags: ['-O3', '-Os']
+        cflags:
+          - '-O3'
+          - '-Os'
+          - '-O3 -DMLD_CONFIG_REDUCE_RAM'
+          - '-Os -DMLD_CONFIG_REDUCE_RAM'
         exclude:
           - external: true
     runs-on: ${{ matrix.target.runner }}
