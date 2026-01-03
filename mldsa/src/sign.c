@@ -874,8 +874,7 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
                                 const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                                 int externalmu)
 {
-  unsigned int i;
-  int ret;
+  int ret, cmp;
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES);
@@ -961,28 +960,12 @@ int crypto_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_H(c2, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, buf,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
 
-  /* Constant time: All data in verification is usually considered public.
-   * However, in our constant-time tests we do not declassify the message and
-   * context string.
-   * The following conditional is the only place in verification whose run-time
-   * depends on the message. As all that can be leakaged here is the output of
-   * a hash call (that should behave like a random oracle), it is safe to
-   * declassify here even with a secret message.
-   */
-  MLD_CT_TESTING_DECLASSIFY(c2, MLDSA_CTILDEBYTES);
-  ret = MLD_ERR_FAIL;
-  for (i = 0; i < MLDSA_CTILDEBYTES; ++i)
-  __loop__(
-    invariant(i <= MLDSA_CTILDEBYTES)
-  )
-  {
-    if (c[i] != c2[i])
-    {
-      goto cleanup;
-    }
-  }
+  cmp = mld_ct_memcmp(c, c2, MLDSA_CTILDEBYTES);
 
-  ret = 0;
+  /* Declassify the result of the verification. */
+  MLD_CT_TESTING_DECLASSIFY(&cmp, sizeof(cmp));
+
+  ret = cmp == 0 ? 0 : MLD_ERR_FAIL;
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
