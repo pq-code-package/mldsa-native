@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = ct_memcmp_harness
+HARNESS_FILE = ct_cmask_nonzero_u32_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mld_ct_memcmp
+PROOF_UID = mld_ct_cmask_nonzero_u32
 
 DEFINES +=
 INCLUDES +=
@@ -17,10 +17,10 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/ct.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c # Dummy because the Makefile wants _some_ project source
 
-CHECK_FUNCTION_CONTRACTS=mld_ct_memcmp
-USE_FUNCTION_CONTRACTS=mld_value_barrier_u8 mld_ct_cmask_nonzero_u8
+CHECK_FUNCTION_CONTRACTS=mld_ct_cmask_nonzero_u32
+USE_FUNCTION_CONTRACTS=mld_value_barrier_i64
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mld_ct_memcmp
+FUNCTION_NAME = mld_ct_cmask_nonzero_u32
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

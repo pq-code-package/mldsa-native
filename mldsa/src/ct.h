@@ -216,6 +216,37 @@ __contract__(
 }
 
 /*************************************************
+ * Name:        mld_ct_cmask_nonzero_u32
+ *
+ * Description: Return 0 if input is zero, and -1 otherwise.
+ *
+ * Arguments:   uint32_t x: Value to be converted into a mask
+ *
+ **************************************************/
+static MLD_INLINE uint32_t mld_ct_cmask_nonzero_u32(uint32_t x)
+__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFFFFFFFF)))
+{
+  int64_t tmp = mld_value_barrier_i64(-((int64_t)x));
+  tmp >>= 32;
+  return mld_cast_int64_to_uint32(tmp);
+}
+
+/*************************************************
+ * Name:        mld_ct_cmask_nonzero_u8
+ *
+ * Description: Return 0 if input is zero, and -1 otherwise.
+ *
+ * Arguments:   uint8_t x: Value to be converted into a mask
+ *
+ **************************************************/
+static MLD_INLINE uint8_t mld_ct_cmask_nonzero_u8(uint8_t x)
+__contract__(ensures(return_value == ((x == 0) ? 0 : 0xFF)))
+{
+  uint32_t mask = mld_ct_cmask_nonzero_u32((uint32_t)x);
+  return (uint8_t)(mask & 0xFF);
+}
+
+/*************************************************
  * Name:        mld_ct_cmask_neg_i32
  *
  * Description: Return 0 if input is non-negative, and -1 otherwise.
@@ -258,41 +289,44 @@ __contract__(
  *
  * Description: Compare two arrays for equality in constant time.
  *
- * Arguments:   const void *a: pointer to first byte array
- *              const void *b: pointer to second byte array
- *              size_t len:    length of the byte arrays
+ * Arguments:   const uint8_t *a: pointer to first byte array
+ *              const uint8_t *b: pointer to second byte array
+ *              size_t len:       length of the byte arrays, upper-bounded
+ *                                to UINT16_MAX to control proof complexity
+ *                                only.
  *
- * Returns 0 if the byte arrays are equal, a non-zero value otherwise
+ * Returns 0 if the byte arrays are equal, 0xFF otherwise.
  **************************************************/
-static MLD_INLINE uint8_t mld_ct_memcmp(const void *a, const void *b,
+static MLD_INLINE uint8_t mld_ct_memcmp(const uint8_t *a, const uint8_t *b,
                                         const size_t len)
 __contract__(
   requires(len <= UINT16_MAX)
   requires(memory_no_alias(a, len))
   requires(memory_no_alias(b, len))
-  ensures((return_value == 0) == forall(i, 0, len, (((const uint8_t *)a)[i] == ((const uint8_t *)b)[i])))
-)
+  ensures((return_value == 0) || (return_value == 0xFF))
+  ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))
 {
-  const uint8_t *a_bytes = (const uint8_t *)a;
-  const uint8_t *b_bytes = (const uint8_t *)b;
   uint8_t r = 0, s = 0;
   unsigned i;
 
   for (i = 0; i < len; i++)
   __loop__(
     invariant(i <= len)
-    invariant((r == 0) == (forall(k, 0, i, (a_bytes[k] == b_bytes[k])))))
+    invariant((r == 0) == (forall(k, 0, i, (a[k] == b[k])))))
   {
-    r |= a_bytes[i] ^ b_bytes[i];
+    r |= a[i] ^ b[i];
     /* s is useless, but prevents the loop from being aborted once r=0xff. */
-    s ^= a_bytes[i] ^ b_bytes[i];
+    s ^= a[i] ^ b[i];
   }
 
   /*
-   * XOR twice with s, separated by a value barrier, to prevent the compile
-   * from dropping the s computation in the loop.
+   * - Convert r into a mask; this may not be necessary, but is an additional
+   *   safeguard
+   *   towards leaking information about a and b.
+   * - XOR twice with s, separated by a value barrier, to prevent the compile
+   *   from dropping the s computation in the loop.
    */
-  return (uint8_t)((mld_value_barrier_u32((uint32_t)r) ^ s) ^ s);
+  return (mld_value_barrier_u8(mld_ct_cmask_nonzero_u8(r) ^ s) ^ s);
 }
 
 /*************************************************

@@ -1346,8 +1346,10 @@ int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   }
 
   /* Validate t0 and tr using constant-time comparisons */
-  cmp0 = mld_ct_memcmp(t0, t0_computed, sizeof(mld_polyveck));
-  cmp1 = mld_ct_memcmp(tr, tr_computed, MLDSA_TRBYTES);
+  cmp0 = mld_ct_memcmp((const uint8_t *)t0, (const uint8_t *)t0_computed,
+                       sizeof(mld_polyveck));
+  cmp1 = mld_ct_memcmp((const uint8_t *)tr, (const uint8_t *)tr_computed,
+                       MLDSA_TRBYTES);
   cmp = mld_value_barrier_u8(cmp0 | cmp1);
 
   /* Declassify the final result of the validity check. */
