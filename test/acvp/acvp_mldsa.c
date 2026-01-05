@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../mldsa/src/sign.h"
+#include "../../mldsa/src/sign.h"
 
 #define USAGE "acvp_mldsa{lvl} [keyGen|sigGen|sigVer] {test specific arguments}"
 #define KEYGEN_USAGE "acvp_mldsa{lvl} keyGen seed=HEX"

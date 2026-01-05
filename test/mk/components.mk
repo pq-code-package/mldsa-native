@@ -148,7 +148,7 @@ endef
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(foreach test,$(ACVP_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp/)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \

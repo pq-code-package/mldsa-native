@@ -3,4 +3,4 @@
 test/build
 .direnv
 # Downloaded ACVP test data
-test/.acvp-data/
+test/acvp/.acvp-data/
