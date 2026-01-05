@@ -8,9 +8,9 @@
 
 /* Expose declaration of randombytes (normally internal) */
 #define MLD_BUILD_INTERNAL
-#include "../mldsa/mldsa_native.h"
-#include "../mldsa/src/common.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mldsa/mldsa_native.h"
+#include "../../mldsa/src/common.h"
+#include "../notrandombytes/notrandombytes.h"
 
 /*
  * This test checks that we handle randombytes failures correctly by:

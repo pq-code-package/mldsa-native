@@ -14,7 +14,13 @@ ifeq ($(OPT),1)
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
 
-ALL_TESTS = test_mldsa test_unit acvp_mldsa bench_mldsa bench_components_mldsa gen_KAT test_stack test_alloc test_rng_fail
+BASIC_TESTS = test_mldsa gen_KAT test_stack
+ACVP_TESTS = acvp_mldsa
+BENCH_TESTS = bench_mldsa bench_components_mldsa
+UNIT_TESTS = test_unit
+ALLOC_TESTS = test_alloc
+RNG_FAIL_TESTS = test_rng_fail
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -86,13 +92,13 @@ $(MLDSA44_DIR)/bin/test_stack44: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA65_DIR)/bin/test_stack65: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA87_DIR)/bin/test_stack87: CFLAGS += -Imldsa -fstack-usage
 
-$(MLDSA44_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLDSA65_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLDSA87_DIR)/test/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA44_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA65_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA87_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
-$(MLDSA44_DIR)/test/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
-$(MLDSA65_DIR)/test/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
-$(MLDSA87_DIR)/test/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+$(MLDSA44_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+$(MLDSA65_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
+$(MLDSA87_DIR)/test/src/test_rng_fail.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_rng_fail_config.h\"
 
 $(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
 $(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
@@ -118,43 +124,40 @@ $(MLDSA87_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
 # Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/$(2).c.o $(BUILD_DIR)/lib$(1).a
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
 
 # Special rule for test_unit - link against unit libraries with exposed internal functions
 define ADD_SOURCE_UNIT
 $(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_unit
-$(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+$(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
 # Special rule for test_alloc - link against alloc libraries with custom alloc config
 define ADD_SOURCE_ALLOC
 $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_alloc
-$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
 # Special rule for test_rng_fail - link against rng_fail libraries with custom randombytes config
 define ADD_SOURCE_RNG_FAIL
 $(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_rng_fail
-$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/test_rng_fail.c.o $(BUILD_DIR)/lib$(1)_rng_fail.a
+$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_rng_fail.c.o $(BUILD_DIR)/lib$(1)_rng_fail.a
 endef
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
-	$(foreach test,$(filter-out test_unit test_alloc test_rng_fail,$(ALL_TESTS)), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test))) \
+	$(foreach test,$(ACVP_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
 	) \
-)
-
-$(foreach scheme,mldsa44 mldsa65 mldsa87, \
+	$(foreach test,$(BENCH_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+	) \
+	$(foreach test,$(BASIC_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),src/)) \
+	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
-)
-
-$(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
-)
-
-$(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(eval $(call ADD_SOURCE_RNG_FAIL,$(scheme))) \
 )
 

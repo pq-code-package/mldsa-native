@@ -9,9 +9,9 @@
 
 /* Expose declaration of allocator (normally internal) */
 #define MLD_BUILD_INTERNAL
-#include "../mldsa/mldsa_native.h"
-#include "../mldsa/src/common.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mldsa/mldsa_native.h"
+#include "../../mldsa/src/common.h"
+#include "../notrandombytes/notrandombytes.h"
 
 /*
  * This test checks that

@@ -6,11 +6,11 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "notrandombytes/notrandombytes.h"
+#include "../notrandombytes/notrandombytes.h"
 
-#include "../mldsa/src/poly.h"
-#include "../mldsa/src/poly_kl.h"
-#include "../mldsa/src/polyvec.h"
+#include "../../mldsa/src/poly.h"
+#include "../../mldsa/src/poly_kl.h"
+#include "../../mldsa/src/polyvec.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLDSA_DEBUG

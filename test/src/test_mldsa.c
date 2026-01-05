@@ -6,9 +6,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mldsa/src/sign.h"
-#include "../mldsa/src/sys.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mldsa/src/sign.h"
+#include "../../mldsa/src/sys.h"
+#include "../notrandombytes/notrandombytes.h"
 
 #ifndef NTESTS
 #define NTESTS 100

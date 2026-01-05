@@ -6,10 +6,10 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../mldsa/src/fips202/fips202.h"
-#include "../mldsa/src/sign.h"
-#include "../mldsa/src/sys.h"
-#include "notrandombytes/notrandombytes.h"
+#include "../../mldsa/src/fips202/fips202.h"
+#include "../../mldsa/src/sign.h"
+#include "../../mldsa/src/sys.h"
+#include "../notrandombytes/notrandombytes.h"
 
 #if defined(MLD_SYS_WINDOWS)
 #include <fcntl.h>
