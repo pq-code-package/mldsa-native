@@ -1297,7 +1297,7 @@ MLD_EXTERNAL_API
 int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                            const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 {
-  uint8_t cmp, cmp0, cmp1;
+  uint8_t check, cmp0, cmp1, chk1, chk2;
   int ret;
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
   MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES);
@@ -1320,6 +1320,10 @@ int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Unpack secret key */
   mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
 
+  /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
+  chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
+  chk2 = mld_polyveck_chknorm(s2, MLDSA_ETA + 1) & 0xFF;
+
   /* Recompute t0, t1, tr, and pk from rho, s1, s2 */
   ret = mld_compute_t0_t1_tr_from_sk_components(t0_computed, t1, tr_computed,
                                                 pk, rho, s1, s2);
@@ -1333,11 +1337,11 @@ int crypto_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                        sizeof(mld_polyveck));
   cmp1 = mld_ct_memcmp((const uint8_t *)tr, (const uint8_t *)tr_computed,
                        MLDSA_TRBYTES);
-  cmp = mld_value_barrier_u8(cmp0 | cmp1);
+  check = mld_value_barrier_u8(cmp0 | cmp1 | chk1 | chk2);
 
   /* Declassify the final result of the validity check. */
-  MLD_CT_TESTING_DECLASSIFY(&cmp, sizeof(cmp));
-  ret = (cmp != 0) ? MLD_ERR_FAIL : 0;
+  MLD_CT_TESTING_DECLASSIFY(&check, sizeof(check));
+  ret = (check != 0) ? MLD_ERR_FAIL : 0;
 
 cleanup:
 

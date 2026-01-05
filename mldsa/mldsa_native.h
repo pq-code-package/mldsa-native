@@ -735,8 +735,16 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
 /*************************************************
  * Name:        crypto_sign_pk_from_sk
  *
- * Description: Derives public key from secret key with validation.
- *              Checks that t0 and tr stored in sk match recomputed values.
+ * Description: Performs basic validity checks on secret key, and derives
+ *              public key.
+ *
+ *              Referring to the decoding of the secret key
+ *              `sk=(rho, K, tr, s1, s2, t0)`
+ *              (cf. [@FIPS204, Algorithm 25 skDecode]),
+ *              the following checks are performed:
+ *                - Check that s1 and s2 have coefficients in
+ *                  [-MLDSA_ETA, MLDSA_ETA]
+ *                - Check that t0 and tr stored in sk match recomputed values.
  *
  * Arguments:   - uint8_t pk[CRYPTO_PUBLICKEYBYTES]: output public key
  *              - const uint8_t sk[CRYPTO_SECRETKEYBYTES]: input secret key
