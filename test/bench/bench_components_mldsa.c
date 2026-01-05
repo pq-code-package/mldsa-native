@@ -8,9 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../mldsa/src/poly.h"
-#include "../mldsa/src/polyvec.h"
-#include "../mldsa/src/randombytes.h"
+#include "../../mldsa/src/poly.h"
+#include "../../mldsa/src/polyvec.h"
+#include "../../mldsa/src/randombytes.h"
 #include "hal.h"
 
 #define NWARMUP 50

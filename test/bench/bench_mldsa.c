@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../mldsa/src/randombytes.h"
-#include "../mldsa/src/sign.h"
+#include "../../mldsa/src/randombytes.h"
+#include "../../mldsa/src/sign.h"
 #include "hal.h"
 
 #define NWARMUP 3

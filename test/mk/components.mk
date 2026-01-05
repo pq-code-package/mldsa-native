@@ -124,7 +124,7 @@ $(MLDSA87_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
 # Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
 $(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)$(2).c.o $(BUILD_DIR)/lib$(1).a
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)/$(2).c.o $(BUILD_DIR)/lib$(1).a
 endef
 
 
@@ -148,13 +148,13 @@ endef
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(foreach test,$(ACVP_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp/)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \
 	) \
 	$(foreach test,$(BASIC_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),src/)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),src)) \
 	) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
