@@ -70,7 +70,9 @@ typedef struct
 } alloc_info_t;
 
 #define MLD_MAX_IN_FLIGHT_ALLOCS 100
+#ifndef MLD_BUMP_ALLOC_SIZE
 #define MLD_BUMP_ALLOC_SIZE (128 * 1024) /* 128KB buffer */
+#endif
 
 struct test_ctx_t
 {

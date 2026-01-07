@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+--- /tmp/core_cm33.h.orig	2026-01-13 17:41:47.293575163 +0000
++++ envs/m33-an524/src/platform/core_cm33.h	2026-01-13 15:11:08.465800173 +0000
+@@ -2954,7 +2954,7 @@ __STATIC_INLINE uint32_t TZ_NVIC_GetPriority_NS(IRQn_Type IRQn)
+ 
+ #if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
+ 
+-#include "mpu_armv8.h"
++#include "m-profile/armv8m_mpu.h"
+ 
+ #endif
+ 

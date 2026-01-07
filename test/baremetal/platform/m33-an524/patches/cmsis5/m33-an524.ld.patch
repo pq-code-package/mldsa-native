@@ -1,0 +1,207 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+--- /tmp/gcc_arm.ld.orig	2026-01-13 17:15:29.707688468 +0000
++++ envs/m33-an524/src/platform/m33-an524.ld	2026-01-13 15:11:08.395799030 +0000
+@@ -1,6 +1,6 @@
+ /******************************************************************************
+- * @file     gcc_arm.ld
+- * @brief    GNU Linker Script for Cortex-M based device
++ * @file     m33-an524.ld
++ * @brief    GNU Linker Script for Cortex-M33 Device on MPS3 AN524
+  * @version  V2.2.0
+  * @date     16. December 2020
+  ******************************************************************************/
+@@ -20,38 +20,37 @@
+  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
++ *
++ * Modifications for MPS3 AN524:
++ * - Flash Base: 0x00000000 (Non-Secure BRAM, 512KB - QEMU kernel load address)
++ * - RAM Base: 0x60000000 (Non-Secure DDR4, using 2MB of 256MB available)
++ * - Stack Size: 64KB (increased for ML-DSA-87)
++ * - Heap Size: 512KB (increased for cryptographic operations)
++ *
++ * Hardware Reference:
++ *   ARM DAI 0524F - Application Note AN524 "SSE-200 Subsystem for MPS3"
++ *   https://developer.arm.com/documentation/dai0524/latest
++ *
++ * Memory Configuration (from ARM DAI 0524F):
++ *   FLASH: 0x10000000 - Secure BRAM alias (Table 3-1 Row 5, 512KB)
++ *   RAM:   0x70000000 - Secure DDR4 (Table 3-1 Row 38, using 2MB of 256MB available)
+  */
+ 
+-/*
+- *-------- <<< Use Configuration Wizard in Context Menu >>> -------------------
+- */
++/* Flash: Secure BRAM alias (512KB) */
++__ROM_BASE = 0x10000000; /* 0x10000000; */
++__ROM_SIZE = 0x00080000;
+ 
+-/*---------------------- Flash Configuration ----------------------------------
+-  <h> Flash Configuration
+-    <o0> Flash Base Address <0x0-0xFFFFFFFF:8>
+-    <o1> Flash Size (in Bytes) <0x0-0xFFFFFFFF:8>
+-  </h>
+-  -----------------------------------------------------------------------------*/
+-__ROM_BASE = 0x00000000;
+-__ROM_SIZE = 0x00040000;
+-
+-/*--------------------- Embedded RAM Configuration ----------------------------
+-  <h> RAM Configuration
+-    <o0> RAM Base Address    <0x0-0xFFFFFFFF:8>
+-    <o1> RAM Size (in Bytes) <0x0-0xFFFFFFFF:8>
+-  </h>
+- -----------------------------------------------------------------------------*/
+-__RAM_BASE = 0x20000000;
+-__RAM_SIZE = 0x00020000;
++/* RAM: Secure DDR4 (using 2MB from 256MB available at 0x70000000-0x7FFFFFFF) */
++/* Note: AN524 has 2GB DDR4, we use secure region for larger working memory */
++__RAM_BASE = 0x20000000; /* 0x70000000; */
++__RAM_SIZE = 0x00020000; /* 0x00200000; */
+ 
+ /*--------------------- Stack / Heap Configuration ----------------------------
+-  <h> Stack / Heap Configuration
+-    <o0> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
+-    <o1> Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
+-  </h>
++  Stack Size: 64KB (for ML-DSA-87)
++  Heap Size: 512KB (for cryptographic operations)
+   -----------------------------------------------------------------------------*/
+-__STACK_SIZE = 0x00000400;
+-__HEAP_SIZE  = 0x00000C00;
++__STACK_SIZE = 0x00018000;
++__HEAP_SIZE  = 0x00000100;
+ 
+ /*
+  *-------------------- <<< end of configuration section >>> -------------------
+@@ -102,6 +101,12 @@ MEMORY
+  */
+ ENTRY(Reset_Handler)
+ 
++/* Single PHDRS entry to create single LOAD segment */
++PHDRS
++{
++  rom PT_LOAD;
++}
++
+ SECTIONS
+ {
+   .text :
+@@ -129,12 +134,12 @@ SECTIONS
+     *(.rodata*)
+ 
+     KEEP(*(.eh_frame*))
+-  } > FLASH
++  } > FLASH :rom
+ 
+   /*
+    * SG veneers:
+    * All SG veneers are placed in the special output section .gnu.sgstubs. Its start address
+-   * must be set, either with the command line option ∩┐╜--section-start∩┐╜ or in a linker script,
++   * must be set, either with the command line option ┬æ--section-start┬Æ or in a linker script,
+    * to indicate where to place these veneers in memory.
+    */
+ /*
+@@ -146,13 +151,13 @@ SECTIONS
+   .ARM.extab :
+   {
+     *(.ARM.extab* .gnu.linkonce.armextab.*)
+-  } > FLASH
++  } > FLASH :rom
+ 
+   __exidx_start = .;
+   .ARM.exidx :
+   {
+     *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+-  } > FLASH
++  } > FLASH :rom
+   __exidx_end = .;
+ 
+   .copy.table :
+@@ -164,14 +169,8 @@ SECTIONS
+     LONG (__data_start__)
+     LONG ((__data_end__ - __data_start__) / 4)
+ 
+-    /* Add each additional data section here */
+-/*
+-    LONG (__etext2)
+-    LONG (__data2_start__)
+-    LONG ((__data2_end__ - __data2_start__) / 4)
+-*/
+     __copy_table_end__ = .;
+-  } > FLASH
++  } > FLASH :rom
+ 
+   .zero.table :
+   {
+@@ -183,14 +182,14 @@ SECTIONS
+     LONG ((__bss2_end__ - __bss2_start__) / 4)
+ */
+     __zero_table_end__ = .;
+-  } > FLASH
++  } > FLASH :rom
+ 
+   /**
+    * Location counter can end up 2byte aligned with narrow Thumb code but
+    * __etext is assumed by startup code to be the LMA of a section in RAM
+    * which must be 4byte aligned
+    */
+-  __etext = ALIGN (4);
++  __etext = .;
+ 
+   .data : AT (__etext)
+   {
+@@ -224,7 +223,7 @@ SECTIONS
+     /* All data end */
+     __data_end__ = .;
+ 
+-  } > RAM
++  } > RAM :rom
+ 
+   /*
+    * Secondary data section, optional
+@@ -248,7 +247,7 @@ SECTIONS
+   } > RAM2
+ */
+ 
+-  .bss :
++  .bss (NOLOAD):
+   {
+     . = ALIGN(4);
+     __bss_start__ = .;
+@@ -257,7 +256,7 @@ SECTIONS
+     *(COMMON)
+     . = ALIGN(4);
+     __bss_end__ = .;
+-  } > RAM AT > RAM
++  } > RAM
+ 
+   /*
+    * Secondary bss section, optional
+@@ -278,7 +277,7 @@ SECTIONS
+   } > RAM2 AT > RAM2
+ */
+ 
+-  .heap (COPY) :
++  .heap (NOLOAD) :
+   {
+     . = ALIGN(8);
+     __end__ = .;
+@@ -288,7 +287,7 @@ SECTIONS
+     __HeapLimit = .;
+   } > RAM
+ 
+-  .stack (ORIGIN(RAM) + LENGTH(RAM) - __STACK_SIZE - __STACKSEAL_SIZE) (COPY) :
++  .stack (ORIGIN(RAM) + LENGTH(RAM) - __STACK_SIZE - __STACKSEAL_SIZE) (NOLOAD):
+   {
+     . = ALIGN(8);
+     __StackLimit = .;
+@@ -297,7 +296,7 @@ SECTIONS
+     __StackTop = .;
+   } > RAM
+   PROVIDE(__stack = __StackTop);
+-  
++
+   /* ARMv8-M stack sealing:
+      to use ARMv8-M stack sealing uncomment '.stackseal' section
+    */
