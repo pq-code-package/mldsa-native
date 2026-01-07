@@ -807,4 +807,77 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #endif /* MLD_CONFIG_API_NO_SUPERCOP */
 #endif /* !MLD_CONFIG_API_CONSTANTS_ONLY */
 
+
+/***************************** Memory Usage **********************************/
+
+/*
+ * By default mldsa-native performs all memory allocations on the stack.
+ * Alternatively, mldsa-native supports custom allocation of large structures
+ * through the `MLD_CONFIG_CUSTOM_ALLOC_FREE` configuration option.
+ * See mldsa_native_config.h for details.
+ *
+ * `MLD_TOTAL_ALLOC_{44,65,87}_{KEYPAIR,SIGN,VERIFY}` indicates the maximum
+ * (accumulative) allocation via MLD_ALLOC for each parameter set and operation.
+ * Note that some stack allocation remains even
+ * when using custom allocators, so these values are lower than total stack
+ * usage with the default stack-only allocation.
+ *
+ * These constants may be used to implement custom allocations using a
+ * fixed-sized buffer and a simple allocator (e.g., bump allocator).
+ */
+/* check-magic: off */
+#if defined(MLD_API_LEGACY_CONFIG) || !defined(MLD_CONFIG_REDUCE_RAM)
+#define MLD_TOTAL_ALLOC_44_KEYPAIR 56640
+#define MLD_TOTAL_ALLOC_44_SIGN 52896
+#define MLD_TOTAL_ALLOC_44_VERIFY 38816
+#define MLD_TOTAL_ALLOC_65_KEYPAIR 85856
+#define MLD_TOTAL_ALLOC_65_SIGN 80576
+#define MLD_TOTAL_ALLOC_65_VERIFY 62432
+#define MLD_TOTAL_ALLOC_87_KEYPAIR 130816
+#define MLD_TOTAL_ALLOC_87_SIGN 123584
+#define MLD_TOTAL_ALLOC_87_VERIFY 99552
+#else /* MLD_API_LEGACY_CONFIG || !MLD_CONFIG_REDUCE_RAM */
+#define MLD_TOTAL_ALLOC_44_KEYPAIR 36192
+#define MLD_TOTAL_ALLOC_44_SIGN 32448
+#define MLD_TOTAL_ALLOC_44_VERIFY 26560
+#define MLD_TOTAL_ALLOC_65_KEYPAIR 50048
+#define MLD_TOTAL_ALLOC_65_SIGN 44768
+#define MLD_TOTAL_ALLOC_65_VERIFY 36864
+#define MLD_TOTAL_ALLOC_87_KEYPAIR 66336
+#define MLD_TOTAL_ALLOC_87_SIGN 59104
+#define MLD_TOTAL_ALLOC_87_VERIFY 49408
+#endif /* !(MLD_API_LEGACY_CONFIG || !MLD_CONFIG_REDUCE_RAM) */
+/* check-magic: on */
+
+/*
+ * `MLD_MAX_TOTAL_ALLOC_{KEYPAIR,SIGN,VERIFY}` is the maximum across all
+ * parameter sets for each operation.
+ * `MLD_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
+ * operations.
+ */
+#define MLD_MAX_TOTAL_ALLOC_KEYPAIR MLD_TOTAL_ALLOC_87_KEYPAIR
+#define MLD_MAX_TOTAL_ALLOC_SIGN MLD_TOTAL_ALLOC_87_SIGN
+#define MLD_MAX_TOTAL_ALLOC_VERIFY MLD_TOTAL_ALLOC_87_VERIFY
+
+#define MLD_MAX3_(a, b, c) \
+  ((a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c)))
+
+/*
+ * `MLD_TOTAL_ALLOC_{44,65,87}` is the maximum across all operations for each
+ * parameter set.
+ * `MLD_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
+ * operations.
+ */
+#define MLD_TOTAL_ALLOC_44                                       \
+  MLD_MAX3_(MLD_TOTAL_ALLOC_44_KEYPAIR, MLD_TOTAL_ALLOC_44_SIGN, \
+            MLD_TOTAL_ALLOC_44_VERIFY)
+#define MLD_TOTAL_ALLOC_65                                       \
+  MLD_MAX3_(MLD_TOTAL_ALLOC_65_KEYPAIR, MLD_TOTAL_ALLOC_65_SIGN, \
+            MLD_TOTAL_ALLOC_65_VERIFY)
+#define MLD_TOTAL_ALLOC_87                                       \
+  MLD_MAX3_(MLD_TOTAL_ALLOC_87_KEYPAIR, MLD_TOTAL_ALLOC_87_SIGN, \
+            MLD_TOTAL_ALLOC_87_VERIFY)
+
+#define MLD_MAX_TOTAL_ALLOC MLD_TOTAL_ALLOC_87
+
 #endif /* !MLD_H */

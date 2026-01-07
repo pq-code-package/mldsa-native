@@ -155,11 +155,7 @@ Yes. mldsa-native supports all three ML-DSA security levels (ML-DSA-44, ML-DSA-6
 
 ### Can I reduce RAM usage for embedded systems?
 
-Yes. mldsa-native provides a compile-time option `MLD_CONFIG_REDUCE_RAM` that reduces RAM usage. This trades memory for performance:
-
-- **Memory savings**: 12 KB (ML-DSA-44), 25 KB (ML-DSA-65), 49 KB (ML-DSA-87) for each of key generation, signing, and verification.
-                      For signing, additional 4 KB (ML-DSA-44), 5 KB (ML-DSA-65), and 7 KB (ML-DSA-87) are saved.
-- **Performance cost**: Matrix generation is no longer batched, resulting in slower signing and verification
+Yes. mldsa-native provides a compile-time option `MLD_CONFIG_REDUCE_RAM` that reduces RAM usage. This trades memory for performance. See the `MLD_TOTAL_ALLOC_*` constants in [mldsa_native.h](mldsa/mldsa_native.h) for memory usage per parameter set and operation.
 
 To enable this mode, define `MLD_CONFIG_REDUCE_RAM` in [mldsa_native_config.h](mldsa/mldsa_native_config.h) or pass `-DMLD_CONFIG_REDUCE_RAM` as a compiler flag.
 

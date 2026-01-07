@@ -14,6 +14,29 @@
 #include "../notrandombytes/notrandombytes.h"
 
 /*
+ * Level-dependent allocation limit macros.
+ * These expand to the right MLD_TOTAL_ALLOC_{44,65,87}_* constant
+ * based on MLD_CONFIG_API_PARAMETER_SET.
+ */
+#define MLD_TOTAL_ALLOC_KEYPAIR__(LVL) MLD_TOTAL_ALLOC_##LVL##_KEYPAIR
+#define MLD_TOTAL_ALLOC_KEYPAIR_(LVL) MLD_TOTAL_ALLOC_KEYPAIR__(LVL)
+#define MLD_TOTAL_ALLOC_KEYPAIR \
+  MLD_TOTAL_ALLOC_KEYPAIR_(MLD_CONFIG_API_PARAMETER_SET)
+
+#define MLD_TOTAL_ALLOC_SIGN__(LVL) MLD_TOTAL_ALLOC_##LVL##_SIGN
+#define MLD_TOTAL_ALLOC_SIGN_(LVL) MLD_TOTAL_ALLOC_SIGN__(LVL)
+#define MLD_TOTAL_ALLOC_SIGN MLD_TOTAL_ALLOC_SIGN_(MLD_CONFIG_API_PARAMETER_SET)
+
+#define MLD_TOTAL_ALLOC_VERIFY__(LVL) MLD_TOTAL_ALLOC_##LVL##_VERIFY
+#define MLD_TOTAL_ALLOC_VERIFY_(LVL) MLD_TOTAL_ALLOC_VERIFY__(LVL)
+#define MLD_TOTAL_ALLOC_VERIFY \
+  MLD_TOTAL_ALLOC_VERIFY_(MLD_CONFIG_API_PARAMETER_SET)
+
+#define MLD_TOTAL_ALLOC__(LVL) MLD_TOTAL_ALLOC_##LVL
+#define MLD_TOTAL_ALLOC_(LVL) MLD_TOTAL_ALLOC__(LVL)
+#define MLD_TOTAL_ALLOC MLD_TOTAL_ALLOC_(MLD_CONFIG_API_PARAMETER_SET)
+
+/*
  * This test checks that
  * - we handle allocator failures correctly, propagating MLD_ERR_OUT_OF_MEMORY
  *   and cleaning up all memory, and
@@ -103,6 +126,11 @@ static void alloc_tracker_pop(void *addr, size_t size, const char *file,
 static uint8_t *bump_buffer = NULL;      /* Base address */
 static size_t bump_offset = 0;           /* Watermark */
 static size_t bump_high_mark = 0;        /* High watermark */
+static size_t global_bump_high_mark = 0; /* High watermark over all tests */
+static size_t global_bump_high_mark_keypair =
+    0;                                          /* High watermark for keypair */
+static size_t global_bump_high_mark_sign = 0;   /* High watermark for sign */
+static size_t global_bump_high_mark_verify = 0; /* High watermark for verify */
 
 static void *bump_alloc(size_t sz)
 {
@@ -206,70 +234,84 @@ void custom_free(void *p, size_t sz, const char *file, int line,
   }
 }
 
-#define TEST_ALLOC_FAILURE(test_name, call)                                   \
-  do                                                                          \
-  {                                                                           \
-    int num_allocs, i, rc;                                                    \
-    /* First pass: count allocations */                                       \
-    bump_high_mark = 0;                                                       \
-    reset_all();                                                              \
-    rc = call;                                                                \
-    if (rc != 0)                                                              \
-    {                                                                         \
-      fprintf(stderr, "ERROR: %s failed in counting pass\n", test_name);      \
-      return 1;                                                               \
-    }                                                                         \
-    if (alloc_stack_top != 0)                                                 \
-    {                                                                         \
-      fprintf(stderr, "ERROR: %s leaked %d allocation(s) in counting pass\n", \
-              test_name, alloc_stack_top);                                    \
-      return 1;                                                               \
-    }                                                                         \
-    num_allocs = alloc_counter;                                               \
-    /* Second pass: test each allocation failure */                           \
-    for (i = 0; i < num_allocs; i++)                                          \
-    {                                                                         \
-      reset_all();                                                            \
-      fail_on_counter = i;                                                    \
-      rc = call;                                                              \
-      if (rc != MLD_ERR_OUT_OF_MEMORY)                                        \
-      {                                                                       \
-        int rc2;                                                              \
-        /* Re-run dry-run and print debug info */                             \
-        reset_all();                                                          \
-        print_debug_info = 1;                                                 \
-        rc2 = call;                                                           \
-        (void)rc2;                                                            \
-        if (rc == 0)                                                          \
-        {                                                                     \
-          fprintf(stderr,                                                     \
-                  "ERROR: %s unexpectedly succeeded when allocation %d/%d "   \
-                  "was instrumented to fail\n",                               \
-                  test_name, i + 1, num_allocs);                              \
-        }                                                                     \
-        else                                                                  \
-        {                                                                     \
-          fprintf(stderr,                                                     \
-                  "ERROR: %s failed with wrong error code %d "                \
-                  "(expected %d) when allocation %d/%d was instrumented "     \
-                  "to fail\n",                                                \
-                  test_name, rc, MLD_ERR_OUT_OF_MEMORY, i + 1, num_allocs);   \
-        }                                                                     \
-        return 1;                                                             \
-      }                                                                       \
-      if (alloc_stack_top != 0)                                               \
-      {                                                                       \
-        fprintf(stderr,                                                       \
-                "ERROR: %s leaked %d allocation(s) when allocation %d/%d "    \
-                "was instrumented to fail\n",                                 \
-                test_name, alloc_stack_top, i + 1, num_allocs);               \
-        return 1;                                                             \
-      }                                                                       \
-    }                                                                         \
-    printf(                                                                   \
-        "Allocation test for %s PASSED.\n"                                    \
-        "  Max dynamic allocation: %d bytes\n",                               \
-        test_name, (int)bump_high_mark);                                      \
+#define TEST_ALLOC_FAILURE(test_name, call, alloc_limit, global_high_mark_ptr) \
+  do                                                                           \
+  {                                                                            \
+    int num_allocs, i, rc;                                                     \
+    /* First pass: count allocations */                                        \
+    bump_high_mark = 0;                                                        \
+    reset_all();                                                               \
+    rc = call;                                                                 \
+    if (rc != 0)                                                               \
+    {                                                                          \
+      fprintf(stderr, "ERROR: %s failed in counting pass\n", test_name);       \
+      return 1;                                                                \
+    }                                                                          \
+    if (alloc_stack_top != 0)                                                  \
+    {                                                                          \
+      fprintf(stderr, "ERROR: %s leaked %d allocation(s) in counting pass\n",  \
+              test_name, alloc_stack_top);                                     \
+      return 1;                                                                \
+    }                                                                          \
+    num_allocs = alloc_counter;                                                \
+    /* Second pass: test each allocation failure */                            \
+    for (i = 0; i < num_allocs; i++)                                           \
+    {                                                                          \
+      reset_all();                                                             \
+      fail_on_counter = i;                                                     \
+      rc = call;                                                               \
+      if (rc != MLD_ERR_OUT_OF_MEMORY)                                         \
+      {                                                                        \
+        int rc2;                                                               \
+        /* Re-run dry-run and print debug info */                              \
+        reset_all();                                                           \
+        print_debug_info = 1;                                                  \
+        rc2 = call;                                                            \
+        (void)rc2;                                                             \
+        if (rc == 0)                                                           \
+        {                                                                      \
+          fprintf(stderr,                                                      \
+                  "ERROR: %s unexpectedly succeeded when allocation %d/%d "    \
+                  "was instrumented to fail\n",                                \
+                  test_name, i + 1, num_allocs);                               \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+          fprintf(stderr,                                                      \
+                  "ERROR: %s failed with wrong error code %d "                 \
+                  "(expected %d) when allocation %d/%d was instrumented "      \
+                  "to fail\n",                                                 \
+                  test_name, rc, MLD_ERR_OUT_OF_MEMORY, i + 1, num_allocs);    \
+        }                                                                      \
+        return 1;                                                              \
+      }                                                                        \
+      if (alloc_stack_top != 0)                                                \
+      {                                                                        \
+        fprintf(stderr,                                                        \
+                "ERROR: %s leaked %d allocation(s) when allocation %d/%d "     \
+                "was instrumented to fail\n",                                  \
+                test_name, alloc_stack_top, i + 1, num_allocs);                \
+        return 1;                                                              \
+      }                                                                        \
+    }                                                                          \
+    if (bump_high_mark > (alloc_limit))                                        \
+    {                                                                          \
+      fprintf(stderr, "ERROR: max allocation %u in %s exceeded limit %d\n",    \
+              (unsigned)bump_high_mark, test_name, (int)(alloc_limit));        \
+      return 1;                                                                \
+    }                                                                          \
+    printf(                                                                    \
+        "Allocation test for %s PASSED.\n"                                     \
+        "  Max dynamic allocation: %d bytes\n",                                \
+        test_name, (int)bump_high_mark);                                       \
+    if (bump_high_mark > global_bump_high_mark)                                \
+    {                                                                          \
+      global_bump_high_mark = bump_high_mark;                                  \
+    }                                                                          \
+    if (bump_high_mark > *(global_high_mark_ptr))                              \
+    {                                                                          \
+      *(global_high_mark_ptr) = bump_high_mark;                                \
+    }                                                                          \
   } while (0)
 
 static int test_keygen_alloc_failure(void)
@@ -277,7 +319,8 @@ static int test_keygen_alloc_failure(void)
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
 
-  TEST_ALLOC_FAILURE("mld_keypair", mld_keypair(pk, sk));
+  TEST_ALLOC_FAILURE("mld_keypair", mld_keypair(pk, sk),
+                     MLD_TOTAL_ALLOC_KEYPAIR, &global_bump_high_mark_keypair);
   return 0;
 }
 
@@ -300,7 +343,8 @@ static int test_sign_alloc_failure(void)
 
   TEST_ALLOC_FAILURE(
       "mld_signature",
-      mld_signature(sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, sk));
+      mld_signature(sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, sk),
+      MLD_TOTAL_ALLOC_SIGN, &global_bump_high_mark_sign);
   return 0;
 }
 
@@ -331,8 +375,10 @@ static int test_verify_alloc_failure(void)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("mld_verify", mld_verify(sig, siglen, msg, sizeof(msg),
-                                              ctx, sizeof(ctx) - 1, pk));
+  TEST_ALLOC_FAILURE(
+      "mld_verify",
+      mld_verify(sig, siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, pk),
+      MLD_TOTAL_ALLOC_VERIFY, &global_bump_high_mark_verify);
   return 0;
 }
 
@@ -352,8 +398,10 @@ static int test_sign_combined_alloc_failure(void)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("mld_sign", mld_sign(sm, &smlen, msg, sizeof(msg), ctx,
-                                          sizeof(ctx) - 1, sk));
+  TEST_ALLOC_FAILURE(
+      "mld_sign",
+      mld_sign(sm, &smlen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, sk),
+      MLD_TOTAL_ALLOC_SIGN, &global_bump_high_mark_sign);
   return 0;
 }
 
@@ -380,8 +428,9 @@ static int test_open_alloc_failure(void)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("mld_open", mld_open(msg_out, &mlen, sm, smlen, ctx,
-                                          sizeof(ctx) - 1, pk));
+  TEST_ALLOC_FAILURE(
+      "mld_open", mld_open(msg_out, &mlen, sm, smlen, ctx, sizeof(ctx) - 1, pk),
+      MLD_TOTAL_ALLOC_VERIFY, &global_bump_high_mark_verify);
   return 0;
 }
 
@@ -406,7 +455,8 @@ static int test_signature_extmu_alloc_failure(void)
   }
 
   TEST_ALLOC_FAILURE("mld_signature_extmu",
-                     mld_signature_extmu(sig, &siglen, mu, sk));
+                     mld_signature_extmu(sig, &siglen, mu, sk),
+                     MLD_TOTAL_ALLOC_SIGN, &global_bump_high_mark_sign);
   return 0;
 }
 
@@ -432,7 +482,8 @@ static int test_verify_extmu_alloc_failure(void)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("mld_verify_extmu", mld_verify_extmu(sig, siglen, mu, pk));
+  TEST_ALLOC_FAILURE("mld_verify_extmu", mld_verify_extmu(sig, siglen, mu, pk),
+                     MLD_TOTAL_ALLOC_VERIFY, &global_bump_high_mark_verify);
   return 0;
 }
 
@@ -458,7 +509,8 @@ static int test_signature_pre_hash_shake256_alloc_failure(void)
   TEST_ALLOC_FAILURE(
       "mld_signature_pre_hash_shake256",
       mld_signature_pre_hash_shake256(sig, &siglen, msg, sizeof(msg), ctx,
-                                      sizeof(ctx) - 1, rnd, sk));
+                                      sizeof(ctx) - 1, rnd, sk),
+      MLD_TOTAL_ALLOC_SIGN, &global_bump_high_mark_sign);
   return 0;
 }
 
@@ -492,7 +544,8 @@ static int test_verify_pre_hash_shake256_alloc_failure(void)
 
   TEST_ALLOC_FAILURE("mld_verify_pre_hash_shake256",
                      mld_verify_pre_hash_shake256(sig, siglen, msg, sizeof(msg),
-                                                  ctx, sizeof(ctx) - 1, pk));
+                                                  ctx, sizeof(ctx) - 1, pk),
+                     MLD_TOTAL_ALLOC_VERIFY, &global_bump_high_mark_verify);
   return 0;
 }
 
@@ -508,9 +561,24 @@ static int test_pk_from_sk_alloc_failure(void)
     return 1;
   }
 
-  TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, sk));
+  TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, sk),
+                     MLD_TOTAL_ALLOC_KEYPAIR, &global_bump_high_mark_keypair);
   return 0;
 }
+
+/*
+ * Helper macro to check allocation high watermark matches expected limit.
+ */
+#define CHECK_ALLOC_MATCH(high_mark, expected)                               \
+  do                                                                         \
+  {                                                                          \
+    if ((expected) != (high_mark))                                           \
+    {                                                                        \
+      fprintf(stderr, "ERROR: %s = %u does not match %s = %d\n", #high_mark, \
+              (unsigned)(high_mark), #expected, (int)(expected));            \
+      return 1;                                                              \
+    }                                                                        \
+  } while (0)
 
 int main(void)
 {
@@ -566,6 +634,23 @@ int main(void)
   {
     return 1;
   }
+
+  /* Check per-operation high watermarks match the declared limits */
+  CHECK_ALLOC_MATCH(global_bump_high_mark_keypair, MLD_TOTAL_ALLOC_KEYPAIR);
+  CHECK_ALLOC_MATCH(global_bump_high_mark_sign, MLD_TOTAL_ALLOC_SIGN);
+  CHECK_ALLOC_MATCH(global_bump_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
+  CHECK_ALLOC_MATCH(global_bump_high_mark, MLD_TOTAL_ALLOC);
+
+  /*
+   * For parameter set 87, also check that the high watermarks match
+   * the MLD_MAX_TOTAL_ALLOC_* constants (which are defined as the 87 values).
+   */
+#if MLD_CONFIG_API_PARAMETER_SET == 87
+  CHECK_ALLOC_MATCH(global_bump_high_mark_keypair, MLD_MAX_TOTAL_ALLOC_KEYPAIR);
+  CHECK_ALLOC_MATCH(global_bump_high_mark_sign, MLD_MAX_TOTAL_ALLOC_SIGN);
+  CHECK_ALLOC_MATCH(global_bump_high_mark_verify, MLD_MAX_TOTAL_ALLOC_VERIFY);
+  CHECK_ALLOC_MATCH(global_bump_high_mark, MLD_MAX_TOTAL_ALLOC);
+#endif /* MLD_CONFIG_API_PARAMETER_SET == 87 */
 
   return 0;
 }

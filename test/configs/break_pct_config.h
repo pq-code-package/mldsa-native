@@ -680,8 +680,8 @@ static MLD_INLINE int mld_break_pct(void)
  * Description: Set this to reduce RAM usage.
  *              This trades memory for performance.
  *
- *              For detailed expected memory savings, see the
- *              mldsa-native README.
+ *              For expected memory usage, see the MLD_TOTAL_ALLOC_* constants
+ *              defined in mldsa_native.h.
  *
  *              This option is useful for embedded systems with tight RAM
  *              constraints but relaxed performance requirements.

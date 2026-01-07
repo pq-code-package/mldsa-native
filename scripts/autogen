@@ -1812,7 +1812,6 @@ def get_syscaps():
 
 def check_macro_typos():
     files = get_all_files()
-    configs = get_config_options()
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
@@ -1822,6 +1821,10 @@ def check_macro_typos():
 
     def macro_check(m, rest, filename):
         if m in macros:
+            return True
+
+        # Ignore alloc macros only defined in mldsa_native.h
+        if m.startswith("MLD_TOTAL_ALLOC") or m.startswith("MLD_MAX_TOTAL_ALLOC"):
             return True
 
         is_autogen = filename == "scripts/autogen"
