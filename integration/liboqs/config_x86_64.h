@@ -122,13 +122,13 @@
  * Description: In compliance with FIPS 204 Section 3.6.3, mldsa-native zeroizes
  *              intermediate stack buffers before returning from function calls.
  *
- *              Set this option and define `mld_zeroize_native` if you want to
+ *              Set this option and define `mld_zeroize` if you want to
  *              use a custom method to zeroize intermediate stack buffers.
  *              The default implementation uses SecureZeroMemory on Windows
  *              and a memset + compiler barrier otherwise. If neither of those
  *              is available on the target platform, compilation will fail,
  *              and you will need to use MLD_CONFIG_CUSTOM_ZEROIZE to provide
- *              a custom implementation of `mld_zeroize_native()`.
+ *              a custom implementation of `mld_zeroize()`.
  *
  *              WARNING:
  *              The explicit stack zeroization conducted by mldsa-native
@@ -141,7 +141,7 @@
  *
  *              If you need bullet-proof zeroization of the stack, you need to
  *              consider additional measures instead of what this feature
- *              provides. In this case, you can set mld_zeroize_native to a
+ *              provides. In this case, you can set mld_zeroize to a
  *              no-op.
  *
  *****************************************************************************/
@@ -149,7 +149,7 @@
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
    #include "sys.h"
-   static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
+   static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
    {
        ... your implementation ...
    }

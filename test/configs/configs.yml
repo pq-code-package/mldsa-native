@@ -17,7 +17,7 @@ configs:
           #include <stdint.h>
           #include <string.h>
           #include "../mldsa/src/sys.h"
-          static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
+          static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
           {
             explicit_bzero(ptr, len);
           }
@@ -54,7 +54,7 @@ configs:
           #include <stdint.h>
           #include <string.h>
           #include "../mldsa/src/sys.h"
-          static MLD_INLINE void mld_zeroize_native(void *ptr, size_t len)
+          static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
           {
             explicit_bzero(ptr, len);
           }
