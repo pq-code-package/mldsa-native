@@ -341,7 +341,7 @@ __contract__(
   return mld_rej_eta_c(a, target, offset, buf, buflen);
 }
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
                              mld_poly *r3, const uint8_t seed[MLDSA_CRHBYTES],
@@ -425,8 +425,9 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
-#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
                           uint8_t nonce)
@@ -482,13 +483,14 @@ void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
-#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
 #define MLD_POLY_UNIFORM_GAMMA1_NBLOCKS                       \
   ((MLDSA_POLYZ_PACKEDBYTES + MLD_STREAM256_BLOCKBYTES - 1) / \
    MLD_STREAM256_BLOCKBYTES)
 
-#if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if MLD_CONFIG_PARAMETER_SET == 65 || \
+    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
                              uint16_t nonce)
@@ -516,10 +518,11 @@ void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
-#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
+          MLD_UNIT_TEST */
 
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
                                 mld_poly *r3,
@@ -568,7 +571,7 @@ void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
 MLD_INTERNAL_API
 void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])

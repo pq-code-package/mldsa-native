@@ -92,7 +92,7 @@ __contract__(
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
 /*************************************************
  * Name:        mld_poly_uniform_eta
@@ -132,9 +132,9 @@ __contract__(
   ensures(array_abs_bound(r2->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
   ensures(array_abs_bound(r3->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
-#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_eta MLD_NAMESPACE_KL(poly_uniform_eta)
 /*************************************************
  * Name:        mld_poly_uniform_eta
@@ -157,9 +157,10 @@ __contract__(
   assigns(memory_slice(r, sizeof(mld_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
-#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
-#if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if MLD_CONFIG_PARAMETER_SET == 65 || \
+    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1
@@ -182,9 +183,10 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
+          MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1_4x
@@ -219,7 +221,7 @@ __contract__(
   ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_UNIT_TEST */
 
 #define mld_poly_challenge MLD_NAMESPACE_KL(poly_challenge)
 /*************************************************

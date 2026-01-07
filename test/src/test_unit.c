@@ -20,6 +20,14 @@
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
+#ifndef NUM_RANDOM_TESTS_REJ_UNIFORM
+#ifdef MLDSA_DEBUG
+#define NUM_RANDOM_TESTS_REJ_UNIFORM 100
+#else
+#define NUM_RANDOM_TESTS_REJ_UNIFORM 1000
+#endif
+#endif /* !NUM_RANDOM_TESTS_REJ_UNIFORM */
+
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -581,6 +589,99 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
+static int test_poly_uniform_gamma1_consistency(void)
+{
+  mld_poly r0_x4, r1_x4, r2_x4, r3_x4, r0_x1, r1_x1, r2_x1, r3_x1;
+  MLD_ALIGN uint8_t seed[MLDSA_CRHBYTES];
+  uint16_t nonce0, nonce1, nonce2, nonce3;
+  int i;
+  for (i = 0; i < NUM_RANDOM_TESTS_REJ_UNIFORM; i++)
+  {
+    randombytes(seed, MLDSA_CRHBYTES);
+    randombytes((uint8_t *)&nonce0, sizeof(uint16_t));
+    randombytes((uint8_t *)&nonce1, sizeof(uint16_t));
+    randombytes((uint8_t *)&nonce2, sizeof(uint16_t));
+    randombytes((uint8_t *)&nonce3, sizeof(uint16_t));
+    /* Call 4x version */
+    mld_poly_uniform_gamma1_4x(&r0_x4, &r1_x4, &r2_x4, &r3_x4, seed, nonce0,
+                               nonce1, nonce2, nonce3);
+    /* Call scalar version 4 times */
+    mld_poly_uniform_gamma1(&r0_x1, seed, nonce0);
+    mld_poly_uniform_gamma1(&r1_x1, seed, nonce1);
+    mld_poly_uniform_gamma1(&r2_x1, seed, nonce2);
+    mld_poly_uniform_gamma1(&r3_x1, seed, nonce3);
+
+    CHECK(memcmp(r0_x4.coeffs, r0_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r1_x4.coeffs, r1_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r2_x4.coeffs, r2_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r3_x4.coeffs, r3_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+  }
+  return 0;
+}
+
+static int test_poly_uniform_consistency(void)
+{
+  mld_poly r0_x4, r1_x4, r2_x4, r3_x4, r0_x1, r1_x1, r2_x1, r3_x1;
+  MLD_ALIGN uint8_t seed[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  int i, j;
+
+  for (i = 0; i < NUM_RANDOM_TESTS_REJ_UNIFORM; i++)
+  {
+    for (j = 0; j < 4; j++)
+    {
+      randombytes(seed[j], MLDSA_SEEDBYTES + 2);
+    }
+
+    /* Call 4x version */
+    mld_poly_uniform_4x(&r0_x4, &r1_x4, &r2_x4, &r3_x4, seed);
+
+    /* Call scalar version 4 times */
+    mld_poly_uniform(&r0_x1, seed[0]);
+    mld_poly_uniform(&r1_x1, seed[1]);
+    mld_poly_uniform(&r2_x1, seed[2]);
+    mld_poly_uniform(&r3_x1, seed[3]);
+
+    CHECK(memcmp(r0_x4.coeffs, r0_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r1_x4.coeffs, r1_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r2_x4.coeffs, r2_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r3_x4.coeffs, r3_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+  }
+  return 0;
+}
+
+static int test_poly_uniform_eta_consistency(void)
+{
+  mld_poly r0_x4, r1_x4, r2_x4, r3_x4, r0_x1, r1_x1, r2_x1, r3_x1;
+  MLD_ALIGN uint8_t seed[MLDSA_CRHBYTES];
+  uint8_t nonce0, nonce1, nonce2, nonce3;
+  int i;
+
+  for (i = 0; i < NUM_RANDOM_TESTS_REJ_UNIFORM; i++)
+  {
+    randombytes(seed, MLDSA_CRHBYTES);
+    randombytes(&nonce0, sizeof(uint8_t));
+    randombytes(&nonce1, sizeof(uint8_t));
+    randombytes(&nonce2, sizeof(uint8_t));
+    randombytes(&nonce3, sizeof(uint8_t));
+
+    /* Call 4x version */
+    mld_poly_uniform_eta_4x(&r0_x4, &r1_x4, &r2_x4, &r3_x4, seed, nonce0,
+                            nonce1, nonce2, nonce3);
+
+    /* Call scalar version 4 times */
+    mld_poly_uniform_eta(&r0_x1, seed, nonce0);
+    mld_poly_uniform_eta(&r1_x1, seed, nonce1);
+    mld_poly_uniform_eta(&r2_x1, seed, nonce2);
+    mld_poly_uniform_eta(&r3_x1, seed, nonce3);
+
+    CHECK(memcmp(r0_x4.coeffs, r0_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r1_x4.coeffs, r1_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r2_x4.coeffs, r2_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+    CHECK(memcmp(r3_x4.coeffs, r3_x1.coeffs, MLDSA_N * sizeof(int32_t)) == 0);
+  }
+  return 0;
+}
+
 int main(void)
 {
   /* WARNING: Test-only
@@ -612,6 +713,9 @@ int main(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
+  CHECK(test_poly_uniform_gamma1_consistency() == 0);
+  CHECK(test_poly_uniform_eta_consistency() == 0);
+  CHECK(test_poly_uniform_consistency() == 0);
 
   return 0;
 }

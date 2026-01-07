@@ -10,7 +10,7 @@
 #include "common.h"
 
 #include MLD_FIPS202_HEADER_FILE
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_UNIT_TEST)
 #include MLD_FIPS202X4_HEADER_FILE
 #endif
 
