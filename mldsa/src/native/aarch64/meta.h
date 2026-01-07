@@ -67,7 +67,7 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
 {
-  unsigned int outlen;
+  uint64_t outlen;
   /* AArch64 implementation assumes specific buffer lengths */
   if (len != MLDSA_N || buflen != MLD_AARCH64_REJ_UNIFORM_ETA2_BUFLEN)
   {
@@ -91,7 +91,7 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
 {
-  unsigned int outlen;
+  uint64_t outlen;
   /* AArch64 implementation assumes specific buffer lengths */
   if (len != MLDSA_N || buflen != MLD_AARCH64_REJ_UNIFORM_ETA4_BUFLEN)
   {
