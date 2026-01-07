@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+--- envs/m33-an524/src/platform/uart.c.orig	2026-01-30 00:00:00.000000000 +0000
++++ envs/m33-an524/src/platform/uart.c	2026-01-30 00:00:00.000000000 +0000
+@@ -20,9 +20,9 @@
+ #include <stdint.h>
+ #include <stdio.h>
+ 
+-#define UART0_BASE 0x49303000
++#define UART0_BASE 0x41303000
+ #define UART0_BAUDRATE 115200
+-#define SYSTEM_CORE_CLOCK 25000000
++#define SYSTEM_CORE_CLOCK 32000000
+ 
+ /*------------- Universal Asynchronous Receiver Transmitter (UART) -----------*/
