@@ -25,6 +25,16 @@ jobs:
            alloc: true
            bench: true
            opt: no_opt
+         - runner: ubuntu-latest
+           name: 'M33-AN524'
+           makefile: test/baremetal/platform/m33-an524/platform.mk
+           nix-shell: cross-arm-embedded
+           func: true
+           kat: true
+           acvp: true
+           alloc: true
+           bench: true
+           opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
