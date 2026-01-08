@@ -65,7 +65,7 @@ on:
         type: string
         default: ''
 env:
-  AWS_ROLE: arn:aws:iam::559050233797:role/mlkem-c-aarch64-gh-action
+  AWS_ROLE: arn:aws:iam::904233116199:role/mldsa-native-ci
   AWS_REGION: us-east-1
   AMI_UBUNTU_LATEST_X86_64: ami-0e86e20dae9224db8
   AMI_UBUNTU_LATEST_AARCH64: ami-096ea6a12ea24a797
@@ -110,8 +110,8 @@ jobs:
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
           ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          subnet-id: subnet-094d73eb42eb6bf5b
+          security-group-id: sg-0282706dbc92a1579
       - name: Start EC2 runner (wait before retry)
         if: steps.start-ec2-runner-first.outcome == 'failure'
         shell: bash
@@ -127,8 +127,8 @@ jobs:
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
           ec2-image-id: ${{ steps.det_ami_id.outputs.AMI_ID }}
           ec2-instance-type: ${{ inputs.ec2_instance_type }}
-          subnet-id: subnet-07b2729e5e065962f
-          security-group-id: sg-0ab2e297196c8c381
+          subnet-id: subnet-094d73eb42eb6bf5b
+          security-group-id: sg-0282706dbc92a1579
       - name: Remember runner
         id: remember-runner
         shell: bash
