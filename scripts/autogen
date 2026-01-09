@@ -27,7 +27,9 @@ montgomery_factor = pow(2, 32, modulus)
 _RE_DEFINED = re.compile(r"defined\(([^)]+)\)")
 _RE_MARKDOWN_CITE = re.compile(r"\[\^(?P<id>\w+)\]")
 _RE_C_CITE = re.compile(r"@\[(?P<id>\w+)")
-_RE_BYTECODE_START = re.compile(r"=== bytecode start: mldsa/([^/\s]+?)\.o")
+_RE_BYTECODE_START = re.compile(
+    r"=== bytecode start: (?:aarch64|x86_64)/mldsa/([^/\s]+?)\.o"
+)
 _RE_FUNC_SYMBOL = re.compile(r"MLD_ASM_FN_SYMBOL\((.*)\)")
 _RE_MACRO_CHECK = re.compile(r"[^_]((?:MLD_|MLDSA_)\w+)(.*)$", re.M)
 _RE_DEFINE = re.compile(r"^\s*#define\s+(\w+)")
@@ -2134,10 +2136,10 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm_file(job):
-    infile, outfile, indir, cflags = job
+    infile, outfile, indir, cflags, arch = job
     update_via_simpasm(
         f"{indir}/{infile}",
-        "proofs/hol_light/x86_64/mldsa",
+        "proofs/hol_light/" + arch + "/mldsa",
         outfile=outfile,
         cflags=cflags,
         preserve_header=False,
@@ -2145,17 +2147,19 @@ def gen_hol_light_asm_file(job):
 
 
 def gen_hol_light_asm():
-    joblist = [
+    x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
+    joblist_x86_64 = [
         (
             "ntt.S",
             "mldsa_ntt.S",
             "dev/x86_64/src",
-            "-Imldsa/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=full",
+            f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
+            "x86_64",
         ),
     ]
 
     with ThreadPoolExecutor() as executor:
-        _ = list(executor.map(partial(gen_hol_light_asm_file), joblist))
+        _ = list(executor.map(partial(gen_hol_light_asm_file), joblist_x86_64))
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
