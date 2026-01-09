@@ -966,6 +966,18 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
                              int externalmu)
 {
   int ret, cmp;
+
+  /* TODO: Remove the following workaround for
+   * https://github.com/diffblue/cbmc/issues/8813 */
+  typedef MLK_UNION_OR_STRUCT
+  {
+    mld_polyveck t1;
+    mld_polyveck w1;
+  }
+  t1w1_u;
+  mld_polyveck *t1;
+  mld_polyveck *w1;
+
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES);
@@ -974,18 +986,19 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   MLD_ALLOC(cp, mld_poly, 1);
   MLD_ALLOC(mat, mld_polymat, 1);
   MLD_ALLOC(z, mld_polyvecl, 1);
-  MLD_ALLOC(t1, mld_polyveck, 1);
-  MLD_ALLOC(w1, mld_polyveck, 1);
+  MLD_ALLOC(t1w1, t1w1_u, 1);
   MLD_ALLOC(tmp, mld_polyveck, 1);
   MLD_ALLOC(h, mld_polyveck, 1);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
-      cp == NULL || mat == NULL || z == NULL || t1 == NULL || w1 == NULL ||
-      tmp == NULL || h == NULL)
+      cp == NULL || mat == NULL || z == NULL || t1w1 == NULL || tmp == NULL ||
+      h == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
+  t1 = &t1w1->t1;
+  w1 = &t1w1->w1;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1028,17 +1041,14 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
   mld_poly_challenge(cp, c);
-  mld_polyvec_matrix_expand(mat, rho);
-
-  mld_polyvecl_ntt(z);
-  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
-
   mld_poly_ntt(cp);
   mld_polyveck_shiftl(t1);
   mld_polyveck_ntt(t1);
-
   mld_polyveck_pointwise_poly_montgomery(tmp, cp, t1);
 
+  mld_polyvec_matrix_expand(mat, rho);
+  mld_polyvecl_ntt(z);
+  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
   mld_polyveck_sub(w1, tmp);
   mld_polyveck_reduce(w1);
   mld_polyveck_invntt_tomont(w1);
@@ -1062,8 +1072,7 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(h, mld_polyveck, 1);
   MLD_FREE(tmp, mld_polyveck, 1);
-  MLD_FREE(w1, mld_polyveck, 1);
-  MLD_FREE(t1, mld_polyveck, 1);
+  MLD_FREE(t1w1, t1w1_u, 1);
   MLD_FREE(z, mld_polyvecl, 1);
   MLD_FREE(mat, mld_polymat, 1);
   MLD_FREE(cp, mld_poly, 1);
