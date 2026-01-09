@@ -35,5 +35,5 @@ jobs:
           acvp: true
           examples: false
           stack: false
-          alloc: false
+          alloc: true
           rng_fail: false
