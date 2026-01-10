@@ -8,7 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib'
     required: false
     default: 'all'
   opt:
@@ -29,6 +29,35 @@ runs:
         func: true
         kat: true
         acvp: true
+        opt: ${{ inputs.opt }}
+        examples: true
+        extra_args: "--exclude-example basic_deterministic"
+    - name: "REDUCE_RAM"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'reduce-ram') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_REDUCE_RAM -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        alloc: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "REDUCE_RAM + PCT"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'reduce-ram-pct') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_REDUCE_RAM -DMLD_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        alloc: true
         opt: ${{ inputs.opt }}
         examples: true
         extra_args: "--exclude-example basic_deterministic"

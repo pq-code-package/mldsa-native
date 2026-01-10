@@ -405,7 +405,11 @@ configs:
     description: "Configuration for low RAM build of mldsa-native"
     defines:
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
-      MLD_CONFIG_REDUCE_RAM: true
+      MLD_CONFIG_REDUCE_RAM:
+        content: |
+          #if !defined(MLD_CONFIG_REDUCE_RAM)
+          #define MLD_CONFIG_REDUCE_RAM
+          #endif
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
