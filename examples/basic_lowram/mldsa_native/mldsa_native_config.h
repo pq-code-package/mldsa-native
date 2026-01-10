@@ -709,7 +709,10 @@
  *              Its scope and configuration may change at any time.
  *
  *****************************************************************************/
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define MLD_CONFIG_REDUCE_RAM
+#endif
+
 
 /*************************  Config internals  ********************************/
 
