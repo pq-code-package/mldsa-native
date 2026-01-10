@@ -43,6 +43,10 @@
                 '')
             ];
           };
+          holLightShellHook = ''
+            export PATH=$PWD/scripts:$PATH
+            export PROOF_DIR="$PWD/proofs/hol_light"
+          '';
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -87,6 +91,7 @@
 
           # arm-none-eabi-gcc + platform files from pqmx
           packages.m55-an547 = util.m55-an547;
+          #packages.avr-toolchain = util.avr-toolchain; # TODO The AVR shell is currently unavaliable for mldsa-native
           devShells.arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
@@ -94,17 +99,20 @@
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
           };
+
+          devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           devShells.hol_light = (util.mkShell {
-            packages = builtins.attrValues {
-              inherit (config.packages) linters hol_light s2n_bignum;
-            };
-          }).overrideAttrs (old: {
-            shellHook = ''
-              export PATH=$PWD/scripts:$PATH
-              # Set proof directory for x86_64
-              export PROOF_DIR_X86_64="$PWD/proofs/hol_light/x86_64"
-            '';
-          });
+            packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchains hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross-aarch64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64 hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross-x86_64 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum; };
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };
