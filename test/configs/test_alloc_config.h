@@ -31,7 +31,6 @@
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
  *   - MLD_CONFIG_NAMESPACE_PREFIX
- *   - MLD_CONFIG_KEYGEN_PCT
  *   - MLD_CONFIG_CONTEXT_PARAMETER
  *   - MLD_CONFIG_CONTEXT_PARAMETER_TYPE
  *   - MLD_CONFIG_CUSTOM_ALLOC_FREE
@@ -633,10 +632,7 @@ void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
  *              key generation.
  *
  *****************************************************************************/
-#if !defined(MLD_CONFIG_KEYGEN_PCT)
-#define MLD_CONFIG_KEYGEN_PCT
-#endif
-
+/* #define MLD_CONFIG_KEYGEN_PCT */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
