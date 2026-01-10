@@ -413,11 +413,6 @@ configs:
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:
       MLD_CONFIG_NAMESPACE_PREFIX: mld
-      MLD_CONFIG_KEYGEN_PCT:
-        content: |
-          #if !defined(MLD_CONFIG_KEYGEN_PCT)
-          #define MLD_CONFIG_KEYGEN_PCT
-          #endif
       MLD_CONFIG_CUSTOM_ALLOC_FREE:
         content: |
           #define MLD_CONFIG_CUSTOM_ALLOC_FREE

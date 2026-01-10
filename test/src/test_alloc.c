@@ -17,6 +17,9 @@
  * Level-dependent allocation limit macros.
  * These expand to the right MLD_TOTAL_ALLOC_{44,65,87}_* constant
  * based on MLD_CONFIG_API_PARAMETER_SET.
+ *
+ * Note: MLD_TOTAL_ALLOC_*_KEYPAIR in the header automatically adapts
+ * based on MLD_CONFIG_KEYGEN_PCT.
  */
 #define MLD_TOTAL_ALLOC_KEYPAIR__(LVL) MLD_TOTAL_ALLOC_##LVL##_KEYPAIR
 #define MLD_TOTAL_ALLOC_KEYPAIR_(LVL) MLD_TOTAL_ALLOC_KEYPAIR__(LVL)
@@ -644,6 +647,7 @@ int main(void)
   /*
    * For parameter set 87, also check that the high watermarks match
    * the MLD_MAX_TOTAL_ALLOC_* constants (which are defined as the 87 values).
+   * MLD_MAX_TOTAL_ALLOC_KEYPAIR adapts based on MLD_CONFIG_KEYGEN_PCT.
    */
 #if MLD_CONFIG_API_PARAMETER_SET == 87
   CHECK_ALLOC_MATCH(global_bump_high_mark_keypair, MLD_MAX_TOTAL_ALLOC_KEYPAIR);
