@@ -6,12 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "src/sign.h"
+#include "mldsa_native.h"
 
 static void test_keygen_only(void)
 {
-  unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
-  unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES];
+  unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+  unsigned char sk[CRYPTO_SECRETKEYBYTES];
 
   /* Only call keypair - this is what we're measuring */
   /* Uses the notrandombytes implementation for deterministic randomness */
@@ -21,8 +21,8 @@ static void test_keygen_only(void)
 
 static void test_sign_only(void)
 {
-  unsigned char sk[MLDSA_CRYPTO_SECRETKEYBYTES] = {0};
-  unsigned char sig[MLDSA_CRYPTO_BYTES];
+  unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
+  unsigned char sig[CRYPTO_BYTES];
   size_t siglen;
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
@@ -36,15 +36,15 @@ static void test_sign_only(void)
 
 static void test_verify_only(void)
 {
-  unsigned char pk[MLDSA_CRYPTO_PUBLICKEYBYTES] = {0};
-  unsigned char sig[MLDSA_CRYPTO_BYTES] = {0};
+  unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
+  unsigned char sig[CRYPTO_BYTES] = {0};
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
 
   /* Only call verify - this is what we're measuring */
   /* pk and sig are zero-initialized (invalid, but OK for stack measurement) */
-  int ret = crypto_sign_verify(sig, MLDSA_CRYPTO_BYTES, msg, sizeof(msg) - 1,
-                               ctx, sizeof(ctx) - 1, pk);
+  int ret = crypto_sign_verify(sig, CRYPTO_BYTES, msg, sizeof(msg) - 1, ctx,
+                               sizeof(ctx) - 1, pk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 }
 

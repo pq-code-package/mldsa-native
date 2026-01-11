@@ -8,9 +8,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../mldsa/src/randombytes.h"
-#include "../../mldsa/src/sign.h"
+#include "src/common.h"
+
 #include "hal.h"
+#include "mldsa_native.h"
+#include "src/randombytes.h"
+
+/* Additional SUPERCOP-style macros for functions not in the standard set */
+#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
+#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
 
 #define NWARMUP 3
 #define NITERATIONS 5
@@ -74,9 +80,9 @@ static void print_percentiles(const char *txt, uint64_t cyc[NTESTS])
 
 static int bench(void)
 {
-  uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[MLDSA_CRYPTO_BYTES];
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
   unsigned char kg_rand[MLDSA_SEEDBYTES], sig_rand[MLDSA_SEEDBYTES];

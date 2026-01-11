@@ -6,10 +6,16 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "../../mldsa/src/fips202/fips202.h"
-#include "../../mldsa/src/sign.h"
-#include "../../mldsa/src/sys.h"
+#include "src/common.h"
+
 #include "../notrandombytes/notrandombytes.h"
+#include "mldsa_native.h"
+#include "src/fips202/fips202.h"
+#include "src/sys.h"
+
+/* Additional SUPERCOP-style macros for functions not in the standard set */
+#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
+#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
 
 #if defined(MLD_SYS_WINDOWS)
 #include <fcntl.h>
@@ -47,9 +53,9 @@ int main(void)
 {
   unsigned i;
   int rc;
-  uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES];
-  uint8_t s[MLDSA_CRYPTO_BYTES];
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t s[CRYPTO_BYTES];
   uint8_t *m;
   /* empty ctx */
   uint8_t pre[2] = {0, 0};
@@ -85,8 +91,8 @@ int main(void)
 
     CHECK(crypto_sign_keypair_internal(pk, sk, coins) == 0);
 
-    print_hex(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
-    print_hex(sk, MLDSA_CRYPTO_SECRETKEYBYTES);
+    print_hex(pk, CRYPTO_PUBLICKEYBYTES);
+    print_hex(sk, CRYPTO_SECRETKEYBYTES);
 
     CHECK(crypto_sign_signature_internal(s, &slen, m, i, pre, sizeof(pre),
                                          coins + MLDSA_SEEDBYTES, sk, 0) == 0);
