@@ -29,6 +29,7 @@
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
+ *   - MLD_CONFIG_NO_SUPERCOP
  *   - MLD_CONFIG_MULTILEVEL_BUILD
  *   - MLD_CONFIG_NAMESPACE_PREFIX
  *   - MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
@@ -158,7 +159,7 @@
  *              naming does not disambiguate between the parameter sets.
  *
  *****************************************************************************/
-/* #define MLD_CONFIG_NO_SUPERCOP */
+#define MLD_CONFIG_NO_SUPERCOP
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CONSTANTS_ONLY

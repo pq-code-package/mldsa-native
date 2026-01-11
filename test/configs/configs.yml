@@ -302,6 +302,7 @@ configs:
   - path: examples/monolithic_build_multilevel/mldsa_native/mldsa_native_config.h
     description: "Multilevel monolithic build config"
     defines:
+      MLD_CONFIG_NO_SUPERCOP: true
       MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_INTERNAL_API_QUALIFIER: static
@@ -311,6 +312,7 @@ configs:
   - path: examples/multilevel_build/mldsa_native/mldsa_native_config.h
     description: "Multilevel build config"
     defines:
+      MLD_CONFIG_NO_SUPERCOP: true
       MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_FILE:
@@ -319,6 +321,7 @@ configs:
   - path: examples/multilevel_build_native/mldsa_native/mldsa_native_config.h
     description: "Multilevel build config"
     defines:
+      MLD_CONFIG_NO_SUPERCOP: true
       MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
@@ -329,6 +332,7 @@ configs:
   - path: examples/monolithic_build_multilevel_native/mldsa_native/mldsa_native_config.h
     description: "Multilevel monolithic build config with native backends"
     defines:
+      MLD_CONFIG_NO_SUPERCOP: true
       MLD_CONFIG_MULTILEVEL_BUILD: true
       MLD_CONFIG_NAMESPACE_PREFIX: mldsa
       MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
