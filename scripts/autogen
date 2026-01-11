@@ -2920,16 +2920,30 @@ def update_bytecode_in_proof_script(filepath, bytecode):
     update_file(filepath, updated_content)
 
 
-def update_hol_light_bytecode():
-    """Update HOL Light proof files with bytecode from make dump_bytecode."""
+def update_hol_light_bytecode_for_arch(arch, force_cross=False):
     status_update(
-        "HOL Light bytecode",
-        "Running make dump_bytecode ... (this may take a few minutes)",
+        f"HOL Light bytecode ({arch})",
+        f"Running make dump_bytecode ({arch})... (this may take a few minutes)",
     )
+
+    source_arch = arch
+    if platform.machine().lower() in ["arm64", "aarch64"]:
+        native_arch = "aarch64"
+    else:
+        native_arch = "x86_64"
+
+    if native_arch != source_arch:
+        cross_prefix = f"{source_arch}-unknown-linux-gnu-"
+        cross_gcc = cross_prefix + "gcc"
+        # Check if cross-compiler is present
+        if shutil.which(cross_gcc) is None:
+            if force_cross is False:
+                return
+            raise Exception(f"Could not find cross toolchain {cross_prefix}")
 
     # Run make to get bytecode output
     result = subprocess.run(
-        ["make", "-C", "proofs/hol_light/x86_64", "dump_bytecode"],
+        ["make", "-C", "proofs/hol_light/" + arch, "dump_bytecode"],
         capture_output=True,
         text=True,
         check=True,
@@ -2941,8 +2955,15 @@ def update_hol_light_bytecode():
 
     # Update each .ml file
     for obj_name, bytecode in bytecode_dict.items():
-        ml_file = "proofs/hol_light/x86_64/proofs/" + obj_name + ".ml"
+        ml_file = "proofs/hol_light/" + arch + "/proofs/" + obj_name + ".ml"
         update_bytecode_in_proof_script(ml_file, bytecode)
+
+
+def update_hol_light_bytecode(force_cross=False):
+    """Update HOL Light proof files with bytecode from make dump_bytecode."""
+    # NOTE: The following line is commented out until there are hol_light aarch64 proofs.
+    # update_hol_light_bytecode_for_arch("aarch64", force_cross=force_cross)
+    update_hol_light_bytecode_for_arch("x86_64", force_cross=force_cross)
 
 
 def gen_test_config(config_path, config_spec, default_config_content):
@@ -3170,7 +3191,7 @@ def _main():
     high_level_status("Completed final backend synchronization")
 
     if args.update_hol_light_bytecode:
-        update_hol_light_bytecode()
+        update_hol_light_bytecode(args.force_cross)
         high_level_status("Updated HOL Light bytecode")
 
     gen_monolithic_source_file()
