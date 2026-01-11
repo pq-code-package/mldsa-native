@@ -44,27 +44,33 @@
 
 #endif /* MLD_CHECK_APIS */
 
-#define mld_sign_keypair_internal MLD_NAMESPACE_KL(keypair_internal)
-#define mld_sign_keypair MLD_NAMESPACE_KL(keypair)
-#define mld_sign_signature_internal MLD_NAMESPACE_KL(signature_internal)
-#define mld_sign_signature MLD_NAMESPACE_KL(signature)
-#define mld_sign_signature_extmu MLD_NAMESPACE_KL(signature_extmu)
-#define mld_sign MLD_NAMESPACE_KL(sign)
-#define mld_sign_verify_internal MLD_NAMESPACE_KL(verify_internal)
-#define mld_sign_verify MLD_NAMESPACE_KL(verify)
-#define mld_sign_verify_extmu MLD_NAMESPACE_KL(verify_extmu)
-#define mld_sign_open MLD_NAMESPACE_KL(open)
+#define mld_sign_keypair_internal \
+  MLD_NAMESPACE_KL(keypair_internal) MLD_CONTEXT_PARAMETERS_3
+#define mld_sign_keypair MLD_NAMESPACE_KL(keypair) MLD_CONTEXT_PARAMETERS_2
+#define mld_sign_signature_internal \
+  MLD_NAMESPACE_KL(signature_internal) MLD_CONTEXT_PARAMETERS_9
+#define mld_sign_signature MLD_NAMESPACE_KL(signature) MLD_CONTEXT_PARAMETERS_7
+#define mld_sign_signature_extmu \
+  MLD_NAMESPACE_KL(signature_extmu) MLD_CONTEXT_PARAMETERS_4
+#define mld_sign MLD_NAMESPACE_KL(sign) MLD_CONTEXT_PARAMETERS_7
+#define mld_sign_verify_internal \
+  MLD_NAMESPACE_KL(verify_internal) MLD_CONTEXT_PARAMETERS_8
+#define mld_sign_verify MLD_NAMESPACE_KL(verify) MLD_CONTEXT_PARAMETERS_7
+#define mld_sign_verify_extmu \
+  MLD_NAMESPACE_KL(verify_extmu) MLD_CONTEXT_PARAMETERS_4
+#define mld_sign_open MLD_NAMESPACE_KL(open) MLD_CONTEXT_PARAMETERS_7
 #define mld_sign_signature_pre_hash_internal \
-  MLD_NAMESPACE_KL(signature_pre_hash_internal)
+  MLD_NAMESPACE_KL(signature_pre_hash_internal) MLD_CONTEXT_PARAMETERS_9
 #define mld_sign_verify_pre_hash_internal \
-  MLD_NAMESPACE_KL(verify_pre_hash_internal)
+  MLD_NAMESPACE_KL(verify_pre_hash_internal) MLD_CONTEXT_PARAMETERS_8
 #define mld_sign_signature_pre_hash_shake256 \
-  MLD_NAMESPACE_KL(signature_pre_hash_shake256)
+  MLD_NAMESPACE_KL(signature_pre_hash_shake256) MLD_CONTEXT_PARAMETERS_8
 #define mld_sign_verify_pre_hash_shake256 \
-  MLD_NAMESPACE_KL(verify_pre_hash_shake256)
+  MLD_NAMESPACE_KL(verify_pre_hash_shake256) MLD_CONTEXT_PARAMETERS_7
 #define mld_prepare_domain_separation_prefix \
   MLD_NAMESPACE_KL(prepare_domain_separation_prefix)
-#define mld_sign_pk_from_sk MLD_NAMESPACE_KL(pk_from_sk)
+#define mld_sign_pk_from_sk \
+  MLD_NAMESPACE_KL(pk_from_sk) MLD_CONTEXT_PARAMETERS_2
 
 /*************************************************
  * Hash algorithm constants for domain separation
@@ -108,7 +114,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                               uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                              const uint8_t seed[MLDSA_SEEDBYTES])
+                              const uint8_t seed[MLDSA_SEEDBYTES],
+                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
@@ -142,7 +149,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                     uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                     uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
@@ -190,7 +198,8 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                                 const uint8_t *pre, size_t prelen,
                                 const uint8_t rnd[MLDSA_RNDBYTES],
                                 const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                                int externalmu)
+                                int externalmu,
+                                MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
@@ -242,7 +251,8 @@ MLD_EXTERNAL_API
 int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                        const uint8_t *m, size_t mlen, const uint8_t *ctx,
                        size_t ctxlen,
-                       const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                       const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
@@ -286,7 +296,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                              const uint8_t mu[MLDSA_CRHBYTES],
-                             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(siglen, sizeof(size_t)))
@@ -324,7 +335,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
              const uint8_t *ctx, size_t ctxlen,
-             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sm, MLDSA_CRYPTO_BYTES + mlen))
@@ -371,7 +383,8 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
                              const uint8_t *m, size_t mlen, const uint8_t *pre,
                              size_t prelen,
                              const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                             int externalmu)
+                             int externalmu,
+                             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
@@ -411,7 +424,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                     size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
@@ -448,7 +462,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
                           const uint8_t mu[MLDSA_CRHBYTES],
-                          const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                          const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sig, siglen))
@@ -482,7 +497,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
                   const uint8_t *ctx, size_t ctxlen,
-                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                  MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(smlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(m, smlen))
@@ -536,7 +552,8 @@ int mld_sign_signature_pre_hash_internal(
     uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES], int hashalg)
+    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES], int hashalg,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
@@ -588,7 +605,8 @@ MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_internal(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int hashalg)
+    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int hashalg,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
@@ -632,7 +650,8 @@ int mld_sign_signature_pre_hash_shake256(
     uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *m,
     size_t mlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
@@ -677,7 +696,8 @@ MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_shake256(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
@@ -776,7 +796,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                        const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                        const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))

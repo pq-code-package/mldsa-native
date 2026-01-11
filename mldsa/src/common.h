@@ -169,18 +169,75 @@
 #error Bad configuration: MLD_CONFIG_CUSTOM_ALLOC_FREE must be set together with MLD_CUSTOM_ALLOC and MLD_CUSTOM_FREE
 #endif
 
+/*
+ * If the integration wants to provide a context parameter for use in
+ * platform-specific hooks, then it should define this parameter.
+ *
+ * The MLD_CONTEXT_PARAMETERS_n macros are intended to be used with macros
+ * defining the function names and expand to either pass or discard the context
+ * argument as required by the current build.  If there is no context parameter
+ * requested then these are removed from the prototypes and from all calls.
+ */
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+#define MLD_CONTEXT_PARAMETERS_0(context) (context)
+#define MLD_CONTEXT_PARAMETERS_1(arg0, context) (arg0, context)
+#define MLD_CONTEXT_PARAMETERS_2(arg0, arg1, context) (arg0, arg1, context)
+#define MLD_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) \
+  (arg0, arg1, arg2, context)
+#define MLD_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
+  (arg0, arg1, arg2, arg3, context)
+#define MLD_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4, context)
+#define MLD_CONTEXT_PARAMETERS_6(arg0, arg1, arg2, arg3, arg4, arg5, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5, context)
+#define MLD_CONTEXT_PARAMETERS_7(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 context)                                  \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, context)
+#define MLD_CONTEXT_PARAMETERS_8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 arg7, context)                            \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, context)
+#define MLD_CONTEXT_PARAMETERS_9(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 arg7, arg8, context)                      \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, context)
+#else /* MLD_CONFIG_CONTEXT_PARAMETER */
+#define MLD_CONTEXT_PARAMETERS_0(context) ()
+#define MLD_CONTEXT_PARAMETERS_1(arg0, context) (arg0)
+#define MLD_CONTEXT_PARAMETERS_2(arg0, arg1, context) (arg0, arg1)
+#define MLD_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) (arg0, arg1, arg2)
+#define MLD_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
+  (arg0, arg1, arg2, arg3)
+#define MLD_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4)
+#define MLD_CONTEXT_PARAMETERS_6(arg0, arg1, arg2, arg3, arg4, arg5, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5)
+#define MLD_CONTEXT_PARAMETERS_7(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 context)                                  \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6)
+#define MLD_CONTEXT_PARAMETERS_8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 arg7, context)                            \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+#define MLD_CONTEXT_PARAMETERS_9(arg0, arg1, arg2, arg3, arg4, arg5, arg6, \
+                                 arg7, arg8, context)                      \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+#endif /* !MLD_CONFIG_CONTEXT_PARAMETER */
+
+#if defined(MLD_CONFIG_CONTEXT_PARAMETER_TYPE) != \
+    defined(MLD_CONFIG_CONTEXT_PARAMETER)
+#error MLD_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is defined
+#endif
+
 #if !defined(MLD_CONFIG_CUSTOM_ALLOC_FREE)
 /* Default: stack allocation */
 
-#define MLD_ALLOC(v, T, N)      \
-  MLD_ALIGN T mld_alloc_##v[N]; \
+#define MLD_ALLOC(v, T, N, context) \
+  MLD_ALIGN T mld_alloc_##v[N];     \
   T *v = mld_alloc_##v
 
 /* TODO: This leads to a circular dependency between common and ct.h
  * It just works out before we're at the end of the file, but it's still
  * prone to issues in the future. */
 #include "ct.h"
-#define MLD_FREE(v, T, N)                              \
+#define MLD_FREE(v, T, N, context)                     \
   do                                                   \
   {                                                    \
     mld_zeroize(mld_alloc_##v, sizeof(mld_alloc_##v)); \
@@ -191,16 +248,23 @@
 
 /* Custom allocation */
 
-#define MLD_ALLOC(v, T, N) MLD_CUSTOM_ALLOC(v, T, N)
-#define MLD_FREE(v, T, N)              \
-  do                                   \
-  {                                    \
-    if (v != NULL)                     \
-    {                                  \
-      mld_zeroize(v, sizeof(T) * (N)); \
-      MLD_CUSTOM_FREE(v, T, N);        \
-      v = NULL;                        \
-    }                                  \
+/*
+ * The indirection here is necessary to use MLD_CONTEXT_PARAMETERS_3 here.
+ */
+#define MLD_APPLY(f, args) f args
+
+#define MLD_ALLOC(v, T, N, context) \
+  MLD_APPLY(MLD_CUSTOM_ALLOC, MLD_CONTEXT_PARAMETERS_3(v, T, N, context))
+
+#define MLD_FREE(v, T, N, context)                                            \
+  do                                                                          \
+  {                                                                           \
+    if (v != NULL)                                                            \
+    {                                                                         \
+      mld_zeroize(v, sizeof(T) * (N));                                        \
+      MLD_APPLY(MLD_CUSTOM_FREE, MLD_CONTEXT_PARAMETERS_3(v, T, N, context)); \
+      v = NULL;                                                               \
+    }                                                                         \
   } while (0)
 
 #endif /* MLD_CONFIG_CUSTOM_ALLOC_FREE */

@@ -13,5 +13,6 @@ void harness(void)
   size_t ctxlen;
   const uint8_t *pk;
 
-  mld_sign_open(m, mlen, sm, smlen, ctx, ctxlen, pk);
+  mld_sign_open(m, mlen, sm, smlen, ctx, ctxlen, pk,
+                NULL /* context will be dropped by preprocessor */);
 }

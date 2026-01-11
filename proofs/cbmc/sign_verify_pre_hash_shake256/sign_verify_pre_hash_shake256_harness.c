@@ -13,5 +13,7 @@ void harness(void)
   size_t ctxlen;
   const uint8_t *pk;
   int r;
-  r = mld_sign_verify_pre_hash_shake256(sig, siglen, m, mlen, ctx, ctxlen, pk);
+  r = mld_sign_verify_pre_hash_shake256(
+      sig, siglen, m, mlen, ctx, ctxlen, pk,
+      NULL /* context will be dropped by preprocessor */);
 }

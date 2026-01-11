@@ -1867,6 +1867,10 @@ def check_macro_typos():
         if is_autogen or filename == "integration/awslc/awslc.patch":
             return True
 
+        if is_autogen or filename == "mldsa/src/common.h":
+            if m == "MLD_CONTEXT_PARAMETERS_n":
+                return True
+
         return False
 
     with ThreadPoolExecutor() as executor:

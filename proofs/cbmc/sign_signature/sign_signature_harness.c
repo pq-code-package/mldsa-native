@@ -14,5 +14,6 @@ void harness(void)
   uint8_t *sk;
   int r;
 
-  r = mld_sign_signature(sig, siglen, m, mlen, ctx, ctxlen, sk);
+  r = mld_sign_signature(sig, siglen, m, mlen, ctx, ctxlen, sk,
+                         NULL /* context will be dropped by preprocessor */);
 }

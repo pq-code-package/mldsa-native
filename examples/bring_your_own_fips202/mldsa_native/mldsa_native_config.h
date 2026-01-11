@@ -671,6 +671,29 @@
 /* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_CONTEXT_PARAMETER
+ *
+ * Description: Set this to add a context parameter that is provided to public
+ *              API functions and is then available in custom callbacks.
+ *
+ *              The type of the context parameter is configured via
+ *              MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CONTEXT_PARAMETER */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CONTEXT_PARAMETER_TYPE
+ *
+ * Description: Set this to define the type for the context parameter used by
+ *              MLD_CONFIG_CONTEXT_PARAMETER.
+ *
+ *              This is only relevant if MLD_CONFIG_CONTEXT_PARAMETER is set.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
+/******************************************************************************
  * Name:        MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
  *
  * Description: Set this to reduce RAM usage.

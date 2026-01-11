@@ -14,6 +14,7 @@ void harness(void)
   const uint8_t *rnd;
   const uint8_t *sk;
   int r;
-  r = mld_sign_signature_pre_hash_shake256(sig, siglen, m, mlen, ctx, ctxlen,
-                                           rnd, sk);
+  r = mld_sign_signature_pre_hash_shake256(
+      sig, siglen, m, mlen, ctx, ctxlen, rnd, sk,
+      NULL /* context will be dropped by preprocessor */);
 }

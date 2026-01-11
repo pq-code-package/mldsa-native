@@ -15,6 +15,7 @@ void harness(void)
   const uint8_t *sk;
   int hashalg;
   int r;
-  r = mld_sign_signature_pre_hash_internal(sig, siglen, ph, phlen, ctx, ctxlen,
-                                           rnd, sk, hashalg);
+  r = mld_sign_signature_pre_hash_internal(
+      sig, siglen, ph, phlen, ctx, ctxlen, rnd, sk, hashalg,
+      NULL /* context will be dropped by preprocessor */);
 }
