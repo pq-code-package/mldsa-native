@@ -5,7 +5,7 @@
 
 void harness(void)
 {
-  const uint8_t sig;
+  const uint8_t *sig;
   size_t siglen;
   const uint8_t *m;
   size_t mlen;

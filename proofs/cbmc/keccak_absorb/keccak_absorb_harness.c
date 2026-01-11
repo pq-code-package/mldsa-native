@@ -14,7 +14,6 @@ void harness(void)
   const unsigned int r;
   const uint8_t *in;
   size_t inlen;
-  uint8_t p;
 
   keccak_absorb(s, pos, r, in, inlen);
 }
