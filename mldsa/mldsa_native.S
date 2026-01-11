@@ -331,7 +331,6 @@
 #undef mld_power2round
 #undef mld_use_hint
 /* mldsa/src/sign.h */
-#undef MLD_CONFIG_NO_SUPERCOP
 #undef MLD_DOMAIN_SEPARATION_MAX_BYTES
 #undef MLD_PREHASH_NONE
 #undef MLD_PREHASH_SHA2_224
@@ -347,22 +346,22 @@
 #undef MLD_PREHASH_SHAKE_128
 #undef MLD_PREHASH_SHAKE_256
 #undef MLD_SIGN_H
-#undef crypto_sign
-#undef crypto_sign_keypair
-#undef crypto_sign_keypair_internal
-#undef crypto_sign_open
-#undef crypto_sign_pk_from_sk
-#undef crypto_sign_signature
-#undef crypto_sign_signature_extmu
-#undef crypto_sign_signature_internal
-#undef crypto_sign_signature_pre_hash_internal
-#undef crypto_sign_signature_pre_hash_shake256
-#undef crypto_sign_verify
-#undef crypto_sign_verify_extmu
-#undef crypto_sign_verify_internal
-#undef crypto_sign_verify_pre_hash_internal
-#undef crypto_sign_verify_pre_hash_shake256
 #undef mld_prepare_domain_separation_prefix
+#undef mld_sign
+#undef mld_sign_keypair
+#undef mld_sign_keypair_internal
+#undef mld_sign_open
+#undef mld_sign_pk_from_sk
+#undef mld_sign_signature
+#undef mld_sign_signature_extmu
+#undef mld_sign_signature_internal
+#undef mld_sign_signature_pre_hash_internal
+#undef mld_sign_signature_pre_hash_shake256
+#undef mld_sign_verify
+#undef mld_sign_verify_extmu
+#undef mld_sign_verify_internal
+#undef mld_sign_verify_pre_hash_internal
+#undef mld_sign_verify_pre_hash_shake256
 
 #if !defined(MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)
 /*
