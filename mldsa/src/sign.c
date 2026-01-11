@@ -42,21 +42,23 @@
  * This is to facilitate building multiple instances
  * of mldsa-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
-#define mld_check_pct MLD_ADD_PARAM_SET(mld_check_pct)
+#define mld_check_pct MLD_ADD_PARAM_SET(mld_check_pct) MLD_CONTEXT_PARAMETERS_2
 #define mld_sample_s1_s2 MLD_ADD_PARAM_SET(mld_sample_s1_s2)
 #define mld_validate_hash_length MLD_ADD_PARAM_SET(mld_validate_hash_length)
 #define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
 #define mld_compute_pack_z MLD_ADD_PARAM_SET(mld_compute_pack_z)
 #define mld_attempt_signature_generation \
-  MLD_ADD_PARAM_SET(mld_attempt_signature_generation)
-#define mld_compute_t0_t1_tr_from_sk_components \
-  MLD_ADD_PARAM_SET(mld_compute_t0_t1_tr_from_sk_components)
+  MLD_ADD_PARAM_SET(mld_attempt_signature_generation) MLD_CONTEXT_PARAMETERS_8
+#define mld_compute_t0_t1_tr_from_sk_components              \
+  MLD_ADD_PARAM_SET(mld_compute_t0_t1_tr_from_sk_components) \
+  MLD_CONTEXT_PARAMETERS_7
 /* End of parameter set namespacing */
 
 
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
@@ -82,13 +84,14 @@ __contract__(
  * for the calculation and/of verification of digital signatures.
  **************************************************/
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t message[1] = {0};
   size_t siglen;
   int ret;
-  MLD_ALLOC(signature, uint8_t, MLDSA_CRYPTO_BYTES);
-  MLD_ALLOC(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES);
+  MLD_ALLOC(signature, uint8_t, MLDSA_CRYPTO_BYTES, context);
+  MLD_ALLOC(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, context);
 
   if (signature == NULL || pk_test == NULL)
   {
@@ -101,7 +104,7 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
   /* Sign a test message using the original secret key */
   ret = mld_sign_signature(signature, &siglen, message, sizeof(message), NULL,
-                           0, sk);
+                           0, sk, context);
   if (ret != 0)
   {
     goto cleanup;
@@ -117,22 +120,26 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
   /* Verify the signature using the (potentially corrupted) public key */
   ret = mld_sign_verify(signature, siglen, message, sizeof(message), NULL, 0,
-                        pk_test);
+                        pk_test, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES);
-  MLD_FREE(signature, uint8_t, MLDSA_CRYPTO_BYTES);
+  MLD_FREE(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, context);
+  MLD_FREE(signature, uint8_t, MLDSA_CRYPTO_BYTES, context);
 
   return ret;
 }
-#else  /* MLD_CONFIG_KEYGEN_PCT */
+#else /* MLD_CONFIG_KEYGEN_PCT */
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                         uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   /* Skip PCT */
   ((void)pk);
   ((void)sk);
+#if defined(MLD_CONFIG_CONTEXT_PARAMETER)
+  ((void)context);
+#endif
   return 0;
 }
 #endif /* !MLD_CONFIG_KEYGEN_PCT */
@@ -210,7 +217,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_t0_t1_tr_from_sk_components(
     mld_polyveck *t0, mld_polyveck *t1, uint8_t tr[MLDSA_TRBYTES],
     uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], const uint8_t rho[MLDSA_SEEDBYTES],
-    const mld_polyvecl *s1, const mld_polyveck *s2)
+    const mld_polyvecl *s1, const mld_polyveck *s2,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
@@ -230,9 +238,9 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY))
 {
   int ret;
-  MLD_ALLOC(mat, mld_polymat, 1);
-  MLD_ALLOC(s1hat, mld_polyvecl, 1);
-  MLD_ALLOC(t, mld_polyveck, 1);
+  MLD_ALLOC(mat, mld_polymat, 1, context);
+  MLD_ALLOC(s1hat, mld_polyvecl, 1, context);
+  MLD_ALLOC(t, mld_polyveck, 1, context);
 
   if (mat == NULL || s1hat == NULL || t == NULL)
   {
@@ -276,9 +284,9 @@ __contract__(
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(t, mld_polyveck, 1);
-  MLD_FREE(s1hat, mld_polyvecl, 1);
-  MLD_FREE(mat, mld_polymat, 1);
+  MLD_FREE(t, mld_polyveck, 1, context);
+  MLD_FREE(s1hat, mld_polyvecl, 1, context);
+  MLD_FREE(mat, mld_polymat, 1, context);
   return ret;
 }
 
@@ -286,17 +294,18 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                               uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                              const uint8_t seed[MLDSA_SEEDBYTES])
+                              const uint8_t seed[MLDSA_SEEDBYTES],
+                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
   const uint8_t *rho, *rhoprime, *key;
-  MLD_ALLOC(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES);
-  MLD_ALLOC(inbuf, uint8_t, MLDSA_SEEDBYTES + 2);
-  MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_ALLOC(s1, mld_polyvecl, 1);
-  MLD_ALLOC(s2, mld_polyveck, 1);
-  MLD_ALLOC(t1, mld_polyveck, 1);
-  MLD_ALLOC(t0, mld_polyveck, 1);
+  MLD_ALLOC(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES, context);
+  MLD_ALLOC(inbuf, uint8_t, MLDSA_SEEDBYTES + 2, context);
+  MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES, context);
+  MLD_ALLOC(s1, mld_polyvecl, 1, context);
+  MLD_ALLOC(s2, mld_polyveck, 1, context);
+  MLD_ALLOC(t1, mld_polyveck, 1, context);
+  MLD_ALLOC(t0, mld_polyveck, 1, context);
 
   if (seedbuf == NULL || inbuf == NULL || tr == NULL || s1 == NULL ||
       s2 == NULL || t1 == NULL || t0 == NULL)
@@ -322,7 +331,8 @@ int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   mld_sample_s1_s2(s1, s2, rhoprime);
 
   /* Compute t0, t1, tr, and pk from rho, s1, s2 */
-  ret = mld_compute_t0_t1_tr_from_sk_components(t0, t1, tr, pk, rho, s1, s2);
+  ret = mld_compute_t0_t1_tr_from_sk_components(t0, t1, tr, pk, rho, s1, s2,
+                                                context);
   if (ret != 0)
   {
     goto cleanup;
@@ -336,13 +346,13 @@ int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(t0, mld_polyveck, 1);
-  MLD_FREE(t1, mld_polyveck, 1);
-  MLD_FREE(s2, mld_polyveck, 1);
-  MLD_FREE(s1, mld_polyvecl, 1);
-  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(inbuf, uint8_t, MLDSA_SEEDBYTES + 2);
-  MLD_FREE(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES);
+  MLD_FREE(t0, mld_polyveck, 1, context);
+  MLD_FREE(t1, mld_polyveck, 1, context);
+  MLD_FREE(s2, mld_polyveck, 1, context);
+  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES, context);
+  MLD_FREE(inbuf, uint8_t, MLDSA_SEEDBYTES + 2, context);
+  MLD_FREE(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES, context);
 
   if (ret != 0)
   {
@@ -351,14 +361,15 @@ cleanup:
 
   /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
   /* Do this after freeing all temporaries. */
-  return mld_check_pct(pk, sk);
+  return mld_check_pct(pk, sk, context);
 }
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                     uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                     uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t seed[MLDSA_SEEDBYTES];
   int ret;
@@ -368,7 +379,7 @@ int mld_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
     goto cleanup;
   }
   MLD_CT_TESTING_SECRET(seed, sizeof(seed));
-  ret = mld_sign_keypair_internal(pk, sk, seed);
+  ret = mld_sign_keypair_internal(pk, sk, seed, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -551,7 +562,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
-    const mld_polyvecl *s1, const mld_polyveck *s2, const mld_polyveck *t0)
+    const mld_polyvecl *s1, const mld_polyveck *s2, const mld_polyveck *t0,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
@@ -596,13 +608,13 @@ __contract__(
   mld_polyveck *w1;
   mld_polyvecl *tmp;
 
-  MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_ALLOC(yh, yh_u, 1);
-  MLD_ALLOC(z, mld_poly, 1);
-  MLD_ALLOC(w1tmp, w1tmp_u, 1);
-  MLD_ALLOC(w0, mld_polyveck, 1);
-  MLD_ALLOC(cp, mld_poly, 1);
-  MLD_ALLOC(t, mld_poly, 1);
+  MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
+  MLD_ALLOC(yh, yh_u, 1, context);
+  MLD_ALLOC(z, mld_poly, 1, context);
+  MLD_ALLOC(w1tmp, w1tmp_u, 1, context);
+  MLD_ALLOC(w0, mld_polyveck, 1, context);
+  MLD_ALLOC(cp, mld_poly, 1, context);
+  MLD_ALLOC(t, mld_poly, 1, context);
 
   if (challenge_bytes == NULL || yh == NULL || z == NULL || w1tmp == NULL ||
       w0 == NULL || cp == NULL || t == NULL)
@@ -705,13 +717,13 @@ __contract__(
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(t, mld_poly, 1);
-  MLD_FREE(cp, mld_poly, 1);
-  MLD_FREE(w0, mld_polyveck, 1);
-  MLD_FREE(w1tmp, w1tmp_u, 1);
-  MLD_FREE(z, mld_poly, 1);
-  MLD_FREE(yh, yh_u, 1);
-  MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES);
+  MLD_FREE(t, mld_poly, 1, context);
+  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(w0, mld_polyveck, 1, context);
+  MLD_FREE(w1tmp, w1tmp_u, 1, context);
+  MLD_FREE(z, mld_poly, 1, context);
+  MLD_FREE(yh, yh_u, 1, context);
+  MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
 
   return ret;
 }
@@ -722,17 +734,18 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                                 const uint8_t *pre, size_t prelen,
                                 const uint8_t rnd[MLDSA_RNDBYTES],
                                 const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                                int externalmu)
+                                int externalmu,
+                                MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   uint16_t nonce = 0;
   MLD_ALLOC(seedbuf, uint8_t,
-            2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES);
-  MLD_ALLOC(mat, mld_polymat, 1);
-  MLD_ALLOC(s1, mld_polyvecl, 1);
-  MLD_ALLOC(t0, mld_polyveck, 1);
-  MLD_ALLOC(s2, mld_polyveck, 1);
+            2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
+  MLD_ALLOC(mat, mld_polymat, 1, context);
+  MLD_ALLOC(s1, mld_polyvecl, 1, context);
+  MLD_ALLOC(t0, mld_polyveck, 1, context);
+  MLD_ALLOC(s2, mld_polyveck, 1, context);
 
   if (seedbuf == NULL || mat == NULL || s1 == NULL || t0 == NULL || s2 == NULL)
   {
@@ -805,7 +818,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     }
 
     ret = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat, s1,
-                                           s2, t0);
+                                           s2, t0, context);
     nonce++;
     if (ret == 0)
     {
@@ -831,12 +844,12 @@ cleanup:
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(s2, mld_polyveck, 1);
-  MLD_FREE(t0, mld_polyveck, 1);
-  MLD_FREE(s1, mld_polyvecl, 1);
-  MLD_FREE(mat, mld_polymat, 1);
+  MLD_FREE(s2, mld_polyveck, 1, context);
+  MLD_FREE(t0, mld_polyveck, 1, context);
+  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(seedbuf, uint8_t,
-           2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES);
+           2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   return ret;
 }
 
@@ -846,12 +859,13 @@ MLD_EXTERNAL_API
 int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                        const uint8_t *m, size_t mlen, const uint8_t *ctx,
                        size_t ctxlen,
-                       const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                       const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   size_t pre_len;
   int ret;
-  MLD_ALLOC(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES);
-  MLD_ALLOC(rnd, uint8_t, MLDSA_RNDBYTES);
+  MLD_ALLOC(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES, context);
+  MLD_ALLOC(rnd, uint8_t, MLDSA_RNDBYTES, context);
 
   if (pre == NULL || rnd == NULL)
   {
@@ -878,7 +892,7 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
   ret = mld_sign_signature_internal(sig, siglen, m, mlen, pre, pre_len, rnd, sk,
-                                    0);
+                                    0, context);
 
 cleanup:
   if (ret != 0)
@@ -894,8 +908,8 @@ cleanup:
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(rnd, uint8_t, MLDSA_RNDBYTES);
-  MLD_FREE(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES);
+  MLD_FREE(rnd, uint8_t, MLDSA_RNDBYTES, context);
+  MLD_FREE(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES, context);
 
   return ret;
 }
@@ -906,7 +920,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                              const uint8_t mu[MLDSA_CRHBYTES],
-                             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t rnd[MLDSA_RNDBYTES];
   int ret;
@@ -922,7 +937,7 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
   ret = mld_sign_signature_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0,
-                                    rnd, sk, 1);
+                                    rnd, sk, 1, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -937,7 +952,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
              const uint8_t *ctx, size_t ctxlen,
-             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
   size_t i;
@@ -951,7 +967,7 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
     sm[MLDSA_CRYPTO_BYTES + mlen - 1 - i] = m[mlen - 1 - i];
   }
   ret = mld_sign_signature(sm, smlen, sm + MLDSA_CRYPTO_BYTES, mlen, ctx,
-                           ctxlen, sk);
+                           ctxlen, sk, context);
   *smlen += mlen;
   return ret;
 }
@@ -963,7 +979,8 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
                              const uint8_t *m, size_t mlen, const uint8_t *pre,
                              size_t prelen,
                              const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                             int externalmu)
+                             int externalmu,
+                             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret, cmp;
 
@@ -978,17 +995,17 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_polyveck *t1;
   mld_polyveck *w1;
 
-  MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
-  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
-  MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES);
-  MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_ALLOC(cp, mld_poly, 1);
-  MLD_ALLOC(mat, mld_polymat, 1);
-  MLD_ALLOC(z, mld_polyvecl, 1);
-  MLD_ALLOC(t1w1, t1w1_u, 1);
-  MLD_ALLOC(tmp, mld_polyveck, 1);
-  MLD_ALLOC(h, mld_polyveck, 1);
+  MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
+  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
+  MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
+  MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
+  MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
+  MLD_ALLOC(cp, mld_poly, 1, context);
+  MLD_ALLOC(mat, mld_polymat, 1, context);
+  MLD_ALLOC(z, mld_polyvecl, 1, context);
+  MLD_ALLOC(t1w1, t1w1_u, 1, context);
+  MLD_ALLOC(tmp, mld_polyveck, 1, context);
+  MLD_ALLOC(h, mld_polyveck, 1, context);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
       cp == NULL || mat == NULL || z == NULL || t1w1 == NULL || tmp == NULL ||
@@ -1070,17 +1087,17 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(h, mld_polyveck, 1);
-  MLD_FREE(tmp, mld_polyveck, 1);
-  MLD_FREE(t1w1, t1w1_u, 1);
-  MLD_FREE(z, mld_polyvecl, 1);
-  MLD_FREE(mat, mld_polymat, 1);
-  MLD_FREE(cp, mld_poly, 1);
-  MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES);
-  MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES);
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
-  MLD_FREE(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES));
+  MLD_FREE(h, mld_polyveck, 1, context);
+  MLD_FREE(tmp, mld_polyveck, 1, context);
+  MLD_FREE(t1w1, t1w1_u, 1, context);
+  MLD_FREE(z, mld_polyvecl, 1, context);
+  MLD_FREE(mat, mld_polymat, 1, context);
+  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
+  MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
+  MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES, context);
+  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES, context);
+  MLD_FREE(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   return ret;
 }
 
@@ -1088,7 +1105,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
                     size_t mlen, const uint8_t *ctx, size_t ctxlen,
-                    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
   size_t pre_len;
@@ -1102,7 +1120,8 @@ int mld_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
     goto cleanup;
   }
 
-  ret = mld_sign_verify_internal(sig, siglen, m, mlen, pre, pre_len, pk, 0);
+  ret = mld_sign_verify_internal(sig, siglen, m, mlen, pre, pre_len, pk, 0,
+                                 context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1115,17 +1134,19 @@ MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
                           const uint8_t mu[MLDSA_CRHBYTES],
-                          const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                          const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   return mld_sign_verify_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0, pk,
-                                  1);
+                                  1, context);
 }
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
                   const uint8_t *ctx, size_t ctxlen,
-                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                  MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
   size_t i;
@@ -1138,7 +1159,7 @@ int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
 
   *mlen = smlen - MLDSA_CRYPTO_BYTES;
   ret = mld_sign_verify(sm, MLDSA_CRYPTO_BYTES, sm + MLDSA_CRYPTO_BYTES, *mlen,
-                        ctx, ctxlen, pk);
+                        ctx, ctxlen, pk, context);
   if (ret == 0)
   {
     /* All good, copy msg, return 0 */
@@ -1171,7 +1192,8 @@ int mld_sign_signature_pre_hash_internal(
     uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES], int hashalg)
+    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES], int hashalg,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
   size_t pre_len;
@@ -1186,7 +1208,7 @@ int mld_sign_signature_pre_hash_internal(
   }
 
   ret = mld_sign_signature_internal(sig, siglen, pre, pre_len, NULL, 0, rnd, sk,
-                                    0);
+                                    0, context);
 cleanup:
   if (ret != 0)
   {
@@ -1210,7 +1232,8 @@ MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_internal(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int hashalg)
+    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int hashalg,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
   size_t pre_len;
@@ -1224,7 +1247,8 @@ int mld_sign_verify_pre_hash_internal(
     goto cleanup;
   }
 
-  ret = mld_sign_verify_internal(sig, siglen, pre, pre_len, NULL, 0, pk, 0);
+  ret = mld_sign_verify_internal(sig, siglen, pre, pre_len, NULL, 0, pk, 0,
+                                 context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1238,13 +1262,15 @@ int mld_sign_signature_pre_hash_shake256(
     uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *m,
     size_t mlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t ph[64];
   int ret;
   mld_shake256(ph, sizeof(ph), m, mlen);
-  ret = mld_sign_signature_pre_hash_internal(
-      sig, siglen, ph, sizeof(ph), ctx, ctxlen, rnd, sk, MLD_PREHASH_SHAKE_256);
+  ret = mld_sign_signature_pre_hash_internal(sig, siglen, ph, sizeof(ph), ctx,
+                                             ctxlen, rnd, sk,
+                                             MLD_PREHASH_SHAKE_256, context);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return ret;
@@ -1255,13 +1281,15 @@ MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_shake256(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+    const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t ph[64];
   int ret;
   mld_shake256(ph, sizeof(ph), m, mlen);
   ret = mld_sign_verify_pre_hash_internal(sig, siglen, ph, sizeof(ph), ctx,
-                                          ctxlen, pk, MLD_PREHASH_SHAKE_256);
+                                          ctxlen, pk, MLD_PREHASH_SHAKE_256,
+                                          context);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return ret;
@@ -1395,19 +1423,20 @@ size_t mld_prepare_domain_separation_prefix(
 
 MLD_EXTERNAL_API
 int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                        const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+                        const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   uint8_t check, cmp0, cmp1, chk1, chk2;
   int ret;
-  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
-  MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_ALLOC(tr_computed, uint8_t, MLDSA_TRBYTES);
-  MLD_ALLOC(key, uint8_t, MLDSA_SEEDBYTES);
-  MLD_ALLOC(s1, mld_polyvecl, 1);
-  MLD_ALLOC(s2, mld_polyveck, 1);
-  MLD_ALLOC(t0, mld_polyveck, 1);
-  MLD_ALLOC(t0_computed, mld_polyveck, 1);
-  MLD_ALLOC(t1, mld_polyveck, 1);
+  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
+  MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES, context);
+  MLD_ALLOC(tr_computed, uint8_t, MLDSA_TRBYTES, context);
+  MLD_ALLOC(key, uint8_t, MLDSA_SEEDBYTES, context);
+  MLD_ALLOC(s1, mld_polyvecl, 1, context);
+  MLD_ALLOC(s2, mld_polyveck, 1, context);
+  MLD_ALLOC(t0, mld_polyveck, 1, context);
+  MLD_ALLOC(t0_computed, mld_polyveck, 1, context);
+  MLD_ALLOC(t1, mld_polyveck, 1, context);
 
   if (rho == NULL || tr == NULL || tr_computed == NULL || key == NULL ||
       s1 == NULL || s2 == NULL || t0 == NULL || t0_computed == NULL ||
@@ -1426,7 +1455,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
   /* Recompute t0, t1, tr, and pk from rho, s1, s2 */
   ret = mld_compute_t0_t1_tr_from_sk_components(t0_computed, t1, tr_computed,
-                                                pk, rho, s1, s2);
+                                                pk, rho, s1, s2, context);
   if (ret != 0)
   {
     goto cleanup;
@@ -1454,15 +1483,15 @@ cleanup:
   MLD_CT_TESTING_DECLASSIFY(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(t1, mld_polyveck, 1);
-  MLD_FREE(t0_computed, mld_polyveck, 1);
-  MLD_FREE(t0, mld_polyveck, 1);
-  MLD_FREE(s2, mld_polyveck, 1);
-  MLD_FREE(s1, mld_polyvecl, 1);
-  MLD_FREE(key, uint8_t, MLDSA_SEEDBYTES);
-  MLD_FREE(tr_computed, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES);
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES);
+  MLD_FREE(t1, mld_polyveck, 1, context);
+  MLD_FREE(t0_computed, mld_polyveck, 1, context);
+  MLD_FREE(t0, mld_polyveck, 1, context);
+  MLD_FREE(s2, mld_polyveck, 1, context);
+  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(key, uint8_t, MLDSA_SEEDBYTES, context);
+  MLD_FREE(tr_computed, uint8_t, MLDSA_TRBYTES, context);
+  MLD_FREE(tr, uint8_t, MLDSA_TRBYTES, context);
+  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES, context);
 
   return ret;
 }

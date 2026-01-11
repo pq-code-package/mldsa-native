@@ -6,5 +6,6 @@
 void harness(void)
 {
   uint8_t *a, *b, *c;
-  mld_sign_keypair_internal(a, b, c);
+  mld_sign_keypair_internal(a, b, c,
+                            NULL /* context will be dropped by preprocessor */);
 }

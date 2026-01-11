@@ -14,5 +14,6 @@ void harness(void)
 
   int r;
 
-  r = mld_sign_verify_extmu(sig, siglen, mu, pk);
+  r = mld_sign_verify_extmu(sig, siglen, mu, pk,
+                            NULL /* context will be dropped by preprocessor */);
 }

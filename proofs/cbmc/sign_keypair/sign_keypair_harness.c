@@ -7,5 +7,6 @@ void harness(void)
 {
   uint8_t *pk, *sk;
   int r;
-  r = mld_sign_keypair(pk, sk);
+  r = mld_sign_keypair(pk, sk,
+                       NULL /* context will be dropped by preprocessor */);
 }

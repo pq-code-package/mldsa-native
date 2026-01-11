@@ -230,7 +230,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair_internal)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
     uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    const uint8_t seed[MLDSA_SEEDBYTES]);
+    const uint8_t seed[MLDSA_SEEDBYTES]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_keypair
@@ -259,7 +264,12 @@ MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_signature_internal
@@ -300,7 +310,12 @@ int MLD_API_NAMESPACE(signature_internal)(
     const uint8_t *m, size_t mlen, const uint8_t *pre, size_t prelen,
     const uint8_t rnd[MLDSA_RNDBYTES],
     const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    int externalmu);
+    int externalmu
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_signature
@@ -337,7 +352,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
     const uint8_t *m, size_t mlen, const uint8_t *ctx, size_t ctxlen,
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_signature_extmu
@@ -369,7 +389,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_extmu)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
     const uint8_t mu[MLDSA_CRHBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign
@@ -401,7 +426,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(sign)(
     uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_verify_internal
@@ -434,7 +464,12 @@ int MLD_API_NAMESPACE(verify_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *pre, size_t prelen,
     const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    int externalmu);
+    int externalmu
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_verify
@@ -466,7 +501,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_verify_extmu
@@ -495,7 +535,12 @@ MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_extmu)(
     const uint8_t *sig, size_t siglen, const uint8_t mu[MLDSA_CRHBYTES],
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_open
@@ -524,7 +569,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(open)(
     uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Hash algorithm constants for domain separation
@@ -585,7 +635,12 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
     const uint8_t *ph, size_t phlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
     const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    int hashalg);
+    int hashalg
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_internal
@@ -624,7 +679,12 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen,
     const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    int hashalg);
+    int hashalg
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_signature_pre_hash_shake256
@@ -659,7 +719,12 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
     uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
     const uint8_t *m, size_t mlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_shake256
@@ -690,7 +755,12 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /* Maximum formatted domain separation message length */
 #define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
@@ -768,7 +838,12 @@ MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(pk_from_sk)(
     uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]);
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+#ifdef MLD_CONFIG_CONTEXT_PARAMETER
+    ,
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#endif
+);
 
 /****************************** SUPERCOP API *********************************/
 
