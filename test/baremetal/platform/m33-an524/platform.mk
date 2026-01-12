@@ -6,10 +6,17 @@
 # This platform provides 100% CMSIS compliance with M55-AN547 reference,
 # including complete hardware abstraction, system integration, and ARM v8-M features.
 
-# Platform environment paths (following pqmx pattern)
-ENV_PATH := envs/m33-an524
-PLATFORM_PATH := $(ENV_PATH)/src/platform
+# Platform environment paths (using Nix environment variable)
+# M33_AN524_PATH is set by Nix setupHook to point directly to platform files
+PLATFORM_PATH := $(M33_AN524_PATH)
 PROJECT_PLATFORM_PATH := test/baremetal/platform/m33-an524
+
+# Verify M33_AN524_PATH is set (only when building, not during clean)
+ifneq ($(MAKECMDGOALS),clean)
+ifndef M33_AN524_PATH
+$(error M33_AN524_PATH not set. Ensure you are in the Nix arm-embedded environment: nix develop .#arm-embedded)
+endif
+endif
 
 CROSS_PREFIX = arm-none-eabi-
 CC = gcc
