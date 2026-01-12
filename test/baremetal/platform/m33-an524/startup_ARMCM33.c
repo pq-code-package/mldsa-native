@@ -41,8 +41,8 @@ extern uint32_t __StackTop;
 extern uint32_t __STACK_SEAL;
 #endif
 
-/* Forward declarations for main function */
-extern int main(int argc, char **argv);
+/* C library entry point */
+extern int main(int argc, char *argv[]);
 
 /*---------------------------------------------------------------------------
   Internal References
@@ -192,19 +192,21 @@ __attribute__((noreturn, naked)) void Reset_Handler(void)
 /* C portion of Reset Handler - proper stack frame */
 __attribute__((noreturn, used)) void Reset_Handler_C(void)
 {
-  SystemInit(); /* FPU, fault handlers, etc. */
-
-  int ret = main(0, NULL);
-
-#ifdef SEMIHOSTING
-  extern void semihosting_exit(int code);
-  semihosting_exit(ret);
-#else
-  (void)ret;
-#endif
-
-  while (1)
-  {
+  /* Use CMSIS __PROGRAM_START which handles:
+   * 1. Copy .data from flash to RAM
+   * 2. Zero .bss section
+   * 3. Call __libc_init_array (C++ constructors, stdio init)
+   * 4. Call main()
+   * 5. Call exit() on return
+   */
+  SystemInit();                             /* CMSIS System Initialization */
+  
+  /* __PROGRAM_START is defined in cmsis_gcc.h and handles all initialization */
+  extern void __PROGRAM_START(void);
+  __PROGRAM_START();
+  
+  /* Should not reach here - __PROGRAM_START calls exit() */
+  while (1) {
     __asm__ volatile("wfi");
   }
 }
@@ -213,8 +215,7 @@ __attribute__((noreturn, used)) void Reset_Handler_C(void)
   Wrapped Main Support
  *---------------------------------------------------------------------------*/
 
-/* Wrapper for main function to support --wrap=main linker option */
-extern int __real_main(int argc, char **argv);
-int __wrap_main(int argc, char **argv) {
-    return __real_main(argc, argv);
-}
+/* Note: __wrap_main is provided by cmdline.c for command line argument
+ * processing. The linker --wrap=main option redirects main() calls to
+ * __wrap_main(), which then calls __real_main() with processed arguments.
+ */

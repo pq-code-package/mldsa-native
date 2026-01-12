@@ -35,9 +35,10 @@ extern const void *__VECTOR_TABLE[];
 /*----------------------------------------------------------------------------
   Define clocks
  *----------------------------------------------------------------------------*/
-#define  XTAL            (25000000UL)       /* Oscillator frequency             */
+#define  XTAL            (250000000UL)      /* Oscillator frequency - 250 MHz   */
+                                            /* Matches STM32H5 series           */
 
-#define  SYSTEM_CLOCK    (XTAL / 2U)
+#define  SYSTEM_CLOCK    (XTAL)             /* System clock = 250 MHz           */
 
 /*----------------------------------------------------------------------------
   System Core Clock Variable
@@ -87,4 +88,45 @@ void SystemInit (void)
   __ISB();
 
   SystemCoreClock = SYSTEM_CLOCK;
+}
+
+/*----------------------------------------------------------------------------
+  Wrapped syscalls for newlib stdio - use semihosting for output
+ *----------------------------------------------------------------------------*/
+#include <errno.h>
+#undef errno
+extern int errno;
+
+/* Semihosting SYS_WRITEC - write single character to console */
+static void semihost_writec(char c)
+{
+  __asm__ volatile(
+      "mov r0, #0x03\n"  /* SYS_WRITEC */
+      "mov r1, %0\n"
+      "bkpt 0xAB\n"
+      :
+      : "r"(&c)
+      : "r0", "r1", "memory");
+}
+
+int __wrap__read(int file, char *ptr, int len)
+{
+  (void)file;
+  (void)ptr;
+  (void)len;
+  errno = ENOSYS;
+  return -1;
+}
+
+int __wrap__write(int file, char *ptr, int len)
+{
+  if (file == 1 || file == 2) {  /* stdout or stderr */
+    /* Write each character using semihosting SYS_WRITEC */
+    for (int i = 0; i < len; ++i) {
+      semihost_writec(ptr[i]);
+    }
+    return len;
+  }
+  errno = EBADF;
+  return -1;
 }
