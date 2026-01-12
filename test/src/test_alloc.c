@@ -666,17 +666,5 @@ int main(void)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_TOTAL_ALLOC);
 
-  /*
-   * For parameter set 87, also check that the high watermarks match
-   * the MLD_MAX_TOTAL_ALLOC_* constants (which are defined as the 87 values).
-   * MLD_MAX_TOTAL_ALLOC_KEYPAIR adapts based on MLD_CONFIG_KEYGEN_PCT.
-   */
-#if MLD_CONFIG_API_PARAMETER_SET == 87
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLD_MAX_TOTAL_ALLOC_KEYPAIR);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_sign, MLD_MAX_TOTAL_ALLOC_SIGN);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_MAX_TOTAL_ALLOC_VERIFY);
-  CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_MAX_TOTAL_ALLOC);
-#endif /* MLD_CONFIG_API_PARAMETER_SET == 87 */
-
   return 0;
 }

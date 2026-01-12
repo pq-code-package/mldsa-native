@@ -945,22 +945,12 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87_KEYPAIR MLD_TOTAL_ALLOC_87_KEYPAIR_NO_PCT
 #endif
 
-/*
- * `MLD_MAX_TOTAL_ALLOC_{KEYPAIR,SIGN,VERIFY}` is the maximum across all
- * parameter sets for each operation.
- */
-#define MLD_MAX_TOTAL_ALLOC_KEYPAIR MLD_TOTAL_ALLOC_87_KEYPAIR
-#define MLD_MAX_TOTAL_ALLOC_SIGN MLD_TOTAL_ALLOC_87_SIGN
-#define MLD_MAX_TOTAL_ALLOC_VERIFY MLD_TOTAL_ALLOC_87_VERIFY
-
 #define MLD_MAX3_(a, b, c) \
   ((a) > (b) ? ((a) > (c) ? (a) : (c)) : ((b) > (c) ? (b) : (c)))
 
 /*
  * `MLD_TOTAL_ALLOC_{44,65,87}` is the maximum across all operations for each
  * parameter set.
- * `MLD_MAX_TOTAL_ALLOC` is the maximum across all parameter sets and
- * operations.
  */
 #define MLD_TOTAL_ALLOC_44                                       \
   MLD_MAX3_(MLD_TOTAL_ALLOC_44_KEYPAIR, MLD_TOTAL_ALLOC_44_SIGN, \
@@ -971,7 +961,5 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87                                       \
   MLD_MAX3_(MLD_TOTAL_ALLOC_87_KEYPAIR, MLD_TOTAL_ALLOC_87_SIGN, \
             MLD_TOTAL_ALLOC_87_VERIFY)
-
-#define MLD_MAX_TOTAL_ALLOC MLD_TOTAL_ALLOC_87
 
 #endif /* !MLD_H */
