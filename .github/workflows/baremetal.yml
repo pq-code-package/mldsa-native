@@ -19,6 +19,10 @@ jobs:
            name: 'M55-AN547'
            makefile: test/baremetal/platform/m55-an547/platform.mk
            nix-shell: arm-embedded
+         - runner: ubuntu-latest
+           name: 'M33-AN524'
+           makefile: test/baremetal/platform/m33-an524/platform.mk
+           nix-shell: arm-embedded
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
