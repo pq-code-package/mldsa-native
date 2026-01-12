@@ -1,11 +1,12 @@
 /******************************************************************************
  * @file     semihosting.c
  * @brief    Semihosting support for Cortex-M33 Device on MPS3 AN524
- * @version  V1.0.0
- * @date     16. December 2020
+ * @version  V2.0.0
+ * @date     10. January 2026
  ******************************************************************************/
 /*
  * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) The mldsa-native project authors
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,59 +21,102 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Aligned with M55-AN547 implementation for main build compatibility.
  */
 
-#ifdef SEMIHOSTING
+#if !defined(NO_SEMIHOSTING_EXIT)
 
 #include <stdint.h>
-#include <stddef.h>
-#include <sys/types.h>
+#include <stdio.h>
 
-/*===========================================================================
- * Semihosting Support
- *===========================================================================*/
+/* Semihosting syscall numbers */
+static const uint32_t REPORT_EXCEPTION = 0x18;
+static const uint32_t ApplicationExit = 0x20026;
 
-#define SYS_WRITE 0x05
-#define SYS_READ 0x06
-#define SYS_ISTTY 0x09
-#define SYS_SEEK 0x0A
-#define SYS_CLOSE 0x02
-#define SYS_OPEN 0x01
-#define SYS_EXIT 0x18
-
-/* Angel exit codes */
-#define ADP_Stopped_ApplicationExit 0x20026
-#define ADP_Stopped_RunTimeError 0x20023
-
-static inline int32_t semihosting_call(uint32_t op, void *arg)
+/* Do a system call towards QEMU or the debugger */
+uint32_t semihosting_syscall(uint32_t nr, const uint32_t arg)
 {
-  int32_t result;
   __asm__ volatile(
-      "mov r0, %[op]\n"
+      "mov r0, %[nr]\n"
       "mov r1, %[arg]\n"
       "bkpt 0xAB\n"
-      "mov %[res], r0\n"
-      : [res] "=r"(result)
-      : [op] "r"(op), [arg] "r"(arg)
-      : "r0", "r1", "r2", "r3", "ip", "lr", "memory", "cc");
-  return result;
+      "mov %[nr], r0\n"
+      : [nr] "+r"(nr)
+      : [arg] "r"(arg)
+      : "r0", "r1", "memory");
+  return nr;
 }
 
-void semihosting_exit(int code)
+/* Register a destructor that will call QEMU telling it the program has exited */
+static void __attribute__((destructor)) semihosting_exit(void)
 {
-  uint32_t reason =
-      (code == 0) ? ADP_Stopped_ApplicationExit : ADP_Stopped_RunTimeError;
-  uint32_t args[2] = {reason, (uint32_t)code};
-  semihosting_call(SYS_EXIT, args);
-  while (1)
-  {
-    __asm__ volatile("wfi");
-  }
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
 }
+
+/* Exception handlers - print message and exit */
+void NMI_Handler(void)
+{
+  puts("NMI_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void HardFault_Handler(void)
+{
+  puts("HardFault_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void MemManage_Handler(void)
+{
+  puts("MemManage_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void BusFault_Handler(void)
+{
+  puts("BusFault_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void UsageFault_Handler(void)
+{
+  puts("UsageFault_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void SecureFault_Handler(void)
+{
+  puts("SecureFault_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void SVC_Handler(void)
+{
+  puts("SVC_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void DebugMon_Handler(void)
+{
+  puts("DebugMon_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+void PendSV_Handler(void)
+{
+  puts("PendSV_Handler");
+  semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
+}
+
+#endif /* !defined(NO_SEMIHOSTING_EXIT) */
 
 /*===========================================================================
- * Newlib Syscall Implementation (Semihosting)
+ * Newlib Syscall Stubs (minimal implementations)
  *===========================================================================*/
+
+#include <sys/types.h>
+#include <errno.h>
 
 extern uint32_t __HeapBase;
 extern uint32_t __HeapLimit;
@@ -94,123 +138,31 @@ void *_sbrk(ptrdiff_t incr)
   return (void *)prev;
 }
 
-int _open(const char *path, int flags, int mode)
-{
-  uint32_t args[3] = {(uint32_t)path, (uint32_t)flags, (uint32_t)mode};
-  return semihosting_call(SYS_OPEN, args);
-}
-
-int _close(int fd) { return semihosting_call(SYS_CLOSE, &fd); }
-
-int _write(int fd, const void *buf, size_t count)
-{
-  if (count == 0)
-  {
-    return 0;
-  }
-  uint32_t args[3] = {(uint32_t)fd, (uint32_t)buf, (uint32_t)count};
-  int32_t not_written = semihosting_call(SYS_WRITE, args);
-  return (not_written < 0) ? -1 : (int)(count - (size_t)not_written);
-}
-
-int _read(int fd, void *buf, size_t count)
-{
-  if (count == 0)
-  {
-    return 0;
-  }
-  uint32_t args[3] = {(uint32_t)fd, (uint32_t)buf, (uint32_t)count};
-  int32_t not_read = semihosting_call(SYS_READ, args);
-  return (not_read < 0) ? -1 : (int)(count - (size_t)not_read);
-}
-
-int _lseek(int fd, int offset, int whence)
-{
-  (void)whence; /* Semihosting only supports absolute seek */
-  uint32_t args[2] = {(uint32_t)fd, (uint32_t)offset};
-  return semihosting_call(SYS_SEEK, args);
-}
-
-int _isatty(int fd) { return semihosting_call(SYS_ISTTY, &fd); }
-
-int _fstat(int fd, void *st)
-{
-  (void)fd;
-  (void)st;
-  return -1;
-}
-
-int _getpid(void) { return 1; }
-
-int _kill(int pid, int sig)
-{
-  (void)pid;
-  (void)sig;
-  return -1;
-}
-
-void _exit(int code) { semihosting_exit(code); }
-
-#else /* !SEMIHOSTING */
-
-/*===========================================================================
- * Minimal Syscall Stubs (No Semihosting)
- *===========================================================================*/
-
-extern uint32_t __HeapBase;
-extern uint32_t __HeapLimit;
-static uint8_t *heap_ptr = NULL;
-
-void *_sbrk(ptrdiff_t incr)
-{
-  if (heap_ptr == NULL)
-  {
-    heap_ptr = (uint8_t *)&__HeapBase;
-  }
-
-  uint8_t *prev = heap_ptr;
-  if ((heap_ptr + incr) > (uint8_t *)&__HeapLimit)
-  {
-    return (void *)-1;
-  }
-
-  heap_ptr += incr;
-  return (void *)prev;
-}
-
-int _write(int fd, const void *buf, size_t count)
-{
-  (void)fd;
-  (void)buf;
-  (void)count;
-  return -1;
-}
-
-int _read(int fd, void *buf, size_t count)
-{
-  (void)fd;
-  (void)buf;
-  (void)count;
-  return -1;
-}
-
 int _close(int fd)
 {
   (void)fd;
-  return -1;
+  return 0;
 }
 
 int _fstat(int fd, void *st)
 {
   (void)fd;
   (void)st;
+  errno = ENOSYS;
+  return -1;
+}
+
+int _getpid(void)
+{
+  errno = ENOSYS;
   return -1;
 }
 
 int _isatty(int fd)
 {
   (void)fd;
-  return 0;
+  errno = ENOSYS;
+  return -1;
 }
 
 int _lseek(int fd, int offset, int whence)
@@ -218,25 +170,14 @@ int _lseek(int fd, int offset, int whence)
   (void)fd;
   (void)offset;
   (void)whence;
+  errno = ENOSYS;
   return -1;
 }
-
-int _getpid(void) { return 1; }
 
 int _kill(int pid, int sig)
 {
   (void)pid;
   (void)sig;
+  errno = ENOSYS;
   return -1;
 }
-
-void _exit(int code)
-{
-  (void)code;
-  while (1)
-  {
-    __asm__ volatile("wfi");
-  }
-}
-
-#endif /* SEMIHOSTING */

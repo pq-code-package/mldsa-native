@@ -100,12 +100,13 @@ typedef enum IRQn
 #define MPS3_TIMER0_BASE          (0x40000000UL)  /*!< Timer 0 Base Address     */
 #define MPS3_TIMER1_BASE          (0x40001000UL)  /*!< Timer 1 Base Address     */
 #define MPS3_DUALTIMER_BASE       (0x40002000UL)  /*!< Dual Timer Base Address  */
-#define MPS3_UART0_BASE           (0x40200000UL)  /*!< UART 0 Base Address      */
-#define MPS3_UART1_BASE           (0x40201000UL)  /*!< UART 1 Base Address      */
-#define MPS3_UART2_BASE           (0x40202000UL)  /*!< UART 2 Base Address      */
-#define MPS3_UART3_BASE           (0x40203000UL)  /*!< UART 3 Base Address      */
-#define MPS3_UART4_BASE           (0x40204000UL)  /*!< UART 4 Base Address      */
-#define MPS3_UART5_BASE           (0x40205000UL)  /*!< UART 5 Base Address      */
+/* UART addresses for QEMU mps3-an524 (SSE-200 memory map) */
+#define MPS3_UART0_BASE           (0x40004000UL)  /*!< UART 0 Base Address      */
+#define MPS3_UART1_BASE           (0x40005000UL)  /*!< UART 1 Base Address      */
+#define MPS3_UART2_BASE           (0x40006000UL)  /*!< UART 2 Base Address      */
+#define MPS3_UART3_BASE           (0x40007000UL)  /*!< UART 3 Base Address      */
+#define MPS3_UART4_BASE           (0x40008000UL)  /*!< UART 4 Base Address      */
+#define MPS3_UART5_BASE           (0x40009000UL)  /*!< UART 5 Base Address      */
 
 /* GPIO */
 #define MPS3_GPIO0_BASE           (0x40100000UL)  /*!< GPIO 0 Base Address      */
