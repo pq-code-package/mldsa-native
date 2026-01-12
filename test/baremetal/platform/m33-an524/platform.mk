@@ -6,7 +6,10 @@
 # This platform provides 100% CMSIS compliance with M55-AN547 reference,
 # including complete hardware abstraction, system integration, and ARM v8-M features.
 
-PLATFORM_PATH := test/baremetal/platform/m33-an524
+# Platform environment paths (following pqmx pattern)
+ENV_PATH := envs/m33-an524
+PLATFORM_PATH := $(ENV_PATH)/src/platform
+PROJECT_PLATFORM_PATH := test/baremetal/platform/m33-an524
 
 CROSS_PREFIX = arm-none-eabi-
 CC = gcc
@@ -70,7 +73,7 @@ EXTRA_SOURCES = \
 # The CMSIS files fail compilation if conversion warnings are enabled
 EXTRA_SOURCES_CFLAGS = -Wno-conversion -Wno-sign-conversion
 
-EXEC_WRAPPER := $(realpath $(PLATFORM_PATH)/exec_wrapper.py)
+EXEC_WRAPPER := $(realpath $(PROJECT_PLATFORM_PATH)/exec_wrapper.py)
 
 # =============================================================================
 # CMSIS Compliance Verification
