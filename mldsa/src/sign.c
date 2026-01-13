@@ -255,7 +255,6 @@ __contract__(
   *s1hat = *s1;
   mld_polyvecl_ntt(s1hat);
   mld_polyvec_matrix_pointwise_montgomery(t, mat, s1hat);
-  mld_polyveck_reduce(t);
   mld_polyveck_invntt_tomont(t);
 
   /* Add error vector s2 */
@@ -634,7 +633,6 @@ __contract__(
   *tmp = *y;
   mld_polyvecl_ntt(tmp);
   mld_polyvec_matrix_pointwise_montgomery(w0, mat, tmp);
-  mld_polyveck_reduce(w0);
   mld_polyveck_invntt_tomont(w0);
 
   /* Decompose w and call the random oracle */
