@@ -110,7 +110,7 @@ void PendSV_Handler(void)
   semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
 }
 
-#endif /* !defined(NO_SEMIHOSTING_EXIT) */
+#endif /* !NO_SEMIHOSTING_EXIT */
 
 /*===========================================================================
  * Newlib Syscall Stubs (minimal implementations)

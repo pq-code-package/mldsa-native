@@ -88,7 +88,7 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
 }
 
 #define __PROGRAM_START __cmsis_start
-#endif
+#endif /* !__PROGRAM_START */
 
 #ifndef __INITIAL_SP
 #define __INITIAL_SP __StackTop
@@ -123,7 +123,7 @@ __STATIC_FORCEINLINE void __TZ_set_STACKSEAL_S(uint32_t *stackTop)
 {
   *((uint64_t *)stackTop) = __TZ_STACK_SEAL_VALUE;
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /* ###########################  Core Function Access ###########################
@@ -161,7 +161,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_CONTROL_NS(void)
   __ASM volatile("MRS %0, control_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -188,7 +188,7 @@ __STATIC_FORCEINLINE void __TZ_set_CONTROL_NS(uint32_t control)
   __ASM volatile("MSR control_ns, %0" : : "r"(control) : "memory");
   __ISB();
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -261,7 +261,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PSP_NS(void)
   __ASM volatile("MRS %0, psp_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -286,7 +286,7 @@ __STATIC_FORCEINLINE void __TZ_set_PSP_NS(uint32_t topOfProcStack)
 {
   __ASM volatile("MSR psp_ns, %0" : : "r"(topOfProcStack) :);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -317,7 +317,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_MSP_NS(void)
   __ASM volatile("MRS %0, msp_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -342,7 +342,7 @@ __STATIC_FORCEINLINE void __TZ_set_MSP_NS(uint32_t topOfMainStack)
 {
   __ASM volatile("MSR msp_ns, %0" : : "r"(topOfMainStack) :);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
@@ -371,7 +371,7 @@ __STATIC_FORCEINLINE void __TZ_set_SP_NS(uint32_t topOfStack)
 {
   __ASM volatile("MSR sp_ns, %0" : : "r"(topOfStack) :);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -403,7 +403,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PRIMASK_NS(void)
   __ASM volatile("MRS %0, primask_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -428,7 +428,7 @@ __STATIC_FORCEINLINE void __TZ_set_PRIMASK_NS(uint32_t priMask)
 {
   __ASM volatile("MSR primask_ns, %0" : : "r"(priMask) : "memory");
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 #if (__ARM_ARCH_ISA_THUMB >= 2)
@@ -460,7 +460,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_BASEPRI_NS(void)
   __ASM volatile("MRS %0, basepri_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -485,7 +485,7 @@ __STATIC_FORCEINLINE void __TZ_set_BASEPRI_NS(uint32_t basePri)
 {
   __ASM volatile("MSR basepri_ns, %0" : : "r"(basePri) : "memory");
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -528,7 +528,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_FAULTMASK_NS(void)
   __ASM volatile("MRS %0, faultmask_ns" : "=r"(result));
   return (result);
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -553,9 +553,9 @@ __STATIC_FORCEINLINE void __TZ_set_FAULTMASK_NS(uint32_t faultMask)
 {
   __ASM volatile("MSR faultmask_ns, %0" : : "r"(faultMask) : "memory");
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
-#endif /* (__ARM_ARCH_ISA_THUMB >= 2) */
+#endif /* __ARM_ARCH_ISA_THUMB >= 2 */
 
 
 #if (__ARM_ARCH >= 8)
@@ -576,11 +576,15 @@ __STATIC_FORCEINLINE uint32_t __get_PSPLIM(void)
      (!defined(__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   /* without main extensions, the non-secure PSPLIM is RAZ/WI */
   return (0U);
-#else
+#else  /* !(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&     \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3) */
   uint32_t result;
   __ASM volatile("MRS %0, psplim" : "=r"(result));
   return (result);
-#endif
+#endif /* !(!(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&   \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3)) */
 }
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3)
@@ -605,7 +609,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_PSPLIM_NS(void)
   return (result);
 #endif
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -624,9 +628,13 @@ __STATIC_FORCEINLINE void __set_PSPLIM(uint32_t ProcStackPtrLimit)
      (!defined(__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   /* without main extensions, the non-secure PSPLIM is RAZ/WI */
   (void)ProcStackPtrLimit;
-#else
+#else  /* !(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&     \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3) */
   __ASM volatile("MSR psplim, %0" : : "r"(ProcStackPtrLimit));
-#endif
+#endif /* !(!(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&   \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3)) */
 }
 
 
@@ -650,7 +658,7 @@ __STATIC_FORCEINLINE void __TZ_set_PSPLIM_NS(uint32_t ProcStackPtrLimit)
   __ASM volatile("MSR psplim_ns, %0\n" : : "r"(ProcStackPtrLimit));
 #endif
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -668,11 +676,15 @@ __STATIC_FORCEINLINE uint32_t __get_MSPLIM(void)
      (!defined(__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   /* without main extensions, the non-secure MSPLIM is RAZ/WI */
   return (0U);
-#else
+#else  /* !(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&     \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3) */
   uint32_t result;
   __ASM volatile("MRS %0, msplim" : "=r"(result));
   return (result);
-#endif
+#endif /* !(!(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&   \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3)) */
 }
 
 
@@ -698,7 +710,7 @@ __STATIC_FORCEINLINE uint32_t __TZ_get_MSPLIM_NS(void)
   return (result);
 #endif
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
 
 /**
@@ -716,9 +728,13 @@ __STATIC_FORCEINLINE void __set_MSPLIM(uint32_t MainStackPtrLimit)
      (!defined(__ARM_FEATURE_CMSE) || (__ARM_FEATURE_CMSE < 3)))
   /* without main extensions, the non-secure MSPLIM is RAZ/WI */
   (void)MainStackPtrLimit;
-#else
+#else  /* !(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&     \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3) */
   __ASM volatile("MSR msplim, %0" : : "r"(MainStackPtrLimit));
-#endif
+#endif /* !(!(__ARM_ARCH_8M_MAIN__ && __ARM_ARCH_8M_MAIN__ == 1) &&   \
+          !(__ARM_ARCH_8_1M_MAIN__ && __ARM_ARCH_8_1M_MAIN__ == 1) && \
+          (!__ARM_FEATURE_CMSE || __ARM_FEATURE_CMSE < 3)) */
 }
 
 
@@ -742,9 +758,9 @@ __STATIC_FORCEINLINE void __TZ_set_MSPLIM_NS(uint32_t MainStackPtrLimit)
   __ASM volatile("MSR msplim_ns, %0" : : "r"(MainStackPtrLimit));
 #endif
 }
-#endif
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3 */
 
-#endif /* (__ARM_ARCH >= 8) */
+#endif /* __ARM_ARCH >= 8 */
 /** @} end of CMSIS_Core_RegAccFunctions */
 
-#endif /* __CMSIS_GCC_M_H */
+#endif /* !__CMSIS_GCC_M_H */

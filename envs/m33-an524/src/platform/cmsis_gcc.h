@@ -76,7 +76,7 @@ __PACKED_STRUCT T_UINT16_WRITE { uint16_t v; };
 #pragma GCC diagnostic pop
 #define __UNALIGNED_UINT16_WRITE(addr, val) \
   (void)((((struct T_UINT16_WRITE *)(void *)(addr))->v) = (val))
-#endif
+#endif /* !__UNALIGNED_UINT16_WRITE */
 #ifndef __UNALIGNED_UINT16_READ
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpacked"
@@ -85,7 +85,7 @@ __PACKED_STRUCT T_UINT16_READ { uint16_t v; };
 #pragma GCC diagnostic pop
 #define __UNALIGNED_UINT16_READ(addr) \
   (((const struct T_UINT16_READ *)(const void *)(addr))->v)
-#endif
+#endif /* !__UNALIGNED_UINT16_READ */
 #ifndef __UNALIGNED_UINT32_WRITE
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpacked"
@@ -94,7 +94,7 @@ __PACKED_STRUCT T_UINT32_WRITE { uint32_t v; };
 #pragma GCC diagnostic pop
 #define __UNALIGNED_UINT32_WRITE(addr, val) \
   (void)((((struct T_UINT32_WRITE *)(void *)(addr))->v) = (val))
-#endif
+#endif /* !__UNALIGNED_UINT32_WRITE */
 #ifndef __UNALIGNED_UINT32_READ
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpacked"
@@ -103,7 +103,7 @@ __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
 #pragma GCC diagnostic pop
 #define __UNALIGNED_UINT32_READ(addr) \
   (((const struct T_UINT32_READ *)(const void *)(addr))->v)
-#endif
+#endif /* !__UNALIGNED_UINT32_READ */
 #ifndef __ALIGNED
 #define __ALIGNED(x) __attribute__((aligned(x)))
 #endif
@@ -304,7 +304,7 @@ __STATIC_FORCEINLINE uint32_t __RBIT(uint32_t value)
     s--;
   }
   result <<= s; /* shift when v's highest bits are zero */
-#endif
+#endif /* !__ARM_ARCH_ISA_THUMB >= 2 */
   return (result);
 }
 
@@ -354,7 +354,7 @@ __STATIC_FORCEINLINE uint8_t __CLZ(uint32_t value)
  */
 #define __USAT(value, sat) __usat(value, sat)
 
-#else  /* (__ARM_FEATURE_SAT >= 1) */
+#else  /* __ARM_FEATURE_SAT >= 1 */
 /**
   \brief   Signed Saturate
   \details Saturates a signed value.
@@ -404,7 +404,7 @@ __STATIC_FORCEINLINE uint32_t __USAT(int32_t val, uint32_t sat)
   }
   return ((uint32_t)val);
 }
-#endif /* (__ARM_FEATURE_SAT >= 1) */
+#endif /* !__ARM_FEATURE_SAT >= 1 */
 
 
 #if (__ARM_FEATURE_LDREX >= 1)
@@ -449,7 +449,7 @@ __STATIC_FORCEINLINE uint32_t __STREXB(uint8_t value, volatile uint8_t *addr)
                  "=Q"(*addr) : "r"((uint32_t)value));
   return (result);
 }
-#endif /* (__ARM_FEATURE_LDREX >= 1) */
+#endif /* __ARM_FEATURE_LDREX >= 1 */
 
 
 #if (__ARM_FEATURE_LDREX >= 2)
@@ -484,7 +484,7 @@ __STATIC_FORCEINLINE uint32_t __STREXH(uint16_t value, volatile uint16_t *addr)
                  "=Q"(*addr) : "r"((uint32_t)value));
   return (result);
 }
-#endif /* (__ARM_FEATURE_LDREX >= 2) */
+#endif /* __ARM_FEATURE_LDREX >= 2 */
 
 
 #if (__ARM_FEATURE_LDREX >= 4)
@@ -518,7 +518,7 @@ __STATIC_FORCEINLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
   __ASM volatile("strex %0, %2, %1" : "=&r"(result), "=Q"(*addr) : "r"(value));
   return (result);
 }
-#endif /* (__ARM_FEATURE_LDREX >= 4) */
+#endif /* __ARM_FEATURE_LDREX >= 4 */
 
 
 #if (__ARM_ARCH_ISA_THUMB >= 2)
@@ -617,7 +617,7 @@ __STATIC_FORCEINLINE void __STRT(uint32_t value, volatile uint32_t *ptr)
 {
   __ASM volatile("strt %1, %0" : "=Q"(*ptr) : "r"(value));
 }
-#endif /* (__ARM_ARCH_ISA_THUMB >= 2) */
+#endif /* __ARM_ARCH_ISA_THUMB >= 2 */
 
 
 #if (__ARM_ARCH >= 8)
@@ -800,7 +800,7 @@ __STATIC_FORCEINLINE uint32_t __STLEX(uint32_t value, volatile uint32_t *ptr)
   return (result);
 }
 
-#endif /* (__ARM_ARCH >= 8) */
+#endif /* __ARM_ARCH >= 8 */
 
 /** @}*/ /* end of group CMSIS_Core_InstructionInterface */
 
@@ -854,7 +854,7 @@ __STATIC_FORCEINLINE void __disable_fault_irq(void)
 {
   __ASM volatile("cpsid f" : : : "memory");
 }
-#endif
+#endif /* __ARM_ARCH_ISA_THUMB >= 2 */
 
 
 /**
@@ -873,9 +873,9 @@ __STATIC_FORCEINLINE uint32_t __get_FPSCR(void)
   __ASM volatile("VMRS %0, fpscr" : "=r"(result));
   return (result);
 #endif
-#else
+#else  /* __ARM_FP && __ARM_FP >= 1 */
   return (0U);
-#endif
+#endif /* !(__ARM_FP && __ARM_FP >= 1) */
 }
 
 
@@ -893,9 +893,9 @@ __STATIC_FORCEINLINE void __set_FPSCR(uint32_t fpscr)
 #else
   __ASM volatile("VMSR fpscr, %0" : : "r"(fpscr) : "vfpcc", "memory");
 #endif
-#else
+#else  /* __ARM_FP && __ARM_FP >= 1 */
   (void)fpscr;
-#endif
+#endif /* !(__ARM_FP && __ARM_FP >= 1) */
 }
 
 
@@ -1030,7 +1030,7 @@ __STATIC_FORCEINLINE int32_t __SMMLA(int32_t op1, int32_t op2, int32_t op3)
                  "r"(op3));
   return (result);
 }
-#endif /* (__ARM_FEATURE_DSP == 1) */
+#endif /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1 */
 /** @} end of group CMSIS_SIMD_intrinsics */
 
 // Include the profile specific settings:
@@ -1044,4 +1044,4 @@ __STATIC_FORCEINLINE int32_t __SMMLA(int32_t op1, int32_t op2, int32_t op3)
 #error "Unknown Arm architecture profile"
 #endif
 
-#endif /* __CMSIS_GCC_H */
+#endif /* !__CMSIS_GCC_H */

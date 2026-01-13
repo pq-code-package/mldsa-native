@@ -47,4 +47,4 @@
   ((__CA_CMSIS_VERSION_MAIN << 16U) | \
    __CA_CMSIS_VERSION_SUB) /*!< \brief CMSIS-Core(A) version number */
 
-#endif
+#endif /* !__CMSIS_VERSION_H */

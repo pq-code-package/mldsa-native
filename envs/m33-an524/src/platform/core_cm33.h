@@ -81,9 +81,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __TARGET_FPU_VFP */
 #define __FPU_USED 0U
-#endif
+#endif /* !__TARGET_FPU_VFP */
 
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
 #if defined(__DSP_PRESENT) && (__DSP_PRESENT == 1U)
@@ -93,9 +93,9 @@ extern "C"
     "Compiler generates DSP (SIMD) instructions for a devices without DSP extensions (check __DSP_PRESENT)"
 #define __DSP_USED 0U
 #endif
-#else
+#else /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U */
 #define __DSP_USED 0U
-#endif
+#endif /* !(__ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U) */
 
 #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 #if defined(__ARM_FP)
@@ -106,9 +106,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __ARM_FP */
 #define __FPU_USED 0U
-#endif
+#endif /* !__ARM_FP */
 
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
 #if defined(__DSP_PRESENT) && (__DSP_PRESENT == 1U)
@@ -118,9 +118,9 @@ extern "C"
     "Compiler generates DSP (SIMD) instructions for a devices without DSP extensions (check __DSP_PRESENT)"
 #define __DSP_USED 0U
 #endif
-#else
+#else /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U */
 #define __DSP_USED 0U
-#endif
+#endif /* !(__ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U) */
 
 #elif defined(__ti__)
 #if defined(__ARM_FP)
@@ -131,9 +131,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __ARM_FP */
 #define __FPU_USED 0U
-#endif
+#endif /* !__ARM_FP */
 
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
 #if defined(__DSP_PRESENT) && (__DSP_PRESENT == 1U)
@@ -143,9 +143,9 @@ extern "C"
     "Compiler generates DSP (SIMD) instructions for a devices without DSP extensions (check __DSP_PRESENT)"
 #define __DSP_USED 0U
 #endif
-#else
+#else /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U */
 #define __DSP_USED 0U
-#endif
+#endif /* !(__ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U) */
 
 #elif defined(__GNUC__)
 #if defined(__VFP_FP__) && !defined(__SOFTFP__)
@@ -156,9 +156,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __VFP_FP__ && !__SOFTFP__ */
 #define __FPU_USED 0U
-#endif
+#endif /* !(__VFP_FP__ && !__SOFTFP__) */
 
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
 #if defined(__DSP_PRESENT) && (__DSP_PRESENT == 1U)
@@ -168,9 +168,9 @@ extern "C"
     "Compiler generates DSP (SIMD) instructions for a devices without DSP extensions (check __DSP_PRESENT)"
 #define __DSP_USED 0U
 #endif
-#else
+#else /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U */
 #define __DSP_USED 0U
-#endif
+#endif /* !(__ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U) */
 
 #elif defined(__ICCARM__)
 #if defined(__ARMVFP__)
@@ -181,9 +181,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __ARMVFP__ */
 #define __FPU_USED 0U
-#endif
+#endif /* !__ARMVFP__ */
 
 #if defined(__ARM_FEATURE_DSP) && (__ARM_FEATURE_DSP == 1U)
 #if defined(__DSP_PRESENT) && (__DSP_PRESENT == 1U)
@@ -193,9 +193,9 @@ extern "C"
     "Compiler generates DSP (SIMD) instructions for a devices without DSP extensions (check __DSP_PRESENT)"
 #define __DSP_USED 0U
 #endif
-#else
+#else /* __ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U */
 #define __DSP_USED 0U
-#endif
+#endif /* !(__ARM_FEATURE_DSP && __ARM_FEATURE_DSP == 1U) */
 
 #elif defined(__TI_ARM__)
 #if defined(__TI_VFP_SUPPORT__)
@@ -206,9 +206,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __TI_VFP_SUPPORT__ */
 #define __FPU_USED 0U
-#endif
+#endif /* !__TI_VFP_SUPPORT__ */
 
 #elif defined(__TASKING__)
 #if defined(__FPU_VFP__)
@@ -219,9 +219,9 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /* __FPU_VFP__ */
 #define __FPU_USED 0U
-#endif
+#endif /* !__FPU_VFP__ */
 
 #elif defined(__CSMC__)
 #if (__CSMC__ & 0x400U)
@@ -232,11 +232,13 @@ extern "C"
     "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #define __FPU_USED 0U
 #endif
-#else
+#else /*  (__CSMC__ & 0x400U) */
 #define __FPU_USED 0U
-#endif
+#endif /* !( (__CSMC__ & 0x400U)) */
 
-#endif
+#endif /* !__CC_ARM && !(__ARMCC_VERSION && __ARMCC_VERSION >= 6010050) &&   \
+          !__ti__ && !__GNUC__ && !__ICCARM__ && !__TI_ARM__ && !__TASKING__ \
+          && __CSMC__ */
 
 #include "cmsis_compiler.h" /* CMSIS compiler specific defines */
 
@@ -245,7 +247,7 @@ extern "C"
 }
 #endif
 
-#endif /* __CORE_CM33_H_GENERIC */
+#endif /* !__CORE_CM33_H_GENERIC */
 
 #ifndef __CMSIS_GENERIC
 
@@ -299,7 +301,7 @@ extern "C"
 #warning \
     "__Vendor_SysTickConfig not defined in device header file; using default!"
 #endif
-#endif
+#endif /*  defined __CHECK_DEVICE_DEFINES */
 
 /* IO definitions (access restrictions to peripheral registers) */
 /**
@@ -2028,7 +2030,7 @@ extern "C"
   (0xFFUL /*<< MPU_MAIR1_Attr4_Pos*/) /*!< MPU MAIR1: Attr4 Mask */
 
 /*@} end of group CMSIS_MPU */
-#endif
+#endif /* __MPU_PRESENT && __MPU_PRESENT == 1U */
 
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
@@ -2052,9 +2054,9 @@ extern "C"
         RBAR; /*!< Offset: 0x00C (R/W)  SAU Region Base Address Register */
     __IOM uint32_t
         RLAR; /*!< Offset: 0x010 (R/W)  SAU Region Limit Address Register */
-#else
+#else         /* __SAUREGION_PRESENT && __SAUREGION_PRESENT == 1U */
     uint32_t RESERVED0[3];
-#endif
+#endif        /* !(__SAUREGION_PRESENT && __SAUREGION_PRESENT == 1U) */
     __IOM uint32_t
         SFSR; /*!< Offset: 0x014 (R/W)  Secure Fault Status Register */
     __IOM uint32_t
@@ -2098,7 +2100,7 @@ extern "C"
 #define SAU_RLAR_ENABLE_Msk \
   (1UL /*<< SAU_RLAR_ENABLE_Pos*/) /*!< SAU RLAR: ENABLE Mask */
 
-#endif /* defined (__SAUREGION_PRESENT) && (__SAUREGION_PRESENT == 1U) */
+#endif /* __SAUREGION_PRESENT && __SAUREGION_PRESENT == 1U */
 
 /** \brief SAU Secure Fault Status Register Definitions */
 #define SAU_SFSR_LSERR_Pos 7U /*!< SAU SFSR: LSERR Position */
@@ -2134,7 +2136,7 @@ extern "C"
   (1UL /*<< SAU_SFSR_INVEP_Pos*/) /*!< SAU SFSR: INVEP Mask */
 
 /*@} end of group CMSIS_SAU */
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
 
   /**
@@ -2819,7 +2821,7 @@ extern "C"
 #define MPU_NS                                                                 \
   ((MPU_Type *)MPU_BASE_NS) /*!< Memory Protection Unit            (non-secure \
                                address space) */
-#endif
+#endif                      /* __MPU_PRESENT && __MPU_PRESENT == 1U */
 
 #define FPU_BASE_NS                                                           \
   (SCS_BASE_NS + 0x0F30UL) /*!< Floating Point Unit               (non-secure \
@@ -2828,7 +2830,7 @@ extern "C"
   ((FPU_Type *)FPU_BASE_NS) /*!< Floating Point Unit               (non-secure \
                                address space) */
 
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
   /*@} */
 
 
@@ -2971,7 +2973,7 @@ extern "C"
 #define CoreDebug_NS ((CoreDebug_Type *)DCB_BASE_NS)
 #endif
 
-#endif  // CMSIS_DISABLE_DEPRECATED
+#endif /* !CMSIS_DISABLE_DEPRECATED */
 
   /*@} */
 
@@ -3004,7 +3006,7 @@ extern "C"
 #define CMSIS_NVIC_VIRTUAL_HEADER_FILE "cmsis_nvic_virtual.h"
 #endif
 #include CMSIS_NVIC_VIRTUAL_HEADER_FILE
-#else
+#else /* CMSIS_NVIC_VIRTUAL */
 #define NVIC_SetPriorityGrouping __NVIC_SetPriorityGrouping
 #define NVIC_GetPriorityGrouping __NVIC_GetPriorityGrouping
 #define NVIC_EnableIRQ __NVIC_EnableIRQ
@@ -3017,17 +3019,17 @@ extern "C"
 #define NVIC_SetPriority __NVIC_SetPriority
 #define NVIC_GetPriority __NVIC_GetPriority
 #define NVIC_SystemReset __NVIC_SystemReset
-#endif /* CMSIS_NVIC_VIRTUAL */
+#endif /* !CMSIS_NVIC_VIRTUAL */
 
 #ifdef CMSIS_VECTAB_VIRTUAL
 #ifndef CMSIS_VECTAB_VIRTUAL_HEADER_FILE
 #define CMSIS_VECTAB_VIRTUAL_HEADER_FILE "cmsis_vectab_virtual.h"
 #endif
 #include CMSIS_VECTAB_VIRTUAL_HEADER_FILE
-#else
+#else /* CMSIS_VECTAB_VIRTUAL */
 #define NVIC_SetVector __NVIC_SetVector
 #define NVIC_GetVector __NVIC_GetVector
-#endif /* (CMSIS_VECTAB_VIRTUAL) */
+#endif /* !CMSIS_VECTAB_VIRTUAL */
 
 #define NVIC_USER_IRQ_OFFSET 16
 
@@ -3071,10 +3073,12 @@ extern "C"
      1U) /* Value for processors with floating-point extension: */
 #define EXC_INTEGRITY_SIGNATURE \
   (0xFEFA125AUL) /* bit [0] SFTC must match LR bit[4] EXC_RETURN_FTYPE */
-#else
+#else /*  __FPU_PRESENT &&(__FPU_PRESENT ==1U) /* Value for processors with \
+         floating-point extension: */                                       \
+          * /
 #define EXC_INTEGRITY_SIGNATURE \
   (0xFEFA125BUL) /* Value for processors without floating-point extension */
-#endif
+#endif /* !( __FPU_PRESENT &&(__FPU_PRESENT ==1U) /* Value for processors with floating-point extension: */) */
 
 
   /**
@@ -3343,7 +3347,7 @@ extern "C"
       return (0U);
     }
   }
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
 
   /**
@@ -3759,7 +3763,7 @@ extern "C"
                (8U - __NVIC_PRIO_BITS)));
     }
   }
-#endif /*  defined (__ARM_FEATURE_CMSE) &&(__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
   /*@} end of CMSIS_Core_NVICFunctions */
 
@@ -3844,7 +3848,7 @@ extern "C"
     SAU->CTRL &= ~(SAU_CTRL_ENABLE_Msk);
   }
 
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
   /*@} end of CMSIS_Core_SAUFunctions */
 
@@ -3910,7 +3914,7 @@ extern "C"
   {
     return (DCB_NS->DAUTHCTRL);
   }
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
   /*@} end of CMSIS_Core_DCBFunctions */
 
@@ -3948,7 +3952,7 @@ extern "C"
   {
     return (DIB_NS->DAUTHSTATUS);
   }
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
   /*@} end of CMSIS_Core_DCBFunctions */
 
@@ -4028,9 +4032,9 @@ extern "C"
         SysTick_CTRL_ENABLE_Msk; /* Enable SysTick IRQ and SysTick Timer */
     return (0UL);                /* Function successful */
   }
-#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif /* __ARM_FEATURE_CMSE && __ARM_FEATURE_CMSE == 3U */
 
-#endif
+#endif /* __Vendor_SysTickConfig && __Vendor_SysTickConfig == 0U */
 
   /*@} end of CMSIS_Core_SysTickFunctions */
 
@@ -4124,6 +4128,6 @@ extern "C"
 }
 #endif
 
-#endif /* __CORE_CM33_H_DEPENDANT */
+#endif /* !__CORE_CM33_H_DEPENDANT */
 
-#endif /* __CMSIS_GENERIC */
+#endif /* !__CMSIS_GENERIC */
