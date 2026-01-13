@@ -23,37 +23,38 @@
 #define UART_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-/**
- * @brief Initialize UART0 for serial communication
- *
- * Configures UART0 at 115200 baud with TX and RX enabled.
- * Uses MPS3 AN524 UART0 at address 0x40200000.
- */
-void uart_init(void);
+  /**
+   * @brief Initialize UART0 for serial communication
+   *
+   * Configures UART0 at 115200 baud with TX and RX enabled.
+   * Uses MPS3 AN524 UART0 at address 0x40200000.
+   */
+  void uart_init(void);
 
-/**
- * @brief Output a character via UART
- *
- * @param ch Character to transmit
- * @return The transmitted character
- *
- * Automatically converts '\n' to '\r\n' for proper line endings.
- * Blocks until transmit buffer is ready.
- */
-unsigned char uart_putc(unsigned char ch);
+  /**
+   * @brief Output a character via UART
+   *
+   * @param ch Character to transmit
+   * @return The transmitted character
+   *
+   * Automatically converts '\n' to '\r\n' for proper line endings.
+   * Blocks until transmit buffer is ready.
+   */
+  unsigned char uart_putc(unsigned char ch);
 
-/**
- * @brief Read a character from UART
- *
- * @return The received character
- *
- * Blocks until a character is available.
- * Automatically converts '\r' to '\n'.
- */
-unsigned char uart_getc(void);
+  /**
+   * @brief Read a character from UART
+   *
+   * @return The received character
+   *
+   * Blocks until a character is available.
+   * Automatically converts '\r' to '\n'.
+   */
+  unsigned char uart_getc(void);
 
 #ifdef __cplusplus
 }

@@ -54,13 +54,13 @@ int __wrap_main(int unused_argc, char *unused_argv[])
 {
   (void)unused_argc;
   (void)unused_argv;
-  
+
   /* Note: We skip setvbuf() because it causes BusFault on mps3-an524.
    * Instead, __wrap__write uses semihosting which is unbuffered. */
-  
+
   /* Call real main with no arguments. */
   int rc = __real_main(0, (char **)0);
-  
+
 #ifdef SEMIHOSTING
   semihosting_exit_with_rc(rc);
 #endif
