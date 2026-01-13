@@ -3073,12 +3073,12 @@ extern "C"
      1U) /* Value for processors with floating-point extension: */
 #define EXC_INTEGRITY_SIGNATURE \
   (0xFEFA125AUL) /* bit [0] SFTC must match LR bit[4] EXC_RETURN_FTYPE */
-#else /*  __FPU_PRESENT &&(__FPU_PRESENT ==1U) /* Value for processors with \
-         floating-point extension: */                                       \
-        * /
+#else /*  __FPU_PRESENT &&(__FPU_PRESENT ==1U)  // Value for processors with \
+         floating-point extension: */                                      
+        
 #define EXC_INTEGRITY_SIGNATURE \
   (0xFEFA125BUL) /* Value for processors without floating-point extension */
-#endif /* !( __FPU_PRESENT &&(__FPU_PRESENT ==1U) /* Value for processors with floating-point extension: */) */
+#endif /* !( __FPU_PRESENT &&(__FPU_PRESENT ==1U) // Value for processors with floating-point extension: */ 
 
 
   /**
