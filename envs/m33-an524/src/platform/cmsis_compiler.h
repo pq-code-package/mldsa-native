@@ -287,9 +287,13 @@ __PACKED_STRUCT T_UINT32_READ { uint32_t v; };
 #define __ALIAS(x) __attribute__((alias(x)))
 #endif
 
-#else
+#else /* !(__ARMCC_VERSION && __ARMCC_VERSION >= 6100100) && !__ti__ &&        \
+         !__clang__ && !__GNUC__ && !__ICCARM__ && !__TI_ARM__ && !__TASKING__ \
+         && __CSMC__ */
 #error Unknown compiler.
-#endif
+#endif /* !(__ARMCC_VERSION && __ARMCC_VERSION >= 6100100) && !__ti__ && \
+          !__clang__ && !__GNUC__ && !__ICCARM__ && !__TI_ARM__ &&       \
+          !__TASKING__ && !__CSMC__ */
 
 
-#endif /* __CMSIS_COMPILER_H */
+#endif /* !__CMSIS_COMPILER_H */

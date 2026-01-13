@@ -74,7 +74,7 @@ __STATIC_FORCEINLINE void SCB_EnableICache(void)
   SCB->CCR |= (uint32_t)SCB_CCR_IC_Msk; /* enable I-Cache */
   __DSB();
   __ISB();
-#endif
+#endif /* __ICACHE_PRESENT && __ICACHE_PRESENT == 1U */
 }
 
 
@@ -91,7 +91,7 @@ __STATIC_FORCEINLINE void SCB_DisableICache(void)
   SCB->ICIALLU = 0UL;                    /* invalidate I-Cache */
   __DSB();
   __ISB();
-#endif
+#endif /* __ICACHE_PRESENT && __ICACHE_PRESENT == 1U */
 }
 
 
@@ -107,7 +107,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateICache(void)
   SCB->ICIALLU = 0UL;
   __DSB();
   __ISB();
-#endif
+#endif /* __ICACHE_PRESENT && __ICACHE_PRESENT == 1U */
 }
 
 
@@ -143,7 +143,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateICache_by_Addr(volatile void *addr,
     __DSB();
     __ISB();
   }
-#endif
+#endif /* __ICACHE_PRESENT && __ICACHE_PRESENT == 1U */
 }
 
 
@@ -188,7 +188,7 @@ __STATIC_FORCEINLINE void SCB_EnableDCache(void)
 
   __DSB();
   __ISB();
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -235,12 +235,12 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void)
   SCB->DCCIMVAC = (uint32_t)&locals.sets;
   SCB->DCCIMVAC = (uint32_t)&locals.ways;
   SCB->DCCIMVAC = (uint32_t)&locals.ccsidr;
-#else
+#else  /* __ICCARM__ */
   SCB->DCCIMVAC = (uint32_t)&locals;
-#endif
+#endif /* !__ICCARM__ */
   __DSB();
   __ISB();
-#endif
+#endif /* !__OPTIMIZE__ */
 
   locals.ccsidr = SCB->CCSIDR;
   /* clean & invalidate D-Cache */
@@ -261,7 +261,7 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void)
 
   __DSB();
   __ISB();
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -298,7 +298,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache(void)
 
   __DSB();
   __ISB();
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -335,7 +335,7 @@ __STATIC_FORCEINLINE void SCB_CleanDCache(void)
 
   __DSB();
   __ISB();
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -372,7 +372,7 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache(void)
 
   __DSB();
   __ISB();
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -408,7 +408,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr(volatile void *addr,
     __DSB();
     __ISB();
   }
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -444,7 +444,7 @@ __STATIC_FORCEINLINE void SCB_CleanDCache_by_Addr(volatile void *addr,
     __DSB();
     __ISB();
   }
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 
@@ -480,9 +480,9 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache_by_Addr(volatile void *addr,
     __DSB();
     __ISB();
   }
-#endif
+#endif /* __DCACHE_PRESENT && __DCACHE_PRESENT == 1U */
 }
 
 /*@} end of CMSIS_Core_CacheFunctions */
 
-#endif /* ARM_ARMV7M_CACHEL1_H */
+#endif /* !ARM_ARMV7M_CACHEL1_H */

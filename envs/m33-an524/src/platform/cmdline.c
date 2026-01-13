@@ -47,7 +47,7 @@ void semihosting_exit_with_rc(int rc)
   } s = {ADP_Stopped_ApplicationExit, rc};
   semihosting_syscall(SYS_EXIT_EXTENDED, (uint32_t)&s);
 }
-#endif
+#endif /* SEMIHOSTING */
 
 /* Wrap main: forward to __real_main with semihosting exit. */
 int __wrap_main(int unused_argc, char *unused_argv[])

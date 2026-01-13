@@ -1,3 +1,5 @@
+[//]: # (SPDX-License-Identifier: CC-BY-4.0)
+
 # Cortex-M33 MPS3-AN524 Platform Environment
 
 This directory contains the complete CMSIS-compliant platform environment for Cortex-M33 on MPS3-AN524, providing 100% feature parity with the M55-AN547 reference implementation.

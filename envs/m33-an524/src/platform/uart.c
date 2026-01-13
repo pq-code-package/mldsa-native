@@ -22,9 +22,9 @@
  * - Uses MPS3_UART_TypeDef from ARMCM33.h device header
  */
 
-#include "uart.h"
 #include <stdint.h>
 #include "ARMCM33.h"
+#include "uart.h"
 
 /*
  * MPS3 AN524 UART Configuration

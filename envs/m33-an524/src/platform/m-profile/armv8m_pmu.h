@@ -466,4 +466,4 @@ __STATIC_INLINE void ARM_PMU_CNTR_Increment(uint32_t mask)
   PMU->SWINC = mask;
 }
 
-#endif
+#endif /* !ARM_PMU_ARMV8_H */

@@ -50,4 +50,4 @@ extern "C"
 }
 #endif
 
-#endif /* SYSTEM_ARMCM33_H */
+#endif /* !SYSTEM_ARMCM33_H */

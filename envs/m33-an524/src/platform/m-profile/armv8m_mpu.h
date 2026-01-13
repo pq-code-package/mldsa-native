@@ -197,7 +197,7 @@
    (((IDX) << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
    (MPU_RLAR_EN_Msk))
 
-#endif
+#endif /* MPU_RLAR_PXN_Pos */
 
 /**
  * Struct for a single MPU Region
@@ -268,7 +268,7 @@ __STATIC_INLINE void ARM_MPU_Disable_NS(void)
   __DSB();
   __ISB();
 }
-#endif
+#endif /* MPU_NS */
 
 /** Set the memory attribute encoding to the given MPU.
  * \param mpu Pointer to the MPU to be configured.
@@ -308,7 +308,7 @@ __STATIC_INLINE void ARM_MPU_SetMemAttr_NS(uint8_t idx, uint8_t attr)
 {
   ARM_MPU_SetMemAttrEx(MPU_NS, idx, attr);
 }
-#endif
+#endif /* MPU_NS */
 
 /** Clear and disable the given MPU region of the given MPU.
  * \param mpu Pointer to MPU to be used.
@@ -336,7 +336,7 @@ __STATIC_INLINE void ARM_MPU_ClrRegion_NS(uint32_t rnr)
 {
   ARM_MPU_ClrRegionEx(MPU_NS, rnr);
 }
-#endif
+#endif /* MPU_NS */
 
 /** Configure the given MPU region of the given MPU.
  * \param mpu Pointer to MPU to be used.
@@ -374,7 +374,7 @@ __STATIC_INLINE void ARM_MPU_SetRegion_NS(uint32_t rnr, uint32_t rbar,
 {
   ARM_MPU_SetRegionEx(MPU_NS, rnr, rbar, rlar);
 }
-#endif
+#endif /* MPU_NS */
 
 /** Memcpy with strictly ordered memory access, e.g. used by code in
  * ARM_MPU_LoadEx()
@@ -454,6 +454,6 @@ __STATIC_INLINE void ARM_MPU_Load_NS(uint32_t rnr,
 {
   ARM_MPU_LoadEx(MPU_NS, rnr, table, cnt);
 }
-#endif
+#endif /* MPU_NS */
 
-#endif
+#endif /* !ARM_MPU_ARMV8_H */

@@ -293,4 +293,4 @@ extern "C"
 }
 #endif
 
-#endif /* ARMCM33_H */
+#endif /* !ARMCM33_H */
