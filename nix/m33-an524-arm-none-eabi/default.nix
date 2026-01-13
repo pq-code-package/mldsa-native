@@ -6,16 +6,16 @@
 stdenvNoCC.mkDerivation {
   pname = "mldsa-native-m33-an524";
   version = "local-2026-01-10";
-  
+
   src = ../../envs/m33-an524;
-  
+
   dontBuild = true;
-  
+
   installPhase = ''
     mkdir -p $out/
     cp -r . $out/
   '';
-  
+
   setupHook = writeText "setup-hook.sh" ''
     export M33_AN524_PATH="$1/src/platform/"
   '';

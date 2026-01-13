@@ -48,7 +48,8 @@ uint32_t semihosting_syscall(uint32_t nr, const uint32_t arg)
   return nr;
 }
 
-/* Register a destructor that will call QEMU telling it the program has exited */
+/* Register a destructor that will call QEMU telling it the program has exited
+ */
 static void __attribute__((destructor)) semihosting_exit(void)
 {
   semihosting_syscall(REPORT_EXCEPTION, ApplicationExit);
@@ -115,8 +116,8 @@ void PendSV_Handler(void)
  * Newlib Syscall Stubs (minimal implementations)
  *===========================================================================*/
 
-#include <sys/types.h>
 #include <errno.h>
+#include <sys/types.h>
 
 extern uint32_t __HeapBase;
 extern uint32_t __HeapLimit;

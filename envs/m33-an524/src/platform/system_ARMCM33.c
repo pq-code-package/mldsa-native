@@ -23,10 +23,10 @@
  * limitations under the License.
  */
 
-#if defined (ARMCM33)
-  #include "ARMCM33.h"
+#if defined(ARMCM33)
+#include "ARMCM33.h"
 #else
-  #error device not specified!
+#error device not specified!
 #endif
 
 /* External reference to vector table */
@@ -35,37 +35,33 @@ extern const void *__VECTOR_TABLE[];
 /*----------------------------------------------------------------------------
   Define clocks
  *----------------------------------------------------------------------------*/
-#define  XTAL            (250000000UL)      /* Oscillator frequency - 250 MHz   */
-                                            /* Matches STM32H5 series           */
+#define XTAL (250000000UL) /* Oscillator frequency - 250 MHz   */
+                           /* Matches STM32H5 series           */
 
-#define  SYSTEM_CLOCK    (XTAL)             /* System clock = 250 MHz           */
+#define SYSTEM_CLOCK (XTAL) /* System clock = 250 MHz           */
 
 /*----------------------------------------------------------------------------
   System Core Clock Variable
  *----------------------------------------------------------------------------*/
-uint32_t SystemCoreClock = SYSTEM_CLOCK;   /* System Core Clock Frequency      */
+uint32_t SystemCoreClock = SYSTEM_CLOCK; /* System Core Clock Frequency      */
 
 /*----------------------------------------------------------------------------
   System Core Clock update function
  *----------------------------------------------------------------------------*/
-void SystemCoreClockUpdate (void)
-{
-  SystemCoreClock = SYSTEM_CLOCK;
-}
+void SystemCoreClockUpdate(void) { SystemCoreClock = SYSTEM_CLOCK; }
 
 /*----------------------------------------------------------------------------
   System initialization function
  *----------------------------------------------------------------------------*/
-void SystemInit (void)
+void SystemInit(void)
 {
-
-#if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-  SCB->VTOR = (uint32_t) &__VECTOR_TABLE;
+#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
+  SCB->VTOR = (uint32_t)&__VECTOR_TABLE;
 #endif
 
-#if defined (__FPU_USED) && (__FPU_USED == 1U)
-  SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */
-                 (3U << 11U*2U)  );         /* enable CP11 Full Access */
+#if defined(__FPU_USED) && (__FPU_USED == 1U)
+  SCB->CPACR |= ((3U << 10U * 2U) | /* enable CP10 Full Access */
+                 (3U << 11U * 2U)); /* enable CP11 Full Access */
 #endif
 
 #ifdef UNALIGNED_SUPPORT_DISABLE
@@ -73,12 +69,12 @@ void SystemInit (void)
 #endif
 
   /* Enable fault handlers */
-  SCB->SHCSR |= (SCB_SHCSR_MEMFAULTENA_Msk | 
-                 SCB_SHCSR_BUSFAULTENA_Msk | 
+  SCB->SHCSR |= (SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
                  SCB_SHCSR_USGFAULTENA_Msk);
 
 #ifdef __ARM_FEATURE_CMSE
-  SCB->SHCSR |= SCB_SHCSR_SECUREFAULTENA_Msk; /* Enable SecureFault handler (TrustZone) */
+  SCB->SHCSR |=
+      SCB_SHCSR_SECUREFAULTENA_Msk; /* Enable SecureFault handler (TrustZone) */
 #endif
 
   /* Ensure 8-byte stack alignment on exception entry (bit 9) */
@@ -101,7 +97,7 @@ extern int errno;
 static void semihost_writec(char c)
 {
   __asm__ volatile(
-      "mov r0, #0x03\n"  /* SYS_WRITEC */
+      "mov r0, #0x03\n" /* SYS_WRITEC */
       "mov r1, %0\n"
       "bkpt 0xAB\n"
       :
@@ -120,9 +116,11 @@ int __wrap__read(int file, char *ptr, int len)
 
 int __wrap__write(int file, char *ptr, int len)
 {
-  if (file == 1 || file == 2) {  /* stdout or stderr */
+  if (file == 1 || file == 2)
+  { /* stdout or stderr */
     /* Write each character using semihosting SYS_WRITEC */
-    for (int i = 0; i < len; ++i) {
+    for (int i = 0; i < len; ++i)
+    {
       semihost_writec(ptr[i]);
     }
     return len;

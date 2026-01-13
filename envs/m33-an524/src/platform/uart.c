@@ -23,8 +23,8 @@
  */
 
 #include "uart.h"
-#include "ARMCM33.h"
 #include <stdint.h>
+#include "ARMCM33.h"
 
 /*
  * MPS3 AN524 UART Configuration
@@ -32,61 +32,61 @@
  * - System clock: 25 MHz
  * - Default baud rate: 115200
  */
-#define UART0_BAUDRATE    115200
+#define UART0_BAUDRATE 115200
 #define SYSTEM_CORE_CLOCK 25000000
 
 void uart_init(void)
 {
-    /* Configure baud rate divider: SystemCoreClock / BaudRate */
-    MPS3_UART0->BAUDDIV = SYSTEM_CORE_CLOCK / UART0_BAUDRATE;
+  /* Configure baud rate divider: SystemCoreClock / BaudRate */
+  MPS3_UART0->BAUDDIV = SYSTEM_CORE_CLOCK / UART0_BAUDRATE;
 
-    /* Enable TX and RX */
-    MPS3_UART0->CTRL = (MPS3_UART_CTRL_TXEN_Msk |  /* TX enable */
-                        MPS3_UART_CTRL_RXEN_Msk);  /* RX enable */
+  /* Enable TX and RX */
+  MPS3_UART0->CTRL = (MPS3_UART_CTRL_TXEN_Msk | /* TX enable */
+                      MPS3_UART_CTRL_RXEN_Msk); /* RX enable */
 }
 
 unsigned char uart_putc(unsigned char ch)
 {
-    /* Wait while transmit buffer is full (TXBF = 1) */
+  /* Wait while transmit buffer is full (TXBF = 1) */
+  while (MPS3_UART0->STATE & MPS3_UART_STATE_TXBF_Msk)
+  {
+    /* Busy wait */
+  }
+
+  /* Convert LF to CRLF for proper terminal output */
+  if (ch == '\n')
+  {
+    MPS3_UART0->DATA = '\r';
     while (MPS3_UART0->STATE & MPS3_UART_STATE_TXBF_Msk)
     {
-        /* Busy wait */
+      /* Wait for CR to be sent */
     }
+  }
 
-    /* Convert LF to CRLF for proper terminal output */
-    if (ch == '\n')
-    {
-        MPS3_UART0->DATA = '\r';
-        while (MPS3_UART0->STATE & MPS3_UART_STATE_TXBF_Msk)
-        {
-            /* Wait for CR to be sent */
-        }
-    }
+  /* Write character to transmit data register */
+  MPS3_UART0->DATA = ch;
 
-    /* Write character to transmit data register */
-    MPS3_UART0->DATA = ch;
-
-    return ch;
+  return ch;
 }
 
 unsigned char uart_getc(void)
 {
-    unsigned char ch;
+  unsigned char ch;
 
-    /* Wait while receive buffer is empty (RXBF = 0) */
-    while ((MPS3_UART0->STATE & MPS3_UART_STATE_RXBF_Msk) == 0)
-    {
-        /* Busy wait */
-    }
+  /* Wait while receive buffer is empty (RXBF = 0) */
+  while ((MPS3_UART0->STATE & MPS3_UART_STATE_RXBF_Msk) == 0)
+  {
+    /* Busy wait */
+  }
 
-    /* Read character from receive data register */
-    ch = (unsigned char)(MPS3_UART0->DATA & MPS3_UART_DATA_Msk);
+  /* Read character from receive data register */
+  ch = (unsigned char)(MPS3_UART0->DATA & MPS3_UART_DATA_Msk);
 
-    /* Convert CR to LF for consistent line endings */
-    if (ch == '\r')
-    {
-        ch = '\n';
-    }
+  /* Convert CR to LF for consistent line endings */
+  if (ch == '\r')
+  {
+    ch = '\n';
+  }
 
-    return ch;
+  return ch;
 }
