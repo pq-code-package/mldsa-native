@@ -199,6 +199,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /*************************************************
  * Name:        crypto_sign_keypair_internal
  *
@@ -844,6 +850,10 @@ int MLD_API_NAMESPACE(pk_from_sk)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+
+#ifdef __cplusplus
+}
+#endif
 
 /****************************** SUPERCOP API *********************************/
 
