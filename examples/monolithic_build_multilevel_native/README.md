@@ -31,6 +31,7 @@ The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.
 - `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix
 - `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH`: Enables native arithmetic backend
 - `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202`: Enables native FIPS-202 backend
+- `MLD_CONFIG_NO_SUPERCOP`: Disables the SUPERCOP API (crypto_sign*)
 
 The wrapper [mldsa_native_all.c](mldsa_native_all.c) includes `mldsa_native.c` three times:
 ```c

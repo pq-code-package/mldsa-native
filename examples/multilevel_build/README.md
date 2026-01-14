@@ -26,6 +26,7 @@ The library is built 3 times into separate directories (`build/mldsa44`, `build/
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
 - `MLD_CONFIG_MULTILEVEL_BUILD`: Enables multi-level build mode
 - `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix; level suffix added automatically
+- `MLD_CONFIG_NO_SUPERCOP`: Disables the SUPERCOP API (crypto_sign*)
 
 Build-time flags passed via CFLAGS:
 - `MLD_CONFIG_PARAMETER_SET=44/65/87`: Selects the security level

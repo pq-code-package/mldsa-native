@@ -7,8 +7,6 @@
 #ifndef MLD_ALL_H
 #define MLD_ALL_H
 
-#define MLD_CONFIG_NO_SUPERCOP
-
 /* API for MLDSA-44 */
 #define MLD_CONFIG_PARAMETER_SET 44
 #include <mldsa_native.h>
