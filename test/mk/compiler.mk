@@ -72,4 +72,9 @@ MK_COMPILER_SUPPORTS_SHA3 ?= $(shell echo 'int main() { __asm__("eor3 v0.16b, v1
 
 endif # aarch64
 
+# Linker feature detection
+
+# Test --fatal-warnings support
+MK_LINKER_SUPPORTS_FATAL_WARNINGS ?= $(shell echo 'int main() { return 0; }' | $(CC) -x c - -o /dev/null -Wl,--fatal-warnings 2>/dev/null && echo 1 || echo 0)
+
 endif # _COMPILER_MK

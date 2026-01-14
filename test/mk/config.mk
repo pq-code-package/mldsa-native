@@ -53,6 +53,11 @@ CFLAGS := \
 	-MMD \
 	$(CFLAGS)
 
+# Treat linker warnings as errors
+ifeq ($(MK_LINKER_SUPPORTS_FATAL_WARNINGS),1)
+LDFLAGS += -Wl,--fatal-warnings
+endif
+
 ##################
 # Some Variables #
 ##################

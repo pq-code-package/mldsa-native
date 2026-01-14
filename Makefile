@@ -36,8 +36,8 @@ BUILD_DIR ?= test/build
 
 # Skip includes for clean target
 ifneq ($(MAKECMDGOALS),clean)
-include test/mk/config.mk
 include test/mk/compiler.mk
+include test/mk/config.mk
 include test/mk/auto.mk
 include test/mk/components.mk
 include test/mk/rules.mk
@@ -266,6 +266,9 @@ else
 	@echo "=== Architecture Not Supported ==="
 	@echo "No specific feature detection available for $(ARCH)"
 endif
+	@echo ""
+	@echo "=== Linker Feature Support ==="
+	@echo "Fatal Warnings: $(if $(filter 1,$(MK_LINKER_SUPPORTS_FATAL_WARNINGS)),✅,❌)"
 
 EXAMPLE_DIRS := \
 	examples/bring_your_own_fips202 \
