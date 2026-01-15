@@ -58,6 +58,7 @@ rec {
     attrs // {
       shellHook = ''
         export PATH=$PWD/scripts:$PATH
+        ${attrs.shellHook or ""}
       '';
     }
   );
@@ -105,7 +106,6 @@ rec {
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
   m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
-  m33-an524 = pkgs.callPackage ./m33-an524-arm-none-eabi { };
 
   # Helper function to build individual cross toolchains
   _individual_toolchain = { name, cross_compilers }:
