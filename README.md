@@ -46,6 +46,13 @@ make test
 ./scripts/tests --help
 ```
 
+
+## Applications
+
+mldsa-native is used in
+ - The [zeroRISC's fork of OpenTitan](https://github.com/zerorisc/expo) - an open source silicon Root of Trust (RoT)
+ - [CHERIoT-PQC](https://github.com/CHERIoT-Platform/cheriot-pqc) — post-quantum cryptography support for the CHERIoT platform
+
 ## Formal Verification
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
