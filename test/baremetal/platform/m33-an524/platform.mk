@@ -6,17 +6,19 @@
 # This platform provides 100% CMSIS compliance with M55-AN547 reference,
 # including complete hardware abstraction, system integration, and ARM v8-M features.
 
-# Platform environment paths (using Nix environment variable)
-# M33_AN524_PATH is set by Nix setupHook to point directly to platform files
-PLATFORM_PATH := $(M33_AN524_PATH)
-PROJECT_PLATFORM_PATH := test/baremetal/platform/m33-an524
+# Platform environment paths
+# When in Nix environment: M33_AN524_PATH and M33_AN524_CMSIS_PATH are set by shellHook
+# When building locally: Use relative paths
+ifdef M33_AN524_PATH
+  PLATFORM_PATH := $(M33_AN524_PATH)
+  CMSIS_PATH := $(M33_AN524_CMSIS_PATH)
+else
+  ENV_PATH := envs/m33-an524
+  PLATFORM_PATH := $(ENV_PATH)/src/platform
+  CMSIS_PATH := $(PLATFORM_PATH)/CMSIS
+endif
 
-# Verify M33_AN524_PATH is set (only when building, not during clean)
-ifneq ($(MAKECMDGOALS),clean)
-ifndef M33_AN524_PATH
-$(error M33_AN524_PATH not set. Ensure you are in the Nix arm-embedded environment: nix develop .#arm-embedded)
-endif
-endif
+PROJECT_PLATFORM_PATH := test/baremetal/platform/m33-an524
 
 CROSS_PREFIX = arm-none-eabi-
 CC = gcc
@@ -35,13 +37,14 @@ CFLAGS += \
 	-DARMCM33 \
 	-DDEVICE=an524 \
 	-DSEMIHOSTING \
+	-I$(CMSIS_PATH) \
+	-I$(CMSIS_PATH)/m-profile \
 	-I$(PLATFORM_PATH) \
-	-I$(PLATFORM_PATH)/m-profile \
 	$(ARCH_FLAGS) --specs=nosys.specs
 
 CFLAGS += $(CFLAGS_EXTRA)
 
-LDSCRIPT := $(PLATFORM_PATH)/m33-an524.ld
+LDSCRIPT := $(CMSIS_PATH)/m33-an524.ld
 
 # Linker flags for semihosting support
 # Uses --wrap for syscalls to redirect to our implementations (like M55-AN547)
@@ -70,8 +73,8 @@ LDFLAGS += \
 # Note: No hal.c - uses default test/hal/hal.c like M55-AN547
 # For actual cycle counting on M33, use the standalone bench_baseline.c
 EXTRA_SOURCES = \
-	$(PLATFORM_PATH)/startup_ARMCM33.c \
-	$(PLATFORM_PATH)/system_ARMCM33.c \
+	$(CMSIS_PATH)/startup_ARMCM33.c \
+	$(CMSIS_PATH)/system_ARMCM33.c \
 	$(PLATFORM_PATH)/semihosting.c \
 	$(PLATFORM_PATH)/libfns.c \
 	$(PLATFORM_PATH)/cmdline.c \
@@ -90,18 +93,18 @@ EXEC_WRAPPER := $(realpath $(PROJECT_PLATFORM_PATH)/exec_wrapper.py)
 
 # Core CMSIS Headers (Layer 1)
 REQUIRED_CMSIS_CORE = \
-	$(PLATFORM_PATH)/core_cm33.h \
-	$(PLATFORM_PATH)/cmsis_compiler.h \
-	$(PLATFORM_PATH)/cmsis_gcc.h \
-	$(PLATFORM_PATH)/cmsis_version.h
+	$(CMSIS_PATH)/core_cm33.h \
+	$(CMSIS_PATH)/cmsis_compiler.h \
+	$(CMSIS_PATH)/cmsis_gcc.h \
+	$(CMSIS_PATH)/cmsis_version.h
 
 # Device Templates (Layer 2)
 REQUIRED_DEVICE_TEMPLATES = \
-	$(PLATFORM_PATH)/ARMCM33.h \
-	$(PLATFORM_PATH)/startup_ARMCM33.c \
-	$(PLATFORM_PATH)/system_ARMCM33.c \
-	$(PLATFORM_PATH)/system_ARMCM33.h \
-	$(PLATFORM_PATH)/m33-an524.ld
+	$(CMSIS_PATH)/ARMCM33.h \
+	$(CMSIS_PATH)/startup_ARMCM33.c \
+	$(CMSIS_PATH)/system_ARMCM33.c \
+	$(CMSIS_PATH)/system_ARMCM33.h \
+	$(CMSIS_PATH)/m33-an524.ld
 
 # Hardware Abstraction (Layer 3)
 REQUIRED_HARDWARE_ABSTRACTION = \
@@ -116,9 +119,9 @@ REQUIRED_SYSTEM_INTEGRATION = \
 
 # ARM v8-M Features (Layer 5) - in m-profile subdirectory
 REQUIRED_ARMV8M_FEATURES = \
-	$(PLATFORM_PATH)/m-profile/armv8m_mpu.h \
-	$(PLATFORM_PATH)/m-profile/armv8m_pmu.h \
-	$(PLATFORM_PATH)/m-profile/armv7m_cachel1.h
+	$(CMSIS_PATH)/m-profile/armv8m_mpu.h \
+	$(CMSIS_PATH)/m-profile/armv8m_pmu.h \
+	$(CMSIS_PATH)/m-profile/armv7m_cachel1.h
 
 # All required CMSIS files
 REQUIRED_CMSIS_FILES = \
