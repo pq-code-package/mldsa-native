@@ -38,10 +38,10 @@ void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a,
 {
   unsigned int i;
   __m256i f, f0, f1, h, t;
-  const __m256i q_bound = _mm256_set1_epi32(87 * MLDSA_GAMMA2);
+  const __m256i q_bound = _mm256_set1_epi32(87 * ((MLDSA_Q - 1) / 32));
   /* check-magic: 1025 == floor(2**22 / 4092) */
   const __m256i v = _mm256_set1_epi32(1025);
-  const __m256i alpha = _mm256_set1_epi32(2 * MLDSA_GAMMA2);
+  const __m256i alpha = _mm256_set1_epi32(2 * ((MLDSA_Q - 1) / 32));
   const __m256i off = _mm256_set1_epi32(127);
   const __m256i shift = _mm256_set1_epi32(512);
   const __m256i mask = _mm256_set1_epi32(15);

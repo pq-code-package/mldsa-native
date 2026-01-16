@@ -38,7 +38,7 @@ void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a)
   /* Equivalent to _mm256_set_epi32(4, 0, 4, 0, 4, 0, 4, 0) */
   const __m256i srlvdidx = _mm256_set1_epi64x((uint64_t)4 << 32);
   const __m256i mask = _mm256_set1_epi32(0xFFFFF);
-  const __m256i gamma1 = _mm256_set1_epi32(MLDSA_GAMMA1);
+  const __m256i gamma1 = _mm256_set1_epi32((1 << 19));
 
   for (i = 0; i < MLDSA_N / 8; i++)
   {

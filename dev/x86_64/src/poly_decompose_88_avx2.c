@@ -42,10 +42,10 @@ void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0)
 {
   unsigned int i;
   __m256i f, f0, f1, t;
-  const __m256i q_bound = _mm256_set1_epi32(87 * MLDSA_GAMMA2);
+  const __m256i q_bound = _mm256_set1_epi32(87 * ((MLDSA_Q - 1) / 88));
   /* check-magic: 11275 == floor(2**24 / 1488) */
   const __m256i v = _mm256_set1_epi32(11275);
-  const __m256i alpha = _mm256_set1_epi32(2 * MLDSA_GAMMA2);
+  const __m256i alpha = _mm256_set1_epi32(2 * ((MLDSA_Q - 1) / 88));
   const __m256i off = _mm256_set1_epi32(127);
   const __m256i shift = _mm256_set1_epi32(128);
 
