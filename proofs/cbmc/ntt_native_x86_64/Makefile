@@ -22,7 +22,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c $(SRCDIR)/mldsa/src/native/x86_64/src/consts.c
 
 CHECK_FUNCTION_CONTRACTS=mld_ntt_native
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)ntt_avx2 mld_sys_check_capability
+USE_FUNCTION_CONTRACTS=mld_ntt_avx2
+USE_FUNCTION_CONTRACTS+=mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

@@ -20,12 +20,12 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_compute_pack_z
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_pointwise_montgomery \
-                       $(MLD_NAMESPACE)poly_invntt_tomont \
-                       $(MLD_NAMESPACE)poly_add \
-                       $(MLD_NAMESPACE)poly_reduce \
-                       $(MLD_NAMESPACE)poly_chknorm \
-                       $(MLD_NAMESPACE)pack_sig_z
+USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery 
+USE_FUNCTION_CONTRACTS+=mld_poly_invntt_tomont 
+USE_FUNCTION_CONTRACTS+=mld_poly_add 
+USE_FUNCTION_CONTRACTS+=mld_poly_reduce 
+USE_FUNCTION_CONTRACTS+=mld_poly_chknorm 
+USE_FUNCTION_CONTRACTS+=mld_pack_sig_z
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on

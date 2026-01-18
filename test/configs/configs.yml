@@ -433,3 +433,9 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: proofs/cbmc/mldsa_native_config_cbmc.h
+    description: "mldsa-native configuration used for CBMC proofs"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mld
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"

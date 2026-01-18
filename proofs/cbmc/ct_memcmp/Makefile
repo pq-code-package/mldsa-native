@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/ct.c
 
 CHECK_FUNCTION_CONTRACTS=mld_ct_memcmp
-USE_FUNCTION_CONTRACTS=mld_value_barrier_u8 mld_ct_cmask_nonzero_u8
+USE_FUNCTION_CONTRACTS=mld_value_barrier_u8
+USE_FUNCTION_CONTRACTS+=mld_ct_cmask_nonzero_u8
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

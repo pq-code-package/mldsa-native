@@ -21,11 +21,16 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fip
 
 # Only relevant for ML-DSA-65
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_uniform_gamma1
+CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1
 else
 CHECK_FUNCTION_CONTRACTS=
 endif
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)shake256_init $(MLD_NAMESPACE)shake256_absorb $(MLD_NAMESPACE)shake256_finalize $(MLD_NAMESPACE)shake256_squeeze $(MLD_NAMESPACE)shake256_release $(MLD_NAMESPACE)polyz_unpack
+USE_FUNCTION_CONTRACTS=mld_shake256_init
+USE_FUNCTION_CONTRACTS+=mld_shake256_absorb
+USE_FUNCTION_CONTRACTS+=mld_shake256_finalize
+USE_FUNCTION_CONTRACTS+=mld_shake256_squeeze
+USE_FUNCTION_CONTRACTS+=mld_shake256_release
+USE_FUNCTION_CONTRACTS+=mld_polyz_unpack
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

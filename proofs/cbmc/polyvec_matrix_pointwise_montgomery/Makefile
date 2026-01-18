@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvec_matrix_pointwise_montgomery
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvecl_pointwise_acc_montgomery
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery
+USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

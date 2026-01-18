@@ -19,8 +19,9 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_invntt_tomont
-USE_FUNCTION_CONTRACTS=mld_intt_native mld_poly_invntt_tomont_c
+CHECK_FUNCTION_CONTRACTS=mld_poly_invntt_tomont
+USE_FUNCTION_CONTRACTS=mld_intt_native
+USE_FUNCTION_CONTRACTS+=mld_poly_invntt_tomont_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

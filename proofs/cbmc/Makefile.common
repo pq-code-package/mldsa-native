@@ -555,6 +555,7 @@ ifndef MLD_CONFIG_PARAMETER_SET
     $(error MLD_CONFIG_PARAMETER_SET not set)
 endif
 
+DEFINES += -DMLD_CONFIG_FILE="\"mldsa_native_config_cbmc.h\""
 DEFINES += -DMLD_CONFIG_PARAMETER_SET=$(MLD_CONFIG_PARAMETER_SET)
 # Give visibility to all static functions
 DEFINES += -Dstatic=

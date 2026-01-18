@@ -19,8 +19,10 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202x4.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_uniform_gamma1_4x
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)shake256x4_absorb_once $(MLD_NAMESPACE)shake256x4_squeezeblocks $(MLD_NAMESPACE)polyz_unpack
+CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_4x
+USE_FUNCTION_CONTRACTS=mld_shake256x4_absorb_once
+USE_FUNCTION_CONTRACTS+=mld_shake256x4_squeezeblocks
+USE_FUNCTION_CONTRACTS+=mld_polyz_unpack
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

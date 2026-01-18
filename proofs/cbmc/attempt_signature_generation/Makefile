@@ -20,25 +20,25 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_attempt_signature_generation
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyvecl_uniform_gamma1 \
-                       $(MLD_NAMESPACE)polyvecl_ntt \
-                       $(MLD_NAMESPACE)polyvec_matrix_pointwise_montgomery \
-                       $(MLD_NAMESPACE)polyveck_reduce \
-                       $(MLD_NAMESPACE)polyveck_invntt_tomont \
-                       $(MLD_NAMESPACE)polyveck_caddq \
-                       $(MLD_NAMESPACE)polyveck_decompose \
-                       $(MLD_NAMESPACE)polyveck_pack_w1 \
-                       mld_H \
-                       $(MLD_NAMESPACE)poly_challenge \
-                       $(MLD_NAMESPACE)poly_ntt \
-                       $(MLD_NAMESPACE)polyveck_pointwise_poly_montgomery \
-                       $(MLD_NAMESPACE)polyveck_sub \
-                       $(MLD_NAMESPACE)polyveck_reduce \
-                       $(MLD_NAMESPACE)polyveck_chknorm \
-                       $(MLD_NAMESPACE)polyveck_add \
-                       $(MLD_NAMESPACE)polyveck_make_hint \
-                       $(MLD_NAMESPACE)pack_sig_c_h \
-                       mld_compute_pack_z
+USE_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
+USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt 
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_decompose 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_pack_w1 
+USE_FUNCTION_CONTRACTS+=mld_H 
+USE_FUNCTION_CONTRACTS+=mld_poly_challenge 
+USE_FUNCTION_CONTRACTS+=mld_poly_ntt 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_pointwise_poly_montgomery 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_sub 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_chknorm 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_add 
+USE_FUNCTION_CONTRACTS+=mld_polyveck_make_hint 
+USE_FUNCTION_CONTRACTS+=mld_pack_sig_c_h 
+USE_FUNCTION_CONTRACTS+=mld_compute_pack_z
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on

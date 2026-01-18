@@ -19,7 +19,7 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_pointwise_montgomery
+CHECK_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
 USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

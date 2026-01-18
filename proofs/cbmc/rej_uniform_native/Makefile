@@ -20,7 +20,8 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
 CHECK_FUNCTION_CONTRACTS=mld_rej_uniform
-USE_FUNCTION_CONTRACTS=mld_rej_uniform_native mld_rej_uniform_c
+USE_FUNCTION_CONTRACTS=mld_rej_uniform_native
+USE_FUNCTION_CONTRACTS+=mld_rej_uniform_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

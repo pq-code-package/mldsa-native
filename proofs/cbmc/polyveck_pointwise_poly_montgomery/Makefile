@@ -18,8 +18,8 @@ REMOVE_FUNCTION_BODY +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)polyveck_pointwise_poly_montgomery
-USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)poly_pointwise_montgomery
+CHECK_FUNCTION_CONTRACTS=mld_polyveck_pointwise_poly_montgomery
+USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

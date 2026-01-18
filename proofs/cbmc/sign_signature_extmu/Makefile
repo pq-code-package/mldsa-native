@@ -19,9 +19,9 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
-CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)signature_extmu
-USE_FUNCTION_CONTRACTS=mld_randombytes \
-                       $(MLD_NAMESPACE)signature_internal
+CHECK_FUNCTION_CONTRACTS=mld_signature_extmu
+USE_FUNCTION_CONTRACTS=mld_randombytes
+USE_FUNCTION_CONTRACTS+=mld_signature_internal
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
