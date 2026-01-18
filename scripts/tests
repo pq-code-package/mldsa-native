@@ -967,7 +967,7 @@ class Tests:
                 run_cbmc_single_step(mldsa_parameter_set, proofs)
                 return
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
-            p = subprocess.run(
+            cmd = (
                 [
                     "python3",
                     "run-cbmc-proofs.py",
@@ -978,7 +978,12 @@ class Tests:
                     "-p",
                 ]
                 + proofs
-                + self.make_j(),
+                + self.make_j()
+            )
+            if self.args.output_result_json:
+                cmd.extend(["--output-result-json", self.args.output_result_json])
+            p = subprocess.run(
+                cmd,
                 cwd="proofs/cbmc",
                 env=os.environ.copy() | envvars,
             )
@@ -1415,6 +1420,12 @@ def cli():
         help="Don't run any proofs, but list all functions for which CBMC proofs are available",
         action="store_true",
         default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--output-result-json",
+        help="Path to export result JSON",
+        default=None,
     )
 
     # hol_light arguments

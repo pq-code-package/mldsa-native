@@ -52,7 +52,17 @@ runs:
             EOF
       - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }})
         shell: ${{ env.SHELL }}
+        env:
+          GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           echo "::group::cbmc_${{ inputs.mldsa_parameter_set }}"
-          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800;
+          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json || cbmc_failed=true
           echo "::endgroup::"
+          python3 ${{ github.action_path }}/report.py \
+            --results-json "${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json" \
+            --mldsa-parameter-set "${{ inputs.mldsa_parameter_set }}" \
+            --min-runtime 20 \
+            --regression-threshold 1.5 \
+            --gh-pages-branch gh-pages \
+            --data-dir dev/cbmc
+          if [ "$cbmc_failed" = "true" ]; then exit 1; fi
