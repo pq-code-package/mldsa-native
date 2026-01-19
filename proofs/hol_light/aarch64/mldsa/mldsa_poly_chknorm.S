@@ -2,9 +2,7 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
-#include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -17,8 +15,13 @@
 
 .text
 .balign 4
-.global MLD_ASM_NAMESPACE(poly_chknorm_asm)
-MLD_ASM_FN_SYMBOL(poly_chknorm_asm)
+#ifdef __APPLE__
+.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_asm:
+#else
+.global PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_asm
+PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_asm:
+#endif
 
         .cfi_startproc
         dup	v20.4s, w1
@@ -49,7 +52,3 @@ Lpoly_chknorm_loop:
         and	w0, w0, #0x1
         ret
         .cfi_endproc
-
-MLD_ASM_FN_SIZE(poly_chknorm_asm)
-
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

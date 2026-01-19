@@ -81,6 +81,8 @@ jobs:
           # Dependencies on {name}.{S,ml} are implicit
           - name: mldsa_poly_caddq
             needs: ["aarch64_utils.ml"]
+          - name: mldsa_poly_chknorm
+            needs: ["aarch64_utils.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork

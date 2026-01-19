@@ -30,7 +30,7 @@ MLD_ASM_FN_SYMBOL(poly_chknorm_asm)
         // Load constants
         dup bound.4s, B
 
-        movi flags.4s, 0
+        eor flags.16b, flags.16b, flags.16b
 
         mov count, #(64/4)
 

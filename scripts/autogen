@@ -2271,6 +2271,13 @@ def gen_hol_light_asm():
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
+        (
+            "poly_chknorm_asm.S",
+            "mldsa_poly_chknorm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
     ]
 
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"

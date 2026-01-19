@@ -52,5 +52,6 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 ## What is covered?
 
 - AArch64 poly_caddq: [mldsa_poly_caddq.S](aarch64/mldsa/mldsa_poly_caddq.S)
+- AArch64 poly_chknorm: [mldsa_poly_chknorm.S](aarch64/mldsa/mldsa_poly_chknorm.S)
 - x86_64 forward NTT: [mldsa_ntt.S](x86_64/mldsa/mldsa_ntt.S)
 - x86_64 inverse NTT: [mldsa_intt.S](x86_64/mldsa/mldsa_intt.S)

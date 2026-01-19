@@ -9,12 +9,12 @@ hol_light.overrideAttrs (old: {
     export HOLLIGHT_DIR="$1/lib/hol_light"
     export PATH="$1/lib/hol_light:$PATH"
   '';
-  version = "unstable-2026-01-17";
+  version = "unstable-2026-03-20";
   src = fetchFromGitHub {
     owner = "jrh13";
     repo = "hol-light";
-    rev = "e960dd0f636c36d48f79664c7cf11a59ba6f66a3";
-    hash = "sha256-ZgOzAYokQsgO1Ua3m50shxvU9dVSzocuFHRLdIrINmU=";
+    rev = "6df9b2115135fd3321e3975827f89e7ea03ffaa0";
+    hash = "sha256-qOKksOUq9lfMn5gWdLJqDvvD5FY68k+9wJ9KbdBg0LE=";
   };
   patches = [
     ./0005-Configure-hol-sh-for-mldsa-native.patch
