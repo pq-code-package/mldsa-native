@@ -21,7 +21,8 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)verify_internal
 USE_FUNCTION_CONTRACTS=$(MLD_NAMESPACE)unpack_pk
-USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)unpack_sig
+USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)unpack_sig_c_z
+USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)unpack_sig_h
 USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_H
 USE_FUNCTION_CONTRACTS+=$(MLD_NAMESPACE)poly_challenge
@@ -46,8 +47,9 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 CBMCFLAGS += --slice-formula
+CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = sign_verify_internal
 
@@ -58,7 +60,7 @@ FUNCTION_NAME = sign_verify_internal
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 12
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

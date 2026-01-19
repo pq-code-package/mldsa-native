@@ -993,27 +993,38 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_polyveck *t1;
   mld_polyveck *w1;
 
+  /* TODO: Remove the following workaround for
+   * https://github.com/diffblue/cbmc/issues/8813 */
+  typedef MLD_UNION_OR_STRUCT
+  {
+    mld_polymat mat;
+    mld_polyveck h;
+  }
+  math_u;
+  mld_polymat *mat;
+  mld_polyveck *h;
+
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(cp, mld_poly, 1, context);
-  MLD_ALLOC(mat, mld_polymat, 1, context);
+  MLD_ALLOC(math, math_u, 1, context);
   MLD_ALLOC(z, mld_polyvecl, 1, context);
   MLD_ALLOC(t1w1, t1w1_u, 1, context);
   MLD_ALLOC(tmp, mld_polyveck, 1, context);
-  MLD_ALLOC(h, mld_polyveck, 1, context);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
-      cp == NULL || mat == NULL || z == NULL || t1w1 == NULL || tmp == NULL ||
-      h == NULL)
+      cp == NULL || math == NULL || z == NULL || t1w1 == NULL || tmp == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
   t1 = &t1w1->t1;
   w1 = &t1w1->w1;
+  mat = &math->mat;
+  h = &math->h;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1023,14 +1034,10 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   mld_unpack_pk(rho, t1, pk);
 
-  /* mld_unpack_sig and mld_polyvecl_chknorm signal failure through a
+  mld_unpack_sig_c_z(c, z, sig);
+  /* mld_polyvecl_chknorm signals failure through a
    * single non-zero error code that's not yet aligned with MLD_ERR_XXX.
    * Map it to MLD_ERR_FAIL explicitly. */
-  if (mld_unpack_sig(c, z, h, sig))
-  {
-    ret = MLD_ERR_FAIL;
-    goto cleanup;
-  }
   if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
     ret = MLD_ERR_FAIL;
@@ -1070,6 +1077,14 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   /* Reconstruct w1 */
   mld_polyveck_caddq(w1);
+  /* mld_unpack_sig_h signals failure through a
+   * single non-zero error code that's not yet aligned with MLD_ERR_XXX.
+   * Map it to MLD_ERR_FAIL explicitly. */
+  if (mld_unpack_sig_h(h, sig))
+  {
+    ret = MLD_ERR_FAIL;
+    goto cleanup;
+  }
   mld_polyveck_use_hint(tmp, w1, h);
   mld_polyveck_pack_w1(buf, tmp);
   /* Call random oracle and verify challenge */
@@ -1085,11 +1100,10 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(h, mld_polyveck, 1, context);
   MLD_FREE(tmp, mld_polyveck, 1, context);
   MLD_FREE(t1w1, t1w1_u, 1, context);
   MLD_FREE(z, mld_polyvecl, 1, context);
-  MLD_FREE(mat, mld_polymat, 1, context);
+  MLD_FREE(math, math_u, 1, context);
   MLD_FREE(cp, mld_poly, 1, context);
   MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
