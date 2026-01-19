@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/core_cm33.h.orig	2026-01-13 17:41:47.293575163 +0000
 +++ envs/m33-an524/src/platform/core_cm33.h	2026-01-13 15:11:08.465800173 +0000
 @@ -103,7 +103,7 @@

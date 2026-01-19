@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/cmsis_gcc.h.orig	2026-01-13 17:39:09.750987445 +0000
 +++ envs/m33-an524/src/platform/cmsis_gcc.h	2026-01-13 15:11:08.445799847 +0000
 @@ -25,11 +25,9 @@

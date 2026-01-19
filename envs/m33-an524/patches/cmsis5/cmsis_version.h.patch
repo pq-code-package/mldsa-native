@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/cmsis_version.h.orig	2026-01-13 17:40:28.872287080 +0000
 +++ envs/m33-an524/src/platform/cmsis_version.h	2026-01-13 15:11:08.455800010 +0000
 @@ -1,11 +1,5 @@
