@@ -91,19 +91,15 @@
 
           # arm-none-eabi-gcc + platform files from pqmx
           packages.m55-an547 = util.m55-an547;
+          packages.m33-an524-cmsis = util.m33-an524-cmsis;
+          packages.m33-an524 = util.m33-an524;
           #packages.avr-toolchain = util.avr-toolchain; # TODO The AVR shell is currently unavaliable for mldsa-native
           devShells.arm-embedded = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (config.packages) m55-an547;
+                inherit (config.packages) m55-an547 m33-an524;
                 inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
               };
-            shellHook = ''
-              # M55-AN547 uses external pqmx, so M55_AN547_PATH is set by the package
-              # M33-AN524 uses local files in envs/, so set the path directly
-              export M33_AN524_PATH="${toString ./.}/envs/m33-an524/src/platform"
-              export M33_AN524_CMSIS_PATH="${toString ./.}/envs/m33-an524/src/platform/CMSIS"
-            '';
           };
 
           devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });

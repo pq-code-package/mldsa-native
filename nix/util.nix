@@ -107,6 +107,8 @@ rec {
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
   m55-an547 = pkgs.callPackage ./m55-an547-arm-none-eabi { };
+  m33-an524-cmsis = pkgs.callPackage ./m33-an524-cmsis { };
+  m33-an524 = pkgs.callPackage ./m33-an524 { inherit m33-an524-cmsis; };
 
   # Helper function to build individual cross toolchains
   _individual_toolchain = { name, cross_compilers }:
