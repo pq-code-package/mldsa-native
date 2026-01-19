@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/cachel1_armv7.h.orig	2026-01-13 19:46:30.065981381 +0000
 +++ envs/m33-an524/src/platform/m-profile/armv7m_cachel1.h	2026-01-13 15:11:08.455800010 +0000
 @@ -1,9 +1,3 @@
