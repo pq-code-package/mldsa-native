@@ -8,6 +8,7 @@
 #define MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 
 #include <stdint.h>
+#include "../../../cbmc.h"
 #include "../../../common.h"
 
 #define mld_aarch64_ntt_zetas_layer123456 \
@@ -74,7 +75,15 @@ void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0);
 void mld_poly_decompose_88_asm(int32_t *a1, int32_t *a0);
 
 #define mld_poly_caddq_asm MLD_NAMESPACE(poly_caddq_asm)
-void mld_poly_caddq_asm(int32_t *a);
+void mld_poly_caddq_asm(int32_t *a)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_poly_caddq.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+);
 
 #define mld_poly_use_hint_32_asm MLD_NAMESPACE(poly_use_hint_32_asm)
 void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h);
