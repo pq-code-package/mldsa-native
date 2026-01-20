@@ -20,7 +20,7 @@ BENCH_TESTS = bench_mldsa bench_components_mldsa
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS)
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -122,12 +122,6 @@ $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -
 $(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
 endef
 
-# Special rule for test_rng_fail - link against rng_fail libraries with custom randombytes config
-define ADD_SOURCE_RNG_FAIL
-$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/test_rng_fail$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_rng_fail.c.o $(BUILD_DIR)/lib$(1).a
-endef
-
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(foreach test,$(ACVP_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
@@ -138,14 +132,20 @@ $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(foreach test,$(BASIC_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),src)) \
 	) \
+	$(eval $(call ADD_SOURCE,$(scheme),test_rng_fail,src)) \
 	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
 	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
-	$(eval $(call ADD_SOURCE_RNG_FAIL,$(scheme))) \
 )
 
-$(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44): $(call MAKE_OBJS, $(MLDSA44_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
-$(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65): $(call MAKE_OBJS, $(MLDSA65_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
-$(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87): $(call MAKE_OBJS, $(MLDSA87_DIR), $(wildcard test/notrandombytes/*.c) $(EXTRA_SOURCES))
+# All tests get EXTRA_SOURCES
+$(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44): $(call MAKE_OBJS, $(MLDSA44_DIR), $(EXTRA_SOURCES))
+$(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65): $(call MAKE_OBJS, $(MLDSA65_DIR), $(EXTRA_SOURCES))
+$(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87): $(call MAKE_OBJS, $(MLDSA87_DIR), $(EXTRA_SOURCES))
+
+# All tests except rng_fail get notrandombytes (rng_fail provides its own)
+$(filter-out %test_rng_fail44,$(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44)): $(call MAKE_OBJS, $(MLDSA44_DIR), $(wildcard test/notrandombytes/*.c))
+$(filter-out %test_rng_fail65,$(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65)): $(call MAKE_OBJS, $(MLDSA65_DIR), $(wildcard test/notrandombytes/*.c))
+$(filter-out %test_rng_fail87,$(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87)): $(call MAKE_OBJS, $(MLDSA87_DIR), $(wildcard test/notrandombytes/*.c))
 
 # Apply EXTRA_CFLAGS to EXTRA_SOURCES object files
 ifneq ($(EXTRA_SOURCES),)
@@ -153,4 +153,3 @@ $(call MAKE_OBJS, $(MLDSA44_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_C
 $(call MAKE_OBJS, $(MLDSA65_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLDSA87_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
-
