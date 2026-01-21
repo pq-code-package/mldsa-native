@@ -112,16 +112,10 @@ stdenvNoCC.mkDerivation {
 
     # Apply patches
     patch -p0 < patches/cmsis5/core_cm33.h.patch || true
-    patch -p0 < patches/cmsis5/cmsis_compiler.h.patch || true
-    patch -p0 < patches/cmsis5/cmsis_gcc.h.patch || true
-    patch -p0 < patches/cmsis5/cmsis_version.h.patch || true
     patch -p0 < patches/cmsis5/ARMCM33.patch || true
     patch -p0 < patches/cmsis5/startup_ARMCM33.patch || true
     patch -p0 < patches/cmsis5/system_ARMCM33.patch || true
     patch -p0 < patches/cmsis5/m33-an524.ld.patch || true
-    patch -p0 < patches/cmsis5/m-profile-armv8m_mpu.h.patch || true
-    patch -p0 < patches/cmsis5/m-profile-armv8m_pmu.h.patch || true
-    patch -p0 < patches/cmsis5/m-profile-armv7m_cachel1.h.patch || true
     
     runHook postBuild
   '';
