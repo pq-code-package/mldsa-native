@@ -40,4 +40,4 @@ jobs:
           examples: false
           stack: false
           alloc: true
-          rng_fail: false
+          rng_fail: true
