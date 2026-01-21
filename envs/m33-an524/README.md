@@ -11,9 +11,14 @@ CMSIS platform files for ARM Cortex-M33 on MPS3-AN524 FPGA (SSE-200 subsystem). 
 ## Build
 
 ```bash
-# With Nix shell (includes toolchain + QEMU)
+
+# Nix shell (provides toolchain and QEMU)
 nix develop --experimental-features 'nix-command flakes' .#arm-embedded
 make lib EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0
+
+make run_func_44 EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0
+make run_bench_44 EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0 CYCLES=NO
+
 ```
 
 ## Patches
