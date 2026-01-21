@@ -1,54 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/system_ARMCM33.c.orig	2026-01-13 17:06:53.809238718 +0000
 +++ envs/m33-an524/src/platform/system_ARMCM33.c	2026-01-13 15:11:08.435799683 +0000
-@@ -1,7 +1,6 @@
--/**************************************************************************//**
-+/******************************************************************************
-  * @file     system_ARMCM33.c
-- * @brief    CMSIS Device System Source File for
-- *           ARMCM33 Device
-+ * @brief    CMSIS Device System Source File for Arm Cortex-M33 Device on MPS3 AN524
-  * @version  V1.0.1
-  * @date     15. November 2019
-  ******************************************************************************/
-@@ -24,7 +23,7 @@
-  */
- 
- #if defined (ARMCM33)
--  #include "ARMCM33.h"
-+#include "ARMCM33.h"
- #elif defined (ARMCM33_TZ)
-   #include "ARMCM33_TZ.h"
- 
-@@ -40,21 +39,18 @@
-     #include "partition_ARMCM33.h"
-   #endif
- #else
--  #error device not specified!
-+#error device not specified!
- #endif
- 
--/*----------------------------------------------------------------------------
--  Define clocks
-- *----------------------------------------------------------------------------*/
--#define  XTAL            (50000000UL)     /* Oscillator frequency */
--
--#define  SYSTEM_CLOCK    (XTAL / 2U)
-+/* External reference to vector table */
-+extern const void *__VECTOR_TABLE[];
- 
+@@ -46,7 +46,7 @@
  /*----------------------------------------------------------------------------
--  Exception / Interrupt Vector table
-+  Define clocks
+   Define clocks
   *----------------------------------------------------------------------------*/
--extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
-+#define  XTAL            (250000000UL)     /* Oscillator frequency - 250 MHz Matches STM32H5 series           */
+-#define  XTAL            (50000000UL)     /* Oscillator frequency */
++#define  XTAL            (500000000UL)     /* Oscillator frequency - 250 MHz Matches STM32H5 series           */
  
-+#define SYSTEM_CLOCK (XTAL) /* System clock = 250 MHz           */
+ #define  SYSTEM_CLOCK    (XTAL / 2U)
  
- /*----------------------------------------------------------------------------
-   System Core Clock Variable
-@@ -89,9 +85,62 @@ void SystemInit (void)
+@@ -89,9 +89,62 @@ void SystemInit (void)
    SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
  #endif
  
