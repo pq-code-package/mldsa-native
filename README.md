@@ -50,6 +50,8 @@ make test
 ## Applications
 
 mldsa-native is used in
+ - AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/)
+ - [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project
  - The [zeroRISC's fork of OpenTitan](https://github.com/zerorisc/expo) - an open source silicon Root of Trust (RoT)
  - [CHERIoT-PQC](https://github.com/CHERIoT-Platform/cheriot-pqc) — post-quantum cryptography support for the CHERIoT platform
 
