@@ -1,8 +1,8 @@
 /*
  * Copyright (c) The mldsa-native project authors
  * Copyright (c) The mlkem-native project authors
- * Copyright (c) 2022 Arm Limited
  * Copyright (c) 2020 Dougall Johnson
+ * Copyright (c) 2022 Arm Limited
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -95,9 +95,52 @@ uint64_t get_cyclecounter(void)
   return retval;
 }
 
-#else /* (!__x86_64__ && __AARCH64EL__) || _M_ARM64 */
-#error PMU_CYCLES option only supported on x86_64 and AArch64
-#endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) */
+#elif defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8_1M_MAIN__)
+#include <ARMCM55.h>
+#include <system_ARMCM55.h>
+#include "pmu_armv8.h"
+
+void enable_cyclecounter(void)
+{
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  ARM_PMU_Enable();
+  ARM_PMU_CYCCNT_Reset();
+  ARM_PMU_CNTR_Enable(PMU_CNTENSET_CCNTR_ENABLE_Msk);
+}
+
+void disable_cyclecounter(void)
+{
+  ARM_PMU_CNTR_Disable(PMU_CNTENSET_CCNTR_ENABLE_Msk);
+  ARM_PMU_Disable();
+}
+
+uint64_t get_cyclecounter(void) { return ARM_PMU_Get_CCNTR(); }
+
+#elif defined(__riscv)
+
+void enable_cyclecounter(void) {}
+
+void disable_cyclecounter(void) {}
+
+uint64_t get_cyclecounter(void)
+{
+#if (__riscv_xlen == 32)
+  uint32_t lo, hi;
+  __asm__ volatile("rdcycle %0" : "=r"(lo));
+  __asm__ volatile("rdcycleh %0" : "=r"(hi));
+  return (((uint64_t)hi) << 32) | ((uint64_t)lo);
+#else  /* __riscv_xlen == 32 */
+  uint64_t retval;
+  __asm__ volatile("rdcycle %0" : "=r"(retval));
+  return retval;
+#endif /* __riscv_xlen != 32 */
+}
+
+#else /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) && !(__ARM_ARCH_8M_MAIN__ \
+         || __ARM_ARCH_8_1M_MAIN__) && __riscv */
+#error PMU_CYCLES option only supported on x86_64, AArch64, Armv8-M, and RISC-V
+#endif /* !__x86_64__ && !(__AARCH64EL__ || _M_ARM64) && \
+          !(__ARM_ARCH_8M_MAIN__ || __ARM_ARCH_8_1M_MAIN__) && !__riscv */
 
 #elif defined(PERF_CYCLES)
 
@@ -154,9 +197,7 @@ uint64_t get_cyclecounter(void)
   return (uint64_t)cpu_cycles;
 }
 #elif defined(MAC_CYCLES)
-
 /* Based on @[m1cycles] */
-
 
 #include <dlfcn.h>
 #include <pthread.h>

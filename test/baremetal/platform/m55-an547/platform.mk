@@ -1,4 +1,5 @@
 # Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 PLATFORM_PATH:=test/baremetal/platform/m55-an547
@@ -6,12 +7,20 @@ PLATFORM_PATH:=test/baremetal/platform/m55-an547
 CROSS_PREFIX=arm-none-eabi-
 CC=gcc
 
+# Use PMU cycle counting by default
+CYCLES ?= PMU
+
+# Reduce iterations for benchmarking
+CFLAGS += -DMLD_BENCHMARK_NTESTS=3 -DMLD_BENCHMARK_NITERATIONS=2 -DMLD_BENCHMARK_NWARMUP=3
+
 CFLAGS += \
 	-O3 \
 	-Wall -Wextra -Wshadow \
 	-Wno-pedantic \
 	-Wno-redundant-decls \
 	-Wno-missing-prototypes \
+	-Wno-conversion \
+	-Wno-sign-conversion \
 	-fno-common \
 	-ffunction-sections \
 	-fdata-sections \
