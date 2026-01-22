@@ -18,9 +18,15 @@
 #define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
 #define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
 
-#define NWARMUP 3
-#define NITERATIONS 5
-#define NTESTS 1000
+#ifndef MLD_BENCHMARK_NWARMUP
+#define MLD_BENCHMARK_NWARMUP 3
+#endif
+#ifndef MLD_BENCHMARK_NITERATIONS
+#define MLD_BENCHMARK_NITERATIONS 5
+#endif
+#ifndef MLD_BENCHMARK_NTESTS
+#define MLD_BENCHMARK_NTESTS 1000
+#endif
 #define MLEN 59
 #define CTXLEN 1
 
@@ -41,15 +47,15 @@ static int cmp_uint64_t(const void *a, const void *b)
   return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
 }
 
-static void print_avg(const char *txt, uint64_t cyc[NTESTS])
+static void print_avg(const char *txt, uint64_t cyc[MLD_BENCHMARK_NTESTS])
 {
   uint64_t avg = 0;
   int i;
-  for (i = 0; i < NTESTS; i++)
+  for (i = 0; i < MLD_BENCHMARK_NTESTS; i++)
   {
     avg += cyc[i];
   }
-  avg /= (NTESTS * NITERATIONS);
+  avg /= (MLD_BENCHMARK_NTESTS * MLD_BENCHMARK_NITERATIONS);
   printf("%10s cycles (avg) = %" PRIu64 "\n", txt, avg);
 }
 
@@ -62,18 +68,20 @@ static void print_percentile_legend(void)
   printf("%21s", "percentile");
   for (i = 0; i < sizeof(percentiles) / sizeof(percentiles[0]); i++)
   {
-    printf("%7d", percentiles[i]);
+    printf("%9d", percentiles[i]);
   }
   printf("\n");
 }
 
-static void print_percentiles(const char *txt, uint64_t cyc[NTESTS])
+static void print_percentiles(const char *txt,
+                              uint64_t cyc[MLD_BENCHMARK_NTESTS])
 {
   unsigned i;
   printf("%10s percentiles:", txt);
   for (i = 0; i < sizeof(percentiles) / sizeof(percentiles[0]); i++)
   {
-    printf("%7" PRIu64, (cyc)[NTESTS * percentiles[i] / 100] / NITERATIONS);
+    printf("%9" PRIu64, (cyc)[MLD_BENCHMARK_NTESTS * percentiles[i] / 100] /
+                            MLD_BENCHMARK_NITERATIONS);
   }
   printf("\n");
 }
@@ -91,10 +99,11 @@ static int bench(void)
   unsigned i, j;
   uint64_t t0, t1;
 
-  uint64_t cycles_kg[NTESTS], cycles_sign[NTESTS], cycles_verify[NTESTS];
+  uint64_t cycles_kg[MLD_BENCHMARK_NTESTS], cycles_sign[MLD_BENCHMARK_NTESTS],
+      cycles_verify[MLD_BENCHMARK_NTESTS];
   unsigned char pre[CTXLEN + 2];
 
-  for (i = 0; i < NTESTS; i++)
+  for (i = 0; i < MLD_BENCHMARK_NTESTS; i++)
   {
     int ret = 0;
     CHECK(mld_randombytes(kg_rand, sizeof(kg_rand)) == 0);
@@ -102,13 +111,13 @@ static int bench(void)
 
 
     /* Key-pair generation */
-    for (j = 0; j < NWARMUP; j++)
+    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
     {
       ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
     }
 
     t0 = get_cyclecounter();
-    for (j = 0; j < NITERATIONS; j++)
+    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
     {
       ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
     }
@@ -125,13 +134,13 @@ static int bench(void)
     memcpy(pre + 2, ctx, CTXLEN);
 
 
-    for (j = 0; j < NWARMUP; j++)
+    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
     {
       ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
                                             CTXLEN + 2, sig_rand, sk, 0);
     }
     t0 = get_cyclecounter();
-    for (j = 0; j < NITERATIONS; j++)
+    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
     {
       ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
                                             CTXLEN + 2, sig_rand, sk, 0);
@@ -140,12 +149,12 @@ static int bench(void)
     cycles_sign[i] = t1 - t0;
 
     /* Verification */
-    for (j = 0; j < NWARMUP; j++)
+    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
     {
       ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
     }
     t0 = get_cyclecounter();
-    for (j = 0; j < NITERATIONS; j++)
+    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
     {
       ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
     }
@@ -161,9 +170,9 @@ static int bench(void)
 
   printf("\n");
 
-  qsort(cycles_kg, NTESTS, sizeof(uint64_t), cmp_uint64_t);
-  qsort(cycles_sign, NTESTS, sizeof(uint64_t), cmp_uint64_t);
-  qsort(cycles_verify, NTESTS, sizeof(uint64_t), cmp_uint64_t);
+  qsort(cycles_kg, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
+  qsort(cycles_sign, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
+  qsort(cycles_verify, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
 
 
   print_percentile_legend();
