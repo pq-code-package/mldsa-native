@@ -86,6 +86,7 @@
 #include "src/native/x86_64/src/pointwise_acc_l4.S"
 #include "src/native/x86_64/src/pointwise_acc_l5.S"
 #include "src/native/x86_64/src/pointwise_acc_l7.S"
+#include "src/native/x86_64/src/poly_caddq_avx2.S"
 #endif /* MLD_SYS_X86_64 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 

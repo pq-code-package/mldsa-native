@@ -82,7 +82,6 @@
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
 #include "src/native/x86_64/src/consts.c"
-#include "src/native/x86_64/src/poly_caddq_avx2.c"
 #include "src/native/x86_64/src/poly_chknorm_avx2.c"
 #include "src/native/x86_64/src/poly_decompose_32_avx2.c"
 #include "src/native/x86_64/src/poly_decompose_88_avx2.c"
