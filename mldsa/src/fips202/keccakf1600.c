@@ -138,7 +138,8 @@ static const uint64_t mld_KeccakF_RoundConstants[MLD_KECCAK_NROUNDS] = {
     (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
-static void mld_keccakf1600_permute_c(uint64_t *state)
+MLD_STATIC_TESTABLE
+void mld_keccakf1600_permute_c(uint64_t *state)
 {
   unsigned round;
 

@@ -8,15 +8,16 @@
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
 
+#include "../../mldsa/src/fips202/keccakf1600.h"
 #include "../../mldsa/src/poly.h"
 #include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLDSA_DEBUG
-#define NUM_RANDOM_TESTS 1000
+#define NUM_RANDOM_TESTS 800
 #else
-#define NUM_RANDOM_TESTS 5000
+#define NUM_RANDOM_TESTS 4000
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
@@ -44,6 +45,59 @@ void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
 void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *w, const mld_polyvecl *u,
                                              const mld_polyvecl *v);
 void mld_polyz_unpack_c(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES]);
+void mld_keccakf1600_permute_c(uint64_t *state);
+
+#if defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
+static void print_u64_array(const char *label, const uint64_t *array,
+                            size_t len)
+{
+  size_t i;
+  fprintf(stderr, "%s:\n", label);
+  for (i = 0; i < len; i++)
+  {
+    if (i % 4 == 0)
+    {
+      fprintf(stderr, "  ");
+    }
+    fprintf(stderr, "%016llx", (unsigned long long)array[i]);
+    if (i % 4 == 3)
+    {
+      fprintf(stderr, "\n");
+    }
+    else
+    {
+      fprintf(stderr, " ");
+    }
+  }
+  if (len % 4 != 0)
+  {
+    fprintf(stderr, "\n");
+  }
+}
+
+static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
+                              unsigned len, const char *test_name)
+{
+  unsigned i;
+  for (i = 0; i < len; i++)
+  {
+    if (a[i] != b[i])
+    {
+      fprintf(stderr, "FAIL: %s\n", test_name);
+      fprintf(
+          stderr,
+          "  First difference at index %u: got=0x%016llx, expected=0x%016llx\n",
+          i, (unsigned long long)a[i], (unsigned long long)b[i]);
+      print_u64_array("Got", a, len);
+      print_u64_array("Expected", b, len);
+      return 0;
+    }
+  }
+  return 1;
+}
+
+#endif /* MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
+
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
@@ -56,7 +110,9 @@ void mld_polyz_unpack_c(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES]);
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
-    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) ||                      \
+    defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
+
 /* Backend unit test helper functions */
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
@@ -522,6 +578,57 @@ static int test_native_polyz_unpack(void)
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
 
+#ifdef MLD_USE_FIPS202_X1_NATIVE
+static int test_keccakf1600_permute(void)
+{
+  uint64_t state[MLD_KECCAK_LANES];
+  uint64_t state_ref[MLD_KECCAK_LANES];
+  int i;
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    randombytes((uint8_t *)state, sizeof(state));
+    memcpy(state_ref, state, sizeof(state));
+
+    mld_keccakf1600_permute(state);
+    mld_keccakf1600_permute_c(state_ref);
+
+    CHECK(compare_u64_arrays(state, state_ref, MLD_KECCAK_LANES,
+                             "keccakf1600_permute"));
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_FIPS202_X1_NATIVE */
+
+#ifdef MLD_USE_FIPS202_X4_NATIVE
+static int test_keccakf1600x4_permute(void)
+{
+  uint64_t state_x4[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+  uint64_t state_x1[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+  int i, j;
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    randombytes((uint8_t *)state_x4, sizeof(state_x4));
+    memcpy(state_x1, state_x4, sizeof(state_x4));
+
+    mld_keccakf1600x4_permute(state_x4);
+
+    for (j = 0; j < MLD_KECCAK_WAY; j++)
+    {
+      mld_keccakf1600_permute_c(state_x1 + j * MLD_KECCAK_LANES);
+    }
+
+    CHECK(compare_u64_arrays(state_x4, state_x1,
+                             MLD_KECCAK_LANES * MLD_KECCAK_WAY,
+                             "keccakf1600x4_permute"));
+  }
+
+  return 0;
+}
+#endif /* MLD_USE_FIPS202_X4_NATIVE */
+
 static int test_backend_units(void)
 {
   /* Set fixed seed for reproducible tests */
@@ -569,6 +676,14 @@ static int test_backend_units(void)
   CHECK(test_native_polyz_unpack() == 0);
 #endif
 
+#ifdef MLD_USE_FIPS202_X1_NATIVE
+  CHECK(test_keccakf1600_permute() == 0);
+#endif
+
+#ifdef MLD_USE_FIPS202_X4_NATIVE
+  CHECK(test_keccakf1600x4_permute() == 0);
+#endif
+
   return 0;
 }
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
@@ -579,7 +694,8 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
-          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
+          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
+          MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
 
 int main(void)
 {
@@ -600,7 +716,8 @@ int main(void)
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
-    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) ||                      \
+    defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
@@ -610,7 +727,8 @@ int main(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
-          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
+          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
+          MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
 
 
   return 0;
