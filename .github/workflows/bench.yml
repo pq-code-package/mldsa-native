@@ -36,7 +36,7 @@ jobs:
           cflags: "-flto -DMLD_FORCE_AARCH64"
           ldflags: "-flto"
           bench_extra_args: ""
-          nix_shell: ci-bench
+          nix_shell: bench
           only_no_opt: false
         - system: rpi5
           name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
@@ -45,7 +45,7 @@ jobs:
           cflags: "-flto -DMLD_FORCE_AARCH64"
           ldflags: "-flto"
           bench_extra_args: ""
-          nix_shell: ci-bench
+          nix_shell: bench
           only_no_opt: false
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
@@ -54,7 +54,7 @@ jobs:
           cflags: "-flto -DMLD_FORCE_AARCH64"
           ldflags: "-flto -static"
           bench_extra_args: -w exec-on-a55
-          nix_shell: ci-bench
+          nix_shell: bench
           only_no_opt: false
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
@@ -64,7 +64,7 @@ jobs:
           ldflags: "-static"
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
-          nix_shell: ci-cross-riscv64
+          nix_shell: cross-riscv64
           only_no_opt: true
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
@@ -73,7 +73,7 @@ jobs:
           cflags: "-flto"
           ldflags: "-flto"
           bench_extra_args: "-r"
-          nix_shell: ci-bench
+          nix_shell: bench
           only_no_opt: false
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}

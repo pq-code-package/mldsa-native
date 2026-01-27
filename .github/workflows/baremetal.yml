@@ -18,7 +18,7 @@ jobs:
          - runner: ubuntu-latest
            name: 'M55-AN547'
            makefile: test/baremetal/platform/m55-an547/platform.mk
-           nix-shell: ci-cross-arm-embedded
+           nix-shell: cross-arm-embedded
            func: true
            kat: true
            acvp: true
