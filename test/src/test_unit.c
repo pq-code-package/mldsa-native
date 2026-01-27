@@ -113,7 +113,19 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) ||                      \
     defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
 
-/* Backend unit test helper functions */
+/* Backend unit test helper functions for arithmetic native backends */
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                           \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                     \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                     \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) ||                 \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
 static void print_i32_array(const char *label, const int32_t *array, size_t len)
 {
   size_t i;
@@ -151,7 +163,29 @@ static void generate_i32_array_single(int32_t *data, size_t len, size_t pos,
   memset(data, 0, len * sizeof(int32_t));
   data[pos] = value;
 }
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
+          || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
+          MLD_USE_NATIVE_POLY_USE_HINT_32 ||                                   \
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY ||                               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
+          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                           \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                     \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                     \
+    defined(MLD_USE_NATIVE_POLY_CHKNORM) ||                         \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) ||                 \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
 /* This does not generate a uniformly random distribution, but it's
  * good enough for our test.
  *
@@ -169,7 +203,28 @@ static void generate_i32_array_ranged(int32_t *data, size_t len, int min_incl,
                         ((unsigned)data[i] % (unsigned)(max_excl - min_incl)));
   }
 }
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
+          || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
+          MLD_USE_NATIVE_POLY_USE_HINT_32 || MLD_USE_NATIVE_POLY_CHKNORM ||    \
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY ||                               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
+          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
+#if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
+    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) ||                    \
+    defined(MLD_USE_NATIVE_POLY_CADDQ) ||                           \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||                     \
+    defined(MLD_USE_NATIVE_POLY_USE_HINT_32) ||                     \
+    defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) ||                 \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
+    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
 static int compare_i32_arrays(const int32_t *a, const int32_t *b, unsigned len,
                               const char *test_name, const int32_t *input)
 {
@@ -193,6 +248,15 @@ static int compare_i32_arrays(const int32_t *a, const int32_t *b, unsigned len,
   }
   return 1;
 }
+#endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
+          || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
+          MLD_USE_NATIVE_POLY_USE_HINT_32 ||                                   \
+          MLD_USE_NATIVE_POINTWISE_MONTGOMERY ||                               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
+          MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
 #ifdef MLD_USE_NATIVE_NTT
 static int test_ntt_core(const int32_t *input, const char *test_name)
