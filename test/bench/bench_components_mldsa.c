@@ -84,6 +84,8 @@ static int bench(void)
   /* polyz_unpack */
   BENCH("polyz_unpack", mld_polyz_unpack(&poly_out, (const uint8_t *)data0))
 
+  BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
+
   return 0;
 }
 
