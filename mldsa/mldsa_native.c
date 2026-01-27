@@ -104,6 +104,10 @@
 #if defined(MLD_SYS_X86_64)
 #include "src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.c"
 #endif
+#if defined(MLD_SYS_ARMV81M_MVE)
+#include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.c"
+#include "src/fips202/native/armv81m/src/keccakf1600_round_constants.c"
+#endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 /* Macro #undef's
@@ -574,6 +578,21 @@
 #undef MLD_FIPS202_X86_64_XKCP
 #undef MLD_USE_FIPS202_X4_NATIVE
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_ARMV81M_MVE)
+/*
+ * Undefine macros from native code (FIPS202, Armv8.1-M)
+ */
+/* mldsa/src/fips202/native/armv81m/mve.h */
+#undef MLD_FIPS202_ARMV81M_NEED_X4
+#undef MLD_FIPS202_NATIVE_ARMV81M
+#undef MLD_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLD_USE_FIPS202_X4_NATIVE
+#undef mld_keccak_f1600_x4_native_impl
+/* mldsa/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
+#undef MLD_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
+#undef mld_keccak_f1600_x4_mve_asm
+#undef mld_keccakf1600_round_constants
+#endif /* MLD_SYS_ARMV81M_MVE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mldsa/src/native/api.h */

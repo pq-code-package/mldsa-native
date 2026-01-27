@@ -1520,6 +1520,10 @@ def riscv64(c):
     return "/riscv64/" in c
 
 
+def armv81m(c):
+    return "/armv81m/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -1536,11 +1540,16 @@ def native_fips202_x86_64(c):
     return native_fips202(c) and x86_64(c)
 
 
+def native_fips202_armv81m(c):
+    return native_fips202(c) and armv81m(c)
+
+
 def native_fips202_core(c):
     return (
         native_fips202(c)
         and not native_fips202_x86_64(c)
         and not native_fips202_aarch64(c)
+        and not native_fips202_armv81m(c)
     )
 
 
@@ -1649,6 +1658,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_fips202_x86_64, desc="native code (FIPS202, x86_64)"
     )
     yield "#endif"
+    yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_armv81m, desc="native code (FIPS202, Armv8.1-M)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
     yield from gen_monolithic_undef_all_core(filt=native_arith_core, desc="")
@@ -1751,6 +1765,10 @@ def gen_monolithic_source_file():
         for c in filter(native_fips202_x86_64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_fips202_armv81m, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#endif"
         yield ""
         yield from gen_macro_undefs()
@@ -1829,6 +1847,10 @@ def gen_monolithic_asm_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_X86_64)"
         for c in filter(native_fips202_x86_64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_fips202_armv81m, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2159,6 +2181,8 @@ def update_via_simpasm(
         source_arch = "aarch64"
     elif "x86_64" in infile_full:
         source_arch = "x86_64"
+    elif "armv81m" in infile_full:
+        source_arch = "armv81m"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -2167,7 +2191,15 @@ def update_via_simpasm(
     else:
         native_arch = "x86_64"
 
-    if native_arch != source_arch:
+    # Armv8.1-M is always cross-compiled
+    if source_arch == "armv81m":
+        cross_prefix = "arm-none-eabi-"
+        cross_gcc = cross_prefix + "gcc"
+        if shutil.which(cross_gcc) is None:
+            if force_cross is False:
+                return
+            raise Exception(f"Could not find cross toolchain {cross_prefix}")
+    elif native_arch != source_arch:
         cross_prefix = f"{source_arch}-unknown-linux-gnu-"
         cross_gcc = cross_prefix + "gcc"
         # Check if cross-compiler is present
@@ -2181,18 +2213,25 @@ def update_via_simpasm(
     with tempfile.NamedTemporaryFile(suffix=".S") as tmp:
         try:
             # Determine architecture from filename
-            arch = "aarch64" if "aarch64" in infile_full else "x86_64"
+            if "aarch64" in infile_full:
+                arch = "aarch64"
+            elif "armv81m" in infile_full:
+                arch = "armv81m"
+            else:
+                arch = "x86_64"
 
             cmd = [
                 "./scripts/simpasm",
                 "--objdump=llvm-objdump",
-                "--cfify",
                 "--arch=" + arch,
                 "-i",
                 infile_full,
                 "-o",
                 tmp.name,
             ]
+            # TODO: Support CFI for Armv8.1-M
+            if arch != "armv81m":
+                cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
                 cmd += ["--cc", cross_prefix + "gcc"]
@@ -2281,12 +2320,13 @@ def update_via_remove(filename):
     update_file(filename, None)
 
 
+# Only synchronize sources, but not README.md, Makefile and so on
+SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
+
+
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
 
-    # Only synchronize sources, but not README.md, Makefile and so on
-    extensions = (".c", ".h", ".i", ".inc", ".S")
-
-    if not f.endswith(extensions):
+    if not f.endswith(SYNCHRONIZED_EXTENSIONS):
         return None
 
     basename = os.path.basename(f)
@@ -2336,6 +2376,8 @@ def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwar
     # Check for files in the target directory that have not been copied
     for f in get_files(os.path.join(out_dir, "*")):
         if os.path.basename(f) in copied:
+            continue
+        if not f.endswith(SYNCHRONIZED_EXTENSIONS):
             continue
         # Otherwise, remove it
         update_via_remove(f)
@@ -2411,6 +2453,22 @@ def synchronize_backends(
         # This leads to duplicate endbr64 instructions causing a failure when
         # comparing the object code before and after simplification.
         cflags="-Imldsa/src/native/x86_64/src/ -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+    )
+    synchronize_backend(
+        "dev/fips202/armv81m/src",
+        "mldsa/src/fips202/native/armv81m/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/fips202/armv81m/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
+    )
+    synchronize_backend(
+        "dev/fips202/armv81m",
+        "mldsa/src/fips202/native/armv81m",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/fips202/armv81m -Imldsa/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
     )
 
 
