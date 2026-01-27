@@ -4,7 +4,7 @@
 
 FIPS202_SRCS = $(wildcard mldsa/src/fips202/*.c)
 ifeq ($(OPT),1)
-	FIPS202_SRCS += $(wildcard mldsa/src/fips202/native/aarch64/src/*.S) $(wildcard mldsa/src/fips202/native/aarch64/src/*.c) $(wildcard mldsa/src/fips202/native/x86_64/src/*.c)
+	FIPS202_SRCS += $(wildcard mldsa/src/fips202/native/aarch64/src/*.S) $(wildcard mldsa/src/fips202/native/aarch64/src/*.c) $(wildcard mldsa/src/fips202/native/x86_64/src/*.c) $(wildcard mldsa/src/fips202/native/armv81m/src/*.[csS])
 endif
 
 

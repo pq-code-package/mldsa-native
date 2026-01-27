@@ -20,4 +20,8 @@
 #include "x86_64/xkcp.h"
 #endif
 
+#if defined(MLD_SYS_ARMV81M_MVE)
+#include "armv81m/mve.h"
+#endif
+
 #endif /* !MLD_FIPS202_NATIVE_AUTO_H */
