@@ -10,26 +10,8 @@
  
  #define  SYSTEM_CLOCK    (XTAL / 2U)
  
-@@ -89,9 +89,62 @@ void SystemInit (void)
-   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
- #endif
+@@ -95,3 +95,46 @@ void SystemInit (void)
  
--#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
--  TZ_SAU_Setup();
-+  /* Enable fault handlers */
-+  SCB->SHCSR |= (SCB_SHCSR_MEMFAULTENA_Msk | SCB_SHCSR_BUSFAULTENA_Msk |
-+                 SCB_SHCSR_USGFAULTENA_Msk);
-+
-+#ifdef __ARM_FEATURE_CMSE
-+  SCB->SHCSR |= SCB_SHCSR_SECUREFAULTENA_Msk; /* Enable SecureFault handler (TrustZone) */
- #endif
- 
-+  /* Ensure 8-byte stack alignment on exception entry (bit 9) */
-+  SCB->CCR |= (1U << 9);
-+
-+  __DSB();
-+  __ISB();
-+
    SystemCoreClock = SYSTEM_CLOCK;
  }
 +
