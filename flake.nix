@@ -89,18 +89,6 @@
               } ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ config.packages.valgrind_varlat ];
           };
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          packages.m55-an547 = util.m55-an547;
-          #packages.avr-toolchain = util.avr-toolchain; # TODO The AVR shell is currently unavaliable for mldsa-native
-          devShells.arm-embedded = util.mkShell {
-            packages = builtins.attrValues
-              {
-                inherit (config.packages) m55-an547;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
-              };
-          };
-
-          devShells.avr = util.mkShell (import ./nix/avr { inherit pkgs; });
           packages.hol_server = util.hol_server.hol_server_start;
           devShells.hol_light = (util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters hol_light s2n_bignum hol_server; };
@@ -147,6 +135,17 @@
           devShells.ci-cross-aarch64_be = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64_be; };
           };
+
+          # arm-none-eabi-gcc + platform files from pqmx
+          devShells.ci-cross-arm-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (util) m55-an547;
+                inherit (config.packages) linters;
+                inherit (pkgs) gcc-arm-embedded qemu coreutils python3 git;
+              };
+          };
+
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {
@@ -155,6 +154,11 @@
               pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
             ];
           };
+
+
+
+          # TODO: AVR shell not yet available for mldsa-native
+          # devShells.ci-cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
           devShells.ci-linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
