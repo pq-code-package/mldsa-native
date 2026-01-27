@@ -94,6 +94,7 @@ mldsa-native currently offers the following backends:
 * Default portable C backend
 * 64-bit Arm backend (using Neon)
 * 64-bit Intel/AMD backend (using AVX2)
+* 32-bit Armv8.1-M backend (using Helium/MVE). This is still experimental and disabled by default.
 
 If you'd like contribute new backends, please reach out!
 
