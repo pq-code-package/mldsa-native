@@ -24,7 +24,7 @@ jobs:
            acvp: true
            alloc: true
            bench: true
-           opt: no_opt
+           opt: all
          - runner: ubuntu-latest
            name: 'M33-AN524'
            makefile: test/baremetal/platform/m33-an524/platform.mk
@@ -63,7 +63,7 @@ jobs:
           nix-shell: ${{ matrix.target.nix-shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           perf: PMU
-          opt: false
+          opt: true
           store_results: false
 
   baremetal_aarch64_virt:
