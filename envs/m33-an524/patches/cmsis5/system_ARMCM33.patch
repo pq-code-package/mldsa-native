@@ -1,15 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/system_ARMCM33.c.orig	2026-01-13 17:06:53.809238718 +0000
 +++ envs/m33-an524/src/platform/system_ARMCM33.c	2026-01-13 15:11:08.435799683 +0000
-@@ -46,7 +46,7 @@
- /*----------------------------------------------------------------------------
-   Define clocks
-  *----------------------------------------------------------------------------*/
--#define  XTAL            (50000000UL)     /* Oscillator frequency */
-+#define  XTAL            (500000000UL)     /* Oscillator frequency - 250 MHz Matches STM32H5 series           */
- 
- #define  SYSTEM_CLOCK    (XTAL / 2U)
- 
 @@ -95,3 +95,46 @@ void SystemInit (void)
  
    SystemCoreClock = SYSTEM_CLOCK;
