@@ -1,16 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/gcc_arm.ld.orig	2026-01-13 17:15:29.707688468 +0000
 +++ envs/m33-an524/src/platform/m33-an524.ld	2026-01-13 15:11:08.395799030 +0000
-@@ -20,37 +20,36 @@
+@@ -20,37 +20,35 @@
   * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
 + *
 + * Modifications for MPS3 AN524:
-+ * - Flash Base: 0x00000000 (Non-Secure BRAM, 512KB - QEMU kernel load address)
-+ * - RAM Base: 0x60000000 (Non-Secure DDR4, using 2MB of 256MB available)
-+ * - Stack Size: 64KB (increased for ML-DSA-87)
-+ * - Heap Size: 512KB (increased for cryptographic operations)
++ * - Flash Base: 0x10000000 (Secure BRAM alias, 512KB)
++ * - RAM Base: 0x70000000 (Secure DDR4, using 2MB of 256MB available)
++ * - Stack Size: 256KB (for ML-DSA-87 Sign peak: 126KB)
 + * 
 + * Hardware Reference:
 + *   ARM DAI 0524F - Application Note AN524 "SSE-200 Subsystem for MPS3"
@@ -55,12 +54,11 @@
 -    <o0> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 -    <o1> Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
 -  </h>
-+  Stack Size: 64KB (for ML-DSA-87)
-+  Heap Size: 512KB (for cryptographic operations)
++  Stack Size: 256KB
++  Heap Size: 3KB
    -----------------------------------------------------------------------------*/
 -__STACK_SIZE = 0x00000400;
-+__STACK_SIZE = 0x00010000;
++__STACK_SIZE = 0x00040000;
  __HEAP_SIZE  = 0x00000C00;
  
  /*
-  *-------------------- <<< end of configuration section >>> -------------------

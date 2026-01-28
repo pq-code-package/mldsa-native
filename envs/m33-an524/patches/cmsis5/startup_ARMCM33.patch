@@ -212,24 +212,3 @@
  };
  
  #if defined ( __GNUC__ )
-@@ -129,9 +280,9 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[496];
-  *----------------------------------------------------------------------------*/
- __NO_RETURN void Reset_Handler(void)
- {
--  __set_PSP((uint32_t)(&__INITIAL_SP));
--
--  __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
-+  // Remove these lines - they're causing the UsageFault
-+  // __set_PSP((uint32_t)(&__INITIAL_SP));
-+  // __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
-   __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
- 
- #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-@@ -140,6 +291,7 @@ __NO_RETURN void Reset_Handler(void)
- 
-   SystemInit();                             /* CMSIS System Initialization */
-   __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
-+  while(1);
- }
- 
- 
