@@ -141,6 +141,8 @@ __contract__(
    * round(f1' * 11275 / 2^24), where the round-down on the LHS is essential,
    * and on the RHS the type of rounding again does not matter. This concludes
    * the proof.
+   *
+   * See proofs/isabelle/compress for a formalization of the above argument.
    */
   *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
   mld_assert(*a1 >= 0 && *a1 <= 44);

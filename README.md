@@ -68,6 +68,10 @@ HOL-Light functional correctness proofs can be found in [proofs/hol_light](proof
 
 These proofs utilize the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
+Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
+different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
+on the source level.
+
 ## Security
 
 All assembly in mldsa-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,

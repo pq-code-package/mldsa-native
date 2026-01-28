@@ -83,3 +83,11 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
+  isabelle:
+    name: Isabelle
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/isabelle.yml
+    secrets: inherit

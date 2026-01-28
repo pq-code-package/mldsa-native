@@ -42,6 +42,8 @@
         // round(a * 1074791425 / 2^49), where the round-down on the LHS is
         // essential, and on the RHS the type of rounding again does not matter.
         // This concludes the proof.
+        //
+        // See proofs/isabelle/compress for a formalization of this argument.
         sqdmulh \a1\().4s, \a\().4s, barrett_const.4s
         srshr \a1\().4s, \a1\().4s, #18
         // range: 0 <= a1 <= 16
