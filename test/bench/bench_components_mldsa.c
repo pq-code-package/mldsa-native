@@ -61,6 +61,7 @@ static int cmp_uint64_t(const void *a, const void *b)
 static int bench(void)
 {
   MLD_ALIGN int32_t data0[256];
+  MLD_ALIGN int32_t data1[256];
   MLD_ALIGN mld_poly poly_out;
   MLD_ALIGN mld_polyvecl polyvecl_a, polyvecl_b;
   MLD_ALIGN mld_polyveck polyveck_out;
@@ -85,6 +86,9 @@ static int bench(void)
   BENCH("polyz_unpack", mld_polyz_unpack(&poly_out, (const uint8_t *)data0))
 
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
+
+  BENCH("poly_use_hint",
+        mld_poly_use_hint(&poly_out, (mld_poly *)data0, (mld_poly *)data1));
 
   return 0;
 }
