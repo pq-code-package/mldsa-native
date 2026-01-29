@@ -37,7 +37,7 @@ with tempfile.NamedTemporaryFile(mode="wb", delete=False, suffix=".bin") as fd:
     fd.write(binargs)
 
 try:
-    qemu_cmd = f"qemu-system-arm -M mps3-an524 -cpu cortex-m33 -nographic -semihosting -kernel {binpath} -device loader,file={args_file},addr=0x{cmdline_offset:x}".split()
+    qemu_cmd = f"qemu-system-arm -M mps3-an524 -cpu cortex-m33 -nographic -serial pty -kernel {binpath} -device loader,file={args_file},addr=0x{cmdline_offset:x}".split()
     result = subprocess.run(qemu_cmd, capture_output=True, text=True, timeout=300)
 
 except subprocess.TimeoutExpired:

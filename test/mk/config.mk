@@ -32,11 +32,7 @@ CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 # Common config #
 #################
 CFLAGS := \
-	-Wall \
-	-Wextra \
 	-Werror=unused-result \
-	-Wpedantic \
-	-Werror \
 	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \

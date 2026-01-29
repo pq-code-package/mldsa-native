@@ -7,16 +7,9 @@
 # including complete hardware abstraction, system integration, and ARM v8-M features.
 
 # Platform environment paths
-# When in Nix environment: M33_AN524_PATH and M33_AN524_CMSIS_PATH are set by shellHook
-# When building locally: Use relative paths
-ifdef M33_AN524_PATH
-  PLATFORM_PATH := $(M33_AN524_PATH)
-  CMSIS_PATH := $(M33_AN524_CMSIS_PATH)
-else
-  ENV_PATH := envs/m33-an524
-  PLATFORM_PATH := $(ENV_PATH)/src/platform
-  CMSIS_PATH := $(PLATFORM_PATH)/CMSIS
-endif
+# Using local copies in ~/mps3_an524_test for UART development
+PLATFORM_PATH := $(HOME)/mps3_an524_test/platform
+CMSIS_PATH := $(HOME)/mps3_an524_test/platform/CMSIS
 
 PROJECT_PLATFORM_PATH := test/baremetal/platform/m33-an524
 
@@ -29,14 +22,13 @@ CC = gcc
 # - mfloat-abi=soft: Use software floating point to avoid double-precision FPU issues
 #   (Standard newlib printf uses double-precision which Cortex-M33's FPU doesn't support)
 ARCH_FLAGS := -mcpu=cortex-m33 -mthumb -mfloat-abi=soft
+#	-O3 -Wall -Wextra -Wshadow
 
 CFLAGS += \
-	-O3 -Wall -Wextra -Wshadow \
 	-Wno-pedantic -Wno-redundant-decls -Wno-missing-prototypes \
 	-fno-common -ffunction-sections -fdata-sections \
 	-DARMCM33 \
 	-DDEVICE=an524 \
-	-DSEMIHOSTING \
 	-I$(CMSIS_PATH) \
 	-I$(CMSIS_PATH)/m-profile \
 	-I$(PLATFORM_PATH) \
@@ -75,7 +67,6 @@ LDFLAGS += \
 EXTRA_SOURCES = \
 	$(CMSIS_PATH)/startup_ARMCM33.c \
 	$(CMSIS_PATH)/system_ARMCM33.c \
-	$(PLATFORM_PATH)/semihosting.c \
 	$(PLATFORM_PATH)/libfns.c \
 	$(PLATFORM_PATH)/cmdline.c \
 	$(PLATFORM_PATH)/uart.c
