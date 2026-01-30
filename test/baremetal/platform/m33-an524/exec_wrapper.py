@@ -21,7 +21,7 @@ args = sys.argv[1:]
 # Memory layout: [argc] [offset1] [offset2] ... [string1\0] [string2\0] ...
 # AN524 DDR4: 0x70000000-0x701FFFFF (2MB)
 # Place cmdline at 0x70190000 (within heap area, before stack)
-cmdline_offset = 0x70190000
+cmdline_offset = 0x2000F000  
 arg0_offset = cmdline_offset + 4 + len(args) * 4
 arg_offsets = [sum(map(len, args[:i])) + i + arg0_offset for i in range(len(args))]
 

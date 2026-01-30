@@ -1,10 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 --- /tmp/system_ARMCM33.c.orig	2026-01-13 17:06:53.809238718 +0000
 +++ envs/m33-an524/src/platform/system_ARMCM33.c	2026-01-13 15:11:08.435799683 +0000
-@@ -95,3 +95,46 @@ void SystemInit (void)
+@@ -43,6 +43,8 @@
+   #error device not specified!
+ #endif
+ 
++#include "uart.h"
++
+ /*----------------------------------------------------------------------------
+   Define clocks
+  *----------------------------------------------------------------------------*/
+@@ -94,4 +96,36 @@ void SystemInit (void)
+ #endif
  
    SystemCoreClock = SYSTEM_CLOCK;
- }
++  uart_init();
++}
 +
 +/*----------------------------------------------------------------------------
 +  Wrapped syscalls for newlib stdio - use semihosting for output
@@ -12,18 +23,6 @@
 +#include <errno.h>
 +#undef errno
 +extern int errno;
-+
-+/* Semihosting SYS_WRITEC - write single character to console */
-+static void semihost_writec(char c)
-+{
-+  __asm__ volatile(
-+      "mov r0, #0x03\n" /* SYS_WRITEC */
-+      "mov r1, %0\n"
-+      "bkpt 0xAB\n"
-+      :
-+      : "r"(&c)
-+      : "r0", "r1", "memory");
-+}
 +
 +int __wrap__read(int file, char *ptr, int len)
 +{
@@ -38,13 +37,13 @@
 +{
 +  if (file == 1 || file == 2)
 +  { /* stdout or stderr */
-+    /* Write each character using semihosting SYS_WRITEC */
++    /* Write each character using UART */
 +    for (int i = 0; i < len; ++i)
 +    {
-+      semihost_writec(ptr[i]);
++      uart_putc(ptr[i]);
 +    }
 +    return len;
 +  }
 +  errno = EBADF;
 +  return -1;
-+}
+ }

@@ -32,7 +32,7 @@ let
 in
 stdenvNoCC.mkDerivation {
   pname = "m33-an524-cmsis";
-  version = "2026-01-15";
+  version = "2026-01-29";
 
   dontUnpack = true;
 

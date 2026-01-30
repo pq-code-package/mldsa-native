@@ -9,7 +9,7 @@
 
 stdenvNoCC.mkDerivation {
   pname = "m33-an524-platform";
-  version = "2026-01-15";
+  version = "2026-01-30";
 
   # Fetch platform files from pqmx (envs/m55-an547)
   src = fetchFromGitHub {
@@ -34,8 +34,13 @@ stdenvNoCC.mkDerivation {
     # Make files writable
     chmod -R u+w envs/
     
-    # Patch cmdline.c to change ARMCM55.h to ARMCM33.h
-    sed -i 's/#include "ARMCM55\.h"/#include "ARMCM33.h"/' envs/m33-an524/src/platform/cmdline.c
+    # Copy patches from repository
+    cp -r ${../../envs/m33-an524/patches} patches
+    chmod -R u+w patches
+    
+    # Apply patches to customize platform files for m33-an524
+    patch -p0 < patches/platform/cmdline.patch || true
+    patch -p0 < patches/platform/uart.patch || true
     
     runHook postBuild
   '';
