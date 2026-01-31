@@ -93,6 +93,14 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
+  opentitan_integration:
+    name: OpenTitan
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-opentitan.yml
+    secrets: inherit
   isabelle:
     name: Isabelle
     permissions:
