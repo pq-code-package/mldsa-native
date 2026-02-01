@@ -184,6 +184,7 @@ __contract__(
  *
  * Returns 1 if overflow, 0 otherwise
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE unsigned int mld_make_hint(int32_t a0, int32_t a1)
 __contract__(
   ensures(return_value >= 0 && return_value <= 1)
@@ -208,6 +209,7 @@ __contract__(
  *
  * Returns corrected high bits.
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int32_t mld_use_hint(int32_t a, int32_t hint)
 __contract__(
   requires(hint >= 0 && hint <= 1)

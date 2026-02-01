@@ -46,6 +46,7 @@
  */
 
 #if defined(MLD_USE_FIPS202_X1_NATIVE)
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
@@ -55,6 +56,7 @@ __contract__(
 );
 #endif /* MLD_USE_FIPS202_X1_NATIVE */
 #if defined(MLD_USE_FIPS202_X4_NATIVE)
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))

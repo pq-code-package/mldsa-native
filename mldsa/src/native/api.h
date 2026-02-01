@@ -85,6 +85,7 @@
  *
  * Arguments:   - int32_t p[MLDSA_N]: pointer to in/output polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_ntt_native(int32_t p[MLDSA_N])
 __contract__(
     requires(memory_no_alias(p, sizeof(int32_t) * MLDSA_N))
@@ -147,6 +148,7 @@ __contract__(
  *
  * Arguments:   - uint32_t p[MLDSA_N]: pointer to in/output polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_intt_native(int32_t p[MLDSA_N])
 __contract__(
   requires(memory_no_alias(p, sizeof(int32_t) * MLDSA_N))
@@ -177,6 +179,7 @@ __contract__(
  * lengths. Otherwise, returns non-negative number of sampled 32-bit integers
  * (at most len).
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
@@ -209,6 +212,7 @@ __contract__(
  *lengths. Otherwise, returns non-negative number of sampled 32-bit integers
  *(at most len).
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
@@ -241,6 +245,7 @@ __contract__(
  *lengths. Otherwise, returns non-negative number of sampled 32-bit integers
  *(at most len).
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
@@ -272,6 +277,7 @@ __contract__(
  *              - int32_t *a0: input/output polynomial.
  *                             Output has coefficients c0
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
 __contract__(
   requires(memory_no_alias(a1,  sizeof(int32_t) * MLDSA_N))
@@ -304,6 +310,7 @@ __contract__(
  *              - int32_t *a0: output polynomial with coefficients c0.
  *                             Output has coefficients c0
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 __contract__(
   requires(memory_no_alias(a1,  sizeof(int32_t) * MLDSA_N))
@@ -328,6 +335,7 @@ __contract__(
  *
  * Arguments:   - int32_t *a: pointer to input/output polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
@@ -352,6 +360,7 @@ __contract__(
  *              - const int32_t *a: pointer to input polynomial
  *              - const int32_t *h: pointer to input hint polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
 __contract__(
@@ -379,6 +388,7 @@ __contract__(
  *              - const int32_t *a: pointer to input polynomial
  *              - const int32_t *h: pointer to input hint polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
 __contract__(
@@ -407,6 +417,7 @@ __contract__(
  * Returns 0 if the infinity norm is strictly smaller than B, and 1
  * otherwise. B must not be larger than MLDSA_Q - MLD_REDUCE32_RANGE_MAX.
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
@@ -428,6 +439,7 @@ __contract__(
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
@@ -450,6 +462,7 @@ __contract__(
  * Arguments:   - int32_t *r: pointer to output polynomial
  *              - const uint8_t *a: byte array with bit-packed polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
@@ -475,6 +488,7 @@ __contract__(
  *              - const int32_t a[MLDSA_N]: first input polynomial
  *              - const int32_t b[MLDSA_N]: second input polynomial
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
     int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 __contract__(
@@ -507,6 +521,7 @@ __contract__(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
     const int32_t v[4][MLDSA_N])
@@ -540,6 +555,7 @@ __contract__(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
     const int32_t v[5][MLDSA_N])
@@ -573,6 +589,7 @@ __contract__(
  *              - const int32_t u[MLDSA_L][MLDSA_N]: first input vector
  *              - const int32_t v[MLDSA_L][MLDSA_N]: second input vector
  **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
     const int32_t v[7][MLDSA_N])

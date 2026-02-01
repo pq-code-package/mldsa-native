@@ -13,6 +13,7 @@
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 #if !defined(MLD_CONFIG_CUSTOM_RANDOMBYTES)
+MLD_MUST_CHECK_RETURN_VALUE
 int randombytes(uint8_t *out, size_t outlen);
 
 MLD_MUST_CHECK_RETURN_VALUE

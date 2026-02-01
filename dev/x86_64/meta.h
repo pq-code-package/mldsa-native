@@ -44,6 +44,7 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
   }
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -54,6 +55,8 @@ static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
   mld_ntt_avx2(data, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -64,6 +67,7 @@ static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                              const uint8_t *buf,
                                              unsigned buflen)
@@ -79,6 +83,7 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
   return (int)mld_rej_uniform_avx2(r, buf);
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
@@ -105,6 +110,7 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
   return (int)outlen;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
                                                   unsigned buflen)
@@ -131,6 +137,7 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   return (int)outlen;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -141,6 +148,7 @@ static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -151,6 +159,7 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -160,6 +169,8 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   mld_poly_caddq_avx2(a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
 {
@@ -171,6 +182,7 @@ static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
 {
@@ -182,6 +194,7 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -191,6 +204,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   return mld_poly_chknorm_avx2(a, B);
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -201,6 +215,7 @@ static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
@@ -211,6 +226,7 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
     int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 {
@@ -222,6 +238,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
     const int32_t v[4][MLDSA_N])
@@ -234,6 +251,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
     const int32_t v[5][MLDSA_N])
@@ -246,6 +264,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
     const int32_t v[7][MLDSA_N])

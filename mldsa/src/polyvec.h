@@ -656,6 +656,7 @@ __contract__(
  * Returns pointer to the row (mld_polyvecl)
  **************************************************/
 MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
 const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row);
 
 #define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)

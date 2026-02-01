@@ -57,14 +57,17 @@ void mld_ntt_asm(int32_t *, const int32_t *, const int32_t *);
 void mld_intt_asm(int32_t *, const int32_t *, const int32_t *);
 
 #define mld_rej_uniform_asm MLD_NAMESPACE(rej_uniform_asm)
+MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_asm(int32_t *r, const uint8_t *buf, unsigned buflen,
                              const uint8_t *table);
 
 #define mld_rej_uniform_eta2_asm MLD_NAMESPACE(rej_uniform_eta2_asm)
+MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta2_asm(int32_t *r, const uint8_t *buf,
                                   unsigned buflen, const uint8_t *table);
 
 #define mld_rej_uniform_eta4_asm MLD_NAMESPACE(rej_uniform_eta4_asm)
+MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta4_asm(int32_t *r, const uint8_t *buf,
                                   unsigned buflen, const uint8_t *table);
 
@@ -92,6 +95,7 @@ void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h);
 void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_chknorm_asm MLD_NAMESPACE(poly_chknorm_asm)
+MLD_MUST_CHECK_RETURN_VALUE
 int mld_poly_chknorm_asm(const int32_t *a, int32_t B);
 
 #define mld_polyz_unpack_17_asm MLD_NAMESPACE(polyz_unpack_17_asm)

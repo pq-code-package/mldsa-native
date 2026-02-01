@@ -53,14 +53,17 @@ void mld_invntt_avx2(int32_t *r, const int32_t *mld_qdata);
 void mld_nttunpack_avx2(int32_t *r);
 
 #define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
+MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_avx2(int32_t *r,
                               const uint8_t buf[MLD_AVX2_REJ_UNIFORM_BUFLEN]);
 
 #define mld_rej_uniform_eta2_avx2 MLD_NAMESPACE(mld_rej_uniform_eta2_avx2)
+MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_eta2_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN]);
 
 #define mld_rej_uniform_eta4_avx2 MLD_NAMESPACE(mld_rej_uniform_eta4_avx2)
+MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_eta4_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
 
@@ -80,6 +83,7 @@ void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_chknorm_avx2 MLD_NAMESPACE(mld_poly_chknorm_avx2)
+MLD_MUST_CHECK_RETURN_VALUE
 int mld_poly_chknorm_avx2(const int32_t *a, int32_t B);
 
 #define mld_polyz_unpack_17_avx2 MLD_NAMESPACE(mld_polyz_unpack_17_avx2)
