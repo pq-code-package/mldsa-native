@@ -50,7 +50,7 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mldsa/mldsa_ntt.o
+OBJ = mldsa/mldsa_ntt.o mldsa/mldsa_intt.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S

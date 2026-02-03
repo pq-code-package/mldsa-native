@@ -47,7 +47,16 @@ __contract__(
 );
 
 #define mld_invntt_avx2 MLD_NAMESPACE(invntt_avx2)
-void mld_invntt_avx2(int32_t *r, const int32_t *mld_qdata);
+void mld_invntt_avx2(int32_t *r, const int32_t *qdata)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_intt.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  requires(qdata == mld_qdata)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+);
 
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
 void mld_nttunpack_avx2(int32_t *r);

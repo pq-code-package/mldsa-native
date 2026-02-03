@@ -2195,6 +2195,13 @@ def gen_hol_light_asm():
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
+        (
+            "intt.S",
+            "mldsa_intt.S",
+            "dev/x86_64/src",
+            f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
     ]
 
     joblist = joblist_aarch64 + joblist_x86_64

@@ -3,10 +3,6 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
-/*
- * This file is derived from the public domain
- * AVX2 Dilithium implementation @[REF_AVX2].
- */
 
 /* References
  * ==========
@@ -16,6 +12,11 @@
  *   Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé
  *   https://github.com/pq-crystals/dilithium/tree/master/avx2
  */
+
+ /*
+  * This file is derived from the public domain
+  * AVX2 Dilithium implementation @[REF_AVX2].
+  */
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
@@ -52,7 +53,32 @@ vpblendd	$0xAA,%ymm\r1,%ymm\r0,%ymm\r3
  */
 .macro butterfly l, h, zl0=1, zl1=1, zh0=2, zh1=2
 vpsubd		%ymm\l,%ymm\h,%ymm12
+/*
+ * VEX Encoding Optimization for Platform-Independent Code
+ *
+ * Some assemblers (notably clang) will automatically swap operands of
+ * commutative instructions like VPADDD to use shorter encodings, while others
+ * (like gcc) may not. This causes different machine code across platforms.
+ *
+ * VEX prefixes come in two forms:
+ * - 2-byte VEX (0xC5): Can only be used when the ModR/M.rm operand is ymm0-7
+ * - 3-byte VEX (0xC4): Required when ModR/M.rm operand is ymm8-15
+ *
+ * When one operand is in ymm0-7 and another is in ymm8-15, we explicitly
+ * place the lower-numbered register (ymm0-7) as the second source operand
+ * to enable the 2-byte VEX encoding. Since VPADDD is commutative, this
+ * produces identical results while ensuring consistent machine code across
+ * different assemblers.
+ *
+ * Example (AT&T syntax, dest last):
+ *   vpaddd %ymm8, %ymm4, %ymm4  -> 3-byte VEX (0xC4 0xC1 0x5D 0xFE 0xE0)
+ *   vpaddd %ymm4, %ymm8, %ymm4  -> 2-byte VEX (0xC5 0xBD 0xFE 0xE4) preferred
+ */
+.if (\l < 8) && (\h >= 8)
+vpaddd		%ymm\l,%ymm\h,%ymm\l
+.else
 vpaddd		%ymm\h,%ymm\l,%ymm\l
+.endif
 
 vpmuldq		%ymm\zl0,%ymm12,%ymm13
 vmovshdup	%ymm12,%ymm\h
