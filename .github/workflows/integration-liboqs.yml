@@ -42,6 +42,7 @@ jobs:
       - uses: ./.github/actions/setup-oqs
         with:
           commit: '2959f1a4c717d7af1c4ebb52f1c6d3560b2957b7'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           repository: 'open-quantum-safe/liboqs'
       - name: Apply patch
         run: |

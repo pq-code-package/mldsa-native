@@ -42,6 +42,7 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
           cd "$AWSLC_DIR"
@@ -101,6 +102,7 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
           cd "$AWSLC_DIR"
@@ -145,6 +147,7 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           commit: ${{ inputs.commit }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Apply pre-import patch if present
         run: |
           cd "$AWSLC_DIR"
