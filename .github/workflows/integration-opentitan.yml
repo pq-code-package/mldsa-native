@@ -59,7 +59,7 @@ jobs:
 
       - name: Patch mldsa-native dependency
         run: |
-          cd $EXPO_DIR
+          cd "$EXPO_DIR"
 
           # Calculate sha256 of mldsa-native at the new commit
           SHA256=$(curl -sL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | sha256sum | cut -d' ' -f1)
@@ -77,10 +77,10 @@ jobs:
 
       - name: Build mldsa functest
         run: |
-          cd $EXPO_DIR
+          cd "$EXPO_DIR"
           # Build only -- ML-DSA simulation is too slow for CI
           ./bazelisk.sh build \
-            --disk_cache=$BAZEL_CACHE_DIR \
+            --disk_cache="$BAZEL_CACHE_DIR" \
             --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/ \
             //sw/device/tests/crypto:mldsa_functest_sim_verilator
 
