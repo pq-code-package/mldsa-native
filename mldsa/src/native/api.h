@@ -450,7 +450,6 @@ __contract__(
           return_value == 1)
   ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==>
           ((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B)))
-
 );
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 

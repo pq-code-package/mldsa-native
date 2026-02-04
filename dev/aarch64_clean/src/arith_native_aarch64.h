@@ -95,7 +95,16 @@ void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_chknorm_asm MLD_NAMESPACE(poly_chknorm_asm)
 MLD_MUST_CHECK_RETURN_VALUE
-int mld_poly_chknorm_asm(const int32_t *a, int32_t B);
+int mld_poly_chknorm_asm(const int32_t *a, int32_t B)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_poly_chknorm.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
+  requires(forall(k0, 0, MLDSA_N, a[k0] > INT32_MIN))
+  ensures(return_value == 0 || return_value == 1)
+  ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
+);
 
 #define mld_polyz_unpack_17_asm MLD_NAMESPACE(polyz_unpack_17_asm)
 void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,

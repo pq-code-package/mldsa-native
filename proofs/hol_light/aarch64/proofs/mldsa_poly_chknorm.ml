@@ -186,6 +186,9 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
 (* Subroutine correctness theorem (includes return)                          *)
 (* ------------------------------------------------------------------------- *)
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mldsa/src/native/aarch64/src/arith_native_aarch64.h *)
+
 let MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT = prove(
  `!a (x:num->int32) (bound:int32) pc returnaddress.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_mc) (a, 1024)
