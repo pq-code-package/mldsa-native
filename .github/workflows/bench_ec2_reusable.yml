@@ -177,7 +177,7 @@ jobs:
         if: ${{ inputs.opt == 'all' || inputs.opt == 'opt' }}
         with:
           nix-shell: 'ci-bench'
-          custom-shell: 'bash'
+          custom_shell: 'bash'
           nix-cache: false
           nix-verbose: ${{ inputs.verbose }}
           name: ${{ inputs.name }} (${{ inputs.compiler }})
@@ -193,7 +193,7 @@ jobs:
         if: ${{ inputs.opt == 'all' || inputs.opt == 'no_opt' }}
         with:
           nix-shell: 'ci-bench'
-          custom-shell: 'bash'
+          custom_shell: 'bash'
           nix-cache: false
           nix-verbose: ${{ inputs.verbose }}
           name: ${{ inputs.name }} (${{ inputs.compiler }}) (no-opt)
