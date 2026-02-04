@@ -218,7 +218,7 @@ def run_sigGen_test(tg, tc):
     elif tg["signatureInterface"] == "external":
         assert "hashAlg" not in tc or tc["hashAlg"] == "none"
         assert len(tc["context"]) <= 2 * 255
-        assert len(tc["message"]) <= 2 * 65536
+        assert len(tc["message"]) <= 2 * 8192
 
         target = "sigGenDeterministic" if is_deterministic else "sigGen"
         acvp_call = exec_prefix + [
@@ -236,7 +236,7 @@ def run_sigGen_test(tg, tc):
             assert len(tc["mu"]) == 2 * 64
             msg = tc["mu"]
         else:
-            assert len(tc["message"]) <= 2 * 65536
+            assert len(tc["message"]) <= 2 * 8192
             msg = tc["message"]
 
         target = "sigGenInternalDeterministic" if is_deterministic else "sigGenInternal"
@@ -298,7 +298,7 @@ def run_sigVer_test(tg, tc):
     elif tg["signatureInterface"] == "external":
         assert "hashAlg" not in tc or tc["hashAlg"] == "none"
         assert len(tc["context"]) <= 2 * 255
-        assert len(tc["message"]) <= 2 * 65536
+        assert len(tc["message"]) <= 2 * 8192
 
         acvp_call = exec_prefix + [
             acvp_bin,
@@ -316,7 +316,7 @@ def run_sigVer_test(tg, tc):
             assert len(tc["mu"]) == 2 * 64
             msg = tc["mu"]
         else:
-            assert len(tc["message"]) <= 2 * 65536
+            assert len(tc["message"]) <= 2 * 8192
             msg = tc["message"]
 
         acvp_call = exec_prefix + [

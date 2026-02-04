@@ -62,7 +62,7 @@
 
 
 /* maximum message length used in the ACVP tests */
-#define MAX_MSG_LENGTH 65536
+#define MAX_MSG_LENGTH 8192
 /* maximum context length according to FIPS-204 */
 #define MAX_CTX_LENGTH 255
 
