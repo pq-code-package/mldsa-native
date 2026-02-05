@@ -19,8 +19,7 @@
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
 #include "src/fips202_native_aarch64.h"
-
-
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_SHA3))

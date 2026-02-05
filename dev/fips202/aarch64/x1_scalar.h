@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
-#ifndef MLD_FIPS202_NATIVE_AARCH64_X1_SCALAR_H
-#define MLD_FIPS202_NATIVE_AARCH64_X1_SCALAR_H
+#ifndef MLD_DEV_FIPS202_AARCH64_X1_SCALAR_H
+#define MLD_DEV_FIPS202_AARCH64_X1_SCALAR_H
 
 /* Part of backend API */
 #define MLD_USE_FIPS202_X1_NATIVE
@@ -15,6 +15,7 @@
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
 #include "src/fips202_native_aarch64.h"
+MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 {
   mld_keccak_f1600_x1_scalar_asm(state, mld_keccakf1600_round_constants);
@@ -22,4 +23,4 @@ static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
-#endif /* !MLD_FIPS202_NATIVE_AARCH64_X1_SCALAR_H */
+#endif /* !MLD_DEV_FIPS202_AARCH64_X1_SCALAR_H */

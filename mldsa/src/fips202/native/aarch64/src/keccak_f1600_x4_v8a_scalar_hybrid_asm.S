@@ -9,6 +9,28 @@
 // Author: Hanno Becker <hannobecker@posteo.de>
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
+/*yaml
+  Name: keccak_f1600_x4_v8a_scalar_hybrid_asm
+  Description: AArch64 hybrid scalar/vector implementation of Keccak-f[1600] permutation for four sequential states
+  Signature: void mld_keccak_f1600_x4_v8a_scalar_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  ABI:
+    x0:
+      type: buffer
+      size_bytes: 800
+      permissions: read/write
+      c_parameter: uint64_t state[100]
+      description: Four sequential Keccak states (state0[25], state1[25], state2[25], state3[25])
+    x1:
+      type: buffer
+      size_bytes: 192
+      permissions: read-only
+      c_parameter: const uint64_t rc[24]
+      description: Round constants (24 x uint64_t)
+  Stack:
+    bytes: 224
+    description: register preservation and temporary storage
+*/
+
 #include "../../../../common.h"
 #if defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
@@ -24,8 +46,8 @@
 
 .text
 .balign 4
-.global MLD_ASM_NAMESPACE(keccak_f1600_x4_scalar_v8a_hybrid_asm)
-MLD_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_hybrid_asm)
+.global MLD_ASM_NAMESPACE(keccak_f1600_x4_v8a_scalar_hybrid_asm)
+MLD_ASM_FN_SYMBOL(keccak_f1600_x4_v8a_scalar_hybrid_asm)
 
         .cfi_startproc
         sub	sp, sp, #0xe0
@@ -123,7 +145,7 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_scalar_v8a_hybrid_asm)
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x190
 
-Lkeccak_f1600_x4_scalar_v8a_hybrid_initial:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_initial:
         eor	x30, x24, x25
         eor	x27, x9, x10
         eor	v30.16b, v0.16b, v5.16b
@@ -506,7 +528,7 @@ Lkeccak_f1600_x4_scalar_v8a_hybrid_initial:
         str	x30, [sp, #0x10]
         eor	v0.16b, v0.16b, v28.16b
 
-Lkeccak_f1600_x4_scalar_v8a_hybrid_loop:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop:
         eor	x0, x15, x11, ror #52
         eor	x0, x0, x13, ror #48
         eor	v30.16b, v0.16b, v5.16b
@@ -894,8 +916,8 @@ Lkeccak_f1600_x4_scalar_v8a_hybrid_loop:
         str	x30, [sp, #0x10]
         eor	v0.16b, v0.16b, v28.16b
 
-Lkeccak_f1600_x4_scalar_v8a_hybrid_loop_end:
-        b.le	Lkeccak_f1600_x4_scalar_v8a_hybrid_loop
+Lkeccak_f1600_x4_v8a_scalar_hybrid_loop_end:
+        b.le	Lkeccak_f1600_x4_v8a_scalar_hybrid_loop
         ror	x2, x2, #0x3d
         ror	x3, x3, #0x27
         ror	x4, x4, #0x36
@@ -921,7 +943,7 @@ Lkeccak_f1600_x4_scalar_v8a_hybrid_loop_end:
         ror	x25, x25, #0x9
         ldr	x30, [sp, #0x20]
         cmp	x30, #0x1
-        b.eq	Lkeccak_f1600_x4_scalar_v8a_hybrid_done
+        b.eq	Lkeccak_f1600_x4_v8a_scalar_hybrid_done
         mov	x30, #0x1               // =1
         str	x30, [sp, #0x20]
         ldr	x0, [sp]
@@ -955,9 +977,9 @@ Lkeccak_f1600_x4_scalar_v8a_hybrid_loop_end:
         ldp	x15, x20, [x0, #0xb0]
         ldr	x25, [x0, #0xc0]
         sub	x0, x0, #0x258
-        b	Lkeccak_f1600_x4_scalar_v8a_hybrid_initial
+        b	Lkeccak_f1600_x4_v8a_scalar_hybrid_initial
 
-Lkeccak_f1600_x4_scalar_v8a_hybrid_done:
+Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
         ldr	x0, [sp]
         add	x0, x0, #0x258
         stp	x1, x6, [x0]
@@ -1014,10 +1036,18 @@ Lkeccak_f1600_x4_scalar_v8a_hybrid_done:
         str	d24, [x0]
         trn2	v25.2d, v24.2d, v24.2d
         str	d25, [x4]
-        ldp	d14, d15, [sp, #0xc0]
-        ldp	d12, d13, [sp, #0xb0]
-        ldp	d10, d11, [sp, #0xa0]
         ldp	d8, d9, [sp, #0x90]
+        .cfi_restore d8
+        .cfi_restore d9
+        ldp	d10, d11, [sp, #0xa0]
+        .cfi_restore d10
+        .cfi_restore d11
+        ldp	d12, d13, [sp, #0xb0]
+        .cfi_restore d12
+        .cfi_restore d13
+        ldp	d14, d15, [sp, #0xc0]
+        .cfi_restore d14
+        .cfi_restore d15
         ldp	x19, x20, [sp, #0x30]
         .cfi_restore x19
         .cfi_restore x20

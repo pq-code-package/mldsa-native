@@ -13,8 +13,8 @@
  *   https://eprint.iacr.org/2022/1243
  */
 
-#ifndef MLD_FIPS202_NATIVE_AARCH64_AUTO_H
-#define MLD_FIPS202_NATIVE_AARCH64_AUTO_H
+#ifndef MLD_DEV_FIPS202_AARCH64_AUTO_H
+#define MLD_DEV_FIPS202_AARCH64_AUTO_H
 /* Default FIPS202 assembly profile for AArch64 systems */
 
 /*
@@ -68,4 +68,4 @@
 
 #endif /* !__ARM_FEATURE_SHA3 */
 
-#endif /* !MLD_FIPS202_NATIVE_AARCH64_AUTO_H */
+#endif /* !MLD_DEV_FIPS202_AARCH64_AUTO_H */
