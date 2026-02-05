@@ -147,6 +147,15 @@
           devShells.ci-cross-aarch64_be = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_aarch64_be; };
           };
+          devShells.cross-aarch64-embedded = util.mkShell {
+            packages = builtins.attrValues
+              {
+                inherit (pkgs) qemu coreutils python3 git;
+              } ++ [
+              pkgs-unstable.pkgsCross.aarch64-embedded.stdenv.cc
+            ];
+          };
+
           devShells.ci-linter = util.mkShellNoCC {
             packages = builtins.attrValues { inherit (config.packages) linters; };
           };

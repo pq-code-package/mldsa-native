@@ -103,6 +103,7 @@ static int test_sign(void)
   return test_sign_core(pk, sk, sm, m, m2, ctx);
 }
 
+#if !defined(MLD_TEST_NO_UNALIGNED)
 static int test_sign_unaligned(void)
 {
   MLD_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES + 1];
@@ -114,6 +115,7 @@ static int test_sign_unaligned(void)
 
   return test_sign_core(pk + 1, sk + 1, sm + 1, m + 1, m2 + 1, ctx + 1);
 }
+#endif /* !MLD_TEST_NO_UNALIGNED */
 
 static int test_sign_extmu(void)
 {
@@ -386,7 +388,9 @@ int main(void)
   for (i = 0; i < NTESTS; i++)
   {
     r = test_sign();
+#if !defined(MLD_TEST_NO_UNALIGNED)
     r |= test_sign_unaligned();
+#endif
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();

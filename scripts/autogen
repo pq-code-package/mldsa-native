@@ -1906,6 +1906,11 @@ def check_macro_typos():
             if m == "MLD_CONTEXT_PARAMETERS_n":
                 return True
 
+        # Baremetal platform configuration and test macros
+        if filename.startswith("test/baremetal/") or filename.startswith("test/src/"):
+            if m in ["MLD_TEST_NO_UNALIGNED"]:
+                return True
+
         return False
 
     run_parallel(
