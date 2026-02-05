@@ -210,10 +210,10 @@ rej_uniform_eta4_loop8:
 
         // We store 16-bit coefficients here. They will be expanded to 32-bit
         // on copy out
-        str     val0q, [output_tmp]
+        st1     {val0.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr0, lsl #1
 
-        str     val1q, [output_tmp]
+        st1     {val1.8h}, [output_tmp]
         add     output_tmp, output_tmp, ctr1, lsl #1
 
         add     ctr01, ctr0, ctr1

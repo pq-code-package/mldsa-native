@@ -104,13 +104,13 @@ Lrej_uniform_loop48:
         tbl	v17.16b, { v17.16b }, v25.16b
         tbl	v18.16b, { v18.16b }, v26.16b
         tbl	v19.16b, { v19.16b }, v27.16b
-        str	q16, [x7]
+        st1	{ v16.4s }, [x7]
         add	x7, x7, x12, lsl #2
-        str	q17, [x7]
+        st1	{ v17.4s }, [x7]
         add	x7, x7, x13, lsl #2
-        str	q18, [x7]
+        st1	{ v18.4s }, [x7]
         add	x7, x7, x14, lsl #2
-        str	q19, [x7]
+        st1	{ v19.4s }, [x7]
         add	x7, x7, x15, lsl #2
         add	x12, x12, x13
         add	x14, x14, x15

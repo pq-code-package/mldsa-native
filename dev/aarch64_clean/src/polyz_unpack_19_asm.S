@@ -61,9 +61,8 @@ MLD_ASM_FN_SYMBOL(polyz_unpack_19_asm)
         mov count, #(64/4)
 
 polyz_unpack_19_loop:
-        ldr q1, [buf, #16]
-        ldr d2, [buf, #32]
-        ldr q0, [buf], #40
+        ld1	{v0.2d, v1.2d}, [buf], #0x20
+        ldr	d2, [buf], #0x08
 
         tbl v4.16b, {v0.16b}, idx0.16b
         tbl v5.16b, {v0.16b - v1.16b}, idx1.16b
