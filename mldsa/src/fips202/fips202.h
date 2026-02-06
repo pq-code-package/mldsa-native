@@ -39,6 +39,7 @@ typedef struct
  *
  * Arguments:   - mld_shake128ctx *state: pointer to (uninitialized) state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake128_init(mld_shake128ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake128ctx)))
@@ -57,6 +58,7 @@ __contract__(
  *              - const uint8_t *in: pointer to input to be absorbed into s
  *              - size_t inlen: length of input in bytes
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake128_absorb(mld_shake128ctx *state, const uint8_t *in,
                          size_t inlen)
 __contract__(
@@ -76,6 +78,7 @@ __contract__(
  *
  * Arguments:   - mld_shake128ctx *state: pointer to state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake128_finalize(mld_shake128ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake128ctx)))
@@ -96,6 +99,7 @@ __contract__(
  *output)
  *              - mld_shake128ctx *s: pointer to input/output state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake128_squeeze(uint8_t *out, size_t outlen, mld_shake128ctx *state)
 __contract__(
   requires(outlen <= 8 * SHAKE128_RATE /* somewhat arbitrary bound */)
@@ -115,6 +119,7 @@ __contract__(
  *
  * Arguments:   - mld_shake128ctx *state: pointer to state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake128_release(mld_shake128ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake128ctx)))
@@ -129,6 +134,7 @@ __contract__(
  *
  * Arguments:   - mld_shake256ctx *state: pointer to (uninitialized) state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256_init(mld_shake256ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake256ctx)))
@@ -147,6 +153,7 @@ __contract__(
  *              - const uint8_t *in: pointer to input to be absorbed into s
  *              - size_t inlen: length of input in bytes
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256_absorb(mld_shake256ctx *state, const uint8_t *in,
                          size_t inlen)
 __contract__(
@@ -166,6 +173,7 @@ __contract__(
  *
  * Arguments:   - mld_shake256ctx *state: pointer to state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256_finalize(mld_shake256ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake256ctx)))
@@ -186,6 +194,7 @@ __contract__(
  *output)
  *              - mld_shake256ctx *s: pointer to input/output state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256_squeeze(uint8_t *out, size_t outlen, mld_shake256ctx *state)
 __contract__(
   requires(outlen <= 8 * SHAKE256_RATE /* somewhat arbitrary bound */)
@@ -205,6 +214,7 @@ __contract__(
  *
  * Arguments:   - mld_shake256ctx *state: pointer to state
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256_release(mld_shake256ctx *state)
 __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake256ctx)))
@@ -222,6 +232,7 @@ __contract__(
  *              - const uint8_t *in: pointer to input
  *              - size_t inlen: length of input in bytes
  **************************************************/
+MLD_INTERNAL_API
 void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 __contract__(
   requires(inlen <= MLD_MAX_BUFFER_SIZE)

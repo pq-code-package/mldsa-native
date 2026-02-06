@@ -6,12 +6,14 @@
 #ifndef MLD_FIPS202_FIPS202X4_H
 #define MLD_FIPS202_FIPS202X4_H
 
+#include "../common.h"
+
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+
 #include <stddef.h>
 #include <stdint.h>
 
 #include "../cbmc.h"
-#include "../common.h"
-
 #include "fips202.h"
 #include "keccakf1600.h"
 
@@ -26,7 +28,9 @@ typedef struct
   uint64_t ctx[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
 } mld_shake256x4ctx;
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_shake128x4_absorb_once MLD_NAMESPACE(shake128x4_absorb_once)
+MLD_INTERNAL_API
 void mld_shake128x4_absorb_once(mld_shake128x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
@@ -41,6 +45,7 @@ __contract__(
 );
 
 #define mld_shake128x4_squeezeblocks MLD_NAMESPACE(shake128x4_squeezeblocks)
+MLD_INTERNAL_API
 void mld_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                   uint8_t *out3, size_t nblocks,
                                   mld_shake128x4ctx *state)
@@ -59,13 +64,16 @@ __contract__(
 );
 
 #define mld_shake128x4_init MLD_NAMESPACE(shake128x4_init)
+MLD_INTERNAL_API
 void mld_shake128x4_init(mld_shake128x4ctx *state);
 
 #define mld_shake128x4_release MLD_NAMESPACE(shake128x4_release)
+MLD_INTERNAL_API
 void mld_shake128x4_release(mld_shake128x4ctx *state);
-
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 #define mld_shake256x4_absorb_once MLD_NAMESPACE(shake256x4_absorb_once)
+MLD_INTERNAL_API
 void mld_shake256x4_absorb_once(mld_shake256x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
                                 const uint8_t *in3, size_t inlen)
@@ -80,6 +88,7 @@ __contract__(
 );
 
 #define mld_shake256x4_squeezeblocks MLD_NAMESPACE(shake256x4_squeezeblocks)
+MLD_INTERNAL_API
 void mld_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                   uint8_t *out3, size_t nblocks,
                                   mld_shake256x4ctx *state)
@@ -98,10 +107,12 @@ __contract__(
 );
 
 #define mld_shake256x4_init MLD_NAMESPACE(shake256x4_init)
+MLD_INTERNAL_API
 void mld_shake256x4_init(mld_shake256x4ctx *state);
 
 #define mld_shake256x4_release MLD_NAMESPACE(shake256x4_release)
+MLD_INTERNAL_API
 void mld_shake256x4_release(mld_shake256x4ctx *state);
 
-
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_FIPS202_FIPS202X4_H */

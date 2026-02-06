@@ -36,6 +36,7 @@
 #define MLD_KECCAK_NROUNDS 24
 #define MLD_KECCAK_ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
 
+MLD_INTERNAL_API
 void mld_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
                                    unsigned offset, unsigned length)
 {
@@ -57,6 +58,7 @@ void mld_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,
 #endif /* !MLD_SYS_LITTLE_ENDIAN */
 }
 
+MLD_INTERNAL_API
 void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
                                unsigned offset, unsigned length)
 {
@@ -79,6 +81,7 @@ void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #endif /* !MLD_SYS_LITTLE_ENDIAN */
 }
 
+MLD_INTERNAL_API
 void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data1, unsigned char *data2,
                                      unsigned char *data3, unsigned offset,
@@ -94,6 +97,7 @@ void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                 length);
 }
 
+MLD_INTERNAL_API
 void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data1,
                                  const unsigned char *data2,
@@ -110,6 +114,7 @@ void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                             length);
 }
 
+MLD_INTERNAL_API
 void mld_keccakf1600x4_permute(uint64_t *state)
 {
 #if defined(MLD_USE_FIPS202_X4_NATIVE)
@@ -405,6 +410,7 @@ void mld_keccakf1600_permute_c(uint64_t *state)
   state[24] = Asu;
 }
 
+MLD_INTERNAL_API
 void mld_keccakf1600_permute(uint64_t *state)
 {
 #if defined(MLD_USE_FIPS202_X1_NATIVE)
