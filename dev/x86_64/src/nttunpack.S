@@ -13,13 +13,12 @@
  *   https://github.com/pq-crystals/dilithium/tree/master/avx2
  */
 
- /*
+/*
  * This file is derived from the public domain
  * AVX2 Dilithium implementation @[REF_AVX2].
  */
 
- #include "../../../common.h"
-
+#include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */

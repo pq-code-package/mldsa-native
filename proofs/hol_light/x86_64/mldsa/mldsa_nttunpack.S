@@ -18,9 +18,6 @@
  * AVX2 Dilithium implementation @[REF_AVX2].
  */
 
-#include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -29,10 +26,16 @@
 
 .text
 .balign 4
-.global MLD_ASM_NAMESPACE(nttunpack_avx2)
-MLD_ASM_FN_SYMBOL(nttunpack_avx2)
+#ifdef __APPLE__
+.global _PQCP_MLDSA_NATIVE_MLDSA44_nttunpack_avx2
+_PQCP_MLDSA_NATIVE_MLDSA44_nttunpack_avx2:
+#else
+.global PQCP_MLDSA_NATIVE_MLDSA44_nttunpack_avx2
+PQCP_MLDSA_NATIVE_MLDSA44_nttunpack_avx2:
+#endif
 
         .cfi_startproc
+        endbr64
         vmovdqa (%rdi), %ymm4
         vmovdqa 0x20(%rdi), %ymm5
         vmovdqa 0x40(%rdi), %ymm6
@@ -227,11 +230,6 @@ MLD_ASM_FN_SYMBOL(nttunpack_avx2)
         vmovdqa %ymm11, 0x3e0(%rdi)
         retq
         .cfi_endproc
-
-MLD_ASM_FN_SIZE(nttunpack_avx2)
-
-#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-        */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

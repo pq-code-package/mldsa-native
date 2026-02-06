@@ -60,6 +60,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
   * AArch64 pointwise multiplication-accumulation (l=7): [mldsa_pointwise_acc_l7.S](aarch64/mldsa/mldsa_pointwise_acc_l7.S)
   * x86_64 forward NTT: [mldsa_ntt.S](x86_64/mldsa/mldsa_ntt.S)
   * x86_64 inverse NTT: [mldsa_intt.S](x86_64/mldsa/mldsa_intt.S)
+  * x86_64 NTT unpack: [mldsa_nttunpack.S](x86_64/mldsa/mldsa_nttunpack.S)
   * x86_64 pointwise multiplication: [mldsa_pointwise.S](x86_64/mldsa/mldsa_pointwise.S)
   * x86_64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4.S](x86_64/mldsa/mldsa_pointwise_acc_l4.S)
   * x86_64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5.S](x86_64/mldsa/mldsa_pointwise_acc_l5.S)

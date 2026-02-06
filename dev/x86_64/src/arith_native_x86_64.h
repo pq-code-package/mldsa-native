@@ -60,7 +60,18 @@ __contract__(
 );
 
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
-void mld_nttunpack_avx2(int32_t *r);
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_nttunpack.ml */
+void mld_nttunpack_avx2(int32_t *r)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  /* Output is a permutation of input: every output coefficient
+   * is some input coefficient */
+  ensures(forall(i, 0, MLDSA_N, exists(j, 0, MLDSA_N,
+    r[i] == old(*(int32_t (*)[MLDSA_N])r)[j])))
+);
 
 #define mld_rej_uniform_avx2 MLD_NAMESPACE(mld_rej_uniform_avx2)
 MLD_MUST_CHECK_RETURN_VALUE

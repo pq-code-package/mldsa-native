@@ -40,6 +40,39 @@ let bitmap = define
  `bitmap [] n = 0 /\
   bitmap (CONS i t) n = bitval(numbit i n) + 2 * bitmap t n`;;
 
+(* ------------------------------------------------------------------------- *)
+(* AVX2 "nttunpack" ordering: 8x8 transpose within each 64-element block.    *)
+(* Maps (block, lane, offset) -> (block, offset, lane), where                *)
+(* block = i DIV 64, lane = (i MOD 64) DIV 8, offset = i MOD 8.              *)
+(* This is the intra-block component of the full AVX2 NTT ordering.          *)
+(* ------------------------------------------------------------------------- *)
+
+let nttunpack_order = new_definition
+  `nttunpack_order i =
+   let block = i DIV 64 in
+   let pos = i MOD 64 in
+   let lane = pos DIV 8 in
+   let offset = pos MOD 8 in
+   64 * block + 8 * offset + lane`;;
+
+let nttunpack_unorder = new_definition
+  `nttunpack_unorder i =
+   let block = i DIV 64 in
+   let pos = i MOD 64 in
+   let lane = pos MOD 8 in
+   let offset = pos DIV 8 in
+   64 * block + 8 * lane + offset`;;
+
+let pack_nttunpack = new_definition
+  `pack_nttunpack l = list_of_seq (\i. EL (nttunpack_order i) l) 256`;;
+
+let unpack_nttunpack = new_definition
+  `unpack_nttunpack l = list_of_seq (\i. EL (nttunpack_unorder i) l) 256`;;
+
+(* The full AVX2 NTT order is bitreverse8 composed with nttunpack_order:     *)
+(* the nttunpack is the intra-block transpose component, and bitreverse8     *)
+(* provides the inter-block reordering on top.                               *)
+(* MLDSA_AVX2_NTT_ORDER_DECOMPOSE below proves the relationship.            *)
 let mldsa_avx2_ntt_order = define
  `mldsa_avx2_ntt_order i =
     bitreverse8(64 * (i DIV 64) + ((i MOD 64) DIV 8) + 8 * (i MOD 8))`;;
@@ -91,6 +124,15 @@ let MLDSA_AVX2_NTT_ORDER_CLAUSES = end_itlist CONJ (map
  (GEN_REWRITE_CONV I [mldsa_avx2_ntt_order] THENC DEPTH_CONV WORD_NUM_RED_CONV THENC
   GEN_REWRITE_CONV I [BITREVERSE8_CLAUSES])
  (map (curry mk_comb `mldsa_avx2_ntt_order` o mk_small_numeral) (0--255)));;
+
+(* mldsa_avx2_ntt_order decomposes as bitreverse8 after nttunpack_order.     *)
+let MLDSA_AVX2_NTT_ORDER_DECOMPOSE = prove
+ (`!i. i < 256
+       ==> mldsa_avx2_ntt_order i = bitreverse8(nttunpack_order i)`,
+  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REWRITE_TAC[mldsa_avx2_ntt_order; nttunpack_order; LET_DEF; LET_END_DEF] THEN
+  CONV_TAC NUM_REDUCE_CONV THEN
+  REWRITE_TAC[bitreverse8] THEN CONV_TAC(DEPTH_CONV WORD_RED_CONV));;
 
 let MLDSA_FORWARD_NTT_ALT = prove
  (`mldsa_forward_ntt f k =
