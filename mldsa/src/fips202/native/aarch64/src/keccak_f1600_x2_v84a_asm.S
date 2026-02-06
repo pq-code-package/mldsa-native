@@ -250,6 +250,7 @@ Lkeccak_f1600_x2_v84a_loop:
         .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(keccak_f1600_x2_v84a_asm)
 
 #endif /* __ARM_FEATURE_SHA3 */
 

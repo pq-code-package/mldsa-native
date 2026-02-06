@@ -60,5 +60,7 @@ poly_chknorm_loop:
         .unreq count
         .unreq bound
         .unreq flags
+MLD_ASM_FN_SIZE(poly_chknorm_asm)
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

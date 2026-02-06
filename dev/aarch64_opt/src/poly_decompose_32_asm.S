@@ -106,5 +106,7 @@ poly_decompose_32_loop:
         .unreq q_bound
         .unreq gamma2_2x
         .unreq barrett_const
+MLD_ASM_FN_SIZE(poly_decompose_32_asm)
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

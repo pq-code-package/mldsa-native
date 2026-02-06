@@ -978,6 +978,7 @@ Lkeccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
         .cfi_adjust_cfa_offset -0xe0
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm)
 
 #endif /* __ARM_FEATURE_SHA3 */
 

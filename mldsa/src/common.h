@@ -81,6 +81,11 @@
 #define MLD_ASM_FN_SYMBOL(sym) MLD_ASM_NAMESPACE(sym) :
 #endif
 
+/*
+ * Output the size of an assembly function.
+ */
+#define MLD_ASM_FN_SIZE(sym) .size MLD_ASM_NAMESPACE(sym), . - MLD_ASM_NAMESPACE(sym)
+
 /* We aim to simplify the user's life by supporting builds where
  * all source files are included, even those that are not needed.
  * Those files are appropriately guarded and will be empty when unneeded.

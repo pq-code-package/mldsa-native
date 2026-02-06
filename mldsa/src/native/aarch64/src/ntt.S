@@ -647,5 +647,6 @@ Lntt_layer45678_start:
         .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(ntt_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

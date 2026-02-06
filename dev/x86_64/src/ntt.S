@@ -305,6 +305,8 @@ levels2t7	2
 levels2t7	3
 
 ret
+MLD_ASM_FN_SIZE(ntt_avx2)
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
         */

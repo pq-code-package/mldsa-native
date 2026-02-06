@@ -120,5 +120,7 @@ poly_use_hint_88_loop:
         .unreq gamma2_2x
         .unreq barrett_const
         .unreq const_43
+MLD_ASM_FN_SIZE(poly_use_hint_88_asm)
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

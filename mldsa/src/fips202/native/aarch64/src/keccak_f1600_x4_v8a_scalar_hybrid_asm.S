@@ -1070,6 +1070,7 @@ Lkeccak_f1600_x4_v8a_scalar_hybrid_done:
         .cfi_adjust_cfa_offset -0xe0
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(keccak_f1600_x4_v8a_scalar_hybrid_asm)
 
 #endif /* MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED */

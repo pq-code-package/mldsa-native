@@ -96,5 +96,7 @@ polyz_unpack_19_loop:
         .unreq shifts
         .unreq mask
         .unreq gamma1
+MLD_ASM_FN_SIZE(polyz_unpack_19_asm)
+
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

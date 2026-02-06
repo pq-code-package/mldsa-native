@@ -120,5 +120,6 @@ Lrej_uniform_eta4_final_copy:
         .cfi_adjust_cfa_offset -0x240
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(rej_uniform_eta4_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

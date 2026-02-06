@@ -747,5 +747,6 @@ Lintt_layer1234_start:
         .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(intt_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

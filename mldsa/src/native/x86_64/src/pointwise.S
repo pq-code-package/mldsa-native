@@ -124,6 +124,7 @@ Lpointwise_avx2_looptop1:
         vmovdqa	%ymm4, 0x20(%rdi)
         retq
         .cfi_endproc
+MLD_ASM_FN_SIZE(pointwise_avx2)
 
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
         */

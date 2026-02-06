@@ -203,6 +203,7 @@ polyvecl_pointwise_acc_montgomery_l4_loop_start:
     .unreq q_c_1
     .unreq q_c_2
     .unreq q_c_3
+MLD_ASM_FN_SIZE(polyvecl_pointwise_acc_montgomery_l4_asm)
 
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

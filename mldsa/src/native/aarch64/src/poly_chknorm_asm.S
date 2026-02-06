@@ -49,5 +49,6 @@ Lpoly_chknorm_loop:
         and	w0, w0, #0x1
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(poly_chknorm_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

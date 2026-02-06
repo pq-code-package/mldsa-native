@@ -1483,6 +1483,7 @@ intt_layer1234_start:
     .unreq t3
     .unreq ninv
     .unreq ninv_tw
+MLD_ASM_FN_SIZE(intt_asm)
 
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

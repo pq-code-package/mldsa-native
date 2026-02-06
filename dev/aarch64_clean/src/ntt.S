@@ -361,6 +361,7 @@ ntt_layer45678_start:
     .unreq t1
     .unreq t2
     .unreq t3
+MLD_ASM_FN_SIZE(ntt_asm)
 
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

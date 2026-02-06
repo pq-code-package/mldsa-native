@@ -369,6 +369,7 @@ Lkeccak_f1600_x1_scalar_loop:
         .cfi_adjust_cfa_offset -0x80
         ret
         .cfi_endproc
+MLD_ASM_FN_SIZE(keccak_f1600_x1_scalar_asm)
 
 #endif /* MLD_FIPS202_AARCH64_NEED_X1_SCALAR && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED */

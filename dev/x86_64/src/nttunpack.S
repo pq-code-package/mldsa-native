@@ -92,6 +92,7 @@ nttunpack_64_coefficients 4*64*2
 nttunpack_64_coefficients 4*64*3
 
 ret
+MLD_ASM_FN_SIZE(nttunpack_avx2)
 
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

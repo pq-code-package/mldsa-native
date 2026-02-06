@@ -2303,6 +2303,7 @@ MLD_ASM_FN_SYMBOL(invntt_avx2)
         vmovdqa	%ymm7, 0x1e0(%rdi)
         retq
         .cfi_endproc
+MLD_ASM_FN_SIZE(invntt_avx2)
 
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
         */
