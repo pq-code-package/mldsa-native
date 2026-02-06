@@ -52,7 +52,7 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native.S
+ * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native_asm.S
  * ```
  */
 

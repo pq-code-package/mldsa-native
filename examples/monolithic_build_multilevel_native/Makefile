@@ -57,7 +57,7 @@ endif
 #
 # Here, the monolithic C file for mldsa-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
-MLD_SOURCE_ASM = mldsa_native/mldsa_native.S
+MLD_SOURCE_ASM = mldsa_native/mldsa_native_asm.S
 
 INC=-Imldsa_native/ -I./
 

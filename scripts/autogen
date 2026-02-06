@@ -1746,7 +1746,7 @@ def gen_monolithic_asm_file():
         yield " *"
         yield " * Example:"
         yield " * ```bash"
-        yield " * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native.S"
+        yield " * unifdef -UMLD_CONFIG_USE_NATIVE_BACKEND_ARITH mldsa_native_asm.S"
         yield " * ```"
         yield " */"
         yield ""
@@ -1791,7 +1791,7 @@ def gen_monolithic_asm_file():
         ]
         yield from gen_macro_undefs(extra_notes=extra)
 
-    update_file("mldsa/mldsa_native.S", "\n".join(gen()), force_format=True)
+    update_file("mldsa/mldsa_native_asm.S", "\n".join(gen()), force_format=True)
 
 
 def get_config_options():

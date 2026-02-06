@@ -16,7 +16,7 @@ Use this approach when:
 
 1. Source tree [mldsa_native/*](mldsa_native), including top-level compilation unit
    [mldsa_native.c](mldsa_native/mldsa_native.c) (gathering all C sources),
-   [mldsa_native.S](mldsa_native/mldsa_native.S) (gathering all assembly sources),
+   [mldsa_native_asm.S](mldsa_native/mldsa_native_asm.S) (gathering all assembly sources),
    and the mldsa-native API [mldsa_native.h](mldsa_native/mldsa_native.h).
 2. Manually provided wrapper file [mldsa_native_all.c](mldsa_native_all.c),
    including `mldsa_native.c` three times (in this example, we don't use a
@@ -67,7 +67,7 @@ The application [main.c](main.c) embeds the wrapper and imports constants:
 
 ## Notes
 
-- Both `mldsa_native_all.c` and `mldsa_native.S` must be compiled and linked
+- Both `mldsa_native_all.c` and `mldsa_native_asm.S` must be compiled and linked
 - `MLD_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
 - `MLD_CONFIG_CONSTANTS_ONLY` imports size constants without function declarations
 - Native backends are auto-selected based on target architecture
