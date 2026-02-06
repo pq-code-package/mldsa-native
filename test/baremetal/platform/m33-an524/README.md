@@ -21,7 +21,7 @@ make lib EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0
 make run_func_44 EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0
 
 # Run benchmarks
-make run_bench_44 EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0 CYCLES=NO
+make run_bench_44 EXTRA_MAKEFILE=test/baremetal/platform/m33-an524/platform.mk OPT=0 CYCLES=PMU
 ```
 
 ## Patches
