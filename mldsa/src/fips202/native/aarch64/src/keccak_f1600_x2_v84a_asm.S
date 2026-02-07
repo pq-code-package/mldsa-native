@@ -251,6 +251,8 @@ Lkeccak_f1600_x2_v84a_loop:
         ret
         .cfi_endproc
 
+MLD_ASM_FN_SIZE(keccak_f1600_x2_v84a_asm)
+
 #endif /* __ARM_FEATURE_SHA3 */
 
 #endif /* MLD_FIPS202_AARCH64_NEED_X2_V84A && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

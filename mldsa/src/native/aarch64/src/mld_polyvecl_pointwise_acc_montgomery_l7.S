@@ -170,4 +170,6 @@ Lpolyvecl_pointwise_acc_montgomery_l7_loop_start:
         ret
         .cfi_endproc
 
+MLD_ASM_FN_SIZE(polyvecl_pointwise_acc_montgomery_l7_asm)
+
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

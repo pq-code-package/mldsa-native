@@ -77,4 +77,6 @@ Lpoly_decompose_32_loop:
         ret
         .cfi_endproc
 
+MLD_ASM_FN_SIZE(poly_decompose_32_asm)
+
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

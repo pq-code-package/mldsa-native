@@ -128,4 +128,6 @@ Lrej_uniform_eta2_final_copy:
         ret
         .cfi_endproc
 
+MLD_ASM_FN_SIZE(rej_uniform_eta2_asm)
+
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
