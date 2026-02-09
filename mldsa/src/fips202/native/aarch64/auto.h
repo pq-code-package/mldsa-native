@@ -37,6 +37,7 @@
 #include "x1_scalar.h"
 #endif
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && !defined(MLD_CONFIG_REDUCE_RAM)
 /*
  * Keccak-f1600x2/x4
  *
@@ -67,5 +68,7 @@
 #include "x4_v8a_scalar.h"
 
 #endif /* !__ARM_FEATURE_SHA3 */
+
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_REDUCE_RAM */
 
 #endif /* !MLD_FIPS202_NATIVE_AARCH64_AUTO_H */

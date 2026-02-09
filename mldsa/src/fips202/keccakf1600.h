@@ -43,6 +43,7 @@ __contract__(
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
 );
 
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_keccakf1600x4_extract_bytes \
   MLD_NAMESPACE(keccakf1600x4_extract_bytes)
 MLD_INTERNAL_API
@@ -93,6 +94,7 @@ __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
 );
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mld_keccakf1600_permute MLD_NAMESPACE(keccakf1600_permute)
 MLD_INTERNAL_API
