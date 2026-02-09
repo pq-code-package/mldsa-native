@@ -8,6 +8,7 @@
 #include "polyvec.h"
 #include "polyvec_lazy.h"
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_pack_pk MLD_NAMESPACE_KL(pack_pk)
 /*************************************************
  * Name:        mld_pack_pk
@@ -67,6 +68,7 @@ __contract__(
     array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 
 #define mld_pack_sig_c MLD_NAMESPACE_KL(pack_sig_c)

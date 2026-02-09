@@ -11,7 +11,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+#if defined(MLD_ARITH_BACKEND_AARCH64) &&  \
+    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "arith_native_aarch64.h"
@@ -536,8 +537,10 @@ MLD_ALIGN const uint8_t mld_rej_uniform_eta_table[] = {
     8,   9,   10,  11,  12,  13,  14,  15 /* 255 */,
 };
 
-#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \
+         !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLD_EMPTY_CU(aarch64_rej_uniform_eta_table)
 
-#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED) */
+#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

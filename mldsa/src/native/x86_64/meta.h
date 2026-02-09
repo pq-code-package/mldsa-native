@@ -83,6 +83,7 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
   return (int)mld_rej_uniform_avx2(r, buf);
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
@@ -140,6 +141,7 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   return (int)outlen;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)

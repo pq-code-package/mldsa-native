@@ -766,6 +766,7 @@ __contract__(
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
  * Name:        mld_sign_pk_from_sk
  *
@@ -803,4 +804,6 @@ __contract__(
   assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
 #endif /* !MLD_SIGN_H */

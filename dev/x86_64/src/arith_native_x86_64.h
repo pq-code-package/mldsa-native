@@ -67,6 +67,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_avx2(int32_t *r,
                               const uint8_t buf[MLD_AVX2_REJ_UNIFORM_BUFLEN]);
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta2_avx2 MLD_NAMESPACE(mld_rej_uniform_eta2_avx2)
 MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_eta2_avx2(
@@ -76,6 +77,7 @@ unsigned mld_rej_uniform_eta2_avx2(
 MLD_MUST_CHECK_RETURN_VALUE
 unsigned mld_rej_uniform_eta4_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_poly_decompose_32_avx2 MLD_NAMESPACE(mld_poly_decompose_32_avx2)
 void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0);
