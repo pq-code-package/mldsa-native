@@ -20,6 +20,7 @@
 #include "../../../common.h"
 
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) &&   \
+    !defined(MLD_CONFIG_NO_VERIFY_API) &&          \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) &&   \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
      (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
@@ -86,13 +87,14 @@ void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a,
   }
 }
 
-#else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-         && (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == \
-         65 || MLD_CONFIG_PARAMETER_SET == 87) */
+#else /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_NO_VERIFY_API &&     \
+         !MLD_CONFIG_MULTILEVEL_NO_SHARED &&                                  \
+         (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+         || MLD_CONFIG_PARAMETER_SET == 87) */
 
 MLD_EMPTY_CU(avx2_poly_use_hint_32)
 
-#endif /* !(MLD_ARITH_BACKEND_X86_64_DEFAULT &&                                \
+#endif /* !(MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_NO_VERIFY_API &&   \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED &&                                  \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87)) */

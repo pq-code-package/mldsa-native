@@ -111,11 +111,13 @@ __contract__(
   ensures(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_use_hint_32_asm MLD_NAMESPACE(poly_use_hint_32_asm)
 void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_use_hint_88_asm MLD_NAMESPACE(poly_use_hint_88_asm)
 void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_poly_chknorm_asm MLD_NAMESPACE(poly_chknorm_asm)
 MLD_MUST_CHECK_RETURN_VALUE

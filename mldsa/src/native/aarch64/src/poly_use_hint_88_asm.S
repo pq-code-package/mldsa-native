@@ -4,7 +4,7 @@
  */
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_NO_VERIFY_API) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
            (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44)
 
 /*
@@ -101,7 +101,8 @@ Lpoly_use_hint_88_loop:
 
 MLD_ASM_FN_SIZE(poly_use_hint_88_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_VERIFY_API && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44) \
         */
 

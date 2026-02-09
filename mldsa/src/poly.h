@@ -111,6 +111,7 @@ __contract__(
   ensures(array_bound(r->coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX))
 );
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_shiftl MLD_NAMESPACE(poly_shiftl)
 /*************************************************
  * Name:        mld_poly_shiftl
@@ -128,6 +129,7 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_poly_ntt MLD_NAMESPACE(poly_ntt)
 /*************************************************
@@ -302,6 +304,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyt1_unpack MLD_NAMESPACE(polyt1_unpack)
 /*************************************************
  * Name:        mld_polyt1_unpack
@@ -320,6 +323,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(mld_poly)))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << 10))
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyt0_pack MLD_NAMESPACE(polyt0_pack)

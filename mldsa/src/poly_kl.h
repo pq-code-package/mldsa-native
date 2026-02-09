@@ -72,6 +72,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_use_hint MLD_NAMESPACE_KL(poly_use_hint)
 /*************************************************
  * Name:        mld_poly_use_hint
@@ -94,6 +95,7 @@ __contract__(
   assigns(memory_slice(b, sizeof(mld_poly)))
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)

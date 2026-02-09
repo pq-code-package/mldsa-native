@@ -362,6 +362,7 @@ __contract__(
 );
 #endif /* MLD_USE_NATIVE_POLY_CADDQ */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
@@ -424,6 +425,7 @@ __contract__(
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 */
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
 /*************************************************

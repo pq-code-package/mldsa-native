@@ -4,7 +4,7 @@
  */
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_NO_VERIFY_API) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
            (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44)
 /* simpasm: header-end */
 
@@ -122,6 +122,7 @@ poly_use_hint_88_loop:
         .unreq barrett_const
         .unreq const_43
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_VERIFY_API && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44) \
         */

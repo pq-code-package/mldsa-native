@@ -140,6 +140,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_unpack_pk MLD_NAMESPACE_KL(unpack_pk)
 /*************************************************
  * Name:        mld_unpack_pk
@@ -162,7 +163,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
 );
-
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_unpack_sk MLD_NAMESPACE_KL(unpack_sk)
 /*************************************************
@@ -208,6 +209,7 @@ __contract__(
     array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
 /*************************************************
  * Name:        mld_unpack_sig
@@ -240,4 +242,6 @@ __contract__(
     array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
   ensures(return_value >= 0 && return_value <= 1)
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
 #endif /* !MLD_PACKING_H */
