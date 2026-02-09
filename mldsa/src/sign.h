@@ -722,6 +722,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /* Maximum formatted domain separation message length:
  * - Pure ML-DSA: 0x00 || ctxlen || ctx (max 255)
  * - HashML-DSA: 0x01 || ctxlen || ctx (max 255) || oid (11) || ph (max 64) */
@@ -779,6 +780,7 @@ __contract__(
   assigns(memory_slice(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************

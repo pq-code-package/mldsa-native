@@ -1125,6 +1125,7 @@ def gen_aarch64_polyz_unpack_table():
         yield ""
         yield '#include "arith_native_aarch64.h"'
         yield ""
+        yield "#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)"
         yield "/* Table of indices used for tbl instructions in polyz_unpack_{17,19}."
         yield " * See autogen for details. */"
         yield ""
@@ -1138,6 +1139,8 @@ def gen_aarch64_polyz_unpack_table():
             yield "};"
             yield "#endif"
             yield ""
+        yield "#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */"
+        yield ""
         yield "#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLD_EMPTY_CU(aarch64_polyz_unpack_table)"

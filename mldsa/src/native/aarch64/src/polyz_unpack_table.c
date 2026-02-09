@@ -16,6 +16,7 @@
 
 #include "arith_native_aarch64.h"
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /* Table of indices used for tbl instructions in polyz_unpack_{17,19}.
  * See autogen for details. */
 
@@ -39,6 +40,8 @@ MLD_ALIGN const uint8_t mld_polyz_unpack_19_indices[] = {
 };
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 

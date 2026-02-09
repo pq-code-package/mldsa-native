@@ -194,6 +194,7 @@ __contract__(
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_add MLD_NAMESPACE_KL(polyveck_add)
 /*************************************************
  * Name:        mld_polyveck_add
@@ -218,6 +219,7 @@ __contract__(
   ensures(forall(q2, 0, MLDSA_K,
                 array_bound(u->vec[q2].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyveck_sub MLD_NAMESPACE_KL(polyveck_sub)
@@ -328,6 +330,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_chknorm MLD_NAMESPACE_KL(polyveck_chknorm)
 /*************************************************
  * Name:        mld_polyveck_chknorm
@@ -354,7 +357,6 @@ __contract__(
   ensures((return_value == 0) == forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_power2round MLD_NAMESPACE_KL(polyveck_power2round)
 /*************************************************
  * Name:        mld_polyveck_power2round
@@ -452,6 +454,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyveck_pack_w1 MLD_NAMESPACE_KL(polyveck_pack_w1)
 /*************************************************
  * Name:        mld_polyveck_pack_w1
@@ -474,6 +477,7 @@ __contract__(
     array_bound(w1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
   assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_pack_eta MLD_NAMESPACE_KL(polyveck_pack_eta)

@@ -230,6 +230,7 @@ __contract__(
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_challenge MLD_NAMESPACE_KL(poly_challenge)
 /*************************************************
  * Name:        mld_poly_challenge
@@ -251,6 +252,7 @@ __contract__(
   /* All coefficients of c are -1, 0 or +1 */
   ensures(array_bound(c->coeffs, 0, MLDSA_N, -1, 2))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyeta_pack MLD_NAMESPACE_KL(polyeta_pack)
@@ -329,6 +331,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyz_unpack MLD_NAMESPACE_KL(polyz_unpack)
 /*************************************************
  * Name:        mld_polyz_unpack
@@ -367,5 +370,6 @@ __contract__(
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #endif /* !MLD_POLY_KL_H */
