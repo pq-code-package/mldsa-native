@@ -4,7 +4,7 @@
  */
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
            (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
 /* simpasm: header-end */
 
@@ -137,6 +137,7 @@ poly_decompose_32_loop:
         .unreq gamma2_2x
         .unreq barrett_const
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87) */

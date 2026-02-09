@@ -79,11 +79,13 @@ unsigned mld_rej_uniform_eta4_avx2(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_poly_decompose_32_avx2 MLD_NAMESPACE(mld_poly_decompose_32_avx2)
 void mld_poly_decompose_32_avx2(int32_t *a1, int32_t *a0);
 
 #define mld_poly_decompose_88_avx2 MLD_NAMESPACE(mld_poly_decompose_88_avx2)
 void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_caddq_avx2 MLD_NAMESPACE(poly_caddq_avx2)
 void mld_poly_caddq_avx2(int32_t *r);
