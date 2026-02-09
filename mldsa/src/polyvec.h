@@ -26,6 +26,7 @@ typedef struct
 } mld_polyvecl;
 
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyvecl_uniform_gamma1 MLD_NAMESPACE_KL(polyvecl_uniform_gamma1)
 /*************************************************
  * Name:        mld_polyvecl_uniform_gamma1
@@ -51,6 +52,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /*************************************************
@@ -379,6 +381,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyveck_decompose MLD_NAMESPACE_KL(polyveck_decompose)
 /*************************************************
  * Name:        mld_polyveck_decompose
@@ -414,6 +417,7 @@ __contract__(
   ensures(forall(k2, 0, MLDSA_K,
                  array_abs_bound(v0->vec[k2].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_polyveck_use_hint MLD_NAMESPACE_KL(polyveck_use_hint)
 /*************************************************

@@ -124,6 +124,21 @@
 /* #define MLD_CONFIG_NO_KEYPAIR_API */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_NO_SIGN_API
+ *
+ * Description: By default, mldsa-native includes support for creating
+ *              signatures. If you don't need this, set MLD_CONFIG_NO_SIGN_API
+ *              to exclude crypto_sign, crypto_sign_signature,
+ *              crypto_sign_signature_extmu, crypto_sign_signature_internal,
+ *              crypto_sign_signature_pre_hash_internal,
+ *              crypto_sign_signature_pre_hash_shake256, and all internal APIs
+ *              only needed by those functions.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_SIGN_API */
+
+
+/******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
  *
  * Description: If this option is set, mldsa-native will be built without the

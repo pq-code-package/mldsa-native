@@ -265,6 +265,7 @@ __contract__(
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
@@ -337,6 +338,7 @@ __contract__(
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if defined(MLD_USE_NATIVE_POLY_CADDQ)
 /*************************************************

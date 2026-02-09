@@ -88,6 +88,7 @@
 #define MLD_PREHASH_SHAKE_128 11
 #define MLD_PREHASH_SHAKE_256 12
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
  * Name:        mld_sign_keypair_internal
  *
@@ -158,7 +159,9 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL)
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        mld_sign_signature_internal
  *
@@ -351,6 +354,7 @@ __contract__(
            || return_value == MLD_ERR_OUT_OF_MEMORY
            || return_value == MLD_ERR_RNG_FAIL))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        mld_sign_verify_internal
@@ -511,6 +515,7 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        mld_sign_signature_pre_hash_internal
  *
@@ -567,6 +572,7 @@ __contract__(
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        mld_sign_verify_pre_hash_internal
@@ -617,6 +623,7 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        mld_sign_signature_pre_hash_shake256
  *
@@ -665,6 +672,7 @@ __contract__(
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY) && *siglen == 0))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        mld_sign_verify_pre_hash_shake256
