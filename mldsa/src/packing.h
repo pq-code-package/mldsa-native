@@ -165,6 +165,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_unpack_sk MLD_NAMESPACE_KL(unpack_sk)
 /*************************************************
  * Name:        mld_unpack_sk
@@ -208,6 +209,7 @@ __contract__(
   ensures(forall(k2, 0, MLDSA_K,
     array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)

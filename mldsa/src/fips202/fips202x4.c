@@ -22,6 +22,8 @@
 #include "fips202x4.h"
 #include "keccakf1600.h"
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
+    !defined(MLD_CONFIG_REDUCE_RAM)
 static void mld_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
                                       const uint8_t *in0, const uint8_t *in1,
                                       const uint8_t *in2, const uint8_t *in3,
@@ -115,6 +117,8 @@ __contract__(
     nblocks--;
   }
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_REDUCE_RAM */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM)
 MLD_INTERNAL_API
@@ -146,6 +150,7 @@ void mld_shake128x4_release(mld_shake128x4ctx *state)
 }
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
 void mld_shake256x4_absorb_once(mld_shake256x4ctx *state, const uint8_t *in0,
                                 const uint8_t *in1, const uint8_t *in2,
@@ -173,6 +178,7 @@ void mld_shake256x4_release(mld_shake256x4ctx *state)
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(state, sizeof(mld_shake256x4ctx));
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED && !MLD_CONFIG_SERIAL_FIPS202_ONLY \
         */

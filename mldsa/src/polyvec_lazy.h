@@ -16,6 +16,8 @@
 #ifndef MLD_POLYVEC_LAZY_H
 #define MLD_POLYVEC_LAZY_H
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+
 #include "poly.h"
 #include "polyvec.h"
 
@@ -222,4 +224,5 @@ typedef mld_sk_t0hat_eager mld_sk_t0hat;
 #endif
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 #endif /* !MLD_POLYVEC_LAZY_H */

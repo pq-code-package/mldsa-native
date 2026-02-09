@@ -37,7 +37,9 @@
 #include "x1_scalar.h"
 #endif
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
+     !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_REDUCE_RAM)) && \
+    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 /*
  * Keccak-f1600x2/x4
  *
@@ -69,6 +71,7 @@
 
 #endif /* !__ARM_FEATURE_SHA3 */
 
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_REDUCE_RAM) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #endif /* !MLD_FIPS202_NATIVE_AARCH64_AUTO_H */
