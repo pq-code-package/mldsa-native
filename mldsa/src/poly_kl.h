@@ -93,6 +93,7 @@ __contract__(
   ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
 /*************************************************
@@ -159,6 +160,7 @@ __contract__(
   ensures(array_abs_bound(r->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
@@ -244,6 +246,7 @@ __contract__(
   ensures(array_bound(c->coeffs, 0, MLDSA_N, -1, 2))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyeta_pack MLD_NAMESPACE_KL(polyeta_pack)
 /*************************************************
  * Name:        mld_polyeta_pack
@@ -262,6 +265,7 @@ __contract__(
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
   assigns(memory_slice(r, MLDSA_POLYETA_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 /*
  * polyeta_unpack produces coefficients in [-MLDSA_ETA,MLDSA_ETA] for

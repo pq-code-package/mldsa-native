@@ -348,6 +348,7 @@ __contract__(
   ensures((return_value == 0) == forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_power2round MLD_NAMESPACE_KL(polyveck_power2round)
 /*************************************************
  * Name:        mld_polyveck_power2round
@@ -376,6 +377,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K, array_bound(v0->vec[k1].coeffs, 0, MLDSA_N, -(MLD_2_POW_D/2)+1, (MLD_2_POW_D/2)+1)))
   ensures(forall(k2, 0, MLDSA_K, array_bound(v1->vec[k2].coeffs, 0, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_polyveck_decompose MLD_NAMESPACE_KL(polyveck_decompose)
 /*************************************************
@@ -488,6 +490,7 @@ __contract__(
   assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_pack_eta MLD_NAMESPACE_KL(polyveck_pack_eta)
 /*************************************************
  * Name:        mld_polyveck_pack_eta
@@ -553,6 +556,7 @@ __contract__(
     array_bound(p->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
   assigns(memory_slice(r, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_polyvecl_unpack_eta MLD_NAMESPACE_KL(polyvecl_unpack_eta)
 /*************************************************

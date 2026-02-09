@@ -193,6 +193,7 @@ __contract__(
   ensures(array_abs_bound(c->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_poly_power2round MLD_NAMESPACE(poly_power2round)
 /*************************************************
  * Name:        mld_poly_power2round
@@ -220,6 +221,7 @@ __contract__(
   ensures(array_bound(a0->coeffs, 0, MLDSA_N, -(MLD_2_POW_D/2)+1, (MLD_2_POW_D/2)+1))
   ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_poly_uniform MLD_NAMESPACE(poly_uniform)
 /*************************************************
@@ -278,6 +280,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_REDUCE_RAM */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyt1_pack MLD_NAMESPACE(polyt1_pack)
 /*************************************************
  * Name:        mld_polyt1_pack
@@ -297,6 +300,7 @@ __contract__(
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << 10))
   assigns(memory_slice(r, MLDSA_POLYT1_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_polyt1_unpack MLD_NAMESPACE(polyt1_unpack)
 /*************************************************
@@ -317,6 +321,7 @@ __contract__(
   ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << 10))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyt0_pack MLD_NAMESPACE(polyt0_pack)
 /*************************************************
  * Name:        mld_polyt0_pack
@@ -336,6 +341,7 @@ __contract__(
   requires(array_bound(a->coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1))
   assigns(memory_slice(r, MLDSA_POLYT0_PACKEDBYTES))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 
 #define mld_polyt0_unpack MLD_NAMESPACE(polyt0_unpack)
