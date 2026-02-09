@@ -91,6 +91,7 @@ void mld_poly_caddq(mld_poly *a)
   mld_poly_caddq_c(a);
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 /* Reference: We use destructive version (output=first input) to avoid
  *            reasoning about aliasing in the CBMC specification */
 MLD_INTERNAL_API
@@ -111,6 +112,7 @@ void mld_poly_add(mld_poly *r, const mld_poly *b)
     r->coeffs[i] = r->coeffs[i] + b->coeffs[i];
   }
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /* Reference: We use destructive version (output=first input) to avoid
@@ -847,6 +849,7 @@ void mld_polyt0_pack(uint8_t r[MLDSA_POLYT0_PACKEDBYTES], const mld_poly *a)
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
 void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 {
@@ -907,6 +910,7 @@ void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
   mld_assert_bound(r->coeffs, MLDSA_N, -(1 << (MLDSA_D - 1)) + 1,
                    (1 << (MLDSA_D - 1)) + 1);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 MLD_STATIC_TESTABLE uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B)
 __contract__(

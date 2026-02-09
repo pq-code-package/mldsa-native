@@ -275,6 +275,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 /*
  * polyeta_unpack produces coefficients in [-MLDSA_ETA,MLDSA_ETA] for
  * well-formed inputs (i.e., those produced by polyeta_pack).
@@ -308,6 +309,7 @@ __contract__(
   assigns(memory_slice(r, sizeof(mld_poly)))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyz_pack MLD_NAMESPACE_KL(polyz_pack)

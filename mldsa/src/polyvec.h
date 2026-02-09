@@ -550,6 +550,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyvecl_unpack_eta MLD_NAMESPACE_KL(polyvecl_unpack_eta)
 /*************************************************
  * Name:        mld_polyvecl_unpack_eta
@@ -571,6 +572,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyvecl_unpack_z MLD_NAMESPACE_KL(polyvecl_unpack_z)
@@ -596,6 +598,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyveck_unpack_eta MLD_NAMESPACE_KL(polyveck_unpack_eta)
 /*************************************************
  * Name:        mld_polyveck_unpack_eta
@@ -639,6 +642,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 
 
