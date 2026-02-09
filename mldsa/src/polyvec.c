@@ -420,6 +420,7 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
   mld_polyvecl_pointwise_acc_montgomery_c(w, u, v);
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
 {
@@ -444,6 +445,7 @@ uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
   }
   return t;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 /**************************************************************/
 /************ Vectors of polynomials of length MLDSA_K **************/

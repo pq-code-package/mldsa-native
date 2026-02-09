@@ -110,7 +110,7 @@ __contract__(
   ensures(array_abs_bound(w->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 
-
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyvecl_chknorm MLD_NAMESPACE_KL(polyvecl_chknorm)
 /*************************************************
  * Name:        mld_polyvecl_chknorm
@@ -135,6 +135,7 @@ __contract__(
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
   ensures((return_value == 0) == forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 /* Vectors of polynomials of length MLDSA_K */
 typedef struct
