@@ -193,6 +193,7 @@ __contract__(
 );
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
 /*************************************************
@@ -262,6 +263,7 @@ __contract__(
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \

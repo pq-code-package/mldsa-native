@@ -16,6 +16,7 @@
 #define mld_unpack_hints MLD_ADD_PARAM_SET(mld_unpack_hints)
 /* End of parameter set namespacing */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
 void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                  const uint8_t rho[MLDSA_SEEDBYTES], const mld_polyveck *t1)
@@ -34,6 +35,7 @@ void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                     &t1->vec[i]);
   }
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 MLD_INTERNAL_API
 void mld_unpack_pk(uint8_t rho[MLDSA_SEEDBYTES], mld_polyveck *t1,
@@ -50,6 +52,7 @@ void mld_unpack_pk(uint8_t rho[MLDSA_SEEDBYTES], mld_polyveck *t1,
   }
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
 void mld_pack_sk(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                  const uint8_t rho[MLDSA_SEEDBYTES],
@@ -74,6 +77,7 @@ void mld_pack_sk(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
 
   mld_polyveck_pack_t0(sk, t0);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 MLD_INTERNAL_API
 void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],

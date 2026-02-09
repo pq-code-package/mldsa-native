@@ -988,7 +988,8 @@ def gen_aarch64_rej_uniform_eta_table():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
+        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) &&  \\"
+        yield "    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield '#include "arith_native_aarch64.h"'
@@ -1003,11 +1004,15 @@ def gen_aarch64_rej_uniform_eta_table():
             yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
         yield ""
-        yield "#else"
+        yield ("#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\")
+        yield "         !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLD_EMPTY_CU(aarch64_rej_uniform_eta_table)"
         yield ""
-        yield "#endif"
+        yield (
+            "#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\"
+        )
+        yield "          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
     update_file("dev/aarch64_opt/src/rej_uniform_eta_table.c", "\n".join(gen()))

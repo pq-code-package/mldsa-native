@@ -644,6 +644,7 @@ uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t bound)
   return t;
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
 void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
                               const mld_polyveck *v)
@@ -668,6 +669,7 @@ void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
   mld_assert_bound_2d(v1->vec, MLDSA_K, MLDSA_N, 0,
                       ((MLDSA_Q - 1) / MLD_2_POW_D) + 1);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 MLD_INTERNAL_API
 void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
@@ -740,6 +742,7 @@ void mld_polyveck_pack_w1(uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
   }
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
 void mld_polyveck_pack_eta(uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES],
                            const mld_polyveck *p)
@@ -791,6 +794,7 @@ void mld_polyveck_pack_t0(uint8_t r[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES],
     mld_polyt0_pack(&r[i * MLDSA_POLYT0_PACKEDBYTES], &p->vec[i]);
   }
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 MLD_INTERNAL_API
 void mld_polyvecl_unpack_eta(

@@ -26,8 +26,10 @@ extern const int32_t mld_aarch64_intt_zetas_layer123456[];
 
 #define mld_rej_uniform_table MLD_NAMESPACE(rej_uniform_table)
 extern const uint8_t mld_rej_uniform_table[];
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta_table MLD_NAMESPACE(rej_uniform_eta_table)
 extern const uint8_t mld_rej_uniform_eta_table[];
+#endif
 
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_indices MLD_NAMESPACE(polyz_unpack_17_indices)
@@ -78,6 +80,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_asm(int32_t *r, const uint8_t *buf, unsigned buflen,
                              const uint8_t *table);
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta2_asm MLD_NAMESPACE(rej_uniform_eta2_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta2_asm(int32_t *r, const uint8_t *buf,
@@ -87,6 +90,7 @@ uint64_t mld_rej_uniform_eta2_asm(int32_t *r, const uint8_t *buf,
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta4_asm(int32_t *r, const uint8_t *buf,
                                   unsigned buflen, const uint8_t *table);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define mld_poly_decompose_32_asm MLD_NAMESPACE(poly_decompose_32_asm)
 void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0);
