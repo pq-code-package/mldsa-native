@@ -135,6 +135,7 @@ void mld_poly_sub(mld_poly *r, const mld_poly *b)
   mld_assert_bound(r->coeffs, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX);
 }
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 void mld_poly_shiftl(mld_poly *a)
 {
@@ -155,7 +156,7 @@ void mld_poly_shiftl(mld_poly *a)
   }
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
 }
-
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 static MLD_INLINE int32_t mld_fqmul(int32_t a, int32_t b)
 __contract__(
@@ -766,6 +767,7 @@ void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
 {
@@ -789,6 +791,7 @@ void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
 
   mld_assert_bound(r->coeffs, MLDSA_N, 0, 1 << 10);
 }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API

@@ -126,6 +126,7 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a,
                                              const mld_poly *h)
 __contract__(
@@ -183,6 +184,7 @@ void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
           65 || MLD_CONFIG_PARAMETER_SET == 87) */
   mld_poly_use_hint_c(b, a, h);
 }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
