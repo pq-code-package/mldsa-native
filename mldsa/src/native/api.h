@@ -459,6 +459,7 @@ __contract__(
 );
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /*************************************************
@@ -543,6 +544,7 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(c, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4

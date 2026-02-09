@@ -228,6 +228,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   return mld_poly_chknorm_avx2(a, B);
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
@@ -268,6 +269,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   mld_pointwise_avx2(c, a, b, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
 MLD_MUST_CHECK_RETURN_VALUE
