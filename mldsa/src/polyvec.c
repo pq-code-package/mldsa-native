@@ -420,6 +420,7 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
   mld_polyvecl_pointwise_acc_montgomery_c(w, u, v);
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
 {
@@ -471,6 +472,7 @@ void mld_polyveck_reduce(mld_polyveck *v)
   mld_assert_bound_2d(v->vec, MLDSA_K, MLDSA_N, -MLD_REDUCE32_RANGE_MAX,
                       MLD_REDUCE32_RANGE_MAX);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 MLD_INTERNAL_API
 void mld_polyveck_caddq(mld_polyveck *v)
