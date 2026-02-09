@@ -16,7 +16,8 @@
 #include "aarch64/auto.h"
 #endif
 
-#if defined(MLD_SYS_X86_64) && defined(MLD_SYS_X86_64_AVX2)
+#if defined(MLD_SYS_X86_64) && defined(MLD_SYS_X86_64_AVX2) && \
+    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #include "x86_64/xkcp.h"
 #endif
 
