@@ -90,11 +90,13 @@ void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0);
 #define mld_poly_caddq_avx2 MLD_NAMESPACE(poly_caddq_avx2)
 void mld_poly_caddq_avx2(int32_t *r);
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_use_hint_32_avx2 MLD_NAMESPACE(mld_poly_use_hint_32_avx2)
 void mld_poly_use_hint_32_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 
 #define mld_poly_use_hint_88_avx2 MLD_NAMESPACE(mld_poly_use_hint_88_avx2)
 void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a, const int32_t *h);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_poly_chknorm_avx2 MLD_NAMESPACE(mld_poly_chknorm_avx2)
 MLD_MUST_CHECK_RETURN_VALUE

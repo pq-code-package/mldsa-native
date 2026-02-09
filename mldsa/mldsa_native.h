@@ -443,6 +443,7 @@ int MLD_API_NAMESPACE(sign)(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 /*************************************************
  * Name:        crypto_sign_verify_internal
  *
@@ -585,6 +586,7 @@ int MLD_API_NAMESPACE(open)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /*************************************************
  * Hash algorithm constants for domain separation
@@ -654,6 +656,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_internal
  *
@@ -697,6 +700,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
@@ -740,6 +744,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_shake256
  *
@@ -775,6 +780,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /* Maximum formatted domain separation message length */
 #define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)

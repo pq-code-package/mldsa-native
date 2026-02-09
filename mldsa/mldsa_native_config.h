@@ -137,6 +137,20 @@
  *****************************************************************************/
 /* #define MLD_CONFIG_NO_SIGN_API */
 
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_VERIFY_API
+ *
+ * Description: By default, mldsa-native includes support for verifying
+ *              signatures. If you don't need this, set
+ *              MLD_CONFIG_NO_VERIFY_API to exclude crypto_sign_open,
+ *              crypto_sign_verify, crypto_sign_verify_extmu,
+ *              crypto_sign_verify_internal,
+ *              crypto_sign_verify_pre_hash_internal,
+ *              crypto_sign_verify_pre_hash_shake256, and all internal APIs
+ *              only needed by those functions.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_VERIFY_API */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
