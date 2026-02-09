@@ -443,6 +443,7 @@ __contract__(
   mld_zeroize(&state, sizeof(state));
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        mld_compute_pack_z
  *
@@ -973,6 +974,7 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
   return ret;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -1187,7 +1189,7 @@ cleanup:
   return ret;
 }
 
-
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_pre_hash_internal(
@@ -1228,6 +1230,7 @@ cleanup:
   mld_zeroize(pre, sizeof(pre));
   return ret;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -1258,6 +1261,7 @@ cleanup:
   return ret;
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_pre_hash_shake256(
@@ -1277,6 +1281,7 @@ int mld_sign_signature_pre_hash_shake256(
   mld_zeroize(ph, sizeof(ph));
   return ret;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API

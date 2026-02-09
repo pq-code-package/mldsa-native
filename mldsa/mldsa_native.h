@@ -279,6 +279,7 @@ int MLD_API_NAMESPACE(keypair)(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        crypto_sign_signature_internal
  *
@@ -440,6 +441,7 @@ int MLD_API_NAMESPACE(sign)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        crypto_sign_verify_internal
@@ -601,6 +603,7 @@ int MLD_API_NAMESPACE(open)(
 #define MLD_PREHASH_SHAKE_128 11
 #define MLD_PREHASH_SHAKE_256 12
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        crypto_sign_signature_pre_hash_internal
  *
@@ -649,6 +652,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_internal
@@ -694,6 +698,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
 #endif
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        crypto_sign_signature_pre_hash_shake256
  *
@@ -733,6 +738,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        crypto_sign_verify_pre_hash_shake256

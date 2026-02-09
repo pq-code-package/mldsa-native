@@ -9,6 +9,7 @@
 #include "common.h"
 #include "poly.h"
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_poly_decompose MLD_NAMESPACE_KL(poly_decompose)
 /*************************************************
  * Name:        mld_poly_decompose
@@ -69,6 +70,7 @@ __contract__(
   ensures(return_value <= MLDSA_N)
   ensures(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_use_hint MLD_NAMESPACE_KL(poly_use_hint)
 /*************************************************
@@ -162,6 +164,7 @@ __contract__(
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /*************************************************
@@ -223,6 +226,7 @@ __contract__(
   ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_challenge MLD_NAMESPACE_KL(poly_challenge)
 /*************************************************
@@ -301,6 +305,7 @@ __contract__(
   ensures(array_bound(r->coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1))
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyz_pack MLD_NAMESPACE_KL(polyz_pack)
 /*************************************************
  * Name:        mld_polyz_pack
@@ -320,7 +325,7 @@ __contract__(
   requires(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   assigns(memory_slice(r, MLDSA_POLYZ_PACKEDBYTES))
 );
-
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_polyz_unpack MLD_NAMESPACE_KL(polyz_unpack)
 /*************************************************

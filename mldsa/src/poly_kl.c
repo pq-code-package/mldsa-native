@@ -37,6 +37,7 @@
 /* End of parameter set namespacing */
 
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_STATIC_TESTABLE
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0)
 __contract__(
@@ -123,6 +124,7 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
   return s;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a,
                                              const mld_poly *h)
@@ -488,6 +490,7 @@ void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define MLD_POLY_UNIFORM_GAMMA1_NBLOCKS                       \
   ((MLDSA_POLYZ_PACKEDBYTES + MLD_STREAM256_BLOCKBYTES - 1) / \
    MLD_STREAM256_BLOCKBYTES)
@@ -573,6 +576,7 @@ void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(extseed, sizeof(extseed));
 }
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_INTERNAL_API
 void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
@@ -756,7 +760,7 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
                    MLDSA_ETA + 1);
 }
 
-
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
 void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 {
@@ -809,6 +813,7 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
   }
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_STATIC_TESTABLE void mld_polyz_unpack_c(
     mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])

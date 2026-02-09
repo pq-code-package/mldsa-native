@@ -103,6 +103,7 @@ void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
   mld_polyveck_unpack_t0(t0, sk);
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
 void mld_pack_sig_c_h(uint8_t sig[MLDSA_CRYPTO_BYTES],
                       const uint8_t c[MLDSA_CTILDEBYTES], const mld_polyveck *h,
@@ -183,6 +184,7 @@ void mld_pack_sig_z(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *zi,
   sig += i * MLDSA_POLYZ_PACKEDBYTES;
   mld_polyz_pack(sig, zi);
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /*************************************************
  * Name:        mld_unpack_hints

@@ -69,7 +69,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_pack_sig_c_h MLD_NAMESPACE_KL(pack_sig_c_h)
 /*************************************************
  * Name:        mld_pack_sig_c_h
@@ -125,6 +125,7 @@ __contract__(
   requires(array_bound(zi->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_unpack_pk MLD_NAMESPACE_KL(unpack_pk)
 /*************************************************

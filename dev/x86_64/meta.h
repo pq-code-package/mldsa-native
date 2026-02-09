@@ -143,6 +143,7 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
@@ -171,7 +172,7 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
-
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
