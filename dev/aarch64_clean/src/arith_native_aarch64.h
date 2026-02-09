@@ -31,6 +31,7 @@ extern const uint8_t mld_rej_uniform_table[];
 extern const uint8_t mld_rej_uniform_eta_table[];
 #endif
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_indices MLD_NAMESPACE(polyz_unpack_17_indices)
 extern const uint8_t mld_polyz_unpack_17_indices[];
@@ -40,6 +41,7 @@ extern const uint8_t mld_polyz_unpack_17_indices[];
 #define mld_polyz_unpack_19_indices MLD_NAMESPACE(polyz_unpack_19_indices)
 extern const uint8_t mld_polyz_unpack_19_indices[];
 #endif
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 
 /*
@@ -119,6 +121,7 @@ __contract__(
   ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyz_unpack_17_asm MLD_NAMESPACE(polyz_unpack_17_asm)
 void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,
                              const uint8_t *indices);
@@ -131,6 +134,7 @@ void mld_polyz_unpack_19_asm(int32_t *r, const uint8_t *buf,
   MLD_NAMESPACE(poly_pointwise_montgomery_asm)
 void mld_poly_pointwise_montgomery_asm(int32_t *, const int32_t *,
                                        const int32_t *);
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_polyvecl_pointwise_acc_montgomery_l4_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l4_asm)

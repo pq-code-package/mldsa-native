@@ -102,11 +102,13 @@ void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a, const int32_t *h);
 MLD_MUST_CHECK_RETURN_VALUE
 int mld_poly_chknorm_avx2(const int32_t *a, int32_t B);
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyz_unpack_17_avx2 MLD_NAMESPACE(mld_polyz_unpack_17_avx2)
 void mld_polyz_unpack_17_avx2(int32_t *r, const uint8_t *a);
 
 #define mld_polyz_unpack_19_avx2 MLD_NAMESPACE(mld_polyz_unpack_19_avx2)
 void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a);
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_pointwise_avx2 MLD_NAMESPACE(pointwise_avx2)
 void mld_pointwise_avx2(int32_t *c, const int32_t *a, const int32_t *b,

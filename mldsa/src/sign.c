@@ -387,6 +387,7 @@ cleanup:
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /*************************************************
  * Name:        mld_H
  *
@@ -442,6 +443,7 @@ __contract__(
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(&state, sizeof(state));
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
@@ -1308,6 +1310,7 @@ int mld_sign_verify_pre_hash_shake256(
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define MLD_PRE_HASH_OID_LEN 11
 
 /*************************************************
@@ -1433,6 +1436,7 @@ size_t mld_prepare_domain_separation_prefix(
   mld_memcpy(prefix + 2 + ctxlen + MLD_PRE_HASH_OID_LEN, ph, phlen);
   return 2 + ctxlen + MLD_PRE_HASH_OID_LEN + phlen;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_EXTERNAL_API

@@ -3,7 +3,9 @@
  */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 .macro montgomery_reduce_long res, inl, inh
@@ -164,4 +166,5 @@ poly_pointwise_montgomery_loop_start:
     .unreq q_c_3
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_NO_VERIFY_API) && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

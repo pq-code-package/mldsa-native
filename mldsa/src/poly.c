@@ -112,6 +112,7 @@ void mld_poly_add(mld_poly *r, const mld_poly *b)
   }
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /* Reference: We use destructive version (output=first input) to avoid
  *            reasoning about aliasing in the CBMC specification */
 MLD_INTERNAL_API
@@ -134,6 +135,7 @@ void mld_poly_sub(mld_poly *r, const mld_poly *b)
 
   mld_assert_bound(r->coeffs, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX);
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
@@ -452,6 +454,7 @@ void mld_poly_invntt_tomont(mld_poly *a)
   mld_poly_invntt_tomont_c(a);
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_STATIC_TESTABLE void mld_poly_pointwise_montgomery_c(mld_poly *c,
                                                          const mld_poly *a,
                                                          const mld_poly *b)
@@ -498,6 +501,7 @@ void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
   mld_poly_pointwise_montgomery_c(c, a, b);
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
