@@ -262,6 +262,7 @@ void mld_shake256_release(mld_shake256ctx *state)
   mld_zeroize(state, sizeof(mld_shake256ctx));
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_CORE_API_ONLY)
 MLD_INTERNAL_API
 void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 {
@@ -273,5 +274,6 @@ void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
   mld_shake256_squeeze(out, outlen, &state);
   mld_shake256_release(&state);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_CORE_API_ONLY */
 
 #endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */

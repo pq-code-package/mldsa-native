@@ -220,6 +220,7 @@ __contract__(
   assigns(memory_slice(state, sizeof(mld_shake256ctx)))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_CORE_API_ONLY)
 #define mld_shake256 MLD_NAMESPACE(shake256)
 /*************************************************
  * Name:        mld_shake256
@@ -240,5 +241,6 @@ __contract__(
   requires(memory_no_alias(out, outlen))
   assigns(memory_slice(out, outlen))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_CORE_API_ONLY */
 
 #endif /* !MLD_FIPS202_FIPS202_H */
