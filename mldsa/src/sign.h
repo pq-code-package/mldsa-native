@@ -353,9 +353,9 @@ __contract__(
   assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
   assigns(object_whole(smlen))
   ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
-          (return_value == MLD_ERR_FAIL
-           || return_value == MLD_ERR_OUT_OF_MEMORY
-           || return_value == MLD_ERR_RNG_FAIL))
+          ((return_value == MLD_ERR_FAIL
+            || return_value == MLD_ERR_OUT_OF_MEMORY
+            || return_value == MLD_ERR_RNG_FAIL) && *smlen == 0))
 );
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */

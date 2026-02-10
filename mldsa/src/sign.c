@@ -1012,7 +1012,10 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
   }
   ret = mld_sign_signature(sm, smlen, sm + MLDSA_CRYPTO_BYTES, mlen, ctx,
                            ctxlen, sk, context);
-  *smlen += mlen;
+  if (ret == 0)
+  {
+    *smlen += mlen;
+  }
   return ret;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
