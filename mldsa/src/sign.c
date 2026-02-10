@@ -720,8 +720,10 @@ __contract__(
    * Consequently, any value that can be computed from the signature and public
    * key is considered public.
    * w0 and w1 are public as they can be computed from Az - ct = \alpha w1 + w0.
-   * h=c*t0 is public as both c and t0 are public.
-   * For a more detailed discussion, refer to https://eprint.iacr.org/2022/1406.
+   * h=c*t0 is public as both c and t0 are considered public.
+   * While t0 is not part of the public key, it can be reconstructed from
+   * a small number of signatures and need not be regarded as secret
+   * (see @[FIPS204, Section 6.1]).
    */
   MLD_CT_TESTING_DECLASSIFY(w0, sizeof(*w0));
   MLD_CT_TESTING_DECLASSIFY(w1, sizeof(*w1));
