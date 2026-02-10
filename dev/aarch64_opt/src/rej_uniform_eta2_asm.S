@@ -6,7 +6,8 @@
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2)
 /* simpasm: header-end */
 
 // We save the output on the stack first, and copy to the actual
@@ -334,4 +335,5 @@ rej_uniform_eta2_final_copy:
 #undef MLD_STACK_SIZE
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2) */

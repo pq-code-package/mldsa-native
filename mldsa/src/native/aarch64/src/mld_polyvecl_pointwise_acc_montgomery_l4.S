@@ -3,7 +3,8 @@
  */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+           (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4)
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -124,4 +125,5 @@ Lpolyvecl_pointwise_acc_montgomery_l4_loop_start:
 
 MLD_ASM_FN_SIZE(polyvecl_pointwise_acc_montgomery_l4_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4) */

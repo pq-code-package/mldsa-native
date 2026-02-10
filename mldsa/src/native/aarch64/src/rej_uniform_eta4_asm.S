@@ -6,7 +6,8 @@
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4)
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -123,4 +124,5 @@ Lrej_uniform_eta4_final_copy:
 
 MLD_ASM_FN_SIZE(rej_uniform_eta4_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4) */

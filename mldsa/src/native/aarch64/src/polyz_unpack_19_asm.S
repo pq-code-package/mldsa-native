@@ -5,7 +5,8 @@
  */
 
  #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+           (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -62,4 +63,6 @@ Lpolyz_unpack_19_loop:
 
 MLD_ASM_FN_SIZE(polyz_unpack_19_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87) */

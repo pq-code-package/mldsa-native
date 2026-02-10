@@ -195,6 +195,7 @@ __contract__(
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
 /*************************************************
  * Name:        mld_rej_uniform_eta2_native
  *
@@ -225,9 +226,11 @@ __contract__(
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
   ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2 */
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA2 */
 
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4
 /*************************************************
  * Name:        mld_rej_uniform_eta4_native
  *
@@ -258,9 +261,12 @@ __contract__(
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
   ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */
 
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 /*************************************************
  * Name:        mld_poly_decompose_32_native
  *
@@ -291,9 +297,12 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a0, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 */
 
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /*************************************************
  * Name:        mld_poly_decompose_88_native
  *
@@ -324,6 +333,8 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a0, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 #endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
 
 #if defined(MLD_USE_NATIVE_POLY_CADDQ)
@@ -349,6 +360,8 @@ __contract__(
 #endif /* MLD_USE_NATIVE_POLY_CADDQ */
 
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 /*************************************************
  * Name:        mld_poly_use_hint_32_native
  *
@@ -374,9 +387,12 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(b, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(b, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_32 */
 
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_88)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /*************************************************
  * Name:        mld_poly_use_hint_88_native
  *
@@ -402,6 +418,8 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(b, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(b, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 #endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 */
 
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
@@ -429,6 +447,7 @@ __contract__(
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /*************************************************
  * Name:        mld_polyz_unpack_17_native
  *
@@ -449,9 +468,13 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(r, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(r, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_17 */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 /*************************************************
  * Name:        mld_polyz_unpack_19_native
  *
@@ -472,6 +495,8 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(r, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(r, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
@@ -507,6 +532,7 @@ __contract__(
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
 /*************************************************
  * Name:        mld_polyvecl_pointwise_acc_montgomery_l4_native
  *
@@ -538,9 +564,11 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4 */
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 5
 /*************************************************
  * Name:        mld_polyvecl_pointwise_acc_montgomery_l5_native
  *
@@ -572,9 +600,11 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5 */
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7
 /*************************************************
  * Name:        mld_polyvecl_pointwise_acc_montgomery_l7_native
  *
@@ -606,6 +636,7 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(w, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(w, MLDSA_N))
 );
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */
 #endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 #endif /* !MLD_NATIVE_API_H */
