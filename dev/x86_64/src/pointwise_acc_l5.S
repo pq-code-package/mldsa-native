@@ -19,7 +19,8 @@
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 5)
 /* simpasm: header-end */
 
 #include "consts.h"
@@ -146,4 +147,4 @@ pointwise_acc_l5_avx2_looptop2:
         ret
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+          && (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5) */

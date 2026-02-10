@@ -83,6 +83,7 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
   return (int)mld_rej_uniform_avx2(r, buf);
 }
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
@@ -109,7 +110,9 @@ static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
   /* Safety: outlen is at most MLDSA_N and, hence, this cast is safe. */
   return (int)outlen;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
                                                   const uint8_t *buf,
@@ -136,7 +139,10 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   /* Safety: outlen is at most MLDSA_N and, hence, this cast is safe. */
   return (int)outlen;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
 {
@@ -147,7 +153,10 @@ static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
   mld_poly_decompose_32_avx2(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 {
@@ -158,6 +167,9 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
   mld_poly_decompose_88_avx2(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
@@ -170,6 +182,8 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
@@ -181,7 +195,10 @@ static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
   mld_poly_use_hint_32_avx2(b, a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
                                                   const int32_t *h)
@@ -193,6 +210,9 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
   mld_poly_use_hint_88_avx2(b, a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
@@ -204,6 +224,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   return mld_poly_chknorm_avx2(a, B);
 }
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
 {
@@ -214,7 +235,11 @@ static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
   mld_polyz_unpack_17_avx2(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
 {
@@ -225,6 +250,8 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
   mld_polyz_unpack_19_avx2(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
@@ -238,6 +265,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
     int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
@@ -250,7 +278,9 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
   mld_pointwise_acc_l4_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 5
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
     int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
@@ -263,7 +293,9 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
   mld_pointwise_acc_l5_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5 */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
@@ -276,6 +308,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
   mld_pointwise_acc_l7_avx2(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */
 
 #endif /* !__ASSEMBLER__ */
 
