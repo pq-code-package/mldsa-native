@@ -153,6 +153,16 @@
 /* #define MLD_CONFIG_NO_VERIFY_API */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_INTERNAL_API_ONLY
+ *
+ * Description: Set this to remove all public APIs except
+ *              crypto_sign_keypair_internal, crypto_sign_signature_internal,
+ *              and crypto_sign_verify_internal.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_INTERNAL_API_ONLY */
+
+/******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
  *
  * Description: If this option is set, mldsa-native will be built without the

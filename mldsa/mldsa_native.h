@@ -244,6 +244,7 @@ int MLD_API_NAMESPACE(keypair_internal)(
 #endif
 );
 
+#if !defined(MLD_CONFIG_INTERNAL_API_ONLY)
 /*************************************************
  * Name:        crypto_sign_keypair
  *
@@ -277,6 +278,7 @@ int MLD_API_NAMESPACE(keypair)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_INTERNAL_API_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
@@ -326,6 +328,7 @@ int MLD_API_NAMESPACE(signature_internal)(
 #endif
 );
 
+#if !defined(MLD_CONFIG_INTERNAL_API_ONLY)
 /*************************************************
  * Name:        crypto_sign_signature
  *
@@ -441,6 +444,7 @@ int MLD_API_NAMESPACE(sign)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_INTERNAL_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
@@ -482,6 +486,7 @@ int MLD_API_NAMESPACE(verify_internal)(
 #endif
 );
 
+#if !defined(MLD_CONFIG_INTERNAL_API_ONLY)
 /*************************************************
  * Name:        crypto_sign_verify
  *
@@ -586,6 +591,7 @@ int MLD_API_NAMESPACE(open)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_INTERNAL_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /*************************************************
@@ -605,6 +611,7 @@ int MLD_API_NAMESPACE(open)(
 #define MLD_PREHASH_SHAKE_128 11
 #define MLD_PREHASH_SHAKE_256 12
 
+#if !defined(MLD_CONFIG_INTERNAL_API_ONLY)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
  * Name:        crypto_sign_signature_pre_hash_internal
@@ -781,10 +788,12 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
 #endif
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_INTERNAL_API_ONLY */
 
 /* Maximum formatted domain separation message length */
 #define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
 
+#if !defined(MLD_CONFIG_INTERNAL_API_ONLY)
 /*************************************************
  * Name:        mld_prepare_domain_separation_prefix
  *
@@ -866,6 +875,7 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #endif
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_INTERNAL_API_ONLY */
 
 #ifdef __cplusplus
 }
