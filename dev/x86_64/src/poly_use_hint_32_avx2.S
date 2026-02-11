@@ -41,12 +41,67 @@
 
 /* simpasm: header-end */
 
+/* Reference:
+ * - @[REF_AVX2] calls poly_decompose to compute all a1, a0 before the loop.
+ * - Our implementation of decompose() is slightly different from that in
+ *   @[REF_AVX2]. See poly_decompose_32_avx2 for more information.
+ */
+
+// a aliased with a0
+.macro decompose32_avx2 a1, a, temp1, temp2, temp3
+// Compute a1 = round-(a / 523776) ≈ round(a * 1074791425 /
+// 2^49), where round-() denotes "round half down". This is
+// exact for 0 <= a < Q. Note that half is rounded down since
+// 1074791425 / 2^49 ≲ 1 / 523776.
+vpaddd	\a, %ymm5,  \temp1        
+vpsrld	$7, \temp1, \temp1       
+vpmulhuw	%ymm8, \temp1, \temp1    
+vpmulhrsw	%ymm7, \temp1, \temp1   
+
+// If a1 = 16, i.e. a > 31*GAMMA2, proceed as if a' = a - Q was
+// given instead. (For a = 31*GAMMA2 + 1 thus a' = -GAMMA2, we
+// still round it to 0 like other "wrapped around" cases.)
+
+// Check for wrap-around
+vpcmpgtd	%ymm4, \a, \temp2    
+vpandn	\temp1, \temp2, \a1      
+
+// Compute remainder a0
+vpslld	$10, \temp1, \temp3      
+vpsubd	\temp1, \temp3, \temp1   
+vpslld	$9, \temp1, \temp1       
+vpsubd	\temp1, \a, \a  
+
+// check if wrap-around is required
+vpaddd	\temp2, \a, \a
+.endm
+
+/* Reference: The reference avx2 implementation checks a0 >= 0, which is
+ * different from the specification and the reference C implementation. We
+ * follow the specification and check a0 > 0.
+ */
+
+// a aliased with delta
+.macro use_hint32_avx2 b, a, h, a1, temp1, temp2, temp3
+decompose32_avx2 \a1, \a, \temp1, \temp2, \temp3
+
+// delta = (a0 <= 0) ? -1 : 1
+vpcmpgtd	%ymm6, \a, \a            
+vpandn	\h, \a, \a               
+vpslld	$1, \a, \a               
+vpsubd	\a, \h, \h               
+
+// b = (b + delta * h) % 16
+vpaddd	\a1, \h, \b              
+vpand	%ymm3, \b, \b            
+.endm
 
 .text
 .balign 16
 .global MLD_ASM_NAMESPACE(mld_poly_use_hint_32_avx2)
 MLD_ASM_FN_SYMBOL(mld_poly_use_hint_32_avx2)
 
+// Initialize constants
 movl	$127, %ecx
 
 /* check-magic: 1025 == floor(2^22 / 4092) */
@@ -77,26 +132,10 @@ vpbroadcastd	%xmm3, %ymm3
 mld_poly_use_hint_32_avx2_loop:
 vmovdqa	(%rsi,%rax), %ymm0
 vmovdqa	(%rdx,%rax), %ymm2
-vpaddd	%ymm0, %ymm5, %ymm1
-vpcmpgtd	%ymm4, %ymm0, %ymm11
-vpsrld	$7, %ymm1, %ymm1
-vpmulhuw	%ymm8, %ymm1, %ymm1
-vpmulhrsw	%ymm7, %ymm1, %ymm1
-vpslld	$10, %ymm1, %ymm10
-vpandn	%ymm1, %ymm11, %ymm9
-vpsubd	%ymm1, %ymm10, %ymm1
-vpslld	$9, %ymm1, %ymm1
-vpsubd	%ymm1, %ymm0, %ymm0
-vpaddd	%ymm11, %ymm0, %ymm0
-vpcmpgtd	%ymm6, %ymm0, %ymm0
-vandnps	%ymm2, %ymm0, %ymm0
-vpslld	$1, %ymm0, %ymm0
-vpsubd	%ymm0, %ymm2, %ymm2
-vpaddd	%ymm9, %ymm2, %ymm2
-vpand	%ymm3, %ymm2, %ymm2
+
+use_hint32_avx2 %ymm2, %ymm0, %ymm2, %ymm9, %ymm1, %ymm11, %ymm10
+
 vmovdqa	%ymm2, (%rdi,%rax)
-
-
 addq	$32, %rax
 cmpq	$1024, %rax
 jne	mld_poly_use_hint_32_avx2_loop

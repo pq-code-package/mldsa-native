@@ -73,12 +73,12 @@ Lmld_poly_use_hint_88_avx2_loop:
         vmovdqa	(%rsi,%rax), %ymm0
         vmovdqa	(%rdx,%rax), %ymm1
         vpaddd	%ymm0, %ymm4, %ymm10
-        vpcmpgtd	%ymm3, %ymm0, %ymm11
         vpsrld	$0x7, %ymm10, %ymm10
         vpmulhuw	%ymm8, %ymm10, %ymm10
         vpmulhrsw	%ymm7, %ymm10, %ymm10
-        vpslld	$0x1, %ymm10, %ymm12
+        vpcmpgtd	%ymm3, %ymm0, %ymm11
         vpandn	%ymm10, %ymm11, %ymm9
+        vpslld	$0x1, %ymm10, %ymm12
         vpaddd	%ymm10, %ymm12, %ymm12
         vpslld	$0x5, %ymm12, %ymm10
         vpsubd	%ymm12, %ymm10, %ymm10
@@ -86,7 +86,7 @@ Lmld_poly_use_hint_88_avx2_loop:
         vpsubd	%ymm10, %ymm0, %ymm0
         vpaddd	%ymm11, %ymm0, %ymm0
         vpcmpgtd	%ymm5, %ymm0, %ymm0
-        vandnps	%ymm1, %ymm0, %ymm0
+        vpandn	%ymm1, %ymm0, %ymm0
         vpslld	$0x1, %ymm0, %ymm0
         vpsubd	%ymm0, %ymm1, %ymm0
         vpaddd	%ymm9, %ymm0, %ymm0

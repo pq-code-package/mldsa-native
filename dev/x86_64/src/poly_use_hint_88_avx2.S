@@ -40,7 +40,7 @@
 /* Reference:
  * - @[REF_AVX2] calls poly_decompose to compute all a1, a0 before the loop.
  * - Our implementation of decompose() is slightly different from that in
- *   @[REF_AVX2]. See poly_decompose_88_avx2.c for more information.
+ *   @[REF_AVX2]. See poly_decompose_88_avx2 for more information.
  */
 
 // a aliased with a0
@@ -101,6 +101,7 @@ vpandn	\b, \h, \b
 .global MLD_ASM_NAMESPACE(mld_poly_use_hint_88_avx2)  
 MLD_ASM_FN_SYMBOL(mld_poly_use_hint_88_avx2)
 
+// Initialize constants
 movl	$127, %ecx
 xorl	%eax, %eax
 vpxor	%xmm5, %xmm5, %xmm5
@@ -132,30 +133,10 @@ vpbroadcastd	%xmm3, %ymm3
 mld_poly_use_hint_88_avx2_loop:
 vmovdqa	(%rsi,%rax), %ymm0
 vmovdqa	(%rdx,%rax), %ymm1
-vpaddd	%ymm0, %ymm4, %ymm10
-vpcmpgtd	%ymm3, %ymm0, %ymm11
-vpsrld	$7, %ymm10, %ymm10
-vpmulhuw	%ymm8, %ymm10, %ymm10
-vpmulhrsw	%ymm7, %ymm10, %ymm10
-vpslld	$1, %ymm10, %ymm12
-vpandn	%ymm10, %ymm11, %ymm9
-vpaddd	%ymm10, %ymm12, %ymm12
-vpslld	$5, %ymm12, %ymm10
-vpsubd	%ymm12, %ymm10, %ymm10
-vpslld	$11, %ymm10, %ymm10
-vpsubd	%ymm10, %ymm0, %ymm0
-vpaddd	%ymm11, %ymm0, %ymm0
-vpcmpgtd	%ymm5, %ymm0, %ymm0
-vandnps	%ymm1, %ymm0, %ymm0
-vpslld	$1, %ymm0, %ymm0
-vpsubd	%ymm0, %ymm1, %ymm0
-vpaddd	%ymm9, %ymm0, %ymm0
-vblendvps	%ymm0, %ymm6, %ymm0, %ymm0
-vpcmpgtd	%ymm2, %ymm0, %ymm1
-vandnps	%ymm0, %ymm1, %ymm0
-vmovaps	%ymm0, (%rdi,%rax)
 
+use_hint88_avx2 %ymm0, %ymm0, %ymm1, %ymm9, %ymm10, %ymm11, %ymm12
 
+vmovdqa	%ymm0, (%rdi,%rax)
 addq	$32, %rax
 cmpq	$1024, %rax
 jne	mld_poly_use_hint_88_avx2_loop
