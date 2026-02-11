@@ -55,7 +55,9 @@ __contract__(
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(qdata == mld_qdata)
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: off */
+  ensures(array_abs_bound(r, 0, MLDSA_N, 6285313))
+  /* check-magic: on */
 );
 
 #define mld_nttunpack_avx2 MLD_NAMESPACE(nttunpack_avx2)
