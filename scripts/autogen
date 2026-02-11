@@ -1069,6 +1069,65 @@ def gen_aarch64_rej_uniform_table():
     update_file("dev/aarch64_clean/src/rej_uniform_table.c", "\n".join(gen()))
 
 
+def gen_aarch64_polyz_unpack_indices(bit_width):
+    """Generate Neon TBL index bytes for polyz_unpack.
+
+    Each loop iteration loads bit_width * 16 / 8 packed bytes into
+    registers v0, v1, v2 and unpacks 16 coefficients. Coefficients
+    are unpacked in 4 groups of 4, one group per TBL/TBL2.
+
+    Each coefficient is extracted from 3 consecutive bytes.
+    Groups 0,1 index from v0 (and v1); groups 2,3 index from v1 (and v2),
+    so their byte offsets are shifted by -16.
+    """
+    for group in range(4):
+        base_coeff = group * 4
+        reg_offset = 0 if group < 2 else 16
+        for coeff in range(4):
+            i = base_coeff + coeff
+            byte_start = (i * bit_width) // 8 - reg_offset
+            yield byte_start
+            yield byte_start + 1
+            yield byte_start + 2
+            yield 255
+
+
+def gen_aarch64_polyz_unpack_table():
+    def format_row(vals):
+        return ", ".join(f"{v:>3}" for v in vals) + ","
+
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield "#include <stdint.h>"
+        yield '#include "arith_native_aarch64.h"'
+        yield ""
+        yield "/* Table of indices used for tbl instructions in polyz_unpack_{17,19}."
+        yield " * See autogen for details. */"
+        yield ""
+        for gamma1_bits in [17, 19]:
+            bit_width = gamma1_bits + 1
+            indices = list(gen_aarch64_polyz_unpack_indices(bit_width))
+            yield f"MLD_ALIGN const uint8_t mld_polyz_unpack_{gamma1_bits}_indices[] = {{"
+            for row_start in range(0, len(indices), 16):
+                yield "    " + format_row(indices[row_start : row_start + 16])
+            yield "};"
+            yield ""
+        yield "#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
+        yield ""
+        yield "MLD_EMPTY_CU(aarch64_polyz_unpack_table)"
+        yield ""
+        yield "#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED) */"
+        yield ""
+
+    update_file("dev/aarch64_opt/src/polyz_unpack_table.c", "\n".join(gen()))
+    update_file("dev/aarch64_clean/src/polyz_unpack_table.c", "\n".join(gen()))
+
+
 def gen_avx2_rej_uniform_table_rows():
     # The index into the lookup table is an 8-bit bitmap, i.e. a number 0..255.
     # Conceptually, the table entry at index i is a vector of 8 16-bit values, of
@@ -3189,6 +3248,7 @@ def _main():
         gen_aarch64_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_aarch64_rej_uniform_eta_table()
+        gen_aarch64_polyz_unpack_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_zeta_file()
         gen_avx2_rej_uniform_table()

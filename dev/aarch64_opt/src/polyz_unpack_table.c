@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mldsa-native repository.
+ *          Do not modify it directly.
+ */
+
 #include "../../../common.h"
 
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
@@ -11,7 +17,8 @@
 #include <stdint.h>
 #include "arith_native_aarch64.h"
 
-/* Table of indices used for tbl instructions in polyz_unpack_{17,19}. */
+/* Table of indices used for tbl instructions in polyz_unpack_{17,19}.
+ * See autogen for details. */
 
 MLD_ALIGN const uint8_t mld_polyz_unpack_17_indices[] = {
     0,  1,  2,  255, 2,  3,  4,  255, 4,  5,  6,  255, 6,  7,  8,  255,
