@@ -55,7 +55,12 @@ SPLIT=tr ';' '\n'
 
 OBJ = mldsa/mldsa_ntt.o \
       mldsa/mldsa_poly_caddq.o \
-      mldsa/mldsa_poly_chknorm.o
+      mldsa/mldsa_poly_chknorm.o                        \
+      mldsa/keccak_f1600_x1_scalar.o                    \
+      mldsa/keccak_f1600_x1_v84a.o                      \
+      mldsa/keccak_f1600_x2_v84a.o                      \
+      mldsa/keccak_f1600_x4_v8a_scalar.o                \
+      mldsa/keccak_f1600_x4_v8a_v84a_scalar.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,

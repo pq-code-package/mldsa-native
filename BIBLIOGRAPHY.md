@@ -124,6 +124,9 @@ source code and documentation.
   - [mldsa/src/fips202/native/aarch64/auto.h](mldsa/src/fips202/native/aarch64/auto.h)
   - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
   - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [proofs/hol_light/README.md](proofs/hol_light/README.md)
+  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S)
+  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S)
 
 ### `KyberSlash`
 

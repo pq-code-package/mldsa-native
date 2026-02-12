@@ -2309,6 +2309,41 @@ def gen_hol_light_asm():
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
+        (
+            "keccak_f1600_x1_scalar_asm.S",
+            "keccak_f1600_x1_scalar.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "keccak_f1600_x1_v84a_asm.S",
+            "keccak_f1600_x1_v84a.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "keccak_f1600_x2_v84a_asm.S",
+            "keccak_f1600_x2_v84a.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S",
+            "keccak_f1600_x4_v8a_v84a_scalar.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "keccak_f1600_x4_v8a_scalar_hybrid_asm.S",
+            "keccak_f1600_x4_v8a_scalar.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
     ]
 
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
