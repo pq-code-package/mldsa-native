@@ -11,7 +11,7 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-mldsa-native is a secure, fast, and portable C90 implementation of the ML-DSA[^FIPS204] post-quantum signature standard. It is a fork of the ML-DSA reference implementation[^REF].
+mldsa-native is a secure, fast, and portable C90[^C90] implementation of the ML-DSA[^FIPS204] post-quantum signature standard. It is a fork of the ML-DSA reference implementation[^REF].
 
 mldsa-native is supported by the [Post-Quantum Cryptography Alliance](https://pqca.org/) as part of the [Linux Foundation](https://linuxfoundation.org/).
 
@@ -207,6 +207,9 @@ If you have any other question / non-security related issue / feature request, p
 
 If you want to help us build mldsa-native, please reach out. You can contact the mldsa-native team
 through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CONTRIBUTING.md](CONTRIBUTING.md).
+
+[^C90]: Strictly speaking, we rely on C90 + `stdint.h` + 64-bit `unsigned long long`.
+
 
 <!--- bibliography --->
 [^ACVP]: National Institute of Standards and Technology: Automated Cryptographic Validation Protocol (ACVP) Server, [https://github.com/usnistgov/ACVP-Server](https://github.com/usnistgov/ACVP-Server)

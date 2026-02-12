@@ -37,7 +37,6 @@ using the parallel x4 API.
 - `tiny_sha3/` - Symlink to the tiny_sha3 implementation
 - `README.md` - This file
 
-[^tiny_sha3]: https://github.com/mjosaarinen/tiny_sha3
 
 <!--- bibliography --->
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)
