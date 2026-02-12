@@ -7,7 +7,6 @@
 #ifndef MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 #define MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H
 
-#include <stdint.h>
 #include "../../../cbmc.h"
 #include "../../../common.h"
 

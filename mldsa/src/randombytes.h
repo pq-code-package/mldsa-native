@@ -6,7 +6,6 @@
 #define MLD_RANDOMBYTES_H
 
 #include <stddef.h>
-#include <stdint.h>
 
 #include "cbmc.h"
 #include "common.h"

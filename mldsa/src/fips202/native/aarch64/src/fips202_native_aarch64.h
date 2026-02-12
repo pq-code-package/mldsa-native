@@ -6,7 +6,6 @@
 #ifndef MLD_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 #define MLD_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H
 
-#include <stdint.h>
 
 #include "../../../../cbmc.h"
 #include "../../../../common.h"

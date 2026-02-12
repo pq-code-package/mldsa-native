@@ -5,7 +5,6 @@
  */
 #ifndef MLD_FIPS202_KECCAKF1600_H
 #define MLD_FIPS202_KECCAKF1600_H
-#include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
 #include "fips202.h"

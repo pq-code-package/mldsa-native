@@ -32,7 +32,6 @@
  * by Ronny Van Keer, and the public domain @[tweetfips] implementation. */
 
 #include <stddef.h>
-#include <stdint.h>
 
 #include "../common.h"
 #include "../ct.h"

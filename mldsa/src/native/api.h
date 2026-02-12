@@ -18,7 +18,6 @@
  * and run sanity checks.
  */
 
-#include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
 

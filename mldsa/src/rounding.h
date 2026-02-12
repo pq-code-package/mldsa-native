@@ -15,7 +15,6 @@
 #ifndef MLD_ROUNDING_H
 #define MLD_ROUNDING_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "ct.h"

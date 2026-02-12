@@ -24,7 +24,6 @@
  *   https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
  */
 
-#include <stdint.h>
 #include <string.h>
 
 #include "cbmc.h"

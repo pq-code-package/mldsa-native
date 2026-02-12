@@ -25,7 +25,6 @@
      (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
 
 #include <immintrin.h>
-#include <stdint.h>
 #include "arith_native_x86_64.h"
 
 void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a)

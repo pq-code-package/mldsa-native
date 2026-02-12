@@ -6,7 +6,6 @@
 #define MLD_FIPS202_FIPS202_H
 
 #include <stddef.h>
-#include <stdint.h>
 #include "../cbmc.h"
 #include "../common.h"
 

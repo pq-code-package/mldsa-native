@@ -13,7 +13,6 @@
      defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
 #include "fips202_native_aarch64.h"
 
 MLD_ALIGN const uint64_t mld_keccakf1600_round_constants[] = {

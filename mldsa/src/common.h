@@ -6,6 +6,11 @@
 #ifndef MLD_COMMON_H
 #define MLD_COMMON_H
 
+#ifndef __ASSEMBLER__
+#include <stdint.h>
+#endif
+
+
 #define MLD_BUILD_INTERNAL
 
 #if defined(MLD_CONFIG_FILE)

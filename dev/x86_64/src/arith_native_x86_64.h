@@ -7,7 +7,6 @@
 #define MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H
 #include "../../../common.h"
 
-#include <stdint.h>
 #include "consts.h"
 
 #define MLD_AVX2_REJ_UNIFORM_BUFLEN \

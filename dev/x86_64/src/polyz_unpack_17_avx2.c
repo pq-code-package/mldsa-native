@@ -25,7 +25,6 @@
      MLD_CONFIG_PARAMETER_SET == 44)
 
 #include <immintrin.h>
-#include <stdint.h>
 #include "arith_native_x86_64.h"
 
 void mld_polyz_unpack_17_avx2(int32_t *r, const uint8_t *a)

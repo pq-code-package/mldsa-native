@@ -26,7 +26,6 @@
 #ifndef MLD_CT_H
 #define MLD_CT_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 

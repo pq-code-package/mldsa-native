@@ -18,7 +18,6 @@
  *   https://github.com/pq-crystals/dilithium/tree/master/ref
  */
 
-#include <stdint.h>
 #include <string.h>
 
 #include "common.h"

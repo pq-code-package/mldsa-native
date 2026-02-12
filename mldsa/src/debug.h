@@ -8,7 +8,6 @@
 #include "common.h"
 
 #if defined(MLDSA_DEBUG)
-#include <stdint.h>
 
 /*************************************************
  * Name:        mld_assert

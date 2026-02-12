@@ -5,7 +5,6 @@
 #ifndef MLD_POLYVEC_H
 #define MLD_POLYVEC_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "poly.h"

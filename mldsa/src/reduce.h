@@ -5,7 +5,6 @@
 #ifndef MLD_REDUCE_H
 #define MLD_REDUCE_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "ct.h"

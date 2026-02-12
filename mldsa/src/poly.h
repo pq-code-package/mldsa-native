@@ -5,7 +5,6 @@
 #ifndef MLD_POLY_H
 #define MLD_POLY_H
 
-#include <stdint.h>
 #include "cbmc.h"
 #include "common.h"
 #include "reduce.h"

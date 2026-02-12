@@ -12,7 +12,6 @@
 #define MLD_FIPS202_X86_64_XKCP
 
 #if !defined(__ASSEMBLER__)
-#include <stdint.h>
 #include "../api.h"
 #include "src/KeccakP_1600_times4_SIMD256.h"
 

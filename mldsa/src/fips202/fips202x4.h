@@ -11,7 +11,6 @@
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 
 #include <stddef.h>
-#include <stdint.h>
 
 #include "../cbmc.h"
 #include "fips202.h"

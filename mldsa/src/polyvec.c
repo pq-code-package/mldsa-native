@@ -12,13 +12,10 @@
  *   https://csrc.nist.gov/pubs/fips/204/final
  */
 
-#include <stdint.h>
 #include <string.h>
 
 #include "common.h"
 #include "debug.h"
-#include "poly.h"
-#include "poly_kl.h"
 #include "polyvec.h"
 
 /* This namespacing is not done at the top to avoid a naming conflict

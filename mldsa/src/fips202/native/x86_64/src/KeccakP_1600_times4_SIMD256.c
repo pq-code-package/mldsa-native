@@ -30,7 +30,6 @@ http://creativecommons.org/publicdomain/zero/1.0/
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <immintrin.h>
-#include <stdint.h>
 
 #include "KeccakP_1600_times4_SIMD256.h"
 
@@ -323,7 +322,6 @@ static MLD_ALIGN const uint64_t mld_keccakf1600RoundConstants[24] = {
     (uint64_t)0x8000000080008081ULL, (uint64_t)0x8000000000008080ULL,
     (uint64_t)0x0000000080000001ULL, (uint64_t)0x8000000080008008ULL};
 
-#include <stdint.h>
 
 #define MLD_COPY_FROM_STATE(X, state)                                       \
   do                                                                        \
