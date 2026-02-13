@@ -15,7 +15,6 @@
 #define MLD_FIPS202_ARMV81M_NEED_X4
 
 #if !defined(__ASSEMBLER__)
-#include <stdint.h>
 #include "../api.h"
 
 #define mld_keccak_f1600_x4_native_impl \

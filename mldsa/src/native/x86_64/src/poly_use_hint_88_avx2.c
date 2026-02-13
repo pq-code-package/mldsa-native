@@ -25,7 +25,6 @@
      MLD_CONFIG_PARAMETER_SET == 44)
 
 #include <immintrin.h>
-#include <string.h>
 #include "arith_native_x86_64.h"
 #include "consts.h"
 

@@ -9,8 +9,6 @@
 #if defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
-#include <stdint.h>
-
 #include "fips202_native_armv81m.h"
 
 /*

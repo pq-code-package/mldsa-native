@@ -25,7 +25,6 @@
      (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
 
 #include <immintrin.h>
-#include <string.h>
 #include "arith_native_x86_64.h"
 #include "consts.h"
 

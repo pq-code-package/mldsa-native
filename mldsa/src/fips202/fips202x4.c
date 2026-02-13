@@ -17,7 +17,6 @@
 #if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 
-#include <string.h>
 #include "../ct.h"
 #include "fips202.h"
 #include "fips202x4.h"

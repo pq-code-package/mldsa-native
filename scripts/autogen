@@ -1099,7 +1099,6 @@ def gen_aarch64_polyz_unpack_table():
         yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
-        yield "#include <stdint.h>"
         yield '#include "arith_native_aarch64.h"'
         yield ""
         yield "/* Table of indices used for tbl instructions in polyz_unpack_{17,19}."

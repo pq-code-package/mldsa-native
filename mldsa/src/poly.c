@@ -18,12 +18,11 @@
  *   https://github.com/pq-crystals/dilithium/tree/master/ref
  */
 
-#include <string.h>
+#include "poly.h"
 
 #include "common.h"
 #include "ct.h"
 #include "debug.h"
-#include "poly.h"
 #include "reduce.h"
 #include "rounding.h"
 #include "symmetric.h"

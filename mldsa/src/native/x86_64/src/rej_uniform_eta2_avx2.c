@@ -24,7 +24,6 @@
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2)
 
 #include <immintrin.h>
-#include <string.h>
 #include "arith_native_x86_64.h"
 #include "consts.h"
 

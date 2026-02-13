@@ -14,6 +14,7 @@
  */
 
 #include "../../cbmc.h"
+#include "../../common.h"
 
 /* Backends must return MLD_NATIVE_FUNC_SUCCESS upon success. */
 #define MLD_NATIVE_FUNC_SUCCESS (0)

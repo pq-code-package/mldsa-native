@@ -24,7 +24,7 @@
  *   https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
  */
 
-#include <string.h>
+#include "sign.h"
 
 #include "cbmc.h"
 #include "ct.h"
@@ -34,7 +34,6 @@
 #include "poly_kl.h"
 #include "polyvec.h"
 #include "randombytes.h"
-#include "sign.h"
 #include "symmetric.h"
 
 /* Parameter set namespacing

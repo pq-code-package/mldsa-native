@@ -12,11 +12,9 @@
  *   https://csrc.nist.gov/pubs/fips/204/final
  */
 
-#include <string.h>
-
-#include "common.h"
-#include "debug.h"
 #include "polyvec.h"
+
+#include "debug.h"
 
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
