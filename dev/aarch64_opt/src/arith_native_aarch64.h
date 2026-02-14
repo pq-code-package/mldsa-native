@@ -137,13 +137,38 @@ __contract__(
 );
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_asm MLD_NAMESPACE(polyz_unpack_17_asm)
 void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,
-                             const uint8_t *indices);
+                             const uint8_t *indices)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_17.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, 576))
+  requires(indices == mld_polyz_unpack_17_indices)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(r, 0, MLDSA_N, -((1 << 17) - 1), (1 << 17) + 1))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 #define mld_polyz_unpack_19_asm MLD_NAMESPACE(polyz_unpack_19_asm)
 void mld_polyz_unpack_19_asm(int32_t *r, const uint8_t *buf,
-                             const uint8_t *indices);
+                             const uint8_t *indices)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_19.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, 640))
+  requires(indices == mld_polyz_unpack_19_indices)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(r, 0, MLDSA_N, -((1 << 19) - 1), (1 << 19) + 1))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
