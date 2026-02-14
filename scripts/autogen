@@ -1207,6 +1207,30 @@ def gen_aarch64_polyz_unpack_table():
     update_file("dev/aarch64_clean/src/polyz_unpack_table.c", "\n".join(gen()))
 
 
+def gen_hol_light_polyz_unpack_table():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * TBL index tables for polyz_unpack_{17,19}"
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        for gamma1_bits in [17, 19]:
+            bit_width = gamma1_bits + 1
+            name = f"mldsa_polyz_unpack_{gamma1_bits}_indices"
+            indices = list(gen_aarch64_polyz_unpack_indices(bit_width))
+            yield f"let {name} = (REWRITE_RULE[MAP] o define)"
+            yield f"  `{name}:byte list = MAP word ["
+            yield from print_hol_light_array(indices, as_int=False, pad=3)
+            yield "]`;;"
+            yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_consts.ml",
+        "\n".join(gen()),
+    )
+
+
 def gen_avx2_rej_uniform_table_rows():
     # The index into the lookup table is an 8-bit bitmap, i.e. a number 0..255.
     # Conceptually, the table entry at index i is a vector of 8 16-bit values, of
@@ -2437,6 +2461,20 @@ def gen_hol_light_asm():
         (
             "pointwise_montgomery.S",
             "mldsa_pointwise.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "polyz_unpack_17_asm.S",
+            "mldsa_polyz_unpack_17.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "polyz_unpack_19_asm.S",
+            "mldsa_polyz_unpack_19.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
@@ -3743,6 +3781,7 @@ def _main():
         gen_aarch64_rej_uniform_table()
         gen_aarch64_rej_uniform_eta_table()
         gen_aarch64_polyz_unpack_table()
+        gen_hol_light_polyz_unpack_table()
         gen_avx2_hol_light_zeta_file()
         gen_avx2_zeta_file()
         gen_avx2_rej_uniform_table()

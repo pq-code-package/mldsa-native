@@ -33,3 +33,11 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: aarch64/mldsa/mldsa_poly_chknorm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_poly_chknorm.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/mldsa_polyz_unpack_17.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/mldsa_polyz_unpack_17.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/mldsa_polyz_unpack_19.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/mldsa_polyz_unpack_19.o";;
+print_string "==== bytecode end =====================================\n\n";;
