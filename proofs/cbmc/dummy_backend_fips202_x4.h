@@ -8,6 +8,8 @@
 
 
 #define MLD_USE_FIPS202_X4_NATIVE
+#define MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE
+#define MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE
 
 #include "../../mldsa/src/fips202/native/api.h"
 

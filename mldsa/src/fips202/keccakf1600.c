@@ -87,11 +87,12 @@ void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST)) &&                                                \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-MLD_INTERNAL_API
-void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
-                                     unsigned char *data1, unsigned char *data2,
-                                     unsigned char *data3, unsigned offset,
-                                     unsigned length)
+static void mld_keccakf1600x4_extract_bytes_c(uint64_t *state,
+                                              unsigned char *data0,
+                                              unsigned char *data1,
+                                              unsigned char *data2,
+                                              unsigned char *data3,
+                                              unsigned offset, unsigned length)
 {
   mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
                                 length);
@@ -104,11 +105,29 @@ void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
 }
 
 MLD_INTERNAL_API
-void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
-                                 const unsigned char *data1,
-                                 const unsigned char *data2,
-                                 const unsigned char *data3, unsigned offset,
-                                 unsigned length)
+void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
+                                     unsigned char *data1, unsigned char *data2,
+                                     unsigned char *data3, unsigned offset,
+                                     unsigned length)
+{
+#if defined(MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+  if (mld_keccakf1600_extract_bytes_x4_native(state, data0, data1, data2, data3,
+                                              offset, length) ==
+      MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+  mld_keccakf1600x4_extract_bytes_c(state, data0, data1, data2, data3, offset,
+                                    length);
+}
+
+static void mld_keccakf1600x4_xor_bytes_c(uint64_t *state,
+                                          const unsigned char *data0,
+                                          const unsigned char *data1,
+                                          const unsigned char *data2,
+                                          const unsigned char *data3,
+                                          unsigned offset, unsigned length)
 {
   mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
                             length);
@@ -118,6 +137,25 @@ void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                             length);
   mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 3, data3, offset,
                             length);
+}
+
+MLD_INTERNAL_API
+void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
+                                 const unsigned char *data1,
+                                 const unsigned char *data2,
+                                 const unsigned char *data3, unsigned offset,
+                                 unsigned length)
+{
+#if defined(MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+  if (mld_keccakf1600_xor_bytes_x4_native(state, data0, data1, data2, data3,
+                                          offset,
+                                          length) == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+  mld_keccakf1600x4_xor_bytes_c(state, data0, data1, data2, data3, offset,
+                                length);
 }
 
 MLD_INTERNAL_API

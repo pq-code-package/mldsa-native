@@ -103,6 +103,8 @@
 #endif
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
+#include "src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S"
+#include "src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S"
 #endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -640,11 +642,17 @@
 #undef MLD_FIPS202_ARMV81M_NEED_X4
 #undef MLD_FIPS202_NATIVE_ARMV81M
 #undef MLD_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE
 #undef MLD_USE_FIPS202_X4_NATIVE
+#undef MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE
 #undef mld_keccak_f1600_x4_native_impl
+#undef mld_keccak_f1600_x4_state_extract_bytes
+#undef mld_keccak_f1600_x4_state_xor_bytes
 /* mldsa/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLD_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
 #undef mld_keccak_f1600_x4_mve_asm
+#undef mld_keccak_f1600_x4_state_extract_bytes_asm
+#undef mld_keccak_f1600_x4_state_xor_bytes_asm
 #undef mld_keccakf1600_round_constants
 #endif /* MLD_SYS_ARMV81M_MVE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */

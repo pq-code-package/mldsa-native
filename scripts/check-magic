@@ -40,7 +40,17 @@ REMEMBERED = f"{BLUE}⊢{NORMAL}"
 
 def check_magic_numbers():
     mldsa_q = 8380417
-    exceptions = [mldsa_q, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
+    exceptions = [
+        mldsa_q,
+        2025,  # years
+        1024,
+        2048,
+        4096,
+        8192,
+        16384,
+        32768,
+        65536,
+    ]
     enable_marker = "check-magic: on"
     disable_marker = "check-magic: off"
     autogen_marker = "This file is auto-generated from scripts/autogen"
