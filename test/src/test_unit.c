@@ -64,7 +64,7 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
-#if defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
+#if defined(MLD_USE_FIPS202_X1_NATIVE)
 static void print_u64_array(const char *label, const uint64_t *array,
                             size_t len)
 {
@@ -112,8 +112,7 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
   }
   return 1;
 }
-
-#endif /* MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
+#endif /* MLD_USE_FIPS202_X1_NATIVE */
 
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
@@ -1050,13 +1049,23 @@ cleanup:
 }
 #endif /* MLD_USE_FIPS202_X1_NATIVE */
 
+/*
+ * Test that x4 Keccak (xor_bytes, permute, extract_bytes) produces
+ * the same results as the x1 C reference.
+ */
 #ifdef MLD_USE_FIPS202_X4_NATIVE
-static int test_keccakf1600x4_permute(void)
+#define MAX_RATE 136
+
+static int test_keccakf1600x4_xor_permute_extract(void)
 {
   int ret = 1;
   int i, j;
+  unsigned char output_x4[MLD_KECCAK_WAY][MAX_RATE];
+  unsigned char output_x1[MAX_RATE];
+  unsigned char input[MLD_KECCAK_WAY][MAX_RATE];
+  uint8_t xor_offset, xor_length, ext_offset, ext_length;
   MLD_ALLOC(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
-  MLD_ALLOC(state_x1, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_ALLOC(state_x1, uint64_t, MLD_KECCAK_LANES, NULL);
 
   if (state_x4 == NULL || state_x1 == NULL)
   {
@@ -1065,30 +1074,55 @@ static int test_keccakf1600x4_permute(void)
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes((uint8_t *)state_x4,
-                MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
-    memcpy(state_x1, state_x4,
-           MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+    /* Generate random offset and length for xor_bytes */
+    randombytes(&xor_offset, 1);
+    randombytes(&xor_length, 1);
+    xor_offset = xor_offset % MAX_RATE;
+    xor_length = (uint8_t)(1 + (xor_length % (MAX_RATE - xor_offset)));
 
-    mld_keccakf1600x4_permute(state_x4);
+    /* Generate random offset and length for extract_bytes */
+    randombytes(&ext_offset, 1);
+    randombytes(&ext_length, 1);
+    ext_offset = ext_offset % MAX_RATE;
+    ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
+    /* Generate different random input for each lane */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
-      mld_keccakf1600_permute_c(state_x1 + j * MLD_KECCAK_LANES);
+      randombytes(input[j], xor_length);
     }
 
-    CHECK(compare_u64_arrays(state_x4, state_x1,
-                             MLD_KECCAK_LANES * MLD_KECCAK_WAY,
-                             "keccakf1600x4_permute"));
+    /* Run x4 implementation */
+    memset(state_x4, 0, MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+    mld_keccakf1600x4_xor_bytes(state_x4, input[0], input[1], input[2],
+                                input[3], xor_offset, xor_length);
+    mld_keccakf1600x4_permute(state_x4);
+    mld_keccakf1600x4_extract_bytes(state_x4, output_x4[0], output_x4[1],
+                                    output_x4[2], output_x4[3], ext_offset,
+                                    ext_length);
+
+    /* Compare each lane against x1 C reference */
+    for (j = 0; j < MLD_KECCAK_WAY; j++)
+    {
+      memset(state_x1, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+      mld_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
+      mld_keccakf1600_permute_c(state_x1);
+      mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
+                                    ext_length);
+
+      CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
+    }
   }
 
   ret = 0;
 
 cleanup:
-  MLD_FREE(state_x1, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_FREE(state_x1, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_FREE(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   return ret;
 }
+
+#undef MAX_RATE
 #endif /* MLD_USE_FIPS202_X4_NATIVE */
 
 static int test_backend_units(void)
@@ -1164,7 +1198,7 @@ static int test_backend_units(void)
 #endif
 
 #ifdef MLD_USE_FIPS202_X4_NATIVE
-  CHECK(test_keccakf1600x4_permute() == 0);
+  CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
 #endif
 
   return 0;
