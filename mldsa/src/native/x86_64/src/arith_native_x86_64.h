@@ -102,6 +102,12 @@ void mld_polyz_unpack_17_avx2(int32_t *r, const uint8_t *a);
 #define mld_polyz_unpack_19_avx2 MLD_NAMESPACE(mld_polyz_unpack_19_avx2)
 void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a);
 
+#define mld_polyw1_pack_32_avx2 MLD_NAMESPACE(mld_polyw1_pack_32_avx2)
+void mld_polyw1_pack_32_avx2(uint8_t *r, const int32_t *a);
+
+#define mld_polyw1_pack_88_avx2 MLD_NAMESPACE(mld_polyw1_pack_88_avx2)
+void mld_polyw1_pack_88_avx2(uint8_t *r, const int32_t *a);
+
 #define mld_pointwise_avx2 MLD_NAMESPACE(pointwise_avx2)
 void mld_pointwise_avx2(int32_t *c, const int32_t *a, const int32_t *b,
                         const int32_t *qdata);
