@@ -21,6 +21,8 @@
 #define MLD_USE_NATIVE_POLY_CHKNORM
 #define MLD_USE_NATIVE_POLYZ_UNPACK_17
 #define MLD_USE_NATIVE_POLYZ_UNPACK_19
+#define MLD_USE_NATIVE_POLYW1_PACK_32
+#define MLD_USE_NATIVE_POLYW1_PACK_88
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
@@ -197,6 +199,44 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_32_native(uint8_t *r, const int32_t *a)
+{
+  mld_polyw1_pack_32_asm(r, a);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+/* Table of constants for polyw1_pack_88_asm:
+ *   [0:15]  v_shifts: USHL shift amounts {0, 6, 12, 18} as .4s
+ *   [16:31] v_tbl0: TBL indices for out0 from {v16, v17}
+ *   [32:47] v_tbl1: TBL indices for out1 from {v17, v18}
+ *   [48:63] v_tbl2: TBL indices for out2 from {v18, v19} */
+/* clang-format off */
+MLD_ALIGN static const uint8_t mld_polyw1_pack_88_consts[] = {
+  /* v_shifts: {0, 6, 12, 18} as uint32_t little-endian */
+  0, 0, 0, 0,  6, 0, 0, 0,  12, 0, 0, 0,  18, 0, 0, 0,
+  /* v_tbl0: {0,1,2, 4,5,6, 8,9,10, 12,13,14, 16,17,18, 20} */
+  0, 1, 2, 4,  5, 6, 8, 9,  10, 12, 13, 14,  16, 17, 18, 20,
+  /* v_tbl1: {5,6, 8,9,10, 12,13,14, 16,17,18, 20,21,22, 24,25} */
+  5, 6, 8, 9,  10, 12, 13, 14,  16, 17, 18, 20,  21, 22, 24, 25,
+  /* v_tbl2: {10, 12,13,14, 16,17,18, 20,21,22, 24,25,26, 28,29,30} */
+  10, 12, 13, 14,  16, 17, 18, 20,  21, 22, 24, 25,  26, 28, 29, 30,
+};
+/* clang-format on */
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_88_native(uint8_t *r, const int32_t *a)
+{
+  mld_polyw1_pack_88_asm(r, a, mld_polyw1_pack_88_consts);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(

@@ -105,6 +105,12 @@ void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,
 void mld_polyz_unpack_19_asm(int32_t *r, const uint8_t *buf,
                              const uint8_t *indices);
 
+#define mld_polyw1_pack_32_asm MLD_NAMESPACE(polyw1_pack_32_asm)
+void mld_polyw1_pack_32_asm(uint8_t *r, const int32_t *a);
+
+#define mld_polyw1_pack_88_asm MLD_NAMESPACE(polyw1_pack_88_asm)
+void mld_polyw1_pack_88_asm(uint8_t *r, const int32_t *a, const uint8_t *table);
+
 #define mld_poly_pointwise_montgomery_asm \
   MLD_NAMESPACE(poly_pointwise_montgomery_asm)
 void mld_poly_pointwise_montgomery_asm(int32_t *, const int32_t *,
