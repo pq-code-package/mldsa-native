@@ -40,11 +40,16 @@ jobs:
         with:
           mode: start
           github-token: ${{ secrets.AWS_GITHUB_TOKEN }}
-          ec2-image-id: ${{ env.AMI_UBUNTU_22_04_X86_64 }}
           ec2-instance-type: c7i.2xlarge
           ec2-volume-size: 32
-          subnet-id: subnet-094d73eb42eb6bf5b
-          security-group-id: sg-0282706dbc92a1579
+          availability-zones-config: >-
+            [{"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-094d73eb42eb6bf5b","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-04a982f6584de8063","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-077637f396b264f82","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-00e89932da1332c35","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0262f9d5f938f38bc","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-06e0645f1b6520c42","securityGroupId":"sg-0282706dbc92a1579"},
+             {"imageId":"${{ env.AMI_UBUNTU_22_04_X86_64 }}","subnetId":"subnet-0c726ece1c22f45d9","securityGroupId":"sg-0282706dbc92a1579"}]
 
   opentitan_build:
     name: OpenTitan ML-DSA Build Test
