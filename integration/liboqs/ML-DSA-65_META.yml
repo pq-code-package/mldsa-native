@@ -7,6 +7,7 @@ claimed-security: SUF-CMA
 length-public-key: 1952
 length-secret-key: 4032
 length-signature: 3309
+length-mu: 64
 nistkat-sha256: 7cb96242eac9907a55b5c84c202f0ebd552419c50b2e986dc2e28f07ecebf072
 testvectors-sha256: 14bf84918ee90e7afbd580191d3eb890d4557e0900b1145e39a8399ef7dd3fba
 principal-submitters:
@@ -27,6 +28,8 @@ implementations:
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA65_C_keypair
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA65_C_signature
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA65_C_verify
+  signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA65_C_signature_extmu
+  signature_verify_extmu: PQCP_MLDSA_NATIVE_MLDSA65_C_verify_extmu
   api-with-context-string: true
   sources: integration/liboqs/config_c.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mldsa/src/cbmc.h mldsa/src/common.h mldsa/src/ct.c mldsa/src/ct.h mldsa/src/debug.c
@@ -41,6 +44,8 @@ implementations:
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA65_X86_64_keypair
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA65_X86_64_signature
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA65_X86_64_verify
+  signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA65_X86_64_signature_extmu
+  signature_verify_extmu: PQCP_MLDSA_NATIVE_MLDSA65_X86_64_verify_extmu
   api-with-context-string: true
   sources: integration/liboqs/config_x86_64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mldsa/src/cbmc.h mldsa/src/common.h mldsa/src/ct.c mldsa/src/ct.h mldsa/src/debug.c
@@ -65,6 +70,8 @@ implementations:
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA65_AARCH64_keypair
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA65_AARCH64_signature
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA65_AARCH64_verify
+  signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA65_AARCH64_signature_extmu
+  signature_verify_extmu: PQCP_MLDSA_NATIVE_MLDSA65_AARCH64_verify_extmu
   api-with-context-string: true
   sources: integration/liboqs/config_aarch64.h integration/liboqs/fips202_glue.h integration/liboqs/fips202x4_glue.h
     mldsa/src/cbmc.h mldsa/src/common.h mldsa/src/ct.c mldsa/src/ct.h mldsa/src/debug.c
