@@ -98,10 +98,36 @@ uint64_t mld_rej_uniform_eta4_asm(int32_t *r, const uint8_t *buf,
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_poly_decompose_32_asm MLD_NAMESPACE(poly_decompose_32_asm)
-void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0);
+void mld_poly_decompose_32_asm(int32_t *a1, int32_t *a0)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/poly_decompose_32_aarch64_asm.ml */
+__contract__(
+  requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(a0, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: 16 == (MLDSA_Q - 1) / (2 * ((MLDSA_Q - 1) / 32)) */
+  ensures(array_bound(a1, 0, MLDSA_N, 0, 16))
+  /* check-magic: 261889 == (MLDSA_Q - 1) / 32 + 1 */
+  ensures(array_abs_bound(a0, 0, MLDSA_N, 261889))
+);
 
 #define mld_poly_decompose_88_asm MLD_NAMESPACE(poly_decompose_88_asm)
-void mld_poly_decompose_88_asm(int32_t *a1, int32_t *a0);
+void mld_poly_decompose_88_asm(int32_t *a1, int32_t *a0)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/poly_decompose_88_aarch64_asm.ml */
+__contract__(
+  requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(a0, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: 44 == (MLDSA_Q - 1) / (2 * ((MLDSA_Q - 1) / 88)) */
+  ensures(array_bound(a1, 0, MLDSA_N, 0, 44))
+  /* check-magic: 95233 == (MLDSA_Q - 1) / 88 + 1 */
+  ensures(array_abs_bound(a0, 0, MLDSA_N, 95233))
+);
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_caddq_asm MLD_NAMESPACE(poly_caddq_asm)
