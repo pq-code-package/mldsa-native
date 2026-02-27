@@ -57,6 +57,8 @@ OBJ = mldsa/mldsa_ntt.o \
       mldsa/mldsa_pointwise.o \
       mldsa/mldsa_poly_caddq.o \
       mldsa/mldsa_poly_chknorm.o                        \
+      mldsa/poly_decompose_32_aarch64_asm.o                   \
+      mldsa/poly_decompose_88_aarch64_asm.o                   \
       mldsa/mldsa_pointwise_acc_l4.o                    \
       mldsa/mldsa_pointwise_acc_l5.o                    \
       mldsa/mldsa_pointwise_acc_l7.o                    \

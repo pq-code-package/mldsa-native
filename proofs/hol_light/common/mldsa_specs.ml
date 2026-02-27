@@ -1148,6 +1148,7 @@ let SIMD_SIMPLIFY_ABBREV_TAC =
   TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
 
 
+
 (* ========================================================================= *)
 (* zunpack: gamma1 - x unpacking for polyz                                   *)
 (*                                                                           *)
@@ -1698,3 +1699,224 @@ let MLDSA_USE_HINT_88_UNFOLD = prove(
   SPEC_TAC(`mldsa_decompose_88 r`, `p:num#int`) THEN
   REWRITE_TAC[FORALL_PAIR_THM] THEN
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[]);;
+(* ========================================================================= *)
+(* decompose: bound lemmas for FST/SND of mldsa_decompose_{32,88}            *)
+(*                                                                           *)
+(* gamma2_32 = 261888, 2*gamma2_32 = 523776, (q-1)/(2*gamma2_32) = 16        *)
+(* gamma2_88 =  95232, 2*gamma2_88 = 190464, (q-1)/(2*gamma2_88) = 44        *)
+(* ========================================================================= *)
+
+(* --- Helper: num_of_int((&r - mldsa_cmod r m) div &m) computes highbits --- *)
+
+let MLDSA_CMOD_SUB = prove(
+ `!r m. ~(m = 0) ==>
+    num_of_int(&r - mldsa_cmod r m) =
+      if r MOD m * 2 <= m then r DIV m * m
+      else (r DIV m + 1) * m`,
+  REPEAT STRIP_TAC THEN REWRITE_TAC[mldsa_cmod] THEN
+  MP_TAC(SPECL [`r:num`; `m:num`] DIVISION) THEN ASM_REWRITE_TAC[] THEN
+  STRIP_TAC THEN
+  COND_CASES_TAC THEN REWRITE_TAC[] THENL
+  [SUBGOAL_THEN `r MOD m <= r` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+   SUBGOAL_THEN `&r - &(r MOD m) = &(r - r MOD m) : int`
+     (fun th -> REWRITE_TAC[th; NUM_OF_INT_OF_NUM]) THENL
+   [ASM_SIMP_TAC[GSYM INT_OF_NUM_SUB]; ALL_TAC] THEN
+   ASM_ARITH_TAC;
+   SUBGOAL_THEN `r MOD m <= r` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+   SUBGOAL_THEN `&r - (&(r MOD m) - &m) = &(r - r MOD m + m) : int`
+     (fun th -> REWRITE_TAC[th; NUM_OF_INT_OF_NUM]) THENL
+   [ASM_SIMP_TAC[GSYM INT_OF_NUM_SUB; GSYM INT_OF_NUM_ADD] THEN INT_ARITH_TAC;
+    ASM_ARITH_TAC]]);;
+
+let MLDSA_CMOD_HIGHBITS = prove(
+ `!r m. ~(m = 0) ==>
+    num_of_int((&r - mldsa_cmod r m) div &m) =
+      (if r MOD m * 2 <= m then r DIV m else r DIV m + 1)`,
+  REPEAT STRIP_TAC THEN
+  SUBGOAL_THEN `&0 <= &r - mldsa_cmod r m` ASSUME_TAC THENL
+  [REWRITE_TAC[mldsa_cmod] THEN
+   MP_TAC(SPECL [`r:num`; `m:num`] DIVISION) THEN ASM_REWRITE_TAC[] THEN
+   STRIP_TAC THEN
+   SUBGOAL_THEN `r MOD m <= r` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+   COND_CASES_TAC THEN
+   ASM_SIMP_TAC[INT_OF_NUM_SUB; INT_OF_NUM_LE] THEN ASM_ARITH_TAC;
+   ALL_TAC] THEN
+  SUBGOAL_THEN
+   `num_of_int((&r - mldsa_cmod r m) div &m) =
+    num_of_int(&r - mldsa_cmod r m) DIV m` SUBST1_TAC THENL
+  [GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+     [GSYM(MATCH_MP INT_OF_NUM_OF_INT
+                     (ASSUME `&0 <= &r - mldsa_cmod r m`))] THEN
+   REWRITE_TAC[INT_OF_NUM_DIV; NUM_OF_INT_OF_NUM];
+   ASM_SIMP_TAC[MLDSA_CMOD_SUB] THEN
+   COND_CASES_TAC THEN REWRITE_TAC[MULT_SYM] THEN
+   ASM_SIMP_TAC[DIV_MULT]]);;
+
+(* --- mldsa_decompose_32 lemmas --- *)
+
+(* Equivalence to MOD/DIV form, used in bound proofs *)
+let MLDSA_DECOMPOSE_32_EXPAND = prove(
+ `!r. mldsa_decompose_32 r =
+    let r0 = mldsa_cmod r 523776 in
+    let h = if r MOD 523776 * 2 <= 523776
+            then r DIV 523776
+            else r DIV 523776 + 1 in
+    if h = 16 then (0, r0 - &1)
+    else (h, r0)`,
+  GEN_TAC THEN REWRITE_TAC[mldsa_decompose_32; LET_DEF; LET_END_DEF] THEN
+  MP_TAC(SPECL [`r:num`; `523776`] MLDSA_CMOD_HIGHBITS) THEN
+  ANTS_TAC THENL [ARITH_TAC; DISCH_TAC] THEN
+  MP_TAC(SPECL [`r:num`; `523776`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 523776 * 2 <= 523776` THEN ASM_REWRITE_TAC[] THENL
+  [REWRITE_TAC[mldsa_cmod] THEN ASM_REWRITE_TAC[] THEN
+   ASM_CASES_TAC `r DIV 523776 = 16` THEN ASM_REWRITE_TAC[] THENL
+   [SUBGOAL_THEN `&r - &(r MOD 523776) = &8380416 : int` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC;
+    SUBGOAL_THEN `~(&r - &(r MOD 523776) = &8380416 : int)` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC];
+   REWRITE_TAC[mldsa_cmod] THEN ASM_REWRITE_TAC[] THEN
+   ASM_CASES_TAC `r DIV 523776 + 1 = 16` THEN ASM_REWRITE_TAC[] THENL
+   [SUBGOAL_THEN `&r - (&(r MOD 523776) - &523776) = &8380416 : int` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC;
+    SUBGOAL_THEN `~(&r - (&(r MOD 523776) - &523776) = &8380416 : int)` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC]]);;
+
+let MLDSA_DECOMPOSE_32_A1_BOUND = prove(
+ `!r. r < 8380417 ==> FST(mldsa_decompose_32 r) <= 15`,
+  GEN_TAC THEN DISCH_TAC THEN
+  REWRITE_TAC[MLDSA_DECOMPOSE_32_EXPAND; mldsa_cmod;
+              LET_DEF; LET_END_DEF; FST] THEN
+  MP_TAC(SPECL [`r:num`; `523776`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 523776 * 2 <= 523776` THEN
+  ASM_REWRITE_TAC[] THEN
+  COND_CASES_TAC THEN ASM_ARITH_TAC);;
+
+let MLDSA_DECOMPOSE_32_A0_BOUND = prove(
+ `!r. r < 8380417 ==>
+       -- &261888 <= SND(mldsa_decompose_32 r) /\
+       SND(mldsa_decompose_32 r) <= &261888`,
+  GEN_TAC THEN DISCH_TAC THEN
+  REWRITE_TAC[MLDSA_DECOMPOSE_32_EXPAND; mldsa_cmod;
+              LET_DEF; LET_END_DEF] THEN
+  MP_TAC(SPECL [`r:num`; `523776`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 523776 * 2 <= 523776` THEN ASM_REWRITE_TAC[] THENL
+  [(* Case 1: MOD*2 <= 523776 *)
+   ASM_CASES_TAC `r DIV 523776 = 16` THEN ASM_REWRITE_TAC[SND] THENL
+   [(* 1a: wrap *)
+    SUBGOAL_THEN `r MOD 523776 = 0` SUBST1_TAC THENL
+    [ASM_ARITH_TAC; CONV_TAC INT_REDUCE_CONV];
+    (* 1b: no wrap *)
+    MP_TAC(SPEC `r MOD 523776` INT_POS) THEN
+    ASM_REWRITE_TAC[INT_OF_NUM_LE] THEN ASM_ARITH_TAC];
+   (* Case 2: MOD*2 > 523776 *)
+   ASM_CASES_TAC `r DIV 523776 + 1 = 16` THEN ASM_REWRITE_TAC[SND] THENL
+   [(* 2a: wrap *)
+    SUBGOAL_THEN `&261888 < &(r MOD 523776) : int /\ &(r MOD 523776) < &523776 : int` MP_TAC THENL
+    [REWRITE_TAC[INT_OF_NUM_LT] THEN ASM_ARITH_TAC; INT_ARITH_TAC];
+    (* 2b: no wrap *)
+    SUBGOAL_THEN `&261888 < &(r MOD 523776) : int /\ &(r MOD 523776) < &523776 : int` MP_TAC THENL
+    [REWRITE_TAC[INT_OF_NUM_LT] THEN ASM_ARITH_TAC; INT_ARITH_TAC]]]);;
+
+let MLDSA_DECOMPOSE_32_A1_MAP_BOUND = prove(
+ `!l. ALL (\x. x < 8380417) l
+      ==> ALL (\x. x <= 15) (MAP (FST o mldsa_decompose_32) l)`,
+  LIST_INDUCT_TAC THEN REWRITE_TAC[ALL; MAP; o_THM] THEN
+  STRIP_TAC THEN CONJ_TAC THENL
+  [MATCH_MP_TAC MLDSA_DECOMPOSE_32_A1_BOUND THEN ASM_REWRITE_TAC[];
+   FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[]]);;
+
+let MLDSA_DECOMPOSE_32_A0_MAP_BOUND = prove(
+ `!l. ALL (\x. x < 8380417) l
+      ==> ALL (\x. -- &261888 <= x /\ x <= &261888)
+              (MAP (SND o mldsa_decompose_32) l)`,
+  LIST_INDUCT_TAC THEN REWRITE_TAC[ALL; MAP; o_THM] THEN
+  STRIP_TAC THEN CONJ_TAC THENL
+  [MATCH_MP_TAC MLDSA_DECOMPOSE_32_A0_BOUND THEN ASM_REWRITE_TAC[];
+   FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[]]);;
+
+(* --- mldsa_decompose_88 lemmas --- *)
+
+let MLDSA_DECOMPOSE_88_EXPAND = prove(
+ `!r. mldsa_decompose_88 r =
+    let r0 = mldsa_cmod r 190464 in
+    let h = if r MOD 190464 * 2 <= 190464
+            then r DIV 190464
+            else r DIV 190464 + 1 in
+    if h = 44 then (0, r0 - &1)
+    else (h, r0)`,
+  GEN_TAC THEN REWRITE_TAC[mldsa_decompose_88; LET_DEF; LET_END_DEF] THEN
+  MP_TAC(SPECL [`r:num`; `190464`] MLDSA_CMOD_HIGHBITS) THEN
+  ANTS_TAC THENL [ARITH_TAC; DISCH_TAC] THEN
+  MP_TAC(SPECL [`r:num`; `190464`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 190464 * 2 <= 190464` THEN ASM_REWRITE_TAC[] THENL
+  [REWRITE_TAC[mldsa_cmod] THEN ASM_REWRITE_TAC[] THEN
+   ASM_CASES_TAC `r DIV 190464 = 44` THEN ASM_REWRITE_TAC[] THENL
+   [SUBGOAL_THEN `&r - &(r MOD 190464) = &8380416 : int` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC;
+    SUBGOAL_THEN `~(&r - &(r MOD 190464) = &8380416 : int)` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC];
+   REWRITE_TAC[mldsa_cmod] THEN ASM_REWRITE_TAC[] THEN
+   ASM_CASES_TAC `r DIV 190464 + 1 = 44` THEN ASM_REWRITE_TAC[] THENL
+   [SUBGOAL_THEN `&r - (&(r MOD 190464) - &190464) = &8380416 : int` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC;
+    SUBGOAL_THEN `~(&r - (&(r MOD 190464) - &190464) = &8380416 : int)` (fun th -> REWRITE_TAC[th]) THEN
+    REWRITE_TAC[INT_OF_NUM_EQ] THEN ASM_ARITH_TAC]]);;
+
+let MLDSA_DECOMPOSE_88_A1_BOUND = prove(
+ `!r. r < 8380417 ==> FST(mldsa_decompose_88 r) <= 43`,
+  GEN_TAC THEN DISCH_TAC THEN
+  REWRITE_TAC[MLDSA_DECOMPOSE_88_EXPAND; mldsa_cmod;
+              LET_DEF; LET_END_DEF; FST] THEN
+  MP_TAC(SPECL [`r:num`; `190464`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 190464 * 2 <= 190464` THEN
+  ASM_REWRITE_TAC[] THEN
+  COND_CASES_TAC THEN ASM_ARITH_TAC);;
+
+let MLDSA_DECOMPOSE_88_A0_BOUND = prove(
+ `!r. r < 8380417 ==>
+       -- &95232 <= SND(mldsa_decompose_88 r) /\
+       SND(mldsa_decompose_88 r) <= &95232`,
+  GEN_TAC THEN DISCH_TAC THEN
+  REWRITE_TAC[MLDSA_DECOMPOSE_88_EXPAND; mldsa_cmod;
+              LET_DEF; LET_END_DEF] THEN
+  MP_TAC(SPECL [`r:num`; `190464`] DIVISION) THEN
+  ANTS_TAC THENL [ARITH_TAC; STRIP_TAC] THEN
+  ASM_CASES_TAC `r MOD 190464 * 2 <= 190464` THEN ASM_REWRITE_TAC[] THENL
+  [(* Case 1: MOD*2 <= 190464 *)
+   ASM_CASES_TAC `r DIV 190464 = 44` THEN ASM_REWRITE_TAC[SND] THENL
+   [(* 1a: wrap *)
+    SUBGOAL_THEN `r MOD 190464 = 0` SUBST1_TAC THENL
+    [ASM_ARITH_TAC; CONV_TAC INT_REDUCE_CONV];
+    (* 1b: no wrap *)
+    MP_TAC(SPEC `r MOD 190464` INT_POS) THEN
+    ASM_REWRITE_TAC[INT_OF_NUM_LE] THEN ASM_ARITH_TAC];
+   (* Case 2: MOD*2 > 190464 *)
+   ASM_CASES_TAC `r DIV 190464 + 1 = 44` THEN ASM_REWRITE_TAC[SND] THENL
+   [(* 2a: wrap *)
+    SUBGOAL_THEN `&95232 < &(r MOD 190464) : int /\ &(r MOD 190464) < &190464 : int` MP_TAC THENL
+    [REWRITE_TAC[INT_OF_NUM_LT] THEN ASM_ARITH_TAC; INT_ARITH_TAC];
+    (* 2b: no wrap *)
+    SUBGOAL_THEN `&95232 < &(r MOD 190464) : int /\ &(r MOD 190464) < &190464 : int` MP_TAC THENL
+    [REWRITE_TAC[INT_OF_NUM_LT] THEN ASM_ARITH_TAC; INT_ARITH_TAC]]]);;
+
+let MLDSA_DECOMPOSE_88_A1_MAP_BOUND = prove(
+ `!l. ALL (\x. x < 8380417) l
+      ==> ALL (\x. x <= 43) (MAP (FST o mldsa_decompose_88) l)`,
+  LIST_INDUCT_TAC THEN REWRITE_TAC[ALL; MAP; o_THM] THEN
+  STRIP_TAC THEN CONJ_TAC THENL
+  [MATCH_MP_TAC MLDSA_DECOMPOSE_88_A1_BOUND THEN ASM_REWRITE_TAC[];
+   FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[]]);;
+
+let MLDSA_DECOMPOSE_88_A0_MAP_BOUND = prove(
+ `!l. ALL (\x. x < 8380417) l
+      ==> ALL (\x. -- &95232 <= x /\ x <= &95232)
+              (MAP (SND o mldsa_decompose_88) l)`,
+  LIST_INDUCT_TAC THEN REWRITE_TAC[ALL; MAP; o_THM] THEN
+  STRIP_TAC THEN CONJ_TAC THENL
+  [MATCH_MP_TAC MLDSA_DECOMPOSE_88_A0_BOUND THEN ASM_REWRITE_TAC[];
+   FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_REWRITE_TAC[]]);;
