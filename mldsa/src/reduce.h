@@ -129,7 +129,7 @@ __contract__(
   requires(a < MLDSA_Q)
   ensures(return_value >= 0)
   ensures(return_value < MLDSA_Q)
-  ensures(return_value == (a >= 0) ? a : (a + MLDSA_Q))
+  ensures(return_value == ((a >= 0) ? a : (a + MLDSA_Q)))
 )
 {
   return mld_ct_sel_int32(a + MLDSA_Q, a, mld_ct_cmask_neg_i32(a));
