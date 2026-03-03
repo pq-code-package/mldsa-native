@@ -495,7 +495,7 @@ void mld_polyveck_add(mld_polyveck *u, const mld_polyveck *v)
   {
     mld_poly_add(&u->vec[i], &v->vec[i]);
   }
-  mld_assert_bound_2d(u->vec, MLDSA_L, MLDSA_N, INT32_MIN,
+  mld_assert_bound_2d(u->vec, MLDSA_K, MLDSA_N, INT32_MIN,
                       MLD_REDUCE32_DOMAIN_MAX);
 }
 
