@@ -21,7 +21,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
-    if: ${{ always() }} # Make this step non-cancellable to avoid orphaned instances
+    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     outputs:
       label: ${{ steps.start-ec2-runner.outputs.label }}
       ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
@@ -98,7 +98,7 @@ jobs:
       - start-ec2-runner
       - opentitan_build # required to wait when the main job is done
     runs-on: ubuntu-latest
-    if: ${{ always() }} # required to stop the runner even if errors occur
+    if: ${{ always() && needs.start-ec2-runner.result != 'skipped' }} # required to stop the runner even if errors occur
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
