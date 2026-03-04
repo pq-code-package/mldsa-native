@@ -499,9 +499,9 @@ static int test_native_poly_chknorm(void)
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    generate_i32_array_ranged(test_poly.coeffs, MLDSA_N, -REDUCE32_RANGE_MAX,
-                              REDUCE32_RANGE_MAX);
-    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_Q - REDUCE32_RANGE_MAX,
+    generate_i32_array_ranged(test_poly.coeffs, MLDSA_N,
+                              -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX);
+    CHECK(test_poly_chknorm_core(&test_poly, MLDSA_Q - MLD_REDUCE32_RANGE_MAX,
                                  "poly_chknorm_MAX_B") == 0);
     CHECK(test_poly_chknorm_core(&test_poly, MLDSA_GAMMA1 - MLDSA_BETA,
                                  "poly_chknorm_gamma1_minus_beta") == 0);

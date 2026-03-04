@@ -22,6 +22,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 CHECK_FUNCTION_CONTRACTS=mld_poly_chknorm
 USE_FUNCTION_CONTRACTS=mld_poly_chknorm_native
 USE_FUNCTION_CONTRACTS+=mld_poly_chknorm_c
+USE_FUNCTION_CONTRACTS+=mld_ct_cmask_nonzero_u32
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

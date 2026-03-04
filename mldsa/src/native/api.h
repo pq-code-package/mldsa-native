@@ -39,13 +39,13 @@
 
 /* Bound on absolute value of coefficients after NTT.
  *
- * NOTE: This is the same bound as in ntt.h and has to be kept
+ * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
 #define MLD_NTT_BOUND (9 * MLDSA_Q)
 
 /* Absolute exclusive upper bound for the output of the inverse NTT
  *
- * NOTE: This is the same bound as in ntt.h and has to be kept
+ * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
 #define MLD_INTT_BOUND MLDSA_Q
 
@@ -54,7 +54,7 @@
  * NOTE: This is the same bound as in reduce.h and has to be kept
  * in sync. */
 /* check-magic: 6283009 == (MLD_REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
-#define REDUCE32_RANGE_MAX 6283009
+#define MLD_REDUCE32_RANGE_MAX 6283009
 /*
  * This is the C<->native interface allowing for the drop-in of
  * native code for performance critical arithmetic components of ML-DSA.
@@ -429,19 +429,28 @@ __contract__(
  *              Assumes input coefficients were reduced by mld_reduce32().
  *
  * Arguments:   - const int32_t *a: pointer to polynomial
- *              - int32_t B: norm bound
+ *              - int32_t B: norm bound, which must be in the range
+ *                0 .. MLDSA_Q - MLD_REDUCE32_RANGE_MAX inclusive.
  *
- * Returns 0 if the infinity norm is strictly smaller than B, and 1
- * otherwise. B must not be larger than MLDSA_Q - MLD_REDUCE32_RANGE_MAX.
+ * Returns MLD_NATIVE_FUNC_FALLBACK (-1) if the target CPU cannot
+ * support a native implementation of this function.
+ *
+ * If the target CPU can support this function, then
+ *  Returns MLD_NATIVE_FUNC_SUCCESS (0) if the infinity norm is strictly
+ *     smaller than B
+ *  Returns 1 otherwise
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(0 <= B && B <= MLDSA_Q - REDUCE32_RANGE_MAX)
-  requires(array_bound(a, 0, MLDSA_N, -REDUCE32_RANGE_MAX, REDUCE32_RANGE_MAX))
-  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-  ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
+  requires(0 <= B && B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX)
+  requires(array_bound(a, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == 0  ||
+          return_value == 1)
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==>
+          ((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B)))
+
 );
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 

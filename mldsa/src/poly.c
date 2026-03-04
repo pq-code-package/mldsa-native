@@ -956,7 +956,7 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
   if (success)
   {
     /* Convert 0 / 1 to 0 / 0xFFFFFFFF here */
-    return 0U - (uint32_t)ret;
+    return mld_ct_cmask_nonzero_u32((uint32_t)ret);
   }
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
   return mld_poly_chknorm_c(a, B);
