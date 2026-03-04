@@ -51,7 +51,6 @@ jobs:
           func: ${{ matrix.target.func }}
           kat: ${{ matrix.target.kat }}
           acvp: ${{ matrix.target.acvp }}
-          wycheproof: ${{ matrix.target.wycheproof }}
           examples: false
           stack: false
           alloc: ${{ matrix.target.alloc }}

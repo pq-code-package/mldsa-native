@@ -88,6 +88,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -113,6 +114,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -138,6 +140,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -163,6 +166,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -188,6 +192,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -213,6 +218,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -237,6 +243,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -261,6 +268,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -285,6 +293,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
@@ -310,6 +319,7 @@ runs:
           kat: ${{ inputs.kat }}
           unit: ${{ inputs.unit }}
           acvp: ${{ inputs.acvp }}
+          wycheproof: ${{ inputs.wycheproof }}
           examples: ${{ inputs.examples }}
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}

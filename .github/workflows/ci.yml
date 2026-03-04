@@ -504,7 +504,6 @@ jobs:
           func: true
           kat: true
           acvp: true
-          wycheproof: false
           nix-shell: ${{ matrix.compiler.shell }}
   # ensure that sign.h and mldsa_native.h; api.h and native backends are compatible
   check-apis:
