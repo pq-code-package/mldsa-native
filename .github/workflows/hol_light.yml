@@ -102,15 +102,15 @@ jobs:
           - name: poly_use_hint_88_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar
-            needs: ["keccak_spec.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml"]
           - name: keccak_f1600_x1_v84a
-            needs: ["keccak_spec.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml"]
           - name: keccak_f1600_x2_v84a
-            needs: ["keccak_spec.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml"]
           - name: keccak_f1600_x4_v8a_scalar
-            needs: ["keccak_spec.ml"]
+            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml"]
           - name: keccak_f1600_x4_v8a_v84a_scalar
-            needs: ["keccak_spec.ml"]
+            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml"]
           - name: mldsa_polyz_unpack_17
             needs: ["aarch64_utils.ml", "mldsa_polyz_unpack_consts.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
           - name: mldsa_polyz_unpack_19
@@ -209,6 +209,8 @@ jobs:
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: mldsa_pointwise_acc_l7
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
+          - name: keccak_f1600_x4_avx2
+            needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-x64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork

@@ -99,6 +99,7 @@
 #include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S"
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
+#include "src/fips202/native/x86_64/src/keccak_f1600_x4_avx2.S"
 #endif
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
@@ -628,13 +629,16 @@
 /*
  * Undefine macros from native code (FIPS202, x86_64)
  */
-/* mldsa/src/fips202/native/x86_64/src/KeccakP_1600_times4_SIMD256.h */
-#undef MLD_FIPS202_NATIVE_X86_64_SRC_KECCAKP_1600_TIMES4_SIMD256_H
-#undef mld_keccakf1600x4_permute24
-/* mldsa/src/fips202/native/x86_64/xkcp.h */
-#undef MLD_FIPS202_NATIVE_X86_64_XKCP_H
-#undef MLD_FIPS202_X86_64_XKCP
+/* mldsa/src/fips202/native/x86_64/keccak_f1600_x4_avx2.h */
+#undef MLD_FIPS202_NATIVE_X86_64_KECCAK_F1600_X4_AVX2_H
+#undef MLD_FIPS202_X86_64_NEED_X4_AVX2
 #undef MLD_USE_FIPS202_X4_NATIVE
+/* mldsa/src/fips202/native/x86_64/src/fips202_native_x86_64.h */
+#undef MLD_FIPS202_NATIVE_X86_64_SRC_FIPS202_NATIVE_X86_64_H
+#undef mld_keccak_f1600_x4_avx2
+#undef mld_keccak_rho56
+#undef mld_keccak_rho8
+#undef mld_keccakf1600_round_constants
 #endif /* MLD_SYS_X86_64 */
 #if defined(MLD_SYS_ARMV81M_MVE)
 /*

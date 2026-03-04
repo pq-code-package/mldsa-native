@@ -1,7 +1,12 @@
 /*
- * Copyright (c) The mlkem-native project authors
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/*
+ * WARNING: This file is auto-generated from scripts/autogen
+ *          in the mldsa-native repository.
+ *          Do not modify it directly.
  */
 
 #include "../../../../common.h"

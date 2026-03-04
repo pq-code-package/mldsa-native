@@ -32,3 +32,7 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: x86_64/mldsa/mldsa_pointwise_acc_l7.o ================\n";;
 print_literal_from_elf "x86_64/mldsa/mldsa_pointwise_acc_l7.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: x86_64/mldsa/keccak_f1600_x4_avx2.o ================\n";;
+print_literal_from_elf "x86_64/mldsa/keccak_f1600_x4_avx2.o";;
+print_string "==== bytecode end =====================================\n\n";;

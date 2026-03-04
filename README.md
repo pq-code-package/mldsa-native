@@ -61,12 +61,7 @@ We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to
 
 **Note:** The `MLD_CONFIG_REDUCE_RAM` configuration option is not currently covered by CBMC proofs.
 
-HOL-Light functional correctness proofs can be found in [proofs/hol_light](proofs/hol_light). So far, the following functions have been proven correct:
-
-- AArch64 poly_caddq [poly_caddq_asm.S](mldsa/src/native/aarch64/src/poly_caddq_asm.S)
-- x86_64 NTT [ntt.S](mldsa/src/native/x86_64/src/ntt.S)
-
-These proofs utilize the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+HOL-Light functional correctness proofs can be found in [proofs/hol_light](proofs/hol_light). See the [HOL-Light README](proofs/hol_light/README.md) for the list of functions that have been proven correct. These proofs utilize the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate

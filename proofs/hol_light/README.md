@@ -51,6 +51,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## What is covered?
 
+### AArch64
 - ML-DSA Arithmetic:
   * AArch64 poly_caddq: [mldsa_poly_caddq.S](aarch64/mldsa/mldsa_poly_caddq.S)
   * AArch64 poly_chknorm: [mldsa_poly_chknorm.S](aarch64/mldsa/mldsa_poly_chknorm.S)
@@ -60,13 +61,6 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
   * AArch64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4.S](aarch64/mldsa/mldsa_pointwise_acc_l4.S)
   * AArch64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5.S](aarch64/mldsa/mldsa_pointwise_acc_l5.S)
   * AArch64 pointwise multiplication-accumulation (l=7): [mldsa_pointwise_acc_l7.S](aarch64/mldsa/mldsa_pointwise_acc_l7.S)
-  * x86_64 forward NTT: [mldsa_ntt.S](x86_64/mldsa/mldsa_ntt.S)
-  * x86_64 inverse NTT: [mldsa_intt.S](x86_64/mldsa/mldsa_intt.S)
-  * x86_64 NTT unpack: [mldsa_nttunpack.S](x86_64/mldsa/mldsa_nttunpack.S)
-  * x86_64 pointwise multiplication: [mldsa_pointwise.S](x86_64/mldsa/mldsa_pointwise.S)
-  * x86_64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4.S](x86_64/mldsa/mldsa_pointwise_acc_l4.S)
-  * x86_64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5.S](x86_64/mldsa/mldsa_pointwise_acc_l5.S)
-  * x86_64 pointwise multiplication-accumulation (l=7): [mldsa_pointwise_acc_l7.S](x86_64/mldsa/mldsa_pointwise_acc_l7.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar.S](aarch64/mldsa/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](aarch64/mldsa/keccak_f1600_x1_v84a.S)
@@ -75,6 +69,20 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
   * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions: [keccak_f1600_x4_v8a_v84a_scalar.S](aarch64/mldsa/keccak_f1600_x4_v8a_v84a_scalar.S)
 
 
+
+### x86_64
+
+
+- ML-DSA Arithmetic:
+  * x86_64 forward NTT: [mldsa_ntt.S](x86_64/mldsa/mldsa_ntt.S)
+  * x86_64 inverse NTT: [mldsa_intt.S](x86_64/mldsa/mldsa_intt.S)
+  * x86_64 NTT unpack: [mldsa_nttunpack.S](x86_64/mldsa/mldsa_nttunpack.S)
+  * x86_64 pointwise multiplication: [mldsa_pointwise.S](x86_64/mldsa/mldsa_pointwise.S)
+  * x86_64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4.S](x86_64/mldsa/mldsa_pointwise_acc_l4.S)
+  * x86_64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5.S](x86_64/mldsa/mldsa_pointwise_acc_l5.S)
+  * x86_64 pointwise multiplication-accumulation (l=7): [mldsa_pointwise_acc_l7.S](x86_64/mldsa/mldsa_pointwise_acc_l7.S)
+- FIPS202:
+  * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2.S](x86_64/mldsa/keccak_f1600_x4_avx2.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
