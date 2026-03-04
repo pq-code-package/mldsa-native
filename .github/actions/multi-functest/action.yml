@@ -42,6 +42,9 @@ inputs:
   acvp:
     description: Determine whether to run acvp test or not
     default: "true"
+  wycheproof:
+    description: Determine whether to run wycheproof test or not
+    default: "true"
   examples:
     description: Determine whether to run examples or not
     default: "true"

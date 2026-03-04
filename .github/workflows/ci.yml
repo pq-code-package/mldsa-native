@@ -334,6 +334,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -347,6 +348,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -360,6 +362,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -373,6 +376,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -387,6 +391,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -401,6 +406,7 @@ jobs:
           func: true
           kat: false
           acvp: false
+          wycheproof: false
           examples: ${{ matrix.compiler.examples }}
           opt: ${{ matrix.compiler.opt }}
           nix-shell: ${{ matrix.compiler.shell }}
@@ -439,6 +445,7 @@ jobs:
           func: false
           kat: false
           acvp: false
+          wycheproof: false
           examples: false
           stack: true
           check_namespace: false
@@ -497,6 +504,7 @@ jobs:
           func: true
           kat: true
           acvp: true
+          wycheproof: false
           nix-shell: ${{ matrix.compiler.shell }}
   # ensure that sign.h and mldsa_native.h; api.h and native backends are compatible
   check-apis:
@@ -578,6 +586,7 @@ jobs:
       functest: true
       kattest: true
       acvptest: true
+      wycheprooftest: false
       lint: false
       verbose: true
     secrets: inherit
@@ -651,60 +660,78 @@ jobs:
             # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
             quickcheck: false
             acvptest: false
+            wycheprooftest: false
           - id: amazonlinux-2-aarch:gcc-7x
             # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
             quickcheck: false
             acvptest: false
+            wycheprooftest: false
           - id: amazonlinux-2-aarch:clang-7x
             # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
             quickcheck: false
             acvptest: false
+            wycheprooftest: false
           - id: amazonlinux-2023-aarch:base
             quickcheck: true
             acvptest: true
+            wycheprooftest: true
           - id: amazonlinux-2023-aarch:gcc-11x
             quickcheck: true
             acvptest: true
+            wycheprooftest: true
           - id: amazonlinux-2023-aarch:clang-15x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: amazonlinux-2023-aarch:clang-15x-sanitizer
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           # - id: amazonlinux-2023-aarch:cryptofuzz Not yet supported
           - id: ubuntu-22.04-aarch:gcc-12x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-22.04-aarch:gcc-11x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:gcc-8x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:gcc-7x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:clang-9x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:clang-8x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:clang-7x-bm-framework
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:clang-7x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:clang-10x
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-22.04-aarch:base
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
           - id: ubuntu-20.04-aarch:base
             quickcheck: true
             acvptest: true
+            wycheprooftest: false
     name: Compatibility tests (${{ matrix.container.id }})
     permissions:
       contents: 'read'
@@ -722,6 +749,7 @@ jobs:
       functest: true
       kattest: true
       acvptest: ${{ matrix.container.acvptest }}
+      wycheprooftest: ${{ matrix.container.wycheprooftest }}
       quickcheck: ${{ matrix.container.quickcheck }}
       lint: false
       verbose: true
