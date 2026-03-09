@@ -37,8 +37,8 @@ MLD_ASM_FN_SYMBOL(polyz_unpack_17_asm)
         mov	x9, #0x10               // =16
 
 Lpolyz_unpack_17_loop:
-        ld1	{ v0.4s, v1.4s }, [x1], #32
-        ldr	s2, [x1], #0x4
+        ld1	{ v0.16b, v1.16b, v2.16b }, [x1]
+        add	x1, x1, #0x24
         tbl	v4.16b, { v0.16b }, v24.16b
         tbl	v5.16b, { v0.16b, v1.16b }, v25.16b
         tbl	v6.16b, { v1.16b }, v26.16b
