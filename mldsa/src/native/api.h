@@ -507,6 +507,57 @@ __contract__(
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_19 */
 
+#if defined(MLD_USE_NATIVE_POLYW1_PACK_32)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+/*************************************************
+ * Name:        mld_polyw1_pack_32_native
+ *
+ * Description: Native implementation of polyw1_pack for GAMMA2 = (Q-1)/32.
+ *              Bit-pack polynomial w1 with coefficients in [0, 15],
+ *              packing 2 nibbles per byte.
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *              - const int32_t *a: pointer to input polynomial coefficients
+ **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_32_native(uint8_t *r, const int32_t *a)
+__contract__(
+  requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES))
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2)))
+  assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* MLD_USE_NATIVE_POLYW1_PACK_32 */
+
+#if defined(MLD_USE_NATIVE_POLYW1_PACK_88)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+/*************************************************
+ * Name:        mld_polyw1_pack_88_native
+ *
+ * Description: Native implementation of polyw1_pack for GAMMA2 = (Q-1)/88.
+ *              Bit-pack polynomial w1 with coefficients in [0, 43],
+ *              using 6-bit encoding (4 coefficients -> 3 bytes).
+ *
+ * Arguments:   - uint8_t *r: pointer to output byte array
+ *              - const int32_t *a: pointer to input polynomial coefficients
+ **************************************************/
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_88_native(uint8_t *r, const int32_t *a)
+__contract__(
+  requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES))
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2)))
+  assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* MLD_USE_NATIVE_POLYW1_PACK_88 */
+
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
 /*************************************************
  * Name:        mld_poly_pointwise_montgomery_native

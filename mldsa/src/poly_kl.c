@@ -888,31 +888,53 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 MLD_INTERNAL_API
 void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
 {
-  unsigned int i;
-
+#if defined(MLD_USE_NATIVE_POLYW1_PACK_88) && MLD_CONFIG_PARAMETER_SET == 44
+  int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+  ret = mld_polyw1_pack_88_native(r, a->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#elif defined(MLD_USE_NATIVE_POLYW1_PACK_32) && \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+  int ret;
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+  ret = mld_polyw1_pack_32_native(r, a->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* !(MLD_USE_NATIVE_POLYW1_PACK_88 && MLD_CONFIG_PARAMETER_SET == 44)  \
+          && MLD_USE_NATIVE_POLYW1_PACK_32 && (MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87) */
+  {
+    unsigned int i;
+
+    mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
 
 #if MLD_CONFIG_PARAMETER_SET == 44
-  for (i = 0; i < MLDSA_N / 4; ++i)
-  __loop__(
+    for (i = 0; i < MLDSA_N / 4; ++i)
+    __loop__(
     invariant(i <= MLDSA_N/4))
-  {
-    r[3 * i + 0] = (uint8_t)((a->coeffs[4 * i + 0]) & 0xFF);
-    r[3 * i + 0] |= (uint8_t)((a->coeffs[4 * i + 1] << 6) & 0xFF);
-    r[3 * i + 1] = (uint8_t)((a->coeffs[4 * i + 1] >> 2) & 0xFF);
-    r[3 * i + 1] |= (uint8_t)((a->coeffs[4 * i + 2] << 4) & 0xFF);
-    r[3 * i + 2] = (uint8_t)((a->coeffs[4 * i + 2] >> 4) & 0xFF);
-    r[3 * i + 2] |= (uint8_t)((a->coeffs[4 * i + 3] << 2) & 0xFF);
-  }
+    {
+      r[3 * i + 0] = (uint8_t)((a->coeffs[4 * i + 0]) & 0xFF);
+      r[3 * i + 0] |= (uint8_t)((a->coeffs[4 * i + 1] << 6) & 0xFF);
+      r[3 * i + 1] = (uint8_t)((a->coeffs[4 * i + 1] >> 2) & 0xFF);
+      r[3 * i + 1] |= (uint8_t)((a->coeffs[4 * i + 2] << 4) & 0xFF);
+      r[3 * i + 2] = (uint8_t)((a->coeffs[4 * i + 2] >> 4) & 0xFF);
+      r[3 * i + 2] |= (uint8_t)((a->coeffs[4 * i + 3] << 2) & 0xFF);
+    }
 #else  /* MLD_CONFIG_PARAMETER_SET == 44 */
-  for (i = 0; i < MLDSA_N / 2; ++i)
-  __loop__(
+    for (i = 0; i < MLDSA_N / 2; ++i)
+    __loop__(
     invariant(i <= MLDSA_N/2))
-  {
-    r[i] =
-        (uint8_t)((a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4)) & 0xFF);
-  }
+    {
+      r[i] = (uint8_t)((a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4)) &
+                       0xFF);
+    }
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
+  }
 }
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros. */

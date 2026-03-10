@@ -25,6 +25,8 @@
 #define MLD_USE_NATIVE_POLY_CHKNORM
 #define MLD_USE_NATIVE_POLYZ_UNPACK_17
 #define MLD_USE_NATIVE_POLYZ_UNPACK_19
+#define MLD_USE_NATIVE_POLYW1_PACK_32
+#define MLD_USE_NATIVE_POLYW1_PACK_88
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
@@ -252,6 +254,35 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_32_native(uint8_t *r, const int32_t *a)
+{
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+  mld_polyw1_pack_32_avx2(r, a);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyw1_pack_88_native(uint8_t *r, const int32_t *a)
+{
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+  mld_polyw1_pack_88_avx2(r, a);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(

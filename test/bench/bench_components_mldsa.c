@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../mldsa/src/poly.h"
+#include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
 #include "../../mldsa/src/randombytes.h"
 #include "hal.h"
@@ -79,6 +80,18 @@ static int bench(void)
   BENCH("polyvec_matrix_pointwise_montgomery",
         mld_polyvec_matrix_pointwise_montgomery(&polyveck_out, &polymat,
                                                 &polyvecl_b))
+
+  /* polyw1_pack: set up valid input with coefficients in [0, (Q-1)/(2*GAMMA2))
+   */
+  {
+    MLD_ALIGN uint8_t w1_packed[MLDSA_POLYW1_PACKEDBYTES];
+    MLD_ALIGN mld_poly w1_poly;
+    for (i = 0; i < MLDSA_N; i++)
+    {
+      w1_poly.coeffs[i] = (int32_t)(i % ((MLDSA_Q - 1) / (2 * MLDSA_GAMMA2)));
+    }
+    BENCH("polyw1_pack", mld_polyw1_pack(w1_packed, &w1_poly))
+  }
 
   return 0;
 }

@@ -88,6 +88,8 @@
 #include "src/native/x86_64/src/poly_decompose_88_avx2.c"
 #include "src/native/x86_64/src/poly_use_hint_32_avx2.c"
 #include "src/native/x86_64/src/poly_use_hint_88_avx2.c"
+#include "src/native/x86_64/src/polyw1_pack_32_avx2.c"
+#include "src/native/x86_64/src/polyw1_pack_88_avx2.c"
 #include "src/native/x86_64/src/polyz_unpack_17_avx2.c"
 #include "src/native/x86_64/src/polyz_unpack_19_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_avx2.c"
@@ -617,6 +619,8 @@
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+#undef MLD_USE_NATIVE_POLYW1_PACK_32
+#undef MLD_USE_NATIVE_POLYW1_PACK_88
 #undef MLD_USE_NATIVE_POLYZ_UNPACK_17
 #undef MLD_USE_NATIVE_POLYZ_UNPACK_19
 #undef MLD_USE_NATIVE_POLY_CADDQ
@@ -648,6 +652,8 @@
 #undef mld_polyvecl_pointwise_acc_montgomery_l4_asm
 #undef mld_polyvecl_pointwise_acc_montgomery_l5_asm
 #undef mld_polyvecl_pointwise_acc_montgomery_l7_asm
+#undef mld_polyw1_pack_32_asm
+#undef mld_polyw1_pack_88_asm
 #undef mld_polyz_unpack_17_asm
 #undef mld_polyz_unpack_17_indices
 #undef mld_polyz_unpack_19_asm
@@ -672,6 +678,8 @@
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
 #undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+#undef MLD_USE_NATIVE_POLYW1_PACK_32
+#undef MLD_USE_NATIVE_POLYW1_PACK_88
 #undef MLD_USE_NATIVE_POLYZ_UNPACK_17
 #undef MLD_USE_NATIVE_POLYZ_UNPACK_19
 #undef MLD_USE_NATIVE_POLY_CADDQ
@@ -701,6 +709,8 @@
 #undef mld_poly_decompose_88_avx2
 #undef mld_poly_use_hint_32_avx2
 #undef mld_poly_use_hint_88_avx2
+#undef mld_polyw1_pack_32_avx2
+#undef mld_polyw1_pack_88_avx2
 #undef mld_polyz_unpack_17_avx2
 #undef mld_polyz_unpack_19_avx2
 #undef mld_rej_uniform_avx2
