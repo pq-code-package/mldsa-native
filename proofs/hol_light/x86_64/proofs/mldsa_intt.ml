@@ -8,7 +8,7 @@
 (* ========================================================================= *)
 
 needs "x86/proofs/base.ml";;
-needs "x86_64/proofs/mldsa_specs.ml";;
+needs "common/mldsa_specs.ml";;
 needs "x86_64/proofs/mldsa_utils.ml";;
 needs "x86_64/proofs/mldsa_zetas.ml";;
 

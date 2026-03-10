@@ -9,7 +9,7 @@
 (* ========================================================================= *)
 
 needs "arm/proofs/base.ml";;
-needs "aarch64/proofs/mldsa_specs.ml";;
+needs "common/mldsa_specs.ml";;
 needs "aarch64/proofs/aarch64_utils.ml";;
 needs "aarch64/proofs/mldsa_zetas.ml";;
 
