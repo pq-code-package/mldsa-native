@@ -760,6 +760,10 @@ let MLDSA_NTT_CORRECT = prove
       CONV_TAC INT_REDUCE_CONV])));;
 
 (*** Subroutine form, somewhat messy elaboration of the usual wrapper ***)
+
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mldsa/src/native/aarch64/src/arith_native_aarch64.h *)
+
 let MLDSA_NTT_SUBROUTINE_CORRECT = prove
  (`!a z_012345 z_67 zetas_012345 zetas_67 x pc stackpointer returnaddress.
       aligned 16 stackpointer /\

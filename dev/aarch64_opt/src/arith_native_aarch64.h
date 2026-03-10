@@ -50,7 +50,20 @@ extern const uint8_t mld_polyz_unpack_19_indices[];
 #define MLD_AARCH64_REJ_UNIFORM_ETA4_BUFLEN (2 * 136)
 
 #define mld_ntt_asm MLD_NAMESPACE(ntt_asm)
-void mld_ntt_asm(int32_t *, const int32_t *, const int32_t *);
+void mld_ntt_asm(int32_t *r, const int32_t *zetas_l123456,
+                 const int32_t *zetas_l78)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_ntt.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  requires(zetas_l123456 == mld_aarch64_ntt_zetas_layer123456)
+  requires(zetas_l78 == mld_aarch64_ntt_zetas_layer78)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: off */
+  ensures(array_abs_bound(r, 0, MLDSA_N, 75423753))
+  /* check-magic: on */
+);
 
 #define mld_intt_asm MLD_NAMESPACE(intt_asm)
 void mld_intt_asm(int32_t *, const int32_t *, const int32_t *);
