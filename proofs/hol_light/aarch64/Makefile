@@ -53,7 +53,8 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mldsa/mldsa_poly_caddq.o \
+OBJ = mldsa/mldsa_ntt.o \
+      mldsa/mldsa_poly_caddq.o \
       mldsa/mldsa_poly_chknorm.o
 
 # According to

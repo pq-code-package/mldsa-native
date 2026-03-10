@@ -3,6 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *)
 
+(* Merge 4 x bytes32 reads into bytes128 reads *)
+let MEMORY_128_FROM_32_TAC =
+  let a_tm = `a:int64` and n_tm = `n:num` and i64_ty = `:int64`
+  and pat = `read (memory :> bytes128(word_add a (word n))) s0` in
+  fun v boff n ->
+    let pat' = subst[mk_var(v,i64_ty),a_tm] pat in
+    let f i =
+      let itm = mk_small_numeral(boff + 16*i) in
+      READ_MEMORY_MERGE_CONV 2 (subst[itm,n_tm] pat') in
+    MP_TAC(end_itlist CONJ (map f (0--(n-1))));;
+
 (* Utility for executing until target PC is reached *)
 let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
   let is_pc_condition = can (term_match [] `read PC some_state = some_value`) in

@@ -79,6 +79,8 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
+          - name: mldsa_ntt
+            needs: ["mldsa_specs.ml", "mldsa_zetas.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_poly_caddq
             needs: ["aarch64_utils.ml"]
           - name: mldsa_poly_chknorm

@@ -1300,6 +1300,26 @@ def gen_avx2_zetas_qdata():
     return constants, offsets
 
 
+def gen_aarch64_hol_light_zeta_file():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Table of zeta values used in the AArch64 NTTs"
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let ntt_zetas_layer012345 = define `ntt_zetas_layer012345:int list = ["
+        yield from print_hol_light_array(gen_aarch64_fwd_ntt_zetas_layer123456())
+        yield "]`;;"
+        yield ""
+        yield "let ntt_zetas_layer67 = define `ntt_zetas_layer67:int list = ["
+        yield from print_hol_light_array(gen_aarch64_fwd_ntt_zetas_layer78())
+        yield "]`;;"
+        yield ""
+
+    update_file("proofs/hol_light/aarch64/proofs/mldsa_zetas.ml", "\n".join(gen()))
+
+
 def gen_avx2_hol_light_zeta_file():
     def gen():
         yield from gen_hol_light_header()
@@ -3318,6 +3338,7 @@ def _main():
     def gen_zeta_tables():
         gen_c_zeta_file()
         gen_aarch64_zeta_file()
+        gen_aarch64_hol_light_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_aarch64_rej_uniform_eta_table()
         gen_aarch64_polyz_unpack_table()
