@@ -2489,7 +2489,7 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         x86_64_syntax=x86_64_syntax,
-        cflags="-Idev/fips202/x86_64 -Imldsa/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
+        cflags="-Imldsa/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
 
 
