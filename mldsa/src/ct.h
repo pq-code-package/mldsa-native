@@ -327,7 +327,8 @@ __contract__(
   for (i = 0; i < len; i++)
   __loop__(
     invariant(i <= len)
-    invariant((r == 0) == (forall(k, 0, i, (a[k] == b[k])))))
+    invariant((r == 0) == (forall(k, 0, i, (a[k] == b[k]))))
+    decreases(len - i))
   {
     r |= a[i] ^ b[i];
     /* s is useless, but prevents the loop from being aborted once r=0xff. */

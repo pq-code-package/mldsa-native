@@ -58,6 +58,7 @@ __contract__(
     invariant(array_bound(a0->coeffs, i, MLDSA_N, 0, MLDSA_Q))
     invariant(array_bound(a1->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
     invariant(array_abs_bound(a0->coeffs, 0, i, MLDSA_GAMMA2+1))
+    decreases(MLDSA_N - i)
   )
   {
     mld_decompose(&a0->coeffs[i], &a1->coeffs[i], a0->coeffs[i]);
@@ -110,6 +111,7 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
     invariant(i <= MLDSA_N)
     invariant(s <= i)
     invariant(array_bound(h->coeffs, 0, i, 0, 2))
+    decreases(MLDSA_N - i)
   )
   {
     const unsigned int hint_bit = mld_make_hint(a0->coeffs[i], a1->coeffs[i]);
@@ -142,6 +144,7 @@ __contract__(
   __loop__(
     invariant(i <= MLDSA_N)
     invariant(array_bound(b->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+    decreases(MLDSA_N - i)
   )
   {
     b->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
@@ -245,6 +248,7 @@ __contract__(
   __loop__(
     invariant(offset <= ctr && ctr <= target && pos <= buflen)
     invariant(array_abs_bound(a, 0, ctr, MLDSA_ETA + 1))
+    decreases(buflen - pos)
   )
   {
     t0 = buf[pos] & 0x0F;
@@ -659,7 +663,8 @@ void mld_polyeta_pack(uint8_t r[MLDSA_POLYETA_PACKEDBYTES], const mld_poly *a)
 #if MLDSA_ETA == 2
   for (i = 0; i < MLDSA_N / 8; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/8))
+    invariant(i <= MLDSA_N/8)
+    decreases(MLDSA_N / 8 - i))
   {
     /* The casts are safe since we assume that the coefficients
      * of a are <= MLDSA_ETA in absolute value. */
@@ -681,7 +686,8 @@ void mld_polyeta_pack(uint8_t r[MLDSA_POLYETA_PACKEDBYTES], const mld_poly *a)
 #elif MLDSA_ETA == 4
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/2))
+    invariant(i <= MLDSA_N/2)
+    decreases(MLDSA_N / 2 - i))
   {
     /* The casts are safe since we assume that the coefficients
      * of a are <= MLDSA_ETA in absolute value. */
@@ -702,7 +708,8 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
   for (i = 0; i < MLDSA_N / 8; ++i)
   __loop__(
     invariant(i <= MLDSA_N/8)
-    invariant(array_bound(r->coeffs, 0, i*8, -5, MLDSA_ETA + 1)))
+    invariant(array_bound(r->coeffs, 0, i*8, -5, MLDSA_ETA + 1))
+    decreases(MLDSA_N / 8 - i))
   {
     r->coeffs[8 * i + 0] = (a[3 * i + 0] >> 0) & 7;
     r->coeffs[8 * i + 1] = (a[3 * i + 0] >> 3) & 7;
@@ -726,7 +733,8 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
     invariant(i <= MLDSA_N/2)
-    invariant(array_bound(r->coeffs, 0, i*2, -11, MLDSA_ETA + 1)))
+    invariant(array_bound(r->coeffs, 0, i*2, -11, MLDSA_ETA + 1))
+    decreases(MLDSA_N / 2 - i))
   {
     r->coeffs[2 * i + 0] = a[i] & 0x0F;
     r->coeffs[2 * i + 1] = a[i] >> 4;
@@ -753,7 +761,8 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 #if MLD_CONFIG_PARAMETER_SET == 44
   for (i = 0; i < MLDSA_N / 4; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/4))
+    invariant(i <= MLDSA_N/4)
+    decreases(MLDSA_N / 4 - i))
   {
     /* Safety: a->coeffs[i] <= MLDSA_GAMMA1, hence, these casts are safe. */
     t[0] = (uint32_t)(MLDSA_GAMMA1 - a->coeffs[4 * i + 0]);
@@ -777,7 +786,8 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 #else  /* MLD_CONFIG_PARAMETER_SET == 44 */
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/2))
+    invariant(i <= MLDSA_N/2)
+    decreases(MLDSA_N / 2 - i))
   {
     /* Safety: a->coeffs[i] <= MLDSA_GAMMA1, hence, these casts are safe. */
     t[0] = (uint32_t)(MLDSA_GAMMA1 - a->coeffs[2 * i + 0]);
@@ -807,7 +817,8 @@ __contract__(
   for (i = 0; i < MLDSA_N / 4; ++i)
   __loop__(
     invariant(i <= MLDSA_N/4)
-    invariant(array_bound(r->coeffs, 0, i*4, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+    invariant(array_bound(r->coeffs, 0, i*4, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+    decreases(MLDSA_N / 4 - i))
   {
     r->coeffs[4 * i + 0] = a[9 * i + 0];
     r->coeffs[4 * i + 0] |= (int32_t)a[9 * i + 1] << 8;
@@ -838,7 +849,8 @@ __contract__(
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
     invariant(i <= MLDSA_N/2)
-    invariant(array_bound(r->coeffs, 0, i*2, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+    invariant(array_bound(r->coeffs, 0, i*2, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+    decreases(MLDSA_N / 2 - i))
   {
     r->coeffs[2 * i + 0] = a[5 * i + 0];
     r->coeffs[2 * i + 0] |= (int32_t)a[5 * i + 1] << 8;
@@ -895,7 +907,8 @@ void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
 #if MLD_CONFIG_PARAMETER_SET == 44
   for (i = 0; i < MLDSA_N / 4; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/4))
+    invariant(i <= MLDSA_N/4)
+    decreases(MLDSA_N / 4 - i))
   {
     r[3 * i + 0] = (uint8_t)((a->coeffs[4 * i + 0]) & 0xFF);
     r[3 * i + 0] |= (uint8_t)((a->coeffs[4 * i + 1] << 6) & 0xFF);
@@ -907,7 +920,8 @@ void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
 #else  /* MLD_CONFIG_PARAMETER_SET == 44 */
   for (i = 0; i < MLDSA_N / 2; ++i)
   __loop__(
-    invariant(i <= MLDSA_N/2))
+    invariant(i <= MLDSA_N/2)
+    decreases(MLDSA_N / 2 - i))
   {
     r[i] =
         (uint8_t)((a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4)) & 0xFF);
