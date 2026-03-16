@@ -29,6 +29,7 @@ static void mld_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
 __contract__(
   requires(inlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+  requires(r > 0)
   requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
   requires(memory_no_alias(in0, inlen))
   requires(memory_no_alias(in1, inlen))
@@ -43,7 +44,8 @@ __contract__(
     invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
     invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
     invariant(in2 == loop_entry(in2) + (loop_entry(inlen) - inlen))
-    invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen)))
+    invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen))
+    decreases(inlen))
   {
     mld_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, r);
     mld_keccakf1600x4_permute(s);
@@ -104,7 +106,8 @@ __contract__(
       out0 == loop_entry(out0) + r * (loop_entry(nblocks) - nblocks) &&
       out1 == loop_entry(out1) + r * (loop_entry(nblocks) - nblocks) &&
       out2 == loop_entry(out2) + r * (loop_entry(nblocks) - nblocks) &&
-      out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks)))
+      out3 == loop_entry(out3) + r * (loop_entry(nblocks) - nblocks))
+    decreases(nblocks))
   {
     mld_keccakf1600x4_permute(s);
     mld_keccakf1600x4_extract_bytes(s, out0, out1, out2, out3, 0, r);

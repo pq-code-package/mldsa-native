@@ -73,6 +73,7 @@ static unsigned int keccak_absorb(uint64_t s[MLD_KECCAK_LANES],
                                   const uint8_t *in, size_t inlen)
 __contract__(
   requires(inlen <= MLD_MAX_BUFFER_SIZE)
+  requires(r > 0)
   requires(r < sizeof(uint64_t) * MLD_KECCAK_LANES)
   requires(pos <= r)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
@@ -86,7 +87,8 @@ __contract__(
       memory_slice(s, sizeof(uint64_t) *  MLD_KECCAK_LANES))
     invariant(inlen <= loop_entry(inlen))
     invariant(pos <= r)
-    invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen)))
+    invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen))
+    decreases(inlen + pos))
   {
     mld_keccakf1600_xor_bytes(s, in, pos, r - pos);
     inlen -= r - pos;
@@ -173,6 +175,7 @@ __contract__(
     invariant(bytes_to_go <= outlen)
     invariant(out_offset == outlen - bytes_to_go)
     invariant(pos <= r)
+    decreases(bytes_to_go)
   )
   {
     if (pos == r)
