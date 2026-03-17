@@ -278,7 +278,9 @@ EXAMPLE_DIRS := \
 	examples/monolithic_build_multilevel \
 	examples/monolithic_build_multilevel_native \
 	examples/multilevel_build \
-	examples/multilevel_build_native
+	examples/multilevel_build_native \
+	examples/disabled_apis \
+	examples/disabled_apis_native
 
 EXAMPLE_CLEAN_TARGETS := $(EXAMPLE_DIRS:%=clean-%)
 
