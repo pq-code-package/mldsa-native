@@ -26,7 +26,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2 --slice-formula --no-array-field-sensitivity
+CBMCFLAGS=--smt2
 
 FUNCTION_NAME = polymat_permute_bitrev_to_custom
 
@@ -37,7 +37,7 @@ FUNCTION_NAME = polymat_permute_bitrev_to_custom
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
