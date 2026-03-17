@@ -433,6 +433,84 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/disabled_apis/keygen_only_config.h
+    description: "Disabled APIs: keygen only (no sign, no verify)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_NO_SIGN_API: true
+      MLD_CONFIG_NO_VERIFY_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis/sign_only_config.h
+    description: "Disabled APIs: sign only (no keypair, no verify)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_NO_VERIFY_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis/verify_only_config.h
+    description: "Disabled APIs: verify only (no keypair, no sign)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_NO_SIGN_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis/sign_verify_config.h
+    description: "Disabled APIs: sign and verify only (no keypair)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis_native/keygen_only_config.h
+    description: "Disabled APIs (native): keygen only (no sign, no verify)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_NO_SIGN_API: true
+      MLD_CONFIG_NO_VERIFY_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis_native/sign_only_config.h
+    description: "Disabled APIs (native): sign only (no keypair, no verify)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_NO_VERIFY_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis_native/verify_only_config.h
+    description: "Disabled APIs (native): verify only (no keypair, no sign)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_NO_SIGN_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
+  - path: examples/disabled_apis_native/sign_verify_config.h
+    description: "Disabled APIs (native): sign and verify only (no keypair)"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_USE_NATIVE_BACKEND_ARITH: true
+      MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202: true
+      MLD_CONFIG_NO_KEYPAIR_API: true
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: proofs/cbmc/mldsa_native_config_cbmc.h
     description: "mldsa-native configuration used for CBMC proofs"
     defines:
