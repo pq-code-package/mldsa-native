@@ -101,13 +101,14 @@ def check_contracts():
 
 # Loops that only terminate probabilistically (rejection sampling)
 # and therefore cannot have a decreases clause.
-DECREASES_EXCEPTIONS = [
-    ("mldsa/src/poly.c", "mld_poly_uniform"),
-    ("mldsa/src/poly.c", "mld_poly_uniform_4x"),
-    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta_4x"),
-    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta"),
-    ("mldsa/src/poly_kl.c", "mld_poly_challenge"),
-]
+# The value is the number of loops allowed to lack a decreases clause (default 1).
+DECREASES_EXCEPTIONS = {
+    ("mldsa/src/poly.c", "mld_poly_uniform"): 1,
+    ("mldsa/src/poly.c", "mld_poly_uniform_4x"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta_4x"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_challenge"): 1,
+}
 
 
 def find_enclosing_function(content, pos):
@@ -124,6 +125,9 @@ def find_enclosing_function(content, pos):
 def check_decreases():
     files = get_c_source_files() + get_header_files()
     bad = []
+
+    # Count loops without decreases per (filename, func)
+    missing = {}
 
     for filename in files:
         with open(filename, "r") as f:
@@ -156,20 +160,36 @@ def check_decreases():
                 continue
 
             func = find_enclosing_function(content, start)
+            key = (filename, func)
+            missing.setdefault(key, []).append(line)
 
-            if (filename, func) in DECREASES_EXCEPTIONS:
+    for (filename, func), lines in missing.items():
+        key = (filename, func)
+        allowed = DECREASES_EXCEPTIONS.get(key, 0)
+        count = len(lines)
+
+        if count <= allowed:
+            for line in lines:
                 print(
                     f"{filename}:{line}: __loop__ without decreases in "
                     f"{func}(), but is listed as exception"
                 )
-                continue
+            continue
 
+        if allowed > 0:
             print(
-                f"{filename}:{line}: __loop__ without decreases clause "
-                f"in {func}(). FAIL",
+                f"{filename}: {func}() has {count} loops without decreases "
+                f"but only {allowed} allowed. FAIL",
                 file=sys.stderr,
             )
-            bad.append((filename, line))
+        else:
+            for line in lines:
+                print(
+                    f"{filename}:{line}: __loop__ without decreases clause "
+                    f"in {func}(). FAIL",
+                    file=sys.stderr,
+                )
+        bad.append((filename, func))
 
     return len(bad) == 0
 
