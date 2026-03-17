@@ -593,6 +593,7 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
   __loop__(
     assigns(i, signs)
     invariant(i <= 8)
+    decreases(8 - i)
   )
   {
     signs |= (uint64_t)buf[i] << 8 * i;
@@ -610,8 +611,10 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
     invariant(pos <= SHAKE256_RATE)
     invariant(array_bound(c->coeffs, 0, MLDSA_N, -1, 2))
     invariant(state.pos <= SHAKE256_RATE)
+    decreases(MLDSA_N - i)
   )
   {
+    /* This loop teminates only probabilistically, hence no decreases clause. */
     do
     __loop__(
       assigns(j, object_whole(buf), state, pos)
