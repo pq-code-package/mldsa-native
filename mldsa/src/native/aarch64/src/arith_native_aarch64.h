@@ -29,10 +29,15 @@ extern const uint8_t mld_rej_uniform_table[];
 #define mld_rej_uniform_eta_table MLD_NAMESPACE(rej_uniform_eta_table)
 extern const uint8_t mld_rej_uniform_eta_table[];
 
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_indices MLD_NAMESPACE(polyz_unpack_17_indices)
 extern const uint8_t mld_polyz_unpack_17_indices[];
+#endif
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 #define mld_polyz_unpack_19_indices MLD_NAMESPACE(polyz_unpack_19_indices)
 extern const uint8_t mld_polyz_unpack_19_indices[];
+#endif
 
 
 /*
