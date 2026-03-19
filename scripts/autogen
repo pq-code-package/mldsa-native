@@ -1099,6 +1099,15 @@ def gen_aarch64_polyz_unpack_indices(bit_width):
 
 
 def gen_aarch64_polyz_unpack_table():
+    # Map gamma1_bits to parameter set guards
+    param_set_guards = {
+        17: "#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44",
+        19: (
+            "#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \\\n"
+            "    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)"
+        ),
+    }
+
     def format_row(vals):
         return ", ".join(f"{v:>3}" for v in vals) + ","
 
@@ -1117,10 +1126,12 @@ def gen_aarch64_polyz_unpack_table():
         for gamma1_bits in [17, 19]:
             bit_width = gamma1_bits + 1
             indices = list(gen_aarch64_polyz_unpack_indices(bit_width))
+            yield param_set_guards[gamma1_bits]
             yield f"MLD_ALIGN const uint8_t mld_polyz_unpack_{gamma1_bits}_indices[] = {{"
             for row_start in range(0, len(indices), 16):
                 yield "    " + format_row(indices[row_start : row_start + 16])
             yield "};"
+            yield "#endif"
             yield ""
         yield "#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
