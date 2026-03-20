@@ -62,8 +62,13 @@ MLD_ASM_FN_SYMBOL(polyz_unpack_19_asm)
         mov count, #(64/4)
 
 polyz_unpack_19_loop:
-        ld1	{v0.16b, v1.16b, v2.16b}, [buf]
-        add	buf, buf, #0x28
+        // Split the load to avoid overreading the buffer: a
+        // 3-register ld1 would load 48 bytes, but only 40 are
+        // consumed per iteration. The TBL indices for v2 are
+        // adjusted to account for v2's load offset.
+        ld1	{v0.16b, v1.16b}, [buf]
+        add	buf, buf, #0x18
+        ld1	{v2.16b}, [buf], #0x10
 
         tbl v4.16b, {v0.16b}, idx0.16b
         tbl v5.16b, {v0.16b - v1.16b}, idx1.16b

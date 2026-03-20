@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../mldsa/src/poly.h"
+#include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
 #include "../../mldsa/src/randombytes.h"
 #include "hal.h"
@@ -79,6 +80,9 @@ static int bench(void)
   BENCH("polyvec_matrix_pointwise_montgomery",
         mld_polyvec_matrix_pointwise_montgomery(&polyveck_out, &polymat,
                                                 &polyvecl_b))
+
+  /* polyz_unpack */
+  BENCH("polyz_unpack", mld_polyz_unpack(&poly_out, (const uint8_t *)data0))
 
   return 0;
 }

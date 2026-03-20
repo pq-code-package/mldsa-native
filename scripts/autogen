@@ -1075,16 +1075,26 @@ def gen_aarch64_polyz_unpack_indices(bit_width):
     Each coefficient is extracted from 3 consecutive bytes.
     Groups 0,1 index from v0 (and v1); groups 2,3 index from v1 (and v2),
     so their byte offsets are shifted by -16.
+
+    To avoid overreading the input buffer, v0/v1 and v2 are loaded
+    separately: v0/v1 via ld1 {v0,v1} at buf, v2 via ld1 {v2} at
+    buf + stride - 16 (stride = bit_width * 2). Since v2 starts at
+    a different offset than a contiguous 3-register load would give,
+    TBL indices referencing v2 (>= 16 within groups 2,3) are shifted
+    by 48 - 2 * bit_width.
     """
+    v2_shift = 48 - 2 * bit_width
     for group in range(4):
         base_coeff = group * 4
         reg_offset = 0 if group < 2 else 16
         for coeff in range(4):
             i = base_coeff + coeff
             byte_start = (i * bit_width) // 8 - reg_offset
-            yield byte_start
-            yield byte_start + 1
-            yield byte_start + 2
+            for j in range(3):
+                b = byte_start + j
+                if group >= 2 and b >= 16:
+                    b += v2_shift
+                yield b
             yield 255
 
 
