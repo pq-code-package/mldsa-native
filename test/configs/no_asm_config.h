@@ -676,6 +676,10 @@ static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
  *              NOTE: This feature will drastically lower the performance of
  *              key generation.
  *
+ *              NOTE: This option is incompatible with MLD_CONFIG_NO_SIGN_API
+ *              and MLD_CONFIG_NO_VERIFY_API as the current PCT implementation
+ *              requires crypto_sign_signature() and crypto_sign_verify().
+ *
  *****************************************************************************/
 /* #define MLD_CONFIG_KEYGEN_PCT */
 
