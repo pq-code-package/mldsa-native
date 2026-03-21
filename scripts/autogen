@@ -988,7 +988,8 @@ def gen_aarch64_rej_uniform_eta_table():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
+        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) &&  \\"
+        yield "    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield '#include "arith_native_aarch64.h"'
@@ -1003,11 +1004,15 @@ def gen_aarch64_rej_uniform_eta_table():
             yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
         yield ""
-        yield "#else"
+        yield ("#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\")
+        yield "         !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLD_EMPTY_CU(aarch64_rej_uniform_eta_table)"
         yield ""
-        yield "#endif"
+        yield (
+            "#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\"
+        )
+        yield "          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
     update_file("dev/aarch64_opt/src/rej_uniform_eta_table.c", "\n".join(gen()))
@@ -1089,6 +1094,15 @@ def gen_aarch64_polyz_unpack_indices(bit_width):
 
 
 def gen_aarch64_polyz_unpack_table():
+    # Map gamma1_bits to parameter set guards
+    param_set_guards = {
+        17: "#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44",
+        19: (
+            "#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \\\n"
+            "    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)"
+        ),
+    }
+
     def format_row(vals):
         return ", ".join(f"{v:>3}" for v in vals) + ","
 
@@ -1101,17 +1115,22 @@ def gen_aarch64_polyz_unpack_table():
         yield ""
         yield '#include "arith_native_aarch64.h"'
         yield ""
+        yield "#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)"
         yield "/* Table of indices used for tbl instructions in polyz_unpack_{17,19}."
         yield " * See autogen for details. */"
         yield ""
         for gamma1_bits in [17, 19]:
             bit_width = gamma1_bits + 1
             indices = list(gen_aarch64_polyz_unpack_indices(bit_width))
+            yield param_set_guards[gamma1_bits]
             yield f"MLD_ALIGN const uint8_t mld_polyz_unpack_{gamma1_bits}_indices[] = {{"
             for row_start in range(0, len(indices), 16):
                 yield "    " + format_row(indices[row_start : row_start + 16])
             yield "};"
+            yield "#endif"
             yield ""
+        yield "#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */"
+        yield ""
         yield "#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLD_EMPTY_CU(aarch64_polyz_unpack_table)"

@@ -27,7 +27,8 @@ MLD_ALIGN const uint8_t mld_polyz_unpack_17_indices[] = {
     2,  3,  4,  255, 4,  5,  6,  255, 6,  7,  8,  255, 8,  9,  10, 255,
     11, 12, 13, 255, 13, 14, 15, 255, 15, 16, 17, 255, 17, 18, 19, 255,
 };
-#endif
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
 
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
@@ -37,7 +38,9 @@ MLD_ALIGN const uint8_t mld_polyz_unpack_19_indices[] = {
     4,  5,  6,  255, 6,  7,  8,  255, 9,  10, 11, 255, 11, 12, 13, 255,
     14, 15, 16, 255, 16, 17, 18, 255, 19, 20, 21, 255, 21, 22, 23, 255,
 };
-#endif
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
