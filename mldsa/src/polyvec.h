@@ -17,6 +17,7 @@
 #define mld_polyvecl MLD_ADD_PARAM_SET(mld_polyvecl)
 #define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
 #define mld_polymat MLD_ADD_PARAM_SET(mld_polymat)
+#define mld_s1vec MLD_ADD_PARAM_SET(mld_s1vec)
 /* End of parameter set namespacing */
 
 /* Vectors of polynomials of length MLDSA_L */
@@ -150,6 +151,16 @@ typedef struct
   mld_polyvecl vec[MLDSA_K];
 #endif
 } mld_polymat;
+
+/* Secret vector s1, see mld_s1vec_init and mld_s1vec_get_poly below */
+typedef struct
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  const uint8_t *packed;
+#else
+  mld_polyvecl vec;
+#endif
+} mld_s1vec;
 
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
@@ -575,6 +586,30 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
+
+#define mld_s1vec_init MLD_NAMESPACE_KL(s1vec_init)
+static MLD_INLINE void mld_s1vec_init(
+    mld_s1vec *s1, const uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  s1->packed = packed_s1;
+#else
+  mld_polyvecl_unpack_eta(&s1->vec, packed_s1);
+  mld_polyvecl_ntt(&s1->vec);
+#endif
+}
+
+#define mld_s1vec_get_poly MLD_NAMESPACE_KL(s1vec_get_poly)
+static MLD_INLINE void mld_s1vec_get_poly(mld_poly *buf, const mld_s1vec *s1,
+                                          unsigned int i)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  mld_polyeta_unpack(buf, s1->packed + i * MLDSA_POLYETA_PACKEDBYTES);
+  mld_poly_ntt(buf);
+#else
+  *buf = s1->vec.vec[i];
+#endif
+}
 
 #define mld_polyvecl_unpack_z MLD_NAMESPACE_KL(polyvecl_unpack_z)
 /*************************************************

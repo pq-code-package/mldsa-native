@@ -35,6 +35,11 @@
 #define MLD_TOTAL_ALLOC_VERIFY \
   MLD_TOTAL_ALLOC_VERIFY_(MLD_CONFIG_API_PARAMETER_SET)
 
+#define MLD_TOTAL_ALLOC_PK_FROM_SK__(LVL) MLD_TOTAL_ALLOC_##LVL##_PK_FROM_SK
+#define MLD_TOTAL_ALLOC_PK_FROM_SK_(LVL) MLD_TOTAL_ALLOC_PK_FROM_SK__(LVL)
+#define MLD_TOTAL_ALLOC_PK_FROM_SK \
+  MLD_TOTAL_ALLOC_PK_FROM_SK_(MLD_CONFIG_API_PARAMETER_SET)
+
 #define MLD_TOTAL_ALLOC__(LVL) MLD_TOTAL_ALLOC_##LVL
 #define MLD_TOTAL_ALLOC_(LVL) MLD_TOTAL_ALLOC__(LVL)
 #define MLD_TOTAL_ALLOC MLD_TOTAL_ALLOC_(MLD_CONFIG_API_PARAMETER_SET)
@@ -82,6 +87,7 @@ struct test_ctx_t
   size_t high_mark;
   size_t global_high_mark;
   size_t global_high_mark_keypair;
+  size_t global_high_mark_pk_from_sk;
   size_t global_high_mark_sign;
   size_t global_high_mark_verify;
 
@@ -574,7 +580,8 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
   }
 
   TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, sk, ctx),
-                     MLD_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
+                     MLD_TOTAL_ALLOC_PK_FROM_SK,
+                     &ctx->global_high_mark_pk_from_sk);
   return 0;
 }
 
@@ -602,6 +609,7 @@ int main(void)
       0,     /* high_mark */
       0,     /* global_high_mark */
       0,     /* global_high_mark_keypair */
+      0,     /* global_high_mark_pk_from_sk */
       0,     /* global_high_mark_sign */
       0,     /* global_high_mark_verify */
       {{0}}, /* alloc_stack */
@@ -664,6 +672,8 @@ int main(void)
 
   /* Check per-operation high watermarks match the declared limits */
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLD_TOTAL_ALLOC_KEYPAIR);
+  CHECK_ALLOC_MATCH(ctx.global_high_mark_pk_from_sk,
+                    MLD_TOTAL_ALLOC_PK_FROM_SK);
   CHECK_ALLOC_MATCH(ctx.global_high_mark_sign, MLD_TOTAL_ALLOC_SIGN);
   CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_TOTAL_ALLOC);

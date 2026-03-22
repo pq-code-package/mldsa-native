@@ -180,6 +180,7 @@
 #undef MLD_ERR_RNG_FAIL
 #undef MLD_H
 #undef MLD_MAX3_
+#undef MLD_MAX4_
 #undef MLD_PREHASH_NONE
 #undef MLD_PREHASH_SHA2_224
 #undef MLD_PREHASH_SHA2_256
@@ -197,18 +198,21 @@
 #undef MLD_TOTAL_ALLOC_44_KEYPAIR
 #undef MLD_TOTAL_ALLOC_44_KEYPAIR_NO_PCT
 #undef MLD_TOTAL_ALLOC_44_KEYPAIR_PCT
+#undef MLD_TOTAL_ALLOC_44_PK_FROM_SK
 #undef MLD_TOTAL_ALLOC_44_SIGN
 #undef MLD_TOTAL_ALLOC_44_VERIFY
 #undef MLD_TOTAL_ALLOC_65
 #undef MLD_TOTAL_ALLOC_65_KEYPAIR
 #undef MLD_TOTAL_ALLOC_65_KEYPAIR_NO_PCT
 #undef MLD_TOTAL_ALLOC_65_KEYPAIR_PCT
+#undef MLD_TOTAL_ALLOC_65_PK_FROM_SK
 #undef MLD_TOTAL_ALLOC_65_SIGN
 #undef MLD_TOTAL_ALLOC_65_VERIFY
 #undef MLD_TOTAL_ALLOC_87
 #undef MLD_TOTAL_ALLOC_87_KEYPAIR
 #undef MLD_TOTAL_ALLOC_87_KEYPAIR_NO_PCT
 #undef MLD_TOTAL_ALLOC_87_KEYPAIR_PCT
+#undef MLD_TOTAL_ALLOC_87_PK_FROM_SK
 #undef MLD_TOTAL_ALLOC_87_SIGN
 #undef MLD_TOTAL_ALLOC_87_VERIFY
 #undef crypto_sign
@@ -340,6 +344,9 @@
 #undef mld_polyvecl_uniform_gamma1
 #undef mld_polyvecl_unpack_eta
 #undef mld_polyvecl_unpack_z
+#undef mld_s1vec
+#undef mld_s1vec_get_poly
+#undef mld_s1vec_init
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H

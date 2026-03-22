@@ -450,8 +450,10 @@ __contract__(
  *
  * Arguments:   - uint8_t *sig: output signature
  *              - const mld_poly *cp: challenge polynomial
- *              - const polyvecl *s1: secret vector s1
+ *              - const mld_s1vec *s1: secret vector s1 source
  *              - const polyvecl *y: masking vector y
+ *              - mld_poly *z: scratch polynomial for z computation
+ *              - mld_poly *tmp: scratch polynomial for s1 unpacking
  *
  * Returns:     - 0: Success (z has coefficients smaller than
  *                   MLDSA_GAMMA1 - MLDSA_BETA,)
@@ -464,20 +466,22 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
-                              const mld_poly *cp, const mld_polyvecl *s1,
-                              const mld_polyvecl *y, mld_poly *z)
+                              const mld_poly *cp, const mld_s1vec *s1,
+                              const mld_polyvecl *y, mld_poly *z, mld_poly *tmp)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(cp, sizeof(mld_poly)))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(s1, sizeof(mld_s1vec)))
   requires(memory_no_alias(y, sizeof(mld_polyvecl)))
   requires(memory_no_alias(z, sizeof(mld_poly)))
+  requires(memory_no_alias(tmp, sizeof(mld_poly)))
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(forall(k0, 0, MLDSA_L,
     array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
+  assigns(memory_slice(tmp, sizeof(mld_poly)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )
@@ -486,12 +490,15 @@ __contract__(
   uint32_t z_invalid;
   for (i = 0; i < MLDSA_L; i++)
   __loop__(
-    assigns(i, memory_slice(z, sizeof(mld_poly)), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    assigns(i, memory_slice(z, sizeof(mld_poly)),
+            memory_slice(tmp, sizeof(mld_poly)),
+            memory_slice(sig, MLDSA_CRYPTO_BYTES))
     invariant(i <= MLDSA_L)
     decreases(MLDSA_L - i)
   )
   {
-    mld_poly_pointwise_montgomery(z, cp, &s1->vec[i]);
+    mld_s1vec_get_poly(tmp, s1, i);
+    mld_poly_pointwise_montgomery(z, cp, tmp);
     mld_poly_invntt_tomont(z);
     mld_poly_add(z, &y->vec[i]);
     mld_poly_reduce(z);
@@ -542,7 +549,7 @@ __contract__(
  *              - const uint8_t *rhoprime: pointer to randomness seed
  *              - uint16_t nonce: current nonce value
  *              - const mld_polymat *mat: expanded matrix
- *              - const polyvecl *s1: secret vector s1
+ *              - const mld_s1vec *s1: secret vector s1
  *              - const polyveck *s2: secret vector s2
  *              - const polyveck *t0: vector t0
  *
@@ -560,21 +567,21 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
-    const mld_polyvecl *s1, const mld_polyveck *s2, const mld_polyveck *t0,
+    const mld_s1vec *s1, const mld_polyveck *s2, const mld_polyveck *t0,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
   requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(s1, sizeof(mld_s1vec)))
   requires(memory_no_alias(s2, sizeof(mld_polyveck)))
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
   requires(nonce <= MLD_NONCE_UB)
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
                                          array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
@@ -650,7 +657,7 @@ __contract__(
   mld_poly_ntt(cp);
 
   /* Compute z, reject if it reveals secret */
-  ret = mld_compute_pack_z(sig, cp, s1, y, t);
+  ret = mld_compute_pack_z(sig, cp, s1, y, t, z);
   if (ret)
   {
     goto cleanup;
@@ -740,7 +747,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(s1, mld_polyvecl, 1, context);
+  MLD_ALLOC(s1, mld_s1vec, 1, context);
   MLD_ALLOC(t0, mld_polyveck, 1, context);
   MLD_ALLOC(s2, mld_polyveck, 1, context);
 
@@ -776,7 +783,6 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
   /* Expand matrix and transform vectors */
   mld_polyvec_matrix_expand(mat, rho);
-  mld_polyvecl_ntt(s1);
   mld_polyveck_ntt(s2);
   mld_polyveck_ntt(t0);
 
@@ -798,7 +804,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
               array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
     invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-    invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(ret == MLD_ERR_FAIL)
     decreases(MLD_NONCE_UB - nonce)
@@ -844,7 +850,7 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(s2, mld_polyveck, 1, context);
   MLD_FREE(t0, mld_polyveck, 1, context);
-  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(s1, mld_s1vec, 1, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(seedbuf, uint8_t,
            2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
@@ -1433,15 +1439,16 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES, context);
   MLD_ALLOC(tr_computed, uint8_t, MLDSA_TRBYTES, context);
   MLD_ALLOC(key, uint8_t, MLDSA_SEEDBYTES, context);
-  MLD_ALLOC(s1, mld_polyvecl, 1, context);
+  MLD_ALLOC(s1, mld_s1vec, 1, context);
+  MLD_ALLOC(s1_raw, mld_polyvecl, 1, context);
   MLD_ALLOC(s2, mld_polyveck, 1, context);
   MLD_ALLOC(t0, mld_polyveck, 1, context);
   MLD_ALLOC(t0_computed, mld_polyveck, 1, context);
   MLD_ALLOC(t1, mld_polyveck, 1, context);
 
   if (rho == NULL || tr == NULL || tr_computed == NULL || key == NULL ||
-      s1 == NULL || s2 == NULL || t0 == NULL || t0_computed == NULL ||
-      t1 == NULL)
+      s1 == NULL || s1_raw == NULL || s2 == NULL || t0 == NULL ||
+      t0_computed == NULL || t1 == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -1450,13 +1457,17 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Unpack secret key */
   mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
 
+  /* Unpack s1 again in raw form for norm check and recomputation.
+   * TODO: avoid this double unpacking */
+  mld_polyvecl_unpack_eta(s1_raw, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES);
+
   /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
-  chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
+  chk1 = mld_polyvecl_chknorm(s1_raw, MLDSA_ETA + 1) & 0xFF;
   chk2 = mld_polyveck_chknorm(s2, MLDSA_ETA + 1) & 0xFF;
 
   /* Recompute t0, t1, tr, and pk from rho, s1, s2 */
   ret = mld_compute_t0_t1_tr_from_sk_components(t0_computed, t1, tr_computed,
-                                                pk, rho, s1, s2, context);
+                                                pk, rho, s1_raw, s2, context);
   if (ret != 0)
   {
     goto cleanup;
@@ -1488,7 +1499,8 @@ cleanup:
   MLD_FREE(t0_computed, mld_polyveck, 1, context);
   MLD_FREE(t0, mld_polyveck, 1, context);
   MLD_FREE(s2, mld_polyveck, 1, context);
-  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(s1_raw, mld_polyvecl, 1, context);
+  MLD_FREE(s1, mld_s1vec, 1, context);
   MLD_FREE(key, uint8_t, MLDSA_SEEDBYTES, context);
   MLD_FREE(tr_computed, uint8_t, MLDSA_TRBYTES, context);
   MLD_FREE(tr, uint8_t, MLDSA_TRBYTES, context);
