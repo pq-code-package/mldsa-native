@@ -344,6 +344,9 @@
 #undef mld_s1vec
 #undef mld_s1vec_get_poly
 #undef mld_s1vec_init
+#undef mld_s2vec
+#undef mld_s2vec_get_poly
+#undef mld_s2vec_init
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H

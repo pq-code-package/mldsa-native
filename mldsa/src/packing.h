@@ -165,7 +165,7 @@ __contract__(
 MLD_INTERNAL_API
 void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
                    uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
-                   mld_s1vec *s1, mld_polyveck *s2,
+                   mld_s1vec *s1, mld_s2vec *s2,
                    const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
@@ -173,20 +173,20 @@ __contract__(
   requires(memory_no_alias(key, MLDSA_SEEDBYTES))
   requires(memory_no_alias(t0, sizeof(mld_polyveck)))
   requires(memory_no_alias(s1, sizeof(mld_s1vec)))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
+  requires(memory_no_alias(s2, sizeof(mld_s2vec)))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(rho, MLDSA_SEEDBYTES))
   assigns(memory_slice(tr, MLDSA_TRBYTES))
   assigns(memory_slice(key, MLDSA_SEEDBYTES))
   assigns(memory_slice(t0, sizeof(mld_polyveck)))
   assigns(memory_slice(s1, sizeof(mld_s1vec)))
-  assigns(memory_slice(s2, sizeof(mld_polyveck)))
+  assigns(memory_slice(s2, sizeof(mld_s2vec)))
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t0->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
   ensures(forall(k1, 0, MLDSA_L,
     array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   ensures(forall(k2, 0, MLDSA_K,
-    array_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
+    array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 
 #define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
