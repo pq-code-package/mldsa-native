@@ -666,6 +666,12 @@ __contract__(
   /* Check that subtracting cs2 does not change high bits of w and low bits
    * do not reveal secret information */
   for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k, memory_slice(z, sizeof(mld_poly)),
+            memory_slice(h, sizeof(mld_polyveck)))
+    invariant(k <= MLDSA_K)
+    decreases(MLDSA_K - k)
+  )
   {
     mld_s2vec_get_poly(z, s2, k);
     mld_poly_pointwise_montgomery(&h->vec[k], cp, z);
@@ -685,6 +691,12 @@ __contract__(
 
   /* Compute hints for w1 */
   for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k, memory_slice(z, sizeof(mld_poly)),
+            memory_slice(h, sizeof(mld_polyveck)))
+    invariant(k <= MLDSA_K)
+    decreases(MLDSA_K - k)
+  )
   {
     mld_t0vec_get_poly(z, t0, k);
     mld_poly_pointwise_montgomery(&h->vec[k], cp, z);
