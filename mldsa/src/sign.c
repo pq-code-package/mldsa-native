@@ -567,7 +567,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
-    const mld_s1vec *s1, const mld_s2vec *s2, const mld_polyveck *t0,
+    const mld_s1vec *s1, const mld_s2vec *s2, const mld_t0vec *t0,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
@@ -576,11 +576,11 @@ __contract__(
   requires(memory_no_alias(mat, sizeof(mld_polymat)))
   requires(memory_no_alias(s1, sizeof(mld_s1vec)))
   requires(memory_no_alias(s2, sizeof(mld_s2vec)))
-  requires(memory_no_alias(t0, sizeof(mld_polyveck)))
+  requires(memory_no_alias(t0, sizeof(mld_t0vec)))
   requires(nonce <= MLD_NONCE_UB)
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
                                          array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
@@ -684,7 +684,11 @@ __contract__(
   }
 
   /* Compute hints for w1 */
-  mld_polyveck_pointwise_poly_montgomery(h, cp, t0);
+  for (k = 0; k < MLDSA_K; k++)
+  {
+    mld_t0vec_get_poly(z, t0, k);
+    mld_poly_pointwise_montgomery(&h->vec[k], cp, z);
+  }
   mld_polyveck_invntt_tomont(h);
   mld_polyveck_reduce(h);
 
@@ -752,7 +756,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
   MLD_ALLOC(s1, mld_s1vec, 1, context);
-  MLD_ALLOC(t0, mld_polyveck, 1, context);
+  MLD_ALLOC(t0, mld_t0vec, 1, context);
   MLD_ALLOC(s2, mld_s2vec, 1, context);
 
   if (seedbuf == NULL || mat == NULL || s1 == NULL || t0 == NULL || s2 == NULL)
@@ -787,7 +791,6 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
   /* Expand matrix and transform vectors */
   mld_polyvec_matrix_expand(mat, rho);
-  mld_polyveck_ntt(t0);
 
   /* By default, return failure. Flip to success and write output
    * once signature generation succeeds. */
@@ -806,7 +809,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     /* loop invariant. This makes proof noticeably faster with CBMC          */
     invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
               array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(ret == MLD_ERR_FAIL)
@@ -852,7 +855,7 @@ cleanup:
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(s2, mld_s2vec, 1, context);
-  MLD_FREE(t0, mld_polyveck, 1, context);
+  MLD_FREE(t0, mld_t0vec, 1, context);
   MLD_FREE(s1, mld_s1vec, 1, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(seedbuf, uint8_t,
@@ -1446,13 +1449,14 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   MLD_ALLOC(s1_raw, mld_polyvecl, 1, context);
   MLD_ALLOC(s2, mld_s2vec, 1, context);
   MLD_ALLOC(s2_raw, mld_polyveck, 1, context);
-  MLD_ALLOC(t0, mld_polyveck, 1, context);
+  MLD_ALLOC(t0, mld_t0vec, 1, context);
+  MLD_ALLOC(t0_raw, mld_polyveck, 1, context);
   MLD_ALLOC(t0_computed, mld_polyveck, 1, context);
   MLD_ALLOC(t1, mld_polyveck, 1, context);
 
   if (rho == NULL || tr == NULL || tr_computed == NULL || key == NULL ||
       s1 == NULL || s1_raw == NULL || s2 == NULL || s2_raw == NULL ||
-      t0 == NULL || t0_computed == NULL || t1 == NULL)
+      t0 == NULL || t0_raw == NULL || t0_computed == NULL || t1 == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -1470,6 +1474,12 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   mld_polyveck_unpack_eta(s2_raw, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
                                       MLDSA_L * MLDSA_POLYETA_PACKEDBYTES);
 
+  /* Unpack t0 again in raw form for validation.
+   * TODO: avoid this double unpacking */
+  mld_polyveck_unpack_t0(t0_raw, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
+                                     MLDSA_L * MLDSA_POLYETA_PACKEDBYTES +
+                                     MLDSA_K * MLDSA_POLYETA_PACKEDBYTES);
+
   /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
   chk1 = mld_polyvecl_chknorm(s1_raw, MLDSA_ETA + 1) & 0xFF;
   chk2 = mld_polyveck_chknorm(s2_raw, MLDSA_ETA + 1) & 0xFF;
@@ -1483,7 +1493,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   }
 
   /* Validate t0 and tr using constant-time comparisons */
-  cmp0 = mld_ct_memcmp((const uint8_t *)t0, (const uint8_t *)t0_computed,
+  cmp0 = mld_ct_memcmp((const uint8_t *)t0_raw, (const uint8_t *)t0_computed,
                        sizeof(mld_polyveck));
   cmp1 = mld_ct_memcmp((const uint8_t *)tr, (const uint8_t *)tr_computed,
                        MLDSA_TRBYTES);
@@ -1506,7 +1516,8 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(t1, mld_polyveck, 1, context);
   MLD_FREE(t0_computed, mld_polyveck, 1, context);
-  MLD_FREE(t0, mld_polyveck, 1, context);
+  MLD_FREE(t0_raw, mld_polyveck, 1, context);
+  MLD_FREE(t0, mld_t0vec, 1, context);
   MLD_FREE(s2_raw, mld_polyveck, 1, context);
   MLD_FREE(s2, mld_s2vec, 1, context);
   MLD_FREE(s1_raw, mld_polyvecl, 1, context);
