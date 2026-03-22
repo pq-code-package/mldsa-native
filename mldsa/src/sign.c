@@ -454,7 +454,7 @@ __contract__(
  *
  * Arguments:   - uint8_t *sig: output signature
  *              - const mld_poly *cp: challenge polynomial
- *              - const mld_s1vec *s1: secret vector s1 source
+ *              - const mld_s1vec *s1: secret vector s1
  *              - const polyvecl *y: masking vector y
  *              - mld_poly *z: scratch polynomial for z computation
  *              - mld_poly *tmp: scratch polynomial for s1 unpacking
@@ -542,6 +542,17 @@ __contract__(
  * 814 (< (UINT16_MAX - L)/L) - see @[FIPS204, Appendix C]. */
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
+/*************************************************
+ * Name:        mld_polyveck_pointwise_poly_montgomery_s2
+ *
+ * Description: Pointwise multiplication of s2 by a polynomial in NTT domain
+ *              and multiplication of the resulting vector by 2^{-32}.
+ *
+ * Arguments:   - mld_polyveck *h: pointer to output vector
+ *              - const mld_poly *cp: pointer to input polynomial
+ *              - const mld_s2vec *s2: pointer to input s2 vector
+ *              - mld_poly *tmp: scratch polynomial
+ **************************************************/
 static void mld_polyveck_pointwise_poly_montgomery_s2(mld_polyveck *h,
                                                       const mld_poly *cp,
                                                       const mld_s2vec *s2,
@@ -573,6 +584,17 @@ __contract__(
   }
 }
 
+/*************************************************
+ * Name:        mld_polyveck_pointwise_poly_montgomery_t0
+ *
+ * Description: Pointwise multiplication of t0 by a polynomial in NTT domain
+ *              and multiplication of the resulting vector by 2^{-32}.
+ *
+ * Arguments:   - mld_polyveck *h: pointer to output vector
+ *              - const mld_poly *cp: pointer to input polynomial
+ *              - const mld_t0vec *t0: pointer to input t0 vector
+ *              - mld_poly *tmp: scratch polynomial
+ **************************************************/
 static void mld_polyveck_pointwise_poly_montgomery_t0(mld_polyveck *h,
                                                       const mld_poly *cp,
                                                       const mld_t0vec *t0,
@@ -714,6 +736,10 @@ __contract__(
 
   mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
+  /* Constant time: Leaking challenge_bytes does not reveal any information
+   * about the secret key as H() is modelled as random oracle.
+   * This also applies to challenges for rejected signatures.
+   * See Section 5.5 of @[Round3_Spec]. */
   MLD_CT_TESTING_DECLASSIFY(challenge_bytes, MLDSA_CTILDEBYTES);
   mld_poly_challenge(cp, challenge_bytes);
   mld_poly_ntt(cp);
