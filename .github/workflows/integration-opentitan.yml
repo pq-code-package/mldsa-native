@@ -80,6 +80,16 @@ jobs:
           echo "=== Patched extensions.bzl ==="
           cat third_party/mldsa_native/extensions.bzl
 
+      - name: Apply integration patches
+        run: |
+          cd "$EXPO_DIR"
+          for patch in "$GITHUB_WORKSPACE"/integration/opentitan/*.patch; do
+            if [ -f "$patch" ]; then
+              echo "Applying $patch"
+              git apply "$patch"
+            fi
+          done
+
       - name: Build mldsa functest
         run: |
           cd "$EXPO_DIR"
