@@ -1,0 +1,14 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/third_party/mldsa_native/BUILD.mldsa_native.bazel b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+index 8a63d09..1c576c2 100644
+--- a/third_party/mldsa_native/BUILD.mldsa_native.bazel
++++ b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+@@ -26,6 +26,7 @@ cc_library(
+         "mldsa/src/poly_kl.h",
+         "mldsa/src/polyvec.c",
+         "mldsa/src/polyvec.h",
++        "mldsa/src/polyvec_lazy.h",
+         "mldsa/src/reduce.h",
+         "mldsa/src/rounding.h",
+         "mldsa/src/sign.c",

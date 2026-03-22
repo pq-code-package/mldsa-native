@@ -46,6 +46,10 @@
 #define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
 #define mld_compute_pack_z MLD_ADD_PARAM_SET(mld_compute_pack_z)
+#define mld_polyveck_pointwise_poly_montgomery_s2 \
+  MLD_ADD_PARAM_SET(mld_polyveck_pointwise_poly_montgomery_s2)
+#define mld_polyveck_pointwise_poly_montgomery_t0 \
+  MLD_ADD_PARAM_SET(mld_polyveck_pointwise_poly_montgomery_t0)
 #define mld_attempt_signature_generation \
   MLD_ADD_PARAM_SET(mld_attempt_signature_generation) MLD_CONTEXT_PARAMETERS_8
 #define mld_compute_t0_t1_tr_from_sk_components              \
@@ -450,8 +454,10 @@ __contract__(
  *
  * Arguments:   - uint8_t *sig: output signature
  *              - const mld_poly *cp: challenge polynomial
- *              - const polyvecl *s1: secret vector s1
+ *              - const mld_sk_s1hat *s1hat: secret vector s1 in NTT domain
  *              - const polyvecl *y: masking vector y
+ *              - mld_poly *z: scratch polynomial for z computation
+ *              - mld_poly *tmp: scratch polynomial for s1 unpacking
  *
  * Returns:     - 0: Success (z has coefficients smaller than
  *                   MLDSA_GAMMA1 - MLDSA_BETA,)
@@ -464,20 +470,22 @@ __contract__(
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
-                              const mld_poly *cp, const mld_polyvecl *s1,
-                              const mld_polyvecl *y, mld_poly *z)
+                              const mld_poly *cp, const mld_sk_s1hat *s1hat,
+                              const mld_polyvecl *y, mld_poly *z, mld_poly *tmp)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(cp, sizeof(mld_poly)))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
   requires(memory_no_alias(y, sizeof(mld_polyvecl)))
   requires(memory_no_alias(z, sizeof(mld_poly)))
+  requires(memory_no_alias(tmp, sizeof(mld_poly)))
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(forall(k0, 0, MLDSA_L,
     array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
+  assigns(memory_slice(tmp, sizeof(mld_poly)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )
@@ -486,12 +494,15 @@ __contract__(
   uint32_t z_invalid;
   for (i = 0; i < MLDSA_L; i++)
   __loop__(
-    assigns(i, memory_slice(z, sizeof(mld_poly)), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    assigns(i, memory_slice(z, sizeof(mld_poly)),
+            memory_slice(tmp, sizeof(mld_poly)),
+            memory_slice(sig, MLDSA_CRYPTO_BYTES))
     invariant(i <= MLDSA_L)
     decreases(MLDSA_L - i)
   )
   {
-    mld_poly_pointwise_montgomery(z, cp, &s1->vec[i]);
+    mld_sk_s1hat_get_poly(tmp, s1hat, i);
+    mld_poly_pointwise_montgomery(z, cp, tmp);
     mld_poly_invntt_tomont(z);
     mld_poly_add(z, &y->vec[i]);
     mld_poly_reduce(z);
@@ -532,6 +543,92 @@ __contract__(
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
+ * Name:        mld_polyveck_pointwise_poly_montgomery_s2
+ *
+ * Description: Pointwise multiplication of s2 by a polynomial in NTT domain
+ *              and multiplication of the resulting vector by 2^{-32}.
+ *
+ * Arguments:   - mld_polyveck *h: pointer to output vector
+ *              - const mld_poly *cp: pointer to input polynomial
+ *              - const mld_sk_s2hat *s2hat: pointer to input s2 vector in NTT
+ *                domain
+ *              - mld_poly *tmp: scratch polynomial
+ **************************************************/
+static void mld_polyveck_pointwise_poly_montgomery_s2(mld_polyveck *h,
+                                                      const mld_poly *cp,
+                                                      const mld_sk_s2hat *s2hat,
+                                                      mld_poly *tmp)
+__contract__(
+  requires(memory_no_alias(h, sizeof(mld_polyveck)))
+  requires(memory_no_alias(cp, sizeof(mld_poly)))
+  requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
+  requires(memory_no_alias(tmp, sizeof(mld_poly)))
+  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  requires(forall(k0, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
+  assigns(memory_slice(tmp, sizeof(mld_poly)))
+  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(h->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
+)
+{
+  unsigned int k;
+  for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k, memory_slice(tmp, sizeof(mld_poly)),
+            memory_slice(h, sizeof(mld_polyveck)))
+    invariant(k <= MLDSA_K)
+    invariant(forall(k0, 0, k, array_abs_bound(h->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    decreases(MLDSA_K - k)
+  )
+  {
+    mld_sk_s2hat_get_poly(tmp, s2hat, k);
+    mld_poly_pointwise_montgomery(&h->vec[k], cp, tmp);
+  }
+}
+
+/*************************************************
+ * Name:        mld_polyveck_pointwise_poly_montgomery_t0
+ *
+ * Description: Pointwise multiplication of t0 by a polynomial in NTT domain
+ *              and multiplication of the resulting vector by 2^{-32}.
+ *
+ * Arguments:   - mld_polyveck *h: pointer to output vector
+ *              - const mld_poly *cp: pointer to input polynomial
+ *              - const mld_sk_t0hat *t0hat: pointer to input t0 vector in NTT
+ *                domain
+ *              - mld_poly *tmp: scratch polynomial
+ **************************************************/
+static void mld_polyveck_pointwise_poly_montgomery_t0(mld_polyveck *h,
+                                                      const mld_poly *cp,
+                                                      const mld_sk_t0hat *t0hat,
+                                                      mld_poly *tmp)
+__contract__(
+  requires(memory_no_alias(h, sizeof(mld_polyveck)))
+  requires(memory_no_alias(cp, sizeof(mld_poly)))
+  requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
+  requires(memory_no_alias(tmp, sizeof(mld_poly)))
+  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  requires(forall(k0, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
+  assigns(memory_slice(tmp, sizeof(mld_poly)))
+  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(h->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
+)
+{
+  unsigned int k;
+  for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k, memory_slice(tmp, sizeof(mld_poly)),
+            memory_slice(h, sizeof(mld_polyveck)))
+    invariant(k <= MLDSA_K)
+    invariant(forall(k0, 0, k, array_abs_bound(h->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    decreases(MLDSA_K - k)
+  )
+  {
+    mld_sk_t0hat_get_poly(tmp, t0hat, k);
+    mld_poly_pointwise_montgomery(&h->vec[k], cp, tmp);
+  }
+}
+
+/*************************************************
  * Name:        attempt_signature_generation
  *
  * Description: Attempts to generate a single signature.
@@ -542,9 +639,9 @@ __contract__(
  *              - const uint8_t *rhoprime: pointer to randomness seed
  *              - uint16_t nonce: current nonce value
  *              - const mld_polymat *mat: expanded matrix
- *              - const polyvecl *s1: secret vector s1
- *              - const polyveck *s2: secret vector s2
- *              - const polyveck *t0: vector t0
+ *              - const mld_sk_s1hat *s1hat: secret vector s1 in NTT domain
+ *              - const mld_sk_s2hat *s2hat: secret vector s2 in NTT domain
+ *              - const mld_sk_t0hat *t0hat: vector t0 in NTT domain
  *
  * Returns:     - 0: Signature generation succeeded
  *              - MLD_ERR_FAIL: Signature rejected (norm check failed)
@@ -560,22 +657,22 @@ MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
-    const mld_polyvecl *s1, const mld_polyveck *s2, const mld_polyveck *t0,
-    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
+    const mld_sk_s1hat *s1hat, const mld_sk_s2hat *s2hat,
+    const mld_sk_t0hat *t0hat, MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
   requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(memory_no_alias(t0, sizeof(mld_polyveck)))
+  requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
+  requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
+  requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
   requires(nonce <= MLD_NONCE_UB)
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
                                          array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
@@ -650,7 +747,7 @@ __contract__(
   mld_poly_ntt(cp);
 
   /* Compute z, reject if it reveals secret */
-  ret = mld_compute_pack_z(sig, cp, s1, y, t);
+  ret = mld_compute_pack_z(sig, cp, s1hat, y, t, z);
   if (ret)
   {
     goto cleanup;
@@ -658,7 +755,7 @@ __contract__(
 
   /* Check that subtracting cs2 does not change high bits of w and low bits
    * do not reveal secret information */
-  mld_polyveck_pointwise_poly_montgomery(h, cp, s2);
+  mld_polyveck_pointwise_poly_montgomery_s2(h, cp, s2hat, z);
   mld_polyveck_invntt_tomont(h);
   mld_polyveck_sub(w0, h);
   mld_polyveck_reduce(w0);
@@ -673,7 +770,7 @@ __contract__(
   }
 
   /* Compute hints for w1 */
-  mld_polyveck_pointwise_poly_montgomery(h, cp, t0);
+  mld_polyveck_pointwise_poly_montgomery_t0(h, cp, t0hat, z);
   mld_polyveck_invntt_tomont(h);
   mld_polyveck_reduce(h);
 
@@ -740,11 +837,12 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(s1, mld_polyvecl, 1, context);
-  MLD_ALLOC(t0, mld_polyveck, 1, context);
-  MLD_ALLOC(s2, mld_polyveck, 1, context);
+  MLD_ALLOC(s1hat, mld_sk_s1hat, 1, context);
+  MLD_ALLOC(t0hat, mld_sk_t0hat, 1, context);
+  MLD_ALLOC(s2hat, mld_sk_s2hat, 1, context);
 
-  if (seedbuf == NULL || mat == NULL || s1 == NULL || t0 == NULL || s2 == NULL)
+  if (seedbuf == NULL || mat == NULL || s1hat == NULL || t0hat == NULL ||
+      s2hat == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -755,7 +853,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   key = tr + MLDSA_TRBYTES;
   mu = key + MLDSA_SEEDBYTES;
   rhoprime = mu + MLDSA_CRHBYTES;
-  mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
+  mld_unpack_sk(rho, tr, key, t0hat, s1hat, s2hat, sk);
 
   if (!externalmu)
   {
@@ -776,9 +874,6 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
   /* Expand matrix and transform vectors */
   mld_polyvec_matrix_expand(mat, rho);
-  mld_polyvecl_ntt(s1);
-  mld_polyveck_ntt(s2);
-  mld_polyveck_ntt(t0);
 
   /* By default, return failure. Flip to success and write output
    * once signature generation succeeds. */
@@ -797,9 +892,9 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     /* loop invariant. This makes proof noticeably faster with CBMC          */
     invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
               array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0->vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-    invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-    invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2->vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     invariant(ret == MLD_ERR_FAIL)
     decreases(MLD_NONCE_UB - nonce)
   )
@@ -815,8 +910,8 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       break;
     }
 
-    ret = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat, s1,
-                                           s2, t0, context);
+    ret = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat, s1hat,
+                                           s2hat, t0hat, context);
     nonce++;
     if (ret == 0)
     {
@@ -842,9 +937,9 @@ cleanup:
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(s2, mld_polyveck, 1, context);
-  MLD_FREE(t0, mld_polyveck, 1, context);
-  MLD_FREE(s1, mld_polyvecl, 1, context);
+  MLD_FREE(s2hat, mld_sk_s2hat, 1, context);
+  MLD_FREE(t0hat, mld_sk_t0hat, 1, context);
+  MLD_FREE(s1hat, mld_sk_s1hat, 1, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(seedbuf, uint8_t,
            2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
@@ -1447,8 +1542,17 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
     goto cleanup;
   }
 
-  /* Unpack secret key */
-  mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
+  /* Inline unpack_sk: mld_unpack_sk uses lazy types for s1/s2/t0 which
+   * we cannot use here.  */
+  mld_memcpy(rho, sk, MLDSA_SEEDBYTES);
+  mld_memcpy(key, sk + MLDSA_SEEDBYTES, MLDSA_SEEDBYTES);
+  mld_memcpy(tr, sk + 2 * MLDSA_SEEDBYTES, MLDSA_TRBYTES);
+  mld_polyvecl_unpack_eta(s1, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES);
+  mld_polyveck_unpack_eta(s2, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
+                                  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES);
+  mld_polyveck_unpack_t0(t0, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
+                                 MLDSA_L * MLDSA_POLYETA_PACKEDBYTES +
+                                 MLDSA_K * MLDSA_POLYETA_PACKEDBYTES);
 
   /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
   chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
@@ -1505,6 +1609,8 @@ cleanup:
 #undef mld_get_hash_oid
 #undef mld_H
 #undef mld_compute_pack_z
+#undef mld_polyveck_pointwise_poly_montgomery_s2
+#undef mld_polyveck_pointwise_poly_montgomery_t0
 #undef mld_attempt_signature_generation
 #undef mld_compute_t0_t1_tr_from_sk_components
 #undef MLD_NONCE_UB

@@ -1612,6 +1612,7 @@ def k_specific(c):
         "poly_kl.h",
         "polyvec.c",
         "polyvec.h",
+        "polyvec_lazy.h",
         "rounding.h",
         "sign.c",
         "sign.h",

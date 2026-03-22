@@ -35,11 +35,11 @@ $(MLDSA87_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
 
 # Unit test object files - same sources but with MLD_STATIC_TESTABLE=
 MLDSA44_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA44_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA44_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
 MLDSA65_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA65_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA65_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
 MLDSA87_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA87_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA87_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
 
 # Alloc test object files - same sources but with custom alloc config
 MLDSA44_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
@@ -82,9 +82,9 @@ $(MLDSA44_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/co
 $(MLDSA65_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLDSA87_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
-$(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLDSA87_DIR)/bin/test_unit87: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
+$(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
+$(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
+$(MLDSA87_DIR)/bin/test_unit87: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
 
 # Unit library object files compiled with MLD_STATIC_TESTABLE=
 $(MLDSA44_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes

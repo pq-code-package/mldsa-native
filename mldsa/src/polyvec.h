@@ -642,6 +642,8 @@ __contract__(
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
 
+
+
 #define mld_polymat_get_row MLD_NAMESPACE_KL(polymat_get_row)
 /*************************************************
  * Name:        mld_polymat_get_row
@@ -679,8 +681,6 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
     array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 );
-
-
 
 #define mld_polyvec_matrix_pointwise_montgomery \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery)

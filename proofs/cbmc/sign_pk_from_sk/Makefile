@@ -20,7 +20,9 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_pk_from_sk
-USE_FUNCTION_CONTRACTS=mld_unpack_sk
+USE_FUNCTION_CONTRACTS=mld_polyvecl_unpack_eta
+USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_eta
+USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_t0
 USE_FUNCTION_CONTRACTS+=mld_pack_pk
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_polyveck_chknorm
