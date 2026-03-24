@@ -220,6 +220,38 @@ static int test_pk_from_sk(void)
   return 0;
 }
 
+static int test_invalid_sk_sign(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t m[MLEN];
+  uint8_t ctx[CTXLEN];
+  size_t smlen;
+  int rc;
+
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
+  CHECK(randombytes(m, MLEN) == 0);
+
+  /* Corrupt s1 portion of the secret key by setting bytes to 0xFF,
+   * producing out-of-range coefficients.
+   * SK layout: rho (SEEDBYTES) || key (SEEDBYTES) || tr (TRBYTES) || s1 ... */
+  memset(sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES, 0xFF, 3);
+
+  rc = crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk);
+
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
+
+  if (rc != -1)
+  {
+    printf("ERROR: signing with invalid sk should fail\n");
+    return 1;
+  }
+
+  return 0;
+}
+
 static int test_wrong_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -393,6 +425,7 @@ int main(void)
     r |= test_sign_extmu();
     r |= test_sign_pre_hash();
     r |= test_pk_from_sk();
+    r |= test_invalid_sk_sign();
     if (r)
     {
       return 1;

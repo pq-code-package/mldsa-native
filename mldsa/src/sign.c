@@ -755,7 +755,11 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   key = tr + MLDSA_TRBYTES;
   mu = key + MLDSA_SEEDBYTES;
   rhoprime = mu + MLDSA_CRHBYTES;
-  mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
+  ret = mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   if (!externalmu)
   {
@@ -1427,7 +1431,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                         const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  uint8_t check, cmp0, cmp1, chk1, chk2;
+  uint8_t check, cmp0, cmp1;
   int ret;
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
   MLD_ALLOC(tr, uint8_t, MLDSA_TRBYTES, context);
@@ -1447,12 +1451,12 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
     goto cleanup;
   }
 
-  /* Unpack secret key */
-  mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
-
-  /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
-  chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
-  chk2 = mld_polyveck_chknorm(s2, MLDSA_ETA + 1) & 0xFF;
+  /* Unpack and validate secret key */
+  ret = mld_unpack_sk(rho, tr, key, t0, s1, s2, sk);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
   /* Recompute t0, t1, tr, and pk from rho, s1, s2 */
   ret = mld_compute_t0_t1_tr_from_sk_components(t0_computed, t1, tr_computed,
@@ -1467,7 +1471,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                        sizeof(mld_polyveck));
   cmp1 = mld_ct_memcmp((const uint8_t *)tr, (const uint8_t *)tr_computed,
                        MLDSA_TRBYTES);
-  check = mld_value_barrier_u8(cmp0 | cmp1 | chk1 | chk2);
+  check = mld_value_barrier_u8(cmp0 | cmp1);
 
   /* Declassify the final result of the validity check. */
   MLD_CT_TESTING_DECLASSIFY(&check, sizeof(check));

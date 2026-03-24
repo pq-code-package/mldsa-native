@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "ct.h"
 #include "packing.h"
 #include "poly.h"
 #include "polyvec.h"
@@ -76,11 +77,13 @@ void mld_pack_sk(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
 }
 
 MLD_INTERNAL_API
-void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
-                   uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
-                   mld_polyvecl *s1, mld_polyveck *s2,
-                   const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
+                  uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
+                  mld_polyvecl *s1, mld_polyveck *s2,
+                  const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 {
+  uint8_t chk1, chk2, check;
   mld_memcpy(rho, sk, MLDSA_SEEDBYTES);
   sk += MLDSA_SEEDBYTES;
 
@@ -97,6 +100,15 @@ void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
   sk += MLDSA_K * MLDSA_POLYETA_PACKEDBYTES;
 
   mld_polyveck_unpack_t0(t0, sk);
+
+  /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
+  chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
+  chk2 = mld_polyveck_chknorm(s2, MLDSA_ETA + 1) & 0xFF;
+  check = mld_value_barrier_u8(chk1 | chk2);
+
+  /* Declassify the final result of the validity check. */
+  MLD_CT_TESTING_DECLASSIFY(&check, sizeof(check));
+  return (check != 0) ? MLD_ERR_FAIL : 0;
 }
 
 MLD_INTERNAL_API

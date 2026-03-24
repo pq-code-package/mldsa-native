@@ -153,6 +153,8 @@ __contract__(
  * Name:        mld_unpack_sk
  *
  * Description: Unpack secret key sk = (rho, tr, key, t0, s1, s2).
+ *              Validates that s1 and s2 coefficients are within
+ *              [-MLDSA_ETA, MLDSA_ETA].
  *
  * Arguments:   - const uint8_t rho[]: output byte array for rho
  *              - const uint8_t tr[]: output byte array for tr
@@ -161,12 +163,16 @@ __contract__(
  *              - const mld_polyvecl *s1: pointer to output vector s1
  *              - const mld_polyveck *s2: pointer to output vector s2
  *              - uint8_t sk[]: byte array containing bit-packed sk
+ *
+ * Returns:     - 0: Success
+ *              - MLD_ERR_FAIL: s1 or s2 coefficients out of range
  **************************************************/
 MLD_INTERNAL_API
-void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
-                   uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
-                   mld_polyvecl *s1, mld_polyveck *s2,
-                   const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
+                  uint8_t key[MLDSA_SEEDBYTES], mld_polyveck *t0,
+                  mld_polyvecl *s1, mld_polyveck *s2,
+                  const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES])
 __contract__(
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(tr, MLDSA_TRBYTES))
@@ -181,12 +187,13 @@ __contract__(
   assigns(memory_slice(t0, sizeof(mld_polyveck)))
   assigns(memory_slice(s1, sizeof(mld_polyvecl)))
   assigns(memory_slice(s2, sizeof(mld_polyveck)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t0->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
-  ensures(forall(k1, 0, MLDSA_L,
-    array_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
-  ensures(forall(k2, 0, MLDSA_K,
-    array_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
+  ensures((return_value == 0) ==> forall(k1, 0, MLDSA_L,
+    array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
+  ensures((return_value == 0) ==> forall(k2, 0, MLDSA_K,
+    array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
 );
 
 #define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
