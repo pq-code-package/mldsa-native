@@ -20,6 +20,7 @@
 #define mld_s1vec MLD_ADD_PARAM_SET(mld_s1vec)
 #define mld_s2vec MLD_ADD_PARAM_SET(mld_s2vec)
 #define mld_t0vec MLD_ADD_PARAM_SET(mld_t0vec)
+#define mld_yvec MLD_ADD_PARAM_SET(mld_yvec)
 /* End of parameter set namespacing */
 
 /* Vectors of polynomials of length MLDSA_L */
@@ -183,6 +184,64 @@ typedef struct
   mld_polyveck vec;
 #endif
 } mld_t0vec;
+
+/* y masking vector, either precomputed or regenerated on demand */
+typedef struct
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  const uint8_t *rhoprime;
+  uint16_t nonce;
+#else
+  mld_polyvecl vec;
+#endif
+} mld_yvec;
+
+#define mld_yvec_init MLD_NAMESPACE_KL(yvec_init)
+/*************************************************
+ * Name:        mld_yvec_init
+ *
+ * Description: Initialize y vector.
+ *              In normal mode, samples the full vector.
+ *              In REDUCE_RAM mode, stores seed and nonce
+ *              for on-demand regeneration.
+ *
+ * Arguments:   - mld_yvec *y: pointer to y vector to initialize
+ *              - const uint8_t *rhoprime: seed for y sampling
+ *              - uint16_t nonce: nonce for y sampling
+ **************************************************/
+static MLD_INLINE void mld_yvec_init(mld_yvec *y,
+                                     const uint8_t rhoprime[MLDSA_CRHBYTES],
+                                     uint16_t nonce)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  y->rhoprime = rhoprime;
+  y->nonce = nonce;
+#else
+  mld_polyvecl_uniform_gamma1(&y->vec, rhoprime, nonce);
+#endif
+}
+
+#define mld_yvec_get_poly MLD_NAMESPACE_KL(yvec_get_poly)
+/*************************************************
+ * Name:        mld_yvec_get_poly
+ *
+ * Description: Get polynomial i of y.
+ *              In normal mode, copies from the precomputed vector.
+ *              In REDUCE_RAM mode, regenerates from seed/nonce.
+ *
+ * Arguments:   - mld_poly *buf: output buffer for the polynomial
+ *              - const mld_yvec *y: pointer to y vector
+ *              - unsigned int i: index of polynomial (0 <= i < MLDSA_L)
+ **************************************************/
+static MLD_INLINE void mld_yvec_get_poly(mld_poly *buf, const mld_yvec *y,
+                                         unsigned int i)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  mld_poly_uniform_gamma1(buf, y->rhoprime, (uint16_t)(MLDSA_L * y->nonce + i));
+#else
+  *buf = y->vec.vec[i];
+#endif
+}
 
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
@@ -830,7 +889,7 @@ MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 const mld_poly *mld_polymat_get_element(mld_polymat *mat, unsigned int k,
                                         unsigned int l);
-#else
+#else /* MLD_CONFIG_REDUCE_RAM */
 #define mld_polymat_get_row MLD_NAMESPACE_KL(polymat_get_row)
 /*************************************************
  * Name:        mld_polymat_get_row
@@ -845,7 +904,7 @@ const mld_poly *mld_polymat_get_element(mld_polymat *mat, unsigned int k,
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row);
-#endif
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 #define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)
 /*************************************************
@@ -910,5 +969,29 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
+
+#define mld_polyvec_matrix_pointwise_montgomery_yvec \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_yvec
+ *
+ * Description: Compute w = A * NTT(y) and invNTT the result.
+ *              In normal mode, samples y, copies and NTTs it, and
+ *              performs the standard matrix-vector multiplication.
+ *              In REDUCE_RAM mode, fuses y sampling with column-by-column
+ *              matrix multiplication to avoid storing the full y vector.
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat *mat: pointer to input matrix
+ *              - const mld_yvec *y: y vector (precomputed or seed/nonce)
+ *              - mld_polyvecl *ntt_buf: scratch for NTT'd copy of y
+ *                (normal mode only, unused in REDUCE_RAM mode)
+ *              - mld_poly *scratch0: scratch polynomial (REDUCE_RAM only)
+ *              - mld_poly *scratch1: scratch polynomial (REDUCE_RAM only)
+ **************************************************/
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec(
+    mld_polyveck *w, mld_polymat *mat, const mld_yvec *y, mld_polyvecl *ntt_buf,
+    mld_poly *scratch0, mld_poly *scratch1);
 
 #endif /* !MLD_POLYVEC_H */

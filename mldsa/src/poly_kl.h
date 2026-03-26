@@ -160,7 +160,8 @@ __contract__(
 );
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
-#if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if MLD_CONFIG_PARAMETER_SET == 65 || \
+    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1
@@ -183,7 +184,8 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
+          MLD_CONFIG_REDUCE_RAM */
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)

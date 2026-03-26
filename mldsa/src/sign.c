@@ -451,9 +451,9 @@ __contract__(
  * Arguments:   - uint8_t *sig: output signature
  *              - const mld_poly *cp: challenge polynomial
  *              - const mld_s1vec *s1: secret vector s1
- *              - const polyvecl *y: masking vector y
+ *              - const mld_yvec *y: masking vector y
  *              - mld_poly *z: scratch polynomial for z computation
- *              - mld_poly *tmp: scratch polynomial for s1 unpacking
+ *              - mld_poly *tmp: scratch polynomial
  *
  * Returns:     - 0: Success (z has coefficients smaller than
  *                   MLDSA_GAMMA1 - MLDSA_BETA,)
@@ -467,17 +467,15 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
                               const mld_poly *cp, const mld_s1vec *s1,
-                              const mld_polyvecl *y, mld_poly *z, mld_poly *tmp)
+                              const mld_yvec *y, mld_poly *z, mld_poly *tmp)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(cp, sizeof(mld_poly)))
   requires(memory_no_alias(s1, sizeof(mld_s1vec)))
-  requires(memory_no_alias(y, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(y, sizeof(mld_yvec)))
   requires(memory_no_alias(z, sizeof(mld_poly)))
   requires(memory_no_alias(tmp, sizeof(mld_poly)))
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  requires(forall(k0, 0, MLDSA_L,
-    array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
   requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
@@ -500,7 +498,8 @@ __contract__(
     mld_s1vec_get_poly(tmp, s1, i);
     mld_poly_pointwise_montgomery(z, cp, tmp);
     mld_poly_invntt_tomont(z);
-    mld_poly_add(z, &y->vec[i]);
+    mld_yvec_get_poly(tmp, y, i);
+    mld_poly_add(z, tmp);
     mld_poly_reduce(z);
 
     z_invalid = mld_poly_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA);
@@ -605,7 +604,7 @@ __contract__(
   mld_polyvecl *tmp;
 
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(y, mld_polyvecl, 1, context);
+  MLD_ALLOC(y, mld_yvec, 1, context);
   MLD_ALLOC(z, mld_poly, 1, context);
   MLD_ALLOC(w1tmp, w1tmp_u, 1, context);
   MLD_ALLOC(w0, mld_polyveck, 1, context);
@@ -621,14 +620,11 @@ __contract__(
   w1 = &w1tmp->w1;
   tmp = &w1tmp->tmp;
 
-  /* Sample intermediate vector y */
-  mld_polyvecl_uniform_gamma1(y, rhoprime, nonce);
+  /* Sample/initialize intermediate vector y */
+  mld_yvec_init(y, rhoprime, nonce);
 
   /* Matrix-vector multiplication */
-  *tmp = *y;
-  mld_polyvecl_ntt(tmp);
-  mld_polyvec_matrix_pointwise_montgomery(w0, mat, tmp);
-  mld_polyveck_invntt_tomont(w0);
+  mld_polyvec_matrix_pointwise_montgomery_yvec(w0, mat, y, tmp, t, z);
 
   /* Decompose w and call the random oracle */
   mld_polyveck_caddq(w0);
@@ -750,7 +746,7 @@ cleanup:
   MLD_FREE(w0, mld_polyveck, 1, context);
   MLD_FREE(w1tmp, w1tmp_u, 1, context);
   MLD_FREE(z, mld_poly, 1, context);
-  MLD_FREE(y, mld_polyvecl, 1, context);
+  MLD_FREE(y, mld_yvec, 1, context);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
 
   return ret;

@@ -317,6 +317,7 @@
 #undef mld_polymat_get_row
 #undef mld_polyvec_matrix_expand
 #undef mld_polyvec_matrix_pointwise_montgomery
+#undef mld_polyvec_matrix_pointwise_montgomery_yvec
 #undef mld_polyveck
 #undef mld_polyveck_add
 #undef mld_polyveck_caddq
@@ -353,6 +354,9 @@
 #undef mld_t0vec
 #undef mld_t0vec_get_poly
 #undef mld_t0vec_init
+#undef mld_yvec
+#undef mld_yvec_get_poly
+#undef mld_yvec_init
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H

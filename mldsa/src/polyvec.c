@@ -114,13 +114,13 @@ const mld_poly *mld_polymat_get_element(mld_polymat *mat, unsigned int k,
 
   return &mat->poly_buffer;
 }
-#else
+#else  /* MLD_CONFIG_REDUCE_RAM */
 MLD_INTERNAL_API
 const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row)
 {
   return &mat->vec[row];
 }
-#endif
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand(mld_polymat *mat,
@@ -259,7 +259,7 @@ void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
       mld_poly_reduce(&t->vec[i]);
     }
   }
-#else
+#else  /* MLD_CONFIG_REDUCE_RAM */
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
     assigns(i, memory_slice(t, sizeof(mld_polyveck)))
@@ -272,9 +272,48 @@ void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
     const mld_polyvecl *row = mld_polymat_get_row(mat, i);
     mld_polyvecl_pointwise_acc_montgomery(&t->vec[i], row, v);
   }
-#endif
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
   mld_assert_abs_bound_2d(t->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
+}
+
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec(
+    mld_polyveck *w, mld_polymat *mat, const mld_yvec *y, mld_polyvecl *ntt_buf,
+    mld_poly *scratch0, mld_poly *scratch1)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  /* Column-by-column: sample y[l], NTT, multiply with column l of A */
+  unsigned int k, l;
+  (void)ntt_buf;
+  for (l = 0; l < MLDSA_L; l++)
+  {
+    mld_yvec_get_poly(scratch0, y, l);
+    mld_poly_ntt(scratch0);
+    for (k = 0; k < MLDSA_K; k++)
+    {
+      const mld_poly *a_kl = mld_polymat_get_element(mat, k, l);
+      if (l == 0)
+      {
+        mld_poly_pointwise_montgomery(&w->vec[k], a_kl, scratch0);
+      }
+      else
+      {
+        mld_poly_pointwise_montgomery(scratch1, a_kl, scratch0);
+        mld_poly_add(&w->vec[k], scratch1);
+      }
+    }
+  }
+  mld_polyveck_reduce(w);
+#else  /* MLD_CONFIG_REDUCE_RAM */
+  (void)scratch0;
+  (void)scratch1;
+  *ntt_buf = y->vec;
+  mld_polyvecl_ntt(ntt_buf);
+  mld_polyvec_matrix_pointwise_montgomery(w, mat, ntt_buf);
+#endif /* !MLD_CONFIG_REDUCE_RAM */
+
+  mld_polyveck_invntt_tomont(w);
 }
 
 /**************************************************************/
