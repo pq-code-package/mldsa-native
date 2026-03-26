@@ -313,6 +313,7 @@
 /* mldsa/src/polyvec.h */
 #undef MLD_POLYVEC_H
 #undef mld_polymat
+#undef mld_polymat_get_element
 #undef mld_polymat_get_row
 #undef mld_polyvec_matrix_expand
 #undef mld_polyvec_matrix_pointwise_montgomery

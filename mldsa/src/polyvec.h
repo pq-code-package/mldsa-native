@@ -147,7 +147,7 @@ typedef struct
 typedef struct
 {
 #if defined(MLD_CONFIG_REDUCE_RAM)
-  mld_polyvecl row_buffer;
+  mld_poly poly_buffer;
   uint8_t rho[MLDSA_SEEDBYTES];
 #else
   mld_polyvecl vec[MLDSA_K];
@@ -810,12 +810,32 @@ static MLD_INLINE void mld_t0vec_get_poly(mld_poly *buf, const mld_t0vec *t0,
 #endif
 }
 
+#if defined(MLD_CONFIG_REDUCE_RAM)
+#define mld_polymat_get_element MLD_NAMESPACE_KL(polymat_get_element)
+/*************************************************
+ * Name:        mld_polymat_get_element
+ *
+ * Description: Get a single matrix element A[k][l] in NTT domain.
+ *              Only available in MLD_CONFIG_REDUCE_RAM mode.
+ *              Samples from rho on demand into the matrix's
+ *              single-poly buffer.
+ *
+ * Arguments:   - mld_polymat *mat: pointer to matrix
+ *              - unsigned int k: row index (must be < MLDSA_K)
+ *              - unsigned int l: column index (must be < MLDSA_L)
+ *
+ * Returns pointer to the polynomial (valid until next get_element call)
+ **************************************************/
+MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
+const mld_poly *mld_polymat_get_element(mld_polymat *mat, unsigned int k,
+                                        unsigned int l);
+#else
 #define mld_polymat_get_row MLD_NAMESPACE_KL(polymat_get_row)
 /*************************************************
  * Name:        mld_polymat_get_row
  *
  * Description: Retrieve a pointer to a specific row of the matrix.
- *              In MLD_CONFIG_REDUCE_RAM mode, generates the row on-demand.
  *
  * Arguments:   - mld_polymat *mat: pointer to matrix
  *              - unsigned int row: row index (must be < MLDSA_K)
@@ -825,6 +845,7 @@ static MLD_INLINE void mld_t0vec_get_poly(mld_poly *buf, const mld_t0vec *t0,
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row);
+#endif
 
 #define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)
 /*************************************************

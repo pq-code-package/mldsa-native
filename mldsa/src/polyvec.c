@@ -91,39 +91,36 @@ __contract__(
 }
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
-MLD_INTERNAL_API
-const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row)
-{
 #if defined(MLD_CONFIG_REDUCE_RAM)
-  unsigned int i;
+MLD_INTERNAL_API
+const mld_poly *mld_polymat_get_element(mld_polymat *mat, unsigned int k,
+                                        unsigned int l)
+{
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
 
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
-  /* Generate row on-demand */
-  for (i = 0; i < MLDSA_L; i++)
-  {
-    uint8_t x = (uint8_t)row;
-    uint8_t y = (uint8_t)i;
+  seed_ext[MLDSA_SEEDBYTES + 0] = (uint8_t)l;
+  seed_ext[MLDSA_SEEDBYTES + 1] = (uint8_t)k;
 
-    seed_ext[MLDSA_SEEDBYTES + 0] = y;
-    seed_ext[MLDSA_SEEDBYTES + 1] = x;
-
-    mld_poly_uniform(&mat->row_buffer.vec[i], seed_ext);
+  mld_poly_uniform(&mat->poly_buffer, seed_ext);
 
 #if defined(MLD_USE_NATIVE_NTT_CUSTOM_ORDER)
-    mld_poly_permute_bitrev_to_custom(mat->row_buffer.vec[i].coeffs);
+  mld_poly_permute_bitrev_to_custom(mat->poly_buffer.coeffs);
 #endif
-  }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
 
-  return &mat->row_buffer;
-#else  /* MLD_CONFIG_REDUCE_RAM */
-  return &mat->vec[row];
-#endif /* !MLD_CONFIG_REDUCE_RAM */
+  return &mat->poly_buffer;
 }
+#else
+MLD_INTERNAL_API
+const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row)
+{
+  return &mat->vec[row];
+}
+#endif
 
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand(mld_polymat *mat,
@@ -230,6 +227,39 @@ void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
   unsigned int i;
   mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
 
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  /* Per-element: for each row k, accumulate A[k][l] * v[l] */
+  {
+    unsigned int l;
+    mld_poly tmp;
+    for (i = 0; i < MLDSA_K; ++i)
+    __loop__(
+      assigns(i, l, object_whole(tmp),
+              memory_slice(mat, sizeof(mld_polymat)),
+              memory_slice(t, sizeof(mld_polyveck)))
+      invariant(i <= MLDSA_K)
+      decreases(MLDSA_K - i)
+    )
+    {
+      const mld_poly *a_kl = mld_polymat_get_element(mat, i, 0);
+      mld_poly_pointwise_montgomery(&t->vec[i], a_kl, &v->vec[0]);
+      for (l = 1; l < MLDSA_L; ++l)
+      __loop__(
+        assigns(l, object_whole(tmp),
+                memory_slice(mat, sizeof(mld_polymat)),
+                memory_slice(t, sizeof(mld_polyveck)))
+        invariant(l >= 1 && l <= MLDSA_L)
+        decreases(MLDSA_L - l)
+      )
+      {
+        a_kl = mld_polymat_get_element(mat, i, l);
+        mld_poly_pointwise_montgomery(&tmp, a_kl, &v->vec[l]);
+        mld_poly_add(&t->vec[i], &tmp);
+      }
+      mld_poly_reduce(&t->vec[i]);
+    }
+  }
+#else
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
     assigns(i, memory_slice(t, sizeof(mld_polyveck)))
@@ -242,6 +272,7 @@ void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
     const mld_polyvecl *row = mld_polymat_get_row(mat, i);
     mld_polyvecl_pointwise_acc_montgomery(&t->vec[i], row, v);
   }
+#endif
 
   mld_assert_abs_bound_2d(t->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
 }
