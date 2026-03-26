@@ -1011,34 +1011,41 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
    * https://github.com/diffblue/cbmc/issues/8813 */
   typedef MLD_UNION_OR_STRUCT
   {
-    mld_polyveck t1;
-    mld_polyveck w1;
+    mld_polyvecl z;
+    mld_poly cp;
   }
-  t1w1_u;
-  mld_polyveck *t1;
-  mld_polyveck *w1;
+  zcp_u;
+  mld_polyvecl *z;
+  mld_poly *cp;
+
+  /* TODO: Remove the following workaround for
+   * https://github.com/diffblue/cbmc/issues/8813 */
+  typedef MLD_UNION_OR_STRUCT
+  {
+    mld_polymat mat;
+    mld_polyveck t1;
+    mld_polyveck tmp;
+    mld_polyveck h;
+  }
+  reuse_u;
 
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(cp, mld_poly, 1, context);
-  MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(z, mld_polyvecl, 1, context);
-  MLD_ALLOC(t1w1, t1w1_u, 1, context);
-  MLD_ALLOC(tmp, mld_polyveck, 1, context);
-  MLD_ALLOC(h, mld_polyveck, 1, context);
+  MLD_ALLOC(zcp, zcp_u, 1, context);
+  MLD_ALLOC(w1, mld_polyveck, 1, context);
+  MLD_ALLOC(reuse, reuse_u, 1, context);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
-      cp == NULL || mat == NULL || z == NULL || t1w1 == NULL || tmp == NULL ||
-      h == NULL)
+      zcp == NULL || w1 == NULL || reuse == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  t1 = &t1w1->t1;
-  w1 = &t1w1->w1;
+  z = &zcp->z;
+  cp = &zcp->cp;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1046,16 +1053,11 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
     goto cleanup;
   }
 
-  mld_unpack_pk(rho, t1, pk);
+  mld_memcpy(rho, pk, MLDSA_SEEDBYTES);
 
-  /* mld_unpack_sig and mld_polyvecl_chknorm signal failure through a
-   * single non-zero error code that's not yet aligned with MLD_ERR_XXX.
-   * Map it to MLD_ERR_FAIL explicitly. */
-  if (mld_unpack_sig(c, z, h, sig))
-  {
-    ret = MLD_ERR_FAIL;
-    goto cleanup;
-  }
+  mld_memcpy(c, sig, MLDSA_CTILDEBYTES);
+  mld_polyvecl_unpack_z(z, sig + MLDSA_CTILDEBYTES);
+
   if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
     ret = MLD_ERR_FAIL;
@@ -1080,23 +1082,31 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   }
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
+  mld_polyvecl_ntt(z);
+  mld_polyvec_matrix_expand(&reuse->mat, rho);
+  mld_polyvec_matrix_pointwise_montgomery(w1, &reuse->mat, z);
+
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
-  mld_polyveck_shiftl(t1);
-  mld_polyveck_ntt(t1);
-  mld_polyveck_pointwise_poly_montgomery(tmp, cp, t1);
-
-  mld_polyvec_matrix_expand(mat, rho);
-  mld_polyvecl_ntt(z);
-  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
-  mld_polyveck_sub(w1, tmp);
+  mld_unpack_pk(rho, &reuse->t1, pk);
+  mld_polyveck_shiftl(&reuse->t1);
+  mld_polyveck_ntt(&reuse->t1);
+  mld_polyveck_pointwise_poly_montgomery(&reuse->tmp, cp, &reuse->t1);
+  mld_polyveck_sub(w1, &reuse->tmp);
   mld_polyveck_reduce(w1);
   mld_polyveck_invntt_tomont(w1);
 
   /* Reconstruct w1 */
   mld_polyveck_caddq(w1);
-  mld_polyveck_use_hint(tmp, w1, h);
-  mld_polyveck_pack_w1(buf, tmp);
+  if (mld_unpack_hints(&reuse->h, sig + MLDSA_CTILDEBYTES +
+                                      MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
+  {
+    ret = MLD_ERR_FAIL;
+    goto cleanup;
+  }
+  mld_polyveck_use_hint(&reuse->tmp, w1, &reuse->h);
+  mld_polyveck_pack_w1(buf, &reuse->tmp);
+
   /* Call random oracle and verify challenge */
   mld_H(c2, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, buf,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
@@ -1110,12 +1120,9 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(h, mld_polyveck, 1, context);
-  MLD_FREE(tmp, mld_polyveck, 1, context);
-  MLD_FREE(t1w1, t1w1_u, 1, context);
-  MLD_FREE(z, mld_polyvecl, 1, context);
-  MLD_FREE(mat, mld_polymat, 1, context);
-  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(reuse, reuse_u, 1, context);
+  MLD_FREE(w1, mld_polyveck, 1, context);
+  MLD_FREE(zcp, zcp_u, 1, context);
   MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES, context);

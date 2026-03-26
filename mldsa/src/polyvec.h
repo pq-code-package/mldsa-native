@@ -21,6 +21,7 @@
 #define mld_s2vec MLD_ADD_PARAM_SET(mld_s2vec)
 #define mld_t0vec MLD_ADD_PARAM_SET(mld_t0vec)
 #define mld_yvec MLD_ADD_PARAM_SET(mld_yvec)
+#define mld_zvec MLD_ADD_PARAM_SET(mld_zvec)
 /* End of parameter set namespacing */
 
 /* Vectors of polynomials of length MLDSA_L */

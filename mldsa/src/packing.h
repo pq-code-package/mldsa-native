@@ -220,6 +220,31 @@ __contract__(
     array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 
+#define mld_unpack_hints MLD_NAMESPACE_KL(unpack_hints)
+/*************************************************
+ * Name:        mld_unpack_hints
+ *
+ * Description: Unpack hint vector h from packed hint bytes in signature.
+ *
+ * Arguments:   - mld_polyveck *h: pointer to output hint vector
+ *              - const uint8_t *packed_hints: pointer to
+ *                raw hint bytes (MLDSA_POLYVECH_PACKEDBYTES)
+ *
+ * Returns 1 in case of malformed hints; otherwise 0.
+ **************************************************/
+MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_unpack_hints(mld_polyveck *h,
+                     const uint8_t packed_hints[MLDSA_POLYVECH_PACKEDBYTES])
+__contract__(
+  requires(memory_no_alias(packed_hints, MLDSA_POLYVECH_PACKEDBYTES))
+  requires(memory_no_alias(h, sizeof(mld_polyveck)))
+  assigns(memory_slice(h, sizeof(mld_polyveck)))
+  ensures(forall(k1, 0, MLDSA_K,
+    array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
+  ensures(return_value >= 0 && return_value <= 1)
+);
+
 #define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
 /*************************************************
  * Name:        mld_unpack_sig

@@ -13,7 +13,6 @@
  * This is to facilitate building multiple instances
  * of mldsa-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
-#define mld_unpack_hints MLD_ADD_PARAM_SET(mld_unpack_hints)
 /* End of parameter set namespacing */
 
 MLD_INTERNAL_API
@@ -157,8 +156,9 @@ void mld_pack_sig_z(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *zi,
  *
  * Returns 1 in case of malformed hints; otherwise 0.
  **************************************************/
-static int mld_unpack_hints(
-    mld_polyveck *h, const uint8_t packed_hints[MLDSA_POLYVECH_PACKEDBYTES])
+MLD_INTERNAL_API
+int mld_unpack_hints(mld_polyveck *h,
+                     const uint8_t packed_hints[MLDSA_POLYVECH_PACKEDBYTES])
 __contract__(
   requires(memory_no_alias(packed_hints, MLDSA_POLYVECH_PACKEDBYTES))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
