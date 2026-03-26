@@ -99,75 +99,41 @@ void mld_unpack_sk(uint8_t rho[MLDSA_SEEDBYTES], uint8_t tr[MLDSA_TRBYTES],
 }
 
 MLD_INTERNAL_API
-void mld_pack_sig_c_h(uint8_t sig[MLDSA_CRYPTO_BYTES],
-                      const uint8_t c[MLDSA_CTILDEBYTES], const mld_polyveck *h,
-                      const unsigned int number_of_hints)
+void mld_pack_sig_c(uint8_t sig[MLDSA_CRYPTO_BYTES],
+                    const uint8_t c[MLDSA_CTILDEBYTES])
 {
-  unsigned int i, j, k;
-
   mld_memcpy(sig, c, MLDSA_CTILDEBYTES);
-  sig += MLDSA_CTILDEBYTES;
+}
 
-  /* skip z component - packed via mld_pack_sig_z */
-  sig += MLDSA_L * MLDSA_POLYZ_PACKEDBYTES;
+MLD_INTERNAL_API
+void mld_pack_sig_h_init(uint8_t sig[MLDSA_CRYPTO_BYTES])
+{
+  uint8_t *sig_h = sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES;
+  mld_memset(sig_h, 0, MLDSA_POLYVECH_PACKEDBYTES);
+}
 
-  /* Encode hints h */
+MLD_INTERNAL_API
+void mld_pack_sig_h_poly(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *h,
+                         unsigned int k, unsigned int *hints_written)
+{
+  unsigned int j;
+  uint8_t *sig_h = sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES;
 
-  /* The final section of sig[] is MLDSA_POLYVECH_PACKEDBYTES long, where
-   * MLDSA_POLYVECH_PACKEDBYTES = MLDSA_OMEGA + MLDSA_K
-   *
-   * The first OMEGA bytes record the index numbers of the coefficients
-   * that are not equal to 0
-   *
-   * The final K bytes record a running tally of the number of hints
-   * coming from each of the K polynomials in h.
-   *
-   * The pre-condition tells us that number_of_hints <= OMEGA, so some
-   * bytes may not be written, so we initialize all of them to zero
-   * to start.
-   */
-  mld_memset(sig, 0, MLDSA_POLYVECH_PACKEDBYTES);
-
-  k = 0;
-  /* For each polynomial in h... */
-  for (i = 0; i < MLDSA_K; ++i)
+  for (j = 0; j < MLDSA_N; j++)
   __loop__(
-    assigns(i, j, k, memory_slice(sig, MLDSA_POLYVECH_PACKEDBYTES))
-    invariant(i <= MLDSA_K)
-    invariant(k <= number_of_hints)
-    invariant(number_of_hints <= MLDSA_OMEGA)
-    decreases(MLDSA_K - i)
+    assigns(j, object_whole(hints_written),
+            memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES))
+    invariant(j <= MLDSA_N)
+    decreases(MLDSA_N - j)
   )
   {
-    /* For each coefficient in that polynomial, record it as as hint */
-    /* if its value is not zero */
-    for (j = 0; j < MLDSA_N; ++j)
-    __loop__(
-      assigns(j, k, memory_slice(sig, MLDSA_POLYVECH_PACKEDBYTES))
-      invariant(i <= MLDSA_K)
-      invariant(j <= MLDSA_N)
-      invariant(k <= number_of_hints)
-      invariant(number_of_hints <= MLDSA_OMEGA)
-      decreases(MLDSA_N - j)
-    )
+    if (h->coeffs[j] != 0 && *hints_written < MLDSA_OMEGA)
     {
-      /* The reference implementation implicitly relies on the total */
-      /* number of hints being less than OMEGA, assuming h is valid. */
-      /* In mldsa-native, we check this explicitly to ease proof of  */
-      /* type safety.                                                */
-      if (h->vec[i].coeffs[j] != 0 && k < number_of_hints)
-      {
-        /* The enclosing if condition AND the loop invariant infer  */
-        /* that k < MLDSA_OMEGA, so writing to sig[k] is safe and k */
-        /* can be incremented.                                      */
-        sig[k++] = (uint8_t)j;
-      }
+      sig_h[*hints_written] = (uint8_t)j;
+      (*hints_written)++;
     }
-    /* Having recorded all the hints for this polynomial, also   */
-    /* record the running tally into the correct "slot" for that */
-    /* coefficient in the final K bytes                          */
-    sig[MLDSA_OMEGA + i] = (uint8_t)k;
   }
+  sig_h[MLDSA_OMEGA + k] = (uint8_t)*hints_written;
 }
 
 MLD_INTERNAL_API
