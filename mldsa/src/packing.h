@@ -18,14 +18,7 @@
  **************************************************/
 MLD_INTERNAL_API
 void mld_pack_sk_s1(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                    const mld_polyvecl *s1)
-__contract__(
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
-  requires(forall(k1, 0, MLDSA_L,
-    array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-);
+                    const mld_polyvecl *s1);
 
 #define mld_pack_sig_c MLD_NAMESPACE_KL(pack_sig_c)
 /*************************************************
@@ -38,12 +31,7 @@ __contract__(
  **************************************************/
 MLD_INTERNAL_API
 void mld_pack_sig_c(uint8_t sig[MLDSA_CRYPTO_BYTES],
-                    const uint8_t c[MLDSA_CTILDEBYTES])
-__contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-);
+                    const uint8_t c[MLDSA_CTILDEBYTES]);
 
 #define mld_pack_sig_h_init MLD_NAMESPACE_KL(pack_sig_h_init)
 /*************************************************
@@ -55,11 +43,7 @@ __contract__(
  * Arguments:   - uint8_t sig[]: byte array containing signature
  **************************************************/
 MLD_INTERNAL_API
-void mld_pack_sig_h_init(uint8_t sig[MLDSA_CRYPTO_BYTES])
-__contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-);
+void mld_pack_sig_h_init(uint8_t sig[MLDSA_CRYPTO_BYTES]);
 
 #define mld_pack_sig_h_poly MLD_NAMESPACE_KL(pack_sig_h_poly)
 /*************************************************
@@ -78,18 +62,7 @@ __contract__(
  **************************************************/
 MLD_INTERNAL_API
 void mld_pack_sig_h_poly(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *h,
-                         unsigned int k, unsigned int *hints_written)
-__contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(h, sizeof(mld_poly)))
-  requires(memory_no_alias(hints_written, sizeof(unsigned int)))
-  requires(k < MLDSA_K)
-  requires(*hints_written <= MLDSA_OMEGA)
-  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  assigns(object_whole(hints_written))
-  ensures(*hints_written <= MLDSA_OMEGA + MLDSA_N)
-);
+                         unsigned int k, unsigned int *hints_written);
 
 #define mld_pack_sig_z MLD_NAMESPACE_KL(pack_sig_z)
 /*************************************************
