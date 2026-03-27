@@ -265,7 +265,8 @@
 #undef mld_pack_sig_h_init
 #undef mld_pack_sig_h_poly
 #undef mld_pack_sig_z
-#undef mld_pack_sk
+#undef mld_pack_sk_rho_key_tr_s2_t0
+#undef mld_pack_sk_s1
 #undef mld_unpack_hints
 #undef mld_unpack_pk
 #undef mld_unpack_sig
