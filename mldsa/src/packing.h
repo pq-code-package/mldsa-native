@@ -7,29 +7,6 @@
 
 #include "polyvec.h"
 
-#define mld_pack_pk MLD_NAMESPACE_KL(pack_pk)
-/*************************************************
- * Name:        mld_pack_pk
- *
- * Description: Bit-pack public key pk = (rho, t1).
- *
- * Arguments:   - uint8_t pk[]: output byte array
- *              - const uint8_t rho[]: byte array containing rho
- *              - const mld_polyveck *t1: pointer to vector t1
- **************************************************/
-MLD_INTERNAL_API
-void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                 const uint8_t rho[MLDSA_SEEDBYTES], const mld_polyveck *t1)
-__contract__(
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  requires(memory_no_alias(t1, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K,
-    array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
-  assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-);
-
-
 #define mld_pack_sk_s1 MLD_NAMESPACE_KL(pack_sk_s1)
 /*************************************************
  * Name:        mld_pack_sk_s1
@@ -49,42 +26,6 @@ __contract__(
     array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
-
-#define mld_pack_sk_rho_key_tr_s2_t0 MLD_NAMESPACE_KL(pack_sk_remaining)
-/*************************************************
- * Name:        mld_pack_sk_rho_key_tr_s2_t0
- *
- * Description: Bit-pack rho, key, tr, s2, t0 into the secret key.
- *              s1 must already be packed via mld_pack_sk_s1.
- *
- * Arguments:   - uint8_t sk[]: output byte array
- *              - const uint8_t rho[]: byte array containing rho
- *              - const uint8_t tr[]: byte array containing tr
- *              - const uint8_t key[]: byte array containing key
- *              - const mld_polyveck *t0: pointer to vector t0
- *              - const mld_polyveck *s2: pointer to vector s2
- **************************************************/
-MLD_INTERNAL_API
-void mld_pack_sk_rho_key_tr_s2_t0(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                                  const uint8_t rho[MLDSA_SEEDBYTES],
-                                  const uint8_t tr[MLDSA_TRBYTES],
-                                  const uint8_t key[MLDSA_SEEDBYTES],
-                                  const mld_polyveck *t0,
-                                  const mld_polyveck *s2)
-__contract__(
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  requires(memory_no_alias(tr, MLDSA_TRBYTES))
-  requires(memory_no_alias(key, MLDSA_SEEDBYTES))
-  requires(memory_no_alias(t0, sizeof(mld_polyveck)))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K,
-    array_bound(t0->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
-  requires(forall(k2, 0, MLDSA_K,
-    array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-);
-
 
 #define mld_pack_sig_c MLD_NAMESPACE_KL(pack_sig_c)
 /*************************************************
@@ -263,36 +204,4 @@ __contract__(
   ensures(return_value >= 0 && return_value <= 1)
 );
 
-#define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
-/*************************************************
- * Name:        mld_unpack_sig
- *
- * Description: Unpack signature sig = (c, z, h).
- *
- * Arguments:   - uint8_t *c: pointer to output challenge hash
- *              - mld_polyvecl *z: pointer to output vector z
- *              - mld_polyveck *h: pointer to output hint vector h
- *              - const uint8_t sig[]: byte array containing
- *                bit-packed signature
- *
- * Returns 1 in case of malformed signature; otherwise 0.
- **************************************************/
-MLD_INTERNAL_API
-MLD_MUST_CHECK_RETURN_VALUE
-int mld_unpack_sig(uint8_t c[MLDSA_CTILDEBYTES], mld_polyvecl *z,
-                   mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
-__contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
-  requires(memory_no_alias(z, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  assigns(memory_slice(c, MLDSA_CTILDEBYTES))
-  assigns(memory_slice(z, sizeof(mld_polyvecl)))
-  assigns(memory_slice(h, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_L,
-    array_bound(z->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  ensures(forall(k1, 0, MLDSA_K,
-    array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-  ensures(return_value >= 0 && return_value <= 1)
-);
 #endif /* !MLD_PACKING_H */
