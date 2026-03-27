@@ -316,6 +316,51 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec(
   mld_polyveck_invntt_tomont(w);
 }
 
+MLD_INTERNAL_API
+int mld_polyvec_matrix_pointwise_montgomery_zvec(mld_polyveck *w,
+                                                 mld_polymat *mat, mld_zvec *z,
+                                                 mld_poly *scratch0,
+                                                 mld_poly *scratch1)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  unsigned int k, l;
+  for (l = 0; l < MLDSA_L; l++)
+  {
+    mld_zvec_get_poly(scratch0, z, l);
+    if (mld_poly_chknorm(scratch0, MLDSA_GAMMA1 - MLDSA_BETA))
+    {
+      return MLD_ERR_FAIL;
+    }
+    mld_poly_ntt(scratch0);
+    for (k = 0; k < MLDSA_K; k++)
+    {
+      const mld_poly *a_kl = mld_polymat_get_element(mat, k, l);
+      if (l == 0)
+      {
+        mld_poly_pointwise_montgomery(&w->vec[k], a_kl, scratch0);
+      }
+      else
+      {
+        mld_poly_pointwise_montgomery(scratch1, a_kl, scratch0);
+        mld_poly_add(&w->vec[k], scratch1);
+      }
+    }
+  }
+  mld_polyveck_reduce(w);
+#else  /* MLD_CONFIG_REDUCE_RAM */
+  (void)scratch0;
+  (void)scratch1;
+  if (mld_polyvecl_chknorm(&z->vec, MLDSA_GAMMA1 - MLDSA_BETA))
+  {
+    return MLD_ERR_FAIL;
+  }
+  mld_polyvecl_ntt(&z->vec);
+  mld_polyvec_matrix_pointwise_montgomery(w, mat, &z->vec);
+#endif /* !MLD_CONFIG_REDUCE_RAM */
+
+  return 0;
+}
+
 /**************************************************************/
 /************ Vectors of polynomials of length MLDSA_L **************/
 /**************************************************************/

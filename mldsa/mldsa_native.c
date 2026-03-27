@@ -263,8 +263,8 @@
 #undef mld_pack_sig_h_poly
 #undef mld_pack_sig_z
 #undef mld_pack_sk
-#undef mld_unpack_pk
 #undef mld_unpack_hints
+#undef mld_unpack_pk
 #undef mld_unpack_sig
 #undef mld_unpack_sk
 /* mldsa/src/params.h */
@@ -319,6 +319,7 @@
 #undef mld_polyvec_matrix_expand
 #undef mld_polyvec_matrix_pointwise_montgomery
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec
+#undef mld_polyvec_matrix_pointwise_montgomery_zvec
 #undef mld_polyveck
 #undef mld_polyveck_add
 #undef mld_polyveck_caddq
@@ -358,6 +359,9 @@
 #undef mld_yvec
 #undef mld_yvec_get_poly
 #undef mld_yvec_init
+#undef mld_zvec
+#undef mld_zvec_get_poly
+#undef mld_zvec_init
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H

@@ -736,6 +736,38 @@ __contract__(
     array_bound(z->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
 
+/* z vector from signature, either precomputed or unpacked on demand */
+typedef struct
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  const uint8_t *packed;
+#else
+  mld_polyvecl vec;
+#endif
+} mld_zvec;
+
+#define mld_zvec_init MLD_NAMESPACE_KL(zvec_init)
+static MLD_INLINE void mld_zvec_init(
+    mld_zvec *z, const uint8_t packed_z[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES])
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  z->packed = packed_z;
+#else
+  mld_polyvecl_unpack_z(&z->vec, packed_z);
+#endif
+}
+
+#define mld_zvec_get_poly MLD_NAMESPACE_KL(zvec_get_poly)
+static MLD_INLINE void mld_zvec_get_poly(mld_poly *buf, const mld_zvec *z,
+                                         unsigned int i)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM)
+  mld_polyz_unpack(buf, z->packed + i * MLDSA_POLYZ_PACKEDBYTES);
+#else
+  *buf = z->vec.vec[i];
+#endif
+}
+
 #define mld_polyveck_unpack_eta MLD_NAMESPACE_KL(polyveck_unpack_eta)
 /*************************************************
  * Name:        mld_polyveck_unpack_eta
@@ -994,5 +1026,34 @@ MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_yvec(
     mld_polyveck *w, mld_polymat *mat, const mld_yvec *y, mld_polyvecl *ntt_buf,
     mld_poly *scratch0, mld_poly *scratch1);
+
+#define mld_polyvec_matrix_pointwise_montgomery_zvec \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_zvec)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_zvec
+ *
+ * Description: Compute w = A * NTT(z) with per-poly norm checking.
+ *              In normal mode, unpacks z, checks norm, NTTs, and
+ *              performs the standard matrix-vector multiplication.
+ *              In REDUCE_RAM mode, does all of the above per-poly
+ *              with column-by-column matrix multiplication.
+ *
+ *              Does NOT include invNTT of the result.
+ *
+ *              Returns MLD_ERR_FAIL if any z polynomial fails the
+ *              norm check against MLDSA_GAMMA1 - MLDSA_BETA.
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat *mat: pointer to input matrix
+ *              - mld_zvec *z: z vector (NTT'd in place in normal mode)
+ *              - mld_poly *scratch0: scratch polynomial (REDUCE_RAM only)
+ *              - mld_poly *scratch1: scratch polynomial (REDUCE_RAM only)
+ **************************************************/
+MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_polyvec_matrix_pointwise_montgomery_zvec(mld_polyveck *w,
+                                                 mld_polymat *mat, mld_zvec *z,
+                                                 mld_poly *scratch0,
+                                                 mld_poly *scratch1);
 
 #endif /* !MLD_POLYVEC_H */

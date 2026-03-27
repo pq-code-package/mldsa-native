@@ -1011,17 +1011,6 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
    * https://github.com/diffblue/cbmc/issues/8813 */
   typedef MLD_UNION_OR_STRUCT
   {
-    mld_polyvecl z;
-    mld_poly cp;
-  }
-  zcp_u;
-  mld_polyvecl *z;
-  mld_poly *cp;
-
-  /* TODO: Remove the following workaround for
-   * https://github.com/diffblue/cbmc/issues/8813 */
-  typedef MLD_UNION_OR_STRUCT
-  {
     mld_polymat mat;
     mld_polyveck t1;
     mld_polyveck tmp;
@@ -1034,18 +1023,18 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(zcp, zcp_u, 1, context);
+  MLD_ALLOC(z, mld_zvec, 1, context);
+  MLD_ALLOC(cp, mld_poly, 1, context);
+  MLD_ALLOC(scratch, mld_poly, 1, context);
   MLD_ALLOC(w1, mld_polyveck, 1, context);
   MLD_ALLOC(reuse, reuse_u, 1, context);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
-      zcp == NULL || w1 == NULL || reuse == NULL)
+      z == NULL || cp == NULL || scratch == NULL || w1 == NULL || reuse == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  z = &zcp->z;
-  cp = &zcp->cp;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1056,13 +1045,7 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_memcpy(rho, pk, MLDSA_SEEDBYTES);
 
   mld_memcpy(c, sig, MLDSA_CTILDEBYTES);
-  mld_polyvecl_unpack_z(z, sig + MLDSA_CTILDEBYTES);
-
-  if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
-  {
-    ret = MLD_ERR_FAIL;
-    goto cleanup;
-  }
+  mld_zvec_init(z, sig + MLDSA_CTILDEBYTES);
 
   if (!externalmu)
   {
@@ -1082,9 +1065,13 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   }
 
   /* Matrix-vector multiplication; compute Az - c2^dt1 */
-  mld_polyvecl_ntt(z);
   mld_polyvec_matrix_expand(&reuse->mat, rho);
-  mld_polyvec_matrix_pointwise_montgomery(w1, &reuse->mat, z);
+  ret = mld_polyvec_matrix_pointwise_montgomery_zvec(w1, &reuse->mat, z,
+                                                     scratch, cp);
+  if (ret)
+  {
+    goto cleanup;
+  }
 
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
@@ -1122,7 +1109,9 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(reuse, reuse_u, 1, context);
   MLD_FREE(w1, mld_polyveck, 1, context);
-  MLD_FREE(zcp, zcp_u, 1, context);
+  MLD_FREE(scratch, mld_poly, 1, context);
+  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(z, mld_zvec, 1, context);
   MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES, context);
