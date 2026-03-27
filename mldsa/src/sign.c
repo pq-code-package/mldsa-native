@@ -236,11 +236,11 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY))
 {
   int ret;
+  mld_polyveck *t = t0;
   MLD_ALLOC(mat, mld_polymat, 1, context);
   MLD_ALLOC(s1hat, mld_polyvecl, 1, context);
-  MLD_ALLOC(t, mld_polyveck, 1, context);
 
-  if (mat == NULL || s1hat == NULL || t == NULL)
+  if (mat == NULL || s1hat == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
@@ -281,7 +281,6 @@ __contract__(
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(t, mld_polyveck, 1, context);
   MLD_FREE(s1hat, mld_polyvecl, 1, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   return ret;
