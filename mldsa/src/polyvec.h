@@ -31,6 +31,7 @@ typedef struct
 } mld_polyvecl;
 
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_polyvecl_uniform_gamma1 MLD_NAMESPACE_KL(polyvecl_uniform_gamma1)
 /*************************************************
  * Name:        mld_polyvecl_uniform_gamma1
@@ -56,6 +57,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /*************************************************
@@ -75,6 +77,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_polyvecl_pointwise_acc_montgomery \
   MLD_NAMESPACE_KL(polyvecl_pointwise_acc_montgomery)
 /*************************************************
@@ -112,6 +115,7 @@ __contract__(
   assigns(memory_slice(w, sizeof(mld_poly)))
   ensures(array_abs_bound(w->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 
 #define mld_polyvecl_chknorm MLD_NAMESPACE_KL(polyvecl_chknorm)
@@ -614,6 +618,7 @@ static MLD_INLINE void mld_s1vec_get_poly(mld_poly *buf, const mld_s1vec *s1,
 #endif
 }
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_polyvecl_unpack_z MLD_NAMESPACE_KL(polyvecl_unpack_z)
 /*************************************************
  * Name:        mld_polyvecl_unpack_z
@@ -635,6 +640,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(z->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 /* z vector from signature, either precomputed or unpacked on demand */
 typedef struct
@@ -863,6 +869,7 @@ __contract__(
 
 
 
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define mld_polyvec_matrix_pointwise_montgomery \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery)
 /*************************************************
@@ -879,9 +886,6 @@ __contract__(
  *              The second input "v" is assumed to be output of an NTT, and
  *              hence must have coefficients bounded by [-9q+1, +9q-1]
  *              inclusive.
- *
- *              Note: In MLD_CONFIG_REDUCE_RAM mode, mat cannot be const
- *              as rows are generated on-demand.
  *
  * Arguments:   - mld_polyveck *t: pointer to output vector t
  *              - mld_polymat *mat: pointer to input matrix
@@ -902,6 +906,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec)
