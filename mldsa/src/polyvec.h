@@ -238,7 +238,8 @@ static MLD_INLINE void mld_yvec_get_poly(mld_poly *buf, const mld_yvec *y,
                                          unsigned int i)
 {
 #if defined(MLD_CONFIG_REDUCE_RAM)
-  mld_poly_uniform_gamma1(buf, y->rhoprime, (uint16_t)(MLDSA_L * y->nonce + i));
+  mld_poly_uniform_gamma1(buf, y->rhoprime,
+                          (uint16_t)((uint16_t)(MLDSA_L * y->nonce) + i));
 #else
   *buf = y->vec.vec[i];
 #endif
