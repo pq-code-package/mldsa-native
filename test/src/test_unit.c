@@ -562,9 +562,10 @@ static int test_native_pointwise_montgomery(void)
 }
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 
-#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
-    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
-    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
+#if !defined(MLD_CONFIG_REDUCE_RAM) &&                               \
+    (defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7))
 static int test_polyvecl_pointwise_acc_montgomery_core(const mld_polyvecl *u,
                                                        const mld_polyvecl *v,
                                                        const char *test_name)
@@ -602,9 +603,10 @@ static int test_native_polyvecl_pointwise_acc_montgomery(void)
 
   return 0;
 }
-#endif /* MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 || \
-          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 || \
-          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
+#endif /* !MLD_CONFIG_REDUCE_RAM &&                               \
+          (MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 || \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||  \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) */
 
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) || \
@@ -729,11 +731,15 @@ static int test_backend_units(void)
   CHECK(test_native_pointwise_montgomery() == 0);
 #endif
 
-#if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
-    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
-    defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7)
+#if !defined(MLD_CONFIG_REDUCE_RAM) &&                               \
+    (defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
+     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
+     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7))
   CHECK(test_native_polyvecl_pointwise_acc_montgomery() == 0);
-#endif
+#endif /* !MLD_CONFIG_REDUCE_RAM &&                               \
+          (MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4 || \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||  \
+          MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) */
 
 #if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) || \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
