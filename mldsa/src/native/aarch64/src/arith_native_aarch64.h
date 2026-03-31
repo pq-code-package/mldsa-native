@@ -129,8 +129,21 @@ void mld_polyz_unpack_19_asm(int32_t *r, const uint8_t *buf,
 
 #define mld_poly_pointwise_montgomery_asm \
   MLD_NAMESPACE(poly_pointwise_montgomery_asm)
-void mld_poly_pointwise_montgomery_asm(int32_t *, const int32_t *,
-                                       const int32_t *);
+void mld_poly_pointwise_montgomery_asm(int32_t *r, const int32_t *a,
+                                       const int32_t *b)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_pointwise.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: off */
+  requires(array_abs_bound(a, 0, MLDSA_N, 75423753))
+  requires(array_abs_bound(b, 0, MLDSA_N, 75423753))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_polyvecl_pointwise_acc_montgomery_l4_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l4_asm)

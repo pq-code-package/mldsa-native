@@ -253,6 +253,7 @@ source code and documentation.
   - [mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c)
   - [proofs/hol_light/x86_64/mldsa/mldsa_intt.S](proofs/hol_light/x86_64/mldsa/mldsa_intt.S)
   - [proofs/hol_light/x86_64/mldsa/mldsa_ntt.S](proofs/hol_light/x86_64/mldsa/mldsa_ntt.S)
+  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S)
 
 ### `Round3_Spec`
 

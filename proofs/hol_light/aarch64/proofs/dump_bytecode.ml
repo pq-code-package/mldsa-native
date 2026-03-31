@@ -10,6 +10,10 @@ print_string "=== bytecode start: aarch64/mldsa/mldsa_ntt.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_ntt.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: aarch64/mldsa/mldsa_pointwise.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/mldsa_pointwise.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: aarch64/mldsa/mldsa_poly_caddq.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_poly_caddq.o";;
 print_string "==== bytecode end =====================================\n\n";;

@@ -54,8 +54,10 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 - ML-DSA Arithmetic:
   * AArch64 poly_caddq: [mldsa_poly_caddq.S](aarch64/mldsa/mldsa_poly_caddq.S)
   * AArch64 poly_chknorm: [mldsa_poly_chknorm.S](aarch64/mldsa/mldsa_poly_chknorm.S)
+  * AArch64 pointwise multiplication: [mldsa_pointwise.S](aarch64/mldsa/mldsa_pointwise.S)
   * x86_64 forward NTT: [mldsa_ntt.S](x86_64/mldsa/mldsa_ntt.S)
   * x86_64 inverse NTT: [mldsa_intt.S](x86_64/mldsa/mldsa_intt.S)
+  * x86_64 pointwise multiplication: [mldsa_pointwise.S](x86_64/mldsa/mldsa_pointwise.S)
 - FIPS202:
   * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar.S](aarch64/mldsa/keccak_f1600_x1_scalar.S)
   * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a.S](aarch64/mldsa/keccak_f1600_x1_v84a.S)

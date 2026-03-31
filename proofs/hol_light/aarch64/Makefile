@@ -54,6 +54,7 @@ endif
 SPLIT=tr ';' '\n'
 
 OBJ = mldsa/mldsa_ntt.o \
+      mldsa/mldsa_pointwise.o \
       mldsa/mldsa_poly_caddq.o \
       mldsa/mldsa_poly_chknorm.o                        \
       mldsa/keccak_f1600_x1_scalar.o                    \

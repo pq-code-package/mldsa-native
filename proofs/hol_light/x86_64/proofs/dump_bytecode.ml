@@ -12,3 +12,7 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: x86_64/mldsa/mldsa_intt.o ================\n";;
 print_literal_from_elf "x86_64/mldsa/mldsa_intt.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: x86_64/mldsa/mldsa_pointwise.o ================\n";;
+print_literal_from_elf "x86_64/mldsa/mldsa_pointwise.o";;
+print_string "==== bytecode end =====================================\n\n";;
