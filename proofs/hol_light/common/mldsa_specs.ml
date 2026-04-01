@@ -193,6 +193,34 @@ let ARM_MLDSA_FORWARD_NTT_CONV =
   GEN_REWRITE_CONV DEPTH_CONV [INT_OF_NUM_POW; INT_OF_NUM_REM] THENC
   ONCE_DEPTH_CONV EXP_MOD_CONV THENC INT_REDUCE_CONV;;
 
+let mldsa_pointwise_acc_l4 = define
+ `mldsa_pointwise_acc_l4 (f:num->int) (g:num->int) i =
+    ((f i * g i +
+      f (i + 256) * g (i + 256) +
+      f (i + 512) * g (i + 512) +
+      f (i + 768) * g (i + 768)) *
+     &(inverse_mod 8380417 4294967296)) rem &8380417`;;
+
+let mldsa_pointwise_acc_l5 = define
+ `mldsa_pointwise_acc_l5 (f:num->int) (g:num->int) i =
+    ((f i * g i +
+      f (i + 256) * g (i + 256) +
+      f (i + 512) * g (i + 512) +
+      f (i + 768) * g (i + 768) +
+      f (i + 1024) * g (i + 1024)) *
+     &(inverse_mod 8380417 4294967296)) rem &8380417`;;
+
+let mldsa_pointwise_acc_l7 = define
+ `mldsa_pointwise_acc_l7 (f:num->int) (g:num->int) i =
+    ((f i * g i +
+      f (i + 256) * g (i + 256) +
+      f (i + 512) * g (i + 512) +
+      f (i + 768) * g (i + 768) +
+      f (i + 1024) * g (i + 1024) +
+      f (i + 1280) * g (i + 1280) +
+      f (i + 1536) * g (i + 1536)) *
+     &(inverse_mod 8380417 4294967296)) rem &8380417`;;
+
 (* ------------------------------------------------------------------------- *)
 (* Abbreviate the Barrett reduction and multiplication and Montgomery        *)
 (* reduction patterns in the x86 code.                                       *)

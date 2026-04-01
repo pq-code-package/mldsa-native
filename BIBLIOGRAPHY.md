@@ -254,6 +254,9 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mldsa/mldsa_intt.S](proofs/hol_light/x86_64/mldsa/mldsa_intt.S)
   - [proofs/hol_light/x86_64/mldsa/mldsa_ntt.S](proofs/hol_light/x86_64/mldsa/mldsa_ntt.S)
   - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S)
+  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l4.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l4.S)
+  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l5.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l5.S)
+  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l7.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l7.S)
 
 ### `Round3_Spec`
 

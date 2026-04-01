@@ -123,16 +123,58 @@ __contract__(
 #define mld_pointwise_acc_l4_avx2 MLD_NAMESPACE(pointwise_acc_l4_avx2)
 void mld_pointwise_acc_l4_avx2(int32_t c[MLDSA_N], const int32_t a[4][MLDSA_N],
                                const int32_t b[4][MLDSA_N],
-                               const int32_t *qdata);
+                               const int32_t *qdata)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l4.ml */
+__contract__(
+  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 4 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 4, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  requires(qdata == mld_qdata)
+  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_pointwise_acc_l5_avx2 MLD_NAMESPACE(pointwise_acc_l5_avx2)
 void mld_pointwise_acc_l5_avx2(int32_t c[MLDSA_N], const int32_t a[5][MLDSA_N],
                                const int32_t b[5][MLDSA_N],
-                               const int32_t *qdata);
+                               const int32_t *qdata)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l5.ml */
+__contract__(
+  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 5 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 5, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  requires(qdata == mld_qdata)
+  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_pointwise_acc_l7_avx2 MLD_NAMESPACE(pointwise_acc_l7_avx2)
 void mld_pointwise_acc_l7_avx2(int32_t c[MLDSA_N], const int32_t a[7][MLDSA_N],
                                const int32_t b[7][MLDSA_N],
-                               const int32_t *qdata);
+                               const int32_t *qdata)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l7.ml */
+__contract__(
+  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 7 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 7, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  requires(qdata == mld_qdata)
+  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #endif /* !MLD_NATIVE_X86_64_SRC_ARITH_NATIVE_X86_64_H */

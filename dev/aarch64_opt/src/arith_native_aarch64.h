@@ -152,17 +152,59 @@ __contract__(
 
 #define mld_polyvecl_pointwise_acc_montgomery_l4_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l4_asm)
-void mld_polyvecl_pointwise_acc_montgomery_l4_asm(int32_t *, const int32_t *,
-                                                  const int32_t *);
+void mld_polyvecl_pointwise_acc_montgomery_l4_asm(int32_t *r,
+                                                  const int32_t a[4][MLDSA_N],
+                                                  const int32_t b[4][MLDSA_N])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l4.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 4 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 4, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_polyvecl_pointwise_acc_montgomery_l5_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l5_asm)
-void mld_polyvecl_pointwise_acc_montgomery_l5_asm(int32_t *, const int32_t *,
-                                                  const int32_t *);
+void mld_polyvecl_pointwise_acc_montgomery_l5_asm(int32_t *r,
+                                                  const int32_t a[5][MLDSA_N],
+                                                  const int32_t b[5][MLDSA_N])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l5.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 5 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 5, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_polyvecl_pointwise_acc_montgomery_l7_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l7_asm)
-void mld_polyvecl_pointwise_acc_montgomery_l7_asm(int32_t *, const int32_t *,
-                                                  const int32_t *);
+void mld_polyvecl_pointwise_acc_montgomery_l7_asm(int32_t *r,
+                                                  const int32_t a[7][MLDSA_N],
+                                                  const int32_t b[7][MLDSA_N])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l7.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * 7 * MLDSA_N))
+  /* check-magic: off */
+  requires(forall(l0, 0, 7, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
+  requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #endif /* !MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H */
