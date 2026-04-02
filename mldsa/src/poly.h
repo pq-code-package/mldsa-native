@@ -209,12 +209,12 @@ __contract__(
  * Description: For all coefficients c of the input polynomial,
  *              compute c0, c1 such that c mod MLDSA_Q = c1*2^MLDSA_D + c0
  *              with -2^{MLDSA_D-1} < c0 <= 2^{MLDSA_D-1}. Assumes coefficients
- *to be standard representatives.
+ *              to be standard representatives.
  *
  * Arguments:   - mld_poly *a1: pointer to output polynomial with coefficients
- *c1
+ *                c1
  *              - mld_poly *a0: pointer to output polynomial with coefficients
- *c0
+ *                c0; may alias the input polynomial a
  *              - const mld_poly *a: pointer to input polynomial
  **************************************************/
 MLD_INTERNAL_API
@@ -222,7 +222,9 @@ void mld_poly_power2round(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 __contract__(
   requires(memory_no_alias(a0, sizeof(mld_poly)))
   requires(memory_no_alias(a1, sizeof(mld_poly)))
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  /* The implementation does not require a0 == a, but the single call site
+   * aliases them and asserting equality simplifies the proof. */
+  requires(a0 == a)
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   assigns(memory_slice(a1, sizeof(mld_poly)))
   assigns(memory_slice(a0, sizeof(mld_poly)))

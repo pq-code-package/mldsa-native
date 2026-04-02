@@ -1,28 +1,28 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 diff --git a/sw/device/lib/crypto/include/mldsa.h b/sw/device/lib/crypto/include/mldsa.h
-index be11f20..26351ee 100644
+index be11f20..0000000 100644
 --- a/sw/device/lib/crypto/include/mldsa.h
 +++ b/sw/device/lib/crypto/include/mldsa.h
-@@ -41,16 +41,16 @@ enum {
+@@ -41,15 +41,15 @@ enum {
    kOtcryptoMldsa87SeedBytes = 32,
  
    // Work buffer sizes in 32-bit words
 -  kOtcryptoMldsa44WorkBufferKeypairWords = 32992 / sizeof(uint32_t),
 -  kOtcryptoMldsa44WorkBufferSignWords = 32448 / sizeof(uint32_t),
-+  kOtcryptoMldsa44WorkBufferKeypairWords = 28960 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferKeypairWords = 16672 / sizeof(uint32_t),
 +  kOtcryptoMldsa44WorkBufferSignWords = 20256 / sizeof(uint32_t),
    kOtcryptoMldsa44WorkBufferVerifyWords = 22464 / sizeof(uint32_t),
  
 -  kOtcryptoMldsa65WorkBufferKeypairWords = 46304 / sizeof(uint32_t),
 -  kOtcryptoMldsa65WorkBufferSignWords = 44768 / sizeof(uint32_t),
-+  kOtcryptoMldsa65WorkBufferKeypairWords = 40224 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferKeypairWords = 23840 / sizeof(uint32_t),
 +  kOtcryptoMldsa65WorkBufferSignWords = 26432 / sizeof(uint32_t),
    kOtcryptoMldsa65WorkBufferVerifyWords = 30720 / sizeof(uint32_t),
  
 -  kOtcryptoMldsa87WorkBufferKeypairWords = 62688 / sizeof(uint32_t),
 -  kOtcryptoMldsa87WorkBufferSignWords = 59104 / sizeof(uint32_t),
-+  kOtcryptoMldsa87WorkBufferKeypairWords = 54560 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferKeypairWords = 32032 / sizeof(uint32_t),
 +  kOtcryptoMldsa87WorkBufferSignWords = 34624 / sizeof(uint32_t),
    kOtcryptoMldsa87WorkBufferVerifyWords = 41216 / sizeof(uint32_t),
  };

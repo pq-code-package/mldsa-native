@@ -23,11 +23,18 @@ CHECK_FUNCTION_CONTRACTS=mld_keypair_internal
 USE_FUNCTION_CONTRACTS=mld_shake256
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
 USE_FUNCTION_CONTRACTS+=mld_sample_s1_s2
-USE_FUNCTION_CONTRACTS+=mld_compute_t0_t1_tr_from_sk_components
 USE_FUNCTION_CONTRACTS+=mld_pack_pk
-USE_FUNCTION_CONTRACTS+=mld_pack_sk
+USE_FUNCTION_CONTRACTS+=mld_pack_sk_s1
+USE_FUNCTION_CONTRACTS+=mld_pack_sk_rho_key_tr_s2_t0
+USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 USE_FUNCTION_CONTRACTS+=mld_check_pct
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery
+USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
+USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
+USE_FUNCTION_CONTRACTS+=mld_polyveck_add
+USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq
+USE_FUNCTION_CONTRACTS+=mld_polyveck_power2round
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -36,7 +43,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = sign_keypair_internal
 

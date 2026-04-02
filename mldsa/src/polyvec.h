@@ -372,7 +372,7 @@ __contract__(
  * Arguments:   - mld_polyveck *v1: pointer to output vector of polynomials with
  *                              coefficients a1
  *              - mld_polyveck *v0: pointer to output vector of polynomials with
- *                              coefficients a0
+ *                              coefficients a0; may alias the input vector v
  *              - const mld_polyveck *v: pointer to input vector
  **************************************************/
 MLD_INTERNAL_API
@@ -381,7 +381,9 @@ void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
 __contract__(
   requires(memory_no_alias(v1, sizeof(mld_polyveck)))
   requires(memory_no_alias(v0, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  /* The implementation does not require v0 == v, but the single call site
+   * aliases them and asserting equality simplifies the proof. */
+  requires(v0 == v)
   requires(forall(k0, 0, MLDSA_K, array_bound(v->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   assigns(memory_slice(v1, sizeof(mld_polyveck)))
   assigns(memory_slice(v0, sizeof(mld_polyveck)))

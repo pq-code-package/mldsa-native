@@ -26,10 +26,18 @@ USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_t0
 USE_FUNCTION_CONTRACTS+=mld_pack_pk
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_polyveck_chknorm
-USE_FUNCTION_CONTRACTS+=mld_compute_t0_t1_tr_from_sk_components
+USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_value_barrier_u8
 USE_FUNCTION_CONTRACTS+=mld_ct_memcmp
 USE_FUNCTION_CONTRACTS+=mld_zeroize
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery
+USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
+USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
+USE_FUNCTION_CONTRACTS+=mld_polyveck_add
+USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq
+USE_FUNCTION_CONTRACTS+=mld_polyveck_power2round
+USE_FUNCTION_CONTRACTS+=mld_shake256
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -38,7 +46,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = sign_pk_from_sk
 

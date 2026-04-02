@@ -259,7 +259,8 @@
 #undef mld_pack_sig_c
 #undef mld_pack_sig_h_poly
 #undef mld_pack_sig_z
-#undef mld_pack_sk
+#undef mld_pack_sk_rho_key_tr_s2_t0
+#undef mld_pack_sk_s1
 #undef mld_unpack_pk
 #undef mld_unpack_sig
 #undef mld_unpack_sk
