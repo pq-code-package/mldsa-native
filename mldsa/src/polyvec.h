@@ -413,31 +413,6 @@ __contract__(
                  array_abs_bound(v0->vec[k2].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
 );
 
-#define mld_polyveck_make_hint MLD_NAMESPACE_KL(polyveck_make_hint)
-/*************************************************
- * Name:        mld_polyveck_make_hint
- *
- * Description: Compute hint vector.
- *
- * Arguments:   - mld_polyveck *h: pointer to output vector
- *              - const mld_polyveck *v0: pointer to low part of input vector
- *              - const mld_polyveck *v1: pointer to high part of input vector
- *
- * Returns number of 1 bits.
- **************************************************/
-MLD_INTERNAL_API
-MLD_MUST_CHECK_RETURN_VALUE
-unsigned int mld_polyveck_make_hint(mld_polyveck *h, const mld_polyveck *v0,
-                                    const mld_polyveck *v1)
-__contract__(
-  requires(memory_no_alias(h,  sizeof(mld_polyveck)))
-  requires(memory_no_alias(v0, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v1, sizeof(mld_polyveck)))
-  assigns(memory_slice(h, sizeof(mld_polyveck)))
-  ensures(return_value <= MLDSA_N * MLDSA_K)
-  ensures(forall(k1, 0, MLDSA_K, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-);
-
 #define mld_polyveck_use_hint MLD_NAMESPACE_KL(polyveck_use_hint)
 /*************************************************
  * Name:        mld_polyveck_use_hint

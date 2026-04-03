@@ -46,10 +46,6 @@
 #define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
 #define mld_compute_pack_z MLD_ADD_PARAM_SET(mld_compute_pack_z)
-#define mld_polyveck_pointwise_poly_montgomery_s2 \
-  MLD_ADD_PARAM_SET(mld_polyveck_pointwise_poly_montgomery_s2)
-#define mld_polyveck_pointwise_poly_montgomery_t0 \
-  MLD_ADD_PARAM_SET(mld_polyveck_pointwise_poly_montgomery_t0)
 #define mld_attempt_signature_generation \
   MLD_ADD_PARAM_SET(mld_attempt_signature_generation) MLD_CONTEXT_PARAMETERS_8
 #define mld_compute_t0_t1_tr_from_sk_components              \
@@ -543,92 +539,6 @@ __contract__(
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
- * Name:        mld_polyveck_pointwise_poly_montgomery_s2
- *
- * Description: Pointwise multiplication of s2 by a polynomial in NTT domain
- *              and multiplication of the resulting vector by 2^{-32}.
- *
- * Arguments:   - mld_polyveck *h: pointer to output vector
- *              - const mld_poly *cp: pointer to input polynomial
- *              - const mld_sk_s2hat *s2hat: pointer to input s2 vector in NTT
- *                domain
- *              - mld_poly *tmp: scratch polynomial
- **************************************************/
-static void mld_polyveck_pointwise_poly_montgomery_s2(mld_polyveck *h,
-                                                      const mld_poly *cp,
-                                                      const mld_sk_s2hat *s2hat,
-                                                      mld_poly *tmp)
-__contract__(
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  requires(memory_no_alias(cp, sizeof(mld_poly)))
-  requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
-  requires(memory_no_alias(tmp, sizeof(mld_poly)))
-  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  requires(forall(k0, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(h, sizeof(mld_polyveck)))
-  assigns(memory_slice(tmp, sizeof(mld_poly)))
-  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(h->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-)
-{
-  unsigned int k;
-  for (k = 0; k < MLDSA_K; k++)
-  __loop__(
-    assigns(k, memory_slice(tmp, sizeof(mld_poly)),
-            memory_slice(h, sizeof(mld_polyveck)))
-    invariant(k <= MLDSA_K)
-    invariant(forall(k0, 0, k, array_abs_bound(h->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-    decreases(MLDSA_K - k)
-  )
-  {
-    mld_sk_s2hat_get_poly(tmp, s2hat, k);
-    mld_poly_pointwise_montgomery(&h->vec[k], cp, tmp);
-  }
-}
-
-/*************************************************
- * Name:        mld_polyveck_pointwise_poly_montgomery_t0
- *
- * Description: Pointwise multiplication of t0 by a polynomial in NTT domain
- *              and multiplication of the resulting vector by 2^{-32}.
- *
- * Arguments:   - mld_polyveck *h: pointer to output vector
- *              - const mld_poly *cp: pointer to input polynomial
- *              - const mld_sk_t0hat *t0hat: pointer to input t0 vector in NTT
- *                domain
- *              - mld_poly *tmp: scratch polynomial
- **************************************************/
-static void mld_polyveck_pointwise_poly_montgomery_t0(mld_polyveck *h,
-                                                      const mld_poly *cp,
-                                                      const mld_sk_t0hat *t0hat,
-                                                      mld_poly *tmp)
-__contract__(
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  requires(memory_no_alias(cp, sizeof(mld_poly)))
-  requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
-  requires(memory_no_alias(tmp, sizeof(mld_poly)))
-  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  requires(forall(k0, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(h, sizeof(mld_polyveck)))
-  assigns(memory_slice(tmp, sizeof(mld_poly)))
-  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(h->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-)
-{
-  unsigned int k;
-  for (k = 0; k < MLDSA_K; k++)
-  __loop__(
-    assigns(k, memory_slice(tmp, sizeof(mld_poly)),
-            memory_slice(h, sizeof(mld_polyveck)))
-    invariant(k <= MLDSA_K)
-    invariant(forall(k0, 0, k, array_abs_bound(h->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-    decreases(MLDSA_K - k)
-  )
-  {
-    mld_sk_t0hat_get_poly(tmp, t0hat, k);
-    mld_poly_pointwise_montgomery(&h->vec[k], cp, tmp);
-  }
-}
-
-/*************************************************
  * Name:        attempt_signature_generation
  *
  * Description: Attempts to generate a single signature.
@@ -678,19 +588,9 @@ __contract__(
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )
 {
-  unsigned int n;
+  unsigned int k, n;
   uint32_t w0_invalid, h_invalid;
   int ret;
-  /* TODO: Remove the following workaround for
-   * https://github.com/diffblue/cbmc/issues/8813 */
-  typedef MLD_UNION_OR_STRUCT
-  {
-    mld_polyvecl y;
-    mld_polyveck h;
-  }
-  yh_u;
-  mld_polyvecl *y;
-  mld_polyveck *h;
 
   /* TODO: Remove the following workaround for
    * https://github.com/diffblue/cbmc/issues/8813 */
@@ -704,21 +604,19 @@ __contract__(
   mld_polyvecl *tmp;
 
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(yh, yh_u, 1, context);
+  MLD_ALLOC(y, mld_polyvecl, 1, context);
   MLD_ALLOC(z, mld_poly, 1, context);
   MLD_ALLOC(w1tmp, w1tmp_u, 1, context);
   MLD_ALLOC(w0, mld_polyveck, 1, context);
   MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(t, mld_poly, 1, context);
 
-  if (challenge_bytes == NULL || yh == NULL || z == NULL || w1tmp == NULL ||
+  if (challenge_bytes == NULL || y == NULL || z == NULL || w1tmp == NULL ||
       w0 == NULL || cp == NULL || t == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  y = &yh->y;
-  h = &yh->h;
   w1 = &w1tmp->w1;
   tmp = &w1tmp->tmp;
 
@@ -753,37 +651,62 @@ __contract__(
     goto cleanup;
   }
 
-  /* Check that subtracting cs2 does not change high bits of w and low bits
-   * do not reveal secret information */
-  mld_polyveck_pointwise_poly_montgomery_s2(h, cp, s2hat, z);
-  mld_polyveck_invntt_tomont(h);
-  mld_polyveck_sub(w0, h);
-  mld_polyveck_reduce(w0);
-
-  w0_invalid = mld_polyveck_chknorm(w0, MLDSA_GAMMA2 - MLDSA_BETA);
-  /* Constant time: w0_invalid may be leaked - see comment for z_invalid. */
-  MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
-  if (w0_invalid)
+  /* Compute w0 - cs2 + ct0 per-component, checking norms incrementally.
+   * This avoids allocating a full polyveck for h. */
+  for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k,
+            object_whole(z),
+            object_whole(t),
+            object_whole(w0))
+    invariant(k <= MLDSA_K)
+    invariant(forall(k0, k, MLDSA_K,
+      array_abs_bound(w0->vec[k0].coeffs, 0, MLDSA_N, MLDSA_GAMMA2 + 1)))
+    decreases(MLDSA_K - k)
+  )
   {
-    ret = MLD_ERR_FAIL; /* reject */
-    goto cleanup;
+    /* Compute cs2[k] and subtract from w0[k] */
+    mld_sk_s2hat_get_poly(t, s2hat, k);
+    mld_poly_pointwise_montgomery(z, cp, t);
+    mld_poly_invntt_tomont(z);
+
+    /* TODO: Remove this workaround for CBMC performance issues */
+    *t = w0->vec[k];
+    mld_poly_sub(t, z);
+    mld_poly_reduce(t);
+
+    /* Check that subtracting cs2 does not change high bits of w and low bits
+     * do not reveal secret information */
+    w0_invalid = mld_poly_chknorm(t, MLDSA_GAMMA2 - MLDSA_BETA);
+    w0->vec[k] = *t;
+    /* Constant time: w0_invalid may be leaked - see comment for z_invalid. */
+    MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
+    if (w0_invalid)
+    {
+      ret = MLD_ERR_FAIL; /* reject */
+      goto cleanup;
+    }
+
+    /* Compute ct0[k], check norm, and add to w0[k] */
+    mld_sk_t0hat_get_poly(t, t0hat, k);
+    mld_poly_pointwise_montgomery(z, cp, t);
+    mld_poly_invntt_tomont(z);
+    mld_poly_reduce(z);
+
+    h_invalid = mld_poly_chknorm(z, MLDSA_GAMMA2);
+    /* Constant time: h_invalid may be leaked - see comment for z_invalid. */
+    MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
+    if (h_invalid)
+    {
+      ret = MLD_ERR_FAIL; /* reject */
+      goto cleanup;
+    }
+
+    /* TODO: Remove this workaround for CBMC performance issues */
+    *t = w0->vec[k];
+    mld_poly_add(t, z);
+    w0->vec[k] = *t;
   }
-
-  /* Compute hints for w1 */
-  mld_polyveck_pointwise_poly_montgomery_t0(h, cp, t0hat, z);
-  mld_polyveck_invntt_tomont(h);
-  mld_polyveck_reduce(h);
-
-  h_invalid = mld_polyveck_chknorm(h, MLDSA_GAMMA2);
-  /* Constant time: h_invalid may be leaked - see comment for z_invalid. */
-  MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
-  if (h_invalid)
-  {
-    ret = MLD_ERR_FAIL; /* reject */
-    goto cleanup;
-  }
-
-  mld_polyveck_add(w0, h);
 
   /* Constant time: At this point all norm checks have passed and we, hence,
    * know that the signature does not leak any secret information.
@@ -795,15 +718,34 @@ __contract__(
    */
   MLD_CT_TESTING_DECLASSIFY(w0, sizeof(*w0));
   MLD_CT_TESTING_DECLASSIFY(w1, sizeof(*w1));
-  n = mld_polyveck_make_hint(h, w0, w1);
-  if (n > MLDSA_OMEGA)
+
+  /* Pack challenge bytes and initialize hint section */
+  mld_pack_sig_c(sig, challenge_bytes);
+  mld_memset(sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES, 0,
+             MLDSA_POLYVECH_PACKEDBYTES);
+
+  /* Compute hints per-component and pack incrementally */
+  n = 0;
+  for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k, n,
+            memory_slice(z, sizeof(mld_poly)),
+            memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    invariant(k <= MLDSA_K)
+    invariant(n <= MLDSA_OMEGA)
+    decreases(MLDSA_K - k)
+  )
   {
-    ret = MLD_ERR_FAIL; /* reject */
-    goto cleanup;
+    unsigned int hints = mld_poly_make_hint(z, &w0->vec[k], &w1->vec[k]);
+    if (n + hints > MLDSA_OMEGA)
+    {
+      ret = MLD_ERR_FAIL; /* reject */
+      goto cleanup;
+    }
+    mld_pack_sig_h_poly(sig, z, k, n);
+    n += hints;
   }
 
-  /* All is well - write signature */
-  mld_pack_sig_c_h(sig, challenge_bytes, h, n);
   /* Constant time: At this point it is clear that the signature is valid - it
    * can, hence, be considered public. */
   MLD_CT_TESTING_DECLASSIFY(sig, MLDSA_CRYPTO_BYTES);
@@ -816,7 +758,7 @@ cleanup:
   MLD_FREE(w0, mld_polyveck, 1, context);
   MLD_FREE(w1tmp, w1tmp_u, 1, context);
   MLD_FREE(z, mld_poly, 1, context);
-  MLD_FREE(yh, yh_u, 1, context);
+  MLD_FREE(y, mld_polyvecl, 1, context);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
 
   return ret;
@@ -1609,8 +1551,6 @@ cleanup:
 #undef mld_get_hash_oid
 #undef mld_H
 #undef mld_compute_pack_z
-#undef mld_polyveck_pointwise_poly_montgomery_s2
-#undef mld_polyveck_pointwise_poly_montgomery_t0
 #undef mld_attempt_signature_generation
 #undef mld_compute_t0_t1_tr_from_sk_components
 #undef MLD_NONCE_UB

@@ -17,13 +17,13 @@ index be11f20..26351ee 100644
 -  kOtcryptoMldsa65WorkBufferKeypairWords = 46304 / sizeof(uint32_t),
 -  kOtcryptoMldsa65WorkBufferSignWords = 44768 / sizeof(uint32_t),
 +  kOtcryptoMldsa65WorkBufferKeypairWords = 40224 / sizeof(uint32_t),
-+  kOtcryptoMldsa65WorkBufferSignWords = 27456 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferSignWords = 26432 / sizeof(uint32_t),
    kOtcryptoMldsa65WorkBufferVerifyWords = 30720 / sizeof(uint32_t),
  
 -  kOtcryptoMldsa87WorkBufferKeypairWords = 62688 / sizeof(uint32_t),
 -  kOtcryptoMldsa87WorkBufferSignWords = 59104 / sizeof(uint32_t),
 +  kOtcryptoMldsa87WorkBufferKeypairWords = 54560 / sizeof(uint32_t),
-+  kOtcryptoMldsa87WorkBufferSignWords = 35648 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferSignWords = 34624 / sizeof(uint32_t),
    kOtcryptoMldsa87WorkBufferVerifyWords = 41216 / sizeof(uint32_t),
  };
  

@@ -3,11 +3,8 @@
 
 #include "packing.h"
 
-
 void harness(void)
 {
-  uint8_t *a, *b;
-  mld_polyveck *h;
-  unsigned int nh;
-  mld_pack_sig_c_h(a, b, h, nh);
+  uint8_t *sig, *c;
+  mld_pack_sig_c(sig, c);
 }

@@ -697,28 +697,6 @@ void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
 }
 
 MLD_INTERNAL_API
-unsigned int mld_polyveck_make_hint(mld_polyveck *h, const mld_polyveck *v0,
-                                    const mld_polyveck *v1)
-{
-  unsigned int i, s = 0;
-
-  for (i = 0; i < MLDSA_K; ++i)
-  __loop__(
-    assigns(i, s, memory_slice(h, sizeof(mld_polyveck)))
-    invariant(i <= MLDSA_K)
-    invariant(s <= i * MLDSA_N)
-    invariant(forall(k1, 0, i, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-    decreases(MLDSA_K - i)
-  )
-  {
-    s += mld_poly_make_hint(&h->vec[i], &v0->vec[i], &v1->vec[i]);
-  }
-
-  mld_assert_bound_2d(h->vec, MLDSA_K, MLDSA_N, 0, 2);
-  return s;
-}
-
-MLD_INTERNAL_API
 void mld_polyveck_use_hint(mld_polyveck *w, const mld_polyveck *u,
                            const mld_polyveck *h)
 {

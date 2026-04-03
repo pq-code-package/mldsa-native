@@ -69,35 +69,46 @@ __contract__(
 );
 
 
-#define mld_pack_sig_c_h MLD_NAMESPACE_KL(pack_sig_c_h)
+#define mld_pack_sig_c MLD_NAMESPACE_KL(pack_sig_c)
 /*************************************************
- * Name:        mld_pack_sig_c_h
+ * Name:        mld_pack_sig_c
  *
- * Description: Bit-pack c and h component of sig = (c, z, h).
- *              The z component is packed separately using mld_pack_sig_z.
+ * Description: Bit-pack challenge c into sig = (c, z, h).
  *
  * Arguments:   - uint8_t sig[]: output byte array
- *              - const uint8_t *c:  pointer to challenge hash length
- *                                   MLDSA_SEEDBYTES
- *              - const mld_polyveck *h: pointer to hint vector h
- *              - const unsigned int number_of_hints: total
- *                                   hints in *h
- *
- * Note that the number_of_hints argument is not present
- * in the reference implementation. It is added here to ease
- * proof of type safety.
+ *              - const uint8_t *c: pointer to challenge hash
  **************************************************/
 MLD_INTERNAL_API
-void mld_pack_sig_c_h(uint8_t sig[MLDSA_CRYPTO_BYTES],
-                      const uint8_t c[MLDSA_CTILDEBYTES], const mld_polyveck *h,
-                      const unsigned int number_of_hints)
+void mld_pack_sig_c(uint8_t sig[MLDSA_CRYPTO_BYTES],
+                    const uint8_t c[MLDSA_CTILDEBYTES])
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  requires(forall(k1, 0, MLDSA_K,
-    array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-  requires(number_of_hints <= MLDSA_OMEGA)
+  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+);
+
+#define mld_pack_sig_h_poly MLD_NAMESPACE_KL(pack_sig_h_poly)
+/*************************************************
+ * Name:        mld_pack_sig_h_poly
+ *
+ * Description: Pack hints for one polynomial into the hint section of sig.
+ *              Must be called once per polynomial in order k = 0, ..., K-1.
+ *              The hint section of sig must be zeroed before the first call.
+ *
+ * Arguments:   - uint8_t sig[]: byte array containing signature
+ *              - const mld_poly *h: pointer to hint polynomial (0/1 coeffs)
+ *              - unsigned int k: index of polynomial in vector (0..K-1)
+ *              - unsigned int n: total number of hints written so far
+ **************************************************/
+MLD_INTERNAL_API
+void mld_pack_sig_h_poly(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *h,
+                         unsigned int k, unsigned int n)
+__contract__(
+  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(k < MLDSA_K)
+  requires(n <= MLDSA_OMEGA)
+  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
 );
 
@@ -107,7 +118,7 @@ __contract__(
  *
  * Description: Bit-pack single polynomial of z component of sig = (c, z, h).
  *              The c and h components are packed separately using
- *              mld_pack_sig_c_h.
+ *              mld_pack_sig_c and mld_pack_sig_h_poly.
  *
  * Arguments:   - uint8_t sig[]: output byte array
  *              - const mld_poly *zi: pointer to a single polynomial in z
