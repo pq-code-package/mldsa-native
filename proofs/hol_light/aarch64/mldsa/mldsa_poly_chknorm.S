@@ -9,10 +9,6 @@
  *   dev/aarch64_opt/src/poly_chknorm_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 #ifdef __APPLE__
@@ -52,3 +48,7 @@ Lpoly_chknorm_loop:
         and	w0, w0, #0x1
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

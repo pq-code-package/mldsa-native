@@ -14,10 +14,6 @@
  *   dev/aarch64_opt/src/rej_uniform_eta2_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLD_ASM_NAMESPACE(rej_uniform_eta2_asm)
@@ -133,3 +129,7 @@ MLD_ASM_FN_SIZE(rej_uniform_eta2_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2) */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

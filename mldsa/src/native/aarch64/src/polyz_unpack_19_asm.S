@@ -13,10 +13,6 @@
  *   dev/aarch64_opt/src/polyz_unpack_19_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLD_ASM_NAMESPACE(polyz_unpack_19_asm)
@@ -67,3 +63,7 @@ MLD_ASM_FN_SIZE(polyz_unpack_19_asm)
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87) */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

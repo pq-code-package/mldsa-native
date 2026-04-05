@@ -13,10 +13,6 @@
  *   dev/aarch64_opt/src/rej_uniform_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLD_ASM_NAMESPACE(rej_uniform_asm)
@@ -187,3 +183,7 @@ Lrej_uniform_return:
 MLD_ASM_FN_SIZE(rej_uniform_asm)
 
 #endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

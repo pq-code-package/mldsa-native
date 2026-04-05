@@ -27,10 +27,6 @@
  *   dev/x86_64/src/pointwise_acc_l5.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLD_ASM_NAMESPACE(pointwise_acc_l5_avx2)
@@ -153,3 +149,7 @@ MLD_ASM_FN_SIZE(pointwise_acc_l5_avx2)
 
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
           && (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5) */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

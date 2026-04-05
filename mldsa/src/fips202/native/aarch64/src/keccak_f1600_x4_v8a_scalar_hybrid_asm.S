@@ -40,10 +40,6 @@
  *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
-
 .text
 .balign 4
 .global MLD_ASM_NAMESPACE(keccak_f1600_x4_v8a_scalar_hybrid_asm)
@@ -1075,3 +1071,7 @@ MLD_ASM_FN_SIZE(keccak_f1600_x4_v8a_scalar_hybrid_asm)
 
 #endif /* MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif
