@@ -3,8 +3,9 @@
  */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && \
-    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)) && \
+#if defined(MLD_ARITH_BACKEND_AARCH64) &&                                      \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)) &&              \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -167,4 +168,5 @@ poly_pointwise_montgomery_loop_start:
 
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_SIGN_API || \
-          !MLD_CONFIG_NO_VERIFY_API) && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+          !MLD_CONFIG_NO_VERIFY_API || MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
+          && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

@@ -144,7 +144,10 @@ void mld_polyz_unpack_17_asm(int32_t *r, const uint8_t *buf,
 #define mld_polyz_unpack_19_asm MLD_NAMESPACE(polyz_unpack_19_asm)
 void mld_polyz_unpack_19_asm(int32_t *r, const uint8_t *buf,
                              const uint8_t *indices);
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_pointwise_montgomery_asm \
   MLD_NAMESPACE(poly_pointwise_montgomery_asm)
 void mld_poly_pointwise_montgomery_asm(int32_t *r, const int32_t *a,
@@ -162,7 +165,8 @@ __contract__(
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #define mld_polyvecl_pointwise_acc_montgomery_l4_asm \
   MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l4_asm)

@@ -1988,6 +1988,7 @@ def get_config_options():
         "MLD_CONFIG_XXX",
         "MLD_CONFIG_API_CONSTANTS_ONLY",
         "MLD_PREHASH_",
+        "MLD_UNIT_TEST",
     ]
 
     return configs

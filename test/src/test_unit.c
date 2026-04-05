@@ -22,6 +22,8 @@
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
+#define NUM_RANDOM_TESTS_SLOW 50
+
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -784,10 +786,11 @@ static int test_backend_units(void)
 /* Test that eager and lazy polyvec init+get produce the same results */
 static int test_polyvec_lazy_eager(void)
 {
-  unsigned int i, t;
+  unsigned int i, j, t;
   uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES];
   uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES];
   uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES];
+  uint8_t rho[MLDSA_SEEDBYTES];
   mld_sk_s1hat_eager s1_eager;
   mld_sk_s1hat_lazy s1_lazy;
   mld_sk_s2hat_eager s2_eager;
@@ -795,8 +798,12 @@ static int test_polyvec_lazy_eager(void)
   mld_sk_t0hat_eager t0_eager;
   mld_sk_t0hat_lazy t0_lazy;
   mld_poly poly_eager, poly_lazy;
+  mld_polymat_eager mat_eager;
+  mld_polymat_lazy mat_lazy;
+  mld_polyvecl v;
+  mld_polyveck tk_eager, tk_lazy;
 
-  for (t = 0; t < NUM_RANDOM_TESTS; t++)
+  for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
   {
     /* Test s1vec: eager vs lazy */
     randombytes(packed_s1, sizeof(packed_s1));
@@ -833,6 +840,34 @@ static int test_polyvec_lazy_eager(void)
       mld_sk_t0hat_get_poly_lazy(&poly_lazy, &t0_lazy, i);
       CHECK(memcmp(&poly_eager, &poly_lazy, sizeof(mld_poly)) == 0);
     }
+  }
+
+  /* Test matrix expand + pointwise: eager vs lazy.
+   * Fewer iterations since matrix expand is expensive. */
+  for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
+  {
+    randombytes(rho, sizeof(rho));
+    mld_polyvec_matrix_expand_eager(&mat_eager, rho);
+    mld_polyvec_matrix_expand_lazy(&mat_lazy, rho);
+
+    randombytes((uint8_t *)&v, sizeof(v));
+    for (i = 0; i < MLDSA_L; i++)
+    {
+      for (j = 0; j < MLDSA_N; j++)
+      {
+        v.vec[i].coeffs[j] %= (MLD_NTT_BOUND - 1);
+      }
+    }
+
+    mld_polyvec_matrix_pointwise_montgomery_eager(&tk_eager, &mat_eager, &v);
+    mld_polyvec_matrix_pointwise_montgomery_lazy(&tk_lazy, &mat_lazy, &v);
+
+    /* Compare mod q */
+    mld_polyveck_reduce(&tk_eager);
+    mld_polyveck_reduce(&tk_lazy);
+    mld_polyveck_caddq(&tk_eager);
+    mld_polyveck_caddq(&tk_lazy);
+    CHECK(memcmp(&tk_eager, &tk_lazy, sizeof(mld_polyveck)) == 0);
   }
 
   return 0;

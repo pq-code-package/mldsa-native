@@ -11,6 +11,7 @@
 #include "../../mldsa/src/poly.h"
 #include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
+#include "../../mldsa/src/polyvec_lazy.h"
 #include "../../mldsa/src/randombytes.h"
 #include "hal.h"
 
@@ -74,9 +75,11 @@ static int bench(void)
   BENCH("poly_invntt_tomont", mld_poly_invntt_tomont((mld_poly *)data0))
 
   /* pointwise */
+#if !defined(MLD_CONFIG_REDUCE_RAM)
   BENCH("polyvecl_pointwise_acc_montgomery",
         mld_polyvecl_pointwise_acc_montgomery(&poly_out, &polyvecl_a,
                                               &polyvecl_b))
+#endif
   BENCH("polyvec_matrix_pointwise_montgomery",
         mld_polyvec_matrix_pointwise_montgomery(&polyveck_out, &polymat,
                                                 &polyvecl_b))

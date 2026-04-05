@@ -91,7 +91,7 @@ source code and documentation.
   - [mldsa/src/fips202/fips202x4.c](mldsa/src/fips202/fips202x4.c)
   - [mldsa/src/poly.c](mldsa/src/poly.c)
   - [mldsa/src/poly_kl.c](mldsa/src/poly_kl.c)
-  - [mldsa/src/polyvec.c](mldsa/src/polyvec.c)
+  - [mldsa/src/polyvec_lazy.c](mldsa/src/polyvec_lazy.c)
   - [mldsa/src/rounding.h](mldsa/src/rounding.h)
   - [mldsa/src/sign.c](mldsa/src/sign.c)
   - [mldsa/src/sign.h](mldsa/src/sign.h)

@@ -512,7 +512,10 @@ __contract__(
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* MLD_USE_NATIVE_POLYZ_UNPACK_19 */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
 /*************************************************
  * Name:        mld_poly_pointwise_montgomery_native
@@ -544,7 +547,8 @@ __contract__(
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(c, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4

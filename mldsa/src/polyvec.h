@@ -16,7 +16,6 @@
  * within a single compilation unit. */
 #define mld_polyvecl MLD_ADD_PARAM_SET(mld_polyvecl)
 #define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
-#define mld_polymat MLD_ADD_PARAM_SET(mld_polymat)
 /* End of parameter set namespacing */
 
 /* Vectors of polynomials of length MLDSA_L */
@@ -72,6 +71,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 
+#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_polyvecl_pointwise_acc_montgomery \
   MLD_NAMESPACE_KL(polyvecl_pointwise_acc_montgomery)
 /*************************************************
@@ -109,6 +109,7 @@ __contract__(
   assigns(memory_slice(w, sizeof(mld_poly)))
   ensures(array_abs_bound(w->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
+#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyvecl_chknorm MLD_NAMESPACE_KL(polyvecl_chknorm)
@@ -143,18 +144,8 @@ typedef struct
   mld_poly vec[MLDSA_K];
 } mld_polyveck;
 
-/* Matrix of polynomials (K x L) */
-typedef struct
-{
-#if defined(MLD_CONFIG_REDUCE_RAM)
-  mld_polyvecl row_buffer;
-  uint8_t rho[MLDSA_SEEDBYTES];
-#else
-  mld_polyvecl vec[MLDSA_K];
-#endif
-} mld_polymat;
-
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
  * Name:        polyveck_reduce
@@ -175,7 +166,8 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 #define mld_polyveck_caddq MLD_NAMESPACE_KL(polyveck_caddq)
 /*************************************************
@@ -645,85 +637,5 @@ __contract__(
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
-
-
-
-#define mld_polymat_get_row MLD_NAMESPACE_KL(polymat_get_row)
-/*************************************************
- * Name:        mld_polymat_get_row
- *
- * Description: Retrieve a pointer to a specific row of the matrix.
- *              In MLD_CONFIG_REDUCE_RAM mode, generates the row on-demand.
- *
- * Arguments:   - mld_polymat *mat: pointer to matrix
- *              - unsigned int row: row index (must be < MLDSA_K)
- *
- * Returns pointer to the row (mld_polyvecl)
- **************************************************/
-MLD_INTERNAL_API
-MLD_MUST_CHECK_RETURN_VALUE
-const mld_polyvecl *mld_polymat_get_row(mld_polymat *mat, unsigned int row);
-
-#define mld_polyvec_matrix_expand MLD_NAMESPACE_KL(polyvec_matrix_expand)
-/*************************************************
- * Name:        mld_polyvec_matrix_expand
- *
- * Description: Implementation of ExpandA. Generates matrix A with uniformly
- *              random coefficients a_{i,j} by performing rejection
- *              sampling on the output stream of SHAKE128(rho|j|i)
- *
- * Arguments:   - mld_polymat *mat: pointer to output matrix
- *              - const uint8_t rho[]: byte array containing seed rho
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyvec_matrix_expand(mld_polymat *mat,
-                               const uint8_t rho[MLDSA_SEEDBYTES])
-__contract__(
-  requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  assigns(memory_slice(mat, sizeof(mld_polymat)))
-  ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-    array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-);
-
-#define mld_polyvec_matrix_pointwise_montgomery \
-  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery)
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery
- *
- * Description: Compute matrix-vector multiplication in NTT domain with
- *              pointwise multiplication and multiplication by 2^{-32}.
- *              Input matrix and vector must be in NTT domain representation.
- *
- *              The first input "mat" must be the output of
- *              polyvec_matrix_expand() and so have coefficients in [0, Q-1]
- *              inclusive.
- *
- *              The second input "v" is assumed to be output of an NTT, and
- *              hence must have coefficients bounded by [-9q+1, +9q-1]
- *              inclusive.
- *
- *              Note: In MLD_CONFIG_REDUCE_RAM mode, mat cannot be const
- *              as rows are generated on-demand.
- *
- * Arguments:   - mld_polyveck *t: pointer to output vector t
- *              - mld_polymat *mat: pointer to input matrix
- *              - const mld_polyvecl *v: pointer to input vector v
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
-                                             const mld_polyvecl *v)
-__contract__(
-  requires(memory_no_alias(t, sizeof(mld_polyveck)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-                                         array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  requires(forall(l1, 0, MLDSA_L,
-                  array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_K,
-                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-);
 
 #endif /* !MLD_POLYVEC_H */

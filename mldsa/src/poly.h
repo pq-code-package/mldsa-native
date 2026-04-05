@@ -57,7 +57,8 @@ __contract__(
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_add MLD_NAMESPACE(poly_add)
 /*************************************************
  * Name:        mld_poly_add
@@ -85,7 +86,8 @@ __contract__(
   ensures(forall(k3, 0, MLDSA_N, r->coeffs[k3] < MLD_REDUCE32_DOMAIN_MAX))
   ensures(forall(k4, 0, MLDSA_N, r->coeffs[k4] >= INT32_MIN))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_sub MLD_NAMESPACE(poly_sub)
@@ -174,7 +176,8 @@ __contract__(
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_INTT_BOUND))
 );
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_pointwise_montgomery MLD_NAMESPACE(poly_pointwise_montgomery)
 /*************************************************
  * Name:        mld_poly_pointwise_montgomery
@@ -199,7 +202,8 @@ __contract__(
   assigns(memory_slice(c, sizeof(mld_poly)))
   ensures(array_abs_bound(c->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_poly_power2round MLD_NAMESPACE(poly_power2round)
@@ -254,7 +258,8 @@ __contract__(
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && !defined(MLD_CONFIG_REDUCE_RAM)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_poly_uniform_4x MLD_NAMESPACE(poly_uniform_4x)
 /*************************************************
  * Name:        mld_poly_uniform_x4
@@ -288,7 +293,8 @@ __contract__(
   ensures(array_bound(vec2->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   ensures(array_bound(vec3->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_REDUCE_RAM */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyt1_pack MLD_NAMESPACE(polyt1_pack)

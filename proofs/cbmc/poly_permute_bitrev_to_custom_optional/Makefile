@@ -4,40 +4,38 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_permute_bitrev_to_custom_harness
+HARNESS_FILE = poly_permute_bitrev_to_custom_optional_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_permute_bitrev_to_custom
+PROOF_UID = poly_permute_bitrev_to_custom_optional
 
 DEFINES +=
 INCLUDES +=
-
-REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
-PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
+REMOVE_FUNCTION_BODY +=
 
-CHECK_FUNCTION_CONTRACTS=mld_polyvecl_permute_bitrev_to_custom
+PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
+
+CHECK_FUNCTION_CONTRACTS=mld_poly_permute_bitrev_to_custom_optional
 USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2 --slice-formula --no-array-field-sensitivity
+CBMCFLAGS=--smt2
 
-FUNCTION_NAME = polyvecl_permute_bitrev_to_custom
+FUNCTION_NAME = poly_permute_bitrev_to_custom_optional
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
 # restrict the number of EXPENSIVE CBMC jobs running at once. See the
 # documentation in Makefile.common under the "Job Pools" heading for details.
 # EXPENSIVE = true
-
-# This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

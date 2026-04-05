@@ -6,24 +6,27 @@ index be11f20..0000000 100644
 +++ b/sw/device/lib/crypto/include/mldsa.h
 @@ -41,15 +41,15 @@ enum {
    kOtcryptoMldsa87SeedBytes = 32,
- 
+
    // Work buffer sizes in 32-bit words
 -  kOtcryptoMldsa44WorkBufferKeypairWords = 32992 / sizeof(uint32_t),
 -  kOtcryptoMldsa44WorkBufferSignWords = 32448 / sizeof(uint32_t),
-+  kOtcryptoMldsa44WorkBufferKeypairWords = 16672 / sizeof(uint32_t),
-+  kOtcryptoMldsa44WorkBufferSignWords = 20256 / sizeof(uint32_t),
-   kOtcryptoMldsa44WorkBufferVerifyWords = 22464 / sizeof(uint32_t),
- 
+-  kOtcryptoMldsa44WorkBufferVerifyWords = 22464 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferKeypairWords = 14624 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferSignWords = 18208 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferVerifyWords = 20416 / sizeof(uint32_t),
+
 -  kOtcryptoMldsa65WorkBufferKeypairWords = 46304 / sizeof(uint32_t),
 -  kOtcryptoMldsa65WorkBufferSignWords = 44768 / sizeof(uint32_t),
-+  kOtcryptoMldsa65WorkBufferKeypairWords = 23840 / sizeof(uint32_t),
-+  kOtcryptoMldsa65WorkBufferSignWords = 26432 / sizeof(uint32_t),
-   kOtcryptoMldsa65WorkBufferVerifyWords = 30720 / sizeof(uint32_t),
- 
+-  kOtcryptoMldsa65WorkBufferVerifyWords = 30720 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferKeypairWords = 20768 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferSignWords = 23360 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferVerifyWords = 27648 / sizeof(uint32_t),
+
 -  kOtcryptoMldsa87WorkBufferKeypairWords = 62688 / sizeof(uint32_t),
 -  kOtcryptoMldsa87WorkBufferSignWords = 59104 / sizeof(uint32_t),
-+  kOtcryptoMldsa87WorkBufferKeypairWords = 32032 / sizeof(uint32_t),
-+  kOtcryptoMldsa87WorkBufferSignWords = 34624 / sizeof(uint32_t),
-   kOtcryptoMldsa87WorkBufferVerifyWords = 41216 / sizeof(uint32_t),
+-  kOtcryptoMldsa87WorkBufferVerifyWords = 41216 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferKeypairWords = 26912 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferSignWords = 29504 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferVerifyWords = 36096 / sizeof(uint32_t),
  };
- 
+

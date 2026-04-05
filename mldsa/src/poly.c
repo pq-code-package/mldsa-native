@@ -91,7 +91,8 @@ void mld_poly_caddq(mld_poly *a)
   mld_poly_caddq_c(a);
 }
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 /* Reference: We use destructive version (output=first input) to avoid
  *            reasoning about aliasing in the CBMC specification */
 MLD_INTERNAL_API
@@ -112,7 +113,8 @@ void mld_poly_add(mld_poly *r, const mld_poly *b)
     r->coeffs[i] = r->coeffs[i] + b->coeffs[i];
   }
 }
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /* Reference: We use destructive version (output=first input) to avoid
@@ -456,7 +458,8 @@ void mld_poly_invntt_tomont(mld_poly *a)
   mld_poly_invntt_tomont_c(a);
 }
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 MLD_STATIC_TESTABLE void mld_poly_pointwise_montgomery_c(mld_poly *c,
                                                          const mld_poly *a,
                                                          const mld_poly *b)
@@ -503,7 +506,8 @@ void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
   mld_poly_pointwise_montgomery_c(c, a, b);
 }
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
@@ -680,7 +684,8 @@ void mld_poly_uniform(mld_poly *a, const uint8_t seed[MLDSA_SEEDBYTES + 2])
   mld_zeroize(buf, sizeof(buf));
 }
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && !defined(MLD_CONFIG_REDUCE_RAM)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 MLD_INTERNAL_API
 void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
                          mld_poly *vec3,
@@ -745,7 +750,8 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
   mld_zeroize(buf, sizeof(buf));
 }
 
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_REDUCE_RAM */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
