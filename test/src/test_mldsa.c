@@ -11,15 +11,18 @@
 #include "mldsa_native.h"
 #include "src/sys.h"
 
-/* Additional SUPERCOP-style macros for functions not in the standard set */
-#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
-#define crypto_sign_signature_extmu MLD_API_NAMESPACE(signature_extmu)
-#define crypto_sign_verify_extmu MLD_API_NAMESPACE(verify_extmu)
-#define crypto_sign_signature_pre_hash_shake256 \
+#define mld_sign_keypair MLD_API_NAMESPACE(keypair)
+#define mld_sign MLD_API_NAMESPACE(sign)
+#define mld_sign_signature MLD_API_NAMESPACE(signature)
+#define mld_open MLD_API_NAMESPACE(open)
+#define mld_sign_verify MLD_API_NAMESPACE(verify)
+#define mld_sign_signature_extmu MLD_API_NAMESPACE(signature_extmu)
+#define mld_sign_verify_extmu MLD_API_NAMESPACE(verify_extmu)
+#define mld_sign_signature_pre_hash_shake256 \
   MLD_API_NAMESPACE(signature_pre_hash_shake256)
-#define crypto_sign_verify_pre_hash_shake256 \
+#define mld_sign_verify_pre_hash_shake256 \
   MLD_API_NAMESPACE(verify_pre_hash_shake256)
-#define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
+#define mld_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
 
 #ifndef NTESTS
 #define NTESTS 100
@@ -52,15 +55,15 @@ static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   int rc;
 
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, CTXLEN);
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, MLEN);
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK(mld_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = mld_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -69,25 +72,25 @@ static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
 
   if (rc)
   {
-    printf("ERROR: crypto_sign_open\n");
+    printf("ERROR: mld_open\n");
     return 1;
   }
 
   if (memcmp(m, m2, MLEN))
   {
-    printf("ERROR: crypto_sign_open - wrong message\n");
+    printf("ERROR: mld_open - wrong message\n");
     return 1;
   }
 
   if (smlen != MLEN + CRYPTO_BYTES)
   {
-    printf("ERROR: crypto_sign_open - wrong smlen\n");
+    printf("ERROR: mld_open - wrong smlen\n");
     return 1;
   }
 
   if (mlen != MLEN)
   {
-    printf("ERROR: crypto_sign_open - wrong mlen\n");
+    printf("ERROR: mld_open - wrong mlen\n");
     return 1;
   }
 
@@ -126,12 +129,12 @@ static int test_sign_extmu(void)
   uint8_t mu[MLDSA_CRHBYTES];
   size_t siglen;
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
   MLD_CT_TESTING_SECRET(mu, sizeof(mu));
 
-  CHECK(crypto_sign_signature_extmu(sig, &siglen, mu, sk) == 0);
-  CHECK(crypto_sign_verify_extmu(sig, siglen, mu, pk) == 0);
+  CHECK(mld_sign_signature_extmu(sig, &siglen, mu, sk) == 0);
+  CHECK(mld_sign_verify_extmu(sig, siglen, mu, pk) == 0);
 
   return 0;
 }
@@ -148,7 +151,7 @@ static int test_sign_pre_hash(void)
   size_t siglen;
 
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
@@ -156,10 +159,10 @@ static int test_sign_pre_hash(void)
   CHECK(randombytes(rnd, MLDSA_RNDBYTES) == 0);
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
-  CHECK(crypto_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN, ctx,
-                                                CTXLEN, rnd, sk) == 0);
-  CHECK(crypto_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
-                                             pk) == 0);
+  CHECK(mld_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN, ctx, CTXLEN,
+                                             rnd, sk) == 0);
+  CHECK(mld_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
+                                          pk) == 0);
 
   return 0;
 }
@@ -176,15 +179,17 @@ static int test_pk_from_sk(void)
   int rc;
 
   /* Generate a keypair */
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
 
   /* Derive public key from secret key */
-  CHECK(crypto_sign_pk_from_sk(pk_derived, sk) == 0);
+  CHECK(mld_sign_pk_from_sk(pk_derived, sk) == 0);
 
   /* Verify derived public key matches original */
   if (memcmp(pk, pk_derived, CRYPTO_PUBLICKEYBYTES) != 0)
   {
-    printf("ERROR: pk_from_sk - derived public key does not match original\n");
+    printf(
+        "ERROR: mld_sign_pk_from_sk - derived public key does not match "
+        "original\n");
     return 1;
   }
 
@@ -193,14 +198,16 @@ static int test_pk_from_sk(void)
   /* Corrupt a byte in the t0 portion of the secret key */
   sk_corrupted[MLDSA_SEEDBYTES + MLDSA_TRBYTES + MLDSA_SEEDBYTES + 10] ^= 1;
 
-  rc = crypto_sign_pk_from_sk(pk_derived, sk_corrupted);
+  rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
   /* Constant time: Declassify to check result */
   MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
 
   if (rc != -1)
   {
-    printf("ERROR: pk_from_sk - should fail with corrupted t0 in secret key\n");
+    printf(
+        "ERROR: mld_sign_pk_from_sk - should fail with corrupted t0 in secret "
+        "key\n");
     return 1;
   }
 
@@ -210,7 +217,7 @@ static int test_pk_from_sk(void)
   /* tr starts at offset 2 * MLDSA_SEEDBYTES (after rho and key) */
   sk_corrupted[2 * MLDSA_SEEDBYTES + 10] ^= 1;
 
-  rc = crypto_sign_pk_from_sk(pk_derived, sk_corrupted);
+  rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
   /* Constant time: Declassify to check result */
   MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
@@ -218,7 +225,7 @@ static int test_pk_from_sk(void)
   if (rc != -1)
   {
     printf(
-        "ERROR: crypto_sign_pk_from_sk - should fail with corrupted tr in "
+        "ERROR: mld_sign_pk_from_sk - should fail with corrupted tr in "
         "secret key\n");
     return 1;
   }
@@ -243,13 +250,13 @@ static int test_wrong_pk(void)
   size_t idx;
   size_t i;
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK(mld_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in public key */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -257,7 +264,7 @@ static int test_wrong_pk(void)
 
   pk[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = mld_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -265,7 +272,7 @@ static int test_wrong_pk(void)
 
   if (!rc)
   {
-    printf("ERROR: wrong_pk: crypto_sign_open\n");
+    printf("ERROR: wrong_pk: mld_open\n");
     return 1;
   }
 
@@ -273,7 +280,7 @@ static int test_wrong_pk(void)
   {
     if (m2[i] != 0)
     {
-      printf("ERROR: wrong_pk: crypto_sign_open - message should be zero\n");
+      printf("ERROR: wrong_pk: mld_open - message should be zero\n");
       return 1;
     }
   }
@@ -294,13 +301,13 @@ static int test_wrong_sig(void)
   size_t idx;
   size_t i;
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK(mld_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in signed message */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -308,7 +315,7 @@ static int test_wrong_sig(void)
 
   sm[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = mld_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -316,7 +323,7 @@ static int test_wrong_sig(void)
 
   if (!rc)
   {
-    printf("ERROR: wrong_sig: crypto_sign_open\n");
+    printf("ERROR: wrong_sig: mld_open\n");
     return 1;
   }
 
@@ -324,7 +331,7 @@ static int test_wrong_sig(void)
   {
     if (m2[i] != 0)
     {
-      printf("ERROR: wrong_sig: crypto_sign_open - message should be zero\n");
+      printf("ERROR: wrong_sig: mld_open - message should be zero\n");
       return 1;
     }
   }
@@ -346,13 +353,13 @@ static int test_wrong_ctx(void)
   size_t idx;
   size_t i;
 
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK(mld_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
 
   /* flip bit in ctx */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -360,7 +367,7 @@ static int test_wrong_ctx(void)
 
   ctx[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = mld_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -368,7 +375,7 @@ static int test_wrong_ctx(void)
 
   if (!rc)
   {
-    printf("ERROR: wrong_sig: crypto_sign_open\n");
+    printf("ERROR: wrong_sig: mld_open\n");
     return 1;
   }
 
@@ -376,7 +383,7 @@ static int test_wrong_ctx(void)
   {
     if (m2[i] != 0)
     {
-      printf("ERROR: wrong_sig: crypto_sign_open - message should be zero\n");
+      printf("ERROR: wrong_sig: mld_open - message should be zero\n");
       return 1;
     }
   }
@@ -394,7 +401,7 @@ static int test_sign_expected(void)
     uint8_t test_vector_sk_copy[CRYPTO_SECRETKEYBYTES];
 
     randombytes_reset();
-    CHECK(crypto_sign_keypair(pk, sk) == 0);
+    CHECK(mld_sign_keypair(pk, sk) == 0);
 
     /* Declassify sk's for comparison. This is for testing purposes only.
      * Don't declassify the test_vector_sk itself because we need it to stay
@@ -418,20 +425,20 @@ static int test_sign_expected(void)
      * and not reseed it afterwards. Here, we reseed to make tests
      * independent and reproducible. */
     randombytes_reset();
-    CHECK(crypto_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
-                                TEST_VECTOR_MSG_LEN,
-                                (const uint8_t *)TEST_VECTOR_CTX,
-                                TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
+    CHECK(mld_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                             TEST_VECTOR_MSG_LEN,
+                             (const uint8_t *)TEST_VECTOR_CTX,
+                             TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
     CHECK(siglen == CRYPTO_BYTES);
     CHECK(memcmp(sig, test_vector_sig, CRYPTO_BYTES) == 0);
   }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-  CHECK(crypto_sign_verify(
-            test_vector_sig, CRYPTO_BYTES, (const uint8_t *)TEST_VECTOR_MSG,
-            TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-            TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
+  CHECK(mld_sign_verify(test_vector_sig, CRYPTO_BYTES,
+                        (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                        (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                        test_vector_pk) == 0);
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
   return 0;

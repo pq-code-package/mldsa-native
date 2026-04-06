@@ -24,8 +24,9 @@ int main(void)
          MLD_CONFIG_NO_VERIFY_API */
 
 /* Additional SUPERCOP-style macros for functions not in the standard set */
-#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
-#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
+#define mld_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
+#define mld_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
+#define mld_sign_verify MLD_API_NAMESPACE(verify)
 
 #if defined(MLD_SYS_WINDOWS)
 #include <fcntl.h>
@@ -86,7 +87,7 @@ int main(void)
 
   /*
    * We cannot rely on randombytes in the KAT test as randombytes() is used
-   * inside of crypto_sign_signature() which is called as a part of
+   * inside of mld_sign_signature() which is called as a part of
    * key generation in case PCT (pairwise-consistency test) is enabled.
    * To allow KAT tests to still pass successfully, we derandomize the
    * KAT test to only use deterministic randomness derived using SHAKE.
@@ -99,17 +100,17 @@ int main(void)
     mld_shake256(coins, sizeof(coins), coins, sizeof(coins));
     m = coins + MLDSA_SEEDBYTES + MLDSA_RNDBYTES;
 
-    CHECK(crypto_sign_keypair_internal(pk, sk, coins) == 0);
+    CHECK(mld_sign_keypair_internal(pk, sk, coins) == 0);
 
     print_hex(pk, CRYPTO_PUBLICKEYBYTES);
     print_hex(sk, CRYPTO_SECRETKEYBYTES);
 
-    CHECK(crypto_sign_signature_internal(s, &slen, m, i, pre, sizeof(pre),
-                                         coins + MLDSA_SEEDBYTES, sk, 0) == 0);
+    CHECK(mld_sign_signature_internal(s, &slen, m, i, pre, sizeof(pre),
+                                      coins + MLDSA_SEEDBYTES, sk, 0) == 0);
 
     print_hex(s, slen);
 
-    rc = crypto_sign_verify(s, slen, m, i, NULL, CTXLEN, pk);
+    rc = mld_sign_verify(s, slen, m, i, NULL, CTXLEN, pk);
 
     if (rc)
     {

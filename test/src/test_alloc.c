@@ -457,7 +457,7 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 
 static int test_open_alloc_failure(test_ctx_t *ctx)
 {
-  /* crypto_sign_open needs a signed message (sig || msg).
+  /* mld_open needs a signed message (sig || msg).
    * Construct it from test vectors. */
   uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
   uint8_t msg_out[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
