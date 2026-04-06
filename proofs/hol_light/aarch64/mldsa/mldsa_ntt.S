@@ -1,17 +1,32 @@
-/*
+/* Copyright (c) 2022 Arm Limited
+ * Copyright (c) 2022 Hanno Becker
+ * Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
+ * Copyright (c) The mlkem-native project authors
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+
+/* References
+ * ==========
+ *
+ * - [NeonNTT]
+ *   Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1
+ *   Becker, Hwang, Kannwischer, Yang, Yang
+ *   https://eprint.iacr.org/2021/986
+ *
+ * - [SLOTHY_Paper]
+ *   Fast and Clean: Auditable high-performance assembly via constraint solving
+ *   Abdulrahman, Becker, Kannwischer, Klein
+ *   https://eprint.iacr.org/2022/1303
+ */
+
+/* AArch64 ML-DSA forward NTT following @[NeonNTT] and @[SLOTHY_Paper] */
 
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
  *   dev/aarch64_opt/src/ntt.S using scripts/simpasm. Do not modify it directly.
  */
-
-#if defined(__ELF__)
-.section .note.GNU-stack,"",@progbits
-#endif
 
 .text
 .balign 4
@@ -25,10 +40,19 @@ PQCP_MLDSA_NATIVE_MLDSA44_ntt_asm:
 
         .cfi_startproc
         sub	sp, sp, #0x40
+        .cfi_adjust_cfa_offset 0x40
         stp	d8, d9, [sp]
+        .cfi_rel_offset d8, 0x0
+        .cfi_rel_offset d9, 0x8
         stp	d10, d11, [sp, #0x10]
+        .cfi_rel_offset d10, 0x10
+        .cfi_rel_offset d11, 0x18
         stp	d12, d13, [sp, #0x20]
+        .cfi_rel_offset d12, 0x20
+        .cfi_rel_offset d13, 0x28
         stp	d14, d15, [sp, #0x30]
+        .cfi_rel_offset d14, 0x30
+        .cfi_rel_offset d15, 0x38
         mov	w5, #0xe001             // =57345
         movk	w5, #0x7f, lsl #16
         dup	v7.4s, w5
@@ -607,9 +631,22 @@ Lntt_layer45678_start:
         stur	q13, [x0, #-0x10]
         stur	q21, [x0, #-0x30]
         ldp	d8, d9, [sp]
+        .cfi_restore d8
+        .cfi_restore d9
         ldp	d10, d11, [sp, #0x10]
+        .cfi_restore d10
+        .cfi_restore d11
         ldp	d12, d13, [sp, #0x20]
+        .cfi_restore d12
+        .cfi_restore d13
         ldp	d14, d15, [sp, #0x30]
+        .cfi_restore d14
+        .cfi_restore d15
         add	sp, sp, #0x40
+        .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

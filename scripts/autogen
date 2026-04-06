@@ -2358,6 +2358,13 @@ def gen_hol_light_asm():
     aarch64_flags = "-march=armv8.4-a+sha3"
     joblist_aarch64 = [
         (
+            "ntt.S",
+            "mldsa_ntt.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
             "poly_caddq_asm.S",
             "mldsa_poly_caddq.S",
             "dev/aarch64_opt/src",
