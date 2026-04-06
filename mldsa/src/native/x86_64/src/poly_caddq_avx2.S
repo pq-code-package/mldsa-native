@@ -44,32 +44,32 @@
 MLD_ASM_FN_SYMBOL(poly_caddq_avx2)
 
         .cfi_startproc
-        movl	$0x7fe001, %edx         # imm = 0x7FE001
-        leaq	0x400(%rdi), %rax
-        vpxor	%xmm2, %xmm2, %xmm2
-        vmovd	%edx, %xmm1
-        vpbroadcastd	%xmm1, %ymm1
+        movl $0x7fe001, %edx         # imm = 0x7FE001
+        leaq 0x400(%rdi), %rax
+        vpxor %xmm2, %xmm2, %xmm2
+        vmovd %edx, %xmm1
+        vpbroadcastd %xmm1, %ymm1
 
 Lpoly_caddq_avx2_loop:
-        vpcmpgtd	(%rdi), %ymm2, %ymm0
-        vpand	%ymm1, %ymm0, %ymm0
-        vpaddd	(%rdi), %ymm0, %ymm0
-        vmovdqa	%ymm0, (%rdi)
-        vpcmpgtd	0x20(%rdi), %ymm2, %ymm3
-        vpand	%ymm1, %ymm3, %ymm3
-        vpaddd	0x20(%rdi), %ymm3, %ymm3
-        vmovdqa	%ymm3, 0x20(%rdi)
-        vpcmpgtd	0x40(%rdi), %ymm2, %ymm4
-        vpand	%ymm1, %ymm4, %ymm4
-        vpaddd	0x40(%rdi), %ymm4, %ymm4
-        vmovdqa	%ymm4, 0x40(%rdi)
-        vpcmpgtd	0x60(%rdi), %ymm2, %ymm5
-        vpand	%ymm1, %ymm5, %ymm5
-        vpaddd	0x60(%rdi), %ymm5, %ymm5
-        vmovdqa	%ymm5, 0x60(%rdi)
-        addq	$0x80, %rdi
-        cmpq	%rdi, %rax
-        jne	Lpoly_caddq_avx2_loop
+        vpcmpgtd (%rdi), %ymm2, %ymm0
+        vpand %ymm1, %ymm0, %ymm0
+        vpaddd (%rdi), %ymm0, %ymm0
+        vmovdqa %ymm0, (%rdi)
+        vpcmpgtd 0x20(%rdi), %ymm2, %ymm3
+        vpand %ymm1, %ymm3, %ymm3
+        vpaddd 0x20(%rdi), %ymm3, %ymm3
+        vmovdqa %ymm3, 0x20(%rdi)
+        vpcmpgtd 0x40(%rdi), %ymm2, %ymm4
+        vpand %ymm1, %ymm4, %ymm4
+        vpaddd 0x40(%rdi), %ymm4, %ymm4
+        vmovdqa %ymm4, 0x40(%rdi)
+        vpcmpgtd 0x60(%rdi), %ymm2, %ymm5
+        vpand %ymm1, %ymm5, %ymm5
+        vpaddd 0x60(%rdi), %ymm5, %ymm5
+        vmovdqa %ymm5, 0x60(%rdi)
+        addq $0x80, %rdi
+        cmpq %rdi, %rax
+        jne Lpoly_caddq_avx2_loop
         retq
         .cfi_endproc
 

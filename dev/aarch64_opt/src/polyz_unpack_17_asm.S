@@ -71,9 +71,9 @@ polyz_unpack_17_loop:
         // 3-register ld1 would load 48 bytes, but only 36 are
         // consumed per iteration. The TBL indices for v2 are
         // adjusted to account for v2's load offset.
-        ld1	{v0.16b, v1.16b}, [buf]
-        add	buf, buf, #0x14
-        ld1	{v2.16b}, [buf], #0x10
+        ld1 {v0.16b, v1.16b}, [buf]
+        add buf, buf, #0x14
+        ld1 {v2.16b}, [buf], #0x10
 
         tbl v4.16b, {v0.16b}, idx0.16b
         tbl v5.16b, {v0.16b - v1.16b}, idx1.16b

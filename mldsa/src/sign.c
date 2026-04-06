@@ -62,8 +62,8 @@ __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   ensures(return_value == 0
-	  || return_value == MLD_ERR_FAIL
-	  || return_value == MLD_ERR_OUT_OF_MEMORY
+    || return_value == MLD_ERR_FAIL
+    || return_value == MLD_ERR_OUT_OF_MEMORY
     || return_value == MLD_ERR_RNG_FAIL)
 );
 

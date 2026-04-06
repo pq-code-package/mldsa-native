@@ -42,15 +42,15 @@ vmovdqa  \reg, \offset(%rdi)
 .endm
 
 .text
-.global	MLD_ASM_NAMESPACE(poly_caddq_avx2)
+.global MLD_ASM_NAMESPACE(poly_caddq_avx2)
 .balign 16
 MLD_ASM_FN_SYMBOL(poly_caddq_avx2)
 
-mov	$8380417, %edx
-leaq	1024(%rdi), %rax
-vpxor	%xmm2, %xmm2, %xmm2
-vmovd	%edx, %xmm1
-vpbroadcastd	%xmm1, %ymm1
+mov $8380417, %edx
+leaq 1024(%rdi), %rax
+vpxor %xmm2, %xmm2, %xmm2
+vmovd %edx, %xmm1
+vpbroadcastd %xmm1, %ymm1
 
 poly_caddq_avx2_loop:
 

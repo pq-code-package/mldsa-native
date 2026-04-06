@@ -66,6 +66,18 @@ git ls-files -- ":/*.c" ":/*.h" | xargs -P "$nproc" -I {} sh -c '
     clang-format -i {}
   fi'
 
+info "Expanding tabs"
+expand-tabs()
+{
+  git ls-files -- ":/" ":/!:Makefile" ":/!:**/Makefile" ":/!:**/Makefile.*" ":/!:Makefile.*" ":/!:*.mk" ":/!:*.patch" ":/!:nix/valgrind/*.txt" | xargs -P "$nproc" -I {} sh -c '
+    if [ ! -L {} ] && grep -Pq '"'"'\t'"'"' "{}"; then
+      tmp=$(mktemp)
+      expand -t 4 "{}" > "$tmp" && mv "$tmp" "{}"
+      echo "{}"
+    fi'
+}
+expand-tabs
+
 info "Checking for eol"
 check-eol()
 {
