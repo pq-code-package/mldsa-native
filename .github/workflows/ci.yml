@@ -74,7 +74,7 @@ jobs:
                name: 'ubuntu-latest (aarch64)',
                arch: aarch64,
                mode: native,
-              nix_shell: ci
+               nix_shell: ci
              }}
           - {external: true,
              target: {
@@ -283,6 +283,13 @@ jobs:
            examples: true
          - name: clang-21
            shell: clang21
+           darwin: True
+           c17: True
+           c23: True
+           opt: all
+           examples: true
+         - name: clang-22
+           shell: clang22
            darwin: True
            c17: True
            c23: True
