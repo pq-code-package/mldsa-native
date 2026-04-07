@@ -73,8 +73,8 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
         */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
-    !defined(MLD_CONFIG_NO_VERIFY_API) ||                                   \
-    (!defined(MLD_CONFIG_NO_SIGN_API) &&                                    \
+    ((!defined(MLD_CONFIG_NO_SIGN_API) ||                                   \
+      !defined(MLD_CONFIG_NO_VERIFY_API)) &&                                \
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 MLD_INTERNAL_API
 void mld_polyvecl_ntt(mld_polyvecl *v)
@@ -95,8 +95,8 @@ void mld_polyvecl_ntt(mld_polyvecl *v)
 
   mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
 }
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
-          (!MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM ||     \
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || ((!MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_NO_VERIFY_API) && (!MLD_CONFIG_REDUCE_RAM ||   \
           MLD_UNIT_TEST)) */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -207,7 +207,9 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
 }
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
+    (!defined(MLD_CONFIG_NO_VERIFY_API) &&                                  \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))) ||        \
     defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
@@ -233,8 +235,8 @@ uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
   }
   return t;
 }
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
-          MLD_UNIT_TEST */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_VERIFY_API && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) || MLD_UNIT_TEST */
 
 /**************************************************************/
 /************ Vectors of polynomials of length MLDSA_K **************/
@@ -633,7 +635,8 @@ void mld_polyvecl_unpack_eta(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 MLD_INTERNAL_API
 void mld_polyvecl_unpack_z(mld_polyvecl *z,
                            const uint8_t r[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES])
@@ -647,7 +650,8 @@ void mld_polyvecl_unpack_z(mld_polyvecl *z,
   mld_assert_bound_2d(z->vec, MLDSA_L, MLDSA_N, -(MLDSA_GAMMA1 - 1),
                       MLDSA_GAMMA1 + 1);
 }
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
     (!defined(MLD_CONFIG_NO_SIGN_API) &&                                    \

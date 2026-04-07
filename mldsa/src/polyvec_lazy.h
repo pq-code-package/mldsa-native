@@ -57,6 +57,13 @@
 #define mld_sk_t0hat_get_poly_eager \
   MLD_ADD_PARAM_SET(mld_sk_t0hat_get_poly_eager)
 #define mld_sk_t0hat_get_poly_lazy MLD_ADD_PARAM_SET(mld_sk_t0hat_get_poly_lazy)
+#define mld_zvec_eager MLD_ADD_PARAM_SET(mld_zvec_eager)
+#define mld_zvec_lazy MLD_ADD_PARAM_SET(mld_zvec_lazy)
+#define mld_zvec MLD_ADD_PARAM_SET(mld_zvec)
+#define mld_zvec_init_eager MLD_ADD_PARAM_SET(mld_zvec_init_eager)
+#define mld_zvec_init_lazy MLD_ADD_PARAM_SET(mld_zvec_init_lazy)
+#define mld_zvec_get_poly_eager MLD_ADD_PARAM_SET(mld_zvec_get_poly_eager)
+#define mld_zvec_get_poly_lazy MLD_ADD_PARAM_SET(mld_zvec_get_poly_lazy)
 #define mld_polymat MLD_ADD_PARAM_SET(mld_polymat)
 #define mld_polymat_eager MLD_ADD_PARAM_SET(mld_polymat_eager)
 #define mld_polymat_lazy MLD_ADD_PARAM_SET(mld_polymat_lazy)
@@ -76,6 +83,10 @@
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_eager)
 #define mld_polyvec_matrix_pointwise_montgomery_yvec_lazy \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_lazy)
+#define mld_polyvec_matrix_pointwise_montgomery_zvec_eager \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_zvec_eager)
+#define mld_polyvec_matrix_pointwise_montgomery_zvec_lazy \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_zvec_lazy)
 #define mld_yvec_eager MLD_ADD_PARAM_SET(mld_yvec_eager)
 #define mld_yvec_lazy MLD_ADD_PARAM_SET(mld_yvec_lazy)
 #define mld_yvec MLD_ADD_PARAM_SET(mld_yvec)
@@ -385,6 +396,115 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API && (MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
         */
 
+/* zvec: z polynomial vector from a signature.
+ *
+ * The infinity-norm bound check on z and the (in-place) NTT of z are
+ * performed at the boundary between unpack and use:
+ *   - In eager mode, both happen in mld_zvec_init (the full vector is
+ *     already in memory at that point).
+ *   - In lazy mode, both happen in mld_zvec_get_poly per polynomial.
+ *
+ * Either may fail with MLD_ERR_FAIL if the norm bound is violated, so the
+ * matrix-vector multiplication helpers below need not repeat the check. */
+
+/* Eager: precompute and store the full unpacked vector */
+typedef struct
+{
+  mld_polyvecl vec;
+} mld_zvec_eager;
+
+/* Lazy: borrow packed data, unpack one polynomial on demand */
+typedef struct
+{
+  const uint8_t *packed;
+  mld_poly scratch;
+} mld_zvec_lazy;
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_zvec_init_eager(
+    mld_zvec_eager *z,
+    const uint8_t packed_z[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES])
+__contract__(
+  requires(memory_no_alias(z, sizeof(mld_zvec_eager)))
+  requires(memory_no_alias(packed_z, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(z, sizeof(mld_zvec_eager)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+  ensures(return_value == 0 ==>
+          forall(k0, 0, MLDSA_L,
+                 array_abs_bound(z->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+)
+{
+  mld_polyvecl_unpack_z(&z->vec, packed_z);
+  if (mld_polyvecl_chknorm(&z->vec, MLDSA_GAMMA1 - MLDSA_BETA))
+  {
+    return MLD_ERR_FAIL;
+  }
+  mld_polyvecl_ntt(&z->vec);
+  return 0;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_zvec_get_poly_eager(mld_poly *buf,
+                                              const mld_zvec_eager *z,
+                                              unsigned int i)
+__contract__(
+  requires(memory_no_alias(buf, sizeof(mld_poly)))
+  requires(memory_no_alias(z, sizeof(mld_zvec_eager)))
+  requires(i < MLDSA_L)
+  requires(array_abs_bound(z->vec.vec[i].coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(return_value == 0)
+  ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+)
+{
+  *buf = z->vec.vec[i];
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
+#if !defined(MLD_CONFIG_NO_VERIFY_API) && \
+    (defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_zvec_init_lazy(
+    mld_zvec_lazy *z, const uint8_t packed_z[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES])
+__contract__(
+  requires(memory_no_alias(z, sizeof(mld_zvec_lazy)))
+  assigns(memory_slice(z, sizeof(mld_zvec_lazy)))
+  ensures(z->packed == old(packed_z))
+  ensures(return_value == 0)
+)
+{
+  z->packed = packed_z;
+  return 0;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_zvec_get_poly_lazy(mld_poly *buf, mld_zvec_lazy *z,
+                                             unsigned int i)
+__contract__(
+  requires(memory_no_alias(z, sizeof(mld_zvec_lazy)))
+  requires(buf == &z->scratch)
+  requires(i < MLDSA_L)
+  requires(memory_no_alias(z->packed, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+  ensures(return_value == 0 ==>
+          array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+)
+{
+  mld_polyz_unpack(buf, z->packed + i * MLDSA_POLYZ_PACKEDBYTES);
+  if (mld_poly_chknorm(buf, MLDSA_GAMMA1 - MLDSA_BETA))
+  {
+    return MLD_ERR_FAIL;
+  }
+  mld_poly_ntt(buf);
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API && (MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
+
 /* polymat */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -508,6 +628,40 @@ __contract__(
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_zvec_eager
+ *
+ * Description: Verify-side matrix-vector multiplication for the z
+ *              polynomial vector. In eager mode, z is already NTT'd by
+ *              mld_zvec_init_eager, so this delegates to the standard
+ *              matrix-vector multiplication w = A * z (no invNTT).
+ *              Always returns 0.
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat_eager *mat: pointer to input matrix
+ *              - mld_zvec_eager *z: NTT'd z vector
+ **************************************************/
+MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_polyvec_matrix_pointwise_montgomery_zvec_eager(mld_polyveck *w,
+                                                       mld_polymat_eager *mat,
+                                                       mld_zvec_eager *z)
+__contract__(
+  requires(memory_no_alias(w, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
+  requires(memory_no_alias(z, sizeof(mld_zvec_eager)))
+  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+    array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+  requires(forall(l2, 0, MLDSA_L,
+    array_abs_bound(z->vec.vec[l2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(w, sizeof(mld_polyveck)))
+  ensures(return_value == 0)
+  ensures(forall(k0, 0, MLDSA_K,
+    array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -520,7 +674,7 @@ __contract__(
   assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
 );
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
  * Name:        mld_polyvec_matrix_pointwise_montgomery_row_lazy
  *
@@ -553,7 +707,7 @@ __contract__(
   assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
   ensures(array_abs_bound(t_row->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
@@ -592,6 +746,43 @@ __contract__(
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_zvec_lazy
+ *
+ * Description: Verify-side matrix-vector multiplication for the z
+ *              polynomial vector. Streams z one polynomial at a time
+ *              into z->scratch (with norm check + NTT) and accumulates
+ *              A[*,l] * NTT(z[l]) into w column-by-column. Matrix
+ *              elements are sampled on demand via mat.
+ *
+ *              Returns MLD_ERR_FAIL if any norm check on z[l] fails,
+ *              0 on success.
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat_lazy *mat: pointer to (lazy) input matrix
+ *              - mld_zvec_lazy *z: lazy z vector to be unpacked
+ **************************************************/
+MLD_INTERNAL_API
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_polyvec_matrix_pointwise_montgomery_zvec_lazy(mld_polyveck *w,
+                                                      mld_polymat_lazy *mat,
+                                                      mld_zvec_lazy *z)
+__contract__(
+  requires(memory_no_alias(w, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
+  requires(memory_no_alias(z, sizeof(mld_zvec_lazy)))
+  requires(memory_no_alias(z->packed, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
+  assigns(memory_slice(w, sizeof(mld_polyveck)))
+  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+  assigns(memory_slice(&z->scratch, sizeof(mld_poly)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+  ensures(return_value == 0 ==>
+          forall(k0, 0, MLDSA_K,
+                 array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 /* Dispatch: typedef and define based on MLD_CONFIG_REDUCE_RAM */
@@ -599,6 +790,7 @@ __contract__(
 typedef mld_sk_s1hat_lazy mld_sk_s1hat;
 typedef mld_sk_s2hat_lazy mld_sk_s2hat;
 typedef mld_sk_t0hat_lazy mld_sk_t0hat;
+typedef mld_zvec_lazy mld_zvec;
 typedef mld_polymat_lazy mld_polymat;
 typedef mld_yvec_lazy mld_yvec;
 #define mld_unpack_sk_s1hat mld_unpack_sk_s1hat_lazy
@@ -616,10 +808,15 @@ typedef mld_yvec_lazy mld_yvec;
 #define mld_yvec_get_poly mld_yvec_get_poly_lazy
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
+#define mld_zvec_init mld_zvec_init_lazy
+#define mld_zvec_get_poly mld_zvec_get_poly_lazy
+#define mld_polyvec_matrix_pointwise_montgomery_zvec \
+  mld_polyvec_matrix_pointwise_montgomery_zvec_lazy
 #else /* MLD_CONFIG_REDUCE_RAM */
 typedef mld_sk_s1hat_eager mld_sk_s1hat;
 typedef mld_sk_s2hat_eager mld_sk_s2hat;
 typedef mld_sk_t0hat_eager mld_sk_t0hat;
+typedef mld_zvec_eager mld_zvec;
 typedef mld_polymat_eager mld_polymat;
 typedef mld_yvec_eager mld_yvec;
 #define mld_unpack_sk_s1hat mld_unpack_sk_s1hat_eager
@@ -637,9 +834,13 @@ typedef mld_yvec_eager mld_yvec;
 #define mld_yvec_get_poly mld_yvec_get_poly_eager
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
+#define mld_zvec_init mld_zvec_init_eager
+#define mld_zvec_get_poly mld_zvec_get_poly_eager
+#define mld_polyvec_matrix_pointwise_montgomery_zvec \
+  mld_polyvec_matrix_pointwise_montgomery_zvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
  * Name:        mld_polyvec_matrix_pointwise_montgomery
  *
@@ -676,7 +877,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

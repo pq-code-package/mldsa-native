@@ -1053,14 +1053,6 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   typedef union
   {
-    mld_polyvecl z;
-    mld_poly cp;
-  } zcp_u;
-  mld_polyvecl *z;
-  mld_poly *cp;
-
-  typedef union
-  {
     mld_polymat mat;
     mld_polyveck t1;
     mld_polyveck h;
@@ -1073,18 +1065,17 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(zcp, zcp_u, 1, context);
+  MLD_ALLOC(z, mld_zvec, 1, context);
+  MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(w1, mld_polyveck, 1, context);
   MLD_ALLOC(reuse, reuse_u, 1, context);
 
-  if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || zcp == NULL ||
-      w1 == NULL || reuse == NULL)
+  if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || z == NULL ||
+      cp == NULL || w1 == NULL || reuse == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  z = &zcp->z;
-  cp = &zcp->cp;
   mat = &reuse->mat;
   t1 = &reuse->t1;
   h = &reuse->h;
@@ -1096,11 +1087,13 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   }
 
   mld_memcpy(c, sig, MLDSA_CTILDEBYTES);
-  mld_polyvecl_unpack_z(z, sig + MLDSA_CTILDEBYTES);
 
-  /* mld_polyvecl_chknorm signals failure through a single non-zero error code
+  /* Eager: unpack z, norm-check it, and NTT in place (failure reported here).
+   * Lazy: just store the packed pointer; per-poly norm check is deferred
+   * to the matrix-vector multiplication helper.
+   * mld_zvec_init signals norm-check failure through a non-zero error code
    * that's not yet aligned with MLD_ERR_XXX. Map it to MLD_ERR_FAIL. */
-  if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
+  if (mld_zvec_init(z, sig + MLDSA_CTILDEBYTES))
   {
     ret = MLD_ERR_FAIL;
     goto cleanup;
@@ -1123,10 +1116,16 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
     mld_memcpy(mu, m, MLDSA_CRHBYTES);
   }
 
-  /* Matrix-vector multiplication; compute Az - c2^dt1 */
-  mld_polyvecl_ntt(z);
+  /* Matrix-vector multiplication; compute Az - c2^dt1.
+   * In lazy mode, mld_polyvec_matrix_pointwise_montgomery_zvec performs the
+   * per-poly norm check on z and signals failure through a non-zero error
+   * code that's not yet aligned with MLD_ERR_XXX. Map it to MLD_ERR_FAIL. */
   mld_polyvec_matrix_expand(mat, pk);
-  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
+  if (mld_polyvec_matrix_pointwise_montgomery_zvec(w1, mat, z))
+  {
+    ret = MLD_ERR_FAIL;
+    goto cleanup;
+  }
 
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
@@ -1165,7 +1164,8 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(reuse, reuse_u, 1, context);
   MLD_FREE(w1, mld_polyveck, 1, context);
-  MLD_FREE(zcp, zcp_u, 1, context);
+  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(z, mld_zvec, 1, context);
   MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES, context);

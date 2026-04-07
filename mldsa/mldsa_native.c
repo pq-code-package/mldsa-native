@@ -355,6 +355,9 @@
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
+#undef mld_polyvec_matrix_pointwise_montgomery_zvec
+#undef mld_polyvec_matrix_pointwise_montgomery_zvec_eager
+#undef mld_polyvec_matrix_pointwise_montgomery_zvec_lazy
 #undef mld_sk_s1hat
 #undef mld_sk_s1hat_eager
 #undef mld_sk_s1hat_get_poly
@@ -391,6 +394,15 @@
 #undef mld_yvec_init_eager
 #undef mld_yvec_init_lazy
 #undef mld_yvec_lazy
+#undef mld_zvec
+#undef mld_zvec_eager
+#undef mld_zvec_get_poly
+#undef mld_zvec_get_poly_eager
+#undef mld_zvec_get_poly_lazy
+#undef mld_zvec_init
+#undef mld_zvec_init_eager
+#undef mld_zvec_init_lazy
+#undef mld_zvec_lazy
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H

@@ -462,12 +462,15 @@ USE_FUNCTION_CONTRACTS ?=
 LAZY_EAGER_FUNCTIONS = \
   mld_polyvec_matrix_pointwise_montgomery_row \
   mld_polyvec_matrix_pointwise_montgomery_yvec \
+  mld_polyvec_matrix_pointwise_montgomery_zvec \
   mld_polyvec_matrix_expand \
   mld_sk_s1hat_get_poly \
   mld_sk_s2hat_get_poly \
   mld_sk_t0hat_get_poly \
   mld_yvec_get_poly \
   mld_yvec_init \
+  mld_zvec_get_poly \
+  mld_zvec_init \
   mld_unpack_sk_s1hat \
   mld_unpack_sk_s2hat \
   mld_unpack_sk_t0hat

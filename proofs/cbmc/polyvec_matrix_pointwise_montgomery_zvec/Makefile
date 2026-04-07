@@ -4,36 +4,40 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_unpack_z_harness
+HARNESS_FILE = polyvec_matrix_pointwise_montgomery_zvec_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_unpack_z
+PROOF_UID = polyvec_matrix_pointwise_montgomery_zvec
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mld_polyvecl_unpack_z.0:7 # Largest value of MLDSA_L
+UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_zvec
 ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=
-USE_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=mld_zvec_get_poly
+USE_FUNCTION_CONTRACTS+=mld_poly_pointwise_montgomery
+USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
+USE_FUNCTION_CONTRACTS+=mld_poly_add
+USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
+USE_FUNCTION_CONTRACTS+=mld_zeroize
 else
-CHECK_FUNCTION_CONTRACTS=mld_polyvecl_unpack_z
-USE_FUNCTION_CONTRACTS=mld_polyz_unpack
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--smt2 --arrays-uf-always
 
-FUNCTION_NAME = polyvecl_unpack_z
+FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_zvec
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -42,7 +46,7 @@ FUNCTION_NAME = polyvecl_unpack_z
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

@@ -1,13 +1,14 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "polyvec.h"
+#include "polyvec_lazy.h"
 
 void harness(void)
 {
-#if !defined(MLD_CONFIG_REDUCE_RAM)
-  mld_polyvecl *a;
-  uint8_t *b;
-  mld_polyvecl_unpack_z(a, b);
-#endif
+  mld_poly *buf;
+  mld_zvec *z;
+  unsigned int i;
+  int r;
+
+  r = mld_zvec_get_poly(buf, z, i);
 }

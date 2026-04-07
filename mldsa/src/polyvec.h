@@ -55,9 +55,9 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
         */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
-    !defined(MLD_CONFIG_NO_VERIFY_API) ||  \
-    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||   \
+    ((!defined(MLD_CONFIG_NO_SIGN_API) ||    \
+      !defined(MLD_CONFIG_NO_VERIFY_API)) && \
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /*************************************************
@@ -76,8 +76,8 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyvecl)))
   ensures(forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
-          (!MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM ||     \
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || ((!MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_NO_VERIFY_API) && (!MLD_CONFIG_REDUCE_RAM ||   \
           MLD_UNIT_TEST)) */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -120,7 +120,9 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    (!defined(MLD_CONFIG_NO_VERIFY_API) && \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyvecl_chknorm MLD_NAMESPACE_KL(polyvecl_chknorm)
 /*************************************************
  * Name:        mld_polyvecl_chknorm
@@ -145,7 +147,8 @@ __contract__(
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
   ensures((return_value == 0) == forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_VERIFY_API && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 /* Vectors of polynomials of length MLDSA_K */
 typedef struct
@@ -584,7 +587,8 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyvecl_unpack_z MLD_NAMESPACE_KL(polyvecl_unpack_z)
 /*************************************************
  * Name:        mld_polyvecl_unpack_z
@@ -606,7 +610,8 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(z->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
     (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
