@@ -25,7 +25,8 @@ typedef struct
 } mld_polyvecl;
 
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyvecl_uniform_gamma1 MLD_NAMESPACE_KL(polyvecl_uniform_gamma1)
 /*************************************************
  * Name:        mld_polyvecl_uniform_gamma1
@@ -51,7 +52,8 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
+        */
 
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /*************************************************
@@ -144,8 +146,10 @@ typedef struct
   mld_poly vec[MLDSA_K];
 } mld_polyveck;
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
-    !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
+    !defined(MLD_CONFIG_NO_VERIFY_API) ||                                   \
+    (!defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_REDUCE_RAM)) || \
+    defined(MLD_UNIT_TEST)
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
  * Name:        polyveck_reduce
@@ -166,8 +170,9 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
-          MLD_UNIT_TEST */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API ||          \
+          (!MLD_CONFIG_NO_SIGN_API && MLD_CONFIG_REDUCE_RAM) || MLD_UNIT_TEST \
+        */
 
 #define mld_polyveck_caddq MLD_NAMESPACE_KL(polyveck_caddq)
 /*************************************************

@@ -791,17 +791,22 @@ static int test_polyvec_lazy_eager(void)
   uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES];
   uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES];
   uint8_t rho[MLDSA_SEEDBYTES];
+  uint8_t rhoprime[MLDSA_CRHBYTES];
   mld_sk_s1hat_eager s1_eager;
   mld_sk_s1hat_lazy s1_lazy;
   mld_sk_s2hat_eager s2_eager;
   mld_sk_s2hat_lazy s2_lazy;
   mld_sk_t0hat_eager t0_eager;
   mld_sk_t0hat_lazy t0_lazy;
+  mld_yvec_eager y_eager;
+  mld_yvec_lazy y_lazy;
   mld_poly poly_eager, poly_lazy;
   mld_polymat_eager mat_eager;
   mld_polymat_lazy mat_lazy;
   mld_polyvecl v;
+  mld_polyvecl scratch_eager, scratch_lazy;
   mld_polyveck tk_eager, tk_lazy;
+  mld_polyveck w_eager, w_lazy;
 
   for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
   {
@@ -868,6 +873,40 @@ static int test_polyvec_lazy_eager(void)
     mld_polyveck_caddq(&tk_eager);
     mld_polyveck_caddq(&tk_lazy);
     CHECK(memcmp(&tk_eager, &tk_lazy, sizeof(mld_polyveck)) == 0);
+  }
+
+  /* Test yvec: eager vs lazy. Verify that mld_yvec_get_poly_eager and
+   * mld_yvec_get_poly_lazy produce the same y[i], and that the matrix-vector
+   * multiplication via the yvec helper produces the same w. */
+  for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
+  {
+    randombytes(rhoprime, sizeof(rhoprime));
+
+    mld_yvec_init_eager(&y_eager, rhoprime, 0);
+    mld_yvec_init_lazy(&y_lazy, rhoprime, 0);
+
+    for (i = 0; i < MLDSA_L; i++)
+    {
+      mld_yvec_get_poly_eager(&poly_eager, &y_eager, i);
+      mld_yvec_get_poly_lazy(&poly_lazy, &y_lazy, i);
+      CHECK(memcmp(&poly_eager, &poly_lazy, sizeof(mld_poly)) == 0);
+    }
+
+    randombytes(rho, sizeof(rho));
+    mld_polyvec_matrix_expand_eager(&mat_eager, rho);
+    mld_polyvec_matrix_expand_lazy(&mat_lazy, rho);
+
+    mld_polyvec_matrix_pointwise_montgomery_yvec_eager(
+        &w_eager, &mat_eager, &y_eager, &scratch_eager);
+    mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(&w_lazy, &mat_lazy,
+                                                      &y_lazy, &scratch_lazy);
+
+    /* Compare mod q */
+    mld_polyveck_reduce(&w_eager);
+    mld_polyveck_reduce(&w_lazy);
+    mld_polyveck_caddq(&w_eager);
+    mld_polyveck_caddq(&w_lazy);
+    CHECK(memcmp(&w_eager, &w_lazy, sizeof(mld_polyveck)) == 0);
   }
 
   return 0;

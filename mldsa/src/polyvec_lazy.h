@@ -29,6 +29,7 @@
     !defined(MLD_CONFIG_NO_VERIFY_API)
 
 #include "poly.h"
+#include "poly_kl.h"
 #include "polyvec.h"
 
 /* Parameter set namespacing */
@@ -69,6 +70,17 @@
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_eager)
 #define mld_polyvec_matrix_pointwise_montgomery_lazy \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_lazy)
+#define mld_polyvec_matrix_pointwise_montgomery_yvec_eager \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_eager)
+#define mld_polyvec_matrix_pointwise_montgomery_yvec_lazy \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_lazy)
+#define mld_yvec_eager MLD_ADD_PARAM_SET(mld_yvec_eager)
+#define mld_yvec_lazy MLD_ADD_PARAM_SET(mld_yvec_lazy)
+#define mld_yvec MLD_ADD_PARAM_SET(mld_yvec)
+#define mld_yvec_init_eager MLD_ADD_PARAM_SET(mld_yvec_init_eager)
+#define mld_yvec_init_lazy MLD_ADD_PARAM_SET(mld_yvec_init_lazy)
+#define mld_yvec_get_poly_eager MLD_ADD_PARAM_SET(mld_yvec_get_poly_eager)
+#define mld_yvec_get_poly_lazy MLD_ADD_PARAM_SET(mld_yvec_get_poly_lazy)
 /* End of parameter set namespacing */
 
 /* Eager: precompute and store full NTT'd vector */
@@ -102,6 +114,21 @@ typedef struct
 {
   const uint8_t *packed;
 } mld_sk_t0hat_lazy;
+
+/* yvec (signing masking vector y).
+ *
+ * Eager: precompute and store the full y polyvecl.
+ * Lazy:  store the seed and nonce, regenerate y[i] on demand. */
+typedef struct
+{
+  mld_polyvecl vec;
+} mld_yvec_eager;
+
+typedef struct
+{
+  const uint8_t *rhoprime;
+  uint16_t nonce;
+} mld_yvec_lazy;
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 /* s1vec */
@@ -288,6 +315,46 @@ __contract__(
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
+/* yvec */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+static MLD_INLINE void mld_yvec_init_eager(
+    mld_yvec_eager *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
+{
+  mld_polyvecl_uniform_gamma1(&y->vec, rhoprime, nonce);
+}
+
+static MLD_INLINE void mld_yvec_get_poly_eager(mld_poly *buf,
+                                               const mld_yvec_eager *y,
+                                               unsigned int i)
+{
+  *buf = y->vec.vec[i];
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
+        */
+#if !defined(MLD_CONFIG_NO_SIGN_API) && \
+    (defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+static MLD_INLINE void mld_yvec_init_lazy(
+    mld_yvec_lazy *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
+{
+  y->rhoprime = rhoprime;
+  y->nonce = nonce;
+}
+
+static MLD_INLINE void mld_yvec_get_poly_lazy(mld_poly *buf,
+                                              const mld_yvec_lazy *y,
+                                              unsigned int i)
+{
+  /* Safety: y->nonce is at most ((UINT16_MAX - MLDSA_L) / MLDSA_L) and
+   * i < MLDSA_L, so MLDSA_L * y->nonce + i fits in uint16_t. See
+   * MLD_NONCE_UB comment in sign.c. */
+  mld_poly_uniform_gamma1(buf, y->rhoprime,
+                          (uint16_t)(MLDSA_L * y->nonce + (int)i));
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API && (MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
+        */
+
 /* polymat */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -383,6 +450,41 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_yvec_eager
+ *
+ * Description: Compute w = invNTT(A * NTT(y)) for the signing y vector.
+ *              The eager variant copies y into the scratch polyvecl, NTTs
+ *              it in place, calls the standard matrix-vector multiply,
+ *              and finally inverse-NTTs the result into w.
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat_eager *mat: pointer to input matrix
+ *              - const mld_yvec_eager *y: pointer to (non-NTT) y vector
+ *              - mld_polyvecl *scratch: scratch polyvecl for NTT'd copy of y
+ **************************************************/
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
+                                                        mld_polymat_eager *mat,
+                                                        const mld_yvec_eager *y,
+                                                        mld_polyvecl *scratch)
+__contract__(
+  requires(memory_no_alias(w, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
+  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
+  requires(memory_no_alias(scratch, sizeof(mld_polyvecl)))
+  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+    array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+  requires(forall(l2, 0, MLDSA_L,
+    array_bound(y->vec.vec[l2].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+  assigns(memory_slice(w, sizeof(mld_polyveck)))
+  assigns(memory_slice(scratch, sizeof(mld_polyvecl)))
+  ensures(forall(k0, 0, MLDSA_K,
+    array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
+);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -410,6 +512,44 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
+ *
+ * Description: Compute w = invNTT(A * NTT(y)) for the signing y vector.
+ *              The lazy variant samples one column of y at a time, NTTs it
+ *              into &scratch->vec[0], and accumulates the matrix-vector
+ *              product column-by-column with on-demand sampling of A[k][l].
+ *              Only the first poly of the polyvecl scratch is used; the
+ *              polyvecl type is shared with the eager variant for API
+ *              uniformity (the storage is provided "for free" by the
+ *              caller's polyveck/polyvecl union in REDUCE_RAM mode).
+ *
+ * Arguments:   - mld_polyveck *w: pointer to output vector
+ *              - mld_polymat_lazy *mat: pointer to input matrix
+ *              - const mld_yvec_lazy *y: pointer to y seed/nonce
+ *              - mld_polyvecl *scratch: scratch (only &scratch->vec[0] used)
+ **************************************************/
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
+                                                       mld_polymat_lazy *mat,
+                                                       const mld_yvec_lazy *y,
+                                                       mld_polyvecl *scratch)
+__contract__(
+  requires(memory_no_alias(w, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
+  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
+  requires(memory_no_alias(scratch, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+  requires(y->nonce <= ((UINT16_MAX - MLDSA_L) / MLDSA_L))
+  assigns(memory_slice(w, sizeof(mld_polyveck)))
+  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+  assigns(memory_slice(scratch, sizeof(mld_polyvecl)))
+  ensures(forall(k0, 0, MLDSA_K,
+    array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
+);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 /* Dispatch: typedef and define based on MLD_CONFIG_REDUCE_RAM */
@@ -418,6 +558,7 @@ typedef mld_sk_s1hat_lazy mld_sk_s1hat;
 typedef mld_sk_s2hat_lazy mld_sk_s2hat;
 typedef mld_sk_t0hat_lazy mld_sk_t0hat;
 typedef mld_polymat_lazy mld_polymat;
+typedef mld_yvec_lazy mld_yvec;
 #define mld_unpack_sk_s1hat mld_unpack_sk_s1hat_lazy
 #define mld_unpack_sk_s2hat mld_unpack_sk_s2hat_lazy
 #define mld_unpack_sk_t0hat mld_unpack_sk_t0hat_lazy
@@ -429,11 +570,16 @@ typedef mld_polymat_lazy mld_polymat;
 #define mld_polyvec_matrix_expand mld_polyvec_matrix_expand_lazy
 #define mld_polyvec_matrix_pointwise_montgomery \
   mld_polyvec_matrix_pointwise_montgomery_lazy
+#define mld_yvec_init mld_yvec_init_lazy
+#define mld_yvec_get_poly mld_yvec_get_poly_lazy
+#define mld_polyvec_matrix_pointwise_montgomery_yvec \
+  mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
 #else /* MLD_CONFIG_REDUCE_RAM */
 typedef mld_sk_s1hat_eager mld_sk_s1hat;
 typedef mld_sk_s2hat_eager mld_sk_s2hat;
 typedef mld_sk_t0hat_eager mld_sk_t0hat;
 typedef mld_polymat_eager mld_polymat;
+typedef mld_yvec_eager mld_yvec;
 #define mld_unpack_sk_s1hat mld_unpack_sk_s1hat_eager
 #define mld_unpack_sk_s2hat mld_unpack_sk_s2hat_eager
 #define mld_unpack_sk_t0hat mld_unpack_sk_t0hat_eager
@@ -445,6 +591,10 @@ typedef mld_polymat_eager mld_polymat;
 #define mld_polyvec_matrix_expand mld_polyvec_matrix_expand_eager
 #define mld_polyvec_matrix_pointwise_montgomery \
   mld_polyvec_matrix_pointwise_montgomery_eager
+#define mld_yvec_init mld_yvec_init_eager
+#define mld_yvec_get_poly mld_yvec_get_poly_eager
+#define mld_polyvec_matrix_pointwise_montgomery_yvec \
+  mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \

@@ -167,7 +167,9 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-#if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if MLD_CONFIG_PARAMETER_SET == 65 ||          \
+    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1
@@ -190,9 +192,11 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
 /*************************************************
  * Name:        mld_poly_uniform_gamma1_4x
@@ -227,7 +231,8 @@ __contract__(
   ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)

@@ -5,15 +5,15 @@
 #include "sign.h"
 
 int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *cp,
-                       const mld_sk_s1hat *s1, const mld_polyvecl *y,
-                       mld_poly *z, mld_poly *tmp);
+                       const mld_sk_s1hat *s1, const mld_yvec *y, mld_poly *z,
+                       mld_poly *tmp);
 
 void harness(void)
 {
   uint8_t *sig;
   mld_poly *cp;
   mld_sk_s1hat *s1;
-  mld_polyvecl *y;
+  mld_yvec *y;
   mld_poly *z;
   mld_poly *tmp;
 

@@ -442,6 +442,16 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+/* Reference: The reference implementation does not explicitly check the
+ * maximum nonce value, but instead loops indefinitely (even when the nonce
+ * would overflow). Internally, sampling of y uses
+ * (nonceL), (nonceL+1), ... (nonce*L+L-1).
+ * Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.
+ * Explicitly checking for this explicitly allows us to prove type-safety.
+ * Note that FIPS204 explicitly allows an upper-bound this loop of
+ * 814 (< (UINT16_MAX - L)/L) - see @[FIPS204, Appendix C]. */
+#define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
+
 /*************************************************
  * Name:        mld_compute_pack_z
  *
@@ -452,9 +462,10 @@ __contract__(
  * Arguments:   - uint8_t *sig: output signature
  *              - const mld_poly *cp: challenge polynomial
  *              - const mld_sk_s1hat *s1hat: secret vector s1 in NTT domain
- *              - const polyvecl *y: masking vector y
+ *              - const mld_yvec *y: masking vector y (or seed in REDUCE_RAM
+ * mode)
  *              - mld_poly *z: scratch polynomial for z computation
- *              - mld_poly *tmp: scratch polynomial for s1 unpacking
+ *              - mld_poly *tmp: scratch polynomial
  *
  * Returns:     - 0: Success (z has coefficients smaller than
  *                   MLDSA_GAMMA1 - MLDSA_BETA,)
@@ -468,22 +479,24 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
                               const mld_poly *cp, const mld_sk_s1hat *s1hat,
-                              const mld_polyvecl *y, mld_poly *z, mld_poly *tmp)
+                              const mld_yvec *y, mld_poly *z, mld_poly *tmp)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(cp, sizeof(mld_poly)))
   requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
-  requires(memory_no_alias(y, sizeof(mld_polyvecl)))
+  requires(memory_no_alias(y, sizeof(mld_yvec)))
   requires(memory_no_alias(z, sizeof(mld_poly)))
   requires(memory_no_alias(tmp, sizeof(mld_poly)))
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  requires(forall(k0, 0, MLDSA_L,
-    array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
   MLD_IF_NOT_REDUCE_RAM(
+    requires(forall(k0, 0, MLDSA_L,
+      array_bound(y->vec.vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
     requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
   MLD_IF_REDUCE_RAM(
     requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
+    requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+    requires(y->nonce <= MLD_NONCE_UB)
   )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
@@ -506,7 +519,8 @@ __contract__(
     mld_sk_s1hat_get_poly(tmp, s1hat, i);
     mld_poly_pointwise_montgomery(z, cp, tmp);
     mld_poly_invntt_tomont(z);
-    mld_poly_add(z, &y->vec[i]);
+    mld_yvec_get_poly(tmp, y, i);
+    mld_poly_add(z, tmp);
     mld_poly_reduce(z);
 
     z_invalid = mld_poly_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA);
@@ -533,16 +547,6 @@ __contract__(
   }
   return 0;
 }
-
-/* Reference: The reference implementation does not explicitly check the
- * maximum nonce value, but instead loops indefinitely (even when the nonce
- * would overflow). Internally, sampling of y uses
- * (nonceL), (nonceL+1), ... (nonce*L+L-1).
- * Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.
- * Explicitly checking for this explicitly allows us to prove type-safety.
- * Note that FIPS204 explicitly allows an upper-bound this loop of
- * 814 (< (UINT16_MAX - L)/L) - see @[FIPS204, Appendix C]. */
-#define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
  * Name:        attempt_signature_generation
@@ -617,7 +621,7 @@ __contract__(
   mld_polyvecl *tmp;
 
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(y, mld_polyvecl, 1, context);
+  MLD_ALLOC(y, mld_yvec, 1, context);
   MLD_ALLOC(z, mld_poly, 1, context);
   MLD_ALLOC(w1tmp, w1tmp_u, 1, context);
   MLD_ALLOC(w0, mld_polyveck, 1, context);
@@ -633,14 +637,11 @@ __contract__(
   w1 = &w1tmp->w1;
   tmp = &w1tmp->tmp;
 
-  /* Sample intermediate vector y */
-  mld_polyvecl_uniform_gamma1(y, rhoprime, nonce);
+  /* Sample/initialize intermediate vector y */
+  mld_yvec_init(y, rhoprime, nonce);
 
-  /* Matrix-vector multiplication */
-  *tmp = *y;
-  mld_polyvecl_ntt(tmp);
-  mld_polyvec_matrix_pointwise_montgomery(w0, mat, tmp);
-  mld_polyveck_invntt_tomont(w0);
+  /* Matrix-vector multiplication, fused with y sampling in REDUCE_RAM mode */
+  mld_polyvec_matrix_pointwise_montgomery_yvec(w0, mat, y, tmp);
 
   /* Decompose w and call the random oracle */
   mld_polyveck_caddq(w0);
@@ -773,7 +774,7 @@ cleanup:
   MLD_FREE(w0, mld_polyveck, 1, context);
   MLD_FREE(w1tmp, w1tmp_u, 1, context);
   MLD_FREE(z, mld_poly, 1, context);
-  MLD_FREE(y, mld_polyvecl, 1, context);
+  MLD_FREE(y, mld_yvec, 1, context);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
 
   return ret;

@@ -20,8 +20,13 @@ UNWINDSET += mld_polyvecl_uniform_gamma1.0:7 # Largest value of MLDSA_L
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
+ifdef MLD_CONFIG_REDUCE_RAM
+CHECK_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=
+else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
 USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1
+endif
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

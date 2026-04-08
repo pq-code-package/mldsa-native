@@ -12,21 +12,21 @@ index be11f20..0000000 100644
 -  kOtcryptoMldsa44WorkBufferSignWords = 32448 / sizeof(uint32_t),
 -  kOtcryptoMldsa44WorkBufferVerifyWords = 22464 / sizeof(uint32_t),
 +  kOtcryptoMldsa44WorkBufferKeypairWords = 14624 / sizeof(uint32_t),
-+  kOtcryptoMldsa44WorkBufferSignWords = 18208 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferSignWords = 14144 / sizeof(uint32_t),
 +  kOtcryptoMldsa44WorkBufferVerifyWords = 20416 / sizeof(uint32_t),
 
 -  kOtcryptoMldsa65WorkBufferKeypairWords = 46304 / sizeof(uint32_t),
 -  kOtcryptoMldsa65WorkBufferSignWords = 44768 / sizeof(uint32_t),
 -  kOtcryptoMldsa65WorkBufferVerifyWords = 30720 / sizeof(uint32_t),
 +  kOtcryptoMldsa65WorkBufferKeypairWords = 20768 / sizeof(uint32_t),
-+  kOtcryptoMldsa65WorkBufferSignWords = 23360 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferSignWords = 18272 / sizeof(uint32_t),
 +  kOtcryptoMldsa65WorkBufferVerifyWords = 27648 / sizeof(uint32_t),
 
 -  kOtcryptoMldsa87WorkBufferKeypairWords = 62688 / sizeof(uint32_t),
 -  kOtcryptoMldsa87WorkBufferSignWords = 59104 / sizeof(uint32_t),
 -  kOtcryptoMldsa87WorkBufferVerifyWords = 41216 / sizeof(uint32_t),
 +  kOtcryptoMldsa87WorkBufferKeypairWords = 26912 / sizeof(uint32_t),
-+  kOtcryptoMldsa87WorkBufferSignWords = 29504 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferSignWords = 22368 / sizeof(uint32_t),
 +  kOtcryptoMldsa87WorkBufferVerifyWords = 36096 / sizeof(uint32_t),
  };
 

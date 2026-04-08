@@ -29,6 +29,7 @@ USE_FUNCTION_CONTRACTS+=mld_pack_sig_z
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 ifdef MLD_CONFIG_REDUCE_RAM
 USE_FUNCTION_CONTRACTS+=mld_sk_s1hat_get_poly_lazy
+USE_FUNCTION_CONTRACTS+=mld_poly_uniform_gamma1
 else
 USE_FUNCTION_CONTRACTS+=mld_sk_s1hat_get_poly_eager
 endif

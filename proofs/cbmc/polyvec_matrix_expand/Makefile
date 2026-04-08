@@ -25,8 +25,8 @@ USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand_eager
 USE_FUNCTION_CONTRACTS=mld_poly_uniform_4x
-USE_FUNCTION_CONTRACTS+=mld_poly_uniform
 USE_FUNCTION_CONTRACTS+=mld_poly_permute_bitrev_to_custom_optional
+USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

@@ -43,6 +43,13 @@
 static MLD_INLINE void mld_polymat_expand_entry(
     mld_poly *p, uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)], uint8_t l,
     uint8_t k)
+__contract__(
+  requires(memory_no_alias(p, sizeof(mld_poly)))
+  requires(memory_no_alias(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  assigns(memory_slice(p, sizeof(mld_poly)))
+  assigns(memory_slice(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  ensures(array_bound(p->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+)
 {
   seed_ext[MLDSA_SEEDBYTES + 0] = l;
   seed_ext[MLDSA_SEEDBYTES + 1] = k;
@@ -163,6 +170,20 @@ void mld_polyvec_matrix_pointwise_montgomery_eager(mld_polyveck *t,
   mld_assert_abs_bound_2d(t->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
+                                                        mld_polymat_eager *mat,
+                                                        const mld_yvec_eager *y,
+                                                        mld_polyvecl *scratch)
+{
+  *scratch = y->vec;
+  mld_polyvecl_ntt(scratch);
+  mld_polyvec_matrix_pointwise_montgomery_eager(w, mat, scratch);
+  mld_polyveck_invntt_tomont(w);
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
@@ -220,6 +241,80 @@ void mld_polyvec_matrix_pointwise_montgomery_lazy(mld_polyveck *t,
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
 }
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
+                                                       mld_polymat_lazy *mat,
+                                                       const mld_yvec_lazy *y,
+                                                       mld_polyvecl *scratch)
+{
+  unsigned int k, l;
+  MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  /* Only the first poly of the polyvecl scratch is used. The polyvecl type
+   * matches the eager variant for API uniformity; in REDUCE_RAM mode the
+   * polyvecl storage is provided "for free" by the caller's polyveck/polyvecl
+   * union. */
+  mld_poly *y_ntt = &scratch->vec[0];
+
+  mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
+
+  /* Column-by-column: sample y[l], NTT, accumulate column l of A into w. */
+  for (l = 0; l < MLDSA_L; l++)
+  __loop__(
+    assigns(k, l, object_whole(seed_ext),
+            memory_slice(w, sizeof(mld_polyveck)),
+            memory_slice(mat, sizeof(mld_polymat_lazy)),
+            memory_slice(scratch, sizeof(mld_polyvecl)))
+    invariant(l <= MLDSA_L)
+    invariant(l == 0 ||
+              forall(k0, 0, MLDSA_K,
+                     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N,
+                                     (int)l * MLDSA_Q)))
+    decreases(MLDSA_L - l)
+  )
+  {
+    mld_yvec_get_poly_lazy(y_ntt, y, l);
+    mld_poly_ntt(y_ntt);
+    for (k = 0; k < MLDSA_K; k++)
+    __loop__(
+      assigns(k, object_whole(seed_ext),
+              memory_slice(w, sizeof(mld_polyveck)),
+              memory_slice(mat, sizeof(mld_polymat_lazy)))
+      invariant(k <= MLDSA_K)
+      invariant(l != 0 ||
+                forall(k1, 0, k,
+                       array_abs_bound(w->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
+      invariant(l == 0 ||
+                forall(k2, 0, k,
+                       array_abs_bound(w->vec[k2].coeffs, 0, MLDSA_N,
+                                       ((int)l + 1) * MLDSA_Q)))
+      invariant(l == 0 ||
+                forall(k3, k, MLDSA_K,
+                       array_abs_bound(w->vec[k3].coeffs, 0, MLDSA_N,
+                                       (int)l * MLDSA_Q)))
+      decreases(MLDSA_K - k)
+    )
+    {
+      mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
+      if (l == 0)
+      {
+        mld_poly_pointwise_montgomery(&w->vec[k], &mat->cur, y_ntt);
+      }
+      else
+      {
+        mld_poly_pointwise_montgomery(&mat->tmp, &mat->cur, y_ntt);
+        mld_poly_add(&w->vec[k], &mat->tmp);
+      }
+    }
+  }
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(seed_ext, sizeof(seed_ext));
+  mld_polyveck_reduce(w);
+  mld_polyveck_invntt_tomont(w);
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
