@@ -27,7 +27,6 @@ USE_DYNAMIC_FRAMES=1
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
-CBMCFLAGS += --slice-formula
 CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
@@ -39,7 +38,7 @@ FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 13
+CBMC_OBJECT_BITS = 14
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
