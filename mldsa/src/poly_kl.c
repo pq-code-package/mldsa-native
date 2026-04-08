@@ -101,29 +101,6 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
   mld_poly_decompose_c(a1, a0);
 }
 
-MLD_INTERNAL_API
-unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
-                                const mld_poly *a1)
-{
-  unsigned int i, s = 0;
-
-  for (i = 0; i < MLDSA_N; ++i)
-  __loop__(
-    invariant(i <= MLDSA_N)
-    invariant(s <= i)
-    invariant(array_bound(h->coeffs, 0, i, 0, 2))
-    decreases(MLDSA_N - i)
-  )
-  {
-    const unsigned int hint_bit = mld_make_hint(a0->coeffs[i], a1->coeffs[i]);
-    h->coeffs[i] = (int32_t)hint_bit;
-    s += hint_bit;
-  }
-
-  mld_assert(s <= MLDSA_N);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  return s;
-}
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)

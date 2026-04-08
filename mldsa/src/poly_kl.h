@@ -44,32 +44,6 @@ __contract__(
 );
 
 
-#define mld_poly_make_hint MLD_NAMESPACE_KL(poly_make_hint)
-/*************************************************
- * Name:        mld_poly_make_hint
- *
- * Description: Compute hint polynomial. The coefficients of which indicate
- *              whether the low bits of the corresponding coefficient of
- *              the input polynomial overflow into the high bits.
- *
- * Arguments:   - mld_poly *h: pointer to output hint polynomial
- *              - const mld_poly *a0: pointer to low part of input polynomial
- *              - const mld_poly *a1: pointer to high part of input polynomial
- *
- * Returns number of 1 bits.
- **************************************************/
-MLD_INTERNAL_API
-MLD_MUST_CHECK_RETURN_VALUE
-unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
-                                const mld_poly *a1)
-__contract__(
-  requires(memory_no_alias(h,  sizeof(mld_poly)))
-  requires(memory_no_alias(a0, sizeof(mld_poly)))
-  requires(memory_no_alias(a1, sizeof(mld_poly)))
-  assigns(memory_slice(h, sizeof(mld_poly)))
-  ensures(return_value <= MLDSA_N)
-  ensures(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-);
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)

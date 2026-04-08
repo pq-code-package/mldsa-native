@@ -681,7 +681,7 @@ __contract__(
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )
 {
-  unsigned int k, n;
+  unsigned int k;
   uint32_t w0_invalid, h_invalid;
   int ret;
 
@@ -808,31 +808,13 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(w0, sizeof(*w0));
   MLD_CT_TESTING_DECLASSIFY(w1, sizeof(*w1));
 
-  /* Pack challenge bytes and initialize hint section */
+  /* Pack challenge bytes and hints. */
   mld_pack_sig_c(sig, challenge_bytes);
-  mld_memset(sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES, 0,
-             MLDSA_POLYVECH_PACKEDBYTES);
 
-  /* Compute hints per-component and pack incrementally */
-  n = 0;
-  for (k = 0; k < MLDSA_K; k++)
-  __loop__(
-    assigns(k, n,
-            memory_slice(z, sizeof(mld_poly)),
-            memory_slice(sig, MLDSA_CRYPTO_BYTES))
-    invariant(k <= MLDSA_K)
-    invariant(n <= MLDSA_OMEGA)
-    decreases(MLDSA_K - k)
-  )
+  ret = mld_pack_sig_h(sig, w0, w1);
+  if (ret != 0)
   {
-    unsigned int hints = mld_poly_make_hint(z, &w0->vec[k], &w1->vec[k]);
-    if (n + hints > MLDSA_OMEGA)
-    {
-      ret = MLD_ERR_FAIL; /* reject */
-      goto cleanup;
-    }
-    mld_pack_sig_h_poly(sig, z, k, n);
-    n += hints;
+    goto cleanup;
   }
 
   /* Constant time: At this point it is clear that the signature is valid - it
