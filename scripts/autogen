@@ -3382,6 +3382,196 @@ def gen_test_configs():
         gen_test_config(config_spec["path"], config_spec, default_config)
 
 
+def gen_test_vectors(msg, ctx):
+    """Generate expected test vectors using ACVP binaries and notrandombytes.
+
+    For each parameter set (44, 65, 87):
+    - Keygen: reset notrandombytes with seed=0, draw 32 bytes as keypair seed
+    - Signing: reset notrandombytes with seed=1, draw 32 bytes as sign rnd
+    This makes the signature independent of keygen PRNG consumption (e.g. PCT).
+    """
+    nrb_script = os.path.join(os.path.dirname(__file__), "notrandombytes")
+
+    def notrandombytes(num_bytes, seed_val):
+        result = subprocess.run(
+            [sys.executable, nrb_script, str(num_bytes), str(seed_val)],
+            capture_output=True,
+            encoding="utf-8",
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"notrandombytes failed: {result.stderr}")
+        return result.stdout.strip().upper()
+
+    def run_acvp(lvl, *args):
+        acvp_bin = f"./test/build/mldsa{lvl}/bin/acvp_mldsa{lvl}"
+        if not os.path.isfile(acvp_bin):
+            console.print(
+                f"[red]Error:[/] ACVP binary not found: {acvp_bin}\n"
+                f"Build it first: [bold]make acvp OPT=0[/]"
+            )
+            sys.exit(1)
+        result = subprocess.run(
+            [acvp_bin, *args],
+            capture_output=True,
+            encoding="utf-8",
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"acvp_mldsa{lvl} {args[0]} failed: {result.stderr}")
+        out = {}
+        for line in result.stdout.splitlines():
+            k, v = line.split("=", 1)
+            out[k] = v
+        return out
+
+    levels = [44, 65, 87]
+    msg_hex = msg.encode().hex().upper()
+    ctx_hex = ctx.encode().hex().upper()
+
+    results = {}
+    for lvl in levels:
+        keypair_seed = notrandombytes(32, 0)
+        keygen_out = run_acvp(lvl, "keyGen", f"seed={keypair_seed}")
+
+        sign_rnd = notrandombytes(32, 1)
+        sig_out = run_acvp(
+            lvl,
+            "sigGen",
+            f"message={msg_hex}",
+            f"sk={keygen_out['sk']}",
+            f"context={ctx_hex}",
+            f"rnd={sign_rnd}",
+        )
+
+        results[lvl] = {
+            "pk": keygen_out["pk"],
+            "sk": keygen_out["sk"],
+            "sig": sig_out["signature"],
+        }
+
+    def hex_to_c_array(hex_str, indent="    "):
+        """Convert hex string to C array initializer with 12 bytes per line."""
+        raw = bytes.fromhex(hex_str)
+        lines = []
+        for i in range(0, len(raw), 12):
+            chunk = raw[i : i + 12]
+            elems = ", ".join(f"0x{b:02x}" for b in chunk)
+            lines.append(f"{indent}{elems},")
+        # Remove trailing comma from last line
+        if lines:
+            lines[-1] = lines[-1].rstrip(",")
+        return "\n".join(lines)
+
+    def c_string_literal(s):
+        """Escape a string for use in a C string literal."""
+        return s.replace("\\", "\\\\").replace('"', '\\"')
+
+    keypair_seed = notrandombytes(32, 0)
+    sign_rnd = notrandombytes(32, 1)
+
+    def gen_msg_ctx_defines():
+        yield f'#define TEST_VECTOR_MSG "{c_string_literal(msg)}"'
+        yield "#define TEST_VECTOR_MSG_LEN (sizeof(TEST_VECTOR_MSG) - 1)"
+        yield f'#define TEST_VECTOR_CTX "{c_string_literal(ctx)}"'
+        yield "#define TEST_VECTOR_CTX_LEN (sizeof(TEST_VECTOR_CTX) - 1)"
+        yield ""
+        yield "/* notrandombytes(32, seed=0) */"
+        yield "static const uint8_t test_vector_keypair_seed[] = {"
+        yield hex_to_c_array(keypair_seed)
+        yield "};"
+        yield "/* notrandombytes(32, seed=1) */"
+        yield "static const uint8_t test_vector_sign_rnd[] = {"
+        yield hex_to_c_array(sign_rnd)
+        yield "};"
+
+    def gen_description():
+        yield "/*"
+        yield " * Generated with:"
+        yield f' *   message: "{c_string_literal(msg)}"'
+        yield f' *   context: "{c_string_literal(ctx)}"'
+        yield " *   keygen seed: notrandombytes(32, seed=0)"
+        yield " *   sign rnd:    notrandombytes(32, seed=1)"
+        yield " */"
+
+    # Generate expected_test_vectors.h (single-level, with #if guards)
+    def gen_single():
+        yield from gen_header()
+        yield from gen_description()
+        yield ""
+        yield "#ifndef EXPECTED_TEST_VECTORS_H"
+        yield "#define EXPECTED_TEST_VECTORS_H"
+        yield ""
+        yield "#include <stdint.h>"
+        yield ""
+        yield from gen_msg_ctx_defines()
+        yield ""
+
+        first = True
+        for lvl in levels:
+            r = results[lvl]
+            directive = "#if" if first else "#elif"
+            yield f"{directive} MLD_CONFIG_PARAMETER_SET == {lvl}"
+            yield "const uint8_t test_vector_pk[] = {"
+            yield hex_to_c_array(r["pk"])
+            yield "};"
+            yield "const uint8_t test_vector_sk[] = {"
+            yield hex_to_c_array(r["sk"])
+            yield "};"
+            yield "const uint8_t test_vector_sig[] = {"
+            yield hex_to_c_array(r["sig"])
+            yield "};"
+            first = False
+
+        yield f"#endif /* MLD_CONFIG_PARAMETER_SET == {levels[-1]} */"
+        yield ""
+        yield "#endif /* !EXPECTED_TEST_VECTORS_H */"
+        yield ""
+
+    update_file(
+        "test/test_vectors/expected_test_vectors.h",
+        "\n".join(gen_single()),
+    )
+
+    # Generate expected_test_vectors_multilevel.h (all levels, suffixed names)
+    def gen_multi():
+        yield from gen_header()
+        yield "/*"
+        yield " * Expected test vectors for multilevel builds."
+        yield " * Generated with per-level array names."
+        yield " */"
+        yield ""
+        yield from gen_description()
+        yield ""
+        yield "#ifndef EXPECTED_TEST_VECTORS_MULTILEVEL_H"
+        yield "#define EXPECTED_TEST_VECTORS_MULTILEVEL_H"
+        yield ""
+        yield "#include <stdint.h>"
+        yield ""
+        yield from gen_msg_ctx_defines()
+        yield ""
+
+        for lvl in levels:
+            r = results[lvl]
+            yield f"/* ML-DSA-{lvl} */"
+            yield f"const uint8_t test_vector_pk_{lvl}[] = {{"
+            yield hex_to_c_array(r["pk"])
+            yield "};"
+            yield f"const uint8_t test_vector_sk_{lvl}[] = {{"
+            yield hex_to_c_array(r["sk"])
+            yield "};"
+            yield f"const uint8_t test_vector_sig_{lvl}[] = {{"
+            yield hex_to_c_array(r["sig"])
+            yield "};"
+            yield ""
+
+        yield "#endif /* !EXPECTED_TEST_VECTORS_MULTILEVEL_H */"
+        yield ""
+
+    update_file(
+        "test/test_vectors/expected_test_vectors_multilevel.h",
+        "\n".join(gen_multi()),
+    )
+
+
 def _main():
     slothy_choices = [
         "ntt",
@@ -3420,6 +3610,24 @@ def _main():
         choices=["att", "intel"],
         default="att",
         help="Assembly syntax for x86_64 disassembly output (att or intel)",
+    )
+    parser.add_argument(
+        "--test-vectors",
+        default=False,
+        action="store_true",
+        help="Generate expected test vectors using ACVP binaries",
+    )
+    parser.add_argument(
+        "--test-vectors-msg",
+        type=str,
+        default="This is a test message for ML-DSA digital signature algorithm!",
+        help="Message to use for test vector generation",
+    )
+    parser.add_argument(
+        "--test-vectors-ctx",
+        type=str,
+        default="test_context_123",
+        help="Context to use for test vector generation",
     )
 
     args = parser.parse_args()
@@ -3493,11 +3701,20 @@ def _main():
         ("Generate monolithic source files", gen_monolithic),
         ("Generate undefs", gen_undefs),
         ("Generate test configs", gen_test_configs),
+        (
+            "Generate test vectors",
+            lambda: gen_test_vectors(args.test_vectors_msg, args.test_vectors_ctx),
+            args.test_vectors,
+        ),
         ("Check macro typos", check_macro_typos),
         ("Generate preprocessor comments", gen_preprocessor_comments),
         # Formatting should be the last step
         ("Format files", lambda: format_files(args.dry_run)),
     ]
+
+    # When --test-vectors is set, only run test vector generation + finalize
+    if args.test_vectors:
+        steps = [s for s in steps if s[0] == "Generate test vectors"]
 
     global _progress, _main_task
     with Progress(

@@ -27,6 +27,7 @@
  * Randombytes invocation tracker
  */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 int randombytes(uint8_t *buf, size_t len);
 int randombytes_counter = 0;
 int randombytes_fail_on_counter = -1;
@@ -35,7 +36,7 @@ static void reset_all(void)
 {
   randombytes_counter = 0;
   randombytes_fail_on_counter = -1;
-  randombytes_reset();
+  randombytes_reset(0);
 }
 
 int randombytes(uint8_t *buf, size_t len)
@@ -49,6 +50,7 @@ int randombytes(uint8_t *buf, size_t len)
 
   return notrandombytes(buf, len);
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #define TEST_RNG_FAILURE(test_name, call)                              \
   do                                                                   \
@@ -109,6 +111,7 @@ int randombytes(uint8_t *buf, size_t len)
         test_name, num_randombytes_calls);                             \
   } while (0)
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -117,7 +120,9 @@ static int test_keygen_rng_failure(void)
   TEST_RNG_FAILURE("crypto_sign_keypair", crypto_sign_keypair(pk, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -140,7 +145,10 @@ static int test_sign_rng_failure(void)
                                          sizeof(ctx) - 1, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_rng_failure(void)
 {
   uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
@@ -171,7 +179,10 @@ static int test_verify_rng_failure(void)
       crypto_sign_verify(sig, siglen, msg, sizeof(msg), ctx, sizeof(ctx), pk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_combined_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -193,7 +204,10 @@ static int test_sign_combined_rng_failure(void)
                                               sizeof(ctx) - 1, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_open_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -222,7 +236,10 @@ static int test_open_rng_failure(void)
       crypto_sign_open(msg_out, &mlen, sm, smlen, ctx, sizeof(ctx) - 1, pk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_signature_extmu_rng_failure(void)
 {
   uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
@@ -248,7 +265,10 @@ static int test_signature_extmu_rng_failure(void)
                    MLD_API_NAMESPACE(signature_extmu)(sig, &siglen, mu, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_extmu_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -277,7 +297,10 @@ static int test_verify_extmu_rng_failure(void)
                    MLD_API_NAMESPACE(verify_extmu)(sig, siglen, mu, pk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_signature_pre_hash_shake256_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -304,7 +327,10 @@ static int test_signature_pre_hash_shake256_rng_failure(void)
           sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, rnd, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_pre_hash_shake256_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -340,7 +366,10 @@ static int test_verify_pre_hash_shake256_rng_failure(void)
                                                   ctx, sizeof(ctx) - 1, pk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_pk_from_sk_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -358,58 +387,87 @@ static int test_pk_from_sk_rng_failure(void)
                    MLD_API_NAMESPACE(pk_from_sk)(pk, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 int main(void)
 {
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   if (test_keygen_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_sign_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_sign_combined_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_open_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_signature_extmu_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_extmu_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_signature_pre_hash_shake256_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_pre_hash_shake256_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   if (test_pk_from_sk_rng_failure() != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
   return 0;
 }

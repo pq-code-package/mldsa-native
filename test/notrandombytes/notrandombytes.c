@@ -31,14 +31,18 @@
 #include <valgrind/memcheck.h>
 #endif
 
-static uint32_t seed[32] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 9, 7, 9, 3,
-                            2, 3, 8, 4, 6, 2, 6, 4, 3, 3, 8, 3, 2, 7, 9, 5};
+static const uint32_t base_seed[32] = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5,
+                                       8, 9, 7, 9, 3, 2, 3, 8, 4, 6, 2,
+                                       6, 4, 3, 3, 8, 3, 2, 7, 9, 5};
+static uint32_t seed[32];
 static uint32_t in[12];
 static uint32_t out[8];
 static int32_t outleft = 0;
 
-void randombytes_reset(void)
+void randombytes_reset(uint32_t seed_val)
 {
+  memcpy(seed, base_seed, sizeof(seed));
+  seed[31] = seed_val;
   memset(in, 0, sizeof(in));
   memset(out, 0, sizeof(out));
   outleft = 0;

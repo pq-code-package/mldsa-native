@@ -57,11 +57,11 @@ $(error Neither 'shasum' nor 'sha256sum' found. Please install one of these tool
 endif
 
 run_kat_44: kat_44
-	set -o pipefail; $(W) $(MLDSA44_DIR)/bin/gen_KAT44 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-44 kat-sha256
+	$(W) $(MLDSA44_DIR)/bin/gen_KAT44 > /dev/null 2>&1; rc=$$?; if [ $$rc -eq 77 ]; then echo "KAT ML-DSA-44: SKIPPED (reduced API)"; else set -o pipefail; $(W) $(MLDSA44_DIR)/bin/gen_KAT44 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-44 kat-sha256; fi
 run_kat_65: kat_65
-	set -o pipefail; $(W) $(MLDSA65_DIR)/bin/gen_KAT65 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-65 kat-sha256
+	$(W) $(MLDSA65_DIR)/bin/gen_KAT65 > /dev/null 2>&1; rc=$$?; if [ $$rc -eq 77 ]; then echo "KAT ML-DSA-65: SKIPPED (reduced API)"; else set -o pipefail; $(W) $(MLDSA65_DIR)/bin/gen_KAT65 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-65 kat-sha256; fi
 run_kat_87: kat_87
-	set -o pipefail; $(W) $(MLDSA87_DIR)/bin/gen_KAT87 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-87 kat-sha256
+	$(W) $(MLDSA87_DIR)/bin/gen_KAT87 > /dev/null 2>&1; rc=$$?; if [ $$rc -eq 77 ]; then echo "KAT ML-DSA-87: SKIPPED (reduced API)"; else set -o pipefail; $(W) $(MLDSA87_DIR)/bin/gen_KAT87 | $(SHA256SUM) | cut -d " " -f 1 | xargs ./META.sh ML-DSA-87 kat-sha256; fi
 run_kat: run_kat_44 run_kat_65 run_kat_87
 
 run_func_44: func_44
@@ -278,9 +278,7 @@ EXAMPLE_DIRS := \
 	examples/monolithic_build_multilevel \
 	examples/monolithic_build_multilevel_native \
 	examples/multilevel_build \
-	examples/multilevel_build_native \
-	examples/disabled_apis \
-	examples/disabled_apis_native
+	examples/multilevel_build_native
 
 EXAMPLE_CLEAN_TARGETS := $(EXAMPLE_DIRS:%=clean-%)
 

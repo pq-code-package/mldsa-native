@@ -215,8 +215,6 @@ class TEST_TYPES(Enum):
     ALLOC = 20
     BASIC_LOWRAM = 21
     RNG_FAIL = 22
-    DISABLED_APIS = 23
-    DISABLED_APIS_NATIVE = 24
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -239,8 +237,6 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
             TEST_TYPES.BASIC_DETERMINISTIC,
             TEST_TYPES.BASIC_LOWRAM,
-            TEST_TYPES.DISABLED_APIS,
-            TEST_TYPES.DISABLED_APIS_NATIVE,
         ]
 
     @staticmethod
@@ -280,10 +276,6 @@ class TEST_TYPES(Enum):
             return "Example (mldsa-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.BASIC_LOWRAM:
             return "Example (mldsa-native with reduced RAM usage)"
-        if self == TEST_TYPES.DISABLED_APIS:
-            return "Example (disabled APIs)"
-        if self == TEST_TYPES.DISABLED_APIS_NATIVE:
-            return "Example (disabled APIs, native)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -330,10 +322,6 @@ class TEST_TYPES(Enum):
             return "examples/multilevel_build"
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
             return "examples/multilevel_build_native"
-        if self == TEST_TYPES.DISABLED_APIS:
-            return "examples/disabled_apis"
-        if self == TEST_TYPES.DISABLED_APIS_NATIVE:
-            return "examples/disabled_apis_native"
         return ""
 
     def make_target(self):
@@ -372,10 +360,6 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.MULTILEVEL_BUILD:
             return ""
         if self == TEST_TYPES.MULTILEVEL_BUILD_NATIVE:
-            return ""
-        if self == TEST_TYPES.DISABLED_APIS:
-            return ""
-        if self == TEST_TYPES.DISABLED_APIS_NATIVE:
             return ""
         if self == TEST_TYPES.SIZE:
             return "size"
@@ -1246,8 +1230,6 @@ def cli():
             "monolithic_build_multilevel_native",
             "multilevel_build",
             "multilevel_build_native",
-            "disabled_apis",
-            "disabled_apis_native",
         ],
         action="append",
         default=[],
@@ -1329,8 +1311,6 @@ def cli():
             "monolithic_build_multilevel_native",
             "multilevel_build",
             "multilevel_build_native",
-            "disabled_apis",
-            "disabled_apis_native",
         ],
         action="append",
     )

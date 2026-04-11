@@ -88,98 +88,145 @@ static void print_percentiles(const char *txt,
 
 static int bench(void)
 {
+  unsigned i;
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char kg_rand[MLDSA_SEEDBYTES];
+  uint64_t cycles_kg[MLD_BENCHMARK_NTESTS];
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  unsigned char kg_rand[MLDSA_SEEDBYTES], sig_rand[MLDSA_SEEDBYTES];
+  unsigned char sig_rand[MLDSA_SEEDBYTES];
   size_t siglen;
-
-  unsigned i, j;
-  uint64_t t0, t1;
-
-  uint64_t cycles_kg[MLD_BENCHMARK_NTESTS], cycles_sign[MLD_BENCHMARK_NTESTS],
-      cycles_verify[MLD_BENCHMARK_NTESTS];
   unsigned char pre[CTXLEN + 2];
+  uint64_t cycles_sign[MLD_BENCHMARK_NTESTS];
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
+  uint64_t cycles_verify[MLD_BENCHMARK_NTESTS];
+#endif
 
   for (i = 0; i < MLD_BENCHMARK_NTESTS; i++)
   {
-    int ret = 0;
-    CHECK(mld_randombytes(kg_rand, sizeof(kg_rand)) == 0);
-    CHECK(mld_randombytes(sig_rand, sizeof(sig_rand)) == 0);
-
-
-    /* Key-pair generation */
-    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
     {
-      ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
-    }
+      unsigned j;
+      uint64_t t0, t1;
+      int ret = 0;
+      CHECK(mld_randombytes(kg_rand, sizeof(kg_rand)) == 0);
 
-    t0 = get_cyclecounter();
-    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
+      /* Key-pair generation */
+      for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
+      {
+        ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
+      }
+
+      t0 = get_cyclecounter();
+      for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
+      {
+        ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
+      }
+      t1 = get_cyclecounter();
+      cycles_kg[i] = t1 - t0;
+      CHECK(ret == 0);
+    }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
     {
-      ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
+      unsigned j;
+      uint64_t t0, t1;
+      int ret = 0;
+      /* Signing */
+      CHECK(mld_randombytes(sig_rand, sizeof(sig_rand)) == 0);
+      CHECK(mld_randombytes(ctx, CTXLEN) == 0);
+      CHECK(mld_randombytes(m, MLEN) == 0);
+
+      pre[0] = 0;
+      pre[1] = CTXLEN;
+      memcpy(pre + 2, ctx, CTXLEN);
+
+      for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
+      {
+        ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
+                                              CTXLEN + 2, sig_rand, sk, 0);
+      }
+      t0 = get_cyclecounter();
+      for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
+      {
+        ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
+                                              CTXLEN + 2, sig_rand, sk, 0);
+      }
+      t1 = get_cyclecounter();
+      cycles_sign[i] = t1 - t0;
+      CHECK(ret == 0);
     }
-    t1 = get_cyclecounter();
-    cycles_kg[i] = t1 - t0;
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
-
-    /* Signing */
-    CHECK(mld_randombytes(ctx, CTXLEN) == 0);
-    CHECK(mld_randombytes(m, MLEN) == 0);
-
-    pre[0] = 0;
-    pre[1] = CTXLEN;
-    memcpy(pre + 2, ctx, CTXLEN);
-
-
-    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
     {
-      ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                            CTXLEN + 2, sig_rand, sk, 0);
+      unsigned j;
+      uint64_t t0, t1;
+      int ret = 0;
+      /* Verification */
+      for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
+      {
+        ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+      }
+      t0 = get_cyclecounter();
+      for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
+      {
+        ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+      }
+      t1 = get_cyclecounter();
+      cycles_verify[i] = t1 - t0;
+      CHECK(ret == 0);
     }
-    t0 = get_cyclecounter();
-    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
-    {
-      ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                            CTXLEN + 2, sig_rand, sk, 0);
-    }
-    t1 = get_cyclecounter();
-    cycles_sign[i] = t1 - t0;
-
-    /* Verification */
-    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
-    {
-      ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
-    }
-    t0 = get_cyclecounter();
-    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
-    {
-      ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
-    }
-    t1 = get_cyclecounter();
-    cycles_verify[i] = t1 - t0;
-
-    CHECK(ret == 0);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
   }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   print_avg("keypair", cycles_kg);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   print_avg("sign", cycles_sign);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   print_avg("verify", cycles_verify);
+#endif
 
   printf("\n");
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   qsort(cycles_kg, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   qsort(cycles_sign, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   qsort(cycles_verify, MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);
-
+#endif
 
   print_percentile_legend();
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   print_percentiles("keypair", cycles_kg);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   print_percentiles("sign", cycles_sign);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   print_percentiles("verify", cycles_verify);
+#endif
 
   return 0;
 }

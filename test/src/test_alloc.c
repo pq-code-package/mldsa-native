@@ -189,14 +189,16 @@ static int bump_free(test_ctx_t *ctx, void *p)
   return 0;
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static void reset_all(test_ctx_t *ctx)
 {
-  randombytes_reset();
+  randombytes_reset(0);
   ctx->alloc_counter = 0;
   ctx->alloc_stack_top = 0;
   ctx->offset = 0;
   ctx->fail_on_counter = -1;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 void *custom_alloc(test_ctx_t *ctx, size_t sz, const char *file, int line,
                    const char *var, const char *type)
@@ -335,6 +337,7 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -344,7 +347,9 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -368,7 +373,10 @@ static int test_sign_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -399,7 +407,10 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_combined_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -422,7 +433,10 @@ static int test_sign_combined_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_open_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -453,7 +467,10 @@ static int test_open_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -475,7 +492,10 @@ static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -503,7 +523,10 @@ static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -530,7 +553,10 @@ static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
       MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -566,7 +592,10 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
       MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -584,6 +613,7 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
                      &ctx->global_high_mark_pk_from_sk);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 /*
  * Helper macro to check allocation high watermark matches expected limit.
@@ -619,64 +649,100 @@ int main(void)
       0      /* print_debug_info */
   };
   ctx.buffer = bump_buffer;
+  (void)ctx;
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   if (test_keygen_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_sign_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_sign_combined_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_open_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_signature_extmu_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_extmu_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   if (test_signature_pre_hash_shake256_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   if (test_verify_pre_hash_shake256_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   if (test_pk_from_sk_alloc_failure(&ctx) != 0)
   {
     return 1;
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
   /* Check per-operation high watermarks match the declared limits */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLD_TOTAL_ALLOC_KEYPAIR);
   CHECK_ALLOC_MATCH(ctx.global_high_mark_pk_from_sk,
                     MLD_TOTAL_ALLOC_PK_FROM_SK);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_sign, MLD_TOTAL_ALLOC_SIGN);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_TOTAL_ALLOC);
+#endif
 
   return 0;
 }

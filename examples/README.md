@@ -62,14 +62,3 @@ mldsa-native (with C backend) inside a single compilation unit, sharing the leve
 See [monolithic_build_multilevel_native](monolithic_build_multilevel_native) for an example of how to build all security
 levels of mldsa-native inside a single compilation unit, sharing the level-independent code, while also linking in assembly
 from the native backends.
-
-## Disabled APIs (C only)
-
-See [disabled_apis](disabled_apis) for an example of building mldsa-native with individual APIs disabled
-(`MLD_CONFIG_NO_KEYPAIR_API`, `MLD_CONFIG_NO_SIGN_API`, `MLD_CONFIG_NO_VERIFY_API`).
-Tests all four disabled API combinations across all three parameter sets.
-
-## Disabled APIs (with native code)
-
-See [disabled_apis_native](disabled_apis_native) for the same as above, but with native arithmetic and
-FIPS-202 backends enabled.
