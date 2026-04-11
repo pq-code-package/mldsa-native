@@ -218,6 +218,50 @@ jobs:
       - name: make lib
         run: |
           make lib
+  examples:
+    name: Examples
+    strategy:
+      matrix:
+        system: [macos-latest, macos-15-intel, ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.system }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: basic
+        run: |
+          CFLAGS="-O0" make run -C examples/basic
+      - name: basic_deterministic
+        run: |
+          CFLAGS="-O0" make run -C examples/basic_deterministic
+      - name: basic_lowram
+        run: |
+          CFLAGS="-O0" make run -C examples/basic_lowram
+      - name: bring_your_own_fips202
+        run: |
+          CFLAGS="-O0" make run -C examples/bring_your_own_fips202
+      - name: bring_your_own_fips202_static
+        run: |
+          CFLAGS="-O0" make run -C examples/bring_your_own_fips202_static
+      - name: custom_backend
+        run: |
+          CFLAGS="-O0" make run -C examples/custom_backend
+      - name: monolithic_build
+        run: |
+          CFLAGS="-O0" make run -C examples/monolithic_build
+      - name: monolithic_build_native
+        run: |
+          CFLAGS="-O0" make run -C examples/monolithic_build_native
+      - name: monolithic_build_multilevel
+        run: |
+          CFLAGS="-O0" make run -C examples/monolithic_build_multilevel
+      - name: monolithic_build_multilevel_native
+        run: |
+          CFLAGS="-O0" make run -C examples/monolithic_build_multilevel_native
+      - name: multilevel_build
+        run: |
+          CFLAGS="-O0" make run -C examples/multilevel_build
+      - name: multilevel_build_native
+        run: |
+          CFLAGS="-O0" make run -C examples/multilevel_build_native
   simpasm:
     strategy:
       fail-fast: false
@@ -233,7 +277,7 @@ jobs:
            - arg: '--no-simplify'
              name: Unmodified
     runs-on: ubuntu-24.04-arm
-    name: AArch64 dev backend (${{ matrix.simplify.name }})
+    name: AArch64 dev backend (${{ matrix.backend.name }}, ${{ matrix.simplify.name }})
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Reinstate and test backend
@@ -242,7 +286,7 @@ jobs:
           nix-shell: 'ci'
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            ./scripts/autogen ${{ matrix.simplify.arg }}
+            ./scripts/autogen ${{ matrix.backend.arg }} ${{ matrix.simplify.arg }}
             make clean
             OPT=1 make quickcheck
   x86_64_intel_syntax:
