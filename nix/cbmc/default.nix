@@ -21,10 +21,10 @@ buildEnv {
       cbmc = cbmc.overrideAttrs (old: rec {
         version = "6.8.0";
         src = fetchFromGitHub {
-          owner = "mkannwischer";
+          owner = "hanno-becker";
           repo = "cbmc";
-          hash = "sha256-pdMN3+twOElQ0FXEw4rMrPg6UzDaz51hyRtdkKz19q4=";
-          rev = "e941c78012ff56a9374f497286898ec5ccf9a7c2";
+          hash = "sha256-P6aIyOOrrjQz6vpxlVFN7X306oC+8FG/PSX4j5k2g+k=";
+          rev = "9135bb7c68401a306bd0f6077577bb57d17f0e42";
         };
         srccadical = cadical.src; # 3.0.0 from nixpkgs-unstable
         patches = [
