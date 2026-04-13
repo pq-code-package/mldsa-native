@@ -9,11 +9,9 @@
 #include <string.h>
 
 #include "mldsa_native_all.c"
-
 #define MLD_CONFIG_API_CONSTANTS_ONLY
 #include <mldsa_native.h>
-
-#include "expected_signatures.h"
+#include "expected_test_vectors_multilevel.h"
 #include "test_only_rng/notrandombytes.h"
 
 #define CHECK(x)                                              \
@@ -28,323 +26,302 @@
     }                                                         \
   } while (0)
 
-#define TEST_MSG \
-  "This is a test message for ML-DSA digital signature algorithm!"
-#define TEST_MSG_LEN (sizeof(TEST_MSG) - 1)
+/* Keygen examples */
 
-#define TEST_CTX "test_context_123"
-#define TEST_CTX_LEN (sizeof(TEST_CTX) - 1)
-
-static int test_mldsa44(void)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+static int example_mldsa44_keygen(void)
 {
-  const char test_msg[] = TEST_MSG;
-  const char test_ctx[] = TEST_CTX;
-
   uint8_t pk[MLDSA44_PUBLICKEYBYTES];
   uint8_t sk[MLDSA44_SECRETKEYBYTES];
-  uint8_t sig[MLDSA44_BYTES];
-  uint8_t sm[TEST_MSG_LEN + MLDSA44_BYTES]; /* signed message buffer */
-  uint8_t m2[TEST_MSG_LEN + MLDSA44_BYTES]; /* recovered message buffer */
-  size_t siglen;
-  size_t smlen;
-  size_t mlen;
 
-  /* WARNING: Test-only
-   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
-  randombytes_reset();
-
-  printf("ML-DSA-44\n");
-  printf("======================\n\n");
-
-  printf("Message: %s\n", test_msg);
-  printf("Context: %s\n\n", test_ctx);
-
-  printf("Generating keypair ... ");
-
-  /* Alice generates a public/private key pair */
+  printf("  Generating keypair... ");
   CHECK(mldsa44_keypair(pk, sk) == 0);
-
+  CHECK(memcmp(pk, test_vector_pk_44, MLDSA44_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_44, MLDSA44_SECRETKEYBYTES) == 0);
   printf("DONE\n");
-  printf("Signing message... ");
-
-  /* Alice signs the message */
-  CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Verifying signature... ");
-
-  /* Bob verifies Alice's signature */
-  CHECK(mldsa44_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Creating signed message... ");
-
-  /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Opening signed message... ");
-
-  /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa44_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
-                     TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Compare messages... ");
-
-  /* Verify the recovered message matches the original */
-  CHECK(mlen == TEST_MSG_LEN);
-  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
-
-  printf("DONE\n\n");
-
-  printf("Results:\n");
-  printf("--------\n");
-  printf("Public key size:  %d bytes\n", MLDSA44_PUBLICKEYBYTES);
-  printf("Secret key size:  %d bytes\n", MLDSA44_SECRETKEYBYTES);
-  printf("Signature size:   %d bytes\n", MLDSA44_BYTES);
-  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
-  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
-  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
-
-#if !defined(MLD_CONFIG_KEYGEN_PCT)
-  /* Check against expected signature to make sure that
-   * we integrated the library correctly */
-  printf("Checking deterministic signature... ");
-  {
-    /* Compare the generated signature directly against the expected signature
-     */
-    CHECK(siglen == sizeof(expected_signature_44));
-    CHECK(memcmp(sig, expected_signature_44, siglen) == 0);
-  }
-  printf("DONE\n");
-#else  /* !MLD_CONFIG_KEYGEN_PCT */
-  printf(
-      "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif /* MLD_CONFIG_KEYGEN_PCT */
-
-  printf("Signature verification completed successfully!\n");
-
-  printf("\nAll tests passed! ML-DSA signature verification successful.\n");
   return 0;
 }
 
-static int test_mldsa65(void)
+static int example_mldsa65_keygen(void)
 {
-  const char test_msg[] = TEST_MSG;
-  const char test_ctx[] = TEST_CTX;
-
   uint8_t pk[MLDSA65_PUBLICKEYBYTES];
   uint8_t sk[MLDSA65_SECRETKEYBYTES];
-  uint8_t sig[MLDSA65_BYTES];
-  uint8_t sm[TEST_MSG_LEN + MLDSA65_BYTES]; /* signed message buffer */
-  uint8_t m2[TEST_MSG_LEN + MLDSA65_BYTES]; /* recovered message buffer */
-  size_t siglen;
-  size_t smlen;
-  size_t mlen;
 
-  /* WARNING: Test-only
-   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
-  randombytes_reset();
-
-  printf("ML-DSA-65\n");
-  printf("======================\n\n");
-
-  printf("Message: %s\n", test_msg);
-  printf("Context: %s\n\n", test_ctx);
-
-  printf("Generating keypair ... ");
-
-  /* Alice generates a public/private key pair */
+  printf("  Generating keypair... ");
   CHECK(mldsa65_keypair(pk, sk) == 0);
-
+  CHECK(memcmp(pk, test_vector_pk_65, MLDSA65_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_65, MLDSA65_SECRETKEYBYTES) == 0);
   printf("DONE\n");
-  printf("Signing message... ");
-
-  /* Alice signs the message */
-  CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Verifying signature... ");
-
-  /* Bob verifies Alice's signature */
-  CHECK(mldsa65_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Creating signed message... ");
-
-  /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Opening signed message... ");
-
-  /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa65_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
-                     TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Compare messages... ");
-
-  /* Verify the recovered message matches the original */
-  CHECK(mlen == TEST_MSG_LEN);
-  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
-
-  printf("DONE\n\n");
-
-  printf("Results:\n");
-  printf("--------\n");
-  printf("Public key size:  %d bytes\n", MLDSA65_PUBLICKEYBYTES);
-  printf("Secret key size:  %d bytes\n", MLDSA65_SECRETKEYBYTES);
-  printf("Signature size:   %d bytes\n", MLDSA65_BYTES);
-  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
-  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
-  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
-
-#if !defined(MLD_CONFIG_KEYGEN_PCT)
-  /* Check against expected signature to make sure that
-   * we integrated the library correctly */
-  printf("Checking deterministic signature... ");
-  {
-    /* Compare the generated signature directly against the expected signature
-     */
-    CHECK(siglen == sizeof(expected_signature_65));
-    CHECK(memcmp(sig, expected_signature_65, siglen) == 0);
-  }
-  printf("DONE\n");
-#else  /* !MLD_CONFIG_KEYGEN_PCT */
-  printf(
-      "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif /* MLD_CONFIG_KEYGEN_PCT */
-
-  printf("Signature verification completed successfully!\n");
-
-  printf("\nAll tests passed! ML-DSA signature verification successful.\n");
   return 0;
 }
 
-
-static int test_mldsa87(void)
+static int example_mldsa87_keygen(void)
 {
-  const char test_msg[] = TEST_MSG;
-  const char test_ctx[] = TEST_CTX;
-
   uint8_t pk[MLDSA87_PUBLICKEYBYTES];
   uint8_t sk[MLDSA87_SECRETKEYBYTES];
-  uint8_t sig[MLDSA87_BYTES];
-  uint8_t sm[TEST_MSG_LEN + MLDSA87_BYTES]; /* signed message buffer */
-  uint8_t m2[TEST_MSG_LEN + MLDSA87_BYTES]; /* recovered message buffer */
+
+  printf("  Generating keypair... ");
+  CHECK(mldsa87_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_87, MLDSA87_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_87, MLDSA87_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLD_CONFIG_NO_KEYPAIR_API */
+static int example_mldsa44_keygen(void)
+{
+  printf("  Generating keypair... SKIPPED (keygen API disabled)\n");
+  return 0;
+}
+static int example_mldsa65_keygen(void)
+{
+  printf("  Generating keypair... SKIPPED (keygen API disabled)\n");
+  return 0;
+}
+static int example_mldsa87_keygen(void)
+{
+  printf("  Generating keypair... SKIPPED (keygen API disabled)\n");
+  return 0;
+}
+#endif /* MLD_CONFIG_NO_KEYPAIR_API */
+
+/* Sign examples */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+static int example_mldsa44_sign(void)
+{
+  uint8_t sig[MLDSA44_BYTES];
   size_t siglen;
+
+  printf("  Signing message... ");
+  CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                          TEST_VECTOR_CTX_LEN, test_vector_sk_44) == 0);
+  CHECK(siglen == sizeof(test_vector_sig_44));
+  CHECK(memcmp(sig, test_vector_sig_44, siglen) == 0);
+  printf("DONE\n");
+  return 0;
+}
+
+static int example_mldsa65_sign(void)
+{
+  uint8_t sig[MLDSA65_BYTES];
+  size_t siglen;
+
+  printf("  Signing message... ");
+  CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                          TEST_VECTOR_CTX_LEN, test_vector_sk_65) == 0);
+  CHECK(siglen == sizeof(test_vector_sig_65));
+  CHECK(memcmp(sig, test_vector_sig_65, siglen) == 0);
+  printf("DONE\n");
+  return 0;
+}
+
+static int example_mldsa87_sign(void)
+{
+  uint8_t sig[MLDSA87_BYTES];
+  size_t siglen;
+
+  printf("  Signing message... ");
+  CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                          TEST_VECTOR_CTX_LEN, test_vector_sk_87) == 0);
+  CHECK(siglen == sizeof(test_vector_sig_87));
+  CHECK(memcmp(sig, test_vector_sig_87, siglen) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLD_CONFIG_NO_SIGN_API */
+static int example_mldsa44_sign(void)
+{
+  printf("  Signing message... SKIPPED (sign API disabled)\n");
+  return 0;
+}
+static int example_mldsa65_sign(void)
+{
+  printf("  Signing message... SKIPPED (sign API disabled)\n");
+  return 0;
+}
+static int example_mldsa87_sign(void)
+{
+  printf("  Signing message... SKIPPED (sign API disabled)\n");
+  return 0;
+}
+#endif /* MLD_CONFIG_NO_SIGN_API */
+
+/* Verify examples */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int example_mldsa44_verify(void)
+{
+  printf("  Verifying signature... ");
+  CHECK(mldsa44_verify(test_vector_sig_44, sizeof(test_vector_sig_44),
+                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                       test_vector_pk_44) == 0);
+  printf("DONE\n");
+  return 0;
+}
+
+static int example_mldsa65_verify(void)
+{
+  printf("  Verifying signature... ");
+  CHECK(mldsa65_verify(test_vector_sig_65, sizeof(test_vector_sig_65),
+                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                       test_vector_pk_65) == 0);
+  printf("DONE\n");
+  return 0;
+}
+
+static int example_mldsa87_verify(void)
+{
+  printf("  Verifying signature... ");
+  CHECK(mldsa87_verify(test_vector_sig_87, sizeof(test_vector_sig_87),
+                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                       test_vector_pk_87) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLD_CONFIG_NO_VERIFY_API */
+static int example_mldsa44_verify(void)
+{
+  printf("  Verifying signature... SKIPPED (verify API disabled)\n");
+  return 0;
+}
+static int example_mldsa65_verify(void)
+{
+  printf("  Verifying signature... SKIPPED (verify API disabled)\n");
+  return 0;
+}
+static int example_mldsa87_verify(void)
+{
+  printf("  Verifying signature... SKIPPED (verify API disabled)\n");
+  return 0;
+}
+#endif /* MLD_CONFIG_NO_VERIFY_API */
+
+/* Sign-and-open examples */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_NO_VERIFY_API)
+static int example_mldsa44_sign_message(void)
+{
+  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA44_BYTES];
+  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA44_BYTES];
   size_t smlen;
   size_t mlen;
 
-  /* WARNING: Test-only
-   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
-  randombytes_reset();
-
-  printf("ML-DSA-87\n");
-  printf("======================\n\n");
-
-  printf("Message: %s\n", test_msg);
-  printf("Context: %s\n\n", test_ctx);
-
-  printf("Generating keypair ... ");
-
-  /* Alice generates a public/private key pair */
-  CHECK(mldsa87_keypair(pk, sk) == 0);
-
+  printf("  Sign and open message... ");
+  CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
+                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_sk_44) == 0);
+  CHECK(mldsa44_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_pk_44) == 0);
+  CHECK(mlen == TEST_VECTOR_MSG_LEN);
+  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
   printf("DONE\n");
-  printf("Signing message... ");
-
-  /* Alice signs the message */
-  CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                          (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Verifying signature... ");
-
-  /* Bob verifies Alice's signature */
-  CHECK(mldsa87_verify(sig, siglen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                       (const uint8_t *)test_ctx, TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Creating signed message... ");
-
-  /* Alternative API: Create a signed message (signature + message combined) */
-  CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)test_msg, TEST_MSG_LEN,
-                     (const uint8_t *)test_ctx, TEST_CTX_LEN, sk) == 0);
-
-  printf("DONE\n");
-  printf("Opening signed message... ");
-
-  /* Bob opens the signed message to recover the original message */
-  CHECK(mldsa87_open(m2, &mlen, sm, smlen, (const uint8_t *)test_ctx,
-                     TEST_CTX_LEN, pk) == 0);
-
-  printf("DONE\n");
-  printf("Compare messages... ");
-
-  /* Verify the recovered message matches the original */
-  CHECK(mlen == TEST_MSG_LEN);
-  CHECK(memcmp(test_msg, m2, TEST_MSG_LEN) == 0);
-
-  printf("DONE\n\n");
-
-  printf("Results:\n");
-  printf("--------\n");
-  printf("Public key size:  %d bytes\n", MLDSA87_PUBLICKEYBYTES);
-  printf("Secret key size:  %d bytes\n", MLDSA87_SECRETKEYBYTES);
-  printf("Signature size:   %d bytes\n", MLDSA87_BYTES);
-  printf("Message length:   %lu bytes\n", (unsigned long)TEST_MSG_LEN);
-  printf("Signature length: %lu bytes\n", (unsigned long)siglen);
-  printf("Signed msg length: %lu bytes\n", (unsigned long)smlen);
-
-#if !defined(MLD_CONFIG_KEYGEN_PCT)
-  /* Check against expected signature to make sure that
-   * we integrated the library correctly */
-  printf("Checking deterministic signature... ");
-  {
-    /* Compare the generated signature directly against the expected signature
-     */
-    CHECK(siglen == sizeof(expected_signature_87));
-    CHECK(memcmp(sig, expected_signature_87, siglen) == 0);
-  }
-  printf("DONE\n");
-#else  /* !MLD_CONFIG_KEYGEN_PCT */
-  printf(
-      "[WARNING] Skipping KAT test since PCT is enabled and modifies PRNG\n");
-#endif /* MLD_CONFIG_KEYGEN_PCT */
-
-  printf("Signature verification completed successfully!\n");
-
-  printf("\nAll tests passed! ML-DSA signature verification successful.\n");
   return 0;
 }
+
+static int example_mldsa65_sign_message(void)
+{
+  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA65_BYTES];
+  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA65_BYTES];
+  size_t smlen;
+  size_t mlen;
+
+  printf("  Sign and open message... ");
+  CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
+                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_sk_65) == 0);
+  CHECK(mldsa65_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_pk_65) == 0);
+  CHECK(mlen == TEST_VECTOR_MSG_LEN);
+  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
+  printf("DONE\n");
+  return 0;
+}
+
+static int example_mldsa87_sign_message(void)
+{
+  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA87_BYTES];
+  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA87_BYTES];
+  size_t smlen;
+  size_t mlen;
+
+  printf("  Sign and open message... ");
+  CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
+                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_sk_87) == 0);
+  CHECK(mldsa87_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_pk_87) == 0);
+  CHECK(mlen == TEST_VECTOR_MSG_LEN);
+  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
+  printf("DONE\n");
+  return 0;
+}
+#else  /* !MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API */
+static int example_mldsa44_sign_message(void)
+{
+  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
+  return 0;
+}
+static int example_mldsa65_sign_message(void)
+{
+  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
+  return 0;
+}
+static int example_mldsa87_sign_message(void)
+{
+  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
+  return 0;
+}
+#endif /* !(!MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API) */
 
 int main(void)
 {
+  int r = 0;
+
   printf("ML-DSA monolithic_build_multilevel Example\n");
+  printf("======================\n\n");
 
-  if (test_mldsa44() != 0)
+  printf("ML-DSA-44\n");
+  /* WARNING: Test-only
+   * Normally, you would want to seed a PRNG with trustworthy entropy here. */
+  randombytes_reset();
+  r |= example_mldsa44_keygen();
+  /* WARNING: Test-only
+   * Normally, you would seed a PRNG _once_ with trustworthy entropy
+   * and not reseed it afterwards. Here, we reseed to make tests
+   * independent and reproducible. */
+  randombytes_reset();
+  r |= example_mldsa44_sign();
+  r |= example_mldsa44_verify();
+  r |= example_mldsa44_sign_message();
+
+  printf("\nML-DSA-65\n");
+  randombytes_reset();
+  r |= example_mldsa65_keygen();
+  randombytes_reset();
+  r |= example_mldsa65_sign();
+  r |= example_mldsa65_verify();
+  r |= example_mldsa65_sign_message();
+
+  printf("\nML-DSA-87\n");
+  randombytes_reset();
+  r |= example_mldsa87_keygen();
+  randombytes_reset();
+  r |= example_mldsa87_sign();
+  r |= example_mldsa87_verify();
+  r |= example_mldsa87_sign_message();
+
+  if (r)
   {
     return 1;
   }
 
-  if (test_mldsa65() != 0)
-  {
-    return 1;
-  }
-
-  if (test_mldsa87() != 0)
-  {
-    return 1;
-  }
-
+  printf("\nAll tests passed!\n");
   return 0;
 }

@@ -13,6 +13,16 @@
 #include "src/fips202/fips202.h"
 #include "src/sys.h"
 
+#if defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_CONFIG_NO_SIGN_API) || \
+    defined(MLD_CONFIG_NO_VERIFY_API)
+int main(void)
+{
+  printf("SKIPPED (KAT requires full API)\n");
+  return 0;
+}
+#else /* MLD_CONFIG_NO_KEYPAIR_API || MLD_CONFIG_NO_SIGN_API || \
+         MLD_CONFIG_NO_VERIFY_API */
+
 /* Additional SUPERCOP-style macros for functions not in the standard set */
 #define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
 #define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
@@ -109,3 +119,5 @@ int main(void)
   }
   return 0;
 }
+#endif /* !(MLD_CONFIG_NO_KEYPAIR_API || MLD_CONFIG_NO_SIGN_API || \
+          MLD_CONFIG_NO_VERIFY_API) */

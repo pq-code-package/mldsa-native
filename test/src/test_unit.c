@@ -38,14 +38,22 @@
 void mld_poly_ntt_c(mld_poly *a);
 void mld_poly_invntt_tomont_c(mld_poly *a);
 void mld_poly_caddq_c(mld_poly *a);
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0);
+#endif
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
+#endif
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
                                      const mld_poly *b);
+#endif
 void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *w, const mld_polyvecl *u,
                                              const mld_polyvecl *v);
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 void mld_polyz_unpack_c(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES]);
+#endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
 #if defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
@@ -361,8 +369,9 @@ static int test_native_invntt_tomont(void)
 }
 #endif /* MLD_USE_NATIVE_INTT */
 
-#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) || \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+#if (defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||  \
+     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)) && \
+    !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_poly_decompose_core(const mld_poly *input_poly,
                                     const char *test_name)
 {
@@ -396,8 +405,8 @@ static int test_native_decompose(void)
 
   return 0;
 }
-#endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
-        */
+#endif /* (MLD_USE_NATIVE_POLY_DECOMPOSE_32 || \
+          MLD_USE_NATIVE_POLY_DECOMPOSE_88) && !MLD_CONFIG_NO_SIGN_API */
 
 #if defined(MLD_USE_NATIVE_POLY_CADDQ)
 static int test_caddq_core(const int32_t *input, const char *test_name)
@@ -438,8 +447,9 @@ static int test_native_caddq(void)
 }
 #endif /* MLD_USE_NATIVE_POLY_CADDQ */
 
-#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) || \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+#if (defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||  \
+     defined(MLD_USE_NATIVE_POLY_USE_HINT_32)) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_poly_use_hint_core(const mld_poly *poly_a,
                                    const mld_poly *poly_h,
                                    const char *test_name)
@@ -471,8 +481,8 @@ static int test_native_use_hint(void)
 
   return 0;
 }
-#endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 || MLD_USE_NATIVE_POLY_USE_HINT_32 \
-        */
+#endif /* (MLD_USE_NATIVE_POLY_USE_HINT_88 || MLD_USE_NATIVE_POLY_USE_HINT_32) \
+          && !MLD_CONFIG_NO_VERIFY_API */
 
 #if defined(MLD_USE_NATIVE_POLY_CHKNORM)
 static int test_poly_chknorm_core(const mld_poly *input_poly, int32_t B,
@@ -516,7 +526,8 @@ static int test_native_poly_chknorm(void)
 }
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
 
-#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API))
 static int test_poly_pointwise_montgomery_core(const mld_poly *poly_a,
                                                const mld_poly *poly_b,
                                                const char *test_name)
@@ -561,7 +572,8 @@ static int test_native_pointwise_montgomery(void)
 
   return 0;
 }
-#endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
+#endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY && (!MLD_CONFIG_NO_SIGN_API || \
+          !MLD_CONFIG_NO_VERIFY_API) */
 
 #if defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4) || \
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5) || \
@@ -608,8 +620,9 @@ static int test_native_polyvecl_pointwise_acc_montgomery(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 */
 
 
-#if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) || \
-    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
+#if (defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||  \
+     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API))
 static int test_mld_polyz_unpack_core(const uint8_t *input,
                                       const char *test_name)
 {
@@ -640,7 +653,8 @@ static int test_native_polyz_unpack(void)
 
   return 0;
 }
-#endif /* MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 */
+#endif /* (MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19) \
+          && (!MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API) */
 
 
 #ifdef MLD_USE_FIPS202_X1_NATIVE
@@ -708,8 +722,9 @@ static int test_backend_units(void)
   CHECK(test_native_invntt_tomont() == 0);
 #endif
 
-#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) || \
-    defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+#if (defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||  \
+     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)) && \
+    !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK(test_native_decompose() == 0);
 #endif
 
@@ -717,8 +732,9 @@ static int test_backend_units(void)
   CHECK(test_native_caddq() == 0);
 #endif
 
-#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) || \
-    defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+#if (defined(MLD_USE_NATIVE_POLY_USE_HINT_88) ||  \
+     defined(MLD_USE_NATIVE_POLY_USE_HINT_32)) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK(test_native_use_hint() == 0);
 #endif
 
@@ -726,7 +742,8 @@ static int test_backend_units(void)
   CHECK(test_native_poly_chknorm() == 0);
 #endif
 
-#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY)
+#if defined(MLD_USE_NATIVE_POINTWISE_MONTGOMERY) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API))
   CHECK(test_native_pointwise_montgomery() == 0);
 #endif
 
@@ -736,8 +753,9 @@ static int test_backend_units(void)
   CHECK(test_native_polyvecl_pointwise_acc_montgomery() == 0);
 #endif
 
-#if defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) || \
-    defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)
+#if (defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||  \
+     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19)) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API))
   CHECK(test_native_polyz_unpack() == 0);
 #endif
 
@@ -762,6 +780,7 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
           MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
 static int test_polyvec_lazy_eager(void)
 {
@@ -818,6 +837,7 @@ static int test_polyvec_lazy_eager(void)
 
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 int main(void)
 {
@@ -825,7 +845,9 @@ int main(void)
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
   randombytes_reset();
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK(test_polyvec_lazy_eager() == 0);
+#endif
 
   /* Run backend unit tests */
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \

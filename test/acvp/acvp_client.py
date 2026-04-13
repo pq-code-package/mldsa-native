@@ -78,24 +78,55 @@ def loadAcvpData(prompt, expectedResults):
     return (prompt, promptData, expectedResults, expectedResultsData)
 
 
-def loadDefaultAcvpData(version):
+def detect_supported_modes():
+    """Run acvp_mldsa44 --info to detect which modes are supported."""
+    acvp_bin = "./test/build/mldsa44/bin/acvp_mldsa44"
+    acvp_call = exec_prefix + [acvp_bin, "--info"]
+    try:
+        result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
+        if result.returncode != 0:
+            err(
+                f"Warning: {acvp_call} failed (rc={result.returncode}), assuming all modes supported"
+            )
+            return {"keyGen", "sigGen", "sigVer"}
+        modes = set()
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line in ("keyGen", "sigGen", "sigVer"):
+                modes.add(line)
+        return modes
+    except FileNotFoundError:
+        err(f"Warning: {acvp_bin} not found, assuming all modes supported")
+        return {"keyGen", "sigGen", "sigVer"}
+
+
+def loadDefaultAcvpData(version, supported_modes=None):
+    if supported_modes is None:
+        supported_modes = {"keyGen", "sigGen", "sigVer"}
+
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
+            "keyGen",
             f"{data_dir}/ML-DSA-keyGen-FIPS204/prompt.json",
             f"{data_dir}/ML-DSA-keyGen-FIPS204/expectedResults.json",
         ),
         (
+            "sigGen",
             f"{data_dir}/ML-DSA-sigGen-FIPS204/prompt.json",
             f"{data_dir}/ML-DSA-sigGen-FIPS204/expectedResults.json",
         ),
         (
+            "sigVer",
             f"{data_dir}/ML-DSA-sigVer-FIPS204/prompt.json",
             f"{data_dir}/ML-DSA-sigVer-FIPS204/expectedResults.json",
         ),
     ]
     acvp_data = []
-    for prompt, expectedResults in acvp_jsons_for_version:
+    for mode, prompt, expectedResults in acvp_jsons_for_version:
+        if mode not in supported_modes:
+            info(f"Skipping {mode} tests (mode not supported in this build)")
+            continue
         acvp_data.append(loadAcvpData(prompt, expectedResults))
     return acvp_data
 
@@ -418,7 +449,7 @@ def runTest(data, output):
     info("ALL GOOD!")
 
 
-def test(prompt, expected, output, version):
+def test(prompt, expected, output, version, supported_modes=None):
     assert (
         prompt is not None or output is None
     ), "cannot produce output if there is no input"
@@ -432,7 +463,11 @@ def test(prompt, expected, output, version):
         data = [loadAcvpData(prompt, expected)]
     else:
         # load data from downloaded files
-        data = loadDefaultAcvpData(version)
+        data = loadDefaultAcvpData(version, supported_modes)
+
+    if len(data) == 0:
+        info("No test data to run (all modes disabled in this build)")
+        return
 
     runTest(data, output)
 
@@ -456,7 +491,43 @@ parser.add_argument(
     default="v1.1.0.41",
     help="ACVP test vector version (default: v1.1.0.41)",
 )
+parser.add_argument(
+    "--no-keygen",
+    action="store_true",
+    help="Skip keyGen tests",
+)
+parser.add_argument(
+    "--no-sign",
+    action="store_true",
+    help="Skip sigGen tests",
+)
+parser.add_argument(
+    "--no-verify",
+    action="store_true",
+    help="Skip sigVer tests",
+)
+parser.add_argument(
+    "--auto-detect",
+    action="store_true",
+    default=True,
+    help="Auto-detect supported modes by running acvp_mldsa44 --info (default: True)",
+)
 args = parser.parse_args()
+
+# Determine supported modes
+if args.auto_detect and args.prompt is None:
+    supported_modes = detect_supported_modes()
+    info(f"Auto-detected supported modes: {sorted(supported_modes)}")
+else:
+    supported_modes = {"keyGen", "sigGen", "sigVer"}
+
+# Apply explicit --no-* flags
+if args.no_keygen:
+    supported_modes.discard("keyGen")
+if args.no_sign:
+    supported_modes.discard("sigGen")
+if args.no_verify:
+    supported_modes.discard("sigVer")
 
 if args.prompt is None:
     print(f"Using ACVP test vectors version {args.version}", file=sys.stderr)
@@ -466,4 +537,4 @@ if args.prompt is None:
         print("Failed to download ACVP test files", file=sys.stderr)
         sys.exit(1)
 
-test(args.prompt, args.expected, args.output, args.version)
+test(args.prompt, args.expected, args.output, args.version, supported_modes)

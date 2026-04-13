@@ -10,7 +10,9 @@
 # - Field to query, e.g. "kat-sha256"
 #
 # Optional:
-# - Value to compare against
+# - Value to compare against. If omitted, stdin is read instead:
+#   if stdin is "SKIPPED", the test is reported as skipped;
+#   otherwise stdin is hashed with sha256 and compared.
 
 META=META.yml
 
@@ -33,15 +35,30 @@ if (which yq >/dev/null 2>&1); then
   fi
 fi
 
-INPUT=$3
-if [[ $INPUT != "" ]]; then
-  if [[ $INPUT != "$VAL" ]]; then
-    echo "$META $1 $2: FAIL ($VAL != $INPUT)"
-    exit 1
-  else
-    echo "$META $1 $2: OK"
+# Determine the input to compare against
+if [[ $3 != "" ]]; then
+  INPUT=$3
+else
+  STDIN=$(cat)
+  if [[ $STDIN == SKIPPED* ]]; then
+    echo "$META $1 $2: SKIPPED"
     exit 0
   fi
+  if command -v shasum >/dev/null 2>&1; then
+    SHA256SUM="shasum -a 256"
+  elif command -v sha256sum >/dev/null 2>&1; then
+    SHA256SUM="sha256sum"
+  else
+    echo "ERROR: Neither 'shasum' nor 'sha256sum' found."
+    exit 1
+  fi
+  INPUT=$(echo "$STDIN" | $SHA256SUM | cut -d " " -f 1)
+fi
+
+if [[ $INPUT != "$VAL" ]]; then
+  echo "$META $1 $2: FAIL ($VAL != $INPUT)"
+  exit 1
 else
-  echo "$VAL"
+  echo "$META $1 $2: OK"
+  exit 0
 fi

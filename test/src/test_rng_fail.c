@@ -4,11 +4,13 @@
  */
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Expose internal functions */
 #define MLD_BUILD_INTERNAL
 #include "../../mldsa/mldsa_native.h"
 #include "../../mldsa/src/common.h"
+#include "expected_test_vectors.h"
 
 /*
  * This test checks that we handle randombytes failures correctly by:
@@ -109,6 +111,7 @@ int randombytes(uint8_t *buf, size_t len)
         test_name, num_randombytes_calls);                             \
   } while (0)
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -118,295 +121,147 @@ static int test_keygen_rng_failure(void)
   return 0;
 }
 
-static int test_sign_rng_failure(void)
+static int test_pk_from_sk_rng_failure(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
-  const uint8_t ctx[] = "test context";
-  size_t siglen;
 
-  /* Generate valid keypair first */
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_sign_keypair failed in sign test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_sign_signature",
-                   crypto_sign_signature(sig, &siglen, msg, sizeof(msg), ctx,
-                                         sizeof(ctx) - 1, sk));
+  TEST_RNG_FAILURE("crypto_sign_pk_from_sk",
+                   MLD_API_NAMESPACE(pk_from_sk)(pk, test_vector_sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-static int test_verify_rng_failure(void)
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+static int test_sign_rng_failure(void)
 {
-  uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
-  uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
-  uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)];
+  uint8_t sig[CRYPTO_BYTES];
   size_t siglen;
-  uint8_t msg[32] = {0};
-  uint8_t ctx[10] = "test";
 
-  /* Generate valid keypair and signature first */
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_sign_keypair failed in verify test setup\n");
-    return 1;
-  }
-
-  if (crypto_sign_signature(sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx),
-                            sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_signature failed in verify test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE(
-      "crypto_sign_verify",
-      crypto_sign_verify(sig, siglen, msg, sizeof(msg), ctx, sizeof(ctx), pk));
+  TEST_RNG_FAILURE("crypto_sign_signature",
+                   crypto_sign_signature(
+                       sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                       TEST_VECTOR_CTX_LEN, test_vector_sk));
   return 0;
 }
 
 static int test_sign_combined_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[CRYPTO_BYTES + 32];
-  uint8_t msg[32] = {0};
-  const uint8_t ctx[] = "test context";
+  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
   size_t smlen;
 
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_keypair failed in sign combined test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_sign", crypto_sign(sm, &smlen, msg, sizeof(msg), ctx,
-                                              sizeof(ctx) - 1, sk));
-  return 0;
-}
-
-static int test_open_rng_failure(void)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[CRYPTO_BYTES + 32];
-  uint8_t msg[32] = {0};
-  uint8_t msg_out[CRYPTO_BYTES + 32];
-  const uint8_t ctx[] = "test context";
-  size_t smlen, mlen;
-
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_sign_keypair failed in open test setup\n");
-    return 1;
-  }
-
-  if (crypto_sign(sm, &smlen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, sk) != 0)
-  {
-    fprintf(stderr, "ERROR: crypto_sign failed in open test setup\n");
-    return 1;
-  }
-
   TEST_RNG_FAILURE(
-      "crypto_sign_open",
-      crypto_sign_open(msg_out, &mlen, sm, smlen, ctx, sizeof(ctx) - 1, pk));
+      "crypto_sign",
+      crypto_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
+                  TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                  TEST_VECTOR_CTX_LEN, test_vector_sk));
   return 0;
 }
 
 static int test_signature_extmu_rng_failure(void)
 {
-  uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
-  uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)];
-  uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)];
-  size_t siglen;
-  uint8_t mu[MLDSA_CRHBYTES];
-
-  /* Generate valid keypair first */
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(
-        stderr,
-        "ERROR: crypto_sign_keypair failed in signature_extmu test setup\n");
-    return 1;
-  }
-
-  /* Fill mu with test data */
-  randombytes(mu, sizeof(mu));
-
-  TEST_RNG_FAILURE("crypto_sign_signature_extmu",
-                   MLD_API_NAMESPACE(signature_extmu)(sig, &siglen, mu, sk));
-  return 0;
-}
-
-static int test_verify_extmu_rng_failure(void)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t sig[CRYPTO_BYTES];
-  uint8_t mu[64] = {0};
   size_t siglen;
+  uint8_t mu[64] = {0};
 
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_keypair failed in verify_extmu test setup\n");
-    return 1;
-  }
-
-  if (MLD_API_NAMESPACE(signature_extmu)(sig, &siglen, mu, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_signature_extmu failed in verify_extmu test "
-            "setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_sign_verify_extmu",
-                   MLD_API_NAMESPACE(verify_extmu)(sig, siglen, mu, pk));
+  TEST_RNG_FAILURE(
+      "crypto_sign_signature_extmu",
+      MLD_API_NAMESPACE(signature_extmu)(sig, &siglen, mu, test_vector_sk));
   return 0;
 }
 
 static int test_signature_pre_hash_shake256_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
   uint8_t rnd[32] = {0};
-  const uint8_t ctx[] = "test context";
   size_t siglen;
 
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(
-        stderr,
-        "ERROR: crypto_sign_keypair failed in signature_pre_hash_shake256 test "
-        "setup\n");
-    return 1;
-  }
+  TEST_RNG_FAILURE("crypto_sign_signature_pre_hash_shake256",
+                   MLD_API_NAMESPACE(signature_pre_hash_shake256)(
+                       sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                       TEST_VECTOR_CTX_LEN, rnd, test_vector_sk));
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int test_verify_rng_failure(void)
+{
   TEST_RNG_FAILURE(
-      "crypto_sign_signature_pre_hash_shake256",
-      MLD_API_NAMESPACE(signature_pre_hash_shake256)(
-          sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, rnd, sk));
+      "crypto_sign_verify",
+      crypto_sign_verify(test_vector_sig, CRYPTO_BYTES,
+                         (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                         (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                         test_vector_pk));
+  return 0;
+}
+
+static int test_open_rng_failure(void)
+{
+  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
+  uint8_t msg_out[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
+  size_t smlen = CRYPTO_BYTES + TEST_VECTOR_MSG_LEN;
+  size_t mlen;
+
+  memcpy(sm, test_vector_sig, CRYPTO_BYTES);
+  memcpy(sm + CRYPTO_BYTES, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
+
+  TEST_RNG_FAILURE("crypto_sign_open",
+                   crypto_sign_open(msg_out, &mlen, sm, smlen,
+                                    (const uint8_t *)TEST_VECTOR_CTX,
+                                    TEST_VECTOR_CTX_LEN, test_vector_pk));
+  return 0;
+}
+
+static int test_verify_extmu_rng_failure(void)
+{
+  TEST_RNG_FAILURE(
+      "crypto_sign_verify_extmu",
+      MLD_API_NAMESPACE(verify_extmu)(test_vector_sig_extmu, CRYPTO_BYTES,
+                                      test_vector_mu, test_vector_pk));
   return 0;
 }
 
 static int test_verify_pre_hash_shake256_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
-  uint8_t rnd[32] = {0};
-  const uint8_t ctx[] = "test context";
-  size_t siglen;
-
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(
-        stderr,
-        "ERROR: crypto_sign_keypair failed in verify_pre_hash_shake256 test "
-        "setup\n");
-    return 1;
-  }
-
-  if (MLD_API_NAMESPACE(signature_pre_hash_shake256)(
-          sig, &siglen, msg, sizeof(msg), ctx, sizeof(ctx) - 1, rnd, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_signature_pre_hash_shake256 failed in "
-            "verify_pre_hash_shake256 test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE(
-      "crypto_sign_verify_pre_hash_shake256",
-      MLD_API_NAMESPACE(verify_pre_hash_shake256)(sig, siglen, msg, sizeof(msg),
-                                                  ctx, sizeof(ctx) - 1, pk));
+  TEST_RNG_FAILURE("crypto_sign_verify_pre_hash_shake256",
+                   MLD_API_NAMESPACE(verify_pre_hash_shake256)(
+                       test_vector_sig_pre_hash_shake256, CRYPTO_BYTES,
+                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                       test_vector_pk));
   return 0;
 }
-
-static int test_pk_from_sk_rng_failure(void)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-
-  reset_all();
-  if (crypto_sign_keypair(pk, sk) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: crypto_sign_keypair failed in pk_from_sk test setup\n");
-    return 1;
-  }
-
-  TEST_RNG_FAILURE("crypto_sign_pk_from_sk",
-                   MLD_API_NAMESPACE(pk_from_sk)(pk, sk));
-  return 0;
-}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 int main(void)
 {
-  if (test_keygen_rng_failure() != 0)
-  {
-    return 1;
-  }
+  int r = 0;
 
-  if (test_sign_rng_failure() != 0)
-  {
-    return 1;
-  }
+  /* Keygen tests */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  r |= test_keygen_rng_failure();
+  r |= test_pk_from_sk_rng_failure();
+#endif
 
-  if (test_verify_rng_failure() != 0)
-  {
-    return 1;
-  }
+  /* Sign tests */
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+  r |= test_sign_rng_failure();
+  r |= test_sign_combined_rng_failure();
+  r |= test_signature_extmu_rng_failure();
+  r |= test_signature_pre_hash_shake256_rng_failure();
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
-  if (test_sign_combined_rng_failure() != 0)
-  {
-    return 1;
-  }
+  /* Verify tests */
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+  r |= test_verify_rng_failure();
+  r |= test_open_rng_failure();
+  r |= test_verify_extmu_rng_failure();
+  r |= test_verify_pre_hash_shake256_rng_failure();
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-  if (test_open_rng_failure() != 0)
-  {
-    return 1;
-  }
-
-  if (test_signature_extmu_rng_failure() != 0)
-  {
-    return 1;
-  }
-
-  if (test_verify_extmu_rng_failure() != 0)
-  {
-    return 1;
-  }
-
-  if (test_signature_pre_hash_shake256_rng_failure() != 0)
-  {
-    return 1;
-  }
-
-  if (test_verify_pre_hash_shake256_rng_failure() != 0)
-  {
-    return 1;
-  }
-
-  if (test_pk_from_sk_rng_failure() != 0)
+  if (r)
   {
     return 1;
   }

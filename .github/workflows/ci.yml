@@ -450,35 +450,38 @@ jobs:
           stack: true
           check_namespace: false
   config_variations:
-    name: Non-standard configurations
+    name: "Config: ${{ matrix.test.name }} (${{ matrix.target.name }})"
     strategy:
       fail-fast: false
       matrix:
-        external:
-         - ${{ github.repository_owner != 'pq-code-package' }}
         target:
          - runner: ubuntu-24.04-arm
-           name: 'ubuntu-latest (aarch64)'
+           name: 'aarch64'
          - runner: ubuntu-latest
-           name: 'ubuntu-latest (x86_64)'
-        exclude:
-          - {external: true,
-             target: {
-               runner: ubuntu-24.04-arm,
-               name: 'ubuntu-latest (aarch64)',
-             }}
-          - {external: true,
-             target: {
-               runner: ubuntu-latest,
-               name: 'ubuntu-latest (x86_64)',
-             }}
+           name: 'x86_64'
+        test:
+         - name: pct
+           ids: pct-enabled pct-enabled-broken
+         - name: reduce-ram
+           ids: reduce-ram reduce-ram-pct
+         - name: custom-hooks
+           ids: custom-alloc-heap custom-zeroize custom-randombytes custom-memcpy custom-memset custom-stdlib
+         - name: native-cap
+           ids: native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1 native-cap-CPUID_AVX2
+         - name: asm-fips202
+           ids: no-asm serial-fips202
+         - name: nblocks
+           ids: nblocks-1 nblocks-4 nblocks-6
+         - name: reduced-api
+           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: "Config Variations"
+      - name: "Config: ${{ matrix.test.name }} (${{ matrix.target.name }})"
         uses: ./.github/actions/config-variations
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
+          tests: ${{ matrix.test.ids }}
   check-cf-protections:
     name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
     strategy:
@@ -766,6 +769,19 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             python3 ./scripts/autogen --dry-run ${{ matrix.target.extra_args }}
+  check_test_vectors:
+    runs-on: ubuntu-latest
+    name: Check test vectors
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ci
+          nix-cache: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            make acvp OPT=0
+            python3 ./scripts/autogen --test-vectors --dry-run
   check_hol_light_object_code:
     strategy:
       fail-fast: false

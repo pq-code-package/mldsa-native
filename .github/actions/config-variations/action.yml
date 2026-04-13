@@ -8,7 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify'
     required: false
     default: 'all'
   opt:
@@ -302,3 +302,93 @@ runs:
         examples: false # Some examples use a custom config themselves
         alloc: false # Requires custom config
         rng_fail: true
+    - name: "Keygen-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_SIGN_API -DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Sign-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'sign-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_KEYPAIR_API -DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Verify-only API"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'verify-only') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_KEYPAIR_API -DMLD_CONFIG_NO_SIGN_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Keygen+Sign API (no verify)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-sign') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Keygen+Verify API (no sign)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-verify') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_SIGN_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "Sign+Verify API (no keygen)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'sign-verify') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "-DMLD_CONFIG_NO_KEYPAIR_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true

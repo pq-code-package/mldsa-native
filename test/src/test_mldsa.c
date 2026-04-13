@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
+#include "expected_test_vectors.h"
 #include "mldsa_native.h"
 #include "src/sys.h"
 
@@ -39,6 +40,8 @@
   } while (0)
 
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
                           uint8_t sk[CRYPTO_SECRETKEYBYTES],
                           uint8_t sm[MLEN + CRYPTO_BYTES], uint8_t m[MLEN],
@@ -160,7 +163,10 @@ static int test_sign_pre_hash(void)
 
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_pk_from_sk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -219,7 +225,10 @@ static int test_pk_from_sk(void)
 
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_wrong_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -373,11 +382,76 @@ static int test_wrong_ctx(void)
   }
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
+
+static int test_sign_expected(void)
+{
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  {
+    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+    uint8_t sk[CRYPTO_SECRETKEYBYTES];
+    uint8_t test_vector_sk_copy[CRYPTO_SECRETKEYBYTES];
+
+    randombytes_reset();
+    CHECK(crypto_sign_keypair(pk, sk) == 0);
+
+    /* Declassify sk's for comparison. This is for testing purposes only.
+     * Don't declassify the test_vector_sk itself because we need it to stay
+     * secret for the CT signing tests. */
+    MLD_CT_TESTING_DECLASSIFY(sk, CRYPTO_SECRETKEYBYTES);
+    memcpy(test_vector_sk_copy, test_vector_sk, CRYPTO_SECRETKEYBYTES);
+    MLD_CT_TESTING_DECLASSIFY(test_vector_sk_copy, CRYPTO_SECRETKEYBYTES);
+
+    CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
+    CHECK(memcmp(sk, test_vector_sk_copy, CRYPTO_SECRETKEYBYTES) == 0);
+  }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+  {
+    uint8_t sig[CRYPTO_BYTES];
+    size_t siglen;
+
+    /* WARNING: Test-only
+     * Normally, you would seed a PRNG _once_ with trustworthy entropy
+     * and not reseed it afterwards. Here, we reseed to make tests
+     * independent and reproducible. */
+    randombytes_reset();
+    CHECK(crypto_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                                TEST_VECTOR_MSG_LEN,
+                                (const uint8_t *)TEST_VECTOR_CTX,
+                                TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
+    CHECK(siglen == CRYPTO_BYTES);
+    CHECK(memcmp(sig, test_vector_sig, CRYPTO_BYTES) == 0);
+  }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+  CHECK(crypto_sign_verify(
+            test_vector_sig, CRYPTO_BYTES, (const uint8_t *)TEST_VECTOR_MSG,
+            TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+            TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+  return 0;
+}
 
 int main(void)
 {
   unsigned i;
   int r;
+
+  MLD_CT_TESTING_DECLASSIFY(test_vector_pk, CRYPTO_PUBLICKEYBYTES);
+  MLD_CT_TESTING_DECLASSIFY(test_vector_sig, CRYPTO_BYTES);
+  MLD_CT_TESTING_SECRET(test_vector_sk, CRYPTO_SECRETKEYBYTES);
+
+  /* Check hardcoded test vectors as a minimal smoke test that works
+   * even in reduced configurations. */
+  if (test_sign_expected() != 0)
+  {
+    return 1;
+  }
 
   /* WARNING: Test-only
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
@@ -385,14 +459,22 @@ int main(void)
 
   for (i = 0; i < NTESTS; i++)
   {
-    r = test_sign();
+    r = 0;
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
+    r |= test_sign();
     r |= test_sign_unaligned();
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();
     r |= test_sign_extmu();
     r |= test_sign_pre_hash();
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
+          !MLD_CONFIG_NO_VERIFY_API */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
     r |= test_pk_from_sk();
+#endif
+
     if (r)
     {
       return 1;

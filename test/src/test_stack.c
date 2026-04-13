@@ -10,6 +10,7 @@
 
 static void test_keygen_only(void)
 {
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   unsigned char pk[CRYPTO_PUBLICKEYBYTES];
   unsigned char sk[CRYPTO_SECRETKEYBYTES];
 
@@ -17,10 +18,14 @@ static void test_keygen_only(void)
   /* Uses the notrandombytes implementation for deterministic randomness */
   int ret = crypto_sign_keypair(pk, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
+#else        /* !MLD_CONFIG_NO_KEYPAIR_API */
+  printf("keygen test skipped (API disabled)\n");
+#endif       /* MLD_CONFIG_NO_KEYPAIR_API */
 }
 
 static void test_sign_only(void)
 {
+#if !defined(MLD_CONFIG_NO_SIGN_API)
   unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
   unsigned char sig[CRYPTO_BYTES];
   size_t siglen;
@@ -32,10 +37,14 @@ static void test_sign_only(void)
   int ret = crypto_sign_signature(sig, &siglen, msg, sizeof(msg) - 1, ctx,
                                   sizeof(ctx) - 1, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
+#else        /* !MLD_CONFIG_NO_SIGN_API */
+  printf("sign test skipped (API disabled)\n");
+#endif       /* MLD_CONFIG_NO_SIGN_API */
 }
 
 static void test_verify_only(void)
 {
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
   unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
   unsigned char sig[CRYPTO_BYTES] = {0};
   const unsigned char msg[] = "test message for stack measurement";
@@ -46,6 +55,9 @@ static void test_verify_only(void)
   int ret = crypto_sign_verify(sig, CRYPTO_BYTES, msg, sizeof(msg) - 1, ctx,
                                sizeof(ctx) - 1, pk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
+#else        /* !MLD_CONFIG_NO_VERIFY_API */
+  printf("verify test skipped (API disabled)\n");
+#endif       /* MLD_CONFIG_NO_VERIFY_API */
 }
 
 int main(int argc, char *argv[])

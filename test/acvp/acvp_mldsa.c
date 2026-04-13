@@ -61,6 +61,20 @@
   "signature=HEX pk=HEX"
 
 
+/* Print supported API modes and exit (used by acvp_client.py --auto-detect) */
+static void print_info(void)
+{
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  printf("keyGen\n");
+#endif
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+  printf("sigGen\n");
+#endif
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+  printf("sigVer\n");
+#endif
+}
+
 /* maximum message length used in the ACVP tests */
 #define MAX_MSG_LENGTH 8192
 /* maximum context length according to FIPS-204 */
@@ -164,6 +178,7 @@ hex_usage:
 }
 
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 static int decode_keyed_int(const char *prefix_string, int *out,
                             const char *str)
 {
@@ -248,7 +263,9 @@ str_usage:
           str, prefix);
   return 1;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 static void print_hex(const char *name, const unsigned char *raw, size_t len)
 {
   if (name != NULL)
@@ -261,7 +278,9 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
   }
   printf("\n");
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
 {
   unsigned char pk[CRYPTO_PUBLICKEYBYTES];
@@ -273,6 +292,9 @@ static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
   print_hex("sk", sk, sizeof(sk));
 }
 
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
                                   const unsigned char rnd[MLDSA_SEEDBYTES],
                                   const unsigned char sk[CRYPTO_SECRETKEYBYTES],
@@ -341,8 +363,10 @@ static void acvp_mldsa_sigGenInternalDeterministic_AFT(
                                        rnd, sk, externalMu) == 0);
   print_hex("signature", sig, sizeof(sig));
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 static int acvp_mldsa_sigVer_AFT(const unsigned char *message, size_t mlen,
                                  const unsigned char *context, size_t ctxlen,
                                  const unsigned char signature[CRYPTO_BYTES],
@@ -368,7 +392,9 @@ static int acvp_mldsa_sigVerInternal_AFT(
                                        NULL, 0, pk, 0);
   }
 }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 static int str_to_hash_alg(const char *hashAlg)
 {
   if (strcmp(hashAlg, "SHA2-224") == 0)
@@ -423,7 +449,9 @@ static int str_to_hash_alg(const char *hashAlg)
   fprintf(stderr, "Error: Unsupported hash algorithm: %s\n", hashAlg);
   exit(1);
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 static int acvp_mldsa_sigGenPreHash_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char rng[MLDSA_RNDBYTES],
@@ -443,6 +471,9 @@ static int acvp_mldsa_sigGenPreHash_AFT(
   return 0;
 }
 
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 static int acvp_mldsa_sigVerPreHash_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char signature[CRYPTO_BYTES],
@@ -452,7 +483,9 @@ static int acvp_mldsa_sigVerPreHash_AFT(
                                               phlen, context, ctxlen, pk,
                                               str_to_hash_alg(hashAlg));
 }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 static int acvp_mldsa_sigGenPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char rnd[MLDSA_RNDBYTES],
@@ -471,6 +504,9 @@ static int acvp_mldsa_sigGenPreHashShake256_AFT(
   return 0;
 }
 
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 static int acvp_mldsa_sigVerPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char signature[CRYPTO_BYTES],
@@ -479,8 +515,10 @@ static int acvp_mldsa_sigVerPreHashShake256_AFT(
   return crypto_sign_verify_pre_hash_shake256(signature, CRYPTO_BYTES, message,
                                               mlen, context, ctxlen, pk);
 }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /* Deterministic prehash signing functions */
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char sk[CRYPTO_SECRETKEYBYTES],
@@ -518,6 +556,7 @@ static int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
   print_hex("signature", signature, siglen);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 
 int main(int argc, char *argv[])
@@ -535,11 +574,21 @@ int main(int argc, char *argv[])
     goto usage;
   }
 
+  if (strcmp(*argv, "--info") == 0)
+  {
+    print_info();
+    return 0;
+  }
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   if (strcmp(*argv, "keyGen") == 0)
   {
     mode = keyGen;
   }
-  else if (strcmp(*argv, "sigGen") == 0)
+  else
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+      if (strcmp(*argv, "sigGen") == 0)
   {
     mode = sigGen;
   }
@@ -563,7 +612,18 @@ int main(int argc, char *argv[])
   {
     mode = sigGenPreHashShake256Deterministic;
   }
-  else if (strcmp(*argv, "sigVer") == 0)
+  else if (strcmp(*argv, "sigGenPreHash") == 0)
+  {
+    mode = sigGenPreHash;
+  }
+  else if (strcmp(*argv, "sigGenPreHashShake256") == 0)
+  {
+    mode = sigGenPreHashShake256;
+  }
+  else
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+      if (strcmp(*argv, "sigVer") == 0)
   {
     mode = sigVer;
   }
@@ -571,23 +631,16 @@ int main(int argc, char *argv[])
   {
     mode = sigVerInternal;
   }
-  else if (strcmp(*argv, "sigGenPreHash") == 0)
-  {
-    mode = sigGenPreHash;
-  }
   else if (strcmp(*argv, "sigVerPreHash") == 0)
   {
     mode = sigVerPreHash;
-  }
-  else if (strcmp(*argv, "sigGenPreHashShake256") == 0)
-  {
-    mode = sigGenPreHashShake256;
   }
   else if (strcmp(*argv, "sigVerPreHashShake256") == 0)
   {
     mode = sigVerPreHashShake256;
   }
   else
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
   {
     goto usage;
   }
@@ -595,6 +648,7 @@ int main(int argc, char *argv[])
 
   switch (mode)
   {
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
     case keyGen:
     {
       unsigned char seed[MLDSA_SEEDBYTES];
@@ -609,7 +663,9 @@ int main(int argc, char *argv[])
       acvp_mldsa_keyGen_AFT(seed);
       break;
     }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGen:
     {
       unsigned char message[MAX_MSG_LENGTH];
@@ -797,7 +853,9 @@ int main(int argc, char *argv[])
       acvp_mldsa_sigGenInternalDeterministic_AFT(message, mlen, sk, externalMu);
       break;
     }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVer:
     {
       unsigned char message[MAX_MSG_LENGTH];
@@ -907,7 +965,9 @@ int main(int argc, char *argv[])
       return acvp_mldsa_sigVerInternal_AFT(message, mlen, signature, pk,
                                            externalMu);
     }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGenPreHash:
     {
       unsigned char ph[64];
@@ -969,7 +1029,9 @@ int main(int argc, char *argv[])
       return acvp_mldsa_sigGenPreHash_AFT(ph, phlen, context, ctxlen, rnd, sk,
                                           hashAlg);
     }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVerPreHash:
     {
       unsigned char ph[64];
@@ -1035,7 +1097,9 @@ int main(int argc, char *argv[])
       return acvp_mldsa_sigVerPreHash_AFT(ph, phlen, context, ctxlen, signature,
                                           pk, hashAlg);
     }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGenPreHashShake256:
     {
       unsigned char message[MAX_MSG_LENGTH];
@@ -1189,7 +1253,9 @@ int main(int argc, char *argv[])
       return acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
           message, mlen, context, ctxlen, sk);
     }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVerPreHashShake256:
     {
       unsigned char message[MAX_MSG_LENGTH];
@@ -1244,6 +1310,9 @@ int main(int argc, char *argv[])
       return acvp_mldsa_sigVerPreHashShake256_AFT(message, mlen, context,
                                                   ctxlen, signature, pk);
     }
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+    default:
+      goto usage;
   }
 
   return (0);
@@ -1252,10 +1321,13 @@ usage:
   fprintf(stderr, USAGE "\n");
   return (1);
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 keygen_usage:
   fprintf(stderr, KEYGEN_USAGE "\n");
   return (1);
+#endif
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 siggen_usage:
   fprintf(stderr, SIGGEN_USAGE "\n");
   return (1);
@@ -1280,6 +1352,16 @@ siggen_prehash_shake256_deterministic_usage:
   fprintf(stderr, SIGGEN_PREHASH_SHAKE256_DETERMINISTIC_USAGE "\n");
   return (1);
 
+siggen_prehash_usage:
+  fprintf(stderr, SIGGEN_PREHASH_USAGE "\n");
+  return (1);
+
+siggen_prehash_shake256_usage:
+  fprintf(stderr, SIGGEN_PREHASH_SHAKE256_USAGE "\n");
+  return (1);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
 sigver_usage:
   fprintf(stderr, SIGVER_USAGE "\n");
   return (1);
@@ -1288,19 +1370,12 @@ sigver_internal_usage:
   fprintf(stderr, SIGVER_INTERNAL_USAGE "\n");
   return (1);
 
-siggen_prehash_usage:
-  fprintf(stderr, SIGGEN_PREHASH_USAGE "\n");
-  return (1);
-
 sigver_prehash_usage:
   fprintf(stderr, SIGVER_PREHASH_USAGE "\n");
-  return (1);
-
-siggen_prehash_shake256_usage:
-  fprintf(stderr, SIGGEN_PREHASH_SHAKE256_USAGE "\n");
   return (1);
 
 sigver_prehash_shake256_usage:
   fprintf(stderr, SIGVER_PREHASH_SHAKE256_USAGE "\n");
   return (1);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 }

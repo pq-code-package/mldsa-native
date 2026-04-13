@@ -12,6 +12,7 @@
 #include "../../mldsa/mldsa_native.h"
 #include "../../mldsa/src/common.h"
 #include "../notrandombytes/notrandombytes.h"
+#include "expected_test_vectors.h"
 
 /*
  * Level-dependent allocation limit macros.
@@ -335,6 +336,9 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
+/* Keygen tests */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -345,245 +349,132 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
   return 0;
 }
 
-static int test_sign_alloc_failure(test_ctx_t *ctx)
+static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
-  const uint8_t sign_ctx[] = "test context";
-  size_t siglen;
 
-  /* Generate valid keypair first */
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in sign test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_signature",
-                     mld_signature(sig, &siglen, msg, sizeof(msg), sign_ctx,
-                                   sizeof(sign_ctx) - 1, sk, ctx),
-                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+  TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, test_vector_sk, ctx),
+                     MLD_TOTAL_ALLOC_PK_FROM_SK,
+                     &ctx->global_high_mark_pk_from_sk);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-static int test_verify_alloc_failure(test_ctx_t *ctx)
+/* Sign tests — use test_vector_sk directly */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+static int test_sign_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
-  const uint8_t sign_ctx[] = "test context";
   size_t siglen;
 
-  /* Generate valid keypair and signature first */
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in verify test setup\n");
-    return 1;
-  }
-
-  if (mld_signature(sig, &siglen, msg, sizeof(msg), sign_ctx,
-                    sizeof(sign_ctx) - 1, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_signature failed in verify test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_verify",
-                     mld_verify(sig, siglen, msg, sizeof(msg), sign_ctx,
-                                sizeof(sign_ctx) - 1, pk, ctx),
-                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+  TEST_ALLOC_FAILURE(
+      "mld_signature",
+      mld_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                    TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                    TEST_VECTOR_CTX_LEN, test_vector_sk, ctx),
+      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
 
 static int test_sign_combined_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[CRYPTO_BYTES + 32];
-  uint8_t msg[32] = {0};
-  const uint8_t sign_ctx[] = "test context";
+  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
   size_t smlen;
 
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in sign combined test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_sign",
-                     mld_sign(sm, &smlen, msg, sizeof(msg), sign_ctx,
-                              sizeof(sign_ctx) - 1, sk, ctx),
-                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
-  return 0;
-}
-
-static int test_open_alloc_failure(test_ctx_t *ctx)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[CRYPTO_BYTES + 32];
-  uint8_t msg[32] = {0};
-  uint8_t msg_out[CRYPTO_BYTES + 32];
-  const uint8_t sign_ctx[] = "test context";
-  size_t smlen, mlen;
-
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in open test setup\n");
-    return 1;
-  }
-
-  if (mld_sign(sm, &smlen, msg, sizeof(msg), sign_ctx, sizeof(sign_ctx) - 1, sk,
-               ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_sign failed in open test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_open",
-                     mld_open(msg_out, &mlen, sm, smlen, sign_ctx,
-                              sizeof(sign_ctx) - 1, pk, ctx),
-                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+  TEST_ALLOC_FAILURE(
+      "mld_sign",
+      mld_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
+               TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+               TEST_VECTOR_CTX_LEN, test_vector_sk, ctx),
+      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
 
 static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t sig[CRYPTO_BYTES];
   uint8_t mu[64] = {0};
   size_t siglen;
-
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: mld_keypair failed in signature_extmu test setup\n");
-    return 1;
-  }
 
   TEST_ALLOC_FAILURE("mld_signature_extmu",
-                     mld_signature_extmu(sig, &siglen, mu, sk, ctx),
+                     mld_signature_extmu(sig, &siglen, mu, test_vector_sk, ctx),
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
-  return 0;
-}
-
-static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
-  uint8_t mu[64] = {0};
-  size_t siglen;
-
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in verify_extmu test setup\n");
-    return 1;
-  }
-
-  if (mld_signature_extmu(sig, &siglen, mu, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: mld_signature_extmu failed in verify_extmu test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_verify_extmu",
-                     mld_verify_extmu(sig, siglen, mu, pk, ctx),
-                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
 
 static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
   uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
   uint8_t rnd[32] = {0};
-  const uint8_t sign_ctx[] = "test context";
   size_t siglen;
 
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: mld_keypair failed in signature_pre_hash_shake256 test "
-            "setup\n");
-    return 1;
-  }
+  TEST_ALLOC_FAILURE("mld_signature_pre_hash_shake256",
+                     mld_signature_pre_hash_shake256(
+                         sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                         TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                         TEST_VECTOR_CTX_LEN, rnd, test_vector_sk, ctx),
+                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int test_verify_alloc_failure(test_ctx_t *ctx)
+{
   TEST_ALLOC_FAILURE(
-      "mld_signature_pre_hash_shake256",
-      mld_signature_pre_hash_shake256(sig, &siglen, msg, sizeof(msg), sign_ctx,
-                                      sizeof(sign_ctx) - 1, rnd, sk, ctx),
-      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+      "mld_verify",
+      mld_verify(test_vector_sig, CRYPTO_BYTES,
+                 (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                 (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                 test_vector_pk, ctx),
+      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
+{
+  TEST_ALLOC_FAILURE("mld_verify_extmu",
+                     mld_verify_extmu(test_vector_sig_extmu, CRYPTO_BYTES,
+                                      test_vector_mu, test_vector_pk, ctx),
+                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
 
 static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sig[CRYPTO_BYTES];
-  uint8_t msg[32] = {0};
-  uint8_t rnd[32] = {0};
-  const uint8_t sign_ctx[] = "test context";
-  size_t siglen;
+  TEST_ALLOC_FAILURE("mld_verify_pre_hash_shake256",
+                     mld_verify_pre_hash_shake256(
+                         test_vector_sig_pre_hash_shake256, CRYPTO_BYTES,
+                         (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                         (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                         test_vector_pk, ctx),
+                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+  return 0;
+}
 
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: mld_keypair failed in verify_pre_hash_shake256 test "
-            "setup\n");
-    return 1;
-  }
+static int test_open_alloc_failure(test_ctx_t *ctx)
+{
+  /* crypto_sign_open needs a signed message (sig || msg).
+   * Construct it from test vectors. */
+  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
+  uint8_t msg_out[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
+  size_t smlen = CRYPTO_BYTES + TEST_VECTOR_MSG_LEN;
+  size_t mlen;
 
-  if (mld_signature_pre_hash_shake256(sig, &siglen, msg, sizeof(msg), sign_ctx,
-                                      sizeof(sign_ctx) - 1, rnd, sk, ctx) != 0)
-  {
-    fprintf(stderr,
-            "ERROR: mld_signature_pre_hash_shake256 failed in "
-            "verify_pre_hash_shake256 test setup\n");
-    return 1;
-  }
+  memcpy(sm, test_vector_sig, CRYPTO_BYTES);
+  memcpy(sm + CRYPTO_BYTES, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
 
   TEST_ALLOC_FAILURE(
-      "mld_verify_pre_hash_shake256",
-      mld_verify_pre_hash_shake256(sig, siglen, msg, sizeof(msg), sign_ctx,
-                                   sizeof(sign_ctx) - 1, pk, ctx),
+      "mld_open",
+      mld_open(msg_out, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
+               TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
       MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
-
-static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
-{
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
-
-  reset_all(ctx);
-  if (mld_keypair(pk, sk, ctx) != 0)
-  {
-    fprintf(stderr, "ERROR: mld_keypair failed in pk_from_sk test setup\n");
-    return 1;
-  }
-
-  TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, sk, ctx),
-                     MLD_TOTAL_ALLOC_PK_FROM_SK,
-                     &ctx->global_high_mark_pk_from_sk);
-  return 0;
-}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /*
  * Helper macro to check allocation high watermark matches expected limit.
@@ -601,8 +492,8 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 
 int main(void)
 {
+  int r = 0;
   MLD_ALIGN uint8_t bump_buffer[MLD_BUMP_ALLOC_SIZE];
-  /* Initialize test context with default settings */
   test_ctx_t ctx = {
       NULL,  /* buffer (set below) */
       0,     /* offset */
@@ -620,63 +511,49 @@ int main(void)
   };
   ctx.buffer = bump_buffer;
 
-  if (test_keygen_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
+  /* Keygen tests */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  r |= test_keygen_alloc_failure(&ctx);
+  r |= test_pk_from_sk_alloc_failure(&ctx);
+#endif
 
-  if (test_sign_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
+  /* Sign tests */
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+  r |= test_sign_alloc_failure(&ctx);
+  r |= test_sign_combined_alloc_failure(&ctx);
+  r |= test_signature_extmu_alloc_failure(&ctx);
+  r |= test_signature_pre_hash_shake256_alloc_failure(&ctx);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
-  if (test_verify_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
+  /* Verify tests */
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+  r |= test_verify_alloc_failure(&ctx);
+  r |= test_verify_extmu_alloc_failure(&ctx);
+  r |= test_verify_pre_hash_shake256_alloc_failure(&ctx);
+  r |= test_open_alloc_failure(&ctx);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-  if (test_sign_combined_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_open_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_signature_extmu_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_verify_extmu_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_signature_pre_hash_shake256_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_verify_pre_hash_shake256_alloc_failure(&ctx) != 0)
-  {
-    return 1;
-  }
-
-  if (test_pk_from_sk_alloc_failure(&ctx) != 0)
+  if (r)
   {
     return 1;
   }
 
   /* Check per-operation high watermarks match the declared limits */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLD_TOTAL_ALLOC_KEYPAIR);
   CHECK_ALLOC_MATCH(ctx.global_high_mark_pk_from_sk,
                     MLD_TOTAL_ALLOC_PK_FROM_SK);
+#endif
+#if !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_sign, MLD_TOTAL_ALLOC_SIGN);
+#endif
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
+#endif
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
+    !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_TOTAL_ALLOC);
+#endif
 
   return 0;
 }
