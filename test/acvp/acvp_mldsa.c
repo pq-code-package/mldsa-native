@@ -644,7 +644,7 @@ int main(int argc, char *argv[])
         goto siggen_usage;
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
-      if (mlen > MAX_MSG_LENGTH ||
+      if (ctxlen > MAX_CTX_LENGTH ||
           decode_hex("context", context, ctxlen, *argv) != 0)
       {
         goto siggen_usage;
@@ -745,7 +745,7 @@ int main(int argc, char *argv[])
         goto siggen_deterministic_usage;
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
-      if (mlen > MAX_MSG_LENGTH ||
+      if (ctxlen > MAX_CTX_LENGTH ||
           decode_hex("context", context, ctxlen, *argv) != 0)
       {
         goto siggen_deterministic_usage;
@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
         goto sigver_usage;
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
-      if (mlen > MAX_MSG_LENGTH ||
+      if (ctxlen > MAX_CTX_LENGTH ||
           decode_hex("context", context, ctxlen, *argv) != 0)
       {
         goto sigver_usage;
