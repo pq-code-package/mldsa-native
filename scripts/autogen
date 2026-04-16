@@ -936,19 +936,23 @@ def gen_aarch64_zeta_file():
         yield " * Table of zeta values used in the AArch64 forward NTT"
         yield " * See autogen for details."
         yield " */"
-        yield "MLD_ALIGN const int32_t mld_aarch64_ntt_zetas_layer123456[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t"
+        yield "    mld_aarch64_ntt_zetas_layer123456[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer123456())
         yield "};"
         yield ""
-        yield "MLD_ALIGN const int32_t mld_aarch64_ntt_zetas_layer78[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t"
+        yield "    mld_aarch64_ntt_zetas_layer78[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_fwd_ntt_zetas_layer78())
         yield "};"
         yield ""
-        yield "MLD_ALIGN const int32_t mld_aarch64_intt_zetas_layer78[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t"
+        yield "    mld_aarch64_intt_zetas_layer78[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_intt_zetas_layer78())
         yield "};"
         yield ""
-        yield "MLD_ALIGN const int32_t mld_aarch64_intt_zetas_layer123456[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t"
+        yield "    mld_aarch64_intt_zetas_layer123456[] = {"
         yield from map(lambda t: str(t) + ",", gen_aarch64_intt_zetas_layer123456())
         yield "};"
         yield ""
@@ -999,7 +1003,8 @@ def gen_aarch64_rej_uniform_eta_table():
         yield " * Adapted from ML-KEM for ML-DSA eta rejection sampling."
         yield " * See autogen for details."
         yield " */"
-        yield "MLD_ALIGN const uint8_t mld_rej_uniform_eta_table[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t"
+        yield "    mld_rej_uniform_eta_table[] = {"
         for i, idxs in enumerate(gen_aarch64_rej_uniform_eta_table_rows()):
             yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
@@ -1053,7 +1058,8 @@ def gen_aarch64_rej_uniform_table():
         yield " * Lookup table used by rejection sampling of the public matrix."
         yield " * See autogen for details."
         yield " */"
-        yield "MLD_ALIGN const uint8_t mld_rej_uniform_table[] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t"
+        yield "    mld_rej_uniform_table[] = {"
         for i, idxs in enumerate(gen_aarch64_rej_uniform_table_rows()):
             yield ",".join(map(str, idxs)) + f" /* {i} */,"
         yield "};"
@@ -1133,7 +1139,8 @@ def gen_aarch64_polyz_unpack_table():
             bit_width = gamma1_bits + 1
             indices = list(gen_aarch64_polyz_unpack_indices(bit_width))
             yield param_set_guards[gamma1_bits]
-            yield f"MLD_ALIGN const uint8_t mld_polyz_unpack_{gamma1_bits}_indices[] = {{"
+            yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t"
+            yield f"    mld_polyz_unpack_{gamma1_bits}_indices[] = {{"
             for row_start in range(0, len(indices), 16):
                 yield "    " + format_row(indices[row_start : row_start + 16])
             yield "};"
@@ -1184,7 +1191,8 @@ def gen_avx2_rej_uniform_table():
         yield " * Lookup table used by rejection sampling."
         yield " * See autogen for details."
         yield " */"
-        yield "MLD_ALIGN const uint8_t mld_rej_uniform_table[256][8] = {"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t"
+        yield "    mld_rej_uniform_table[256][8] = {"
         yield from map(lambda t: str(t) + ",", gen_avx2_rej_uniform_table_rows())
         yield "};"
         yield ""
@@ -1372,7 +1380,8 @@ def gen_avx2_zeta_file():
         yield " * Table of zeta values used in the AVX2 forward and inverse NTT"
         yield " * See autogen for details."
         yield " */"
-        yield f"MLD_ALIGN const int32_t mld_qdata[{len(constants)}] = {{"
+        yield "MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t"
+        yield f"    mld_qdata[{len(constants)}] = {{"
         yield from map(lambda t: str(t) + ",", constants)
         yield "};"
         yield ""
@@ -1397,7 +1406,7 @@ def gen_avx2_zeta_file():
         yield ""
         yield "#ifndef __ASSEMBLER__"
         yield "#define mld_qdata MLD_NAMESPACE(qdata)"
-        yield f"extern const int32_t mld_qdata[{len(constants)}];"
+        yield f"MLD_INTERNAL_DATA_DECLARATION const int32_t mld_qdata[{len(constants)}];"
         yield "#endif"
         yield ""
         yield "#endif"

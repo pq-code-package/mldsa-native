@@ -607,8 +607,8 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 /******************************************************************************
  * Name:        MLD_CONFIG_INTERNAL_API_QUALIFIER
  *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of internal API.
+ * Description: If set, this option provides an additional qualifier
+ *              to be added to declarations of internal API functions and data.
  *
  *              The primary use case for this option are single-CU builds,
  *              in which case this option can be set to `static`.

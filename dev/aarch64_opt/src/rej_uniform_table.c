@@ -20,7 +20,7 @@
  * Lookup table used by rejection sampling of the public matrix.
  * See autogen for details.
  */
-MLD_ALIGN const uint8_t mld_rej_uniform_table[] = {
+MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t mld_rej_uniform_table[] = {
     255, 255, 255, 255, 255, 255, 255, 255,
     255, 255, 255, 255, 255, 255, 255, 255 /* 0 */,
     0,   1,   2,   3,   255, 255, 255, 255,

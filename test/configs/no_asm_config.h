@@ -603,8 +603,8 @@ static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
 /******************************************************************************
  * Name:        MLD_CONFIG_INTERNAL_API_QUALIFIER
  *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of internal API.
+ * Description: If set, this option provides an additional qualifier
+ *              to be added to declarations of internal API functions and data.
  *
  *              The primary use case for this option are single-CU builds,
  *              in which case this option can be set to `static`.

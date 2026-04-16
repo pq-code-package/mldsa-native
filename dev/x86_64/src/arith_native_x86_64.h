@@ -29,7 +29,7 @@
 #define MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN (2 * 136)
 
 #define mld_rej_uniform_table MLD_NAMESPACE(mld_rej_uniform_table)
-extern const uint8_t mld_rej_uniform_table[256][8];
+MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[256][8];
 
 #define mld_ntt_avx2 MLD_NAMESPACE(ntt_avx2)
 void mld_ntt_avx2(int32_t *r, const int32_t *qdata)

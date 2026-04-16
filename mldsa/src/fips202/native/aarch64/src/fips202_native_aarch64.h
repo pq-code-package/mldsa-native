@@ -13,7 +13,7 @@
 
 #define mld_keccakf1600_round_constants \
   MLD_NAMESPACE(keccakf1600_round_constants)
-extern const uint64_t mld_keccakf1600_round_constants[];
+MLD_INTERNAL_DATA_DECLARATION const uint64_t mld_keccakf1600_round_constants[];
 
 #define mld_keccak_f1600_x1_scalar_asm MLD_NAMESPACE(keccak_f1600_x1_scalar_asm)
 void mld_keccak_f1600_x1_scalar_asm(uint64_t state[25], const uint64_t rc[24])
