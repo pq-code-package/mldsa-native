@@ -23,7 +23,7 @@
  * See autogen for details.
  */
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint8_t
-    mld_rej_uniform_eta_table[] = {
+    mld_rej_uniform_eta_table[4096] = {
         255, 255, 255, 255, 255, 255, 255, 255,
         255, 255, 255, 255, 255, 255, 255, 255 /* 0 */,
         0,   1,   255, 255, 255, 255, 255, 255,

@@ -21,7 +21,7 @@
  * See autogen for details.
  */
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
-    mld_aarch64_ntt_zetas_layer123456[] = {
+    mld_aarch64_ntt_zetas_layer123456[144] = {
         -3572223, -915382907,  3765607,  964937599,   3761513,  963888510,
         -3201494, -820383522,  -2883726, -738955404,  -3145678, -806080660,
         -3201430, -820367122,  0,        0,           -601683,  -154181397,
@@ -49,7 +49,7 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
 };
 
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
-    mld_aarch64_ntt_zetas_layer78[] = {
+    mld_aarch64_ntt_zetas_layer78[384] = {
         3073009,     1277625,     -2635473,   3852015,     787459213,
         327391679,   -675340520,  987079667,  1753,        -2659525,
         2660408,     -59148,      449207,     -681503850,  681730119,
@@ -130,7 +130,7 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
 };
 
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
-    mld_aarch64_intt_zetas_layer78[] = {
+    mld_aarch64_intt_zetas_layer78[384] = {
         -1744507,    2236726,    1922253,     3818627,     -447030292,
         573161516,   492577742,  978523985,   731434,      781875,
         3773731,     -3531229,   187430119,   200355636,   967019376,
@@ -211,7 +211,7 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
 };
 
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const int32_t
-    mld_aarch64_intt_zetas_layer123456[] = {
+    mld_aarch64_intt_zetas_layer123456[160] = {
         -2283733, -585207070, 0,        0,          -1858416, -476219497,
         -3345963, -857403734, -2815639, -721508096, 0,        0,
         -1853806, -475038184, -2917338, -747568486, 3585098,  918682129,
