@@ -18,29 +18,30 @@
 #define mld_aarch64_intt_zetas_layer123456 \
   MLD_NAMESPACE(aarch64_intt_zetas_layer123456)
 
-MLD_INTERNAL_DATA_DECLARATION const int32_t mld_aarch64_ntt_zetas_layer123456[];
-MLD_INTERNAL_DATA_DECLARATION const int32_t mld_aarch64_ntt_zetas_layer78[];
-
-MLD_INTERNAL_DATA_DECLARATION const int32_t mld_aarch64_intt_zetas_layer78[];
 MLD_INTERNAL_DATA_DECLARATION const int32_t
-    mld_aarch64_intt_zetas_layer123456[];
+    mld_aarch64_ntt_zetas_layer123456[144];
+MLD_INTERNAL_DATA_DECLARATION const int32_t mld_aarch64_ntt_zetas_layer78[384];
+
+MLD_INTERNAL_DATA_DECLARATION const int32_t mld_aarch64_intt_zetas_layer78[384];
+MLD_INTERNAL_DATA_DECLARATION const int32_t
+    mld_aarch64_intt_zetas_layer123456[160];
 
 #define mld_rej_uniform_table MLD_NAMESPACE(rej_uniform_table)
-MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[];
+MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[256];
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta_table MLD_NAMESPACE(rej_uniform_eta_table)
-MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_eta_table[];
+MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_eta_table[4096];
 #endif
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_indices MLD_NAMESPACE(polyz_unpack_17_indices)
-MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_17_indices[];
+MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_17_indices[64];
 #endif
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 #define mld_polyz_unpack_19_indices MLD_NAMESPACE(polyz_unpack_19_indices)
-MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_19_indices[];
+MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_19_indices[64];
 #endif
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
