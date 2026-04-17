@@ -599,14 +599,11 @@ __contract__(
   uint32_t w0_invalid, h_invalid;
   int ret;
 
-  /* TODO: Remove the following workaround for
-   * https://github.com/diffblue/cbmc/issues/8813 */
-  typedef MLD_UNION_OR_STRUCT
+  typedef union
   {
     mld_polyveck w1;
     mld_polyvecl tmp;
-  }
-  w1tmp_u;
+  } w1tmp_u;
   mld_polyveck *w1;
   mld_polyvecl *tmp;
 
@@ -1036,14 +1033,11 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 {
   int ret, cmp;
 
-  /* TODO: Remove the following workaround for
-   * https://github.com/diffblue/cbmc/issues/8813 */
-  typedef MLD_UNION_OR_STRUCT
+  typedef union
   {
     mld_polyveck t1;
     mld_polyveck w1;
-  }
-  t1w1_u;
+  } t1w1_u;
   mld_polyveck *t1;
   mld_polyveck *w1;
 
