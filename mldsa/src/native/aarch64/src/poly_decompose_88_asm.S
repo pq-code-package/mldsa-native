@@ -33,10 +33,8 @@ MLD_ASM_FN_SYMBOL(poly_decompose_88_asm)
         mov	x3, #0x10               // =16
 
 Lpoly_decompose_88_loop:
-        ldr	q0, [x1]
-        ldr	q1, [x1, #0x10]
-        ldr	q2, [x1, #0x20]
-        ldr	q3, [x1, #0x30]
+        ldp	q0, q1, [x1]
+        ldp	q2, q3, [x1, #0x20]
         sqdmulh	v5.4s, v1.4s, v23.4s
         srshr	v5.4s, v5.4s, #0x11
         cmgt	v24.4s, v1.4s, v21.4s
@@ -61,14 +59,10 @@ Lpoly_decompose_88_loop:
         mls	v0.4s, v4.4s, v22.4s
         bic	v4.16b, v4.16b, v24.16b
         add	v0.4s, v0.4s, v24.4s
-        str	q5, [x0, #0x10]
-        str	q6, [x0, #0x20]
-        str	q7, [x0, #0x30]
-        str	q4, [x0], #0x40
-        str	q1, [x1, #0x10]
-        str	q2, [x1, #0x20]
-        str	q3, [x1, #0x30]
-        str	q0, [x1], #0x40
+        stp	q6, q7, [x0, #0x20]
+        stp	q4, q5, [x0], #0x40
+        stp	q2, q3, [x1, #0x20]
+        stp	q0, q1, [x1], #0x40
         subs	x3, x3, #0x1
         b.ne	Lpoly_decompose_88_loop
         ret

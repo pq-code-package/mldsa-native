@@ -105,24 +105,18 @@ MLD_ASM_FN_SYMBOL(poly_decompose_32_asm)
         mov count, #(64/4)
 
 poly_decompose_32_loop:
-        ldr q0, [a0_ptr, #0*16]
-        ldr q1, [a0_ptr, #1*16]
-        ldr q2, [a0_ptr, #2*16]
-        ldr q3, [a0_ptr, #3*16]
+        ldp q0, q1, [a0_ptr, #0*16]
+        ldp q2, q3, [a0_ptr, #2*16]
 
         decompose32 v5, v1, v24
         decompose32 v6, v2, v24
         decompose32 v7, v3, v24
         decompose32 v4, v0, v24
 
-        str q5, [a1_ptr, #1*16]
-        str q6, [a1_ptr, #2*16]
-        str q7, [a1_ptr, #3*16]
-        str q4, [a1_ptr], #4*16
-        str q1, [a0_ptr, #1*16]
-        str q2, [a0_ptr, #2*16]
-        str q3, [a0_ptr, #3*16]
-        str q0, [a0_ptr], #4*16
+        stp q6, q7, [a1_ptr, #2*16]
+        stp q4, q5, [a1_ptr], #4*16
+        stp q2, q3, [a0_ptr, #2*16]
+        stp q0, q1, [a0_ptr], #4*16
 
         subs count, count, #1
         bne poly_decompose_32_loop

@@ -28,14 +28,10 @@ PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l5_asm:
         mov	x3, #0x40               // =64
 
 Lpolyvecl_pointwise_acc_montgomery_l5_loop_start:
-        ldr	q17, [x1, #0x10]
-        ldr	q18, [x1, #0x20]
-        ldr	q19, [x1, #0x30]
-        ldr	q16, [x1], #0x40
-        ldr	q21, [x2, #0x10]
-        ldr	q22, [x2, #0x20]
-        ldr	q23, [x2, #0x30]
-        ldr	q20, [x2], #0x40
+        ldp	q18, q19, [x1, #0x20]
+        ldp	q16, q17, [x1], #0x40
+        ldp	q22, q23, [x2, #0x20]
+        ldp	q20, q21, [x2], #0x40
         smull	v24.2d, v16.2s, v20.2s
         smull2	v25.2d, v16.4s, v20.4s
         smull	v26.2d, v17.2s, v21.2s
@@ -128,10 +124,8 @@ Lpolyvecl_pointwise_acc_montgomery_l5_loop_start:
         smlsl	v30.2d, v19.2s, v0.2s
         smlsl2	v31.2d, v19.4s, v0.4s
         uzp2	v19.4s, v30.4s, v31.4s
-        str	q17, [x0, #0x10]
-        str	q18, [x0, #0x20]
-        str	q19, [x0, #0x30]
-        str	q16, [x0], #0x40
+        stp	q18, q19, [x0, #0x20]
+        stp	q16, q17, [x0], #0x40
         subs	x3, x3, #0x4
         cbnz	x3, Lpolyvecl_pointwise_acc_montgomery_l5_loop_start
         ret

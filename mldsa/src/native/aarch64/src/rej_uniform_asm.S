@@ -36,10 +36,8 @@ MLD_ASM_FN_SYMBOL(rej_uniform_asm)
         eor	v16.16b, v16.16b, v16.16b
 
 Lrej_uniform_initial_zero:
-        str	q16, [x7], #0x40
-        stur	q16, [x7, #-0x30]
-        stur	q16, [x7, #-0x20]
-        stur	q16, [x7, #-0x10]
+        stp	q16, q16, [x7], #0x40
+        stp	q16, q16, [x7, #-0x20]
         add	x11, x11, #0x10
         cmp	x11, #0x100
         b.lt	Lrej_uniform_initial_zero
@@ -160,14 +158,10 @@ Lrej_uniform_memory_copy:
         mov	x7, x8
 
 Lrej_uniform_final_copy:
-        ldr	q16, [x7], #0x40
-        ldur	q17, [x7, #-0x30]
-        ldur	q18, [x7, #-0x20]
-        ldur	q19, [x7, #-0x10]
-        str	q16, [x0], #0x40
-        stur	q17, [x0, #-0x30]
-        stur	q18, [x0, #-0x20]
-        stur	q19, [x0, #-0x10]
+        ldp	q16, q17, [x7], #0x40
+        ldp	q18, q19, [x7, #-0x20]
+        stp	q16, q17, [x0], #0x40
+        stp	q18, q19, [x0, #-0x20]
         add	x11, x11, #0x10
         cmp	x11, #0x100
         b.lt	Lrej_uniform_final_copy

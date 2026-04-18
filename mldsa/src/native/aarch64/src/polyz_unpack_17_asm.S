@@ -21,10 +21,8 @@
 MLD_ASM_FN_SYMBOL(polyz_unpack_17_asm)
 
         .cfi_startproc
-        ldr	q24, [x2]
-        ldr	q25, [x2, #0x10]
-        ldr	q26, [x2, #0x20]
-        ldr	q27, [x2, #0x30]
+        ldp	q24, q25, [x2]
+        ldp	q26, q27, [x2, #0x20]
         mov	x3, #0xfe00000000       // =1090921693184
         mov	v28.d[0], x3
         mov	x3, #0xfc               // =252
@@ -54,10 +52,8 @@ Lpolyz_unpack_17_loop:
         ushl	v7.4s, v7.4s, v28.4s
         and	v7.16b, v7.16b, v29.16b
         sub	v7.4s, v30.4s, v7.4s
-        str	q5, [x0, #0x10]
-        str	q6, [x0, #0x20]
-        str	q7, [x0, #0x30]
-        str	q4, [x0], #0x40
+        stp	q6, q7, [x0, #0x20]
+        stp	q4, q5, [x0], #0x40
         subs	x9, x9, #0x1
         b.ne	Lpolyz_unpack_17_loop
         ret

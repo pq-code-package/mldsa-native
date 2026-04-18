@@ -35,10 +35,8 @@ MLD_ASM_FN_SYMBOL(poly_chknorm_asm)
         mov count, #(64/4)
 
 poly_chknorm_loop:
-        ldr q1, [a_ptr, #1*16]
-        ldr q2, [a_ptr, #2*16]
-        ldr q3, [a_ptr, #3*16]
-        ldr q0, [a_ptr], #4*16
+        ldp q2, q3, [a_ptr, #2*16]
+        ldp q0, q1, [a_ptr], #4*16
 
         chknorm v1
         chknorm v2

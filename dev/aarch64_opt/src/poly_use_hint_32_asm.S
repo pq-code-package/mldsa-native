@@ -85,25 +85,19 @@ MLD_ASM_FN_SYMBOL(poly_use_hint_32_asm)
         mov count, #(64/4)
 
 poly_use_hint_32_loop:
-        ldr q1, [a_ptr, #1*16]
-        ldr q2, [a_ptr, #2*16]
-        ldr q3, [a_ptr, #3*16]
-        ldr q0, [a_ptr], #4*16
+        ldp q2, q3, [a_ptr, #2*16]
+        ldp q0, q1, [a_ptr], #4*16
 
-        ldr q5, [h_ptr, #1*16]
-        ldr q6, [h_ptr, #2*16]
-        ldr q7, [h_ptr, #3*16]
-        ldr q4, [h_ptr], #4*16
+        ldp q6, q7, [h_ptr, #2*16]
+        ldp q4, q5, [h_ptr], #4*16
 
         use_hint32 v17, v1, v5, v25
         use_hint32 v18, v2, v6, v25
         use_hint32 v19, v3, v7, v25
         use_hint32 v16, v0, v4, v25
 
-        str q17, [b_ptr, #1*16]
-        str q18, [b_ptr, #2*16]
-        str q19, [b_ptr, #3*16]
-        str q16, [b_ptr], #4*16
+        stp q18, q19, [b_ptr, #2*16]
+        stp q16, q17, [b_ptr], #4*16
 
         subs count, count, #1
         bne poly_use_hint_32_loop

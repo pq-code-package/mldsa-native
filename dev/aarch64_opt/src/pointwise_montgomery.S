@@ -88,15 +88,11 @@ MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_asm)
     mov count, #(MLDSA_N / 4)
 
 poly_pointwise_montgomery_loop_start:
-    ldr q_a_1, [a_ptr, #1*16]
-    ldr q_a_2, [a_ptr, #2*16]
-    ldr q_a_3, [a_ptr, #3*16]
-    ldr q_a_0, [a_ptr], #4*16
+    ldp q_a_2, q_a_3, [a_ptr, #2*16]
+    ldp q_a_0, q_a_1, [a_ptr], #4*16
 
-    ldr q_b_1, [b_ptr, #1*16]
-    ldr q_b_2, [b_ptr, #2*16]
-    ldr q_b_3, [b_ptr, #3*16]
-    ldr q_b_0, [b_ptr], #4*16
+    ldp q_b_2, q_b_3, [b_ptr, #2*16]
+    ldp q_b_0, q_b_1, [b_ptr], #4*16
     // Bounds: |a_{i}|, |b_{i}| < 9q
 
     pmull c_0_lo, c_0_hi, a_0, b_0
@@ -115,10 +111,8 @@ poly_pointwise_montgomery_loop_start:
     //
     // See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
 
-    str q_c_1, [out_ptr, #1*16]
-    str q_c_2, [out_ptr, #2*16]
-    str q_c_3, [out_ptr, #3*16]
-    str q_c_0, [out_ptr], #4*16
+    stp q_c_2, q_c_3, [out_ptr, #2*16]
+    stp q_c_0, q_c_1, [out_ptr], #4*16
 
     subs count, count, #4
     cbnz count, poly_pointwise_montgomery_loop_start

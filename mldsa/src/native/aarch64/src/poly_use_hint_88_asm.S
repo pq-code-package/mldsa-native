@@ -34,14 +34,10 @@ MLD_ASM_FN_SYMBOL(poly_use_hint_88_asm)
         mov	x3, #0x10               // =16
 
 Lpoly_use_hint_88_loop:
-        ldr	q1, [x1, #0x10]
-        ldr	q2, [x1, #0x20]
-        ldr	q3, [x1, #0x30]
-        ldr	q0, [x1], #0x40
-        ldr	q5, [x2, #0x10]
-        ldr	q6, [x2, #0x20]
-        ldr	q7, [x2, #0x30]
-        ldr	q4, [x2], #0x40
+        ldp	q2, q3, [x1, #0x20]
+        ldp	q0, q1, [x1], #0x40
+        ldp	q6, q7, [x2, #0x20]
+        ldp	q4, q5, [x2], #0x40
         sqdmulh	v17.4s, v1.4s, v23.4s
         srshr	v17.4s, v17.4s, #0x11
         cmgt	v25.4s, v1.4s, v21.4s
@@ -90,10 +86,8 @@ Lpoly_use_hint_88_loop:
         cmgt	v25.4s, v16.4s, v24.4s
         bic	v16.16b, v16.16b, v25.16b
         umin	v16.4s, v16.4s, v24.4s
-        str	q17, [x0, #0x10]
-        str	q18, [x0, #0x20]
-        str	q19, [x0, #0x30]
-        str	q16, [x0], #0x40
+        stp	q18, q19, [x0, #0x20]
+        stp	q16, q17, [x0], #0x40
         subs	x3, x3, #0x1
         b.ne	Lpoly_use_hint_88_loop
         ret

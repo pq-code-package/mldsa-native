@@ -69,35 +69,25 @@
 .endm
 
 .macro load_roots_123
-        ldr q_root0, [r012345_ptr], #(4*16)
-        ldr q_root1, [r012345_ptr, #(-4*16 + 1*16)]
-        ldr q_root2, [r012345_ptr, #(-4*16 + 2*16)]
-        ldr q_root3, [r012345_ptr, #(-4*16 + 3*16)]
+        ldp q_root0, q_root1, [r012345_ptr], #(4*16)
+        ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_456
-       ldr q_root0, [r012345_ptr], #(4*16)
-       ldr q_root1, [r012345_ptr, #(-4*16 + 1*16)]
-       ldr q_root2, [r012345_ptr, #(-4*16 + 2*16)]
-       ldr q_root3, [r012345_ptr, #(-4*16 + 3*16)]
+       ldp q_root0, q_root1, [r012345_ptr], #(4*16)
+       ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_78_1
-        ldr q_root0,    [r67_ptr], #(12*16)
-        ldr q_root0_tw, [r67_ptr, #(-12*16 + 1*16)]
-        ldr q_root1,    [r67_ptr, #(-12*16 + 2*16)]
-        ldr q_root1_tw, [r67_ptr, #(-12*16 + 3*16)]
-        ldr q_root2,    [r67_ptr, #(-12*16 + 4*16)]
-        ldr q_root2_tw, [r67_ptr, #(-12*16 + 5*16)]
+        ldp q_root0, q_root0_tw, [r67_ptr], #(12*16)
+        ldp q_root1, q_root1_tw, [r67_ptr, #(-12*16 + 2*16)]
+        ldp q_root2, q_root2_tw, [r67_ptr, #(-12*16 + 4*16)]
 .endm
 
 .macro load_next_roots_78_2
-        ldr q_root0,    [r67_ptr, #(-12*16 + 6*16)]
-        ldr q_root0_tw, [r67_ptr, #(-12*16 + 7*16)]
-        ldr q_root1,    [r67_ptr, #(-12*16 + 8*16)]
-        ldr q_root1_tw, [r67_ptr, #(-12*16 + 9*16)]
-        ldr q_root2,    [r67_ptr, #(-12*16 + 10*16)]
-        ldr q_root2_tw, [r67_ptr, #(-12*16 + 11*16)]
+        ldp q_root0, q_root0_tw, [r67_ptr, #(-12*16 + 6*16)]
+        ldp q_root1, q_root1_tw, [r67_ptr, #(-12*16 + 8*16)]
+        ldp q_root2, q_root2_tw, [r67_ptr, #(-12*16 + 10*16)]
 .endm
 
 .macro transpose4 data0, data1, data2, data3

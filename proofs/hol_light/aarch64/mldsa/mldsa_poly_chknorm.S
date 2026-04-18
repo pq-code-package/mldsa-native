@@ -25,10 +25,8 @@ PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_asm:
         mov	x2, #0x10               // =16
 
 Lpoly_chknorm_loop:
-        ldr	q1, [x0, #0x10]
-        ldr	q2, [x0, #0x20]
-        ldr	q3, [x0, #0x30]
-        ldr	q0, [x0], #0x40
+        ldp	q2, q3, [x0, #0x20]
+        ldp	q0, q1, [x0], #0x40
         abs	v1.4s, v1.4s
         cmge	v1.4s, v1.4s, v20.4s
         orr	v21.16b, v21.16b, v1.16b

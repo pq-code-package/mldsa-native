@@ -26,10 +26,8 @@ PQCP_MLDSA_NATIVE_MLDSA44_poly_caddq_asm:
         mov	x1, #0x10               // =16
 
 Lpoly_caddq_loop:
-        ldr	q0, [x0]
-        ldr	q1, [x0, #0x10]
-        ldr	q2, [x0, #0x20]
-        ldr	q3, [x0, #0x30]
+        ldp	q0, q1, [x0]
+        ldp	q2, q3, [x0, #0x20]
         ushr	v5.4s, v0.4s, #0x1f
         mla	v0.4s, v5.4s, v4.4s
         ushr	v5.4s, v1.4s, #0x1f
@@ -38,10 +36,8 @@ Lpoly_caddq_loop:
         mla	v2.4s, v5.4s, v4.4s
         ushr	v5.4s, v3.4s, #0x1f
         mla	v3.4s, v5.4s, v4.4s
-        str	q1, [x0, #0x10]
-        str	q2, [x0, #0x20]
-        str	q3, [x0, #0x30]
-        str	q0, [x0], #0x40
+        stp	q2, q3, [x0, #0x20]
+        stp	q0, q1, [x0], #0x40
         subs	x1, x1, #0x1
         b.ne	Lpoly_caddq_loop
         ret

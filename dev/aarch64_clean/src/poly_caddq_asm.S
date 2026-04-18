@@ -32,20 +32,16 @@ MLD_ASM_FN_SYMBOL(poly_caddq_asm)
 
         mov count, #64/4
 poly_caddq_loop:
-        ldr q0, [a_ptr, #0*16]
-        ldr q1, [a_ptr, #1*16]
-        ldr q2, [a_ptr, #2*16]
-        ldr q3, [a_ptr, #3*16]
+        ldp q0, q1, [a_ptr, #0*16]
+        ldp q2, q3, [a_ptr, #2*16]
 
         caddq v0
         caddq v1
         caddq v2
         caddq v3
 
-        str q1, [a_ptr, #1*16]
-        str q2, [a_ptr, #2*16]
-        str q3, [a_ptr, #3*16]
-        str q0, [a_ptr], #4*16
+        stp q2, q3, [a_ptr, #2*16]
+        stp q0, q1, [a_ptr], #4*16
 
         subs count, count, #1
         bne poly_caddq_loop

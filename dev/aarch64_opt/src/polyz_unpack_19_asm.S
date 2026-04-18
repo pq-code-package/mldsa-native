@@ -46,10 +46,8 @@
 .balign 4
 MLD_ASM_FN_SYMBOL(polyz_unpack_19_asm)
         // Load indices
-        ldr q24, [indices]
-        ldr q25, [indices, #1*16]
-        ldr q26, [indices, #2*16]
-        ldr q27, [indices, #3*16]
+        ldp q24, q25, [indices]
+        ldp q26, q27, [indices, #2*16]
 
         // Load per-lane shifts 0, -4, 0, -4. (Negative means right shift.)
         // The shifts for the 4 32-bit lanes are sign-extended from the lowest
@@ -82,10 +80,8 @@ polyz_unpack_19_loop:
         trim_map_19 v6
         trim_map_19 v7
 
-        str q5, [output, #1*16]
-        str q6, [output, #2*16]
-        str q7, [output, #3*16]
-        str q4, [output], #4*16
+        stp q6, q7, [output, #2*16]
+        stp q4, q5, [output], #4*16
 
         subs count, count, #1
         bne polyz_unpack_19_loop

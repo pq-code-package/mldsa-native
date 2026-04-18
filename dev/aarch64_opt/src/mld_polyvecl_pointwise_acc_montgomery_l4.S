@@ -17,10 +17,8 @@
 
 .macro load_polys p0, p1, p2, p3, ptr, idx
 .if \idx == 0
-    ldr \p1, [\ptr, #1*16]
-    ldr \p2, [\ptr, #2*16]
-    ldr \p3, [\ptr, #3*16]
-    ldr \p0, [\ptr], #4*16
+    ldp \p2, \p3, [\ptr, #2*16]
+    ldp \p0, \p1, [\ptr], #4*16
 .else
     ldr \p0, [\ptr, #(1024*\idx-4*16)]
     ldr \p1, [\ptr, #(1024*\idx-3*16)]
@@ -155,10 +153,8 @@ polyvecl_pointwise_acc_montgomery_l4_loop_start:
     //
     // See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
 
-    str q_c_1, [out_ptr, #1*16]
-    str q_c_2, [out_ptr, #2*16]
-    str q_c_3, [out_ptr, #3*16]
-    str q_c_0, [out_ptr], #4*16
+    stp q_c_2, q_c_3, [out_ptr, #2*16]
+    stp q_c_0, q_c_1, [out_ptr], #4*16
 
     subs count, count, #4
     cbnz count, polyvecl_pointwise_acc_montgomery_l4_loop_start

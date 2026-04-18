@@ -127,10 +127,8 @@ MLD_ASM_FN_SYMBOL(rej_uniform_asm)
     mov initial_zero_count, #0
     eor val0.16b, val0.16b, val0.16b
 rej_uniform_initial_zero:
-        str val0q, [output_tmp], #64
-        str val0q, [output_tmp, #-48]
-        str val0q, [output_tmp, #-32]
-        str val0q, [output_tmp, #-16]
+        stp val0q, val0q, [output_tmp], #64
+        stp val0q, val0q, [output_tmp, #-32]
         add initial_zero_count, initial_zero_count, #16
         cmp initial_zero_count, #MLDSA_N
         b.lt rej_uniform_initial_zero
@@ -327,14 +325,10 @@ rej_uniform_memory_copy:
     mov final_copy_count, #0
     mov output_tmp, output_tmp_base
 rej_uniform_final_copy:
-        ldr val0q, [output_tmp], #64
-        ldr val1q, [output_tmp, #-48]
-        ldr val2q, [output_tmp, #-32]
-        ldr val3q, [output_tmp, #-16]
-        str val0q, [output], #64
-        str val1q, [output, #-48]
-        str val2q, [output, #-32]
-        str val3q, [output, #-16]
+        ldp val0q, val1q, [output_tmp], #64
+        ldp val2q, val3q, [output_tmp, #-32]
+        stp val0q, val1q, [output], #64
+        stp val2q, val3q, [output, #-32]
         add final_copy_count, final_copy_count, #16
         cmp final_copy_count, #MLDSA_N
         b.lt rej_uniform_final_copy

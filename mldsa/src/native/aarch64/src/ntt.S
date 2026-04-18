@@ -55,10 +55,8 @@ MLD_ASM_FN_SYMBOL(ntt_asm)
         dup	v7.4s, w5
         mov	x3, x0
         mov	x4, #0x8                // =8
-        ldr	q0, [x1], #0x40
-        ldur	q1, [x1, #-0x30]
-        ldur	q2, [x1, #-0x20]
-        ldur	q3, [x1, #-0x10]
+        ldp	q0, q1, [x1], #0x40
+        ldp	q2, q3, [x1, #-0x20]
         ldr	q23, [x0, #0x390]
         ldr	q13, [x0, #0x380]
         ldr	q22, [x0, #0x80]
