@@ -541,7 +541,6 @@ def adjust_preprocessor_comments_for_filename(
 
     ```
     """
-
     content = content.split("\n")
     new_content = []
 
@@ -557,23 +556,23 @@ def adjust_preprocessor_comments_for_filename(
     # - `force_print` indicates if a comment should be omitted
     if_stack = []
 
-    def merge_escaped_lines(l, i):
-        while l.endswith("\\"):
-            l = l.removesuffix("\\").rstrip() + content[i + 1].lstrip()
+    def merge_escaped_lines(line, i):
+        while line.endswith("\\"):
+            line = line.removesuffix("\\").rstrip() + content[i + 1].lstrip()
             i = i + 1
-        return (l, i)
+        return (line, i)
 
-    def merge_commented_lines(l, i):
+    def merge_commented_lines(line, i):
         # Not very robust, but good enough
-        if not "/*" in l or "*/" in l:
-            return (l, i)
+        if "/*" not in line or "*/" in line:
+            return (line, i)
         i += 1
         while "*/" not in content[i]:
-            l += content[i]
+            line += content[i]
             i += 1
 
-        l += content[i]
-        return (l, i)
+        line += content[i]
+        return (line, i)
 
     def should_print(cur_line_no, conds, line_no, force_print):
         line_threshold = 5
@@ -632,26 +631,26 @@ def adjust_preprocessor_comments_for_filename(
 
     i = 0
     while i < len(content):
-        l = content[i].strip()
+        line = content[i].strip()
         # Replace #ifdef by #if defined(...)
-        if l.startswith("#ifdef "):
-            l = "#if defined(" + l.removeprefix("#ifdef").strip() + ")"
-        if l.startswith("#ifndef "):
-            l = "#if !defined(" + l.removeprefix("#ifndef").strip() + ")"
-        if l.startswith("#if"):
-            l, _ = merge_escaped_lines(l, i)
-            cond = l.removeprefix("#if")
+        if line.startswith("#ifdef "):
+            line = "#if defined(" + line.removeprefix("#ifdef").strip() + ")"
+        if line.startswith("#ifndef "):
+            line = "#if !defined(" + line.removeprefix("#ifndef").strip() + ")"
+        if line.startswith("#if"):
+            line, _ = merge_escaped_lines(line, i)
+            cond = line.removeprefix("#if")
             if_stack.append(([cond], i, True, False))
             new_content.append(content[i])
-        elif l.startswith("#elif"):
+        elif line.startswith("#elif"):
             conds, _, _, force_print = if_stack.pop()
-            l, _ = merge_escaped_lines(l, i)
-            conds.append(l.removeprefix("#elif"))
+            line, _ = merge_escaped_lines(line, i)
+            conds.append(line.removeprefix("#elif"))
             if_stack.append((conds, i, True, force_print))
             new_content.append(content[i])
-        elif l.startswith("#else"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#else"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             assert branch is True
             print_else = should_print(i, cond, j, force_print)
@@ -661,9 +660,9 @@ def adjust_preprocessor_comments_for_filename(
                 new_content.append(adhoc_format("#else", cond))
             else:
                 new_content.append("#else")
-        elif l.startswith("#endif"):
-            l, i = merge_escaped_lines(l, i)
-            _, i = merge_commented_lines(l, i)
+        elif line.startswith("#endif"):
+            line, i = merge_escaped_lines(line, i)
+            _, i = merge_commented_lines(line, i)
             conds, j, branch, force_print = if_stack.pop()
             print_endif = should_print(i, conds, j, force_print)
             if print_endif is False:
@@ -676,7 +675,7 @@ def adjust_preprocessor_comments_for_filename(
             # handle `#if ...` inside documentation as this would
             # lead to nested `/* ... */`.
             i_old = i
-            _, i = merge_commented_lines(l, i_old)
+            _, i = merge_commented_lines(line, i_old)
             new_content += content[i_old : i + 1]
         i += 1
 
@@ -811,7 +810,6 @@ def gen_aarch64_fwd_ntt_zetas_layer78():
     # Layers 4,5,6,7,8 are merged, but we emit roots for 4,5,6
     # in separate arrays than those for 7,8
     for block in range(8):
-
         # Ordering of blocks is adjusted to suit the transposed internal
         # presentation of the data
 
@@ -901,7 +899,6 @@ def gen_aarch64_intt_zetas_layer123456():
 
 
 def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
-
     # Format of integer list entries, including `;` separator:
     # - Positive numbers: &42;
     # - Negative numbers: -- &42;
@@ -914,12 +911,12 @@ def print_hol_light_array(g, as_int=True, entries_per_line=8, pad=0):
         c = "&" if as_int is True else ""
         return f"{prefix}{c}{n:>{pad}};"
 
-    l = list(map(format_hol_light_int, g))
+    items = list(map(format_hol_light_int, g))
     # Remove `;` from end of last entry
-    l[-1] = l[-1][:-1]
+    items[-1] = items[-1][:-1]
 
-    for i in range(0, len(l), entries_per_line):
-        yield "  " + " ".join(l[i : i + entries_per_line])
+    for i in range(0, len(items), entries_per_line):
+        yield "  " + " ".join(items[i : i + entries_per_line])
 
 
 def emit_c_array(type_str, name, data, formatter=None, suffix=""):
@@ -1259,14 +1256,6 @@ def gen_avx2_rej_uniform_table():
     update_file("dev/x86_64/src/rej_uniform_table.c", "\n".join(gen()))
 
 
-def signed_reduce(a):
-    """Return signed canonical representative of a mod b"""
-    c = a % modulus
-    if c >= modulus / 2:
-        c -= modulus
-    return c
-
-
 def signed_reduce_u32(a):
     """Return signed canonical representative of a mod b"""
     c = a % 2**32
@@ -1297,7 +1286,6 @@ def gen_avx2_root_of_unity_for_block(layer, block, mult=False):
 
 
 def gen_avx2_fwd_ntt_zetas(mult=False):
-
     def gen_twiddles(layer, block, repeat, mult):
         root = gen_avx2_root_of_unity_for_block(layer, block, mult)
         return [root] * repeat
@@ -1309,7 +1297,7 @@ def gen_avx2_fwd_ntt_zetas(mult=False):
                 block_offsets,
             )
         )
-        yield from (r for l in roots for r in l)
+        yield from (r for ln in roots for r in ln)
 
     # embed the scaling of 1/256 and correction of the Montgomery factor
     # from the basemul into last twiddle of the inverse NTT
@@ -1544,8 +1532,8 @@ def get_all_files():
 
 
 def get_defines_from_file(c):
-    for l in read_file(c).split("\n"):
-        m = _RE_DEFINE.match(l)
+    for line in read_file(c).split("\n"):
+        m = _RE_DEFINE.match(line)
         if m:
             yield (c, m.group(1))
 
@@ -1580,9 +1568,10 @@ def get_checked_defines():
 
 
 def gen_monolithic_undef_all_core(filt=None, desc=""):
-
     if filt is None:
-        filt = lambda c: True
+
+        def filt(c):
+            return True
 
     if desc != "":
         yield "/*"
@@ -1785,7 +1774,6 @@ def gen_macro_undefs(extra_notes=None):
 
 
 def gen_monolithic_source_file():
-
     def gen():
         c_sources = get_c_source_files(main_only=True, strip_mldsa=True)
         yield from gen_header()
@@ -1880,7 +1868,6 @@ def gen_monolithic_source_file():
 
 
 def gen_monolithic_asm_file():
-
     def gen():
         asm_sources = get_asm_source_files(main_only=True, strip_mldsa=True)
         yield from gen_header()
@@ -2100,22 +2087,22 @@ def check_macro_typos():
 def check_asm_register_aliases_for_file(filename):
     """Checks that `filename` has no mismatching or dangling register aliases"""
 
-    def get_alias_def(l):
-        s = list(filter(lambda s: s != "", l.strip().split(" ")))
+    def get_alias_def(line):
+        s = list(filter(lambda s: s != "", line.strip().split(" ")))
         if len(s) < 3 or s[1] != ".req":
             return None
         return s[0]
 
-    def get_alias_undef(l):
-        if l.strip().startswith(".unreq") is False:
+    def get_alias_undef(line):
+        if line.strip().startswith(".unreq") is False:
             return None
-        return list(filter(lambda s: s != "", l.strip().split(" ")))[1]
+        return list(filter(lambda s: s != "", line.strip().split(" ")))[1]
 
     content = read_file(filename)
     aliases = {}
-    for i, l in enumerate(content.split("\n")):
-        alias_def = get_alias_def(l)
-        alias_undef = get_alias_undef(l)
+    for i, line in enumerate(content.split("\n")):
+        alias_def = get_alias_def(line)
+        alias_undef = get_alias_undef(line)
         if alias_def is not None:
             if alias_def in aliases.keys():
                 raise Exception(
@@ -2157,7 +2144,6 @@ def check_asm_loop_labels_for_file(filename):
     content = read_file(filename)
 
     # Find function symbol name
-    func_pattern = r"MLD_ASM_FN_SYMBOL\((.*)\)"
     res = _RE_FUNC_SYMBOL.search(content)
     if res is None:
         raise Exception(f"Could not find function symbol in assembly file {filename}")
@@ -2264,7 +2250,6 @@ def update_via_simpasm(
     force_cross=False,
     x86_64_syntax="att",
 ):
-
     _, infile = os.path.split(infile_full)
     if outfile is None:
         outfile = infile
@@ -2341,7 +2326,7 @@ def update_via_simpasm(
             # Add syntax option for x86_64
             if arch == "x86_64" and x86_64_syntax != "att":
                 cmd += ["--syntax", x86_64_syntax]
-            r = subprocess.run(
+            subprocess.run(
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
@@ -2503,7 +2488,6 @@ def gen_hol_light_asm():
 
 
 def update_via_copy(infile_full, outfile_full, transform=None):
-
     content = read_file(infile_full)
 
     if transform is not None:
@@ -2521,7 +2505,6 @@ SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
 
 
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
-
     if not f.endswith(SYNCHRONIZED_EXTENSIONS):
         return None
 
@@ -2540,7 +2523,9 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
         # don't do it here, the dry-run would fail because of a
         # mismatching intermediate file
         if f.endswith(".h"):
-            transform = lambda c: adjust_header_guard_for_filename(c, outfile_full)
+
+            def transform(c):
+                return adjust_header_guard_for_filename(c, outfile_full)
         else:
             transform = None
         update_via_copy(f, outfile_full, transform=transform)
@@ -2603,7 +2588,7 @@ def synchronize_backends(
         )
 
         update_via_copy(
-            f"dev/x86_64/meta.h",
+            "dev/x86_64/meta.h",
             "mldsa/src/native/x86_64/meta.h",
             transform=lambda c: adjust_header_guard_for_filename(
                 c, "mldsa/src/native/x86_64/meta.h"
@@ -2669,7 +2654,6 @@ def synchronize_backends(
 
 
 def adjust_header_guard_for_filename(content, header_file):
-
     content = content.split("\n")
     exceptions = {
         "mldsa/mldsa_native.h": "MLD_H",
@@ -2693,7 +2677,7 @@ def adjust_header_guard_for_filename(content, header_file):
         yield f"#define {guard_name}"
 
     def gen_footer():
-        yield f"#endif"
+        yield "#endif"
         yield ""
 
     guard = list(gen_guard())
@@ -2701,8 +2685,8 @@ def adjust_header_guard_for_filename(content, header_file):
 
     # Skip over initial commentary
     insert_at = None
-    for i, l in enumerate(content):
-        if l.strip() == "" or l.startswith(("/*", " *")):
+    for i, line in enumerate(content):
+        if line.strip() == "" or line.startswith(("/*", " *")):
             continue
         insert_at = i
         break
@@ -2746,7 +2730,6 @@ def gen_header_guards():
 
 
 def gen_source_undefs(source_file):
-
     # Get list of #define's clauses in this source file (ignore filename)
     undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
     if not undef_list:
@@ -2826,7 +2809,6 @@ def gen_slothy(funcs):
     targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
-
         if t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
         else:
@@ -2904,7 +2886,6 @@ class BibliographyEntry:
 
 
 def gen_markdown_citations_for(filename, bibliography):
-
     # Skip BIBLIOGRAPHY.md
     if filename == "BIBLIOGRAPHY.md":
         return
@@ -2917,8 +2898,8 @@ def gen_markdown_citations_for(filename, bibliography):
 
     # Lookup all citations in style `[^ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_MARKDOWN_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_MARKDOWN_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             uses.append((filename, i))
@@ -2935,12 +2916,12 @@ def gen_markdown_citations_for(filename, bibliography):
     # Find explicit footnote definitions outside the bibliography block
     # These are lines matching `[^ID]: ...` and should be excluded from autogeneration
     explicit_footnotes = set()
-    for l in content:
-        m = re.match(r"^\[\^(\w+)\]:", l)
+    for line in content:
+        m = re.match(r"^\[\^(\w+)\]:", line)
         if m:
             explicit_footnotes.add(m.group(1))
 
-    # Add footnotes for all citations found
+    # Add footnotes for all citations found (excluding explicit ones)
     cite_ids = [c for c in citations.keys() if c not in explicit_footnotes]
     cite_ids.sort()
     if len(cite_ids) > 0:
@@ -2966,7 +2947,6 @@ def gen_markdown_citations_for(filename, bibliography):
 
 
 def gen_c_citations_for(filename, bibliography):
-
     content = read_file(filename)
 
     if not _RE_C_CITE.search(content):
@@ -2986,8 +2966,8 @@ def gen_c_citations_for(filename, bibliography):
 
     # Lookup all citations in style `@[ID]`
     citations = {}
-    for i, l in enumerate(content):
-        for m in _RE_C_CITE.finditer(l):
+    for i, line in enumerate(content):
+        for m in _RE_C_CITE.finditer(line):
             cite_id = m.group("id")
             uses = citations.get(cite_id, [])
             # Remember usage. +1 because line counting starts at 1
@@ -3007,7 +2987,7 @@ def gen_c_citations_for(filename, bibliography):
             raise Exception(
                 f"Could not find bibliography entry {cite_id} referenced in {filename}"
             )
-        references.append(f" *")
+        references.append(" *")
         references.append(f" * - [{cite_id}]")
         prefix = " *   "
         # Wrap long lines at 80 chars
@@ -3037,8 +3017,8 @@ def gen_c_citations_for(filename, bibliography):
         # Add references to file after initial header section
         # Skip over copyright
         insert_at = None
-        for i, l in enumerate(content):
-            if l.startswith(("/*", " *")):
+        for i, line in enumerate(content):
+            if line.startswith(("/*", " *")):
                 continue
             insert_at = i
             break
@@ -3072,7 +3052,6 @@ def gen_citations_for(filename, bibliography):
 
 
 def gen_bib_file(bibliography):
-
     content = [
         "[//]: # (SPDX-License-Identifier: CC-BY-4.0)",
         "[//]: # (This file is auto-generated from BIBLIOGRAPHY.yml)",
@@ -3093,11 +3072,11 @@ def gen_bib_file(bibliography):
         content.append(f"### `{cite_id}`")
         content.append("")
         content.append(f"* {entry.name}")
-        content.append(f"* Author(s):")
+        content.append("* Author(s):")
         for author in entry.authors:
             content.append(f"  - {author}")
         content.append(f"* URL: {entry.url}")
-        content.append(f"* Referenced from:")
+        content.append("* Referenced from:")
         # Usages are pairs of (filename, line_count)
         # Ignore line_count for now, as it would require `autogen` after
         # a change to source files.
@@ -3228,7 +3207,7 @@ def gen_citations():
 
 
 def extract_bytecode_from_output(output_text):
-    """Convert output of proofs/hol_light/x86_64/proofs/dump_bytecode.native
+    """Convert output of proofs/hol_light/{aarch64,x86_64}/proofs/dump_bytecode.native
     into a dictionary mapping function names to byte code strings."""
     bytecode_dict = {}
 
@@ -3251,7 +3230,6 @@ def extract_bytecode_from_output(output_text):
             bytecode = "\n".join(bytecode_lines).strip()
             bytecode_dict[filename] = bytecode
         i += 1
-
     return bytecode_dict
 
 
@@ -3508,7 +3486,7 @@ def gen_test_vectors(msg, ctx):
             "sigGenInternal",
             f"message={mu_hex}",
             f"sk={keygen_out['sk']}",
-            f"externalMu=1",
+            "externalMu=1",
             f"rnd={rnd}",
         )
 

@@ -69,11 +69,11 @@ def github_summary(title, test_label, results):
             )
         ]
 
-    def find_last_consecutive_match(l, s):
-        for i, v in enumerate(l[s + 1 :]):
+    def find_last_consecutive_match(lines, s):
+        for i, v in enumerate(lines[s + 1 :]):
             if not v.startswith("|") or not v.endswith("|"):
                 return i + 1
-        return len(l)
+        return len(lines)
 
     def add_summaries(fn, title, summaries):
         summary_title = "| Tests |"
@@ -473,7 +473,7 @@ class Tests:
         # Add FIPS202 backend selection if specified and this is an OPT build
         if self.args.fips202_aarch64_backend != "auto" and opt is True:
             # Make sure we're forcing AArch64 architecture
-            if not " -DMLD_FORCE_AARCH64" in cflags:
+            if " -DMLD_FORCE_AARCH64" not in cflags:
                 cflags += " -DMLD_FORCE_AARCH64"
 
             # Enable native backend for FIPS202
@@ -709,16 +709,16 @@ class Tests:
 
     def examples(self):
         if self.args.l is None:
-            l = TEST_TYPES.examples()
+            items = TEST_TYPES.examples()
         else:
-            l = list(map(TEST_TYPES.from_string, self.args.l))
+            items = list(map(TEST_TYPES.from_string, self.args.l))
 
         # Filter out excluded examples
         if hasattr(self.args, "exclude_example") and self.args.exclude_example:
             excluded = [TEST_TYPES.from_string(ex) for ex in self.args.exclude_example]
-            l = [e for e in l if e not in excluded]
+            items = [e for e in items if e not in excluded]
 
-        for e in l:
+        for e in items:
             self._compile_schemes(e, None)
             self._run_scheme(e, None, None)
 
@@ -768,7 +768,7 @@ class Tests:
 
                 lines = [line for line in r.splitlines() if "=" in line]
 
-                d = {k.strip(): int(v) for k, v in (l.split("=") for l in lines)}
+                d = {k.strip(): int(v) for k, v in (ln.split("=") for ln in lines)}
                 for primitive in ["keypair", "sign", "verify"]:
                     v.append(
                         {
@@ -799,7 +799,6 @@ class Tests:
         self.check_fail()
 
     def size(self):
-
         test_type = TEST_TYPES.SIZE
 
         resultss = None
@@ -885,7 +884,6 @@ class Tests:
         self.check_fail()
 
     def cbmc(self):
-
         def list_proofs():
             cmd_str = ["./proofs/cbmc/list_proofs.sh"]
             p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
@@ -902,7 +900,7 @@ class Tests:
             scheme = SCHEME.from_mode(mldsa_parameter_set)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"CBMC ({i+1}/{num_proofs})", scheme, None, None)
+                log = logger(f"CBMC ({i + 1}/{num_proofs})", scheme, None, None)
                 log.info(f"Starting CBMC proof for {func}")
                 start = time.time()
                 try:
@@ -945,6 +943,7 @@ class Tests:
                     log.info(f"   SUCCESS (after {dur}s)")
 
         def run_cbmc(mldsa_parameter_set):
+            log = logger("CBMC", SCHEME.from_mode(mldsa_parameter_set), None, None)
             all_proofs = list_proofs()
             proofs = all_proofs
             if self.args.start_with is not None:
@@ -953,7 +952,7 @@ class Tests:
                     proofs = proofs[idx:]
                 except ValueError:
                     log.error(
-                        "Could not find function {self.args.start_with}. Running all proofs"
+                        f"Could not find function {self.args.start_with}. Running all proofs"
                     )
             if self.args.proof is not None:
                 proofs = []
@@ -1002,7 +1001,6 @@ class Tests:
         self.check_fail()
 
     def hol_light(self):
-
         if platform.machine().lower() in ["arm64", "aarch64"]:
             arch = "aarch64"
         elif platform.machine().lower() in ["x86_64"]:
@@ -1024,7 +1022,7 @@ class Tests:
         def run_hol_light_single_step(proofs, arch):
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"HOL_LIGHT ({i+1}/{num_proofs})", None, None, None)
+                log = logger(f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None)
                 log.info(f"Starting HOL-Light proof for {func}")
                 start = time.time()
                 proof_bin = f"mldsa/{func}.native"
@@ -1347,7 +1345,7 @@ def cli():
         action="store_true",
         default=False,
     )
-    size_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "size",
         help="Run the code size measurement for all object file",
         parents=[common_parser],
@@ -1463,12 +1461,12 @@ def cli():
     )
 
     # kat arguments
-    kat_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "kat", help="Run the kat tests for all parameter sets", parents=[common_parser]
     )
 
     # unit arguments
-    unit_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "unit",
         help="Run the unit tests for all parameter sets",
         parents=[common_parser],
@@ -1494,14 +1492,14 @@ def cli():
     )
 
     # alloc arguments
-    alloc_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "alloc",
         help="Run the alloc tests for all parameter sets",
         parents=[common_parser],
     )
 
     # rng_fail arguments
-    rng_fail_parser = cmd_subparsers.add_parser(
+    cmd_subparsers.add_parser(
         "rng_fail",
         help="Run the RNG failure tests for all parameter sets",
         parents=[common_parser],

@@ -91,7 +91,7 @@ def test_random(f, test_name, num_tests=10000000, bound_a=R // 2, bound_b=Q // 2
     print(f"Randomly checking {test_name} ({num_tests} tests)...")
     for i in range(num_tests):
         if i % 100000 == 0:
-            print(f"... run {i} tests ({((i * 1000) // num_tests)/10}%)")
+            print(f"... run {i} tests ({((i * 1000) // num_tests) / 10}%)")
         a = random.randrange(-bound_a, bound_a)
         b = random.randrange(-bound_b, bound_b)
         f(a, b)
@@ -127,7 +127,7 @@ def barmul_bound_test(a, b):
     ab = barmul(a, b)
     bound = barmul_bound(a, b)
     if abs(ab) > bound:
-        print(f"barmul_bound_test failure for (a,b)={(a,b)}")
+        print(f"barmul_bound_test failure for (a,b)={(a, b)}")
         print(f"barmul(a,b): {ab}")
         print(f"bound: {bound}")
         assert False
@@ -189,7 +189,7 @@ def montmul_pos_const_bound_test(a, b):
     ab = montmul_pos(a, b)
     bound = montmul_pos_const_bound(a)
     if abs(ab) > bound:
-        print(f"montmul_pos_const_bound_test failure for (a,b)={(a,b)}")
+        print(f"montmul_pos_const_bound_test failure for (a,b)={(a, b)}")
         print(f"montmul_pos(a,b): {ab}")
         print(f"bound: {bound}")
         assert False

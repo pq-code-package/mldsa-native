@@ -170,8 +170,8 @@ def run_keyGen_test(tg, tc):
         err(result.stderr)
         exit(1)
     # Extract results
-    for l in result.stdout.splitlines():
-        (k, v) = l.split("=")
+    for line in result.stdout.splitlines():
+        (k, v) = line.split("=")
         results[k] = v
     info("done")
     return results
@@ -290,8 +290,8 @@ def run_sigGen_test(tg, tc):
         err(result.stderr)
         exit(1)
     # Extract results
-    for l in result.stdout.splitlines():
-        (k, v) = l.split("=")
+    for line in result.stdout.splitlines():
+        (k, v) = line.split("=")
         results[k] = v
     info("done")
     return results
@@ -450,13 +450,13 @@ def runTest(data, output):
 
 
 def test(prompt, expected, output, version, supported_modes=None):
-    assert (
-        prompt is not None or output is None
-    ), "cannot produce output if there is no input"
+    assert prompt is not None or output is None, (
+        "cannot produce output if there is no input"
+    )
 
-    assert prompt is None or (
-        output is not None or expected is not None
-    ), "if there is a prompt, either output or expectedResult required"
+    assert prompt is None or (output is not None or expected is not None), (
+        "if there is a prompt, either output or expectedResult required"
+    )
 
     # if prompt is passed, use it
     if prompt is not None:
