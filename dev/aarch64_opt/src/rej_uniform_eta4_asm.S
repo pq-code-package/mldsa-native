@@ -128,8 +128,8 @@ MLD_ASM_FN_SYMBOL(rej_uniform_eta4_asm)
     mov initial_zero_count, #0
     eor val0.16b, val0.16b, val0.16b
 rej_uniform_eta4_initial_zero:
+        stp val0q, val0q, [output_tmp, #32]
         stp val0q, val0q, [output_tmp], #64
-        stp val0q, val0q, [output_tmp, #-32]
         add initial_zero_count, initial_zero_count, #32
         cmp initial_zero_count, #MLDSA_N
         b.lt rej_uniform_eta4_initial_zero
@@ -244,8 +244,8 @@ rej_uniform_eta4_final_copy:
         sxtl2 val3.4s, val2.8h
         sxtl  val2.4s, val2.4h
 
+        stp val2q, val3q, [output, #32]
         stp val0q, val1q, [output], #64
-        stp val2q, val3q, [output, #-32]
         add final_copy_count, final_copy_count, #16
         cmp final_copy_count, #MLDSA_N
         b.lt rej_uniform_eta4_final_copy

@@ -69,19 +69,19 @@
 .endm
 
 .macro load_roots_123
+        ldp q_root2, q_root3, [r012345_ptr, #(2*16)]
         ldp q_root0, q_root1, [r012345_ptr], #(4*16)
-        ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_456
+       ldp q_root2, q_root3, [r012345_ptr, #(2*16)]
        ldp q_root0, q_root1, [r012345_ptr], #(4*16)
-       ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_78_1
+        ldp q_root1, q_root1_tw, [r67_ptr, #(2*16)]
+        ldp q_root2, q_root2_tw, [r67_ptr, #(4*16)]
         ldp q_root0, q_root0_tw, [r67_ptr], #(12*16)
-        ldp q_root1, q_root1_tw, [r67_ptr, #(-12*16 + 2*16)]
-        ldp q_root2, q_root2_tw, [r67_ptr, #(-12*16 + 4*16)]
 .endm
 
 .macro load_next_roots_78_2

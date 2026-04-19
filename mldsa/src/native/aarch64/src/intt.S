@@ -282,10 +282,10 @@ Lintt_layer5678_start:
         movk	w5, #0x40, lsl #16
         dup	v30.4s, w5
         mov	x4, #0x4                // =4
+        ldp	q2, q3, [x2, #0x20]
+        ldp	q4, q5, [x2, #0x40]
+        ldp	q6, q7, [x2, #0x60]
         ldp	q0, q1, [x2], #0x80
-        ldp	q2, q3, [x2, #-0x60]
-        ldp	q4, q5, [x2, #-0x40]
-        ldp	q6, q7, [x2, #-0x20]
         ldr	q8, [x0, #0xc0]
         ldr	q27, [x0, #0x80]
         ldr	q20, [x0, #0x1c0]

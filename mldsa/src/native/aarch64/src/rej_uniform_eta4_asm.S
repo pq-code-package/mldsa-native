@@ -41,8 +41,8 @@ MLD_ASM_FN_SYMBOL(rej_uniform_eta4_asm)
         eor	v16.16b, v16.16b, v16.16b
 
 Lrej_uniform_eta4_initial_zero:
+        stp	q16, q16, [x7, #0x20]
         stp	q16, q16, [x7], #0x40
-        stp	q16, q16, [x7, #-0x20]
         add	x11, x11, #0x20
         cmp	x11, #0x100
         b.lt	Lrej_uniform_eta4_initial_zero
@@ -103,8 +103,8 @@ Lrej_uniform_eta4_final_copy:
         sshll	v16.4s, v16.4h, #0x0
         sshll2	v19.4s, v18.8h, #0x0
         sshll	v18.4s, v18.4h, #0x0
+        stp	q18, q19, [x0, #0x20]
         stp	q16, q17, [x0], #0x40
-        stp	q18, q19, [x0, #-0x20]
         add	x11, x11, #0x10
         cmp	x11, #0x100
         b.lt	Lrej_uniform_eta4_final_copy

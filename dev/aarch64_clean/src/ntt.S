@@ -70,19 +70,19 @@
 .endm
 
 .macro load_roots_123
+        ldp q_root2, q_root3, [r012345_ptr, #(2*16)]
         ldp q_root0, q_root1, [r012345_ptr], #(4*16)
-        ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_456
+       ldp q_root2, q_root3, [r012345_ptr, #(2*16)]
        ldp q_root0, q_root1, [r012345_ptr], #(4*16)
-       ldp q_root2, q_root3, [r012345_ptr, #(-4*16 + 2*16)]
 .endm
 
 .macro load_next_roots_78_1
+        ldp q_root1, q_root1_tw, [r67_ptr, #(2*16)]
+        ldp q_root2, q_root2_tw, [r67_ptr, #(4*16)]
         ldp q_root0, q_root0_tw, [r67_ptr], #(12*16)
-        ldp q_root1, q_root1_tw, [r67_ptr, #(-12*16 + 2*16)]
-        ldp q_root2, q_root2_tw, [r67_ptr, #(-12*16 + 4*16)]
 .endm
 
 .macro load_next_roots_78_2
@@ -289,10 +289,10 @@ ntt_layer45678_start:
         transpose4 data0, data1, data2, data3
         transpose4 data4, data5, data6, data7
 
+        stp q_data2, q_data3, [in, #(16*2)]
+        stp q_data4, q_data5, [in, #(16*4)]
+        stp q_data6, q_data7, [in, #(16*6)]
         stp q_data0, q_data1, [in], #(16*8)
-        stp q_data2, q_data3, [in, #(-16*6)]
-        stp q_data4, q_data5, [in, #(-16*4)]
-        stp q_data6, q_data7, [in, #(-16*2)]
 
         subs count, count, #1
         cbnz count, ntt_layer45678_start
