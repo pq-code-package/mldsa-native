@@ -48,7 +48,6 @@ USE_DYNAMIC_FRAMES=1
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
-CBMCFLAGS += --slice-formula
 
 FUNCTION_NAME = mld_attempt_signature_generation
 

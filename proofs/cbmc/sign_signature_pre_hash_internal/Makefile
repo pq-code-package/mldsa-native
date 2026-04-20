@@ -28,7 +28,6 @@ USE_DYNAMIC_FRAMES=1
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
-CBMCFLAGS += --slice-formula
 
 FUNCTION_NAME = sign_signature_pre_hash_internal
 

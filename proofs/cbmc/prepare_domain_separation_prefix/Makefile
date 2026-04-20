@@ -26,7 +26,6 @@ FUNCTION_NAME = prepare_domain_separation_prefix
 
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
-CBMCFLAGS += --slice-formula
 
 CBMC_OBJECT_BITS = 8
 
