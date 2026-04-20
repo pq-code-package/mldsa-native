@@ -27,7 +27,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = polyveck_pack_t0
 

@@ -28,7 +28,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 

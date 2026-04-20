@@ -29,7 +29,6 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 CBMCFLAGS += --slice-formula
-CBMCFLAGS += --no-array-field-sensitivity
 
 FUNCTION_NAME = sign_signature_pre_hash_internal
 
