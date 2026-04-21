@@ -21,6 +21,9 @@ inputs:
   mldsa_parameter_set:
     description: "Security level for ML-DSA (2,3,5)"
     default: "2"
+  reduce_ram:
+    description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled"
+    default: "false"
   gh_token:
     description: Github access token to use
     required: true
@@ -50,13 +53,21 @@ runs:
               - Cadical Version $(cadical --version)
               - $(bash --version | grep -m1 "")
             EOF
-      - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }})
+      - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }}, reduce_ram=${{ inputs.reduce_ram }})
         shell: ${{ env.SHELL }}
         env:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           echo "::group::cbmc_${{ inputs.mldsa_parameter_set }}"
-          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json || cbmc_failed=true
+          reduce_ram_flag=""
+          data_dir="dev/cbmc"
+          variant=""
+          if [ "${{ inputs.reduce_ram }}" = "true" ]; then
+            reduce_ram_flag="--reduce-ram"
+            data_dir="dev/cbmc-reduce-ram"
+            variant="reduce-ram"
+          fi
+          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json $reduce_ram_flag || cbmc_failed=true
           echo "::endgroup::"
           python3 ${{ github.action_path }}/report.py \
             --results-json "${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json" \
@@ -64,5 +75,6 @@ runs:
             --min-runtime 20 \
             --regression-threshold 1.5 \
             --gh-pages-branch gh-pages \
-            --data-dir dev/cbmc
+            --data-dir "$data_dir" \
+            --variant "$variant"
           if [ "$cbmc_failed" = "true" ]; then exit 1; fi

@@ -890,6 +890,17 @@ class Tests:
             proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
             return list(proofs)
 
+        def load_reduce_ram_skiplist():
+            path = "proofs/cbmc/reduce_ram_skip.txt"
+            if not os.path.exists(path):
+                return set()
+            with open(path) as f:
+                return {
+                    line.strip()
+                    for line in f
+                    if line.strip() and not line.lstrip().startswith("#")
+                }
+
         if self.args.list_functions:
             for p in list_proofs():
                 print(p)
@@ -897,6 +908,8 @@ class Tests:
 
         def run_cbmc_single_step(mldsa_parameter_set, proofs):
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+            if self.args.reduce_ram:
+                envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             scheme = SCHEME.from_mode(mldsa_parameter_set)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
@@ -962,10 +975,26 @@ class Tests:
                     proofs += list(filter(lambda x: re.match(pat, x), all_proofs))
                 proofs = sorted(set(proofs))
 
+            # TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
+            if self.args.reduce_ram:
+                skip = load_reduce_ram_skiplist()
+                dropped = [p for p in proofs if p in skip]
+                proofs = [p for p in proofs if p not in skip]
+                if dropped:
+                    log.info(
+                        f"Skipping {len(dropped)} proof(s) under --reduce-ram: "
+                        f"{', '.join(dropped)}"
+                    )
+                if not proofs:
+                    log.info("No proofs left to run after --reduce-ram skiplist")
+                    return
+
             if self.args.single_step:
                 run_cbmc_single_step(mldsa_parameter_set, proofs)
                 return
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+            if self.args.reduce_ram:
+                envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             cmd = (
                 [
                     "python3",
@@ -1422,6 +1451,13 @@ def cli():
         "--output-result-json",
         help="Path to export result JSON",
         default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--reduce-ram",
+        help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled",
+        action="store_true",
+        default=False,
     )
 
     # hol_light arguments

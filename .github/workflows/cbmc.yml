@@ -9,16 +9,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  cbmc_44:
-    name: CBMC (ML-DSA-44)
+  cbmc:
+    name: CBMC (ML-DSA-${{ matrix.parameter_set }}${{ matrix.reduce_ram && ', REDUCE_RAM' || '' }})
     if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: 'read'
       id-token: 'write'
       pull-requests: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        parameter_set: [44, 65, 87]
+        reduce_ram: [false, true]
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
-      name: CBMC (ML-DSA-44)
+      name: CBMC (ML-DSA-${{ matrix.parameter_set }}${{ matrix.reduce_ram && ', REDUCE_RAM' || '' }})
       ec2_instance_type: c7g.4xlarge
       ec2_ami: ubuntu-latest (aarch64)
       ec2_volume_size: 20
@@ -30,51 +35,6 @@ jobs:
       kattest: false
       acvptest: false
       cbmc: true
-      cbmc_mldsa_parameter_set: 44
-    secrets: inherit
-  cbmc_65:
-    name: CBMC (ML-DSA-65)
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-      pull-requests: 'write'
-    uses: ./.github/workflows/ci_ec2_reusable.yml
-    with:
-      name: CBMC (ML-DSA-65)
-      ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (aarch64)
-      ec2_volume_size: 20
-      compile_mode: native
-      opt: no_opt
-      lint: false
-      verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
-      cbmc: true
-      cbmc_mldsa_parameter_set: 65
-    secrets: inherit
-  cbmc_87:
-    name: CBMC (ML-DSA-87)
-    if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-      pull-requests: 'write'
-    uses: ./.github/workflows/ci_ec2_reusable.yml
-    with:
-      name: CBMC (ML-DSA-87)
-      ec2_instance_type: c7g.4xlarge
-      ec2_ami: ubuntu-latest (aarch64)
-      ec2_volume_size: 20
-      compile_mode: native
-      opt: no_opt
-      lint: false
-      verbose: true
-      functest: true
-      kattest: false
-      acvptest: false
-      cbmc: true
-      cbmc_mldsa_parameter_set: 87
+      cbmc_mldsa_parameter_set: ${{ matrix.parameter_set }}
+      cbmc_reduce_ram: ${{ matrix.reduce_ram }}
     secrets: inherit

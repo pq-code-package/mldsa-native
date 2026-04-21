@@ -479,7 +479,9 @@ __contract__(
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(forall(k0, 0, MLDSA_L,
     array_bound(y->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  MLD_IF_NOT_REDUCE_RAM(
+    requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
   assigns(memory_slice(tmp, sizeof(mld_poly)))
@@ -579,11 +581,13 @@ __contract__(
   requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
   requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
   requires(nonce <= MLD_NONCE_UB)
-  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-                                         array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-  requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  MLD_IF_NOT_REDUCE_RAM(
+    requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+                                           array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+    requires(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
@@ -832,11 +836,13 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
     /* loop. We can therefore re-assert their bounds here as part of the     */
     /* loop invariant. This makes proof noticeably faster with CBMC          */
-    invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-              array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-    invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-    invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    MLD_IF_NOT_REDUCE_RAM(
+      invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+                array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+      invariant(forall(k2, 0, MLDSA_K, array_abs_bound(t0hat->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+      invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+      invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    )
     invariant(ret == MLD_ERR_FAIL)
     decreases(MLD_NONCE_UB - nonce)
   )

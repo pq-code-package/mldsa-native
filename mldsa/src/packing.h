@@ -220,12 +220,14 @@ __contract__(
   assigns(memory_slice(t0, sizeof(mld_sk_t0hat)))
   assigns(memory_slice(s1, sizeof(mld_sk_s1hat)))
   assigns(memory_slice(s2, sizeof(mld_sk_s2hat)))
-  ensures(forall(k0, 0, MLDSA_K,
-    array_abs_bound(t0->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  ensures(forall(k1, 0, MLDSA_L,
-    array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  ensures(forall(k2, 0, MLDSA_K,
-    array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  MLD_IF_NOT_REDUCE_RAM(
+    ensures(forall(k0, 0, MLDSA_K,
+      array_abs_bound(t0->vec.vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    ensures(forall(k1, 0, MLDSA_L,
+      array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    ensures(forall(k2, 0, MLDSA_K,
+      array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  )
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 

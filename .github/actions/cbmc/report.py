@@ -39,6 +39,12 @@ def get_args():
     parser.add_argument("--regression-threshold", type=float, default=1.5)
     parser.add_argument("--gh-pages-branch", default="gh-pages")
     parser.add_argument("--data-dir", default="dev/cbmc")
+    parser.add_argument(
+        "--variant",
+        default="",
+        help="Optional label distinguishing a build variant (e.g. 'reduce-ram'). "
+        "Used in PR comment tag/title so variants don't overwrite each other.",
+    )
     return parser.parse_args()
 
 
@@ -155,8 +161,8 @@ def build_comment(current, baseline, cfg):
         alerts.insert(0, total_row)
 
     lines = [
-        f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set} -->",
-        f"## CBMC Results (ML-DSA-{cfg.param_set})",
+        f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set}{cfg.tag_suffix} -->",
+        f"## CBMC Results (ML-DSA-{cfg.param_set}{cfg.title_suffix})",
         "",
     ]
 
@@ -175,7 +181,7 @@ def build_comment(current, baseline, cfg):
             "",
             "</details>",
             "",
-            f"<!-- {COMMENT_TAG}(end): mldsa-{cfg.param_set} -->",
+            f"<!-- {COMMENT_TAG}(end): mldsa-{cfg.param_set}{cfg.tag_suffix} -->",
         ]
     )
     return "\n".join(lines)
@@ -183,7 +189,7 @@ def build_comment(current, baseline, cfg):
 
 def post_or_update_comment(pr_number, body, cfg):
     """Post or update PR comment."""
-    tag = f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set} -->"
+    tag = f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set}{cfg.tag_suffix} -->"
     result = subprocess.run(
         [
             "gh",
@@ -279,6 +285,8 @@ def push_to_gh_pages(current, cfg):
 def main():
     args = get_args()
     args.param_set = args.mldsa_parameter_set
+    args.tag_suffix = f"-{args.variant}" if args.variant else ""
+    args.title_suffix = f", {args.variant.upper()}" if args.variant else ""
 
     with open(args.results_json) as f:
         current = json.load(f)

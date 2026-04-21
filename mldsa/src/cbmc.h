@@ -5,6 +5,7 @@
 
 #ifndef MLD_CBMC_H
 #define MLD_CBMC_H
+
 /***************************************************
  * Basic replacements for __CPROVER_XXX contracts
  ***************************************************/
@@ -19,6 +20,15 @@
 
 #define __contract__(x) x
 #define __loop__(x) x
+
+/* Conditionally expand to __VA_ARGS__ depending on MLD_CONFIG_REDUCE_RAM. */
+#if defined(MLD_CONFIG_REDUCE_RAM)
+#define MLD_IF_REDUCE_RAM(...) __VA_ARGS__
+#define MLD_IF_NOT_REDUCE_RAM(...)
+#else
+#define MLD_IF_REDUCE_RAM(...)
+#define MLD_IF_NOT_REDUCE_RAM(...) __VA_ARGS__
+#endif
 
 /* https://diffblue.github.io/cbmc/contracts-assigns.html */
 #define assigns(...) __CPROVER_assigns(__VA_ARGS__)

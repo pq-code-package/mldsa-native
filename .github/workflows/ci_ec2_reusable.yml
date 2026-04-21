@@ -71,6 +71,9 @@ on:
       cbmc_mldsa_parameter_set:
         type: string
         default: 44
+      cbmc_reduce_ram:
+        type: boolean
+        default: false
 env:
   AWS_ROLE: arn:aws:iam::904233116199:role/mldsa-native-ci
   AWS_REGION: us-east-1
@@ -201,6 +204,7 @@ jobs:
           nix-shell: cbmc
           nix-verbose: ${{ inputs.verbose }}
           mldsa_parameter_set: ${{ inputs.cbmc_mldsa_parameter_set }}
+          reduce_ram: ${{ inputs.cbmc_reduce_ram }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}
