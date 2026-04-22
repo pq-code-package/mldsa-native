@@ -33,6 +33,16 @@ def gen_proofs():
     return proofs
 
 
+def strip_comments(content):
+    """Replace block and line comments with whitespace, preserving line numbers."""
+
+    def repl(m):
+        return re.sub(r"[^\n]", " ", m.group(0))
+
+    # Block comments and line comments.
+    return re.sub(r"/\*[\s\S]*?\*/|//[^\n]*", repl, content)
+
+
 def gen_contracts():
     files = get_c_source_files() + get_header_files()
 
@@ -40,7 +50,9 @@ def gen_contracts():
         with open(filename, "r") as f:
             content = f.read()
 
-        contract_pattern = r"(\w+)\s*\([^)]*\)\s*\n?\s*__contract__"
+        content = strip_comments(content)
+
+        contract_pattern = r"(\w+)\s*\([^)]*\)\s*__contract__"
         matches = re.finditer(contract_pattern, content)
         for m in matches:
             line = content.count("\n", 0, m.start())
@@ -53,7 +65,11 @@ def is_exception(funcname):
     if funcname == "poly_permute_bitrev_to_custom":
         return True
 
-    if funcname.endswith("_native") or funcname.endswith("_asm"):
+    if (
+        funcname.endswith("_native")
+        or funcname.endswith("_asm")
+        or funcname.endswith("_avx2")
+    ):
         # CBMC proofs are axiomatized against contracts of the backends
         return True
 
