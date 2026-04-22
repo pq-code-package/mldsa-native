@@ -195,6 +195,30 @@ lint-c-files()
 checkerr "Lint C" "$(lint-c-files)"
 gh_group_end
 
+check-ast-grep()
+{
+  if ! command -v ast-grep >/dev/null; then
+    gh_error_simple "ast-grep missing" "ast-grep is not installed"
+    error "Check ast-grep"
+    SUCCESS=false
+    gh_summary_failure "Check ast-grep"
+    return 0
+  fi
+
+  if (cd "$ROOT" && ast-grep scan --rule scripts/.ast-grep/mldsa-declarations.yml .); then
+    info "Check ast-grep"
+    gh_summary_success "Check ast-grep"
+  else
+    error "Check ast-grep"
+    gh_summary_failure "Check ast-grep"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check ast-grep (visibility-macro annotations)"
+check-ast-grep
+gh_group_end
+
 check-eol-dry-run()
 {
   for file in $(git ls-files -- ":/" ":/!:*.png"); do

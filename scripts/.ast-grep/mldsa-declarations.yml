@@ -1,0 +1,103 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# ast-grep rules enforcing visibility-macro annotations on every
+# externally-linked declaration under mldsa/src/.  See mldsa/src/common.h
+# for the macro definitions.
+#
+# Invoked by scripts/lint via `ast-grep scan --rule`.
+
+id: mldsa-function-def-missing-visibility
+language: c
+files:
+  - 'mldsa/src/**/*.c'
+  - 'mldsa/src/**/*.h'
+rule:
+  all:
+    - kind: function_definition
+    - not:
+        has:
+          kind: type_identifier
+          regex: '^(MLD_INTERNAL_API|MLD_EXTERNAL_API|MLD_API_QUALIFIER)$'
+          stopBy: end
+    - not:
+        follows:
+          stopBy: neighbor
+          has:
+            kind: identifier
+            regex: '^(MLD_INTERNAL_API|MLD_EXTERNAL_API|MLD_API_QUALIFIER)$'
+            stopBy: end
+    - not:
+        has:
+          kind: storage_class_specifier
+          regex: '^static$'
+          stopBy: end
+    - not:
+        follows:
+          stopBy: neighbor
+          has:
+            kind: storage_class_specifier
+            regex: '^static$'
+            stopBy: end
+    - not:
+        regex: '^\s*(static|MLD_STATIC_TESTABLE)\b'
+    - not:
+        has:
+          kind: identifier
+          regex: '^(empty_cu_|.*_asm$)'
+          stopBy: end
+severity: error
+message: |-
+  Function definition has external linkage but is not preceded by
+  MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER
+  (see mldsa/src/common.h).
+
+---
+
+id: mldsa-function-proto-missing-visibility
+language: c
+files:
+  - 'mldsa/src/**/*.c'
+  - 'mldsa/src/**/*.h'
+rule:
+  all:
+    - kind: declaration
+    - has:
+        kind: function_declarator
+        stopBy: end
+    - not:
+        has:
+          kind: type_identifier
+          regex: '^(MLD_INTERNAL_API|MLD_EXTERNAL_API|MLD_API_QUALIFIER)$'
+          stopBy: end
+    - not:
+        follows:
+          stopBy: neighbor
+          has:
+            kind: identifier
+            regex: '^(MLD_INTERNAL_API|MLD_EXTERNAL_API|MLD_API_QUALIFIER)$'
+            stopBy: end
+    - not:
+        has:
+          kind: storage_class_specifier
+          regex: '^static$'
+          stopBy: end
+    - not:
+        follows:
+          stopBy: neighbor
+          has:
+            kind: storage_class_specifier
+            regex: '^static$'
+            stopBy: end
+    - not:
+        regex: '^\s*(static|MLD_STATIC_TESTABLE)\b'
+    - not:
+        has:
+          kind: identifier
+          regex: '^(empty_cu_|.*_asm$)'
+          stopBy: end
+severity: error
+message: |-
+  Function prototype has external linkage but is not preceded by
+  MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER
+  (see mldsa/src/common.h).
