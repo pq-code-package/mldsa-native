@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 name: CodeQL
+
 permissions:
   contents: read
+
 on:
   workflow_call:
   workflow_dispatch:
@@ -12,14 +14,33 @@ jobs:
   mldsa-declarations:
     name: mldsa-declarations
     runs-on: ubuntu-latest
-    env:
-      NIXPKGS_ALLOW_UNFREE: 1
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: ./.github/actions/setup-shell
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a # v3.35.2
         with:
-          nix-shell: codeql
-          impure: 'true'
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            scripts/ql run mldsa-declarations
+          languages: cpp
+          queries: ./test/codeql/mldsa-declarations.ql
+
+      - name: Build
+        run: make -j
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a # v3.35.2
+        with:
+          category: /language:cpp
+          upload: never
+          output: codeql-results
+
+      - name: Fail on findings
+        run: |
+          sarif=codeql-results/cpp.sarif
+          test -f "$sarif" || { echo "no SARIF produced at $sarif"; ls -R codeql-results; exit 1; }
+          n=$(jq '[.runs[].results[]?] | length' "$sarif")
+          if [ "$n" -gt 0 ]; then
+            echo "CodeQL found $n violation(s):"
+            jq -r '.runs[].results[]? | "\(.locations[0].physicalLocation.artifactLocation.uri):\(.locations[0].physicalLocation.region.startLine): \(.message.text)"' "$sarif"
+            exit 1
+          fi
+          echo "no violations"

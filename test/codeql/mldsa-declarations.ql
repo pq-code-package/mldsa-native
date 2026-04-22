@@ -2,20 +2,24 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT */
 
 /**
- * @name All declarations under mldsa/
- * @description Enumerates every function and (file-scope) variable declaration
- *              located under the mldsa/ source tree, together with its linkage.
- * @kind table
- * @id mldsa/all-declarations
+ * @name Unannotated external declaration under mldsa/
+ * @description Externally-linked declarations under mldsa/ must carry a
+ *              visibility annotation macro so that single-CU builds hide
+ *              internal symbols correctly.  Functions need
+ *              MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER;
+ *              file-scope variables need MLD_INTERNAL_DATA_DEFINITION
+ *              (for definitions) or MLD_INTERNAL_DATA_DECLARATION
+ *              (for declarations).
+ * @kind problem
+ * @problem.severity error
+ * @id mldsa/unannotated-external-declaration
  */
 
 import cpp
 
 /* A declaration is "in mldsa/" if its location's file path contains /mldsa/. */
 predicate inMldsaTree(Declaration d) {
-  exists(string path | path = d.getFile().getAbsolutePath() |
-    path.matches("%/mldsa/%")
-  )
+  d.getFile().getAbsolutePath().matches("%/mldsa/%")
 }
 
 predicate isVisibilityMacro(string name) {
@@ -49,40 +53,42 @@ string visibilityMacro(DeclarationEntry e) {
     )
 }
 
-/* Functions: one row per declaration entry (prototype in a .h, definition in
- * a .c) so we can check *each* site individually. */
-from
-  DeclarationEntry e, Declaration d, string kind, string linkage,
-  string annotation, string def_or_decl
+/* True when e carries an annotation appropriate to its kind/role. */
+predicate hasCorrectVisibilityMacro(DeclarationEntry e) {
+  exists(string m | m = visibilityMacro(e) |
+    e.getDeclaration() instanceof Function and
+    (m = "MLD_INTERNAL_API" or m = "MLD_EXTERNAL_API" or m = "MLD_API_QUALIFIER")
+    or
+    e.getDeclaration() instanceof GlobalOrNamespaceVariable and
+    e.isDefinition() and m = "MLD_INTERNAL_DATA_DEFINITION"
+    or
+    e.getDeclaration() instanceof GlobalOrNamespaceVariable and
+    not e.isDefinition() and m = "MLD_INTERNAL_DATA_DECLARATION"
+  )
+}
+
+string expectedVisibilityMacro(DeclarationEntry e) {
+  e.getDeclaration() instanceof Function and
+  result = "MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER"
+  or
+  e.getDeclaration() instanceof GlobalOrNamespaceVariable and
+  e.isDefinition() and
+  result = "MLD_INTERNAL_DATA_DEFINITION"
+  or
+  e.getDeclaration() instanceof GlobalOrNamespaceVariable and
+  not e.isDefinition() and
+  result = "MLD_INTERNAL_DATA_DECLARATION"
+}
+
+from DeclarationEntry e, Declaration d
 where
   d = e.getDeclaration() and
   inMldsaTree(d) and
   not d.getName().matches("%empty_cu_%") and
   not d.getName().matches("%_asm") and
-  (
-    d instanceof Function and kind = "function"
-    or
-    d instanceof GlobalOrNamespaceVariable and kind = "variable"
-  ) and
-  (
-    if e.hasSpecifier("static")
-    then linkage = "static"
-    else linkage = "extern"
-  ) and
-  (
-    annotation = visibilityMacro(e)
-    or
-    not exists(visibilityMacro(e)) and annotation = "(none)"
-  ) and
-  (
-    if e.isDefinition()
-    then def_or_decl = "definition"
-    else def_or_decl = "declaration"
-  )
-select
-  e.getFile().getRelativePath() + ":" + e.getLocation().getStartLine() as location,
-  kind,
-  def_or_decl,
-  linkage,
-  annotation,
-  d.getName() as name
+  (d instanceof Function or d instanceof GlobalOrNamespaceVariable) and
+  not e.hasSpecifier("static") and
+  not hasCorrectVisibilityMacro(e)
+select e,
+  "'" + d.getName() + "' has external linkage and must carry " +
+  expectedVisibilityMacro(e) + "."
