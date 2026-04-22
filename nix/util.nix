@@ -88,7 +88,8 @@ rec {
         shfmt
         shellcheck
         actionlint
-        ruff;
+        ruff
+        semgrep;
 
       inherit (pkgs.python3Packages)
         mpmath sympy pyparsing pyyaml rich;

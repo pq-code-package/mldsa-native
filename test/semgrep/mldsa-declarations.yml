@@ -1,0 +1,67 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Semgrep rules enforcing visibility-macro annotations on every
+# externally-linked declaration under mldsa/src/.  See mldsa/src/common.h
+# for the macro definitions.
+#
+# How the function rules work:
+#   Semgrep's C parser treats MLD_INTERNAL_API / MLD_EXTERNAL_API /
+#   MLD_API_QUALIFIER as extra specifiers sitting in front of the return
+#   type.  A pattern that starts at the concrete return type
+#   (`void $FN(...)` etc.) therefore matches *only* when no such
+#   annotation is present.  `pattern-not-regex` strips static / MLD_STATIC_TESTABLE.
+#
+# Limitations (vs. CodeQL version):
+#   Semgrep does not run the preprocessor, so these rules also flag
+#   declarations inside #if blocks that are not normally compiled
+#   (e.g. MLDSA_DEBUG, native-backend headers).  Treat those findings as
+#   real: the same visibility convention applies to conditionally-compiled
+#   code.
+
+rules:
+  - id: mldsa-function-def-missing-visibility-annotation
+    languages: [c]
+    severity: ERROR
+    message: >-
+      Function definition '$FN' has external linkage and must be preceded
+      by one of MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER
+      (see mldsa/src/common.h).
+    paths:
+      include:
+        - "/mldsa/src/**/*.c"
+        - "/mldsa/src/**/*.h"
+    patterns:
+      - pattern-either:
+          - pattern: "void $FN(...) { ... }"
+          - pattern: "int $FN(...) { ... }"
+          - pattern: "size_t $FN(...) { ... }"
+          - pattern: "uint32_t $FN(...) { ... }"
+          - pattern: "unsigned int $FN(...) { ... }"
+      - pattern-not-regex: '(?m)^\s*(static|MLD_STATIC_TESTABLE)\b'
+      - metavariable-regex:
+          metavariable: $FN
+          regex: '^(?!empty_cu_).*(?<!_asm)$'
+
+  - id: mldsa-function-proto-missing-visibility-annotation
+    languages: [c]
+    severity: ERROR
+    message: >-
+      Function prototype '$FN' has external linkage and must be preceded
+      by one of MLD_INTERNAL_API, MLD_EXTERNAL_API, or MLD_API_QUALIFIER
+      (see mldsa/src/common.h).
+    paths:
+      include:
+        - "/mldsa/src/**/*.c"
+        - "/mldsa/src/**/*.h"
+    patterns:
+      - pattern-either:
+          - pattern: "void $FN(...);"
+          - pattern: "int $FN(...);"
+          - pattern: "size_t $FN(...);"
+          - pattern: "uint32_t $FN(...);"
+          - pattern: "unsigned int $FN(...);"
+      - pattern-not-regex: '(?m)^\s*(static|MLD_STATIC_TESTABLE)\b'
+      - metavariable-regex:
+          metavariable: $FN
+          regex: '^(?!empty_cu_).*(?<!_asm)$'

@@ -297,6 +297,31 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-semgrep()
+{
+  if ! command -v semgrep >/dev/null; then
+    gh_error_simple "semgrep missing" "semgrep is not installed"
+    error "Check semgrep"
+    SUCCESS=false
+    gh_summary_failure "Check semgrep"
+    return 0
+  fi
+
+  if semgrep --config "$ROOT"/test/semgrep --error --strict \
+    --disable-version-check --quiet "$ROOT"/mldsa/src; then
+    info "Check semgrep"
+    gh_summary_success "Check semgrep"
+  else
+    error "Check semgrep"
+    gh_summary_failure "Check semgrep"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check semgrep (visibility-macro annotations)"
+check-semgrep
+gh_group_end
+
 if ! $SUCCESS; then
   if $IN_GITHUB_CONTEXT; then
     printf "%b%s%b\n" "${RED}" "The following checks failed, expand each for more details." "${NORMAL}"
