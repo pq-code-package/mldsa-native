@@ -1,0 +1,25 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: CodeQL
+permissions:
+  contents: read
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  mldsa-declarations:
+    name: mldsa-declarations
+    runs-on: ubuntu-latest
+    env:
+      NIXPKGS_ALLOW_UNFREE: 1
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: codeql
+          impure: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            scripts/ql run mldsa-declarations

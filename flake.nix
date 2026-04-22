@@ -118,6 +118,9 @@
           devShells.cbmc = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) cbmc toolchains_native; } ++ [ pkgs.gh ];
           };
+          devShells.codeql = util.mkShell {
+            packages = [ pkgs.codeql ];
+          };
           devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
           };

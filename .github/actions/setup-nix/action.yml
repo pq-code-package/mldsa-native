@@ -32,6 +32,10 @@ inputs:
     required: false
     description: Determine how to install nix ('installer' | 'apt')
     default: 'installer'
+  impure:
+    required: false
+    description: Pass --impure to nix develop (needed for NIXPKGS_ALLOW_UNFREE)
+    default: 'false'
 
 runs:
   using: composite
@@ -124,6 +128,7 @@ runs:
 
         echo NIX_SHELL="${{ inputs.devShell }}" >> $GITHUB_ENV
         nix_extra_flags="${{ inputs.verbose == 'false' && '--quiet' || '' }}"
+        nix_extra_flags="${nix_extra_flags} ${{ inputs.impure == 'true' && '--impure' || '' }}"
         if [[ ${{ inputs.install }} == 'apt' && ! -f /.dockerenv ]]; then
           echo SHELL="sudo $(which nix) develop $nix_extra_flags .#${{ inputs.devShell }} -c bash -e {0}" >> $GITHUB_ENV
         else

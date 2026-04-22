@@ -109,3 +109,11 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/isabelle.yml
     secrets: inherit
+  codeql:
+    name: CodeQL
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base, nix ]
+    uses: ./.github/workflows/codeql.yml
+    secrets: inherit

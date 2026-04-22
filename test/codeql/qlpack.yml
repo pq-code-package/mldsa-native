@@ -1,0 +1,9 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+name: mldsa-native/queries
+version: 0.0.1
+library: false
+dependencies:
+  # Pinned to the version shipped with the CodeQL CLI currently packaged in
+  # nixpkgs (2.23.3). Bump together with the CLI.
+  codeql/cpp-all: "6.0.0"
