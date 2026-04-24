@@ -115,6 +115,10 @@ def is_exception(funcname):
         # Implemented using inline ASM or external functions
         return True
 
+    if funcname == "get_max_signing_attempts":
+        # Trivial config accessor; bounds checked statically via preprocessor
+        return True
+
     return False
 
 

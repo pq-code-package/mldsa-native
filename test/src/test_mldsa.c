@@ -39,6 +39,22 @@
     }                                                         \
   } while (0)
 
+/* For test-configurations with a low threshold of signing attempts,
+ * consider the possibility of signatures failing. */
+#if defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND)
+#define CHECK_SIGN_RC(rc)                      \
+  do                                           \
+  {                                            \
+    if (rc == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) \
+    {                                          \
+      return 0;                                \
+    }                                          \
+    CHECK(rc == 0);                            \
+  } while (0)
+#else /* MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND */
+#define CHECK_SIGN_RC(rc) CHECK(rc == 0)
+#endif /* !MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND */
+
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
     !defined(MLD_CONFIG_NO_VERIFY_API)
@@ -58,7 +74,7 @@ static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, MLEN);
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
 
   rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
 
@@ -130,7 +146,7 @@ static int test_sign_extmu(void)
   CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
   MLD_CT_TESTING_SECRET(mu, sizeof(mu));
 
-  CHECK(crypto_sign_signature_extmu(sig, &siglen, mu, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign_signature_extmu(sig, &siglen, mu, sk));
   CHECK(crypto_sign_verify_extmu(sig, siglen, mu, pk) == 0);
 
   return 0;
@@ -156,8 +172,8 @@ static int test_sign_pre_hash(void)
   CHECK(randombytes(rnd, MLDSA_RNDBYTES) == 0);
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
-  CHECK(crypto_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN, ctx,
-                                                CTXLEN, rnd, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN,
+                                                        ctx, CTXLEN, rnd, sk));
   CHECK(crypto_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
                                              pk) == 0);
 
@@ -249,7 +265,7 @@ static int test_wrong_pk(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in public key */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -300,7 +316,7 @@ static int test_wrong_sig(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in signed message */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -352,7 +368,7 @@ static int test_wrong_ctx(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk) == 0);
+  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in ctx */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -385,53 +401,82 @@ static int test_wrong_ctx(void)
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
           !MLD_CONFIG_NO_VERIFY_API */
 
-static int test_sign_expected(void)
-{
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-  {
-    uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-    uint8_t sk[CRYPTO_SECRETKEYBYTES];
-    uint8_t test_vector_sk_copy[CRYPTO_SECRETKEYBYTES];
+static int test_sign_expected_keypair(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t test_vector_sk_copy[CRYPTO_SECRETKEYBYTES];
 
-    randombytes_reset();
-    CHECK(crypto_sign_keypair(pk, sk) == 0);
+  randombytes_reset();
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
 
-    /* Declassify sk's for comparison. This is for testing purposes only.
-     * Don't declassify the test_vector_sk itself because we need it to stay
-     * secret for the CT signing tests. */
-    MLD_CT_TESTING_DECLASSIFY(sk, CRYPTO_SECRETKEYBYTES);
-    memcpy(test_vector_sk_copy, test_vector_sk, CRYPTO_SECRETKEYBYTES);
-    MLD_CT_TESTING_DECLASSIFY(test_vector_sk_copy, CRYPTO_SECRETKEYBYTES);
+  /* Declassify sk's for comparison. This is for testing purposes only.
+   * Don't declassify the test_vector_sk itself because we need it to stay
+   * secret for the CT signing tests. */
+  MLD_CT_TESTING_DECLASSIFY(sk, CRYPTO_SECRETKEYBYTES);
+  memcpy(test_vector_sk_copy, test_vector_sk, CRYPTO_SECRETKEYBYTES);
+  MLD_CT_TESTING_DECLASSIFY(test_vector_sk_copy, CRYPTO_SECRETKEYBYTES);
 
-    CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
-    CHECK(memcmp(sk, test_vector_sk_copy, CRYPTO_SECRETKEYBYTES) == 0);
-  }
+  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_copy, CRYPTO_SECRETKEYBYTES) == 0);
+
+  return 0;
+}
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-  {
-    uint8_t sig[CRYPTO_BYTES];
-    size_t siglen;
+static int test_sign_expected_sign(void)
+{
+  uint8_t sig[CRYPTO_BYTES];
+  size_t siglen;
 
-    /* WARNING: Test-only
-     * Normally, you would seed a PRNG _once_ with trustworthy entropy
-     * and not reseed it afterwards. Here, we reseed to make tests
-     * independent and reproducible. */
-    randombytes_reset();
-    CHECK(crypto_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
-                                TEST_VECTOR_MSG_LEN,
-                                (const uint8_t *)TEST_VECTOR_CTX,
-                                TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
-    CHECK(siglen == CRYPTO_BYTES);
-    CHECK(memcmp(sig, test_vector_sig, CRYPTO_BYTES) == 0);
-  }
+  /* WARNING: Test-only
+   * Normally, you would seed a PRNG _once_ with trustworthy entropy
+   * and not reseed it afterwards. Here, we reseed to make tests
+   * independent and reproducible. */
+  randombytes_reset();
+  CHECK_SIGN_RC(crypto_sign_signature(
+      sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+      (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN, test_vector_sk));
+  CHECK(siglen == CRYPTO_BYTES);
+  CHECK(memcmp(sig, test_vector_sig, CRYPTO_BYTES) == 0);
+
+  return 0;
+}
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int test_sign_expected_verify(void)
+{
   CHECK(crypto_sign_verify(
             test_vector_sig, CRYPTO_BYTES, (const uint8_t *)TEST_VECTOR_MSG,
             TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
             TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
+
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+static int test_sign_expected(void)
+{
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  if (test_sign_expected_keypair() != 0)
+  {
+    return 1;
+  }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+  if (test_sign_expected_sign() != 0)
+  {
+    return 1;
+  }
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+  if (test_sign_expected_verify() != 0)
+  {
+    return 1;
+  }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
   return 0;

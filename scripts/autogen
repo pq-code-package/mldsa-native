@@ -2206,6 +2206,7 @@ def get_config_options():
         "MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER",
         "MLDSA_DEBUG",  # TODO: Rename?
         "MLD_BREAK_PCT",  # Use in PCT breakage test
+        "MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND",  # Internal testing escape hatch
         "MLD_CHECK_APIS",
         "MLD_CONFIG_API_XXX",
         "MLD_ERR_XXX",

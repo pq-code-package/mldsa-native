@@ -165,6 +165,14 @@ configs:
           }
           #endif
 
+  - path: test/configs/low_signing_bound_config.h
+    description: "Test configuration with signing bound set to 1 to exercise MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED"
+    defines:
+      MLD_CONFIG_MAX_SIGNING_ATTEMPTS:
+        content: |
+          #define MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND
+          #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 1
+
   - path: test/configs/custom_native_capability_config_0.h
     description: "Test configuration with custom capability function returning 0"
     defines:

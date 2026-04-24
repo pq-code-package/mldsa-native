@@ -25,12 +25,12 @@
  */
 
 /*
- * Test configuration: Test configuration for PCT breakage testing
+ * Test configuration: Test configuration with signing bound set to 1 to
+ * exercise MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
- *   - MLD_CONFIG_KEYGEN_PCT
- *   - MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+ *   - MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  */
 
 
@@ -680,7 +680,7 @@
  *              requires crypto_sign_signature() and crypto_sign_verify().
  *
  *****************************************************************************/
-#define MLD_CONFIG_KEYGEN_PCT
+/* #define MLD_CONFIG_KEYGEN_PCT */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
@@ -692,19 +692,15 @@
  *              This option only has an effect if MLD_CONFIG_KEYGEN_PCT is set.
  *
  *****************************************************************************/
-#define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
-#if !defined(__ASSEMBLER__)
-#include <stdlib.h>
-#include <string.h>
-#include "../mldsa/src/sys.h"
-static MLD_INLINE int mld_break_pct(void)
-{
-  /* Break PCT if and only if MLD_BREAK_PCT is set to 1 */
-  const char *val = getenv("MLD_BREAK_PCT");
-  return val != NULL && strcmp(val, "1") == 0;
-}
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+   #if !defined(__ASSEMBLER__)
+   #include "src/src.h"
+   static MLD_INLINE int mld_break_pct(void)
+   {
+       ... return 0/1 depending on whether PCT should be broken ...
+   }
+   #endif
+*/
 
 /******************************************************************************
  * Name:        MLD_CONFIG_MAX_SIGNING_ATTEMPTS
@@ -728,7 +724,9 @@ static MLD_INLINE int mld_break_pct(void)
  *              failure rate is < 2^{-256}.
  *
  *****************************************************************************/
-/* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 814 */
+#define MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND
+#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 1
+
 
 /******************************************************************************
  * Name:        MLD_CONFIG_SERIAL_FIPS202_ONLY

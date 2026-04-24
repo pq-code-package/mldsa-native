@@ -312,6 +312,11 @@
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLD_ERR_RNG_FAIL -3
+/* The signing rejection-sampling loop exceeded
+ * MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations without producing a valid
+ * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
+ * has probability < 2^-256. */
+#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED -4
 
 
 #endif /* !__ASSEMBLER__ */

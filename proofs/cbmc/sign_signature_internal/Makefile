@@ -24,6 +24,7 @@ USE_FUNCTION_CONTRACTS=mld_unpack_sk
 USE_FUNCTION_CONTRACTS+=mld_H 
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
 USE_FUNCTION_CONTRACTS+=mld_attempt_signature_generation
+USE_FUNCTION_CONTRACTS+=mld_get_max_signing_attempts
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on

@@ -132,6 +132,11 @@
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLD_ERR_RNG_FAIL -3
+/* The signing rejection-sampling loop exceeded
+ * MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations without producing a valid
+ * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
+ * has probability < 2^-256. */
+#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED -4
 
 /****************************** Function API **********************************/
 
@@ -226,6 +231,9 @@ extern "C"
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
  *     - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The PCT's signing step exhausted
+ *         MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations. Only possible when
+ *         MLD_CONFIG_KEYGEN_PCT is enabled.
  *     - MLD_ERR_FAIL: Other kinds of failure, incl. PCT failure
  *         if MLD_CONFIG_KEYGEN_PCT is enabled.
  *
@@ -262,6 +270,9 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *          - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *              used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
  *          - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *          - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The PCT's signing step
+ *              exhausted MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations. Only
+ *              possible when MLD_CONFIG_KEYGEN_PCT is enabled.
  *          - MLD_ERR_FAIL: If MLD_CONFIG_KEYGEN_PCT is enabled and the
  *              PCT check failed.
  *
@@ -305,14 +316,13 @@ int MLD_API_NAMESPACE(keypair)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure
  *
  * If the returned value is non-zero, then the values of *sig and
  * *siglen should not be referenced.
  *
- * Reference: This code differs from the reference implementation
- *            in that it adds an explicit check for nonce exhaustion
- *            and can return -1 in that case.
  **************************************************/
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -354,6 +364,8 @@ int MLD_API_NAMESPACE(signature_internal)(
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
  *     - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)]
@@ -390,6 +402,8 @@ int MLD_API_NAMESPACE(signature)(
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
  *     - MLD_ERR_RNG_FAIL: Random number generation failed.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure.
  *
  * Specification: Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu
@@ -431,6 +445,8 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure
  **************************************************/
 MLD_API_QUALIFIER
@@ -637,6 +653,8 @@ int MLD_API_NAMESPACE(open)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure
  *
  * Supported hash algorithm constants:
@@ -735,6 +753,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *     - 0: Success
  *     - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
  *         used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ *     - MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED: The rejection-sampling loop
+ *         exceeded MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations.
  *     - MLD_ERR_FAIL: Other kinds of failure
  **************************************************/
 MLD_API_QUALIFIER

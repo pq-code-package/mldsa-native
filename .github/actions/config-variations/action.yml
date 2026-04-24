@@ -8,7 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, signing-bound-exhausted, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify'
     required: false
     default: 'all'
   opt:
@@ -79,6 +79,18 @@ runs:
            exit 1
         else
            echo "PCT failed as expected"
+        fi
+    - name: "Signing bound exhaustion"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'signing-bound-exhausted') }}
+      shell: bash
+      run: |
+        make clean
+        CFLAGS='-Itest -DMLD_CONFIG_FILE=\"configs/low_signing_bound_config.h\"' make func -j4
+        output=$(make run_func 2>&1)
+        echo "$output"
+        if ! echo "$output" | grep -q "MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED"; then
+           echo "ERROR: Expected MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED message not found"
+           exit 1
         fi
     - name: "Custom allocation (heap based)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-alloc-heap') }}

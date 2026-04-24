@@ -718,6 +718,30 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
 */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *
+ * Description: Upper bound on the number of rejection-sampling iterations
+ *              performed by ML-DSA signing (@[FIPS204, Algorithm 7]).
+ *
+ *              If a valid signature is not produced within this many
+ *              attempts, signing returns MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED.
+ *              This is useful in timing-sensitive environments that
+ *              require a deterministic worst-case bound on signing time.
+ *
+ *              For FIPS 204 compliance, this value MUST be at least 814,
+ *              cf. @[FIPS204, Appendix C], which is chosen so that the
+ *              signing failure rate is < 2^{-256}.
+ *
+ *              Default: Largest possible value before internal counters
+ *              would overflow. This is larger than the FIPS204 bound.
+ *
+ *              In particular, in the default configuration, the signing
+ *              failure rate is < 2^{-256}.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 814 */
+
+/******************************************************************************
  * Name:        MLD_CONFIG_SERIAL_FIPS202_ONLY
  *
  * Description: Set this to use a FIPS202 implementation with global state

@@ -51,6 +51,8 @@
 #define mld_compute_t0_t1_tr_from_sk_components              \
   MLD_ADD_PARAM_SET(mld_compute_t0_t1_tr_from_sk_components) \
   MLD_CONTEXT_PARAMETERS_7
+#define mld_get_max_signing_attempts \
+  MLD_ADD_PARAM_SET(mld_get_max_signing_attempts)
 /* End of parameter set namespacing */
 
 
@@ -64,7 +66,8 @@ __contract__(
   ensures(return_value == 0
     || return_value == MLD_ERR_FAIL
     || return_value == MLD_ERR_OUT_OF_MEMORY
-    || return_value == MLD_ERR_RNG_FAIL)
+    || return_value == MLD_ERR_RNG_FAIL
+    || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
 );
 
 #if defined(MLD_CONFIG_KEYGEN_PCT)
@@ -452,11 +455,9 @@ __contract__(
 /* Reference: The reference implementation does not explicitly check the
  * maximum nonce value, but instead loops indefinitely (even when the nonce
  * would overflow). Internally, sampling of y uses
- * (nonceL), (nonceL+1), ... (nonce*L+L-1).
+ * (nonce*L), (nonce*L+1), ..., (nonce*L + L - 1).
  * Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.
- * Explicitly checking for this explicitly allows us to prove type-safety.
- * Note that FIPS204 explicitly allows an upper-bound this loop of
- * 814 (< (UINT16_MAX - L)/L) - see @[FIPS204, Appendix C]. */
+ * Explicitly checking for this explicitly allows us to prove type-safety. */
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
 /*************************************************
@@ -553,6 +554,39 @@ __contract__(
     mld_pack_sig_z(sig, z, i);
   }
   return 0;
+}
+
+/* User-facing bound on signing attempts. See MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ * in mldsa_native_config.h. Default is chosen so that failure probability
+ * is < 2^{-256}, that is, signatures will practically always succeed. */
+#ifndef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS MLD_NONCE_UB
+#endif
+
+#if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
+    MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 814
+#error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 814 for FIPS 204 compliance @[FIPS204, Appendix C]
+#endif
+
+#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 1
+#error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 1
+#endif
+
+#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS > MLD_NONCE_UB
+#error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS exceeds the maximum allowed value.
+#endif
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE uint16_t mld_get_max_signing_attempts(void)
+__contract__(
+  ensures(return_value >= 1)
+  ensures(return_value <= MLD_NONCE_UB)
+)
+{
+  /* cassert(0) ensures CBMC uses the contract rather than inlining the body,
+   * keeping proofs agnostic of the configured value. */
+  cassert(0);
+  return MLD_CONFIG_MAX_SIGNING_ATTEMPTS;
 }
 
 /*************************************************
@@ -799,6 +833,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   int ret;
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   uint16_t nonce = 0;
+  const uint16_t nonce_limit = mld_get_max_signing_attempts();
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
@@ -840,10 +875,6 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   /* Expand matrix and transform vectors */
   mld_polyvec_matrix_expand(mat, rho);
 
-  /* By default, return failure. Flip to success and write output
-   * once signature generation succeeds. */
-  ret = MLD_ERR_FAIL;
-
   /* Reference: This code is re-structured using a while(1),  */
   /* with explicit "continue" statements (rather than "goto") */
   /* to implement rejection of invalid signatures.            */
@@ -856,7 +887,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
               memory_slice(mat, sizeof(mld_polymat)))
     )
-    invariant(nonce <= MLD_NONCE_UB)
+    invariant(nonce <= nonce_limit)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
     /* loop. We can therefore re-assert their bounds here as part of the     */
@@ -868,18 +899,16 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
       invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     )
-    invariant(ret == MLD_ERR_FAIL)
-    decreases(MLD_NONCE_UB - nonce)
+    decreases(nonce_limit - nonce)
   )
   {
-    /* Reference: this code explicitly checks for exhaustion of nonce     */
-    /* values to provide predictable termination and results in that case */
-    /* Checking here also means that incrementing nonce below can also    */
-    /* be proven to be type-safe.                                         */
-    if (nonce == MLD_NONCE_UB)
+    /* Reference: this code explicitly checks for exhaustion of signing */
+    /* attempts to provide predictable termination and results in that  */
+    /* case. Checking here also means that incrementing nonce below can */
+    /* be proven to be type-safe.                                       */
+    if (nonce == nonce_limit)
     {
-      /* Note that ret == MLD_ERR_FAIL by default, so we
-       * don't need to set it here. */
+      ret = MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED;
       break;
     }
 
@@ -1618,5 +1647,7 @@ cleanup:
 #undef mld_compute_pack_z
 #undef mld_attempt_signature_generation
 #undef mld_compute_t0_t1_tr_from_sk_components
+#undef mld_get_max_signing_attempts
 #undef MLD_NONCE_UB
+#undef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN
