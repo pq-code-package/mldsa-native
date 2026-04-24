@@ -61,7 +61,7 @@ jobs:
       - uses: ./.github/actions/setup-opentitan
         with:
           expo-repository: https://github.com/zerorisc/expo
-          expo-commit: 375803409deee1f5f7965f0757e316670b13f544
+          expo-commit: 53619a73e64cb96ee6e61a4b4b992f7250ab7477 # master (2026-04-21)
 
       - name: Patch mldsa-native dependency
         run: |
