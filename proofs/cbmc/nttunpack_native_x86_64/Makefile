@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
 CHECK_FUNCTION_CONTRACTS=mld_poly_permute_bitrev_to_custom
-USE_FUNCTION_CONTRACTS=mld_nttunpack_avx2 mld_sys_check_capability
+USE_FUNCTION_CONTRACTS=mld_nttunpack_avx2_asm mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

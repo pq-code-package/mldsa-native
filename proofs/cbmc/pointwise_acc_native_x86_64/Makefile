@@ -23,13 +23,13 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c $(SRCDIR)/mldsa/src/native/x86_
 
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
     CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery_l4_native
-    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l4_avx2
+    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l4_avx2_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
     CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery_l5_native
-    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l5_avx2
+    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l5_avx2_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
     CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery_l7_native
-    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l7_avx2
+    USE_FUNCTION_CONTRACTS=mld_pointwise_acc_l7_avx2_asm
 endif
 USE_FUNCTION_CONTRACTS+=mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on

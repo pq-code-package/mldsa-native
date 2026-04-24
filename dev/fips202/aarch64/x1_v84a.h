@@ -27,7 +27,7 @@ static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
     return MLD_NATIVE_FUNC_FALLBACK;
   }
 
-  mld_keccak_f1600_x1_v84a_asm(state, mld_keccakf1600_round_constants);
+  mld_keccak_f1600_x1_v84a_aarch64_asm(state, mld_keccakf1600_round_constants);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */

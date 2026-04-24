@@ -22,7 +22,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c $(SRCDIR)/mldsa/src/native/aarch64/src/aarch64_zetas.c
 
 CHECK_FUNCTION_CONTRACTS=mld_ntt_native
-USE_FUNCTION_CONTRACTS=mld_ntt_asm
+USE_FUNCTION_CONTRACTS=mld_ntt_aarch64_asm
 USE_FUNCTION_CONTRACTS+=mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

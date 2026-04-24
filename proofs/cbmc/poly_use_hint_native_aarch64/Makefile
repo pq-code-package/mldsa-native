@@ -23,13 +23,13 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c
 
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
     CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_88_native
-    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_88_asm
+    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_88_aarch64_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
     CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_32_native
-    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_32_asm
+    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_32_aarch64_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
     CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_32_native
-    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_32_asm
+    USE_FUNCTION_CONTRACTS=mld_poly_use_hint_32_aarch64_asm
 endif
 USE_FUNCTION_CONTRACTS+=mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on

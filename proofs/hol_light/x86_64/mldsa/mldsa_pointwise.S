@@ -20,17 +20,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/x86_64/src/pointwise.S using scripts/simpasm. Do not modify it directly.
+ *   dev/x86_64/src/pointwise_avx2_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2
-_PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2:
+.global _PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2
-PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2:
+.global PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2_asm
+PQCP_MLDSA_NATIVE_MLDSA44_pointwise_avx2_asm:
 #endif
 
         .cfi_startproc

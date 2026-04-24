@@ -40,7 +40,7 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
 {
   if (mld_sys_check_capability(MLD_SYS_CAP_AVX2))
   {
-    mld_nttunpack_avx2(data);
+    mld_nttunpack_avx2_asm(data);
   }
 }
 
@@ -52,7 +52,7 @@ static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
     return MLD_NATIVE_FUNC_FALLBACK;
   }
 
-  mld_ntt_avx2(data, mld_qdata);
+  mld_ntt_avx2_asm(data, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -63,7 +63,7 @@ static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_invntt_avx2(data, mld_qdata);
+  mld_invntt_avx2_asm(data, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -181,7 +181,7 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_caddq_avx2(a);
+  mld_poly_caddq_avx2_asm(a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
@@ -267,7 +267,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_avx2(a, b, mld_qdata);
+  mld_pointwise_avx2_asm(a, b, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
@@ -283,7 +283,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l4_avx2(w, u, v, mld_qdata);
+  mld_pointwise_acc_l4_avx2_asm(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4 */
@@ -298,7 +298,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l5_avx2(w, u, v, mld_qdata);
+  mld_pointwise_acc_l5_avx2_asm(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5 */
@@ -313,7 +313,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_acc_l7_avx2(w, u, v, mld_qdata);
+  mld_pointwise_acc_l7_avx2_asm(w, u, v, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */

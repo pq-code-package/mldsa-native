@@ -5,17 +5,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/aarch64_opt/src/mld_polyvecl_pointwise_acc_montgomery_l4.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_asm:
+.global _PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_asm
-PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_asm:
+.global PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
+PQCP_MLDSA_NATIVE_MLDSA44_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm:
 #endif
 
         .cfi_startproc

@@ -120,11 +120,11 @@ source code and documentation.
 * URL: https://eprint.iacr.org/2022/1243
 * Referenced from:
   - [dev/fips202/aarch64/auto.h](dev/fips202/aarch64/auto.h)
-  - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_asm.S)
-  - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](dev/fips202/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)
   - [mldsa/src/fips202/native/aarch64/auto.h](mldsa/src/fips202/native/aarch64/auto.h)
-  - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_asm.S)
-  - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_asm.S)
+  - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
   - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S)
   - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S)
@@ -176,13 +176,13 @@ source code and documentation.
   - Shang-Yi Yang
 * URL: https://eprint.iacr.org/2021/986
 * Referenced from:
-  - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
-  - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
+  - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
-  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
-  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
-  - [mldsa/src/native/aarch64/src/intt.S](mldsa/src/native/aarch64/src/intt.S)
-  - [mldsa/src/native/aarch64/src/ntt.S](mldsa/src/native/aarch64/src/ntt.S)
+  - [dev/aarch64_opt/src/intt_aarch64_asm.S](dev/aarch64_opt/src/intt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/mldsa_ntt.S](proofs/hol_light/aarch64/mldsa/mldsa_ntt.S)
 
 ### `REF`
@@ -217,14 +217,14 @@ source code and documentation.
   - Damien Stehlé
 * URL: https://github.com/pq-crystals/dilithium/tree/master/avx2
 * Referenced from:
-  - [dev/x86_64/src/intt.S](dev/x86_64/src/intt.S)
-  - [dev/x86_64/src/ntt.S](dev/x86_64/src/ntt.S)
-  - [dev/x86_64/src/nttunpack.S](dev/x86_64/src/nttunpack.S)
-  - [dev/x86_64/src/pointwise.S](dev/x86_64/src/pointwise.S)
-  - [dev/x86_64/src/pointwise_acc_l4.S](dev/x86_64/src/pointwise_acc_l4.S)
-  - [dev/x86_64/src/pointwise_acc_l5.S](dev/x86_64/src/pointwise_acc_l5.S)
-  - [dev/x86_64/src/pointwise_acc_l7.S](dev/x86_64/src/pointwise_acc_l7.S)
-  - [dev/x86_64/src/poly_caddq_avx2.S](dev/x86_64/src/poly_caddq_avx2.S)
+  - [dev/x86_64/src/intt_avx2_asm.S](dev/x86_64/src/intt_avx2_asm.S)
+  - [dev/x86_64/src/ntt_avx2_asm.S](dev/x86_64/src/ntt_avx2_asm.S)
+  - [dev/x86_64/src/nttunpack_avx2_asm.S](dev/x86_64/src/nttunpack_avx2_asm.S)
+  - [dev/x86_64/src/pointwise_acc_l4_avx2_asm.S](dev/x86_64/src/pointwise_acc_l4_avx2_asm.S)
+  - [dev/x86_64/src/pointwise_acc_l5_avx2_asm.S](dev/x86_64/src/pointwise_acc_l5_avx2_asm.S)
+  - [dev/x86_64/src/pointwise_acc_l7_avx2_asm.S](dev/x86_64/src/pointwise_acc_l7_avx2_asm.S)
+  - [dev/x86_64/src/pointwise_avx2_asm.S](dev/x86_64/src/pointwise_avx2_asm.S)
+  - [dev/x86_64/src/poly_caddq_avx2_asm.S](dev/x86_64/src/poly_caddq_avx2_asm.S)
   - [dev/x86_64/src/poly_chknorm_avx2.c](dev/x86_64/src/poly_chknorm_avx2.c)
   - [dev/x86_64/src/poly_decompose_32_avx2.c](dev/x86_64/src/poly_decompose_32_avx2.c)
   - [dev/x86_64/src/poly_decompose_88_avx2.c](dev/x86_64/src/poly_decompose_88_avx2.c)
@@ -235,14 +235,14 @@ source code and documentation.
   - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta2_avx2.c](dev/x86_64/src/rej_uniform_eta2_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta4_avx2.c](dev/x86_64/src/rej_uniform_eta4_avx2.c)
-  - [mldsa/src/native/x86_64/src/intt.S](mldsa/src/native/x86_64/src/intt.S)
-  - [mldsa/src/native/x86_64/src/ntt.S](mldsa/src/native/x86_64/src/ntt.S)
-  - [mldsa/src/native/x86_64/src/nttunpack.S](mldsa/src/native/x86_64/src/nttunpack.S)
-  - [mldsa/src/native/x86_64/src/pointwise.S](mldsa/src/native/x86_64/src/pointwise.S)
-  - [mldsa/src/native/x86_64/src/pointwise_acc_l4.S](mldsa/src/native/x86_64/src/pointwise_acc_l4.S)
-  - [mldsa/src/native/x86_64/src/pointwise_acc_l5.S](mldsa/src/native/x86_64/src/pointwise_acc_l5.S)
-  - [mldsa/src/native/x86_64/src/pointwise_acc_l7.S](mldsa/src/native/x86_64/src/pointwise_acc_l7.S)
-  - [mldsa/src/native/x86_64/src/poly_caddq_avx2.S](mldsa/src/native/x86_64/src/poly_caddq_avx2.S)
+  - [mldsa/src/native/x86_64/src/intt_avx2_asm.S](mldsa/src/native/x86_64/src/intt_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/ntt_avx2_asm.S](mldsa/src/native/x86_64/src/ntt_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/nttunpack_avx2_asm.S](mldsa/src/native/x86_64/src/nttunpack_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/pointwise_acc_l4_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_acc_l4_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/pointwise_acc_l5_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_acc_l5_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/pointwise_acc_l7_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_acc_l7_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/pointwise_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/poly_caddq_avx2_asm.S](mldsa/src/native/x86_64/src/poly_caddq_avx2_asm.S)
   - [mldsa/src/native/x86_64/src/poly_chknorm_avx2.c](mldsa/src/native/x86_64/src/poly_chknorm_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_decompose_32_avx2.c](mldsa/src/native/x86_64/src/poly_decompose_32_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c](mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c)
@@ -287,13 +287,13 @@ source code and documentation.
   - Fabien Klein
 * URL: https://eprint.iacr.org/2022/1303
 * Referenced from:
-  - [dev/aarch64_clean/src/intt.S](dev/aarch64_clean/src/intt.S)
-  - [dev/aarch64_clean/src/ntt.S](dev/aarch64_clean/src/ntt.S)
+  - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
-  - [dev/aarch64_opt/src/intt.S](dev/aarch64_opt/src/intt.S)
-  - [dev/aarch64_opt/src/ntt.S](dev/aarch64_opt/src/ntt.S)
-  - [mldsa/src/native/aarch64/src/intt.S](mldsa/src/native/aarch64/src/intt.S)
-  - [mldsa/src/native/aarch64/src/ntt.S](mldsa/src/native/aarch64/src/ntt.S)
+  - [dev/aarch64_opt/src/intt_aarch64_asm.S](dev/aarch64_opt/src/intt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/mldsa_ntt.S](proofs/hol_light/aarch64/mldsa/mldsa_ntt.S)
 
 ### `libmceliece`

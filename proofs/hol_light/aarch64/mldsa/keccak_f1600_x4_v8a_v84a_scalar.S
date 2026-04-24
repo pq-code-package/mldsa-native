@@ -12,7 +12,7 @@
 /*yaml
   Name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
   Description: AArch64 hybrid scalar/vector implementation of Keccak-f[1600] permutation for four sequential states with ARMv8.4-A optimizations
-  Signature: void mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm(uint64_t state[100], const uint64_t rc[24])
+  Signature: void mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(uint64_t state[100], const uint64_t rc[24])
   ABI:
     x0:
       type: buffer
@@ -35,17 +35,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm:
+.global _PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
-PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm:
+.global PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
+PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
 #endif
 
         .cfi_startproc

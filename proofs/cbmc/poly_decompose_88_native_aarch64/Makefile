@@ -24,7 +24,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c
 # poly_decompose_88 is only used with ML-DSA-44
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
 CHECK_FUNCTION_CONTRACTS=mld_poly_decompose_88_native
-USE_FUNCTION_CONTRACTS = mld_poly_decompose_88_asm
+USE_FUNCTION_CONTRACTS = mld_poly_decompose_88_aarch64_asm
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS =

@@ -24,10 +24,10 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c
 # poly_decompose_32 is only used with ML-DSA-65 and ML-DSA-87
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
 CHECK_FUNCTION_CONTRACTS=mld_poly_decompose_32_native
-USE_FUNCTION_CONTRACTS = mld_poly_decompose_32_asm
+USE_FUNCTION_CONTRACTS = mld_poly_decompose_32_aarch64_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
 CHECK_FUNCTION_CONTRACTS=mld_poly_decompose_32_native
-USE_FUNCTION_CONTRACTS = mld_poly_decompose_32_asm
+USE_FUNCTION_CONTRACTS = mld_poly_decompose_32_aarch64_asm
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS =

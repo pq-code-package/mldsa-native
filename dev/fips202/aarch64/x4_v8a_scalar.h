@@ -18,8 +18,8 @@
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 {
-  mld_keccak_f1600_x4_v8a_scalar_hybrid_asm(state,
-                                            mld_keccakf1600_round_constants);
+  mld_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(
+      state, mld_keccakf1600_round_constants);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */

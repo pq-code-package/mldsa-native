@@ -45,8 +45,8 @@ subsection \<open>AArch64 implementation\<close>
 
 text \<open>
   The AArch64 implementations
-  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_32_asm.S\<close> and
-  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_88_asm.S\<close>
+  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_32_aarch64_asm.S\<close> and
+  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_88_aarch64_asm.S\<close>
   Barrett divide directly by \<^verbatim>\<open>2*GAMMA2\<close> using \<^verbatim>\<open>sqdmulh\<close> and \<^verbatim>\<open>srshr\<close>.
 \<close>
 
