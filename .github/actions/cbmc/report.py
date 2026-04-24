@@ -23,6 +23,7 @@ COMMENT_TAG = "cbmc-report"
 OK = "✅"
 WARN = "⚠️"
 FAIL = "❌"
+SKIP = "⏭️"
 
 ProofResult = namedtuple(
     "ProofResult", ["name", "status", "current", "previous", "change"]
@@ -134,8 +135,26 @@ def build_comment(current, baseline, cfg):
         if is_alert:
             alerts.append(result)
 
+    skipped = sorted(current.get("skipped", []))
+    skipped_rows = []
+    for name in skipped:
+        base = baseline_runtimes.get(name, {})
+        if base.get("status") == "failed":
+            prev = "failed"
+        elif base.get("value") is not None:
+            prev = f"{base['value']}s"
+        else:
+            prev = "-"
+        skipped_rows.append(ProofResult(name, SKIP, "skipped", prev, "-"))
+    alerts.extend(skipped_rows)
+    all_rows.extend(skipped_rows)
+
     def sort_key(r):
-        return -1 if r.current == "-" else -int(r.current.rstrip("s"))
+        if r.current == "skipped":
+            return 1  # skipped proofs sink below any timed row
+        if r.current == "-":
+            return -1
+        return -int(r.current.rstrip("s"))
 
     all_rows.sort(key=sort_key)
 
@@ -166,10 +185,17 @@ def build_comment(current, baseline, cfg):
         "",
     ]
 
+    if skipped:
+        lines += [
+            f"{SKIP} **{len(skipped)} proof(s) skipped** "
+            f"(see `proofs/cbmc/reduce_ram_skip.txt`)",
+            "",
+        ]
+
     if alerts:
         lines += [f"{WARN} **Attention Required**", ""] + render_table(alerts) + [""]
 
-    total = current.get("summary", {}).get("total", len(all_rows))
+    total = current.get("summary", {}).get("total", len(all_rows)) + len(skipped)
     lines += (
         [
             "<details>",

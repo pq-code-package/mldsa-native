@@ -976,9 +976,10 @@ class Tests:
                 proofs = sorted(set(proofs))
 
             # TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
+            dropped = []
             if self.args.reduce_ram:
                 skip = load_reduce_ram_skiplist()
-                dropped = [p for p in proofs if p in skip]
+                dropped = sorted(p for p in proofs if p in skip)
                 proofs = [p for p in proofs if p not in skip]
                 if dropped:
                     log.info(
@@ -1015,6 +1016,17 @@ class Tests:
                 cwd="proofs/cbmc",
                 env=os.environ.copy() | envvars,
             )
+
+            if dropped and self.args.output_result_json:
+                try:
+                    with open(self.args.output_result_json) as f:
+                        data = json.load(f)
+                    data["skipped"] = dropped
+                    data["summary"]["skipped"] = len(dropped)
+                    with open(self.args.output_result_json, "w") as f:
+                        json.dump(data, f, indent=2)
+                except (OSError, json.JSONDecodeError) as e:
+                    log.error(f"Could not annotate result JSON with skiplist: {e}")
 
             if p.returncode != 0:
                 self.fail(f"CBMC proofs for parameter set={mldsa_parameter_set}")
