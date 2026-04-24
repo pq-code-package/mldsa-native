@@ -24,10 +24,10 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/native/aarc
 # polyz_unpack_19 is only used with ML-DSA-65 and ML-DSA-87
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
 CHECK_FUNCTION_CONTRACTS=mld_polyz_unpack_19_native
-USE_FUNCTION_CONTRACTS = mld_polyz_unpack_19_asm
+USE_FUNCTION_CONTRACTS = mld_polyz_unpack_19_aarch64_asm
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
 CHECK_FUNCTION_CONTRACTS=mld_polyz_unpack_19_native
-USE_FUNCTION_CONTRACTS = mld_polyz_unpack_19_asm
+USE_FUNCTION_CONTRACTS = mld_polyz_unpack_19_aarch64_asm
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS =

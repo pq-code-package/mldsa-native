@@ -24,7 +24,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/native/aarc
 # polyz_unpack_17 is only used with ML-DSA-44
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
 CHECK_FUNCTION_CONTRACTS=mld_polyz_unpack_17_native
-USE_FUNCTION_CONTRACTS = mld_polyz_unpack_17_asm
+USE_FUNCTION_CONTRACTS = mld_polyz_unpack_17_aarch64_asm
 else
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS =

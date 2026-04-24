@@ -126,8 +126,8 @@ source code and documentation.
   - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S)
   - [mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S](mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S)
   - [proofs/hol_light/README.md](proofs/hol_light/README.md)
-  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a.S)
-  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a.S)
+  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S)
 
 ### `KyberSlash`
 
@@ -183,7 +183,7 @@ source code and documentation.
   - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
-  - [proofs/hol_light/aarch64/mldsa/mldsa_ntt.S](proofs/hol_light/aarch64/mldsa/mldsa_ntt.S)
+  - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
 
 ### `REF`
 
@@ -253,13 +253,13 @@ source code and documentation.
   - [mldsa/src/native/x86_64/src/rej_uniform_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_avx2.c)
   - [mldsa/src/native/x86_64/src/rej_uniform_eta2_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_eta2_avx2.c)
   - [mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_intt.S](proofs/hol_light/x86_64/mldsa/mldsa_intt.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_ntt.S](proofs/hol_light/x86_64/mldsa/mldsa_ntt.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_nttunpack.S](proofs/hol_light/x86_64/mldsa/mldsa_nttunpack.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l4.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l4.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l5.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l5.S)
-  - [proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l7.S](proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l7.S)
+  - [proofs/hol_light/x86_64/mldsa/intt_avx2_asm.S](proofs/hol_light/x86_64/mldsa/intt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/ntt_avx2_asm.S](proofs/hol_light/x86_64/mldsa/ntt_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/nttunpack_avx2_asm.S](proofs/hol_light/x86_64/mldsa/nttunpack_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l4_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l4_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l5_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l5_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S)
 
 ### `Round3_Spec`
 
@@ -294,7 +294,7 @@ source code and documentation.
   - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
-  - [proofs/hol_light/aarch64/mldsa/mldsa_ntt.S](proofs/hol_light/aarch64/mldsa/mldsa_ntt.S)
+  - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
 
 ### `libmceliece`
 

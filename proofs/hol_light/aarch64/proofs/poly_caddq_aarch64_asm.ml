@@ -12,10 +12,10 @@
 needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 
-(**** print_literal_from_elf "aarch64/mldsa/mldsa_poly_caddq.o";;
+(**** print_literal_from_elf "aarch64/mldsa/poly_caddq_aarch64_asm.o";;
  ****)
 
-let mldsa_poly_caddq_mc = define_assert_from_elf "mldsa_poly_caddq_mc" "aarch64/mldsa/mldsa_poly_caddq.o"
+let mldsa_poly_caddq_mc = define_assert_from_elf "mldsa_poly_caddq_mc" "aarch64/mldsa/poly_caddq_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0x529c0029;       (* arm_MOV W9 (rvalue (word 57345)) *)

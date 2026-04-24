@@ -103,8 +103,8 @@ For convenience, you can also use `tests hol_light` which wraps the `make` invoc
 Currently this includes:
 
 - ML-DSA Arithmetic:
-  * x86_64 forward NTT: [mldsa_ntt.S](mldsa/mldsa_ntt.S)
-  * x86_64 inverse NTT: [mldsa_intt.S](mldsa/mldsa_intt.S)
-  * x86_64 NTT unpack:  [mldsa_nttunpack.S](mldsa/mldsa_nttunpack.S)
+  * x86_64 forward NTT: [ntt_avx2_asm.S](mldsa/ntt_avx2_asm.S)
+  * x86_64 inverse NTT: [intt_avx2_asm.S](mldsa/intt_avx2_asm.S)
+  * x86_64 NTT unpack:  [nttunpack_avx2_asm.S](mldsa/nttunpack_avx2_asm.S)
 
 The NTT and inverse NTT functions are optimized using AVX2 instructions and follow the s2n-bignum x86_64 assembly verification patterns.

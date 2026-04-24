@@ -13,10 +13,10 @@ needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_zetas.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 
-(*** print_literal_from_elf "x86_64/mldsa/mldsa_pointwise.o";;
+(*** print_literal_from_elf "x86_64/mldsa/pointwise_avx2_asm.o";;
  ***)
 
-let mldsa_pointwise_mc = define_assert_from_elf "mldsa_pointwise_mc" "x86_64/mldsa/mldsa_pointwise.o"
+let mldsa_pointwise_mc = define_assert_from_elf "mldsa_pointwise_mc" "x86_64/mldsa/pointwise_avx2_asm.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)

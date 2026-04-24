@@ -12,11 +12,11 @@ needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 
-(**** print_literal_from_elf "aarch64/mldsa/mldsa_pointwise_acc_l7.o";;
+(**** print_literal_from_elf "aarch64/mldsa/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.o";;
  ****)
 
-let mldsa_pointwise_acc_l7_mc = define_assert_from_elf
- "mldsa_pointwise_acc_l7_mc" "aarch64/mldsa/mldsa_pointwise_acc_l7.o"
+let mldsa_pointwise_acc_l4_mc = define_assert_from_elf
+ "mldsa_pointwise_acc_l4_mc" "aarch64/mldsa/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0x529c0023;       (* arm_MOV W3 (rvalue (word 57345)) *)
@@ -90,54 +90,6 @@ let mldsa_pointwise_acc_l7_mc = define_assert_from_elf
   0x4eb6825d;       (* arm_SMLAL2_VEC Q29 Q18 Q22 32 *)
   0x0eb7827e;       (* arm_SMLAL_VEC Q30 Q19 Q23 32 *)
   0x4eb7827f;       (* arm_SMLAL2_VEC Q31 Q19 Q23 32 *)
-  0x3dc3f030;       (* arm_LDR Q16 X1 (Immediate_Offset (word 4032)) *)
-  0x3dc3f431;       (* arm_LDR Q17 X1 (Immediate_Offset (word 4048)) *)
-  0x3dc3f832;       (* arm_LDR Q18 X1 (Immediate_Offset (word 4064)) *)
-  0x3dc3fc33;       (* arm_LDR Q19 X1 (Immediate_Offset (word 4080)) *)
-  0x3dc3f054;       (* arm_LDR Q20 X2 (Immediate_Offset (word 4032)) *)
-  0x3dc3f455;       (* arm_LDR Q21 X2 (Immediate_Offset (word 4048)) *)
-  0x3dc3f856;       (* arm_LDR Q22 X2 (Immediate_Offset (word 4064)) *)
-  0x3dc3fc57;       (* arm_LDR Q23 X2 (Immediate_Offset (word 4080)) *)
-  0x0eb48218;       (* arm_SMLAL_VEC Q24 Q16 Q20 32 *)
-  0x4eb48219;       (* arm_SMLAL2_VEC Q25 Q16 Q20 32 *)
-  0x0eb5823a;       (* arm_SMLAL_VEC Q26 Q17 Q21 32 *)
-  0x4eb5823b;       (* arm_SMLAL2_VEC Q27 Q17 Q21 32 *)
-  0x0eb6825c;       (* arm_SMLAL_VEC Q28 Q18 Q22 32 *)
-  0x4eb6825d;       (* arm_SMLAL2_VEC Q29 Q18 Q22 32 *)
-  0x0eb7827e;       (* arm_SMLAL_VEC Q30 Q19 Q23 32 *)
-  0x4eb7827f;       (* arm_SMLAL2_VEC Q31 Q19 Q23 32 *)
-  0x3dc4f030;       (* arm_LDR Q16 X1 (Immediate_Offset (word 5056)) *)
-  0x3dc4f431;       (* arm_LDR Q17 X1 (Immediate_Offset (word 5072)) *)
-  0x3dc4f832;       (* arm_LDR Q18 X1 (Immediate_Offset (word 5088)) *)
-  0x3dc4fc33;       (* arm_LDR Q19 X1 (Immediate_Offset (word 5104)) *)
-  0x3dc4f054;       (* arm_LDR Q20 X2 (Immediate_Offset (word 5056)) *)
-  0x3dc4f455;       (* arm_LDR Q21 X2 (Immediate_Offset (word 5072)) *)
-  0x3dc4f856;       (* arm_LDR Q22 X2 (Immediate_Offset (word 5088)) *)
-  0x3dc4fc57;       (* arm_LDR Q23 X2 (Immediate_Offset (word 5104)) *)
-  0x0eb48218;       (* arm_SMLAL_VEC Q24 Q16 Q20 32 *)
-  0x4eb48219;       (* arm_SMLAL2_VEC Q25 Q16 Q20 32 *)
-  0x0eb5823a;       (* arm_SMLAL_VEC Q26 Q17 Q21 32 *)
-  0x4eb5823b;       (* arm_SMLAL2_VEC Q27 Q17 Q21 32 *)
-  0x0eb6825c;       (* arm_SMLAL_VEC Q28 Q18 Q22 32 *)
-  0x4eb6825d;       (* arm_SMLAL2_VEC Q29 Q18 Q22 32 *)
-  0x0eb7827e;       (* arm_SMLAL_VEC Q30 Q19 Q23 32 *)
-  0x4eb7827f;       (* arm_SMLAL2_VEC Q31 Q19 Q23 32 *)
-  0x3dc5f030;       (* arm_LDR Q16 X1 (Immediate_Offset (word 6080)) *)
-  0x3dc5f431;       (* arm_LDR Q17 X1 (Immediate_Offset (word 6096)) *)
-  0x3dc5f832;       (* arm_LDR Q18 X1 (Immediate_Offset (word 6112)) *)
-  0x3dc5fc33;       (* arm_LDR Q19 X1 (Immediate_Offset (word 6128)) *)
-  0x3dc5f054;       (* arm_LDR Q20 X2 (Immediate_Offset (word 6080)) *)
-  0x3dc5f455;       (* arm_LDR Q21 X2 (Immediate_Offset (word 6096)) *)
-  0x3dc5f856;       (* arm_LDR Q22 X2 (Immediate_Offset (word 6112)) *)
-  0x3dc5fc57;       (* arm_LDR Q23 X2 (Immediate_Offset (word 6128)) *)
-  0x0eb48218;       (* arm_SMLAL_VEC Q24 Q16 Q20 32 *)
-  0x4eb48219;       (* arm_SMLAL2_VEC Q25 Q16 Q20 32 *)
-  0x0eb5823a;       (* arm_SMLAL_VEC Q26 Q17 Q21 32 *)
-  0x4eb5823b;       (* arm_SMLAL2_VEC Q27 Q17 Q21 32 *)
-  0x0eb6825c;       (* arm_SMLAL_VEC Q28 Q18 Q22 32 *)
-  0x4eb6825d;       (* arm_SMLAL2_VEC Q29 Q18 Q22 32 *)
-  0x0eb7827e;       (* arm_SMLAL_VEC Q30 Q19 Q23 32 *)
-  0x4eb7827f;       (* arm_SMLAL2_VEC Q31 Q19 Q23 32 *)
   0x4e991b10;       (* arm_UZP1 Q16 Q24 Q25 32 *)
   0x4ea19e10;       (* arm_MUL_VEC Q16 Q16 Q1 32 128 *)
   0x0ea0a218;       (* arm_SMLSL_VEC Q24 Q16 Q0 32 *)
@@ -163,39 +115,39 @@ let mldsa_pointwise_acc_l7_mc = define_assert_from_elf
   0x3d800c13;       (* arm_STR Q19 X0 (Immediate_Offset (word 48)) *)
   0x3c840410;       (* arm_STR Q16 X0 (Postimmediate_Offset (word 64)) *)
   0xf1001063;       (* arm_SUBS X3 X3 (rvalue (word 4)) *)
-  0xb5ffeee3;       (* arm_CBNZ X3 (word 2096604) *)
+  0xb5fff4e3;       (* arm_CBNZ X3 (word 2096796) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
 (*** BYTECODE END ***)
 
-let MLDSA_POINTWISE_ACC_L7_EXEC = ARM_MK_EXEC_RULE mldsa_pointwise_acc_l7_mc;;
+let MLDSA_POINTWISE_ACC_L4_EXEC = ARM_MK_EXEC_RULE mldsa_pointwise_acc_l4_mc;;
 
 (* ========================================================================= *)
 (* Correctness proof                                                         *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
+let MLDSA_POINTWISE_ACC_L4_CORRECT = prove
  (`!r a b x y pc.
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (r, 1024) /\
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (a, 7168) /\
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (b, 7168) /\
-    nonoverlapping (r, 1024) (a, 7168) /\
-    nonoverlapping (r, 1024) (b, 7168) /\
-    nonoverlapping (a, 7168) (b, 7168)
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (r, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (a, 4096) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (b, 4096) /\
+    nonoverlapping (r, 1024) (a, 4096) /\
+    nonoverlapping (r, 1024) (b, 4096) /\
+    nonoverlapping (a, 4096) (b, 4096)
     ==> ensures arm
-          (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_acc_l7_mc /\
+          (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_acc_l4_mc /\
                read PC s = word pc /\
                C_ARGUMENTS [r; a; b] s /\
-               (!i. i < 1792 ==> abs(ival(x i)) <= &8380416) /\
-               (!i. i < 1792 ==> abs(ival(y i)) <= &75423752) /\
-               (!i. i < 1792 ==>
+               (!i. i < 1024 ==> abs(ival(x i)) <= &8380416) /\
+               (!i. i < 1024 ==> abs(ival(y i)) <= &75423752) /\
+               (!i. i < 1024 ==>
                  read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
-               (!i. i < 1792 ==>
+               (!i. i < 1024 ==>
                  read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
-          (\s. read PC s = word(pc + 0x244) /\
+          (\s. read PC s = word(pc + 0x184) /\
                (!i. i < 256 ==>
                  let zi = read(memory :> bytes32(word_add r (word(4 * i)))) s in
-                 (ival zi == mldsa_pointwise_acc_l7 (ival o x) (ival o y) i)
+                 (ival zi == mldsa_pointwise_acc_l4 (ival o x) (ival o y) i)
                    (mod &8380417) /\
                  abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
@@ -207,13 +159,13 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
      `x:num->int32`; `y:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL;
-              fst MLDSA_POINTWISE_ACC_L7_EXEC] THEN
+              fst MLDSA_POINTWISE_ACC_L4_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
 
   (* Lift x bound to match y bound for product lemma *)
   SUBGOAL_THEN
-    `!i. i < 1792 ==> abs(ival((x:num->int32) i)) <= &75423752`
+    `!i. i < 1024 ==> abs(ival((x:num->int32) i)) <= &75423752`
     ASSUME_TAC THENL
   [GEN_TAC THEN DISCH_TAC THEN
    MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&8380416:int` THEN
@@ -228,34 +180,24 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
   (* Initialize and merge memory *)
   ENSURES_INIT_TAC "s0" THEN
 
-  (* Merge a: 7168 bytes = 448 x 128-bit blocks *)
-  MEMORY_128_FROM_32_TAC "a" 0 448 THEN
+  (* Merge a: 4096 bytes = 256 x 128-bit blocks *)
+  MEMORY_128_FROM_32_TAC "a" 0 256 THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN CONV_TAC WORD_REDUCE_CONV THEN
   STRIP_TAC THEN
 
-  (* Merge b: 7168 bytes = 448 x 128-bit blocks *)
-  MEMORY_128_FROM_32_TAC "b" 0 448 THEN
+  (* Merge b: 4096 bytes = 256 x 128-bit blocks *)
+  MEMORY_128_FROM_32_TAC "b" 0 256 THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN CONV_TAC WORD_REDUCE_CONV THEN
   STRIP_TAC THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
-  (* Simulate all 2215 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POINTWISE_ACC_L7_EXEC [n] THEN
+  (* Simulate all 1463 instructions with SIMD simplification *)
+  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POINTWISE_ACC_L4_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'])
-        (1--2215) THEN
+        (1--1447) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
-  (* Discard unused input memory (a, b) bytes128 reads *)
-  REPEAT(FIRST_X_ASSUM(K ALL_TAC o
-    check (fun th ->
-      let t = concl th in
-      is_eq t &&
-      let lhs = fst(dest_eq t) in
-      can (find_term (fun t -> is_const t && fst(dest_const t) = "memory")) lhs &&
-      (can (find_term (fun t -> t = `a:int64`)) lhs ||
-       can (find_term (fun t -> t = `b:int64`)) lhs)))) THEN
-
-  (* Split remaining bytes128 -> bytes32 for output memory *)
+  (* Split bytes128 -> bytes32 for output memory *)
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
     CONV_RULE (SIMD_SIMPLIFY_CONV []) o
     CONV_RULE(READ_MEMORY_SPLIT_CONV 2) o
@@ -273,7 +215,7 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
 
   (* Product bounds (tight: 8380416 * 75423752 = 632082418040832) *)
   SUBGOAL_THEN
-   `!i. i < 1792 ==>
+   `!i. i < 1024 ==>
      abs(ival(word_mul (word_sx ((x:num->int32) i):int64)
                        (word_sx ((y:num->int32) i):int64))) <= &632082418040832`
    ASSUME_TAC THENL
@@ -293,15 +235,15 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
     let lfn = PROCESS_BOUND_ASSUMPTIONS
       (CONJUNCTS(tryfind (CONV_RULE EXPAND_CASES_CONV o snd) asl))
     in
-    (* Pre-compute 1792 ival_mul theorems via ISPECL + assumption lookup *)
-    let ival_mul_thms = Array.init 1792 (fun i ->
+    (* Pre-compute 1024 ival_mul theorems via ISPECL + assumption lookup *)
+    let ival_mul_thms = Array.init 1024 (fun i ->
       let iterm = mk_small_numeral i in
       let xi = mk_comb(`x:num->int32`, iterm) in
       let yi = mk_comb(`y:num->int32`, iterm) in
       let th = ISPECL [xi; yi] IVAL_WORD_MUL_SX32_64 in
       let ante = lhand(concl th) in
       let ante_x, ante_y = dest_conj ante in
-      let ilt = ARITH_RULE(mk_comb(mk_comb(`(<):num->num->bool`, iterm), `1792`)) in
+      let ilt = ARITH_RULE(mk_comb(mk_comb(`(<):num->num->bool`, iterm), `1024`)) in
       let prove_bound bt =
         tryfind (fun (_,ath) ->
           try let a' = SPEC iterm ath in
@@ -318,14 +260,14 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
     let prove_pair idx pair =
       let mr = rand(lhand(rator(lhand pair))) in
       let cb_th = ASM_CONGBOUND_RULE lfn mr in
-      let relevant_ival = map (fun k -> ival_mul_thms.(idx + 256 * k)) [0;1;2;3;4;5;6] in
+      let relevant_ival = map (fun k -> ival_mul_thms.(idx + 256 * k)) [0;1;2;3] in
       let (_,sgs,just) = (
         MP_TAC cb_th THEN
         MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
          [(* Congruence branch *)
           REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 8380417 4294967296`] THEN
           MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] INT_CONG_TRANS) THEN
-          REWRITE_TAC[GSYM INT_REM_EQ; o_THM; mldsa_pointwise_acc_l7;
+          REWRITE_TAC[GSYM INT_REM_EQ; o_THM; mldsa_pointwise_acc_l4;
                        INVERSE_MOD_CONV `inverse_mod 8380417 4294967296`] THEN
           CONV_TAC INT_REM_DOWN_CONV THEN
           CONV_TAC(DEPTH_CONV NUM_ADD_CONV) THEN
@@ -347,38 +289,37 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
 (* Subroutine form                                                           *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L7_SUBROUTINE_CORRECT = prove
+let MLDSA_POINTWISE_ACC_L4_SUBROUTINE_CORRECT = prove
  (`!r a b x y pc returnaddress.
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (r, 1024) /\
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (a, 7168) /\
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l7_mc) (b, 7168) /\
-    nonoverlapping (r, 1024) (a, 7168) /\
-    nonoverlapping (r, 1024) (b, 7168) /\
-    nonoverlapping (a, 7168) (b, 7168)
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (r, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (a, 4096) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (b, 4096) /\
+    nonoverlapping (r, 1024) (a, 4096) /\
+    nonoverlapping (r, 1024) (b, 4096) /\
+    nonoverlapping (a, 4096) (b, 4096)
     ==> ensures arm
-          (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_acc_l7_mc /\
+          (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_acc_l4_mc /\
                read PC s = word pc /\
                read X30 s = returnaddress /\
                C_ARGUMENTS [r; a; b] s /\
-               (!i. i < 1792 ==> abs(ival(x i)) <= &8380416) /\
-               (!i. i < 1792 ==> abs(ival(y i)) <= &75423752) /\
-               (!i. i < 1792 ==>
+               (!i. i < 1024 ==> abs(ival(x i)) <= &8380416) /\
+               (!i. i < 1024 ==> abs(ival(y i)) <= &75423752) /\
+               (!i. i < 1024 ==>
                  read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
-               (!i. i < 1792 ==>
+               (!i. i < 1024 ==>
                  read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
           (\s. read PC s = returnaddress /\
                (!i. i < 256 ==>
                  let zi = read(memory :> bytes32(word_add r (word(4 * i)))) s in
-                 (ival zi == mldsa_pointwise_acc_l7 (ival o x) (ival o y) i)
+                 (ival zi == mldsa_pointwise_acc_l4 (ival o x) (ival o y) i)
                    (mod &8380417) /\
                  abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 1024)])`,
-  REWRITE_TAC[fst MLDSA_POINTWISE_ACC_L7_EXEC] THEN
-  ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POINTWISE_ACC_L7_EXEC
-    (REWRITE_RULE[fst MLDSA_POINTWISE_ACC_L7_EXEC]
-       MLDSA_POINTWISE_ACC_L7_CORRECT));;
-
+  REWRITE_TAC[fst MLDSA_POINTWISE_ACC_L4_EXEC] THEN
+  ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POINTWISE_ACC_L4_EXEC
+    (REWRITE_RULE[fst MLDSA_POINTWISE_ACC_L4_EXEC]
+       MLDSA_POINTWISE_ACC_L4_CORRECT));;
 
 (* ========================================================================= *)
 (* Constant-time and memory safety proof.                                    *)
@@ -389,23 +330,23 @@ needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
-    (assoc "mldsa_pointwise_acc_l7" subroutine_signatures)
-    MLDSA_POINTWISE_ACC_L7_SUBROUTINE_CORRECT
-    MLDSA_POINTWISE_ACC_L7_EXEC;;
+    (assoc "mldsa_pointwise_acc_l4" subroutine_signatures)
+    MLDSA_POINTWISE_ACC_L4_SUBROUTINE_CORRECT
+    MLDSA_POINTWISE_ACC_L4_EXEC;;
 
-let MLDSA_POINTWISE_ACC_L7_SUBROUTINE_SAFE = time prove
+let MLDSA_POINTWISE_ACC_L4_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a b pc returnaddress.
-           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l7_mc) (r,1024) /\
-           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l7_mc) (a,7168) /\
-           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l7_mc) (b,7168) /\
-           nonoverlapping (r,1024) (a,7168) /\
-           nonoverlapping (r,1024) (b,7168) /\
-           nonoverlapping (a,7168) (b,7168)
+           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (r,1024) /\
+           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (a,4096) /\
+           nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (b,4096) /\
+           nonoverlapping (r,1024) (a,4096) /\
+           nonoverlapping (r,1024) (b,4096) /\
+           nonoverlapping (a,4096) (b,4096)
            ==> ensures arm
                (\s.
                     aligned_bytes_loaded s (word pc)
-                    mldsa_pointwise_acc_l7_mc /\
+                    mldsa_pointwise_acc_l4_mc /\
                     read PC s = word pc /\
                     read X30 s = returnaddress /\
                     C_ARGUMENTS [r; a; b] s /\
@@ -415,8 +356,8 @@ let MLDSA_POINTWISE_ACC_L7_SUBROUTINE_SAFE = time prove
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a b r pc returnaddress /\
-                         memaccess_inbounds e2 [a,7168; b,7168; r,1024]
+                         memaccess_inbounds e2 [a,4096; b,4096; r,1024]
                          [r,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POINTWISE_ACC_L7_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POINTWISE_ACC_L4_EXEC);;

@@ -13,11 +13,11 @@ needs "s2n_bignum/arm/proofs/base.ml";;
 
 needs "mldsa_native/common/keccak_spec.ml";;
 
-(**** print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_scalar.o";;
+(**** print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.o";;
  ****)
 
 let keccak_f1600_x1_scalar_mc = define_assert_from_elf
-  "keccak_f1600_x1_scalar_mc" "aarch64/mldsa/keccak_f1600_x1_scalar.o"
+  "keccak_f1600_x1_scalar_mc" "aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0xd10203ff;       (* arm_SUB SP SP (rvalue (word 128)) *)

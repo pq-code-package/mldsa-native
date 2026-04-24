@@ -14,11 +14,11 @@ needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 needs "mldsa_native/aarch64/proofs/mldsa_polyz_unpack_consts.ml";;
 
-(**** print_literal_from_elf "aarch64/mldsa/mldsa_polyz_unpack_19.o";;
+(**** print_literal_from_elf "aarch64/mldsa/polyz_unpack_19_aarch64_asm.o";;
  ****)
 
 let mldsa_polyz_unpack_19_mc = define_assert_from_elf
-  "mldsa_polyz_unpack_19_mc" "aarch64/mldsa/mldsa_polyz_unpack_19.o"
+  "mldsa_polyz_unpack_19_mc" "aarch64/mldsa/polyz_unpack_19_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0x3dc00058;       (* arm_LDR Q24 X2 (Immediate_Offset (word 0)) *)

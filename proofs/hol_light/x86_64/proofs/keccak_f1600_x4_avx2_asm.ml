@@ -11,7 +11,7 @@
 ****)
 
 let keccak_f1600_x4_avx2_mc = define_assert_from_elf
-  "keccak_f1600_x4_avx2_mc" "x86_64/mldsa/keccak_f1600_x4_avx2.o"
+  "keccak_f1600_x4_avx2_mc" "x86_64/mldsa/keccak_f1600_x4_avx2_asm.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)

@@ -2569,11 +2569,10 @@ def update_via_simpasm(
 
 
 def gen_hol_light_asm_file(job):
-    infile, outfile, indir, cflags, arch = job
+    infile, indir, cflags, arch = job
     update_via_simpasm(
         f"{indir}/{infile}",
         "proofs/hol_light/" + arch + "/mldsa",
-        outfile=outfile,
         cflags=cflags,
         preserve_header=False,
     )
@@ -2584,27 +2583,23 @@ def gen_hol_light_asm():
     joblist_aarch64 = [
         (
             "ntt_aarch64_asm.S",
-            "mldsa_ntt.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "poly_caddq_aarch64_asm.S",
-            "mldsa_poly_caddq.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "poly_chknorm_aarch64_asm.S",
-            "mldsa_poly_chknorm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_decompose_32_aarch64_asm.S",
             "poly_decompose_32_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
@@ -2612,20 +2607,17 @@ def gen_hol_light_asm():
         ),
         (
             "poly_decompose_88_aarch64_asm.S",
-            "poly_decompose_88_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "poly_use_hint_32_aarch64_asm.S",
-            "poly_use_hint_32_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_use_hint_88_aarch64_asm.S",
             "poly_use_hint_88_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
@@ -2633,77 +2625,66 @@ def gen_hol_light_asm():
         ),
         (
             "mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S",
-            "mldsa_pointwise_acc_l4.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S",
-            "mldsa_pointwise_acc_l5.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S",
-            "mldsa_pointwise_acc_l7.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "keccak_f1600_x1_scalar_aarch64_asm.S",
-            "keccak_f1600_x1_scalar.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "keccak_f1600_x1_v84a_aarch64_asm.S",
-            "keccak_f1600_x1_v84a.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "keccak_f1600_x2_v84a_aarch64_asm.S",
-            "keccak_f1600_x2_v84a.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S",
-            "keccak_f1600_x4_v8a_v84a_scalar.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S",
-            "keccak_f1600_x4_v8a_scalar.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
             "pointwise_montgomery_aarch64_asm.S",
-            "mldsa_pointwise.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "polyz_unpack_17_asm.S",
-            "mldsa_polyz_unpack_17.S",
+            "polyz_unpack_17_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "polyz_unpack_19_asm.S",
-            "mldsa_polyz_unpack_19.S",
+            "polyz_unpack_19_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
@@ -2714,56 +2695,48 @@ def gen_hol_light_asm():
     joblist_x86_64 = [
         (
             "ntt_avx2_asm.S",
-            "mldsa_ntt.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "intt_avx2_asm.S",
-            "mldsa_intt.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "nttunpack_avx2_asm.S",
-            "mldsa_nttunpack.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "pointwise_avx2_asm.S",
-            "mldsa_pointwise.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "pointwise_acc_l4_avx2_asm.S",
-            "mldsa_pointwise_acc_l4.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "pointwise_acc_l5_avx2_asm.S",
-            "mldsa_pointwise_acc_l5.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
             "pointwise_acc_l7_avx2_asm.S",
-            "mldsa_pointwise_acc_l7.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "keccak_f1600_x4_avx2.S",
-            "keccak_f1600_x4_avx2.S",
+            "keccak_f1600_x4_avx2_asm.S",
             "dev/fips202/x86_64/src",
             f"-Idev/fips202/x86_64/src -Imldsa/src/fips202/native/x86_64/src {x86_64_flags}",
             "x86_64",

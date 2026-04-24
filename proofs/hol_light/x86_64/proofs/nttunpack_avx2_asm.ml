@@ -10,10 +10,10 @@
 needs "s2n_bignum/x86/proofs/base.ml";;
 needs "mldsa_native/common/mldsa_specs.ml";;
 
-(**** print_literal_from_elf "x86/mldsa/mldsa_nttunpack.o";;
+(**** print_literal_from_elf "x86/mldsa/nttunpack_avx2_asm.o";;
  ****)
 
-let mldsa_nttunpack_mc = define_assert_from_elf "mldsa_nttunpack_mc" "x86_64/mldsa/mldsa_nttunpack.o"
+let mldsa_nttunpack_mc = define_assert_from_elf "mldsa_nttunpack_mc" "x86_64/mldsa/nttunpack_avx2_asm.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)

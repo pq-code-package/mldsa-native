@@ -53,23 +53,23 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mldsa/mldsa_ntt.o \
-      mldsa/mldsa_pointwise.o \
-      mldsa/mldsa_poly_caddq.o \
-      mldsa/mldsa_poly_chknorm.o                        \
-      mldsa/poly_decompose_32_aarch64_asm.o                   \
-      mldsa/poly_decompose_88_aarch64_asm.o                   \
-      mldsa/mldsa_pointwise_acc_l4.o                    \
-      mldsa/mldsa_pointwise_acc_l5.o                    \
-      mldsa/mldsa_pointwise_acc_l7.o                    \
-      mldsa/keccak_f1600_x1_scalar.o                    \
-      mldsa/keccak_f1600_x1_v84a.o                      \
-      mldsa/keccak_f1600_x2_v84a.o                      \
-      mldsa/keccak_f1600_x4_v8a_scalar.o                \
-      mldsa/keccak_f1600_x4_v8a_v84a_scalar.o            \
-      mldsa/mldsa_polyz_unpack_17.o                     \
-      mldsa/mldsa_polyz_unpack_19.o                     \
-      mldsa/poly_use_hint_32_aarch64_asm.o              \
+OBJ = mldsa/ntt_aarch64_asm.o \
+      mldsa/pointwise_montgomery_aarch64_asm.o \
+      mldsa/poly_caddq_aarch64_asm.o \
+      mldsa/poly_chknorm_aarch64_asm.o \
+      mldsa/poly_decompose_32_aarch64_asm.o \
+      mldsa/poly_decompose_88_aarch64_asm.o \
+      mldsa/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.o \
+      mldsa/mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.o \
+      mldsa/mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.o \
+      mldsa/keccak_f1600_x1_scalar_aarch64_asm.o \
+      mldsa/keccak_f1600_x1_v84a_aarch64_asm.o \
+      mldsa/keccak_f1600_x2_v84a_aarch64_asm.o \
+      mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.o \
+      mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.o \
+      mldsa/polyz_unpack_17_aarch64_asm.o \
+      mldsa/polyz_unpack_19_aarch64_asm.o \
+      mldsa/poly_use_hint_32_aarch64_asm.o \
       mldsa/poly_use_hint_88_aarch64_asm.o
 
 # According to

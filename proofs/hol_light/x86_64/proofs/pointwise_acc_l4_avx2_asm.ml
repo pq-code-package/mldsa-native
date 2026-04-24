@@ -13,10 +13,10 @@ needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_zetas.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 
-(*** print_literal_from_elf "x86_64/mldsa/mldsa_pointwise_acc_l5.o";;
+(*** print_literal_from_elf "x86_64/mldsa/pointwise_acc_l4_avx2_asm.o";;
  ***)
 
-let mldsa_pointwise_acc_l5_mc = define_assert_from_elf "mldsa_pointwise_acc_l5_mc" "x86_64/mldsa/mldsa_pointwise_acc_l5.o"
+let mldsa_pointwise_acc_l4_mc = define_assert_from_elf "mldsa_pointwise_acc_l4_mc" "x86_64/mldsa/pointwise_acc_l4_avx2_asm.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)
@@ -134,34 +134,6 @@ let mldsa_pointwise_acc_l5_mc = define_assert_from_elf "mldsa_pointwise_acc_l5_m
   0xc5; 0xc5; 0xd4; 0xdb;  (* VPADDQ (%_% ymm3) (%_% ymm7) (%_% ymm3) *)
   0xc5; 0xbd; 0xd4; 0xe4;  (* VPADDQ (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
   0xc5; 0xb5; 0xd4; 0xed;  (* VPADDQ (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
-  0xc5; 0xfd; 0x6f; 0xb6; 0x00; 0x10; 0x00; 0x00;
-                           (* VMOVDQA (%_% ymm6) (Memop Word256 (%% (rsi,4096))) *)
-  0xc5; 0x7d; 0x6f; 0x86; 0x20; 0x10; 0x00; 0x00;
-                           (* VMOVDQA (%_% ymm8) (Memop Word256 (%% (rsi,4128))) *)
-  0xc5; 0x7d; 0x6f; 0x92; 0x00; 0x10; 0x00; 0x00;
-                           (* VMOVDQA (%_% ymm10) (Memop Word256 (%% (rdx,4096))) *)
-  0xc5; 0x7d; 0x6f; 0xa2; 0x20; 0x10; 0x00; 0x00;
-                           (* VMOVDQA (%_% ymm12) (Memop Word256 (%% (rdx,4128))) *)
-  0xc5; 0xc5; 0x73; 0xd6; 0x20;
-                           (* VPSRLQ (%_% ymm7) (%_% ymm6) (Imm8 (word 32)) *)
-  0xc4; 0xc1; 0x35; 0x73; 0xd0; 0x20;
-                           (* VPSRLQ (%_% ymm9) (%_% ymm8) (Imm8 (word 32)) *)
-  0xc4; 0x41; 0x7e; 0x16; 0xda;
-                           (* VMOVSHDUP (%_% ymm11) (%_% ymm10) *)
-  0xc4; 0x41; 0x7e; 0x16; 0xec;
-                           (* VMOVSHDUP (%_% ymm13) (%_% ymm12) *)
-  0xc4; 0xc2; 0x4d; 0x28; 0xf2;
-                           (* VPMULDQ (%_% ymm6) (%_% ymm6) (%_% ymm10) *)
-  0xc4; 0xc2; 0x45; 0x28; 0xfb;
-                           (* VPMULDQ (%_% ymm7) (%_% ymm7) (%_% ymm11) *)
-  0xc4; 0x42; 0x3d; 0x28; 0xc4;
-                           (* VPMULDQ (%_% ymm8) (%_% ymm8) (%_% ymm12) *)
-  0xc4; 0x42; 0x35; 0x28; 0xcd;
-                           (* VPMULDQ (%_% ymm9) (%_% ymm9) (%_% ymm13) *)
-  0xc5; 0xcd; 0xd4; 0xd2;  (* VPADDQ (%_% ymm2) (%_% ymm6) (%_% ymm2) *)
-  0xc5; 0xc5; 0xd4; 0xdb;  (* VPADDQ (%_% ymm3) (%_% ymm7) (%_% ymm3) *)
-  0xc5; 0xbd; 0xd4; 0xe4;  (* VPADDQ (%_% ymm4) (%_% ymm8) (%_% ymm4) *)
-  0xc5; 0xb5; 0xd4; 0xed;  (* VPADDQ (%_% ymm5) (%_% ymm9) (%_% ymm5) *)
   0xc4; 0xe2; 0x7d; 0x28; 0xf2;
                            (* VPMULDQ (%_% ymm6) (%_% ymm0) (%_% ymm2) *)
   0xc4; 0xe2; 0x7d; 0x28; 0xfb;
@@ -199,51 +171,51 @@ let mldsa_pointwise_acc_l5_mc = define_assert_from_elf "mldsa_pointwise_acc_l5_m
   0x48; 0x83; 0xc7; 0x40;  (* ADD (% rdi) (Imm8 (word 64)) *)
   0x83; 0xc0; 0x01;        (* ADD (% eax) (Imm8 (word 1)) *)
   0x83; 0xf8; 0x10;        (* CMP (% eax) (Imm8 (word 16)) *)
-  0x0f; 0x82; 0xe1; 0xfd; 0xff; 0xff;
-                           (* JB (Imm32 (word 4294966753)) *)
+  0x0f; 0x82; 0x3a; 0xfe; 0xff; 0xff;
+                           (* JB (Imm32 (word 4294966842)) *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
 
-let mldsa_pointwise_acc_l5_tmc = define_trimmed "mldsa_pointwise_acc_l5_tmc" mldsa_pointwise_acc_l5_mc;;
-let MLDSA_POINTWISE_ACC_L5_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_pointwise_acc_l5_tmc;;
+let mldsa_pointwise_acc_l4_tmc = define_trimmed "mldsa_pointwise_acc_l4_tmc" mldsa_pointwise_acc_l4_mc;;
+let MLDSA_POINTWISE_ACC_L4_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_pointwise_acc_l4_tmc;;
 
 (* ========================================================================= *)
 (* Correctness proof                                                         *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
+let MLDSA_POINTWISE_ACC_L4_CORRECT = prove
  (`!c a b consts x y pc.
     aligned 32 c /\
     aligned 32 a /\
     aligned 32 b /\
     aligned 32 consts /\
-    nonoverlapping (word pc, 0x22B) (c, 1024) /\
-    nonoverlapping (word pc, 0x22B) (a, 5120) /\
-    nonoverlapping (word pc, 0x22B) (b, 5120) /\
-    nonoverlapping (word pc, 0x22B) (consts, 2496) /\
-    nonoverlapping (c, 1024) (a, 5120) /\
-    nonoverlapping (c, 1024) (b, 5120) /\
+    nonoverlapping (word pc, 0x1D2) (c, 1024) /\
+    nonoverlapping (word pc, 0x1D2) (a, 4096) /\
+    nonoverlapping (word pc, 0x1D2) (b, 4096) /\
+    nonoverlapping (word pc, 0x1D2) (consts, 2496) /\
+    nonoverlapping (c, 1024) (a, 4096) /\
+    nonoverlapping (c, 1024) (b, 4096) /\
     nonoverlapping (c, 1024) (consts, 2496) /\
-    nonoverlapping (a, 5120) (b, 5120) /\
-    nonoverlapping (a, 5120) (consts, 2496) /\
-    nonoverlapping (b, 5120) (consts, 2496)
+    nonoverlapping (a, 4096) (b, 4096) /\
+    nonoverlapping (a, 4096) (consts, 2496) /\
+    nonoverlapping (b, 4096) (consts, 2496)
     ==> ensures x86
-          (\s. bytes_loaded s (word pc) (BUTLAST mldsa_pointwise_acc_l5_tmc) /\
+          (\s. bytes_loaded s (word pc) (BUTLAST mldsa_pointwise_acc_l4_tmc) /\
               read RIP s = word pc /\
               C_ARGUMENTS [c; a; b; consts] s /\
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
-              (!i. i < 1280 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1280 ==> abs(ival(y i)) <= &75423752) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==> abs(ival(x i)) <= &8380416) /\
+              (!i. i < 1024 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
-          (\s. read RIP s = word(pc + 0x22A) /\
+          (\s. read RIP s = word(pc + 0x1D1) /\
               (!i. i < 256 ==>
                 let zi = read(memory :> bytes32(word_add c (word(4 * i)))) s in
-                (ival zi == mldsa_pointwise_acc_l5 (ival o x) (ival o y) i)
+                (ival zi == mldsa_pointwise_acc_l4 (ival o x) (ival o y) i)
                   (mod &8380417) /\
                 abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
@@ -260,7 +232,7 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
   SUBGOAL_THEN
-    `!i. i < 1280 ==> abs(ival((x:num->int32) i)) <= &75423752`
+    `!i. i < 1024 ==> abs(ival((x:num->int32) i)) <= &75423752`
     ASSUME_TAC THENL
   [GEN_TAC THEN DISCH_TAC THEN
    MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&8380416:int` THEN
@@ -269,7 +241,7 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
   CONV_TAC(RATOR_CONV(LAND_CONV(ONCE_DEPTH_CONV EXPAND_CASES_CONV))) THEN
   CONV_TAC NUM_REDUCE_CONV THEN
   REPEAT STRIP_TAC THEN
-  REWRITE_TAC [SOME_FLAGS; fst MLDSA_POINTWISE_ACC_L5_TMC_EXEC] THEN
+  REWRITE_TAC [SOME_FLAGS; fst MLDSA_POINTWISE_ACC_L4_TMC_EXEC] THEN
 
   GHOST_INTRO_TAC `init_ymm0:int256` `read YMM0` THEN
   GHOST_INTRO_TAC `init_ymm1:int256` `read YMM1` THEN
@@ -298,14 +270,14 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
 
   MP_TAC(end_itlist CONJ (map (fun n ->
     READ_MEMORY_MERGE_CONV 3 (subst[mk_small_numeral(32*n),`n:num`]
-      `read (memory :> bytes256(word_add a (word n))) s0`)) (0--159))) THEN
+      `read (memory :> bytes256(word_add a (word n))) s0`)) (0--127))) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN
   STRIP_TAC THEN
-  
+
   MP_TAC(end_itlist CONJ (map (fun n ->
     READ_MEMORY_MERGE_CONV 3 (subst[mk_small_numeral(32*n),`n:num`]
-      `read (memory :> bytes256(word_add b (word n))) s0`)) (0--159))) THEN
+      `read (memory :> bytes256(word_add b (word n))) s0`)) (0--127))) THEN
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN
   STRIP_TAC THEN
@@ -323,8 +295,9 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
   CONV_TAC(LAND_CONV WORD_REDUCE_CONV) THEN
   STRIP_TAC THEN
 
+  (* Product bounds (tight: 8380416 * 75423752 = 632082418040832) *)
   SUBGOAL_THEN
-   `!i. i < 1280 ==>
+   `!i. i < 1024 ==>
      abs(ival(word_mul (word_sx ((x:num->int32) i):int64)
                        (word_sx ((y:num->int32) i):int64))) <= &632082418040832`
    ASSUME_TAC THENL
@@ -339,15 +312,15 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
      CONV_TAC INT_REDUCE_CONV];
    ALL_TAC] THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_ACC_L5_TMC_EXEC [n] THEN
+  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_ACC_L4_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[mldsa_pointwise_montred])
-        (1--1667) THEN
+        (1--1411) THEN
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
 
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
     CONV_RULE(READ_MEMORY_SPLIT_CONV 3) o
-    check (can (term_match [] `read qqq s1667:int256 = xxx`) o concl))) THEN
+    check (can (term_match [] `read qqq s1411:int256 = xxx`) o concl))) THEN
 
   CONV_TAC(TOP_DEPTH_CONV EXPAND_CASES_CONV) THEN
   CONV_TAC(DEPTH_CONV NUM_MULT_CONV THENC DEPTH_CONV NUM_ADD_CONV) THEN
@@ -363,15 +336,15 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
     let lfn = PROCESS_BOUND_ASSUMPTIONS
       (CONJUNCTS(tryfind (CONV_RULE EXPAND_CASES_CONV o snd) asl))
     in
-    (* Pre-compute 1280 ival_mul theorems via ISPECL + assumption lookup *)
-    let ival_mul_thms = Array.init 1280 (fun i ->
+    (* Pre-compute 1024 ival_mul theorems via ISPECL + assumption lookup *)
+    let ival_mul_thms = Array.init 1024 (fun i ->
       let iterm = mk_small_numeral i in
       let xi = mk_comb(`x:num->int32`, iterm) in
       let yi = mk_comb(`y:num->int32`, iterm) in
       let th = ISPECL [xi; yi] IVAL_WORD_MUL_SX32_64 in
       let ante = lhand(concl th) in
       let ante_x, ante_y = dest_conj ante in
-      let ilt = ARITH_RULE(mk_comb(mk_comb(`(<):num->num->bool`, iterm), `1280`)) in
+      let ilt = ARITH_RULE(mk_comb(mk_comb(`(<):num->num->bool`, iterm), `1024`)) in
       let prove_bound bt =
         tryfind (fun (_,ath) ->
           try let a' = SPEC iterm ath in
@@ -388,13 +361,13 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
     let prove_pair idx pair =
       let mr = rand(lhand(rator(lhand pair))) in
       let cb_th = ASM_CONGBOUND_RULE lfn mr in
-      let relevant_ival = map (fun k -> ival_mul_thms.(idx + 256 * k)) [0;1;2;3;4] in
+      let relevant_ival = map (fun k -> ival_mul_thms.(idx + 256 * k)) [0;1;2;3] in
       let (_,sgs,just) = (
         MP_TAC cb_th THEN
         MATCH_MP_TAC MONO_AND THEN CONJ_TAC THENL
          [REWRITE_TAC[INVERSE_MOD_CONV `inverse_mod 8380417 4294967296`] THEN
           MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] INT_CONG_TRANS) THEN
-          REWRITE_TAC[GSYM INT_REM_EQ; o_THM; mldsa_pointwise_acc_l5;
+          REWRITE_TAC[GSYM INT_REM_EQ; o_THM; mldsa_pointwise_acc_l4;
                        INVERSE_MOD_CONV `inverse_mod 8380417 4294967296`] THEN
           CONV_TAC INT_REM_DOWN_CONV THEN
           CONV_TAC(DEPTH_CONV NUM_ADD_CONV) THEN
@@ -415,93 +388,93 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
 (* Subroutine form                                                           *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L5_NOIBT_SUBROUTINE_CORRECT = prove
+let MLDSA_POINTWISE_ACC_L4_NOIBT_SUBROUTINE_CORRECT = prove
  (`!c a b consts x y pc stackpointer returnaddress.
     aligned 32 c /\
     aligned 32 a /\
     aligned 32 b /\
     aligned 32 consts /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_tmc) (c, 1024) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_tmc) (a, 5120) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_tmc) (b, 5120) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_tmc) (consts, 2496) /\
-    nonoverlapping (c, 1024) (a, 5120) /\
-    nonoverlapping (c, 1024) (b, 5120) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_tmc) (c, 1024) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_tmc) (a, 4096) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_tmc) (b, 4096) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_tmc) (consts, 2496) /\
+    nonoverlapping (c, 1024) (a, 4096) /\
+    nonoverlapping (c, 1024) (b, 4096) /\
     nonoverlapping (c, 1024) (consts, 2496) /\
-    nonoverlapping (a, 5120) (b, 5120) /\
-    nonoverlapping (a, 5120) (consts, 2496) /\
-    nonoverlapping (b, 5120) (consts, 2496) /\
+    nonoverlapping (a, 4096) (b, 4096) /\
+    nonoverlapping (a, 4096) (consts, 2496) /\
+    nonoverlapping (b, 4096) (consts, 2496) /\
     nonoverlapping (stackpointer, 8) (c, 1024) /\
-    nonoverlapping (stackpointer, 8) (a, 5120) /\
-    nonoverlapping (stackpointer, 8) (b, 5120) /\
+    nonoverlapping (stackpointer, 8) (a, 4096) /\
+    nonoverlapping (stackpointer, 8) (b, 4096) /\
     nonoverlapping (stackpointer, 8) (consts, 2496)
     ==> ensures x86
-          (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l5_tmc /\
+          (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l4_tmc /\
               read RIP s = word pc /\
               read RSP s = stackpointer /\
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [c; a; b; consts] s /\
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
-              (!i. i < 1280 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1280 ==> abs(ival(y i)) <= &75423752) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==> abs(ival(x i)) <= &8380416) /\
+              (!i. i < 1024 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
           (\s. read RIP s = returnaddress /\
               read RSP s = word_add stackpointer (word 8) /\
               (!i. i < 256 ==>
                 let zi = read(memory :> bytes32(word_add c (word(4 * i)))) s in
-                (ival zi == mldsa_pointwise_acc_l5 (ival o x) (ival o y) i)
+                (ival zi == mldsa_pointwise_acc_l4 (ival o x) (ival o y) i)
                   (mod &8380417) /\
                 abs(ival zi) <= &8380416))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(c, 1024)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_pointwise_acc_l5_tmc
-    (CONV_RULE TWEAK_CONV MLDSA_POINTWISE_ACC_L5_CORRECT));;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_pointwise_acc_l4_tmc
+    (CONV_RULE TWEAK_CONV MLDSA_POINTWISE_ACC_L4_CORRECT));;
 
-let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT = prove
+let MLDSA_POINTWISE_ACC_L4_SUBROUTINE_CORRECT = prove
  (`!c a b consts x y pc stackpointer returnaddress.
     aligned 32 c /\
     aligned 32 a /\
     aligned 32 b /\
     aligned 32 consts /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_mc) (c, 1024) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_mc) (a, 5120) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_mc) (b, 5120) /\
-    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_mc) (consts, 2496) /\
-    nonoverlapping (c, 1024) (a, 5120) /\
-    nonoverlapping (c, 1024) (b, 5120) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (c, 1024) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (a, 4096) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (b, 4096) /\
+    nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l4_mc) (consts, 2496) /\
+    nonoverlapping (c, 1024) (a, 4096) /\
+    nonoverlapping (c, 1024) (b, 4096) /\
     nonoverlapping (c, 1024) (consts, 2496) /\
-    nonoverlapping (a, 5120) (b, 5120) /\
-    nonoverlapping (a, 5120) (consts, 2496) /\
-    nonoverlapping (b, 5120) (consts, 2496) /\
+    nonoverlapping (a, 4096) (b, 4096) /\
+    nonoverlapping (a, 4096) (consts, 2496) /\
+    nonoverlapping (b, 4096) (consts, 2496) /\
     nonoverlapping (stackpointer, 8) (c, 1024) /\
-    nonoverlapping (stackpointer, 8) (a, 5120) /\
-    nonoverlapping (stackpointer, 8) (b, 5120) /\
+    nonoverlapping (stackpointer, 8) (a, 4096) /\
+    nonoverlapping (stackpointer, 8) (b, 4096) /\
     nonoverlapping (stackpointer, 8) (consts, 2496)
     ==> ensures x86
-          (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l5_mc /\
+          (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l4_mc /\
               read RIP s = word pc /\
               read RSP s = stackpointer /\
               read (memory :> bytes64 stackpointer) s = returnaddress /\
               C_ARGUMENTS [c; a; b; consts] s /\
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
-              (!i. i < 1280 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1280 ==> abs(ival(y i)) <= &75423752) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==> abs(ival(x i)) <= &8380416) /\
+              (!i. i < 1024 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
-              (!i. i < 1280 ==>
+              (!i. i < 1024 ==>
                 read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
           (\s. read RIP s = returnaddress /\
               read RSP s = word_add stackpointer (word 8) /\
               (!i. i < 256 ==>
                 let zi = read(memory :> bytes32(word_add c (word(4 * i)))) s in
-                (ival zi == mldsa_pointwise_acc_l5 (ival o x) (ival o y) i)
+                (ival zi == mldsa_pointwise_acc_l4 (ival o x) (ival o y) i)
                   (mod &8380417) /\
                 abs(ival zi) <= &8380416))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
@@ -509,7 +482,7 @@ let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT = prove
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
-    (CONV_RULE TWEAK_CONV MLDSA_POINTWISE_ACC_L5_NOIBT_SUBROUTINE_CORRECT)));;
+    (CONV_RULE TWEAK_CONV MLDSA_POINTWISE_ACC_L4_NOIBT_SUBROUTINE_CORRECT)));;
 
 (* ========================================================================= *)
 (* Constant-time and memory safety proof.                                    *)
@@ -520,35 +493,35 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
-    (assoc "mldsa_pointwise_acc_l5_x86" subroutine_signatures)
-    MLDSA_POINTWISE_ACC_L5_CORRECT
-    MLDSA_POINTWISE_ACC_L5_TMC_EXEC;;
+    (assoc "mldsa_pointwise_acc_l4_x86" subroutine_signatures)
+    MLDSA_POINTWISE_ACC_L4_CORRECT
+    MLDSA_POINTWISE_ACC_L4_TMC_EXEC;;
 
-let MLDSA_POINTWISE_ACC_L5_SAFE =
+let MLDSA_POINTWISE_ACC_L4_SAFE =
   REWRITE_RULE [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS]
   (time prove
    (full_spec,
     REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS] THEN
     PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
-      MLDSA_POINTWISE_ACC_L5_TMC_EXEC));;
+      MLDSA_POINTWISE_ACC_L4_TMC_EXEC));;
 
-let MLDSA_POINTWISE_ACC_L5_NOIBT_SUBROUTINE_SAFE = time prove
+let MLDSA_POINTWISE_ACC_L4_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e c a b consts pc stackpointer returnaddress.
           aligned 32 c /\ aligned 32 a /\ aligned 32 b /\ aligned 32 consts /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_tmc) (c, 1024) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_tmc) (a, 5120) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_tmc) (b, 5120) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_tmc) (consts, 2496) /\
-          nonoverlapping (c, 1024) (a, 5120) /\ nonoverlapping (c, 1024) (b, 5120) /\
-          nonoverlapping (c, 1024) (consts, 2496) /\ nonoverlapping (a, 5120) (b, 5120) /\
-          nonoverlapping (a, 5120) (consts, 2496) /\ nonoverlapping (b, 5120) (consts, 2496) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_tmc) (c, 1024) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_tmc) (a, 4096) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_tmc) (b, 4096) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_tmc) (consts, 2496) /\
+          nonoverlapping (c, 1024) (a, 4096) /\ nonoverlapping (c, 1024) (b, 4096) /\
+          nonoverlapping (c, 1024) (consts, 2496) /\ nonoverlapping (a, 4096) (b, 4096) /\
+          nonoverlapping (a, 4096) (consts, 2496) /\ nonoverlapping (b, 4096) (consts, 2496) /\
           nonoverlapping (stackpointer, 8) (c, 1024) /\
-          nonoverlapping (stackpointer, 8) (a, 5120) /\
-          nonoverlapping (stackpointer, 8) (b, 5120) /\
+          nonoverlapping (stackpointer, 8) (a, 4096) /\
+          nonoverlapping (stackpointer, 8) (b, 4096) /\
           nonoverlapping (stackpointer, 8) (consts, 2496)
           ==> ensures x86
-               (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l5_tmc /\
+               (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l4_tmc /\
                     read RIP s = word pc /\ read RSP s = stackpointer /\
                     read (memory :> bytes64 stackpointer) s = returnaddress /\
                     C_ARGUMENTS [c; a; b; consts] s /\ read events s = e)
@@ -557,29 +530,29 @@ let MLDSA_POINTWISE_ACC_L5_NOIBT_SUBROUTINE_SAFE = time prove
                     (exists e2. read events s = APPEND e2 e /\
                          e2 = f_events c a b consts pc stackpointer returnaddress /\
                          memaccess_inbounds e2
-                           [a,5120; b,5120; consts,2496; c,1024; stackpointer,8]
+                           [a,4096; b,4096; consts,2496; c,1024; stackpointer,8]
                            [c,1024; stackpointer,8]))
                (\s s'. true)`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_pointwise_acc_l5_tmc
-    MLDSA_POINTWISE_ACC_L5_SAFE THEN DISCHARGE_SAFETY_PROPERTY_TAC);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_pointwise_acc_l4_tmc
+    MLDSA_POINTWISE_ACC_L4_SAFE THEN DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_SAFE = time prove
+let MLDSA_POINTWISE_ACC_L4_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e c a b consts pc stackpointer returnaddress.
           aligned 32 c /\ aligned 32 a /\ aligned 32 b /\ aligned 32 consts /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (c, 1024) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (a, 5120) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (b, 5120) /\
-          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (consts, 2496) /\
-          nonoverlapping (c, 1024) (a, 5120) /\ nonoverlapping (c, 1024) (b, 5120) /\
-          nonoverlapping (c, 1024) (consts, 2496) /\ nonoverlapping (a, 5120) (b, 5120) /\
-          nonoverlapping (a, 5120) (consts, 2496) /\ nonoverlapping (b, 5120) (consts, 2496) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (c, 1024) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (a, 4096) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (b, 4096) /\
+          nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l4_mc) (consts, 2496) /\
+          nonoverlapping (c, 1024) (a, 4096) /\ nonoverlapping (c, 1024) (b, 4096) /\
+          nonoverlapping (c, 1024) (consts, 2496) /\ nonoverlapping (a, 4096) (b, 4096) /\
+          nonoverlapping (a, 4096) (consts, 2496) /\ nonoverlapping (b, 4096) (consts, 2496) /\
           nonoverlapping (stackpointer, 8) (c, 1024) /\
-          nonoverlapping (stackpointer, 8) (a, 5120) /\
-          nonoverlapping (stackpointer, 8) (b, 5120) /\
+          nonoverlapping (stackpointer, 8) (a, 4096) /\
+          nonoverlapping (stackpointer, 8) (b, 4096) /\
           nonoverlapping (stackpointer, 8) (consts, 2496)
           ==> ensures x86
-               (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l5_mc /\
+               (\s. bytes_loaded s (word pc) mldsa_pointwise_acc_l4_mc /\
                     read RIP s = word pc /\ read RSP s = stackpointer /\
                     read (memory :> bytes64 stackpointer) s = returnaddress /\
                     C_ARGUMENTS [c; a; b; consts] s /\ read events s = e)
@@ -588,7 +561,7 @@ let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_SAFE = time prove
                     (exists e2. read events s = APPEND e2 e /\
                          e2 = f_events c a b consts pc stackpointer returnaddress /\
                          memaccess_inbounds e2
-                           [a,5120; b,5120; consts,2496; c,1024; stackpointer,8]
+                           [a,4096; b,4096; consts,2496; c,1024; stackpointer,8]
                            [c,1024; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POINTWISE_ACC_L5_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POINTWISE_ACC_L4_NOIBT_SUBROUTINE_SAFE));;

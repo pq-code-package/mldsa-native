@@ -13,11 +13,11 @@ needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 needs "mldsa_native/aarch64/proofs/mldsa_zetas.ml";;
 
-(**** print_literal_from_elf "aarch64/mldsa/mldsa_ntt.o";;
+(**** print_literal_from_elf "aarch64/mldsa/ntt_aarch64_asm.o";;
  ****)
 
 let mldsa_ntt_mc = define_assert_from_elf
- "mldsa_ntt_mc" "aarch64/mldsa/mldsa_ntt.o"
+ "mldsa_ntt_mc" "aarch64/mldsa/ntt_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0xd10103ff;       (* arm_SUB SP SP (rvalue (word 64)) *)

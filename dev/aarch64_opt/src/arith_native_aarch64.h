@@ -64,7 +64,7 @@ MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_19_indices[64];
 void mld_ntt_aarch64_asm(int32_t *r, const int32_t *zetas_l123456,
                          const int32_t *zetas_l78)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_ntt.ml */
+ * in proofs/hol_light/aarch64/proofs/ntt_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
@@ -139,7 +139,7 @@ __contract__(
 #define mld_poly_caddq_aarch64_asm MLD_NAMESPACE(poly_caddq_aarch64_asm)
 void mld_poly_caddq_aarch64_asm(int32_t *a)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_poly_caddq.ml */
+ * in proofs/hol_light/aarch64/proofs/poly_caddq_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
@@ -181,7 +181,7 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 int mld_poly_chknorm_aarch64_asm(const int32_t *a, int32_t B)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_poly_chknorm.ml */
+ * in proofs/hol_light/aarch64/proofs/poly_chknorm_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
@@ -197,7 +197,7 @@ __contract__(
 void mld_polyz_unpack_17_aarch64_asm(int32_t *r, const uint8_t *buf,
                                      const uint8_t *indices)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_17.ml */
+ * in proofs/hol_light/aarch64/proofs/polyz_unpack_17_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(buf, 576))
@@ -215,7 +215,7 @@ __contract__(
 void mld_polyz_unpack_19_aarch64_asm(int32_t *r, const uint8_t *buf,
                                      const uint8_t *indices)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_19.ml */
+ * in proofs/hol_light/aarch64/proofs/polyz_unpack_19_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(buf, 640))
@@ -233,7 +233,7 @@ __contract__(
   MLD_NAMESPACE(poly_pointwise_montgomery_aarch64_asm)
 void mld_poly_pointwise_montgomery_aarch64_asm(int32_t *a, const int32_t *b)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_pointwise.ml */
+ * in proofs/hol_light/aarch64/proofs/pointwise_montgomery_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
@@ -252,7 +252,9 @@ __contract__(
 void mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm(
     int32_t *r, const int32_t a[4][MLDSA_N], const int32_t b[4][MLDSA_N])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l4.ml */
+ * in
+ * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.ml
+ */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
@@ -270,7 +272,9 @@ __contract__(
 void mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm(
     int32_t *r, const int32_t a[5][MLDSA_N], const int32_t b[5][MLDSA_N])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l5.ml */
+ * in
+ * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.ml
+ */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
@@ -288,7 +292,9 @@ __contract__(
 void mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(
     int32_t *r, const int32_t a[7][MLDSA_N], const int32_t b[7][MLDSA_N])
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/aarch64/proofs/mldsa_pointwise_acc_l7.ml */
+ * in
+ * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.ml
+ */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))

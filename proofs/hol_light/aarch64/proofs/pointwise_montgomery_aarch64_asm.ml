@@ -12,11 +12,11 @@ needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 
-(*** print_literal_from_elf "aarch64/mldsa/mldsa_pointwise.o";;
+(*** print_literal_from_elf "aarch64/mldsa/pointwise_montgomery_aarch64_asm.o";;
  ***)
 
 let mldsa_pointwise_mc = define_assert_from_elf
- "mldsa_pointwise_mc" "aarch64/mldsa/mldsa_pointwise.o"
+ "mldsa_pointwise_mc" "aarch64/mldsa/pointwise_montgomery_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
   0x529c0023;       (* arm_MOV W3 (rvalue (word 57345)) *)

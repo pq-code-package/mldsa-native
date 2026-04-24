@@ -12,10 +12,10 @@ needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 needs "mldsa_native/x86_64/proofs/mldsa_zetas.ml";;
 
-(*** print_literal_from_elf "x86_64/mldsa/mldsa_ntt.o";;
+(*** print_literal_from_elf "x86_64/mldsa/ntt_avx2_asm.o";;
  ***)
 
-let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "x86_64/mldsa/mldsa_ntt.o"
+let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "x86_64/mldsa/ntt_avx2_asm.o"
 (*** BYTECODE START ***)
 [
   0xf3; 0x0f; 0x1e; 0xfa;  (* ENDBR64 *)

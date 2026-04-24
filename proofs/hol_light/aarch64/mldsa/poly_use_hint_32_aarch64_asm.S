@@ -6,17 +6,17 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/aarch64_opt/src/poly_use_hint_32_asm.S using scripts/simpasm. Do not modify it directly.
+ *   dev/aarch64_opt/src/poly_use_hint_32_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
  */
 
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_asm:
+.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_aarch64_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_aarch64_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_asm
-PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_asm:
+.global PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_aarch64_asm
+PQCP_MLDSA_NATIVE_MLDSA44_poly_use_hint_32_aarch64_asm:
 #endif
 
         .cfi_startproc
