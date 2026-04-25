@@ -22,7 +22,11 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 CHECK_FUNCTION_CONTRACTS=mld_signature_internal
 USE_FUNCTION_CONTRACTS=mld_unpack_sk 
 USE_FUNCTION_CONTRACTS+=mld_H 
+ifdef MLD_CONFIG_REDUCE_RAM
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_lazy
+else
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_eager
+endif
 USE_FUNCTION_CONTRACTS+=mld_attempt_signature_generation
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 

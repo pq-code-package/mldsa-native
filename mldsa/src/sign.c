@@ -841,7 +841,13 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   /* to implement rejection of invalid signatures.            */
   while (1)
   __loop__(
-    assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    MLD_IF_NOT_REDUCE_RAM(
+      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    )
+    MLD_IF_REDUCE_RAM(
+      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
+              memory_slice(mat, sizeof(mld_polymat)))
+    )
     invariant(nonce <= MLD_NONCE_UB)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */

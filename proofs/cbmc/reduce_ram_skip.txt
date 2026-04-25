@@ -3,5 +3,4 @@
 #
 # Proofs to skip when CBMC is run with --reduce-ram. One name per line.
 # TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
-sign_signature_internal
 sign_verify_internal
