@@ -322,12 +322,28 @@ __contract__(
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand_lazy(mld_polymat_lazy *mat,
-                                    const uint8_t rho[MLDSA_SEEDBYTES]);
+                                    const uint8_t rho[MLDSA_SEEDBYTES])
+__contract__(
+  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
+  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
+  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+);
 
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_lazy(mld_polyveck *t,
                                                   mld_polymat_lazy *mat,
-                                                  const mld_polyvecl *v);
+                                                  const mld_polyvecl *v)
+__contract__(
+  requires(memory_no_alias(t, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
+  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(forall(l1, 0, MLDSA_L,
+                  array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(t, sizeof(mld_polyveck)))
+  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+  ensures(forall(k0, 0, MLDSA_K,
+                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+);
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 /* Dispatch: typedef and define based on MLD_CONFIG_REDUCE_RAM */

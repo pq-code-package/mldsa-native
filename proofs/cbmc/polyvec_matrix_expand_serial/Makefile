@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvec_matrix_pointwise_montgomery_eager_harness
+HARNESS_FILE = polyvec_matrix_expand_serial_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvec_matrix_pointwise_montgomery_eager
+PROOF_UID = polyvec_matrix_expand_serial
 
-DEFINES +=
+DEFINES += -DMLD_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -19,8 +19,13 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_eager
-USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
+ifdef MLD_CONFIG_REDUCE_RAM
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand_lazy
+USE_FUNCTION_CONTRACTS=
+else
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand_eager
+USE_FUNCTION_CONTRACTS=mld_poly_uniform
+endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +33,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_eager
+FUNCTION_NAME = polyvec_matrix_expand_serial
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -37,14 +42,14 @@ FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_eager
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 10
+CBMC_OBJECT_BITS = 11
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
 # ("mldsa/poly.c") in PROJECT_SOURCES).
 # REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
 # include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mldsa/src/poly.c
+# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mldsa/poly.c
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must

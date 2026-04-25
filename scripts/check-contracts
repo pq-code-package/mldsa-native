@@ -99,6 +99,12 @@ def check_contracts():
         if funcname in proofs:
             continue
 
+        if any(
+            funcname.endswith(suffix) and funcname[: -len(suffix)] in proofs
+            for suffix in ("_eager", "_lazy")
+        ):
+            continue
+
         if is_exception(funcname):
             print(
                 f"{filename}:{line}:{funcname} has contract but no proof, "

@@ -184,11 +184,28 @@ void mld_polyvec_matrix_pointwise_montgomery_lazy(mld_polyveck *t,
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
   for (i = 0; i < MLDSA_K; ++i)
+  __loop__(
+    assigns(i, l, object_whole(seed_ext),
+            memory_slice(t, sizeof(mld_polyveck)),
+            memory_slice(mat, sizeof(mld_polymat_lazy)))
+    invariant(i <= MLDSA_K)
+    invariant(forall(k0, 0, i,
+                     array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    decreases(MLDSA_K - i)
+  )
   {
     mld_polymat_expand_entry(&mat->cur, seed_ext, 0, (uint8_t)i);
     mld_poly_pointwise_montgomery(&t->vec[i], &mat->cur, &v->vec[0]);
 
     for (l = 1; l < MLDSA_L; ++l)
+    __loop__(
+      assigns(l, object_whole(seed_ext),
+              memory_slice(&t->vec[i], sizeof(mld_poly)),
+              memory_slice(mat, sizeof(mld_polymat_lazy)))
+      invariant(l >= 1 && l <= MLDSA_L)
+      invariant(array_abs_bound(t->vec[i].coeffs, 0, MLDSA_N, l * MLDSA_Q))
+      decreases(MLDSA_L - l)
+    )
     {
       mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
       /* TODO: if mld_poly_pointwise_montgomery's CBMC and HOL Light specs
