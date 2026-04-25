@@ -3,15 +3,9 @@
 #
 # Proofs to skip when CBMC is run with --reduce-ram. One name per line.
 # TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
-poly_uniform_4x
 polyvec_matrix_expand_eager
 polyvec_matrix_expand_eager_serial
 polyvec_matrix_pointwise_montgomery_eager
-polyvecl_pointwise_acc_montgomery
-polyvecl_pointwise_acc_montgomery_c
-polyvecl_pointwise_acc_montgomery_native
-shake128x4_absorb_once
-shake128x4_squeezeblocks
 attempt_signature_generation
 compute_pack_z
 unpack_sk

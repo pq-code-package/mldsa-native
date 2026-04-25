@@ -5,6 +5,7 @@
 
 void harness(void)
 {
+#if !defined(MLD_CONFIG_REDUCE_RAM)
   mld_poly *r0;
   mld_poly *r1;
   mld_poly *r2;
@@ -12,4 +13,5 @@ void harness(void)
   uint8_t (*seed)[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
 
   mld_poly_uniform_4x(r0, r1, r2, r3, seed);
+#endif /* !MLD_CONFIG_REDUCE_RAM */
 }

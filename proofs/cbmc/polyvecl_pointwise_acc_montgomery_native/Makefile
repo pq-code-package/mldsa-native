@@ -19,6 +19,10 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
+ifdef MLD_CONFIG_REDUCE_RAM
+CHECK_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=
+else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
 USE_FUNCTION_CONTRACTS= mld_polyvecl_pointwise_acc_montgomery_c
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
@@ -27,6 +31,7 @@ else ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
 	USE_FUNCTION_CONTRACTS+=mld_polyvecl_pointwise_acc_montgomery_l5_native
 else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
 	USE_FUNCTION_CONTRACTS+=mld_polyvecl_pointwise_acc_montgomery_l7_native
+endif
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

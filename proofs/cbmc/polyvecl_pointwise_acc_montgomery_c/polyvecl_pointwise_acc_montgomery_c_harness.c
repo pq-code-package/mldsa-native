@@ -12,7 +12,9 @@ void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *a, mld_polyvecl *b,
 
 void harness(void)
 {
+#if !defined(MLD_CONFIG_REDUCE_RAM)
   mld_poly *a;
   mld_polyvecl *b, *c;
   mld_polyvecl_pointwise_acc_montgomery_c(a, b, c);
+#endif
 }
