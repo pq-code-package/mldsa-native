@@ -482,6 +482,9 @@ __contract__(
   MLD_IF_NOT_REDUCE_RAM(
     requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
+  MLD_IF_REDUCE_RAM(
+    requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
+  )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
   assigns(memory_slice(tmp, sizeof(mld_poly)))
