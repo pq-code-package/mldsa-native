@@ -591,7 +591,15 @@ __contract__(
     requires(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
+  MLD_IF_REDUCE_RAM(
+    requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
+    requires(memory_no_alias(s2hat->packed, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
+    requires(memory_no_alias(t0hat->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
+  )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  MLD_IF_REDUCE_RAM(
+    assigns(memory_slice(mat, sizeof(mld_polymat)))
+  )
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )

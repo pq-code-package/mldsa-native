@@ -22,7 +22,13 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 CHECK_FUNCTION_CONTRACTS=mld_attempt_signature_generation
 USE_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
+ifdef MLD_CONFIG_REDUCE_RAM
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_lazy
+USE_FUNCTION_CONTRACTS+=mld_polyeta_unpack
+USE_FUNCTION_CONTRACTS+=mld_polyt0_unpack
+else
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_eager
+endif
 USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
 USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq
 USE_FUNCTION_CONTRACTS+=mld_polyveck_decompose
