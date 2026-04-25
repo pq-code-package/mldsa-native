@@ -190,7 +190,7 @@ jobs:
           - name: mldsa_intt
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
           - name: mldsa_nttunpack
-            needs: ["mldsa_specs.ml", "mldsa_utils.ml"]
+            needs: ["mldsa_specs.ml"]
           - name: mldsa_pointwise
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
           - name: mldsa_pointwise_acc_l4
