@@ -5,7 +5,6 @@
 # TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
 attempt_signature_generation
 compute_pack_z
-unpack_sk
 sign_keypair_internal
 sign_pk_from_sk
 sign_signature_internal

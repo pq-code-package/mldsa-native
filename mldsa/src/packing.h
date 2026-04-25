@@ -228,6 +228,13 @@ __contract__(
     ensures(forall(k2, 0, MLDSA_K,
       array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
+  MLD_IF_REDUCE_RAM(
+    ensures(s1->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES)
+    ensures(s2->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
+                          MLDSA_L * MLDSA_POLYETA_PACKEDBYTES)
+    ensures(t0->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
+                          (MLDSA_L + MLDSA_K) * MLDSA_POLYETA_PACKEDBYTES)
+  )
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
