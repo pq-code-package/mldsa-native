@@ -50,7 +50,6 @@ runs:
               - $(nix --version)
               - $(cbmc --version)
               - litani Version $(litani --version)
-              - Cadical Version $(cadical --version)
               - $(bash --version | grep -m1 "")
             EOF
       - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }}, reduce_ram=${{ inputs.reduce_ram }})
