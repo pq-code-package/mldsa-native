@@ -382,3 +382,12 @@ source code and documentation.
 * Referenced from:
   - [mldsa/src/fips202/fips202.c](mldsa/src/fips202/fips202.c)
   - [mldsa/src/fips202/keccakf1600.c](mldsa/src/fips202/keccakf1600.c)
+
+### `wycheproof`
+
+* Project Wycheproof
+* Author(s):
+  - Community Cryptography Specification Project
+* URL: https://github.com/C2SP/wycheproof
+* Referenced from:
+  - [README.md](README.md)

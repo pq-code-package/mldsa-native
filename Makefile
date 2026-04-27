@@ -2,11 +2,11 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp stack unit alloc rng_fail \
-	func_44 kat_44 acvp_44 stack_44 unit_44 alloc_44 rng_fail_44 \
-	func_65 kat_65 acvp_65 stack_65 unit_65 alloc_65 rng_fail_65 \
-	func_87 kat_87 acvp_87 stack_87 unit_87 alloc_87 rng_fail_87 \
-	run_func run_kat run_acvp run_stack run_unit run_alloc run_rng_fail \
+.PHONY: func kat acvp wycheproof stack unit alloc rng_fail \
+	func_44 kat_44 acvp_44 wycheproof_44 stack_44 unit_44 alloc_44 rng_fail_44 \
+	func_65 kat_65 acvp_65 wycheproof_65 stack_65 unit_65 alloc_65 rng_fail_65 \
+	func_87 kat_87 acvp_87 wycheproof_87 stack_87 unit_87 alloc_87 rng_fail_87 \
+	run_func run_kat run_acvp run_wycheproof run_stack run_unit run_alloc run_rng_fail \
 	run_func_44 run_kat_44 run_stack_44 run_unit_44 run_alloc_44 run_rng_fail_44 \
 	run_func_65 run_kat_65 run_stack_65 run_unit_65 run_alloc_65 run_rng_fail_65 \
 	run_func_87 run_kat_87 run_stack_87 run_unit_87 run_alloc_87 run_rng_fail_87 \
@@ -44,10 +44,10 @@ endif
 
 quickcheck: test
 
-build: func kat acvp
+build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_unit run_alloc run_rng_fail
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
@@ -108,6 +108,17 @@ acvp_65:  $(MLDSA65_DIR)/bin/acvp_mldsa65
 acvp_87: $(MLDSA87_DIR)/bin/acvp_mldsa87
 	$(Q)echo "  ACVP       ML-DSA-87:  $^"
 acvp: acvp_44 acvp_65 acvp_87
+
+wycheproof_44:  $(MLDSA44_DIR)/bin/wycheproof_mldsa44
+	$(Q)echo "  WYCHEPROOF ML-DSA-44:   $^"
+wycheproof_65:  $(MLDSA65_DIR)/bin/wycheproof_mldsa65
+	$(Q)echo "  WYCHEPROOF ML-DSA-65:   $^"
+wycheproof_87: $(MLDSA87_DIR)/bin/wycheproof_mldsa87
+	$(Q)echo "  WYCHEPROOF ML-DSA-87:  $^"
+wycheproof: wycheproof_44 wycheproof_65 wycheproof_87
+
+run_wycheproof: wycheproof
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/wycheproof/wycheproof_client.py
 
 ifeq ($(HOST_PLATFORM),Linux-aarch64)
 # valgrind does not work with the AArch64 SHA3 extension

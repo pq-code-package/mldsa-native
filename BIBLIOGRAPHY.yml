@@ -165,3 +165,8 @@
   name: Cycle counting on Apple M1
   author: Johnson, Dougall
   url: https://gist.github.com/dougallj/5bafb113492047c865c0c8cfbc930155#file-m1_robsize-c-L390
+
+- id: wycheproof
+  name: Project Wycheproof
+  author: Community Cryptography Specification Project
+  url: https://github.com/C2SP/wycheproof

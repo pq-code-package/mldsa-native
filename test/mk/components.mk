@@ -16,11 +16,12 @@ endif
 
 BASIC_TESTS = test_mldsa gen_KAT test_stack
 ACVP_TESTS = acvp_mldsa
+WYCHEPROOF_TESTS = wycheproof_mldsa
 BENCH_TESTS = bench_mldsa bench_components_mldsa
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -125,6 +126,9 @@ endef
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(foreach test,$(ACVP_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),acvp)) \
+	) \
+	$(foreach test,$(WYCHEPROOF_TESTS), \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),wycheproof)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \
