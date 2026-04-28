@@ -1,8 +1,8 @@
 # Copyright (c) The mldsa-native project authors
-# Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-CFLAGS = /nologo /O2 /Imldsa /Imldsa/src/ /Imlmdsa/src/fips202 /Imldsa/src/fips202/native /Imldsa/src/native
+CFLAGS = /nologo /O2 /Imldsa /Imldsa/src /Imldsa/src/fips202 /Imldsa/src/fips202/native /Imldsa/src/native
 
 OBJ_FILES = .\mldsa\*.obj \
             .\mldsa\fips202\*.obj
@@ -67,6 +67,20 @@ OPT = 0
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\test mkdir $(MLDSA87_BUILD_DIR)\test
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\ $<
 
+# compilation of acvp test for mldsa44
+{test\acvp}.c{$(MLDSA44_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test\acvp mkdir $(MLDSA44_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\acvp\ $<
+
+# compilation of acvp test for mldsa65
+{test\acvp}.c{$(MLDSA65_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test\acvp mkdir $(MLDSA65_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\acvp\ $<
+
+# compilation of acvp test for mldsa87
+{test\acvp}.c{$(MLDSA87_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\acvp mkdir $(MLDSA87_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\acvp\ $<
 
 # compile functional test for mldsa44
 test_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\test_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
@@ -83,7 +97,27 @@ test_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\test_mldsa.obj $(BUILD_D
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_mldsa87 $** /link
 
-quickcheck: test_mldsa44 test_mldsa65 test_mldsa87
+# compile acvp test for mldsa44
+acvp_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\acvp_mldsa44 $** /link
+
+# compile acvp test for mldsa65
+acvp_mldsa65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\acvp_mldsa65 $** /link
+
+# compile acvp test for mldsa87
+acvp_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\acvp_mldsa87 $** /link
+
+acvp: acvp_mldsa44 acvp_mldsa65 acvp_mldsa87
+
+run_acvp: acvp
+    python test/acvp/acvp_client.py
+
+quickcheck: test_mldsa44 test_mldsa65 test_mldsa87 run_acvp
     $(MLDSA44_BUILD_DIR)\bin\test_mldsa44.exe
 	$(MLDSA65_BUILD_DIR)\bin\test_mldsa65.exe
 	$(MLDSA87_BUILD_DIR)\bin\test_mldsa87.exe
