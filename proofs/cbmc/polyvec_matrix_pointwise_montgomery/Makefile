@@ -34,7 +34,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3 --arrays-uf-always
 
 FUNCTION_NAME = polyvec_matrix_pointwise_montgomery
 
@@ -42,7 +42,7 @@ FUNCTION_NAME = polyvec_matrix_pointwise_montgomery
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
 # restrict the number of EXPENSIVE CBMC jobs running at once. See the
 # documentation in Makefile.common under the "Job Pools" heading for details.
-# EXPENSIVE = true
+EXPENSIVE = true
 
 # This function is large enough to need...
 CBMC_OBJECT_BITS = 10

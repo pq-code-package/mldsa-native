@@ -321,6 +321,14 @@ __contract__(
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 static MLD_INLINE void mld_yvec_init_eager(
     mld_yvec_eager *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
+__contract__(
+  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
+  requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
+  requires(nonce <= (UINT16_MAX - MLDSA_L) / MLDSA_L)
+  assigns(memory_slice(y, sizeof(mld_yvec_eager)))
+  ensures(forall(k1, 0, MLDSA_L,
+    array_bound(y->vec.vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
+)
 {
   mld_polyvecl_uniform_gamma1(&y->vec, rhoprime, nonce);
 }
@@ -328,15 +336,26 @@ static MLD_INLINE void mld_yvec_init_eager(
 static MLD_INLINE void mld_yvec_get_poly_eager(mld_poly *buf,
                                                const mld_yvec_eager *y,
                                                unsigned int i)
-{
-  *buf = y->vec.vec[i];
-}
+__contract__(
+  requires(memory_no_alias(buf, sizeof(mld_poly)))
+  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
+  requires(i < MLDSA_L)
+  requires(array_bound(y->vec.vec[i].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+) { *buf = y->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
         */
 #if !defined(MLD_CONFIG_NO_SIGN_API) && \
     (defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 static MLD_INLINE void mld_yvec_init_lazy(
     mld_yvec_lazy *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
+__contract__(
+  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
+  assigns(memory_slice(y, sizeof(mld_yvec_lazy)))
+  ensures(y->rhoprime == old(rhoprime))
+  ensures(y->nonce == old(nonce))
+)
 {
   y->rhoprime = rhoprime;
   y->nonce = nonce;
@@ -345,6 +364,15 @@ static MLD_INLINE void mld_yvec_init_lazy(
 static MLD_INLINE void mld_yvec_get_poly_lazy(mld_poly *buf,
                                               const mld_yvec_lazy *y,
                                               unsigned int i)
+__contract__(
+  requires(memory_no_alias(buf, sizeof(mld_poly)))
+  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
+  requires(i < MLDSA_L)
+  requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+  requires(y->nonce <= ((UINT16_MAX - MLDSA_L) / MLDSA_L))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+)
 {
   /* Safety: y->nonce is at most ((UINT16_MAX - MLDSA_L) / MLDSA_L) and
    * i < MLDSA_L, so MLDSA_L * y->nonce + i fits in uint16_t. See
