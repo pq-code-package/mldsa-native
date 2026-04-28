@@ -9,6 +9,9 @@
     },
     {
       "pattern": "^https://lib\\.mceliece\\.org"
+    },
+    {
+      "pattern": "^https://isabelle\\.in\\.tum\\.de"
     }
   ]
 }
