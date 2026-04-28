@@ -10,7 +10,6 @@
 
 import re
 import sys
-import subprocess
 import pathlib
 
 
@@ -26,11 +25,20 @@ def get_files(pattern):
     return list(map(str, pathlib.Path().glob(pattern)))
 
 
-def gen_proofs():
-    cmd_str = ["./proofs/cbmc/list_proofs.sh"]
-    p = subprocess.run(cmd_str, capture_output=True, universal_newlines=False)
-    proofs = filter(lambda s: s.strip() != "", p.stdout.decode().split("\n"))
-    return proofs
+def get_proof_check_contracts():
+    """Map proof directory name -> set of mld_-stripped function names that
+    appear in any CHECK_FUNCTION_CONTRACTS assignment in that proof's
+    Makefile."""
+    result = {}
+    for makefile in pathlib.Path("proofs/cbmc").glob("*/Makefile"):
+        names = set()
+        with open(makefile) as f:
+            for line in f:
+                m = re.match(r"\s*CHECK_FUNCTION_CONTRACTS\s*[+:]?=\s*(\S+)", line)
+                if m:
+                    names.add(m.group(1).removeprefix("mld_"))
+        result[makefile.parent.name] = names
+    return result
 
 
 def strip_comments(content):
@@ -41,6 +49,28 @@ def strip_comments(content):
 
     # Block comments and line comments.
     return re.sub(r"/\*[\s\S]*?\*/|//[^\n]*", repl, content)
+
+
+# Source-level macro names that expand to a different symbol via
+# MLD_NAMESPACE / MLD_NAMESPACE_KL. CBMC and CHECK_FUNCTION_CONTRACTS see
+# the symbol on the right.
+NAMESPACE_ALIASES = {
+    "sign": "sign",
+    "sign_keypair": "keypair",
+    "sign_keypair_internal": "keypair_internal",
+    "sign_open": "open",
+    "sign_pk_from_sk": "pk_from_sk",
+    "sign_signature": "signature",
+    "sign_signature_extmu": "signature_extmu",
+    "sign_signature_internal": "signature_internal",
+    "sign_signature_pre_hash_internal": "signature_pre_hash_internal",
+    "sign_signature_pre_hash_shake256": "signature_pre_hash_shake256",
+    "sign_verify": "verify",
+    "sign_verify_extmu": "verify_extmu",
+    "sign_verify_internal": "verify_internal",
+    "sign_verify_pre_hash_internal": "verify_pre_hash_internal",
+    "sign_verify_pre_hash_shake256": "verify_pre_hash_shake256",
+}
 
 
 def gen_contracts():
@@ -90,19 +120,20 @@ def is_exception(funcname):
 
 def check_contracts():
     contracts = set(gen_contracts())
-    proofs = set(gen_proofs())
+    proof_checks = get_proof_check_contracts()
 
     bad = []
 
-    # Print contracts without proofs
     for filename, line, funcname in contracts:
-        if funcname in proofs:
-            continue
+        # Convention: the proof directory is named after the function,
+        # except for eager/lazy variants which share a directory whose
+        # name drops the suffix.
+        dirname = funcname.removesuffix("_eager").removesuffix("_lazy")
 
-        if any(
-            funcname.endswith(suffix) and funcname[: -len(suffix)] in proofs
-            for suffix in ("_eager", "_lazy")
-        ):
+        # The Makefile in that directory must contain a corresponding
+        # CHECK_FUNCTION_CONTRACTS line
+        symbol = NAMESPACE_ALIASES.get(funcname, funcname)
+        if symbol in proof_checks.get(dirname, set()):
             continue
 
         if is_exception(funcname):
