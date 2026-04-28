@@ -22,13 +22,12 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/packing.c
 CHECK_FUNCTION_CONTRACTS=mld_unpack_sk
 ifdef MLD_CONFIG_REDUCE_RAM
 USE_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat_lazy
+USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s2hat_lazy
 else
-USE_FUNCTION_CONTRACTS=mld_polyvecl_unpack_eta
-USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
-USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_eta
-USE_FUNCTION_CONTRACTS+=mld_polyveck_ntt
+USE_FUNCTION_CONTRACTS=mld_polyveck_ntt
 USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_t0
 USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s1hat_eager
+USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s2hat_eager
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
