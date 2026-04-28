@@ -232,6 +232,13 @@ __contract__(
 static MLD_INLINE void mld_unpack_sk_t0hat_eager(
     mld_sk_t0hat_eager *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
+__contract__(
+  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_eager)))
+  requires(memory_no_alias(packed_t0, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
+  assigns(memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
+  ensures(forall(k1, 0, MLDSA_K,
+    array_abs_bound(t0->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+)
 {
   mld_polyveck_unpack_t0(&t0->vec, packed_t0);
   mld_polyveck_ntt(&t0->vec);
@@ -241,23 +248,38 @@ static MLD_INLINE void mld_unpack_sk_t0hat_eager(
 static MLD_INLINE void mld_sk_t0hat_get_poly_eager(mld_poly *buf,
                                                    const mld_sk_t0hat_eager *t0,
                                                    unsigned int i)
-{
-  *buf = t0->vec.vec[i];
-}
+__contract__(
+  requires(memory_no_alias(buf, sizeof(mld_poly)))
+  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_eager)))
+  requires(i < MLDSA_K)
+  requires(array_abs_bound(t0->vec.vec[i].coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+) { *buf = t0->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 static MLD_INLINE void mld_unpack_sk_t0hat_lazy(
     mld_sk_t0hat_lazy *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
-{
-  t0->packed = packed_t0;
-}
+__contract__(
+  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_lazy)))
+  assigns(memory_slice(t0, sizeof(mld_sk_t0hat_lazy)))
+  ensures(t0->packed == old(packed_t0))
+) { t0->packed = packed_t0; }
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 static MLD_INLINE void mld_sk_t0hat_get_poly_lazy(mld_poly *buf,
                                                   const mld_sk_t0hat_lazy *t0,
                                                   unsigned int i)
+__contract__(
+  requires(memory_no_alias(buf, sizeof(mld_poly)))
+  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_lazy)))
+  requires(i < MLDSA_K)
+  requires(memory_no_alias(t0->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
+  assigns(memory_slice(buf, sizeof(mld_poly)))
+  ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+)
 {
   mld_polyt0_unpack(buf, t0->packed + i * MLDSA_POLYT0_PACKEDBYTES);
   mld_poly_ntt(buf);
