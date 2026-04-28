@@ -20,15 +20,9 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/packing.c
 
 CHECK_FUNCTION_CONTRACTS=mld_unpack_sk
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat_lazy
-USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s2hat_lazy
-USE_FUNCTION_CONTRACTS+=mld_unpack_sk_t0hat_lazy
-else
-USE_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat_eager
-USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s2hat_eager
-USE_FUNCTION_CONTRACTS+=mld_unpack_sk_t0hat_eager
-endif
+USE_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat
+USE_FUNCTION_CONTRACTS+=mld_unpack_sk_s2hat
+USE_FUNCTION_CONTRACTS+=mld_unpack_sk_t0hat
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

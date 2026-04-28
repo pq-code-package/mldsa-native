@@ -19,19 +19,18 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_yvec
 ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
-USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
+USE_FUNCTION_CONTRACTS=mld_yvec_get_poly
+USE_FUNCTION_CONTRACTS+=mld_poly_pointwise_montgomery
 USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
 USE_FUNCTION_CONTRACTS+=mld_poly_add
 USE_FUNCTION_CONTRACTS+=mld_poly_ntt
-USE_FUNCTION_CONTRACTS+=mld_yvec_get_poly_lazy
 USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
 USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 else
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_yvec_eager
-USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_eager
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
 endif

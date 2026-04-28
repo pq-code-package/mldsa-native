@@ -19,11 +19,10 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
+CHECK_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat
 ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat_lazy
 USE_FUNCTION_CONTRACTS=
 else
-CHECK_FUNCTION_CONTRACTS=mld_unpack_sk_s1hat_eager
 USE_FUNCTION_CONTRACTS=mld_polyvecl_unpack_eta
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 endif

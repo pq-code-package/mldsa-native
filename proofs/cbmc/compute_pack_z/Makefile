@@ -27,13 +27,8 @@ USE_FUNCTION_CONTRACTS+=mld_poly_reduce
 USE_FUNCTION_CONTRACTS+=mld_poly_chknorm
 USE_FUNCTION_CONTRACTS+=mld_pack_sig_z
 USE_FUNCTION_CONTRACTS+=mld_zeroize
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_sk_s1hat_get_poly_lazy
-USE_FUNCTION_CONTRACTS+=mld_yvec_get_poly_lazy
-else
-USE_FUNCTION_CONTRACTS+=mld_sk_s1hat_get_poly_eager
-USE_FUNCTION_CONTRACTS+=mld_yvec_get_poly_eager
-endif
+USE_FUNCTION_CONTRACTS+=mld_sk_s1hat_get_poly
+USE_FUNCTION_CONTRACTS+=mld_yvec_get_poly
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

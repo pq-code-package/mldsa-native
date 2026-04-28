@@ -20,11 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
 CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_lazy
-else
-USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_eager
-endif
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 

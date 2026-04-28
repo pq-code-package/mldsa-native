@@ -19,11 +19,10 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand
 ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand_lazy
 USE_FUNCTION_CONTRACTS=
 else
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand_eager
 USE_FUNCTION_CONTRACTS=mld_poly_uniform_4x
 USE_FUNCTION_CONTRACTS+=mld_poly_permute_bitrev_to_custom_optional
 USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry

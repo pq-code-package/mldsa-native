@@ -131,9 +131,12 @@ def check_contracts():
         dirname = funcname.removesuffix("_eager").removesuffix("_lazy")
 
         # The Makefile in that directory must contain a corresponding
-        # CHECK_FUNCTION_CONTRACTS line
+        # CHECK_FUNCTION_CONTRACTS line.  Makefiles use base names
+        # (without _lazy/_eager suffix); Makefile.common appends the
+        # right suffix.
         symbol = NAMESPACE_ALIASES.get(funcname, funcname)
-        if symbol in proof_checks.get(dirname, set()):
+        symbol_base = symbol.removesuffix("_eager").removesuffix("_lazy")
+        if symbol_base in proof_checks.get(dirname, set()):
             continue
 
         if is_exception(funcname):

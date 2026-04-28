@@ -20,17 +20,10 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_attempt_signature_generation
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
-USE_FUNCTION_CONTRACTS+=mld_sk_s2hat_get_poly_lazy
-USE_FUNCTION_CONTRACTS+=mld_sk_t0hat_get_poly_lazy
-USE_FUNCTION_CONTRACTS+=mld_yvec_init_lazy
-else
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_yvec_eager
-USE_FUNCTION_CONTRACTS+=mld_sk_s2hat_get_poly_eager
-USE_FUNCTION_CONTRACTS+=mld_sk_t0hat_get_poly_eager
-USE_FUNCTION_CONTRACTS+=mld_yvec_init_eager
-endif
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_yvec
+USE_FUNCTION_CONTRACTS+=mld_sk_s2hat_get_poly
+USE_FUNCTION_CONTRACTS+=mld_sk_t0hat_get_poly
+USE_FUNCTION_CONTRACTS+=mld_yvec_init
 USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq
 USE_FUNCTION_CONTRACTS+=mld_polyveck_decompose
 USE_FUNCTION_CONTRACTS+=mld_polyveck_pack_w1

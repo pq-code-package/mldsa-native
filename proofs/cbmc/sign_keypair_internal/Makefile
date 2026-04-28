@@ -21,11 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_keypair_internal
 USE_FUNCTION_CONTRACTS=mld_shake256
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_lazy
-else
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_eager
-endif
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
 USE_FUNCTION_CONTRACTS+=mld_sample_s1_s2
 USE_FUNCTION_CONTRACTS+=mld_pack_pk
 USE_FUNCTION_CONTRACTS+=mld_pack_sk_s1

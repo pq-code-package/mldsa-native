@@ -25,11 +25,7 @@ USE_FUNCTION_CONTRACTS+=mld_unpack_sig
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_H
 USE_FUNCTION_CONTRACTS+=mld_poly_challenge
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_lazy
-else
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_eager
-endif
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_poly_ntt

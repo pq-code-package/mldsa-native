@@ -454,12 +454,38 @@ CBMC_OPT_CONFIG_LIBRARY := $(CBMC_FLAG_MALLOC_MAY_FAIL) $(CBMC_STRING_ABSTRACTIO
 #    One must check separately whether a function contract is sound before
 #    replacing it in calling contexts.
 CHECK_FUNCTION_CONTRACTS ?=
+CHECK_FUNCTION_CONTRACTS_REC ?=
+USE_FUNCTION_CONTRACTS ?=
+
+# Functions with lazy/eager variants: proof Makefiles use base names;
+# the correct suffix is appended here based on MLD_CONFIG_REDUCE_RAM.
+LAZY_EAGER_FUNCTIONS = \
+  mld_polyvec_matrix_pointwise_montgomery_row \
+  mld_polyvec_matrix_pointwise_montgomery_yvec \
+  mld_polyvec_matrix_expand \
+  mld_sk_s1hat_get_poly \
+  mld_sk_s2hat_get_poly \
+  mld_sk_t0hat_get_poly \
+  mld_yvec_get_poly \
+  mld_yvec_init \
+  mld_unpack_sk_s1hat \
+  mld_unpack_sk_s2hat \
+  mld_unpack_sk_t0hat
+
+ifdef MLD_CONFIG_REDUCE_RAM
+LAZY_EAGER_SUFFIX = _lazy
+else
+LAZY_EAGER_SUFFIX = _eager
+endif
+
+_add_le_suffix = $(if $(filter $(LAZY_EAGER_FUNCTIONS),$(1)),$(1)$(LAZY_EAGER_SUFFIX),$(1))
+CHECK_FUNCTION_CONTRACTS := $(foreach fn,$(CHECK_FUNCTION_CONTRACTS),$(call _add_le_suffix,$(fn)))
+USE_FUNCTION_CONTRACTS := $(foreach fn,$(USE_FUNCTION_CONTRACTS),$(call _add_le_suffix,$(fn)))
+
 CBMC_CHECK_FUNCTION_CONTRACTS := $(patsubst %,--enforce-contract %, $(CHECK_FUNCTION_CONTRACTS))
 
-CHECK_FUNCTION_CONTRACTS_REC ?=
 CBMC_CHECK_FUNCTION_CONTRACTS_REC := $(patsubst %,--enforce-contract-rec %, $(CHECK_FUNCTION_CONTRACTS_REC))
 
-USE_FUNCTION_CONTRACTS ?=
 CBMC_USE_FUNCTION_CONTRACTS := $(patsubst %,--replace-call-with-contract %, $(USE_FUNCTION_CONTRACTS))
 
 CODE_CONTRACTS := $(CHECK_FUNCTION_CONTRACTS)$(USE_FUNCTION_CONTRACTS)$(APPLY_LOOP_CONTRACTS)
