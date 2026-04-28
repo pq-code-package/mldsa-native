@@ -32,17 +32,17 @@
 MLD_ASM_FN_SYMBOL(pointwise_avx2)
 
         .cfi_startproc
-        vmovdqa 0x20(%rcx), %ymm0
-        vmovdqa (%rcx), %ymm1
+        vmovdqa 0x20(%rdx), %ymm0
+        vmovdqa (%rdx), %ymm1
         xorl %eax, %eax
 
 Lpointwise_avx2_looptop1:
-        vmovdqa (%rsi), %ymm2
-        vmovdqa 0x20(%rsi), %ymm4
-        vmovdqa 0x40(%rsi), %ymm6
-        vmovdqa (%rdx), %ymm10
-        vmovdqa 0x20(%rdx), %ymm12
-        vmovdqa 0x40(%rdx), %ymm14
+        vmovdqa (%rdi), %ymm2
+        vmovdqa 0x20(%rdi), %ymm4
+        vmovdqa 0x40(%rdi), %ymm6
+        vmovdqa (%rsi), %ymm10
+        vmovdqa 0x20(%rsi), %ymm12
+        vmovdqa 0x40(%rsi), %ymm14
         vpsrlq $0x20, %ymm2, %ymm3
         vpsrlq $0x20, %ymm4, %ymm5
         vmovshdup %ymm6, %ymm7    # ymm7 = ymm6[1,1,3,3,5,5,7,7]
@@ -84,14 +84,13 @@ Lpointwise_avx2_looptop1:
         vmovdqa %ymm6, 0x40(%rdi)
         addq $0x60, %rdi
         addq $0x60, %rsi
-        addq $0x60, %rdx
         addl $0x1, %eax
         cmpl $0xa, %eax
         jb Lpointwise_avx2_looptop1
-        vmovdqa (%rsi), %ymm2
-        vmovdqa 0x20(%rsi), %ymm4
-        vmovdqa (%rdx), %ymm10
-        vmovdqa 0x20(%rdx), %ymm12
+        vmovdqa (%rdi), %ymm2
+        vmovdqa 0x20(%rdi), %ymm4
+        vmovdqa (%rsi), %ymm10
+        vmovdqa 0x20(%rsi), %ymm12
         vpsrlq $0x20, %ymm2, %ymm3
         vpsrlq $0x20, %ymm4, %ymm5
         vmovshdup %ymm10, %ymm11  # ymm11 = ymm10[1,1,3,3,5,5,7,7]

@@ -48,8 +48,7 @@ void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
 #endif
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-void mld_poly_pointwise_montgomery_c(mld_poly *c, const mld_poly *a,
-                                     const mld_poly *b);
+void mld_poly_pointwise_montgomery_c(mld_poly *a, const mld_poly *b);
 #endif
 void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *w, const mld_polyvecl *u,
                                              const mld_polyvecl *v);
@@ -536,8 +535,10 @@ static int test_poly_pointwise_montgomery_core(const mld_poly *poly_a,
 {
   mld_poly test_poly_c, ref_poly_c;
 
-  mld_poly_pointwise_montgomery(&test_poly_c, poly_a, poly_b);
-  mld_poly_pointwise_montgomery_c(&ref_poly_c, poly_a, poly_b);
+  test_poly_c = *poly_a;
+  ref_poly_c = *poly_a;
+  mld_poly_pointwise_montgomery(&test_poly_c, poly_b);
+  mld_poly_pointwise_montgomery_c(&ref_poly_c, poly_b);
 
   CHECK(compare_i32_arrays(test_poly_c.coeffs, ref_poly_c.coeffs, MLDSA_N,
                            test_name, poly_a->coeffs));

@@ -396,12 +396,10 @@ typedef struct
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 /* Lazy: store seed, sample elements on demand.
- * cur holds the on-demand sampled matrix element A[k][l].
- * tmp is scratch space for the per-element pointwise product. */
+ * cur holds the on-demand sampled matrix element A[k][l]. */
 typedef struct
 {
   mld_poly cur;
-  mld_poly tmp;
   uint8_t rho[MLDSA_SEEDBYTES];
 } mld_polymat_lazy;
 
@@ -530,7 +528,7 @@ __contract__(
  *              with pointwise multiplication and multiplication by 2^{-32}.
  *              Input vector must be in NTT domain representation; the matrix
  *              entries are sampled on demand from the seed stored in mat->rho,
- *              using mat->cur and mat->tmp as scratch.
+ *              using mat->cur as scratch.
  *              Output coefficients are bounded by MLDSA_Q in absolute value.
  *
  * Arguments:   - mld_poly *t_row: pointer to output row polynomial

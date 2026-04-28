@@ -28,35 +28,35 @@
         .text
 
 /*
- * void mld_pointwise_avx2(__m256i *c, const __m256i *a, const __m256i *b, const __m256i *qdata)
+ * void mld_pointwise_avx2(__m256i *a, const __m256i *b, const __m256i *qdata)
  *
- * Pointwise multiplication of polynomials in NTT domain with Montgomery reduction
+ * Pointwise multiplication of polynomials in NTT domain with Montgomery
+ * reduction. Destructive in the first argument: a := a * b * R^{-1} mod q.
  *
  * Arguments:
- *   rdi: pointer to output polynomial c
- *   rsi: pointer to input polynomial a
- *   rdx: pointer to input polynomial b
- *   rcx: pointer to qdata constants
+ *   rdi: pointer to first input/output polynomial a
+ *   rsi: pointer to second input polynomial b
+ *   rdx: pointer to qdata constants
  */
         .balign 4
         .global MLD_ASM_NAMESPACE(pointwise_avx2)
 MLD_ASM_FN_SYMBOL(pointwise_avx2)
 
 // Load constants
-        vmovdqa ymm0, [rcx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV)*4]
-        vmovdqa ymm1, [rcx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQ)*4]
+        vmovdqa ymm0, [rdx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV)*4]
+        vmovdqa ymm1, [rdx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQ)*4]
 
         xor     eax, eax
 pointwise_avx2_looptop1:
 // Handle 24 = 3*8 coefficients per iteration
 
 // Load
-        vmovdqa ymm2, [rsi]
-        vmovdqa ymm4, [rsi + 32]
-        vmovdqa ymm6, [rsi + 64]
-        vmovdqa ymm10, [rdx]
-        vmovdqa ymm12, [rdx + 32]
-        vmovdqa ymm14, [rdx + 64]
+        vmovdqa ymm2, [rdi]
+        vmovdqa ymm4, [rdi + 32]
+        vmovdqa ymm6, [rdi + 64]
+        vmovdqa ymm10, [rsi]
+        vmovdqa ymm12, [rsi + 32]
+        vmovdqa ymm14, [rsi + 64]
         vpsrlq  ymm3, ymm2, 32
         vpsrlq  ymm5, ymm4, 32
         vmovshdup ymm7, ymm6
@@ -122,7 +122,6 @@ pointwise_avx2_looptop1:
 
         add     rdi, 96
         add     rsi, 96
-        add     rdx, 96
         add     eax, 1
         cmp     eax, 10
         jb      pointwise_avx2_looptop1
@@ -131,10 +130,10 @@ pointwise_avx2_looptop1:
 // Handle the last 256 % 24 = 16 = 2*8 coefficients, left over by the loop
 
 // Load
-        vmovdqa ymm2, [rsi]
-        vmovdqa ymm4, [rsi + 32]
-        vmovdqa ymm10, [rdx]
-        vmovdqa ymm12, [rdx + 32]
+        vmovdqa ymm2, [rdi]
+        vmovdqa ymm4, [rdi + 32]
+        vmovdqa ymm10, [rsi]
+        vmovdqa ymm12, [rsi + 32]
         vpsrlq  ymm3, ymm2, 32
         vpsrlq  ymm5, ymm4, 32
         vmovshdup ymm11, ymm10

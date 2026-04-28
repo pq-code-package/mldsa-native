@@ -26,14 +26,14 @@ let mldsa_pointwise_mc = define_assert_from_elf
   0x72a07003;       (* arm_MOVK W3 (word 896) 16 *)
   0x4e040c61;       (* arm_DUP_GEN Q1 X3 32 128 *)
   0xd2800803;       (* arm_MOV X3 (rvalue (word 64)) *)
-  0x3dc00431;       (* arm_LDR Q17 X1 (Immediate_Offset (word 16)) *)
-  0x3dc00832;       (* arm_LDR Q18 X1 (Immediate_Offset (word 32)) *)
-  0x3dc00c33;       (* arm_LDR Q19 X1 (Immediate_Offset (word 48)) *)
-  0x3cc40430;       (* arm_LDR Q16 X1 (Postimmediate_Offset (word 64)) *)
-  0x3dc00455;       (* arm_LDR Q21 X2 (Immediate_Offset (word 16)) *)
-  0x3dc00856;       (* arm_LDR Q22 X2 (Immediate_Offset (word 32)) *)
-  0x3dc00c57;       (* arm_LDR Q23 X2 (Immediate_Offset (word 48)) *)
-  0x3cc40454;       (* arm_LDR Q20 X2 (Postimmediate_Offset (word 64)) *)
+  0x3dc00010;       (* arm_LDR Q16 X0 (Immediate_Offset (word 0)) *)
+  0x3dc00411;       (* arm_LDR Q17 X0 (Immediate_Offset (word 16)) *)
+  0x3dc00812;       (* arm_LDR Q18 X0 (Immediate_Offset (word 32)) *)
+  0x3dc00c13;       (* arm_LDR Q19 X0 (Immediate_Offset (word 48)) *)
+  0x3dc00435;       (* arm_LDR Q21 X1 (Immediate_Offset (word 16)) *)
+  0x3dc00836;       (* arm_LDR Q22 X1 (Immediate_Offset (word 32)) *)
+  0x3dc00c37;       (* arm_LDR Q23 X1 (Immediate_Offset (word 48)) *)
+  0x3cc40434;       (* arm_LDR Q20 X1 (Postimmediate_Offset (word 64)) *)
   0x0eb4c218;       (* arm_SMULL_VEC Q24 Q16 Q20 32 *)
   0x4eb4c219;       (* arm_SMULL2_VEC Q25 Q16 Q20 32 *)
   0x0eb5c23a;       (* arm_SMULL_VEC Q26 Q17 Q21 32 *)
@@ -79,14 +79,13 @@ let MLDSA_POINTWISE_EXEC = ARM_MK_EXEC_RULE mldsa_pointwise_mc;;
 (* ========================================================================= *)
 
 let MLDSA_POINTWISE_CORRECT = prove
- (`!r a b x y pc.
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_mc) (r, 1024) /\
-    nonoverlapping (r, 1024) (a, 1024) /\
-    nonoverlapping (r, 1024) (b, 1024)
+ (`!a b x y pc.
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (b, 1024)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_mc /\
                read PC s = word pc /\
-               C_ARGUMENTS [r; a; b] s /\
+               C_ARGUMENTS [a; b] s /\
                (!i. i < 256 ==> abs(ival(x i)) <= &75423752) /\
                (!i. i < 256 ==> abs(ival(y i)) <= &75423752) /\
                (!i. i < 256 ==>
@@ -95,16 +94,16 @@ let MLDSA_POINTWISE_CORRECT = prove
                  read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
           (\s. read PC s = word(pc + 0xC4) /\
                (!i. i < 256 ==>
-                 let zi = read(memory :> bytes32(word_add r (word(4 * i)))) s in
+                 let zi = read(memory :> bytes32(word_add a (word(4 * i)))) s in
                  (ival zi == mldsa_pointwise (ival o x) (ival o y) i)
                    (mod &8380417) /\
                  abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(r, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
 
   (* Setup *)
   MAP_EVERY X_GEN_TAC
-    [`r:int64`; `a:int64`; `b:int64`;
+    [`a:int64`; `b:int64`;
      `x:num->int32`; `y:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL;
@@ -211,15 +210,14 @@ let MLDSA_POINTWISE_CORRECT = prove
 (* ========================================================================= *)
 
 let MLDSA_POINTWISE_SUBROUTINE_CORRECT = prove
- (`!r a b x y pc returnaddress.
-    nonoverlapping (word pc, LENGTH mldsa_pointwise_mc) (r, 1024) /\
-    nonoverlapping (r, 1024) (a, 1024) /\
-    nonoverlapping (r, 1024) (b, 1024)
+ (`!a b x y pc returnaddress.
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (b, 1024)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_mc /\
                read PC s = word pc /\
                read X30 s = returnaddress /\
-               C_ARGUMENTS [r; a; b] s /\
+               C_ARGUMENTS [a; b] s /\
                (!i. i < 256 ==> abs(ival(x i)) <= &75423752) /\
                (!i. i < 256 ==> abs(ival(y i)) <= &75423752) /\
                (!i. i < 256 ==>
@@ -228,12 +226,12 @@ let MLDSA_POINTWISE_SUBROUTINE_CORRECT = prove
                  read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
           (\s. read PC s = returnaddress /\
                (!i. i < 256 ==>
-                 let zi = read(memory :> bytes32(word_add r (word(4 * i)))) s in
+                 let zi = read(memory :> bytes32(word_add a (word(4 * i)))) s in
                  (ival zi == mldsa_pointwise (ival o x) (ival o y) i)
                    (mod &8380417) /\
                  abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(r, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
   REWRITE_TAC[fst MLDSA_POINTWISE_EXEC] THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POINTWISE_EXEC
     (REWRITE_RULE[fst MLDSA_POINTWISE_EXEC] MLDSA_POINTWISE_CORRECT));;
@@ -253,25 +251,24 @@ let full_spec,public_vars = mk_safety_spec
 
 let MLDSA_POINTWISE_SUBROUTINE_SAFE = time prove
  (`exists f_events.
-       forall e r a b pc returnaddress.
-           nonoverlapping (word pc,LENGTH mldsa_pointwise_mc) (r,1024) /\
-           nonoverlapping (r,1024) (a,1024) /\
-           nonoverlapping (r,1024) (b,1024)
+       forall e a b pc returnaddress.
+           nonoverlapping (word pc,LENGTH mldsa_pointwise_mc) (a,1024) /\
+           nonoverlapping (a,1024) (b,1024)
            ==> ensures arm
                (\s.
                     aligned_bytes_loaded s (word pc)
                     mldsa_pointwise_mc /\
                     read PC s = word pc /\
                     read X30 s = returnaddress /\
-                    C_ARGUMENTS [r; a; b] s /\
+                    C_ARGUMENTS [a; b] s /\
                     read events s = e)
                (\s.
                     read PC s = returnaddress /\
                     (exists e2.
                          read events s = APPEND e2 e /\
-                         e2 = f_events a b r pc returnaddress /\
-                         memaccess_inbounds e2 [a,1024; b,1024; r,1024]
-                         [r,1024]))
+                         e2 = f_events b a pc returnaddress /\
+                         memaccess_inbounds e2 [a,1024; b,1024]
+                         [a,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POINTWISE_EXEC);;

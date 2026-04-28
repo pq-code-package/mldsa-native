@@ -263,13 +263,13 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
-    int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
+    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_pointwise_avx2(c, a, b, mld_qdata);
+  mld_pointwise_avx2(a, b, mld_qdata);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \

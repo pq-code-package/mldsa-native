@@ -521,30 +521,27 @@ __contract__(
  * Name:        mld_poly_pointwise_montgomery_native
  *
  * Description: Pointwise multiplication of polynomials in NTT domain
- *              with Montgomery reduction.
+ *              with Montgomery reduction. Destructive in the first argument.
  *
- *              Computes c[i] = a[i] * b[i] * R^(-1) mod q for all i,
+ *              Computes a[i] = a[i] * b[i] * R^(-1) mod q for all i,
  *              where R = 2^32.
  *
- * Arguments:   - int32_t c[MLDSA_N]: output polynomial
- *              - const int32_t a[MLDSA_N]: first input polynomial
+ * Arguments:   - int32_t a[MLDSA_N]: first input/output polynomial
  *              - const int32_t b[MLDSA_N]: second input polynomial
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
-    int32_t c[MLDSA_N], const int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
+    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(a, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(array_abs_bound(b, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(c, 0, MLDSA_N, MLDSA_Q))
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(a, 0, MLDSA_N, MLD_NTT_BOUND))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(b, 0, MLDSA_N, MLD_NTT_BOUND))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(c, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \

@@ -6,13 +6,12 @@
 #include "params.h"
 
 
-int mld_poly_pointwise_montgomery_native(int32_t c[MLDSA_N],
-                                         const int32_t a[MLDSA_N],
+int mld_poly_pointwise_montgomery_native(int32_t a[MLDSA_N],
                                          const int32_t b[MLDSA_N]);
 
 void harness(void)
 {
-  int32_t *c, *a, *b;
+  int32_t *a, *b;
   int t;
-  t = mld_poly_pointwise_montgomery_native(c, a, b);
+  t = mld_poly_pointwise_montgomery_native(a, b);
 }

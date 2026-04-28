@@ -28,14 +28,14 @@ PQCP_MLDSA_NATIVE_MLDSA44_poly_pointwise_montgomery_asm:
         mov x3, #0x40               // =64
 
 Lpoly_pointwise_montgomery_loop_start:
-        ldr q17, [x1, #0x10]
-        ldr q18, [x1, #0x20]
-        ldr q19, [x1, #0x30]
-        ldr q16, [x1], #0x40
-        ldr q21, [x2, #0x10]
-        ldr q22, [x2, #0x20]
-        ldr q23, [x2, #0x30]
-        ldr q20, [x2], #0x40
+        ldr q16, [x0]
+        ldr q17, [x0, #0x10]
+        ldr q18, [x0, #0x20]
+        ldr q19, [x0, #0x30]
+        ldr q21, [x1, #0x10]
+        ldr q22, [x1, #0x20]
+        ldr q23, [x1, #0x30]
+        ldr q20, [x1], #0x40
         smull v24.2d, v16.2s, v20.2s
         smull2 v25.2d, v16.4s, v20.4s
         smull v26.2d, v17.2s, v21.2s

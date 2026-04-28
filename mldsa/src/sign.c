@@ -516,8 +516,8 @@ __contract__(
     decreases(MLDSA_L - i)
   )
   {
-    mld_sk_s1hat_get_poly(tmp, s1hat, i);
-    mld_poly_pointwise_montgomery(z, cp, tmp);
+    mld_sk_s1hat_get_poly(z, s1hat, i);
+    mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
     mld_yvec_get_poly(tmp, y, i);
     mld_poly_add(z, tmp);
@@ -680,8 +680,8 @@ __contract__(
   )
   {
     /* Compute cs2[k] and subtract from w0[k] */
-    mld_sk_s2hat_get_poly(t, s2hat, k);
-    mld_poly_pointwise_montgomery(z, cp, t);
+    mld_sk_s2hat_get_poly(z, s2hat, k);
+    mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
 
     /* TODO: Remove this workaround for CBMC performance issues */
@@ -702,8 +702,8 @@ __contract__(
     }
 
     /* Compute ct0[k], check norm, and add to w0[k] */
-    mld_sk_t0hat_get_poly(t, t0hat, k);
-    mld_poly_pointwise_montgomery(z, cp, t);
+    mld_sk_t0hat_get_poly(z, t0hat, k);
+    mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
     mld_poly_reduce(z);
 
@@ -1125,19 +1125,19 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   mld_poly_ntt(cp);
   mld_polyveck_shiftl(t1);
   mld_polyveck_ntt(t1);
-  mld_polyveck_pointwise_poly_montgomery(tmp, cp, t1);
+  mld_polyveck_pointwise_poly_montgomery(t1, cp);
 
   mld_polyvec_matrix_expand(mat, rho);
   mld_polyvecl_ntt(z);
-  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
-  mld_polyveck_sub(w1, tmp);
-  mld_polyveck_reduce(w1);
-  mld_polyveck_invntt_tomont(w1);
+  mld_polyvec_matrix_pointwise_montgomery(tmp, mat, z);
+  mld_polyveck_sub(tmp, t1);
+  mld_polyveck_reduce(tmp);
+  mld_polyveck_invntt_tomont(tmp);
 
   /* Reconstruct w1 */
-  mld_polyveck_caddq(w1);
-  mld_polyveck_use_hint(tmp, w1, h);
-  mld_polyveck_pack_w1(buf, tmp);
+  mld_polyveck_caddq(tmp);
+  mld_polyveck_use_hint(w1, tmp, h);
+  mld_polyveck_pack_w1(buf, w1);
   /* Call random oracle and verify challenge */
   mld_H(c2, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, buf,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);

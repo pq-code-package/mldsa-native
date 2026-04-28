@@ -184,23 +184,22 @@ __contract__(
  *
  * Description: Pointwise multiplication of polynomials in NTT domain
  *              representation and multiplication of resulting polynomial
- *              by 2^{-32}.
+ *              by 2^{-32}. Destructive in the first argument.
  *
- * Arguments:   - mld_poly *c: pointer to output polynomial
- *              - const mld_poly *a: pointer to first input polynomial
+ * Arguments:   - mld_poly *a: pointer to first input/output polynomial.
+ *                On entry, holds the first multiplicand; on exit, holds
+ *                the product a * b * 2^{-32}.
  *              - const mld_poly *b: pointer to second input polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_poly_pointwise_montgomery(mld_poly *c, const mld_poly *a,
-                                   const mld_poly *b)
+void mld_poly_pointwise_montgomery(mld_poly *a, const mld_poly *b)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(memory_no_alias(b, sizeof(mld_poly)))
-  requires(memory_no_alias(c, sizeof(mld_poly)))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(array_abs_bound(b->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(c, sizeof(mld_poly)))
-  ensures(array_abs_bound(c->coeffs, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */

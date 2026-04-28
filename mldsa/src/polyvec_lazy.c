@@ -206,8 +206,8 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
-  mld_polymat_expand_entry(&mat->cur, seed_ext, 0, (uint8_t)i);
-  mld_poly_pointwise_montgomery(t_row, &mat->cur, &v->vec[0]);
+  mld_polymat_expand_entry(t_row, seed_ext, 0, (uint8_t)i);
+  mld_poly_pointwise_montgomery(t_row, &v->vec[0]);
 
   for (l = 1; l < MLDSA_L; ++l)
   __loop__(
@@ -220,11 +220,8 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
   )
   {
     mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
-    /* TODO: if mld_poly_pointwise_montgomery's CBMC and HOL Light specs
-     * are strengthened to permit aliasing, the product can be written
-     * in place into mat->cur and the separate mat->tmp field dropped. */
-    mld_poly_pointwise_montgomery(&mat->tmp, &mat->cur, &v->vec[l]);
-    mld_poly_add(t_row, &mat->tmp);
+    mld_poly_pointwise_montgomery(&mat->cur, &v->vec[l]);
+    mld_poly_add(t_row, &mat->cur);
   }
   mld_poly_reduce(t_row);
 
@@ -287,15 +284,16 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
       decreases(MLDSA_K - k)
     )
     {
-      mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
       if (l == 0)
       {
-        mld_poly_pointwise_montgomery(&w->vec[k], &mat->cur, y_ntt);
+        mld_polymat_expand_entry(&w->vec[k], seed_ext, 0, (uint8_t)k);
+        mld_poly_pointwise_montgomery(&w->vec[k], y_ntt);
       }
       else
       {
-        mld_poly_pointwise_montgomery(&mat->tmp, &mat->cur, y_ntt);
-        mld_poly_add(&w->vec[k], &mat->tmp);
+        mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
+        mld_poly_pointwise_montgomery(&mat->cur, y_ntt);
+        mld_poly_add(&w->vec[k], &mat->cur);
       }
     }
   }

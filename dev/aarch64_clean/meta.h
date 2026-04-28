@@ -210,10 +210,9 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_pointwise_montgomery_native(
-    int32_t out[MLDSA_N], const int32_t in0[MLDSA_N],
-    const int32_t in1[MLDSA_N])
+    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
 {
-  mld_poly_pointwise_montgomery_asm(out, in0, in1);
+  mld_poly_pointwise_montgomery_asm(a, b);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \

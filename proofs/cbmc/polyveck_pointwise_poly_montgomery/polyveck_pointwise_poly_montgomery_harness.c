@@ -5,7 +5,7 @@
 
 void harness(void)
 {
-  mld_polyveck *a, *b;
-  mld_poly *c;
-  mld_polyveck_pointwise_poly_montgomery(a, c, b);
+  mld_polyveck *v;
+  mld_poly *a;
+  mld_polyveck_pointwise_poly_montgomery(v, a);
 }

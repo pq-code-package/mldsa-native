@@ -122,20 +122,18 @@ void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a);
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_pointwise_avx2 MLD_NAMESPACE(pointwise_avx2)
-void mld_pointwise_avx2(int32_t *c, const int32_t *a, const int32_t *b,
-                        const int32_t *qdata)
+void mld_pointwise_avx2(int32_t *a, const int32_t *b, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/mldsa_pointwise.ml */
 __contract__(
-  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
   /* check-magic: off */
   requires(array_abs_bound(a, 0, MLDSA_N, 75423753))
   requires(array_abs_bound(b, 0, MLDSA_N, 75423753))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(a, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
 

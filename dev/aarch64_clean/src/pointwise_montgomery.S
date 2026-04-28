@@ -22,9 +22,8 @@
     smull2 \dh\().2d, \a\().4s, \b\().4s
 .endm
 
-    out_ptr .req x0
-    a_ptr   .req x1
-    b_ptr   .req x2
+    a_ptr   .req x0
+    b_ptr   .req x1
 
     count   .req x3
     wtmp    .req w3
@@ -89,10 +88,10 @@ MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_asm)
     mov count, #(MLDSA_N / 4)
 
 poly_pointwise_montgomery_loop_start:
+    ldr q_a_0, [a_ptr, #0*16]
     ldr q_a_1, [a_ptr, #1*16]
     ldr q_a_2, [a_ptr, #2*16]
     ldr q_a_3, [a_ptr, #3*16]
-    ldr q_a_0, [a_ptr], #4*16
 
     ldr q_b_1, [b_ptr, #1*16]
     ldr q_b_2, [b_ptr, #2*16]
@@ -116,17 +115,16 @@ poly_pointwise_montgomery_loop_start:
     //
     // See description of mld_montgomery_reduce() in mldsa/src/reduce.h.
 
-    str q_c_1, [out_ptr, #1*16]
-    str q_c_2, [out_ptr, #2*16]
-    str q_c_3, [out_ptr, #3*16]
-    str q_c_0, [out_ptr], #4*16
+    str q_c_1, [a_ptr, #1*16]
+    str q_c_2, [a_ptr, #2*16]
+    str q_c_3, [a_ptr, #3*16]
+    str q_c_0, [a_ptr], #4*16
 
     subs count, count, #4
     cbnz count, poly_pointwise_montgomery_loop_start
 
     ret
 
-    .unreq out_ptr
     .unreq a_ptr
     .unreq b_ptr
     .unreq count

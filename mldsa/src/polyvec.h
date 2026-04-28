@@ -324,23 +324,21 @@ __contract__(
  *
  * Description: Pointwise multiplication of a polynomial vector of length
  *              MLDSA_K by a single polynomial in NTT domain and multiplication
- *              of the resulting polynomial vector by 2^{-32}.
+ *              of the resulting polynomial vector by 2^{-32}. Destructive in
+ *              the first argument: v[i] := v[i] * a * 2^{-32}.
  *
- * Arguments:   - mld_polyveck *r: pointer to output vector
- *              - mld_poly *a: pointer to input polynomial
- *              - mld_polyveck *v: pointer to input vector
+ * Arguments:   - mld_polyveck *v: pointer to input/output vector
+ *              - const mld_poly *a: pointer to input polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *r, const mld_poly *a,
-                                            const mld_polyveck *v)
+void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *v, const mld_poly *a)
 __contract__(
-  requires(memory_no_alias(r, sizeof(mld_polyveck)))
-  requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(forall(k0, 0, MLDSA_K, array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(r, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(r->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
+  assigns(memory_slice(v, sizeof(mld_polyveck)))
+  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

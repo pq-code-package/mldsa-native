@@ -4,11 +4,11 @@
 #include "poly.h"
 
 // Prototype for the function under test
-void mld_poly_pointwise_montgomery_c(mld_poly *c, mld_poly *a, mld_poly *b);
+void mld_poly_pointwise_montgomery_c(mld_poly *a, const mld_poly *b);
 
 
 void harness(void)
 {
-  mld_poly *a, *b, *c;
-  mld_poly_pointwise_montgomery_c(c, a, b);
+  mld_poly *a, *b;
+  mld_poly_pointwise_montgomery_c(a, b);
 }

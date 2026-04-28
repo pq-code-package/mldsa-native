@@ -408,23 +408,23 @@ void mld_polyveck_invntt_tomont(mld_polyveck *v)
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
-void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *r, const mld_poly *a,
-                                            const mld_polyveck *v)
+void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *v, const mld_poly *a)
 {
   unsigned int i;
   mld_assert_abs_bound_2d(v->vec, MLDSA_K, MLDSA_N, MLD_NTT_BOUND);
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, memory_slice(r, sizeof(mld_polyveck)))
+    assigns(i, memory_slice(v, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
-    invariant(forall(k2, 0, i, array_abs_bound(r->vec[k2].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    invariant(forall(k2, 0, i, array_abs_bound(v->vec[k2].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    invariant(forall(k3, i, MLDSA_K, array_abs_bound(v->vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     decreases(MLDSA_K - i)
   )
   {
-    mld_poly_pointwise_montgomery(&r->vec[i], a, &v->vec[i]);
+    mld_poly_pointwise_montgomery(&v->vec[i], a);
   }
-  mld_assert_abs_bound_2d(r->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
+  mld_assert_abs_bound_2d(v->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
