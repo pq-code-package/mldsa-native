@@ -474,6 +474,9 @@ jobs:
            ids: nblocks-1 nblocks-4 nblocks-6
          - name: reduced-api
            ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify
+         - name: reduced-api-reduce-ram
+           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify
+           extra_cflags: -DMLD_CONFIG_REDUCE_RAM
     runs-on: ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -482,6 +485,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           tests: ${{ matrix.test.ids }}
+          extra_cflags: ${{ matrix.test.extra_cflags || '' }}
   check-cf-protections:
     name: Test control-flow protections  (${{ matrix.compiler.name }}, x86_64)
     strategy:
