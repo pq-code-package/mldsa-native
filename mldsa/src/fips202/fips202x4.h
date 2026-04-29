@@ -71,7 +71,9 @@ MLD_INTERNAL_API
 void mld_shake128x4_release(mld_shake128x4ctx *state);
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_shake256x4_absorb_once MLD_NAMESPACE(shake256x4_absorb_once)
 MLD_INTERNAL_API
 void mld_shake256x4_absorb_once(mld_shake256x4ctx *state, const uint8_t *in0,
@@ -113,7 +115,8 @@ void mld_shake256x4_init(mld_shake256x4ctx *state);
 #define mld_shake256x4_release MLD_NAMESPACE(shake256x4_release)
 MLD_INTERNAL_API
 void mld_shake256x4_release(mld_shake256x4ctx *state);
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_FIPS202_FIPS202X4_H */

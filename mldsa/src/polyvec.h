@@ -55,6 +55,10 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
         */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    !defined(MLD_CONFIG_NO_VERIFY_API) ||  \
+    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /*************************************************
  * Name:        mld_polyvecl_ntt
@@ -72,6 +76,9 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyvecl)))
   ensures(forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
+          (!MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM ||     \
+          MLD_UNIT_TEST)) */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_polyvecl_pointwise_acc_montgomery \
@@ -265,6 +272,10 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API) ||    \
+    ((!defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+      !defined(MLD_CONFIG_NO_SIGN_API)) &&   \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyveck_ntt MLD_NAMESPACE_KL(polyveck_ntt)
 /*************************************************
  * Name:        mld_polyveck_ntt
@@ -282,6 +293,9 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
+#endif /* !MLD_CONFIG_NO_VERIFY_API || ((!MLD_CONFIG_NO_KEYPAIR_API || \
+          !MLD_CONFIG_NO_SIGN_API) && (!MLD_CONFIG_REDUCE_RAM ||       \
+          MLD_UNIT_TEST)) */
 
 #define mld_polyveck_invntt_tomont MLD_NAMESPACE_KL(polyveck_invntt_tomont)
 /*************************************************
@@ -549,7 +563,9 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyvecl_unpack_eta MLD_NAMESPACE_KL(polyvecl_unpack_eta)
 /*************************************************
  * Name:        mld_polyvecl_unpack_eta
@@ -571,7 +587,8 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyvecl_unpack_z MLD_NAMESPACE_KL(polyvecl_unpack_z)
@@ -597,7 +614,9 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
+     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyveck_unpack_eta MLD_NAMESPACE_KL(polyveck_unpack_eta)
 /*************************************************
  * Name:        mld_polyveck_unpack_eta
@@ -641,6 +660,7 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 #endif /* !MLD_POLYVEC_H */
