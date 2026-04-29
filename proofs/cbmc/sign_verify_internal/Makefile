@@ -20,8 +20,9 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_verify_internal
-USE_FUNCTION_CONTRACTS=mld_unpack_pk
-USE_FUNCTION_CONTRACTS+=mld_unpack_sig
+USE_FUNCTION_CONTRACTS=mld_unpack_pk_t1
+USE_FUNCTION_CONTRACTS+=mld_sig_unpack_hints
+USE_FUNCTION_CONTRACTS+=mld_polyvecl_unpack_z
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_H
 USE_FUNCTION_CONTRACTS+=mld_poly_challenge
@@ -46,7 +47,7 @@ USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
 
 FUNCTION_NAME = sign_verify_internal
 

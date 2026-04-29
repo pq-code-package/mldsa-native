@@ -159,24 +159,21 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-#define mld_unpack_pk MLD_NAMESPACE_KL(unpack_pk)
+#define mld_unpack_pk_t1 MLD_NAMESPACE_KL(unpack_pk_t1)
 /*************************************************
- * Name:        mld_unpack_pk
+ * Name:        mld_unpack_pk_t1
  *
- * Description: Unpack public key pk = (rho, t1).
+ * Description: Unpack the t1 component of a public key pk = (rho, t1).
  *
- * Arguments:   - const uint8_t rho[]: output byte array for rho
- *              - const mld_polyveck *t1: pointer to output vector t1
+ * Arguments:   - mld_polyveck *t1: pointer to output vector t1
  *              - uint8_t pk[]: byte array containing bit-packed pk
  **************************************************/
 MLD_INTERNAL_API
-void mld_unpack_pk(uint8_t rho[MLDSA_SEEDBYTES], mld_polyveck *t1,
-                   const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+void mld_unpack_pk_t1(mld_polyveck *t1,
+                      const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(t1, sizeof(mld_polyveck)))
-  assigns(memory_slice(rho, MLDSA_SEEDBYTES))
   assigns(memory_slice(t1, sizeof(mld_polyveck)))
   ensures(forall(k0, 0, MLDSA_K,
     array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
@@ -239,34 +236,26 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-#define mld_unpack_sig MLD_NAMESPACE_KL(unpack_sig)
+#define mld_sig_unpack_hints MLD_NAMESPACE_KL(sig_unpack_hints)
 /*************************************************
- * Name:        mld_unpack_sig
+ * Name:        mld_sig_unpack_hints
  *
- * Description: Unpack signature sig = (c, z, h).
+ * Description: Unpack hint vector h from a signature buffer.
  *
- * Arguments:   - uint8_t *c: pointer to output challenge hash
- *              - mld_polyvecl *z: pointer to output vector z
- *              - mld_polyveck *h: pointer to output hint vector h
- *              - const uint8_t sig[]: byte array containing
- *                bit-packed signature
+ * Arguments:   - mld_polyveck *h: pointer to output hint vector
+ *              - const uint8_t sig[]: signature buffer
+ *                (MLDSA_CRYPTO_BYTES); the hint bytes are read from
+ *                the trailing MLDSA_POLYVECH_PACKEDBYTES.
  *
- * Returns 1 in case of malformed signature; otherwise 0.
+ * Returns 1 in case of malformed hints; otherwise 0.
  **************************************************/
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
-int mld_unpack_sig(uint8_t c[MLDSA_CTILDEBYTES], mld_polyvecl *z,
-                   mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
+int mld_sig_unpack_hints(mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(c, MLDSA_CTILDEBYTES))
-  requires(memory_no_alias(z, sizeof(mld_polyvecl)))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  assigns(memory_slice(c, MLDSA_CTILDEBYTES))
-  assigns(memory_slice(z, sizeof(mld_polyvecl)))
   assigns(memory_slice(h, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_L,
-    array_bound(z->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
   ensures(return_value >= 0 && return_value <= 1)

@@ -269,8 +269,8 @@
 #undef mld_pack_sig_z
 #undef mld_pack_sk_rho_key_tr_s2_t0
 #undef mld_pack_sk_s1
-#undef mld_unpack_pk
-#undef mld_unpack_sig
+#undef mld_sig_unpack_hints
+#undef mld_unpack_pk_t1
 #undef mld_unpack_sk
 /* mldsa/src/params.h */
 #undef MLDSA_BETA

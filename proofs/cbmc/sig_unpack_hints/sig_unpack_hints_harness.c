@@ -3,10 +3,10 @@
 
 #include "packing.h"
 
-
 void harness(void)
 {
-  uint8_t *a, *b;
-  mld_polyveck *c;
-  mld_unpack_pk(a, c, b);
+  uint8_t *sig;
+  mld_polyveck *h;
+  int r;
+  r = mld_sig_unpack_hints(h, sig);
 }

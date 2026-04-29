@@ -4,23 +4,23 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = unpack_sig_harness
+HARNESS_FILE = unpack_pk_t1_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = unpack_sig
+PROOF_UID = unpack_pk_t1
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
+UNWINDSET += mld_unpack_pk_t1.0:8 # Largest value of MLDSA_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/packing.c
 
-CHECK_FUNCTION_CONTRACTS=mld_unpack_sig
-USE_FUNCTION_CONTRACTS=mld_polyvecl_unpack_z
-USE_FUNCTION_CONTRACTS+=mld_unpack_hints
+CHECK_FUNCTION_CONTRACTS=mld_unpack_pk_t1
+USE_FUNCTION_CONTRACTS=mld_polyt1_unpack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = unpack_sig
+FUNCTION_NAME = unpack_pk_t1
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -37,7 +37,7 @@ FUNCTION_NAME = unpack_sig
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 8
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

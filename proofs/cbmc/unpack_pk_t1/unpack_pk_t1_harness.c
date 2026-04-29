@@ -6,10 +6,7 @@
 
 void harness(void)
 {
-  uint8_t *c;
-  uint8_t *sig;
-  mld_polyveck *h;
-  mld_polyvecl *z;
-  int r;
-  r = mld_unpack_sig(c, z, h, sig);
+  uint8_t *pk;
+  mld_polyveck *t1;
+  mld_unpack_pk_t1(t1, pk);
 }
