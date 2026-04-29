@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = sign_verify_internal_harness
+HARNESS_FILE = polyvec_matrix_pointwise_montgomery_row_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = sign_verify_internal
+PROOF_UID = polyvec_matrix_pointwise_montgomery_row
 
 DEFINES +=
 INCLUDES +=
@@ -17,51 +17,35 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
-CHECK_FUNCTION_CONTRACTS=mld_verify_internal
-USE_FUNCTION_CONTRACTS=mld_unpack_pk
-USE_FUNCTION_CONTRACTS+=mld_unpack_sig
-USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
-USE_FUNCTION_CONTRACTS+=mld_H
-USE_FUNCTION_CONTRACTS+=mld_poly_challenge
 ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_lazy
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_lazy
+USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
+USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
+USE_FUNCTION_CONTRACTS+=mld_poly_add
+USE_FUNCTION_CONTRACTS+=mld_poly_reduce
 else
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand_eager
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_eager
+USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
 endif
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery
-USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
-USE_FUNCTION_CONTRACTS+=mld_poly_ntt
-USE_FUNCTION_CONTRACTS+=mld_polyveck_shiftl
-USE_FUNCTION_CONTRACTS+=mld_polyveck_ntt
-USE_FUNCTION_CONTRACTS+=mld_polyveck_pointwise_poly_montgomery
-USE_FUNCTION_CONTRACTS+=mld_polyveck_sub
-USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
-USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
-USE_FUNCTION_CONTRACTS+=mld_polyveck_caddq
-USE_FUNCTION_CONTRACTS+=mld_polyveck_use_hint
-USE_FUNCTION_CONTRACTS+=mld_polyveck_pack_w1
-USE_FUNCTION_CONTRACTS+=mld_zeroize
-USE_FUNCTION_CONTRACTS+=mld_ct_memcmp
-
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2
+CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3 --arrays-uf-always
 
-FUNCTION_NAME = sign_verify_internal
+FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_row
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
 # restrict the number of EXPENSIVE CBMC jobs running at once. See the
 # documentation in Makefile.common under the "Job Pools" heading for details.
-# EXPENSIVE = true
+EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 11
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

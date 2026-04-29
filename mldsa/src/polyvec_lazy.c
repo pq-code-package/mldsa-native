@@ -148,26 +148,12 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
 }
 
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_eager(mld_polyveck *t,
-                                                   mld_polymat_eager *mat,
-                                                   const mld_polyvecl *v)
+void mld_polyvec_matrix_pointwise_montgomery_row_eager(mld_poly *t_row,
+                                                       mld_polymat_eager *mat,
+                                                       const mld_polyvecl *v,
+                                                       unsigned int i)
 {
-  unsigned int i;
-  mld_assert_abs_bound_2d(v->vec, MLDSA_L, MLDSA_N, MLD_NTT_BOUND);
-
-  for (i = 0; i < MLDSA_K; ++i)
-  __loop__(
-    assigns(i, memory_slice(t, sizeof(mld_polyveck)))
-    invariant(i <= MLDSA_K)
-    invariant(forall(k0, 0, i,
-                     array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-    decreases(MLDSA_K - i)
-  )
-  {
-    mld_polyvecl_pointwise_acc_montgomery(&t->vec[i], &mat->vec[i], v);
-  }
-
-  mld_assert_abs_bound_2d(t->vec, MLDSA_K, MLDSA_N, MLDSA_Q);
+  mld_polyvecl_pointwise_acc_montgomery(t_row, &mat->vec[i], v);
 }
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
@@ -177,9 +163,23 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
                                                         const mld_yvec_eager *y,
                                                         mld_polyvecl *scratch)
 {
+  unsigned int i;
   *scratch = y->vec;
   mld_polyvecl_ntt(scratch);
-  mld_polyvec_matrix_pointwise_montgomery_eager(w, mat, scratch);
+
+  for (i = 0; i < MLDSA_K; ++i)
+  __loop__(
+    assigns(i, memory_slice(w, sizeof(mld_polyveck)))
+    invariant(i <= MLDSA_K)
+    invariant(forall(k0, 0, i,
+                     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    decreases(MLDSA_K - i)
+  )
+  {
+    mld_polyvec_matrix_pointwise_montgomery_row_eager(&w->vec[i], mat, scratch,
+                                                      i);
+  }
+
   mld_polyveck_invntt_tomont(w);
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -195,52 +195,43 @@ void mld_polyvec_matrix_expand_lazy(mld_polymat_lazy *mat,
   mld_memcpy(mat->rho, rho, MLDSA_SEEDBYTES);
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_lazy(mld_polyveck *t,
-                                                  mld_polymat_lazy *mat,
-                                                  const mld_polyvecl *v)
+void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
+                                                      mld_polymat_lazy *mat,
+                                                      const mld_polyvecl *v,
+                                                      unsigned int i)
 {
-  unsigned int i, l;
+  unsigned int l;
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
-  for (i = 0; i < MLDSA_K; ++i)
+  mld_polymat_expand_entry(&mat->cur, seed_ext, 0, (uint8_t)i);
+  mld_poly_pointwise_montgomery(t_row, &mat->cur, &v->vec[0]);
+
+  for (l = 1; l < MLDSA_L; ++l)
   __loop__(
-    assigns(i, l, object_whole(seed_ext),
-            memory_slice(t, sizeof(mld_polyveck)),
+    assigns(l, object_whole(seed_ext),
+            memory_slice(t_row, sizeof(mld_poly)),
             memory_slice(mat, sizeof(mld_polymat_lazy)))
-    invariant(i <= MLDSA_K)
-    invariant(forall(k0, 0, i,
-                     array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-    decreases(MLDSA_K - i)
+    invariant(l >= 1 && l <= MLDSA_L)
+    invariant(array_abs_bound(t_row->coeffs, 0, MLDSA_N, l * MLDSA_Q))
+    decreases(MLDSA_L - l)
   )
   {
-    mld_polymat_expand_entry(&mat->cur, seed_ext, 0, (uint8_t)i);
-    mld_poly_pointwise_montgomery(&t->vec[i], &mat->cur, &v->vec[0]);
-
-    for (l = 1; l < MLDSA_L; ++l)
-    __loop__(
-      assigns(l, object_whole(seed_ext),
-              memory_slice(&t->vec[i], sizeof(mld_poly)),
-              memory_slice(mat, sizeof(mld_polymat_lazy)))
-      invariant(l >= 1 && l <= MLDSA_L)
-      invariant(array_abs_bound(t->vec[i].coeffs, 0, MLDSA_N, l * MLDSA_Q))
-      decreases(MLDSA_L - l)
-    )
-    {
-      mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
-      /* TODO: if mld_poly_pointwise_montgomery's CBMC and HOL Light specs
-       * are strengthened to permit aliasing, the product can be written
-       * in place into mat->cur and the separate mat->tmp field dropped. */
-      mld_poly_pointwise_montgomery(&mat->tmp, &mat->cur, &v->vec[l]);
-      mld_poly_add(&t->vec[i], &mat->tmp);
-    }
-    mld_poly_reduce(&t->vec[i]);
+    mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
+    /* TODO: if mld_poly_pointwise_montgomery's CBMC and HOL Light specs
+     * are strengthened to permit aliasing, the product can be written
+     * in place into mat->cur and the separate mat->tmp field dropped. */
+    mld_poly_pointwise_montgomery(&mat->tmp, &mat->cur, &v->vec[l]);
+    mld_poly_add(t_row, &mat->tmp);
   }
+  mld_poly_reduce(t_row);
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(seed_ext, sizeof(seed_ext));
 }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
@@ -317,6 +308,30 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
+                                             const mld_polyvecl *v)
+{
+  unsigned int i;
+  for (i = 0; i < MLDSA_K; ++i)
+  __loop__(
+    assigns(i, memory_slice(t, sizeof(mld_polyveck)),
+            memory_slice(mat, sizeof(mld_polymat)))
+    invariant(i <= MLDSA_K)
+    invariant(forall(k0, 0, i,
+                     array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+    MLD_IF_NOT_REDUCE_RAM(
+      invariant(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+        array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))))
+    decreases(MLDSA_K - i)
+  )
+  {
+    mld_polyvec_matrix_pointwise_montgomery_row(&t->vec[i], mat, v, i);
+  }
+}
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */

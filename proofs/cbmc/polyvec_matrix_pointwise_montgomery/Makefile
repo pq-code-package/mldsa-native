@@ -19,22 +19,18 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
+CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery
 ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_lazy
-USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
-USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
-USE_FUNCTION_CONTRACTS+=mld_poly_add
-USE_FUNCTION_CONTRACTS+=mld_poly_reduce
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_lazy
 else
-CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_eager
-USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row_eager
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3 --arrays-uf-always
+CBMCFLAGS=--smt2
 
 FUNCTION_NAME = polyvec_matrix_pointwise_montgomery
 

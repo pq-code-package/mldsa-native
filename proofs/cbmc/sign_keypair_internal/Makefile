@@ -33,11 +33,7 @@ USE_FUNCTION_CONTRACTS+=mld_pack_sk_rho_key_tr_s2_t0
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 USE_FUNCTION_CONTRACTS+=mld_check_pct
-ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_lazy
-else
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_eager
-endif
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery
 USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce
 USE_FUNCTION_CONTRACTS+=mld_polyveck_invntt_tomont
 USE_FUNCTION_CONTRACTS+=mld_polyveck_add

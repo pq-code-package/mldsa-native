@@ -66,10 +66,12 @@
   MLD_NAMESPACE_KL(polyvec_matrix_expand_eager)
 #define mld_polyvec_matrix_expand_lazy \
   MLD_NAMESPACE_KL(polyvec_matrix_expand_lazy)
-#define mld_polyvec_matrix_pointwise_montgomery_eager \
-  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_eager)
-#define mld_polyvec_matrix_pointwise_montgomery_lazy \
-  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_lazy)
+#define mld_polyvec_matrix_pointwise_montgomery \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery)
+#define mld_polyvec_matrix_pointwise_montgomery_row_eager \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_row_eager)
+#define mld_polyvec_matrix_pointwise_montgomery_row_lazy \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_row_lazy)
 #define mld_polyvec_matrix_pointwise_montgomery_yvec_eager \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_eager)
 #define mld_polyvec_matrix_pointwise_montgomery_yvec_lazy \
@@ -444,39 +446,34 @@ __contract__(
 );
 
 /*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery_eager
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_row_eager
  *
- * Description: Compute matrix-vector multiplication in NTT domain with
- *              pointwise multiplication and multiplication by 2^{-32}.
+ * Description: Compute row i of matrix-vector multiplication in NTT domain
+ *              with pointwise multiplication and multiplication by 2^{-32}.
  *              Input matrix and vector must be in NTT domain representation.
+ *              Output coefficients are bounded by MLDSA_Q in absolute value.
  *
- *              The first input "mat" must be the output of
- *              polyvec_matrix_expand() and so have coefficients in [0, Q-1]
- *              inclusive.
- *
- *              The second input "v" is assumed to be output of an NTT, and
- *              hence must have coefficients bounded by [-9q+1, +9q-1]
- *              inclusive.
- *
- * Arguments:   - mld_polyveck *t: pointer to output vector t
+ * Arguments:   - mld_poly *t_row: pointer to output row polynomial
  *              - mld_polymat_eager *mat: pointer to input matrix
  *              - const mld_polyvecl *v: pointer to input vector v
+ *              - unsigned int i: row index, 0 <= i < MLDSA_K
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_eager(mld_polyveck *t,
-                                                   mld_polymat_eager *mat,
-                                                   const mld_polyvecl *v)
+void mld_polyvec_matrix_pointwise_montgomery_row_eager(mld_poly *t_row,
+                                                       mld_polymat_eager *mat,
+                                                       const mld_polyvecl *v,
+                                                       unsigned int i)
 __contract__(
-  requires(memory_no_alias(t, sizeof(mld_polyveck)))
+  requires(memory_no_alias(t_row, sizeof(mld_poly)))
   requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-                                         array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+  requires(i < MLDSA_K)
   requires(forall(l1, 0, MLDSA_L,
-                  array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_K,
-                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+                  array_bound(mat->vec[i].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+  requires(forall(l2, 0, MLDSA_L,
+                  array_abs_bound(v->vec[l2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(t_row, sizeof(mld_poly)))
+  ensures(array_abs_bound(t_row->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
@@ -525,21 +522,40 @@ __contract__(
   assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
 );
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery_row_lazy
+ *
+ * Description: Compute row i of matrix-vector multiplication in NTT domain
+ *              with pointwise multiplication and multiplication by 2^{-32}.
+ *              Input vector must be in NTT domain representation; the matrix
+ *              entries are sampled on demand from the seed stored in mat->rho,
+ *              using mat->cur and mat->tmp as scratch.
+ *              Output coefficients are bounded by MLDSA_Q in absolute value.
+ *
+ * Arguments:   - mld_poly *t_row: pointer to output row polynomial
+ *              - mld_polymat_lazy *mat: pointer to input matrix (seed +
+ *                  scratch)
+ *              - const mld_polyvecl *v: pointer to input vector v
+ *              - unsigned int i: row index, 0 <= i < MLDSA_K
+ **************************************************/
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_lazy(mld_polyveck *t,
-                                                  mld_polymat_lazy *mat,
-                                                  const mld_polyvecl *v)
+void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
+                                                      mld_polymat_lazy *mat,
+                                                      const mld_polyvecl *v,
+                                                      unsigned int i)
 __contract__(
-  requires(memory_no_alias(t, sizeof(mld_polyveck)))
+  requires(memory_no_alias(t_row, sizeof(mld_poly)))
   requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(i < MLDSA_K)
   requires(forall(l1, 0, MLDSA_L,
                   array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t, sizeof(mld_polyveck)))
+  assigns(memory_slice(t_row, sizeof(mld_poly)))
   assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
-  ensures(forall(k0, 0, MLDSA_K,
-                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+  ensures(array_abs_bound(t_row->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /*************************************************
@@ -596,8 +612,8 @@ typedef mld_yvec_lazy mld_yvec;
 #define mld_sk_t0hat_get_poly mld_sk_t0hat_get_poly_lazy
 #endif
 #define mld_polyvec_matrix_expand mld_polyvec_matrix_expand_lazy
-#define mld_polyvec_matrix_pointwise_montgomery \
-  mld_polyvec_matrix_pointwise_montgomery_lazy
+#define mld_polyvec_matrix_pointwise_montgomery_row \
+  mld_polyvec_matrix_pointwise_montgomery_row_lazy
 #define mld_yvec_init mld_yvec_init_lazy
 #define mld_yvec_get_poly mld_yvec_get_poly_lazy
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
@@ -617,13 +633,52 @@ typedef mld_yvec_eager mld_yvec;
 #define mld_sk_t0hat_get_poly mld_sk_t0hat_get_poly_eager
 #endif
 #define mld_polyvec_matrix_expand mld_polyvec_matrix_expand_eager
-#define mld_polyvec_matrix_pointwise_montgomery \
-  mld_polyvec_matrix_pointwise_montgomery_eager
+#define mld_polyvec_matrix_pointwise_montgomery_row \
+  mld_polyvec_matrix_pointwise_montgomery_row_eager
 #define mld_yvec_init mld_yvec_init_eager
 #define mld_yvec_get_poly mld_yvec_get_poly_eager
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+/*************************************************
+ * Name:        mld_polyvec_matrix_pointwise_montgomery
+ *
+ * Description: Compute matrix-vector multiplication in NTT domain with
+ *              pointwise multiplication and multiplication by 2^{-32}.
+ *              Input matrix and vector must be in NTT domain representation.
+ *
+ *              "mat" must be the output of mld_polyvec_matrix_expand(); for
+ *              the eager backend its sampled coefficients lie in [0, Q-1],
+ *              for the lazy backend matrix entries are sampled on demand.
+ *
+ *              The second input "v" is assumed to be output of an NTT, and
+ *              hence must have coefficients bounded by [-9q+1, +9q-1]
+ *              inclusive.
+ *
+ * Arguments:   - mld_polyveck *t: pointer to output vector t
+ *              - mld_polymat *mat: pointer to input matrix
+ *              - const mld_polyvecl *v: pointer to input vector v
+ **************************************************/
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
+                                             const mld_polyvecl *v)
+__contract__(
+  requires(memory_no_alias(t, sizeof(mld_polyveck)))
+  requires(memory_no_alias(mat, sizeof(mld_polymat)))
+  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  MLD_IF_NOT_REDUCE_RAM(
+    requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
+      array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))))
+  requires(forall(l2, 0, MLDSA_L,
+                  array_abs_bound(v->vec[l2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  assigns(memory_slice(t, sizeof(mld_polyveck)))
+  assigns(memory_slice(mat, sizeof(mld_polymat)))
+  ensures(forall(k0, 0, MLDSA_K,
+                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

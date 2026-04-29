@@ -786,7 +786,7 @@ static int test_backend_units(void)
 /* Test that eager and lazy polyvec init+get produce the same results */
 static int test_polyvec_lazy_eager(void)
 {
-  unsigned int i, j, t;
+  unsigned int i, t;
   uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES];
   uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES];
   uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES];
@@ -803,9 +803,11 @@ static int test_polyvec_lazy_eager(void)
   mld_poly poly_eager, poly_lazy;
   mld_polymat_eager mat_eager;
   mld_polymat_lazy mat_lazy;
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+  unsigned int j;
   mld_polyvecl v;
+#endif
   mld_polyvecl scratch_eager, scratch_lazy;
-  mld_polyveck tk_eager, tk_lazy;
   mld_polyveck w_eager, w_lazy;
 
   for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
@@ -847,8 +849,10 @@ static int test_polyvec_lazy_eager(void)
     }
   }
 
-  /* Test matrix expand + pointwise: eager vs lazy.
-   * Fewer iterations since matrix expand is expensive. */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+  /* Test row helpers: eager vs lazy. Both compute one row of A * v in
+   * Montgomery (NTT domain), reduced mod q, but with different storage
+   * strategies for A. */
   for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
   {
     randombytes(rho, sizeof(rho));
@@ -860,20 +864,23 @@ static int test_polyvec_lazy_eager(void)
     {
       for (j = 0; j < MLDSA_N; j++)
       {
-        v.vec[i].coeffs[j] %= (MLD_NTT_BOUND - 1);
+        v.vec[i].coeffs[j] %= MLD_NTT_BOUND;
       }
     }
 
-    mld_polyvec_matrix_pointwise_montgomery_eager(&tk_eager, &mat_eager, &v);
-    mld_polyvec_matrix_pointwise_montgomery_lazy(&tk_lazy, &mat_lazy, &v);
-
-    /* Compare mod q */
-    mld_polyveck_reduce(&tk_eager);
-    mld_polyveck_reduce(&tk_lazy);
-    mld_polyveck_caddq(&tk_eager);
-    mld_polyveck_caddq(&tk_lazy);
-    CHECK(memcmp(&tk_eager, &tk_lazy, sizeof(mld_polyveck)) == 0);
+    for (i = 0; i < MLDSA_K; i++)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_row_eager(&poly_eager, &mat_eager,
+                                                        &v, i);
+      mld_polyvec_matrix_pointwise_montgomery_row_lazy(&poly_lazy, &mat_lazy,
+                                                       &v, i);
+      /* Compare mod q */
+      mld_poly_caddq(&poly_eager);
+      mld_poly_caddq(&poly_lazy);
+      CHECK(memcmp(&poly_eager, &poly_lazy, sizeof(mld_poly)) == 0);
+    }
   }
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
   /* Test yvec: eager vs lazy. Verify that mld_yvec_get_poly_eager and
    * mld_yvec_get_poly_lazy produce the same y[i], and that the matrix-vector
