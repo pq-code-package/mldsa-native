@@ -949,7 +949,7 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     ret = MLD_ERR_RNG_FAIL;
     goto cleanup;
   }
-  MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
+  MLD_CT_TESTING_SECRET(rnd, MLDSA_RNDBYTES);
 
   ret = mld_sign_signature_internal(sig, siglen, m, mlen, pre, pre_len, rnd, sk,
                                     0, context);
