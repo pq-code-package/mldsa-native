@@ -2403,6 +2403,20 @@ def gen_hol_light_asm():
             "aarch64",
         ),
         (
+            "poly_use_hint_32_asm.S",
+            "poly_use_hint_32_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "poly_use_hint_88_asm.S",
+            "poly_use_hint_88_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
             "mld_polyvecl_pointwise_acc_montgomery_l4.S",
             "mldsa_pointwise_acc_l4.S",
             "dev/aarch64_opt/src",

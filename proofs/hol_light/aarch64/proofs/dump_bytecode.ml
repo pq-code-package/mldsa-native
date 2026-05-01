@@ -30,6 +30,14 @@ print_string "=== bytecode start: aarch64/mldsa/mldsa_poly_caddq.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_poly_caddq.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: aarch64/mldsa/poly_use_hint_32_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/poly_use_hint_32_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/poly_use_hint_88_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/poly_use_hint_88_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: aarch64/mldsa/mldsa_poly_chknorm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_poly_chknorm.o";;
 print_string "==== bytecode end =====================================\n\n";;

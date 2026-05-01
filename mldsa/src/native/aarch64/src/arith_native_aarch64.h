@@ -117,10 +117,32 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_use_hint_32_asm MLD_NAMESPACE(poly_use_hint_32_asm)
-void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h);
+void mld_poly_use_hint_32_asm(int32_t *b, const int32_t *a, const int32_t *h)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/poly_use_hint_32_aarch64_asm.ml */
+__contract__(
+  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(b, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(b, 0, MLDSA_N, 0, 16))
+);
 
 #define mld_poly_use_hint_88_asm MLD_NAMESPACE(poly_use_hint_88_asm)
-void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h);
+void mld_poly_use_hint_88_asm(int32_t *b, const int32_t *a, const int32_t *h)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/poly_use_hint_88_aarch64_asm.ml */
+__contract__(
+  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(b, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(b, 0, MLDSA_N, 0, 44))
+);
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_poly_chknorm_asm MLD_NAMESPACE(poly_chknorm_asm)

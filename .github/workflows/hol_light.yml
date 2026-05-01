@@ -97,6 +97,10 @@ jobs:
             needs: ["aarch64_utils.ml"]
           - name: mldsa_poly_chknorm
             needs: ["aarch64_utils.ml"]
+          - name: poly_use_hint_32_aarch64_asm
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
+          - name: poly_use_hint_88_aarch64_asm
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar
             needs: ["keccak_spec.ml"]
           - name: keccak_f1600_x1_v84a

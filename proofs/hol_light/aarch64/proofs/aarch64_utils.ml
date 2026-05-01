@@ -5,6 +5,18 @@
 
 needs "common/mldsa_specs.ml";;
 
+let ENSURES_STRENGTHEN_POST = prove(
+  `!P (Q:armstate->bool) Q' R.
+     ensures arm P Q' R /\ (!s. Q' s ==> Q s) ==> ensures arm P Q R`,
+  REPEAT GEN_TAC THEN DISCH_THEN(CONJUNCTS_THEN2 MP_TAC ASSUME_TAC) THEN
+  REWRITE_TAC[ensures] THEN MATCH_MP_TAC MONO_FORALL THEN
+  X_GEN_TAC `s0:armstate` THEN MATCH_MP_TAC MONO_IMP THEN REWRITE_TAC[] THEN
+  MP_TAC(BETA_RULE(ISPECL [`arm`;
+    `\s':armstate. (Q':armstate->bool) s' /\ (R:armstate->armstate->bool) (s0:armstate) s'`;
+    `\s':armstate. (Q:armstate->bool) s' /\ (R:armstate->armstate->bool) (s0:armstate) s'`]
+    EVENTUALLY_MONO)) THEN
+  ANTS_TAC THENL [ASM_MESON_TAC[]; MESON_TAC[]]);;
+
 (* Merge 4 x bytes32 reads into bytes128 reads *)
 let MEMORY_128_FROM_32_TAC =
   let a_tm = `a:int64` and n_tm = `n:num` and i64_ty = `:int64`

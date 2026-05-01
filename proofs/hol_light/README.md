@@ -54,6 +54,8 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 - ML-DSA Arithmetic:
   * AArch64 poly_caddq: [mldsa_poly_caddq.S](aarch64/mldsa/mldsa_poly_caddq.S)
   * AArch64 poly_chknorm: [mldsa_poly_chknorm.S](aarch64/mldsa/mldsa_poly_chknorm.S)
+  * AArch64 poly_use_hint (l=5,7): [poly_use_hint_32_aarch64_asm.S](aarch64/mldsa/poly_use_hint_32_aarch64_asm.S)
+  * AArch64 poly_use_hint (l=4): [poly_use_hint_88_aarch64_asm.S](aarch64/mldsa/poly_use_hint_88_aarch64_asm.S)
   * AArch64 pointwise multiplication: [mldsa_pointwise.S](aarch64/mldsa/mldsa_pointwise.S)
   * AArch64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4.S](aarch64/mldsa/mldsa_pointwise_acc_l4.S)
   * AArch64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5.S](aarch64/mldsa/mldsa_pointwise_acc_l5.S)
