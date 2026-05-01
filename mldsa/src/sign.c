@@ -364,19 +364,26 @@ int mld_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                      uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                      MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  MLD_ALIGN uint8_t seed[MLDSA_SEEDBYTES];
   int ret;
+  MLD_ALLOC(seed, uint8_t, MLDSA_SEEDBYTES, context);
+
+  if (seed == NULL)
+  {
+    ret = MLD_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+
   if (mld_randombytes(seed, MLDSA_SEEDBYTES) != 0)
   {
     ret = MLD_ERR_RNG_FAIL;
     goto cleanup;
   }
-  MLD_CT_TESTING_SECRET(seed, sizeof(seed));
+  MLD_CT_TESTING_SECRET(seed, MLDSA_SEEDBYTES);
   ret = mld_sign_keypair_internal(pk, sk, seed, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(seed, sizeof(seed));
+  MLD_FREE(seed, uint8_t, MLDSA_SEEDBYTES, context);
   return ret;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
@@ -983,8 +990,15 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                              const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  MLD_ALIGN uint8_t rnd[MLDSA_RNDBYTES];
   int ret;
+  MLD_ALLOC(rnd, uint8_t, MLDSA_RNDBYTES, context);
+
+  if (rnd == NULL)
+  {
+    *siglen = 0;
+    ret = MLD_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
 
   /* Randomized variant of ML-DSA. If you need the deterministic variant,
    * call mld_sign_signature_internal directly with all-zero rnd. */
@@ -994,14 +1008,14 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     ret = MLD_ERR_RNG_FAIL;
     goto cleanup;
   }
-  MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
+  MLD_CT_TESTING_SECRET(rnd, MLDSA_RNDBYTES);
 
   ret = mld_sign_signature_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0,
                                     rnd, sk, 1, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(rnd, sizeof(rnd));
+  MLD_FREE(rnd, uint8_t, MLDSA_RNDBYTES, context);
 
   return ret;
 }
