@@ -85,16 +85,16 @@ def detect_supported_modes():
             err(
                 f"Warning: {wycheproof_call} failed (rc={result.returncode}), assuming all modes supported"
             )
-            return {"keyGen", "sigGen", "sigVer"}
+            return {"keyGen", "sigGen", "sigVer", "pkFromSk"}
         modes = set()
         for line in result.stdout.splitlines():
             line = line.strip()
-            if line in ("keyGen", "sigGen", "sigVer"):
+            if line in ("keyGen", "sigGen", "sigVer", "pkFromSk"):
                 modes.add(line)
         return modes
     except FileNotFoundError:
         err(f"Warning: {wycheproof_bin} not found, assuming all modes supported")
-        return {"keyGen", "sigGen", "sigVer"}
+        return {"keyGen", "sigGen", "sigVer", "pkFromSk"}
 
 
 # File-type → set of modes the binary must support to run those tests.
@@ -125,12 +125,16 @@ class TestResult(Enum):
 
 def check_sign_result(tc, out):
     if tc["result"] == "invalid":
-        # InvalidPrivateKey: implementation does not validate sk
-        if "InvalidPrivateKey" in tc.get("flags", []):
+        flags = tc.get("flags", [])
+        # InvalidPrivateKey: signing does not validate sk; tested via pk_from_sk
+        if "InvalidPrivateKey" in flags:
             return TestResult.SKIPPED
-        # _error: non-zero exit code; decode_error: explicit validation failure
-        assert "_error" in out or "decode_error" in out, (
-            f"binary success on invalid tcId={tc['tcId']}"
+        # If new invalid-flag classes appear, fail loudly so we can handle them.
+        assert "IncorrectPrivateKeyLength" in flags or "InvalidContext" in flags, (
+            f"unhandled invalid flag(s) {flags} for tcId={tc['tcId']}"
+        )
+        assert "decode_error" in out, (
+            f"expected decode_error on invalid tcId={tc['tcId']}"
         )
     elif tc["result"] == "valid":
         assert out["signature"].upper() == tc["sig"].upper(), (
@@ -259,6 +263,40 @@ def run_verify_test(data_file):
     info(f"  {count} verify tests passed")
 
 
+def check_pk_from_sk_result(tc, tg, out):
+    flags = tc.get("flags", [])
+    if "IncorrectPrivateKeyLength" in flags:
+        assert "decode_error" in out, (
+            f"expected decode_error for IncorrectPrivateKeyLength tcId={tc['tcId']}"
+        )
+    elif "InvalidPrivateKey" in flags:
+        assert "_error" in out, f"pk_from_sk accepted invalid SK for tcId={tc['tcId']}"
+    else:
+        assert "pk" in out, f"pk_from_sk failed on valid SK for tcId={tc['tcId']}"
+        assert out["pk"].upper() == tg["publicKey"].upper(), (
+            f"pk_from_sk derived wrong PK for tcId={tc['tcId']}"
+        )
+
+
+def run_pk_from_sk_noseed_test(data_file):
+    """Run pk_from_sk on all noseed signing test groups."""
+    with open(data_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    info(f"Running pk_from_sk tests from {data_file}")
+    binary = get_binary(ALGORITHM_TO_LEVEL[data["algorithm"]])
+    count = 0
+    for tg in data["testGroups"]:
+        sk_hex = tg["privateKey"]
+        for tc in tg["tests"]:
+            info(f"  tcId={tc['tcId']} ... ", end="")
+            out = run_binary([binary, "pkFromSk", f"sk={sk_hex}"])
+            check_pk_from_sk_result(tc, tg, out)
+            info("ok")
+            count += 1
+    info(f"  {count} pk_from_sk tests passed")
+
+
 def run_all(data_dir, supported_modes):
     """Run all Wycheproof test vector files."""
     data_dir = Path(data_dir)
@@ -276,6 +314,10 @@ def run_all(data_dir, supported_modes):
                 break
             runner(filepath)
             break
+
+        if "sign_noseed_test" in filename and "pkFromSk" in supported_modes:
+            run_pk_from_sk_noseed_test(filepath)
+
     info("ALL GOOD!")
 
 
@@ -307,6 +349,11 @@ parser.add_argument(
     help="Skip tests requiring sigVer",
 )
 parser.add_argument(
+    "--no-pkfromsk",
+    action="store_true",
+    help="Skip tests requiring pkFromSk",
+)
+parser.add_argument(
     "--auto-detect",
     action="store_true",
     default=True,
@@ -319,7 +366,7 @@ if args.auto_detect and args.file is None:
     supported_modes = detect_supported_modes()
     info(f"Auto-detected supported modes: {sorted(supported_modes)}")
 else:
-    supported_modes = {"keyGen", "sigGen", "sigVer"}
+    supported_modes = {"keyGen", "sigGen", "sigVer", "pkFromSk"}
 
 # Apply explicit --no-* flags
 if args.no_keygen:
@@ -328,6 +375,8 @@ if args.no_sign:
     supported_modes.discard("sigGen")
 if args.no_verify:
     supported_modes.discard("sigVer")
+if args.no_pkfromsk:
+    supported_modes.discard("pkFromSk")
 
 if args.file:
     # Run a single file
@@ -336,6 +385,8 @@ if args.file:
         run_sign_seed_test(args.file)
     elif "sign_noseed_test" in filename:
         run_sign_noseed_test(args.file)
+        if "pkFromSk" in supported_modes:
+            run_pk_from_sk_noseed_test(args.file)
     elif "verify_test" in filename:
         run_verify_test(args.file)
     else:

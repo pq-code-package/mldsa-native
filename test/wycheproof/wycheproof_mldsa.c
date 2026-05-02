@@ -12,6 +12,7 @@
  * message=HEX context=HEX sk=HEX wycheproof_mldsa{lvl}
  * sigGenInternalDeterministic message=HEX sk=HEX externalMu=0/1
  *   wycheproof_mldsa{lvl} sigVer message=HEX context=HEX signature=HEX pk=HEX
+ *   wycheproof_mldsa{lvl} pkFromSk sk=HEX
  */
 
 #include <stddef.h>
@@ -25,6 +26,7 @@
 /* Additional SUPERCOP-style macros for functions not in the standard set */
 #define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
 #define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
+#define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
 
 /* maximum message length used in the Wycheproof tests */
 #define MAX_MSG_LENGTH 8192
@@ -36,6 +38,7 @@ static void print_info(void)
 {
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   printf("keyGen\n");
+  printf("pkFromSk\n");
 #endif
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   printf("sigGen\n");
@@ -57,7 +60,8 @@ static void print_info(void)
     }                                                         \
   } while (0)
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static unsigned char decode_hex_char(char hex)
 {
   if (hex >= '0' && hex <= '9')
@@ -111,9 +115,10 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
   }
   return 0;
 }
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          !MLD_CONFIG_NO_KEYPAIR_API */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static void print_hex(const char *name, const unsigned char *raw, size_t len)
 {
   if (name != NULL)
@@ -126,7 +131,7 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
   }
   printf("\n");
 }
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_KEYPAIR_API */
 
 int main(int argc, char *argv[])
 {
@@ -365,6 +370,32 @@ int main(int argc, char *argv[])
   }
   else
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+      if (strcmp(argv[1], "pkFromSk") == 0)
+  {
+    /* pkFromSk sk=HEX */
+    unsigned char sk[CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+
+    if (argc != 3)
+    {
+      goto usage;
+    }
+
+    if (decode_hex("sk", sk, sizeof(sk), argv[2]) != 0)
+    {
+      printf("decode_error=1\n");
+      return 0;
+    }
+
+    if (crypto_sign_pk_from_sk(pk, sk) != 0)
+    {
+      return 1;
+    }
+    print_hex("pk", pk, sizeof(pk));
+  }
+  else
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
   {
     goto usage;
   }
@@ -381,6 +412,7 @@ usage:
           "  wycheproof_mldsa{lvl} sigGenInternalDeterministic message=HEX "
           "sk=HEX externalMu=0/1\n"
           "  wycheproof_mldsa{lvl} sigVer message=HEX context=HEX "
-          "signature=HEX pk=HEX\n");
+          "signature=HEX pk=HEX\n"
+          "  wycheproof_mldsa{lvl} pkFromSk sk=HEX\n");
   return 1;
 }
