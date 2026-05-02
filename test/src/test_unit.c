@@ -44,7 +44,7 @@ void mld_poly_caddq_c(mld_poly *a);
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0);
 #endif
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a, const mld_poly *h);
+void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h);
 #endif
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
@@ -455,12 +455,14 @@ static int test_poly_use_hint_core(const mld_poly *poly_a,
                                    const mld_poly *poly_h,
                                    const char *test_name)
 {
-  mld_poly test_b, ref_b;
+  mld_poly test_a, ref_a;
 
-  mld_poly_use_hint(&test_b, poly_a, poly_h);
-  mld_poly_use_hint_c(&ref_b, poly_a, poly_h);
+  test_a = *poly_a;
+  ref_a = *poly_a;
+  mld_poly_use_hint(&test_a, poly_h);
+  mld_poly_use_hint_c(&ref_a, poly_h);
 
-  CHECK(compare_i32_arrays(test_b.coeffs, ref_b.coeffs, MLDSA_N, test_name,
+  CHECK(compare_i32_arrays(test_a.coeffs, ref_a.coeffs, MLDSA_N, test_name,
                            poly_a->coeffs));
   return 0;
 }

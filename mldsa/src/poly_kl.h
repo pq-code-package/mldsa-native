@@ -77,23 +77,20 @@ __contract__(
 /*************************************************
  * Name:        mld_poly_use_hint
  *
- * Description: Use hint polynomial to correct the high bits of a polynomial.
+ * Description: Use hint polynomial h to correct the high bits of a in-place.
  *
- * Arguments:   - mld_poly *b: pointer to output polynomial with corrected high
- *bits
- *              - const mld_poly *a: pointer to input polynomial
- *              - const mld_poly *h: pointer to input hint polynomial
+ * Arguments:   - mld_poly *a: input/output polynomial
+ *              - const mld_poly *h: hint polynomial
  **************************************************/
 MLD_INTERNAL_API
-void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
+void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
 __contract__(
-  requires(memory_no_alias(a,  sizeof(mld_poly)))
-  requires(memory_no_alias(b, sizeof(mld_poly)))
+  requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(memory_no_alias(h, sizeof(mld_poly)))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(b, sizeof(mld_poly)))
-  ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

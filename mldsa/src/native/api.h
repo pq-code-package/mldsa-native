@@ -370,26 +370,22 @@ __contract__(
  * Name:        mld_poly_use_hint_32_native
  *
  * Description: Native implementation of poly_use_hint for GAMMA2 = (Q-1)/32.
- *              Use hint polynomial to correct the high bits of a polynomial.
+ *              Use hint h to correct the high bits of a in-place.
  *
- * Arguments:   - int32_t *b: pointer to output polynomial with corrected high
- *                            bits
- *              - const int32_t *a: pointer to input polynomial
- *              - const int32_t *h: pointer to input hint polynomial
+ * Arguments:   - int32_t *a: input/output polynomial
+ *              - const int32_t *h: hint polynomial
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
-                                                  const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(b, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(b, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(b, MLDSA_N))
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
@@ -401,26 +397,22 @@ __contract__(
  * Name:        mld_poly_use_hint_88_native
  *
  * Description: Native implementation of poly_use_hint for GAMMA2 = (Q-1)/88.
- *              Use hint polynomial to correct the high bits of a polynomial.
+ *              Use hint h to correct the high bits of a in-place.
  *
- * Arguments:   - int32_t *b: pointer to output polynomial with corrected high
- *                            bits
- *              - const int32_t *a: pointer to input polynomial
- *              - const int32_t *h: pointer to input hint polynomial
+ * Arguments:   - int32_t *a: input/output polynomial
+ *              - const int32_t *h: hint polynomial
  **************************************************/
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
-                                                  const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(b, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(b, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(b, MLDSA_N))
+  ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */

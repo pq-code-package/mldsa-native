@@ -34,14 +34,14 @@ let poly_use_hint_32_aarch64_asm_mc = define_assert_from_elf
   0x4e040d77;       (* arm_DUP_GEN Q23 X11 32 128 *)
   0x4f0005f8;       (* arm_MOVI Q24 (word 64424509455) *)
   0xd2800203;       (* arm_MOV X3 (rvalue (word 16)) *)
-  0x3dc00421;       (* arm_LDR Q1 X1 (Immediate_Offset (word 16)) *)
-  0x3dc00822;       (* arm_LDR Q2 X1 (Immediate_Offset (word 32)) *)
-  0x3dc00c23;       (* arm_LDR Q3 X1 (Immediate_Offset (word 48)) *)
-  0x3cc40420;       (* arm_LDR Q0 X1 (Postimmediate_Offset (word 64)) *)
-  0x3dc00445;       (* arm_LDR Q5 X2 (Immediate_Offset (word 16)) *)
-  0x3dc00846;       (* arm_LDR Q6 X2 (Immediate_Offset (word 32)) *)
-  0x3dc00c47;       (* arm_LDR Q7 X2 (Immediate_Offset (word 48)) *)
-  0x3cc40444;       (* arm_LDR Q4 X2 (Postimmediate_Offset (word 64)) *)
+  0x3dc00401;       (* arm_LDR Q1 X0 (Immediate_Offset (word 16)) *)
+  0x3dc00802;       (* arm_LDR Q2 X0 (Immediate_Offset (word 32)) *)
+  0x3dc00c03;       (* arm_LDR Q3 X0 (Immediate_Offset (word 48)) *)
+  0x3dc00000;       (* arm_LDR Q0 X0 (Immediate_Offset (word 0)) *)
+  0x3dc00425;       (* arm_LDR Q5 X1 (Immediate_Offset (word 16)) *)
+  0x3dc00826;       (* arm_LDR Q6 X1 (Immediate_Offset (word 32)) *)
+  0x3dc00c27;       (* arm_LDR Q7 X1 (Immediate_Offset (word 48)) *)
+  0x3cc40424;       (* arm_LDR Q4 X1 (Postimmediate_Offset (word 64)) *)
   0x4eb7b431;       (* arm_SQDMULH_VEC Q17 Q1 Q23 32 128 *)
   0x4f2e2631;       (* arm_SRSHR_VEC Q17 Q17 18 32 128 *)
   0x4eb53439;       (* arm_CMGT_VEC Q25 Q1 Q21 32 128 *)
@@ -404,14 +404,13 @@ let ELEMENT_CORRECT_WORD = prove(
 (* ========================================================================= *)
 
 let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_CODE = prove
- (`!b a h x y pc.
-    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (b, 1024) /\
-    nonoverlapping (b, 1024) (a, 1024) /\
-    nonoverlapping (b, 1024) (h, 1024)
+ (`!a h x y pc.
+    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) poly_use_hint_32_aarch64_asm_mc /\
                read PC s = word pc /\
-               C_ARGUMENTS [b; a; h] s /\
+               C_ARGUMENTS [a; h] s /\
                (!i. i < 256 ==> val(x i) < 8380417) /\
                (!i. i < 256 ==> val(y i) <= 1) /\
                (!i. i < 256 ==>
@@ -420,14 +419,14 @@ let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_CODE = prove
                  read(memory :> bytes32(word_add h (word(4 * i)))) s = y i))
           (\s. read PC s = word(pc + LENGTH poly_use_hint_32_aarch64_asm_mc - 4) /\
                (!i. i < 256 ==>
-                 read(memory :> bytes32(word_add b (word(4 * i)))) s =
+                 read(memory :> bytes32(word_add a (word(4 * i)))) s =
                  word(mldsa_use_hint_32_code (val(x i)) (val(y i)))))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(b, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
 
   (* Setup *)
   MAP_EVERY X_GEN_TAC
-    [`b:int64`; `a:int64`; `h:int64`;
+    [`a:int64`; `h:int64`;
      `x:num->int32`; `y:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL;
@@ -496,14 +495,13 @@ let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_CODE = prove
 (* ========================================================================= *)
 
 let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_BOUND_CODE = prove
- (`!b a h x y pc.
-    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (b, 1024) /\
-    nonoverlapping (b, 1024) (a, 1024) /\
-    nonoverlapping (b, 1024) (h, 1024)
+ (`!a h x y pc.
+    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) poly_use_hint_32_aarch64_asm_mc /\
                read PC s = word pc /\
-               C_ARGUMENTS [b; a; h] s /\
+               C_ARGUMENTS [a; h] s /\
                (!i. i < 256 ==> val(x i) < 8380417) /\
                (!i. i < 256 ==> val(y i) <= 1) /\
                (!i. i < 256 ==>
@@ -512,18 +510,18 @@ let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_BOUND_CODE = prove
                  read(memory :> bytes32(word_add h (word(4 * i)))) s = y i))
           (\s. read PC s = word(pc + LENGTH poly_use_hint_32_aarch64_asm_mc - 4) /\
                (!i. i < 256 ==>
-                 read(memory :> bytes32(word_add b (word(4 * i)))) s =
+                 read(memory :> bytes32(word_add a (word(4 * i)))) s =
                    word(mldsa_use_hint_32_code (val(x i)) (val(y i)))) /\
                (!i. i < 256 ==>
-                 val(read(memory :> bytes32(word_add b (word(4 * i)))) s) < 16))
+                 val(read(memory :> bytes32(word_add a (word(4 * i)))) s) < 16))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(b, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
   REPEAT GEN_TAC THEN DISCH_TAC THEN
   MATCH_MP_TAC ENSURES_STRENGTHEN_POST THEN
   EXISTS_TAC
    `\s. read PC s = word(pc + LENGTH poly_use_hint_32_aarch64_asm_mc - 4) /\
         (!i. i < 256 ==>
-          read(memory :> bytes32(word_add b (word(4 * i)))) s =
+          read(memory :> bytes32(word_add a (word(4 * i)))) s =
             word(mldsa_use_hint_32_code (val(x i:int32)) (val(y i:int32))))` THEN
   CONJ_TAC THENL
   [MATCH_MP_TAC POLY_USE_HINT_32_AARCH64_ASM_CORRECT_CODE THEN ASM_REWRITE_TAC[];
@@ -540,15 +538,14 @@ let POLY_USE_HINT_32_AARCH64_ASM_CORRECT_BOUND_CODE = prove
    Bridged to the public FIPS 204-aligned theorem below via
    MLDSA_USE_HINT_32_EQUIV. *)
 let POLY_USE_HINT_32_AARCH64_ASM_SUBROUTINE_CORRECT_CODE = prove
- (`!b a h x y pc returnaddress.
-    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (b, 1024) /\
-    nonoverlapping (b, 1024) (a, 1024) /\
-    nonoverlapping (b, 1024) (h, 1024)
+ (`!a h x y pc returnaddress.
+    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) poly_use_hint_32_aarch64_asm_mc /\
                read PC s = word pc /\
                read X30 s = returnaddress /\
-               C_ARGUMENTS [b; a; h] s /\
+               C_ARGUMENTS [a; h] s /\
                (!i. i < 256 ==> val(x i) < 8380417) /\
                (!i. i < 256 ==> val(y i) <= 1) /\
                (!i. i < 256 ==>
@@ -557,12 +554,12 @@ let POLY_USE_HINT_32_AARCH64_ASM_SUBROUTINE_CORRECT_CODE = prove
                  read(memory :> bytes32(word_add h (word(4 * i)))) s = y i))
           (\s. read PC s = returnaddress /\
                (!i. i < 256 ==>
-                 read(memory :> bytes32(word_add b (word(4 * i)))) s =
+                 read(memory :> bytes32(word_add a (word(4 * i)))) s =
                    word(mldsa_use_hint_32_code (val(x i)) (val(y i)))) /\
                (!i. i < 256 ==>
-                 val(read(memory :> bytes32(word_add b (word(4 * i)))) s) < 16))
+                 val(read(memory :> bytes32(word_add a (word(4 * i)))) s) < 16))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(b, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
   REWRITE_TAC[fst POLY_USE_HINT_32_AARCH64_ASM_EXEC] THEN
   CONV_TAC NUM_REDUCE_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC POLY_USE_HINT_32_AARCH64_ASM_EXEC
@@ -872,17 +869,16 @@ let MLDSA_USE_HINT_32_EQUIV = prove(
    rewriting mldsa_use_hint_32_code -> mldsa_use_hint_32 via
    MLDSA_USE_HINT_32_EQUIV. *)
 let POLY_USE_HINT_32_AARCH64_ASM_SUBROUTINE_CORRECT = prove
- (`!b a h x y pc returnaddress.
-    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (b, 1024) /\
-    nonoverlapping (b, 1024) (a, 1024) /\
-    nonoverlapping (b, 1024) (h, 1024) /\
+ (`!a h x y pc returnaddress.
+    nonoverlapping (word pc, LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024) /\
     (!i. i < 256 ==> val((x:num->int32) i) < 8380417) /\
     (!i. i < 256 ==> val((y:num->int32) i) <= 1)
     ==> ensures arm
           (\s. aligned_bytes_loaded s (word pc) poly_use_hint_32_aarch64_asm_mc /\
                read PC s = word pc /\
                read X30 s = returnaddress /\
-               C_ARGUMENTS [b; a; h] s /\
+               C_ARGUMENTS [a; h] s /\
                (!i. i < 256 ==> val(x i) < 8380417) /\
                (!i. i < 256 ==> val(y i) <= 1) /\
                (!i. i < 256 ==>
@@ -891,12 +887,12 @@ let POLY_USE_HINT_32_AARCH64_ASM_SUBROUTINE_CORRECT = prove
                  read(memory :> bytes32(word_add h (word(4 * i)))) s = y i))
           (\s. read PC s = returnaddress /\
                (!i. i < 256 ==>
-                 read(memory :> bytes32(word_add b (word(4 * i)))) s =
+                 read(memory :> bytes32(word_add a (word(4 * i)))) s =
                    word(mldsa_use_hint_32 (val(y i)) (val(x i)))) /\
                (!i. i < 256 ==>
-                 val(read(memory :> bytes32(word_add b (word(4 * i)))) s) < 16))
+                 val(read(memory :> bytes32(word_add a (word(4 * i)))) s) < 16))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-           MAYCHANGE [memory :> bytes(b, 1024)])`,
+           MAYCHANGE [memory :> bytes(a, 1024)])`,
   REPEAT GEN_TAC THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   SUBGOAL_THEN
@@ -926,25 +922,24 @@ let full_spec,public_vars = mk_safety_spec
 
 let POLY_USE_HINT_32_AARCH64_ASM_SUBROUTINE_SAFE = time prove
  (`exists f_events.
-       forall e b a h pc returnaddress.
-           nonoverlapping (word pc,LENGTH poly_use_hint_32_aarch64_asm_mc) (b,1024) /\
-           nonoverlapping (b,1024) (a,1024) /\
-           nonoverlapping (b,1024) (h,1024)
+       forall e a h pc returnaddress.
+           nonoverlapping (word pc,LENGTH poly_use_hint_32_aarch64_asm_mc) (a,1024) /\
+           nonoverlapping (a,1024) (h,1024)
            ==> ensures arm
                (\s.
                     aligned_bytes_loaded s (word pc)
                     poly_use_hint_32_aarch64_asm_mc /\
                     read PC s = word pc /\
                     read X30 s = returnaddress /\
-                    C_ARGUMENTS [b; a; h] s /\
+                    C_ARGUMENTS [a; h] s /\
                     read events s = e)
                (\s.
                     read PC s = returnaddress /\
                     (exists e2.
                          read events s = APPEND e2 e /\
-                         e2 = f_events a h b pc returnaddress /\
-                         memaccess_inbounds e2 [a,1024; h,1024; b,1024]
-                         [b,1024]))
+                         e2 = f_events h a pc returnaddress /\
+                         memaccess_inbounds e2 [a,1024; h,1024]
+                         [a,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_USE_HINT_32_AARCH64_ASM_EXEC);;

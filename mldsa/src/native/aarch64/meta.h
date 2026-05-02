@@ -156,10 +156,9 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
-                                                  const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
 {
-  mld_poly_use_hint_32_asm(b, a, h);
+  mld_poly_use_hint_32_asm(a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
@@ -167,10 +166,9 @@ static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *b, const int32_t *a,
 
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *b, const int32_t *a,
-                                                  const int32_t *h)
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
 {
-  mld_poly_use_hint_88_asm(b, a, h);
+  mld_poly_use_hint_88_asm(a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \

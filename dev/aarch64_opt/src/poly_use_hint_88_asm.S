@@ -48,9 +48,8 @@
 .endm
 
         /* Parameters */
-        b_ptr           .req x0     // Output polynomial
-        a_ptr           .req x1     // Input polynomial
-        h_ptr           .req x2     // Input hints
+        a_ptr           .req x0     // In/out: input on entry, result on exit
+        h_ptr           .req x1     // Input hints
 
         count           .req x3
 
@@ -90,7 +89,7 @@ poly_use_hint_88_loop:
         ldr q1, [a_ptr, #1*16]
         ldr q2, [a_ptr, #2*16]
         ldr q3, [a_ptr, #3*16]
-        ldr q0, [a_ptr], #4*16
+        ldr q0, [a_ptr, #0*16]
 
         ldr q5, [h_ptr, #1*16]
         ldr q6, [h_ptr, #2*16]
@@ -102,17 +101,16 @@ poly_use_hint_88_loop:
         use_hint88 v19, v3, v7, v25
         use_hint88 v16, v0, v4, v25
 
-        str q17, [b_ptr, #1*16]
-        str q18, [b_ptr, #2*16]
-        str q19, [b_ptr, #3*16]
-        str q16, [b_ptr], #4*16
+        str q17, [a_ptr, #1*16]
+        str q18, [a_ptr, #2*16]
+        str q19, [a_ptr, #3*16]
+        str q16, [a_ptr], #4*16
 
         subs count, count, #1
         bne poly_use_hint_88_loop
 
         ret
 
-        .unreq b_ptr
         .unreq a_ptr
         .unreq h_ptr
         .unreq count

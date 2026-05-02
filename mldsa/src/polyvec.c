@@ -513,8 +513,7 @@ void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
-void mld_polyveck_use_hint(mld_polyveck *w, const mld_polyveck *u,
-                           const mld_polyveck *h)
+void mld_polyveck_use_hint(mld_polyveck *u, const mld_polyveck *h)
 {
   unsigned int i;
   mld_assert_bound_2d(u->vec, MLDSA_K, MLDSA_N, 0, MLDSA_Q);
@@ -522,18 +521,20 @@ void mld_polyveck_use_hint(mld_polyveck *w, const mld_polyveck *u,
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, memory_slice(w, sizeof(mld_polyveck)))
+    assigns(i, memory_slice(u, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k2, 0, i,
-                     array_bound(w->vec[k2].coeffs, 0, MLDSA_N, 0,
+                     array_bound(u->vec[k2].coeffs, 0, MLDSA_N, 0,
                                  (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2))))
+    invariant(forall(k3, i, MLDSA_K,
+                     array_bound(u->vec[k3].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
     decreases(MLDSA_K - i)
   )
   {
-    mld_poly_use_hint(&w->vec[i], &u->vec[i], &h->vec[i]);
+    mld_poly_use_hint(&u->vec[i], &h->vec[i]);
   }
 
-  mld_assert_bound_2d(w->vec, MLDSA_K, MLDSA_N, 0,
+  mld_assert_bound_2d(u->vec, MLDSA_K, MLDSA_N, 0,
                       (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */

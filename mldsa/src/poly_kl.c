@@ -127,16 +127,14 @@ unsigned int mld_poly_make_hint(mld_poly *h, const mld_poly *a0,
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *b, const mld_poly *a,
-                                             const mld_poly *h)
+MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h)
 __contract__(
-  requires(memory_no_alias(a,  sizeof(mld_poly)))
-  requires(memory_no_alias(b, sizeof(mld_poly)))
+  requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(memory_no_alias(h, sizeof(mld_poly)))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(b, sizeof(mld_poly)))
-  ensures(array_bound(b->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 )
 {
   unsigned int i;
@@ -146,26 +144,27 @@ __contract__(
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
     invariant(i <= MLDSA_N)
-    invariant(array_bound(b->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+    invariant(array_bound(a->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
+    invariant(array_bound(a->coeffs, i, MLDSA_N, 0, MLDSA_Q))
     decreases(MLDSA_N - i)
   )
   {
-    b->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
+    a->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
   }
-  mld_assert_bound(b->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
 }
 
 MLD_INTERNAL_API
-void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
+void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
 {
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) && MLD_CONFIG_PARAMETER_SET == 44
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  ret = mld_poly_use_hint_88_native(b->coeffs, a->coeffs, h->coeffs);
+  ret = mld_poly_use_hint_88_native(a->coeffs, h->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
-    mld_assert_bound(b->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+    mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
     return;
   }
 #elif defined(MLD_USE_NATIVE_POLY_USE_HINT_32) && \
@@ -173,16 +172,16 @@ void mld_poly_use_hint(mld_poly *b, const mld_poly *a, const mld_poly *h)
   int ret;
   mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
   mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  ret = mld_poly_use_hint_32_native(b->coeffs, a->coeffs, h->coeffs);
+  ret = mld_poly_use_hint_32_native(a->coeffs, h->coeffs);
   if (ret == MLD_NATIVE_FUNC_SUCCESS)
   {
-    mld_assert_bound(b->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
+    mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
     return;
   }
 #endif /* !(MLD_USE_NATIVE_POLY_USE_HINT_88 && MLD_CONFIG_PARAMETER_SET == 44) \
           && MLD_USE_NATIVE_POLY_USE_HINT_32 && (MLD_CONFIG_PARAMETER_SET ==   \
           65 || MLD_CONFIG_PARAMETER_SET == 87) */
-  mld_poly_use_hint_c(b, a, h);
+  mld_poly_use_hint_c(a, h);
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

@@ -1051,14 +1051,6 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 {
   int ret, cmp;
 
-  typedef union
-  {
-    mld_polyveck t1;
-    mld_polyveck w1;
-  } t1w1_u;
-  mld_polyveck *t1;
-  mld_polyveck *w1;
-
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, context);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
@@ -1067,19 +1059,17 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
   MLD_ALLOC(z, mld_polyvecl, 1, context);
-  MLD_ALLOC(t1w1, t1w1_u, 1, context);
+  MLD_ALLOC(t1, mld_polyveck, 1, context);
   MLD_ALLOC(tmp, mld_polyveck, 1, context);
   MLD_ALLOC(h, mld_polyveck, 1, context);
 
   if (buf == NULL || rho == NULL || mu == NULL || c == NULL || c2 == NULL ||
-      cp == NULL || mat == NULL || z == NULL || t1w1 == NULL || tmp == NULL ||
+      cp == NULL || mat == NULL || z == NULL || t1 == NULL || tmp == NULL ||
       h == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  t1 = &t1w1->t1;
-  w1 = &t1w1->w1;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1136,8 +1126,8 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   /* Reconstruct w1 */
   mld_polyveck_caddq(tmp);
-  mld_polyveck_use_hint(w1, tmp, h);
-  mld_polyveck_pack_w1(buf, w1);
+  mld_polyveck_use_hint(tmp, h);
+  mld_polyveck_pack_w1(buf, tmp);
   /* Call random oracle and verify challenge */
   mld_H(c2, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, buf,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
@@ -1153,7 +1143,7 @@ cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(h, mld_polyveck, 1, context);
   MLD_FREE(tmp, mld_polyveck, 1, context);
-  MLD_FREE(t1w1, t1w1_u, 1, context);
+  MLD_FREE(t1, mld_polyveck, 1, context);
   MLD_FREE(z, mld_polyvecl, 1, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(cp, mld_poly, 1, context);

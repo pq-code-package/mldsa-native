@@ -444,27 +444,23 @@ __contract__(
 /*************************************************
  * Name:        mld_polyveck_use_hint
  *
- * Description: Use hint vector to correct the high bits of input vector.
+ * Description: Use hint vector h to correct the high bits of u in-place.
  *
- * Arguments:   - mld_polyveck *w: pointer to output vector of polynomials with
- *                             corrected high bits
- *              - const mld_polyveck *u: pointer to input vector
- *              - const mld_polyveck *h: pointer to input hint vector
+ * Arguments:   - mld_polyveck *u: input/output vector
+ *              - const mld_polyveck *h: hint vector
  **************************************************/
 MLD_INTERNAL_API
-void mld_polyveck_use_hint(mld_polyveck *w, const mld_polyveck *v,
-                           const mld_polyveck *h)
+void mld_polyveck_use_hint(mld_polyveck *u, const mld_polyveck *h)
 __contract__(
-  requires(memory_no_alias(w,  sizeof(mld_polyveck)))
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(memory_no_alias(u, sizeof(mld_polyveck)))
   requires(memory_no_alias(h, sizeof(mld_polyveck)))
   requires(forall(k0, 0, MLDSA_K,
-    array_bound(v->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+    array_bound(u->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   requires(forall(k1, 0, MLDSA_K,
     array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-  assigns(memory_slice(w, sizeof(mld_polyveck)))
+  assigns(memory_slice(u, sizeof(mld_polyveck)))
   ensures(forall(k2, 0, MLDSA_K,
-    array_bound(w->vec[k2].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
+    array_bound(u->vec[k2].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

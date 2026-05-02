@@ -83,8 +83,7 @@ let subroutine_signatures = [
 
 ("poly_use_hint_32_aarch64_asm",
   ([(*args*)
-     ("b", "int32_t[static 256]", (*is const?*)"false");
-     ("a", "int32_t[static 256]", (*is const?*)"true");
+     ("a", "int32_t[static 256]", (*is const?*)"false");
      ("h", "int32_t[static 256]", (*is const?*)"true");
    ],
    "void",
@@ -93,7 +92,7 @@ let subroutine_signatures = [
     ("h", "256"(* num elems *), 4(* elem bytesize *));
    ],
    [(* output buffers *)
-    ("b", "256"(* num elems *), 4(* elem bytesize *));
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
    ],
    [(* temporary buffers *)
    ])
@@ -101,8 +100,7 @@ let subroutine_signatures = [
 
 ("poly_use_hint_88_aarch64_asm",
   ([(*args*)
-     ("b", "int32_t[static 256]", (*is const?*)"false");
-     ("a", "int32_t[static 256]", (*is const?*)"true");
+     ("a", "int32_t[static 256]", (*is const?*)"false");
      ("h", "int32_t[static 256]", (*is const?*)"true");
    ],
    "void",
@@ -111,7 +109,7 @@ let subroutine_signatures = [
     ("h", "256"(* num elems *), 4(* elem bytesize *));
    ],
    [(* output buffers *)
-    ("b", "256"(* num elems *), 4(* elem bytesize *));
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
    ],
    [(* temporary buffers *)
    ])

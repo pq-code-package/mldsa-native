@@ -34,8 +34,7 @@
                                        _mm256_castsi256_ps(b), \
                                        _mm256_castsi256_ps(mask)))
 
-void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a,
-                               const int32_t *hint)
+void mld_poly_use_hint_88_avx2(int32_t *a, const int32_t *hint)
 {
   unsigned int i;
   __m256i f, f0, f1, h, t;
@@ -85,7 +84,7 @@ void mld_poly_use_hint_88_avx2(int32_t *b, const int32_t *a,
     f = _mm256_cmpgt_epi32(f1, max);
     f1 = MLD_MM256_BLENDV_EPI32(f1, zero, f);
 
-    _mm256_store_si256((__m256i *)&b[8 * i], f1);
+    _mm256_store_si256((__m256i *)&a[8 * i], f1);
   }
 }
 
