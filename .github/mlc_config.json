@@ -12,6 +12,12 @@
     },
     {
       "pattern": "^https://isabelle\\.in\\.tum\\.de"
+    },
+    {
+      "pattern": "^https://github\\.com/pq-code-package/mldsa-native/compare/.*\\.\\.\\.v"
+    },
+    {
+      "pattern": "^http://nvlpubs\\.nist\\.gov"
     }
   ]
 }
