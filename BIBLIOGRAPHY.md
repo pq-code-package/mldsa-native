@@ -97,6 +97,7 @@ source code and documentation.
   - [mldsa/src/sign.h](mldsa/src/sign.h)
   - [proofs/cbmc/mldsa_native_config_cbmc.h](proofs/cbmc/mldsa_native_config_cbmc.h)
   - [test/configs/break_pct_config.h](test/configs/break_pct_config.h)
+  - [test/configs/custom_heap_alloc_config.h](test/configs/custom_heap_alloc_config.h)
   - [test/configs/custom_memcpy_config.h](test/configs/custom_memcpy_config.h)
   - [test/configs/custom_memset_config.h](test/configs/custom_memset_config.h)
   - [test/configs/custom_native_capability_config_0.h](test/configs/custom_native_capability_config_0.h)

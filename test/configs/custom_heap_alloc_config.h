@@ -11,6 +11,11 @@
  *   Validation Program
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
+ *
+ * - [FIPS204]
+ *   FIPS 204 Module-Lattice-Based Digital Signature Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/204/final
  */
 
 /*
@@ -120,6 +125,57 @@
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_KEYPAIR_API
+ *
+ * Description: By default, mldsa-native includes support for generating key
+ *              pairs. If you don't need this, set MLD_CONFIG_NO_KEYPAIR_API
+ *              to exclude crypto_sign_keypair, crypto_sign_keypair_internal,
+ *              crypto_sign_pk_from_sk, and all internal APIs only needed by
+ *              those functions.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_KEYPAIR_API */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_SIGN_API
+ *
+ * Description: By default, mldsa-native includes support for creating
+ *              signatures. If you don't need this, set MLD_CONFIG_NO_SIGN_API
+ *              to exclude crypto_sign, crypto_sign_signature,
+ *              crypto_sign_signature_extmu, crypto_sign_signature_internal,
+ *              crypto_sign_signature_pre_hash_internal,
+ *              crypto_sign_signature_pre_hash_shake256, and all internal APIs
+ *              only needed by those functions.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_SIGN_API */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_NO_VERIFY_API
+ *
+ * Description: By default, mldsa-native includes support for verifying
+ *              signatures. If you don't need this, set
+ *              MLD_CONFIG_NO_VERIFY_API to exclude crypto_sign_open,
+ *              crypto_sign_verify, crypto_sign_verify_extmu,
+ *              crypto_sign_verify_internal,
+ *              crypto_sign_verify_pre_hash_internal,
+ *              crypto_sign_verify_pre_hash_shake256, and all internal APIs
+ *              only needed by those functions.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_NO_VERIFY_API */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CORE_API_ONLY
+ *
+ * Description: Set this to remove all public APIs except
+ *              crypto_sign_keypair_internal, crypto_sign_signature_internal,
+ *              and crypto_sign_verify_internal.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CORE_API_ONLY */
 
 /******************************************************************************
  * Name:        MLD_CONFIG_NO_RANDOMIZED_API
@@ -352,6 +408,106 @@
 /* #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_ZEROIZE
+ *
+ * Description: In compliance with @[FIPS204, Section 3.6.3], mldsa-native,
+ *              zeroizes intermediate stack buffers before returning from
+ *              function calls.
+ *
+ *              Set this option and define `mld_zeroize` if you want to
+ *              use a custom method to zeroize intermediate stack buffers.
+ *              The default implementation uses SecureZeroMemory on Windows
+ *              and a memset + compiler barrier otherwise. If neither of those
+ *              is available on the target platform, compilation will fail,
+ *              and you will need to use MLD_CONFIG_CUSTOM_ZEROIZE to provide
+ *              a custom implementation of `mld_zeroize()`.
+ *
+ *              WARNING:
+ *              The explicit stack zeroization conducted by mldsa-native
+ *              reduces the likelihood of data leaking on the stack, but
+ *              does not eliminate it! The C standard makes no guarantee about
+ *              where a compiler allocates structures and whether/where it makes
+ *              copies of them. Also, in addition to entire structures, there
+ *              may also be potentially exploitable leakage of individual values
+ *              on the stack.
+ *
+ *              If you need bullet-proof zeroization of the stack, you need to
+ *              consider additional measures instead of what this feature
+ *              provides. In this case, you can set mld_zeroize to a
+ *              no-op.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_ZEROIZE
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/src.h"
+   static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_RANDOMBYTES
+ *
+ * Description: mldsa-native does not provide a secure randombytes
+ *              implementation. Such an implementation has to provided by the
+ *              consumer.
+ *
+ *              If this option is not set, mldsa-native expects a function
+ *              int randombytes(uint8_t *out, size_t outlen).
+ *
+ *              Set this option and define `mld_randombytes` if you want to
+ *              use a custom method to sample randombytes with a different name
+ *              or signature.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/src.h"
+   static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
+   {
+       ... your implementation ...
+       return 0;
+   }
+   #endif
+*/
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+ *
+ * Description: mldsa-native backends may rely on specific hardware features.
+ *              Those backends will only be included in an mldsa-native build
+ *              if support for the respective features is enabled at
+ *              compile-time. However, when building for a heteroneous set
+ *              of CPUs to run the resulting binary/library on, feature
+ *              detection at _runtime_ is needed to decided whether a backend
+ *              can be used or not.
+ *
+ *              Set this option and define `mld_sys_check_capability` if you
+ *              want to use a custom method to dispatch between implementations.
+ *
+ *              Return value 1 indicates that a capability is supported.
+ *              Return value 0 indicates that a capability is not supported.
+ *
+ *              If this option is not set, mldsa-native uses compile-time
+ *              feature detection only to decide which backend to use.
+ *
+ *              If you compile mldsa-native on a system with different
+ *              capabilities than the system that the resulting binary/library
+ *              will be run on, you must use this option.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+   static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+   {
+       ... your implementation ...
+   }
+*/
+
+/******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
  *
  * Description: Set this option and define `MLD_CUSTOM_ALLOC` and
@@ -386,69 +542,33 @@
  *              code will handle this case and invoke MLD_CUSTOM_FREE.
  *
  *****************************************************************************/
+/* In practice, one could just use aligned_alloc here. However, this
+ * requires aligning up the size to a multiple of the alignment, which
+ * weakens some of the memory-safety tests we run using this config. */
 #define MLD_CONFIG_CUSTOM_ALLOC_FREE
 #if !defined(__ASSEMBLER__)
-#include <stdlib.h>
+#if defined(_WIN32)
+#include <malloc.h>
 #define MLD_CUSTOM_ALLOC(v, T, N) \
-  T *v = (T *)aligned_alloc(MLD_DEFAULT_ALIGN, MLD_ALIGN_UP(sizeof(T) * (N)))
+  T *v = (T *)_aligned_malloc(sizeof(T) * (N), MLD_DEFAULT_ALIGN)
+#define MLD_CUSTOM_FREE(v, T, N) _aligned_free(v)
+#else /* _WIN32 */
+#include <stdlib.h>
+static inline void *mld_posix_memalign(size_t align, size_t sz)
+{
+  void *ptr = NULL;
+  if (posix_memalign(&ptr, align, sz) != 0)
+  {
+    return NULL;
+  }
+  return ptr;
+}
+#define MLD_CUSTOM_ALLOC(v, T, N) \
+  T *v = (T *)mld_posix_memalign(MLD_DEFAULT_ALIGN, sizeof(T) * (N))
 #define MLD_CUSTOM_FREE(v, T, N) free(v)
+#endif /* !_WIN32 */
 #endif /* !__ASSEMBLER__ */
 
-
-/******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_RANDOMBYTES
- *
- * Description: mldsa-native does not provide a secure randombytes
- *              implementation. Such an implementation has to provided by the
- *              consumer.
- *
- *              If this option is not set, mldsa-native expects a function
- *              int randombytes(uint8_t *out, size_t outlen).
- *
- *              Set this option and define `mld_randombytes` if you want to
- *              use a custom method to sample randombytes with a different name
- *              or signature.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/src.h"
-   static MLD_INLINE void mld_randombytes(uint8_t *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
-
-/******************************************************************************
- * Name:        MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
- *
- * Description: mldsa-native backends may rely on specific hardware features.
- *              Those backends will only be included in an mldsa-native build
- *              if support for the respective features is enabled at
- *              compile-time. However, when building for a heteroneous set
- *              of CPUs to run the resulting binary/library on, feature
- *              detection at _runtime_ is needed to decided whether a backend
- *              can be used or not.
- *
- *              Set this option and define `mld_sys_check_capability` if you
- *              want to use a custom method to dispatch between implementations.
- *
- *              If this option is not set, mldsa-native uses compile-time
- *              feature detection only to decide which backend to use.
- *
- *              If you compile mldsa-native on a system with different
- *              capabilities than the system that the resulting binary/library
- *              will be run on, you must use this option.
- *
- *****************************************************************************/
-/* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
-   static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
-   {
-       ... your implementation ...
-   }
-*/
 
 /******************************************************************************
  * Name:        MLD_CONFIG_CUSTOM_MEMCPY
@@ -499,8 +619,8 @@
 /******************************************************************************
  * Name:        MLD_CONFIG_INTERNAL_API_QUALIFIER
  *
- * Description: If set, this option provides an additional function
- *              qualifier to be added to declarations of internal API.
+ * Description: If set, this option provides an additional qualifier
+ *              to be added to declarations of internal API functions and data.
  *
  *              The primary use case for this option are single-CU builds,
  *              in which case this option can be set to `static`.
@@ -572,6 +692,10 @@
  *              NOTE: This feature will drastically lower the performance of
  *              key generation.
  *
+ *              NOTE: This option is incompatible with MLD_CONFIG_NO_SIGN_API
+ *              and MLD_CONFIG_NO_VERIFY_API as the current PCT implementation
+ *              requires crypto_sign_signature() and crypto_sign_verify().
+ *
  *****************************************************************************/
 /* #define MLD_CONFIG_KEYGEN_PCT */
 
@@ -617,6 +741,48 @@
  *
  *****************************************************************************/
 /* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CONTEXT_PARAMETER
+ *
+ * Description: Set this to add a context parameter that is provided to public
+ *              API functions and is then available in custom callbacks.
+ *
+ *              The type of the context parameter is configured via
+ *              MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CONTEXT_PARAMETER */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_CONTEXT_PARAMETER_TYPE
+ *
+ * Description: Set this to define the type for the context parameter used by
+ *              MLD_CONFIG_CONTEXT_PARAMETER.
+ *
+ *              This is only relevant if MLD_CONFIG_CONTEXT_PARAMETER is set.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
+/******************************************************************************
+ * Name:        MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
+ *
+ * Description: Set this to reduce RAM usage.
+ *              This trades memory for performance.
+ *
+ *              For expected memory usage, see the MLD_TOTAL_ALLOC_* constants
+ *              defined in mldsa_native.h.
+ *
+ *              This option is useful for embedded systems with tight RAM
+ *              constraints but relaxed performance requirements.
+ *
+ *              WARNING: This option is experimental!
+ *              CBMC proofs do not currently cover this configuration option.
+ *              Its scope and configuration may change at any time.
+ *
+ *****************************************************************************/
+/* #define MLD_CONFIG_REDUCE_RAM */
 
 /*************************  Config internals  ********************************/
 

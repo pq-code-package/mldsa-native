@@ -413,6 +413,36 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: test/configs/custom_heap_alloc_config.h
+    description: "Test configuration with heap-based allocation"
+    defines:
+      MLD_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          /* In practice, one could just use aligned_alloc here. However, this
+           * requires aligning up the size to a multiple of the alignment, which
+           * weakens some of the memory-safety tests we run using this config. */
+          #define MLD_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #if defined(_WIN32)
+          #include <malloc.h>
+          #define MLD_CUSTOM_ALLOC(v, T, N) \
+            T *v = (T *)_aligned_malloc(sizeof(T) * (N), MLD_DEFAULT_ALIGN)
+          #define MLD_CUSTOM_FREE(v, T, N) _aligned_free(v)
+          #else
+          #include <stdlib.h>
+          static inline void *mld_posix_memalign(size_t align, size_t sz)
+          {
+            void *ptr = NULL;
+            if (posix_memalign(&ptr, align, sz) != 0)
+              return NULL;
+            return ptr;
+          }
+          #define MLD_CUSTOM_ALLOC(v, T, N) \
+            T *v = (T *)mld_posix_memalign(MLD_DEFAULT_ALIGN, sizeof(T) * (N))
+          #define MLD_CUSTOM_FREE(v, T, N) free(v)
+          #endif /* _WIN32 */
+          #endif /* !__ASSEMBLER__ */
+
   - path: test/configs/test_alloc_config.h
     description: "Using custom allocation that can be made fail at specific invocation"
     defines:
