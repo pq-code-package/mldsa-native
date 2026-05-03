@@ -8,9 +8,9 @@
 (* Pointwise multiplication and accumulation of polynomials in ML-DSA NTT    *)
 (* ========================================================================= *)
 
-needs "arm/proofs/base.ml";;
-needs "common/mldsa_specs.ml";;
-needs "aarch64/proofs/aarch64_utils.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
+needs "mldsa_native/common/mldsa_specs.ml";;
+needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_pointwise_acc_l7.o";;
  ****)
@@ -384,8 +384,8 @@ let MLDSA_POINTWISE_ACC_L7_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ========================================================================= *)
 
-needs "arm/proofs/consttime.ml";;
-needs "aarch64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;
+needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false

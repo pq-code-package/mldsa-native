@@ -9,9 +9,9 @@
 (* ========================================================================= *)
 
 (* Load base theories for AArch64 from s2n-bignum *)
-needs "arm/proofs/base.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
 
-needs "common/keccak_spec.ml";;
+needs "mldsa_native/common/keccak_spec.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_v84a.o";;
  ****)

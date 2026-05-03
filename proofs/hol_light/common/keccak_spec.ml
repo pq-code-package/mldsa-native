@@ -8,7 +8,7 @@
 (* ========================================================================= *)
 
 needs "Library/words.ml";;
-needs "common/keccak_constants.ml";;
+needs "mldsa_native/common/keccak_constants.ml";;
 
 (*** Some abbreviations on top of the word library ***)
 

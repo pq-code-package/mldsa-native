@@ -7,10 +7,10 @@
 (* ML-DSA Inverse number theoretic transform.                                *)
 (* ========================================================================= *)
 
-needs "x86/proofs/base.ml";;
-needs "common/mldsa_specs.ml";;
-needs "x86_64/proofs/mldsa_utils.ml";;
-needs "x86_64/proofs/mldsa_zetas.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mldsa_native/common/mldsa_specs.ml";;
+needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
+needs "mldsa_native/x86_64/proofs/mldsa_zetas.ml";;
 
 (*** print_literal_from_elf "x86_64/mldsa/mldsa_intt.o";;
  ***)

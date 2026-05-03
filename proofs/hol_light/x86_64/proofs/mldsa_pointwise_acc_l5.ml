@@ -8,10 +8,10 @@
 (* Pointwise multiplication and accumulation of polynomials in ML-DSA NTT    *)
 (* ========================================================================= *)
 
-needs "x86/proofs/base.ml";;
-needs "common/mldsa_specs.ml";;
-needs "x86_64/proofs/mldsa_zetas.ml";;
-needs "x86_64/proofs/mldsa_utils.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mldsa_native/common/mldsa_specs.ml";;
+needs "mldsa_native/x86_64/proofs/mldsa_zetas.ml";;
+needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 
 (*** print_literal_from_elf "x86_64/mldsa/mldsa_pointwise_acc_l5.o";;
  ***)
@@ -515,8 +515,8 @@ let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ========================================================================= *)
 
-needs "x86/proofs/consttime.ml";;
-needs "x86_64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true

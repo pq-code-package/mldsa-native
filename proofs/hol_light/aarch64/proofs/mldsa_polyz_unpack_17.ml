@@ -10,9 +10,9 @@
 (* Maps packed [0, 2^18-1] to signed [-(2^17-1), 2^17] via GAMMA1 - x       *)
 (* ========================================================================= *)
 
-needs "arm/proofs/base.ml";;
-needs "aarch64/proofs/aarch64_utils.ml";;
-needs "aarch64/proofs/mldsa_polyz_unpack_consts.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
+needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
+needs "mldsa_native/aarch64/proofs/mldsa_polyz_unpack_consts.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_polyz_unpack_17.o";;
  ****)
@@ -343,8 +343,8 @@ let MLDSA_POLYZ_UNPACK_17_SUBROUTINE_CORRECT = prove
 (* Constant-time and memory safety proof.                                    *)
 (* ------------------------------------------------------------------------- *)
 
-needs "arm/proofs/consttime.ml";;
-needs "aarch64/proofs/subroutine_signatures.ml";;
+needs "s2n_bignum/arm/proofs/consttime.ml";;
+needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false

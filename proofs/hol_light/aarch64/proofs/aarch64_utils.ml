@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  *)
 
-needs "common/mldsa_specs.ml";;
+needs "mldsa_native/common/mldsa_specs.ml";;
 
 let ENSURES_STRENGTHEN_POST = prove(
   `!P (Q:armstate->bool) Q' R.

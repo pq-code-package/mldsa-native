@@ -7,8 +7,8 @@
 (* NTT unpack for ML-DSA: 8x8 transpose within 4 blocks                      *)
 (* ========================================================================= *)
 
-needs "x86/proofs/base.ml";;
-needs "common/mldsa_specs.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
+needs "mldsa_native/common/mldsa_specs.ml";;
 
 (**** print_literal_from_elf "x86/mldsa/mldsa_nttunpack.o";;
  ****)

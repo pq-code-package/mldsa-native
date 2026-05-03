@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT-0
  *)
 
-needs "x86/proofs/base.ml";;
+needs "s2n_bignum/x86/proofs/base.ml";;
 
 print_string "=== bytecode start: x86_64/mldsa/mldsa_ntt.o ================\n";;
 print_literal_from_elf "x86_64/mldsa/mldsa_ntt.o";;

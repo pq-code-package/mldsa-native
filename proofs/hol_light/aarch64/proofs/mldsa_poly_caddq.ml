@@ -9,8 +9,8 @@
 (* Modular reduction of polynomial coefficients from (-q, q) to [0, q)       *)
 (* ========================================================================= *)
 
-needs "arm/proofs/base.ml";;
-needs "aarch64/proofs/aarch64_utils.ml";;
+needs "s2n_bignum/arm/proofs/base.ml";;
+needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_poly_caddq.o";;
  ****)
