@@ -163,20 +163,23 @@ __contract__(
 /*************************************************
  * Name:        mld_unpack_pk_t1
  *
- * Description: Unpack the t1 component of a public key pk = (rho, t1).
+ * Description: Unpack a single polynomial of the t1 component of a public
+ *              key pk = (rho, t1).
  *
- * Arguments:   - mld_polyveck *t1: pointer to output vector t1
+ * Arguments:   - mld_poly *t1: pointer to output polynomial t1[i]
  *              - uint8_t pk[]: byte array containing bit-packed pk
+ *              - unsigned int i: row index, must be < MLDSA_K
  **************************************************/
 MLD_INTERNAL_API
-void mld_unpack_pk_t1(mld_polyveck *t1,
-                      const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+void mld_unpack_pk_t1(mld_poly *t1,
+                      const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                      unsigned int i)
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(t1, sizeof(mld_polyveck)))
-  assigns(memory_slice(t1, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_K,
-    array_bound(t1->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
+  requires(memory_no_alias(t1, sizeof(mld_poly)))
+  requires(i < MLDSA_K)
+  assigns(memory_slice(t1, sizeof(mld_poly)))
+  ensures(array_bound(t1->coeffs, 0, MLDSA_N, 0, 1 << 10))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -240,25 +243,38 @@ __contract__(
 /*************************************************
  * Name:        mld_sig_unpack_hints
  *
- * Description: Unpack hint vector h from a signature buffer.
+ * Description: Decode and validate a single row of the hint vector h
+ *              from a signature buffer. The hint encoding is shared
+ *              across all rows (a count array followed by a single
+ *              index list), so this function performs the validation
+ *              relevant to row i:
+ *                - the i'th hint count is non-decreasing and bounded
+ *                  by MLDSA_OMEGA;
+ *                - the indices for row i are strictly ascending;
+ *                - on i == MLDSA_K - 1, the trailing index slots are
+ *                  zero.
+ *              Callers must invoke this for every
+ *              i in {0, 1, ..., MLDSA_K - 1}; if any call returns
+ *              MLD_ERR_FAIL the encoding is malformed and the signature
+ *              must be rejected.
  *
- * Arguments:   - mld_polyveck *h: pointer to output hint vector
+ * Arguments:   - mld_poly *h: pointer to output polynomial h[i]
  *              - const uint8_t sig[]: signature buffer
- *                (MLDSA_CRYPTO_BYTES); the hint bytes are read from
- *                the trailing MLDSA_POLYVECH_PACKEDBYTES.
+ *              - unsigned int i: row index, must be < MLDSA_K
  *
- * Returns 1 in case of malformed hints; otherwise 0.
+ * Returns MLD_ERR_FAIL in case of malformed hints; otherwise 0.
  **************************************************/
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
-int mld_sig_unpack_hints(mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
+int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
+                         unsigned int i)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  assigns(memory_slice(h, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K,
-    array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-  ensures(return_value >= 0 && return_value <= 1)
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(i < MLDSA_K)
+  assigns(memory_slice(h, sizeof(mld_poly)))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+  ensures(return_value == 0 ==> array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

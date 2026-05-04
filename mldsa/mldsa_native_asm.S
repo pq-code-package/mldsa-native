@@ -328,14 +328,10 @@
 #undef mld_polyveck_pack_eta
 #undef mld_polyveck_pack_t0
 #undef mld_polyveck_pack_w1
-#undef mld_polyveck_pointwise_poly_montgomery
 #undef mld_polyveck_power2round
 #undef mld_polyveck_reduce
-#undef mld_polyveck_shiftl
-#undef mld_polyveck_sub
 #undef mld_polyveck_unpack_eta
 #undef mld_polyveck_unpack_t0
-#undef mld_polyveck_use_hint
 #undef mld_polyvecl
 #undef mld_polyvecl_chknorm
 #undef mld_polyvecl_ntt

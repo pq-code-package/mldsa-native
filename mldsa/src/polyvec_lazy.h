@@ -639,7 +639,7 @@ typedef mld_yvec_eager mld_yvec;
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /*************************************************
  * Name:        mld_polyvec_matrix_pointwise_montgomery
  *
@@ -676,7 +676,7 @@ __contract__(
   ensures(forall(k0, 0, MLDSA_K,
                  array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

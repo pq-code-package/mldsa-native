@@ -667,7 +667,7 @@ __contract__(
 
   /* Compute z, reject if it reveals secret */
   ret = mld_compute_pack_z(sig, cp, s1hat, y, t, z);
-  if (ret)
+  if (ret != 0)
   {
     goto cleanup;
   }
@@ -1064,44 +1064,24 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret, cmp;
-
-  typedef union
-  {
-    mld_polyvecl z;
-    mld_poly cp;
-  } zcp_u;
-  mld_polyvecl *z;
-  mld_poly *cp;
-
-  typedef union
-  {
-    mld_polymat mat;
-    mld_polyveck t1;
-    mld_polyveck h;
-  } reuse_u;
-  mld_polymat *mat;
-  mld_polyveck *t1;
-  mld_polyveck *h;
+  unsigned int i;
 
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(c2, uint8_t, MLDSA_CTILDEBYTES, context);
-  MLD_ALLOC(zcp, zcp_u, 1, context);
-  MLD_ALLOC(w1, mld_polyveck, 1, context);
-  MLD_ALLOC(reuse, reuse_u, 1, context);
+  MLD_ALLOC(z, mld_polyvecl, 1, context);
+  MLD_ALLOC(cp, mld_poly, 1, context);
+  MLD_ALLOC(mat, mld_polymat, 1, context);
+  MLD_ALLOC(w1, mld_poly, 1, context);
+  MLD_ALLOC(tmp, mld_poly, 1, context);
 
-  if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || zcp == NULL ||
-      w1 == NULL || reuse == NULL)
+  if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || z == NULL ||
+      cp == NULL || mat == NULL || w1 == NULL || tmp == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  z = &zcp->z;
-  cp = &zcp->cp;
-  mat = &reuse->mat;
-  t1 = &reuse->t1;
-  h = &reuse->h;
 
   if (siglen != MLDSA_CRYPTO_BYTES)
   {
@@ -1137,33 +1117,51 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
     mld_memcpy(mu, m, MLDSA_CRHBYTES);
   }
 
-  /* Matrix-vector multiplication; compute Az - c2^dt1 */
+  /* Matrix-vector multiplication and per-row reconstruction of w1. */
   mld_polyvecl_ntt(z);
   mld_polyvec_matrix_expand(mat, pk);
-  mld_polyvec_matrix_pointwise_montgomery(w1, mat, z);
-
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
-  mld_unpack_pk_t1(t1, pk);
-  mld_polyveck_shiftl(t1);
-  mld_polyveck_ntt(t1);
-  mld_polyveck_pointwise_poly_montgomery(t1, cp);
 
-  mld_polyveck_sub(w1, t1);
-  mld_polyveck_reduce(w1);
-  mld_polyveck_invntt_tomont(w1);
-
-  /* Reconstruct w1 */
-  mld_polyveck_caddq(w1);
-  /* mld_sig_unpack_hints signals failure through a single non-zero error
-   * code that's not yet aligned with MLD_ERR_XXX. Map it to MLD_ERR_FAIL. */
-  if (mld_sig_unpack_hints(h, sig))
+  for (i = 0; i < MLDSA_K; ++i)
+  __loop__(
+    assigns(MLD_IF_REDUCE_RAM(memory_slice(mat, sizeof(mld_polymat)),)
+            i, ret,
+            memory_slice(w1, sizeof(mld_poly)),
+            memory_slice(tmp, sizeof(mld_poly)),
+            memory_slice(buf, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES)
+    )
+    invariant(i <= MLDSA_K)
+    decreases(MLDSA_K - i)
+  )
   {
-    ret = MLD_ERR_FAIL;
-    goto cleanup;
+    /* w1 = (A * z)_i in NTT domain */
+    mld_polyvec_matrix_pointwise_montgomery_row(w1, mat, z, i);
+
+    /* tmp = c * t1_i * 2^d in NTT domain */
+    mld_unpack_pk_t1(tmp, pk, i);
+    mld_poly_shiftl(tmp);
+    mld_poly_ntt(tmp);
+    mld_poly_pointwise_montgomery(tmp, cp);
+
+    /* w1 = invNTT(w1 - c * t1_i * 2^d) */
+    mld_poly_sub(w1, tmp);
+    mld_poly_reduce(w1);
+    mld_poly_invntt_tomont(w1);
+    mld_poly_caddq(w1);
+
+    /* tmp = h_i (decoded and validated from signature) */
+    ret = mld_sig_unpack_hints(tmp, sig, i);
+    if (ret != 0)
+    {
+      goto cleanup;
+    }
+
+    /* w1 = use_hint(w1, tmp), then pack into buf[i] */
+    mld_poly_use_hint(w1, tmp);
+    mld_polyw1_pack(buf + i * MLDSA_POLYW1_PACKEDBYTES, w1);
   }
-  mld_polyveck_use_hint(w1, h);
-  mld_polyveck_pack_w1(buf, w1);
+
   /* Call random oracle and verify challenge */
   mld_H(c2, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, buf,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
@@ -1177,9 +1175,11 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  MLD_FREE(reuse, reuse_u, 1, context);
-  MLD_FREE(w1, mld_polyveck, 1, context);
-  MLD_FREE(zcp, zcp_u, 1, context);
+  MLD_FREE(tmp, mld_poly, 1, context);
+  MLD_FREE(w1, mld_poly, 1, context);
+  MLD_FREE(mat, mld_polymat, 1, context);
+  MLD_FREE(cp, mld_poly, 1, context);
+  MLD_FREE(z, mld_polyvecl, 1, context);
   MLD_FREE(c2, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(c, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_FREE(mu, uint8_t, MLDSA_CRHBYTES, context);

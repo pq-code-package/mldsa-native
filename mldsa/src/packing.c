@@ -38,17 +38,11 @@ void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
-void mld_unpack_pk_t1(mld_polyveck *t1,
-                      const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES])
+void mld_unpack_pk_t1(mld_poly *t1,
+                      const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                      unsigned int i)
 {
-  unsigned int i;
-
-  pk += MLDSA_SEEDBYTES;
-
-  for (i = 0; i < MLDSA_K; ++i)
-  {
-    mld_polyt1_unpack(&t1->vec[i], pk + i * MLDSA_POLYT1_PACKEDBYTES);
-  }
+  mld_polyt1_unpack(t1, pk + MLDSA_SEEDBYTES + i * MLDSA_POLYT1_PACKEDBYTES);
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -172,75 +166,52 @@ void mld_pack_sig_z(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_poly *zi,
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
-int mld_sig_unpack_hints(mld_polyveck *h, const uint8_t sig[MLDSA_CRYPTO_BYTES])
+int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
+                         unsigned int i)
 {
   const uint8_t *packed_hints =
       sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES;
-  unsigned int i, j;
-  unsigned int old_hint_count;
+  const unsigned int old_hint_count =
+      (i == 0) ? 0 : packed_hints[MLDSA_OMEGA + i - 1];
+  const unsigned int new_hint_count = packed_hints[MLDSA_OMEGA + i];
+  unsigned int j;
 
-  /* Set all coefficients of all polynomials to 0.    */
-  /* Only those that are actually non-zero hints will */
-  /* be overwritten below.                            */
-  mld_memset(h, 0, sizeof(mld_polyveck));
-
-  old_hint_count = 0;
-  for (i = 0; i < MLDSA_K; ++i)
-  __loop__(
-    invariant(i <= MLDSA_K)
-    /* Maintain the post-condition */
-    invariant(forall(k1, 0, MLDSA_K, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-    decreases(MLDSA_K - i)
-  )
+  if (new_hint_count < old_hint_count || new_hint_count > MLDSA_OMEGA)
   {
-    /* Grab the hint count for the i'th polynomial */
-    const unsigned int new_hint_count = packed_hints[MLDSA_OMEGA + i];
-
-    /* new_hint_count must increase or stay the same, but also remain */
-    /* less than or equal to MLDSA_OMEGA                              */
-    if (new_hint_count < old_hint_count || new_hint_count > MLDSA_OMEGA)
-    {
-      /* Error - new_hint_count is invalid */
-      return 1;
-    }
-
-    /* If new_hint_count == old_hint_count, then this polynomial has */
-    /* zero hints, so this loop executes zero times and we move      */
-    /* straight on to the next polynomial.                           */
-    for (j = old_hint_count; j < new_hint_count; ++j)
-    __loop__(
-        invariant(i <= MLDSA_K)
-        /* Maintain the post-condition */
-        invariant(j <= new_hint_count && new_hint_count <= MLDSA_OMEGA)
-        invariant(forall(k1, 0, MLDSA_K, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-        decreases(new_hint_count - j)
-      )
-    {
-      const uint8_t this_hint_index = packed_hints[j];
-
-      /* Coefficients must be ordered for strong unforgeability */
-      if (j > old_hint_count && this_hint_index <= packed_hints[j - 1])
-      {
-        return 1;
-      }
-      h->vec[i].coeffs[this_hint_index] = 1;
-    }
-
-    old_hint_count = new_hint_count;
+    return MLD_ERR_FAIL;
   }
 
-  /* Extra indices must be zero for strong unforgeability */
-  for (j = old_hint_count; j < MLDSA_OMEGA; ++j)
+  mld_memset(h, 0, sizeof(mld_poly));
+
+  for (j = old_hint_count; j < new_hint_count; ++j)
   __loop__(
-    invariant(j <= MLDSA_OMEGA)
-    /* Maintain the post-condition */
-    invariant(forall(k1, 0, MLDSA_K, array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-    decreases(MLDSA_OMEGA - j)
+    invariant(j >= old_hint_count && j <= new_hint_count &&
+              new_hint_count <= MLDSA_OMEGA)
+    invariant(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
+    decreases(new_hint_count - j)
   )
   {
-    if (packed_hints[j] != 0)
+    if (j > old_hint_count && packed_hints[j] <= packed_hints[j - 1])
     {
-      return 1;
+      return MLD_ERR_FAIL;
+    }
+    /* Safety: packed_hints[j] is uint8_t (<= 255) and MLDSA_N == 256. */
+    h->coeffs[packed_hints[j]] = 1;
+  }
+
+  /* On the last row, also verify that the trailing index slots are zero. */
+  if (i == MLDSA_K - 1)
+  {
+    for (j = new_hint_count; j < MLDSA_OMEGA; ++j)
+    __loop__(
+      invariant(j <= MLDSA_OMEGA)
+      decreases(MLDSA_OMEGA - j)
+    )
+    {
+      if (packed_hints[j] != 0)
+      {
+        return MLD_ERR_FAIL;
+      }
     }
   }
 

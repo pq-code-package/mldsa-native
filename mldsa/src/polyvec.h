@@ -154,7 +154,6 @@ typedef struct
 } mld_polyveck;
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
-    !defined(MLD_CONFIG_NO_VERIFY_API) ||                                   \
     (!defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_REDUCE_RAM)) || \
     defined(MLD_UNIT_TEST)
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
@@ -177,10 +176,11 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API ||          \
-          (!MLD_CONFIG_NO_SIGN_API && MLD_CONFIG_REDUCE_RAM) || MLD_UNIT_TEST \
-        */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
+          MLD_CONFIG_REDUCE_RAM) || MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
+    defined(MLD_UNIT_TEST)
 #define mld_polyveck_caddq MLD_NAMESPACE_KL(polyveck_caddq)
 /*************************************************
  * Name:        mld_polyveck_caddq
@@ -200,6 +200,8 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
 );
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_add MLD_NAMESPACE_KL(polyveck_add)
@@ -228,54 +230,9 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
-#define mld_polyveck_sub MLD_NAMESPACE_KL(polyveck_sub)
-/*************************************************
- * Name:        mld_polyveck_sub
- *
- * Description: Subtract vectors of polynomials of length MLDSA_K.
- *              No modular reduction is performed.
- *
- * Arguments:   - mld_polyveck *u: pointer to first input vector
- *              - const mld_polyveck *v: pointer to second input vector to be
- *                                   subtracted from first input vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_sub(mld_polyveck *u, const mld_polyveck *v)
-__contract__(
-  requires(memory_no_alias(u, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K, array_abs_bound(u->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  requires(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(memory_slice(u, sizeof(mld_polyveck)))
-  ensures(forall(k0, 0, MLDSA_K,
-                 array_bound(u->vec[k0].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
-);
-
-#define mld_polyveck_shiftl MLD_NAMESPACE_KL(polyveck_shiftl)
-/*************************************************
- * Name:        mld_polyveck_shiftl
- *
- * Description: Multiply vector of polynomials of Length MLDSA_K by 2^MLDSA_D
- *without modular reduction. Assumes input coefficients to be less than
- *2^{31-MLDSA_D}.
- *
- * Arguments:   - mld_polyveck *v: pointer to input/output vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_shiftl(mld_polyveck *v)
-__contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K, array_bound(v->vec[k0].coeffs, 0, MLDSA_N, 0, 1 << 10)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K, array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
-);
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
-
-#if !defined(MLD_CONFIG_NO_VERIFY_API) ||    \
-    ((!defined(MLD_CONFIG_NO_KEYPAIR_API) || \
-      !defined(MLD_CONFIG_NO_SIGN_API)) &&   \
-     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
+#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+     !defined(MLD_CONFIG_NO_SIGN_API)) &&   \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyveck_ntt MLD_NAMESPACE_KL(polyveck_ntt)
 /*************************************************
  * Name:        mld_polyveck_ntt
@@ -293,10 +250,11 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
-#endif /* !MLD_CONFIG_NO_VERIFY_API || ((!MLD_CONFIG_NO_KEYPAIR_API || \
-          !MLD_CONFIG_NO_SIGN_API) && (!MLD_CONFIG_REDUCE_RAM ||       \
-          MLD_UNIT_TEST)) */
+#endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API) && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
+    defined(MLD_UNIT_TEST)
 #define mld_polyveck_invntt_tomont MLD_NAMESPACE_KL(polyveck_invntt_tomont)
 /*************************************************
  * Name:        mld_polyveck_invntt_tomont
@@ -315,32 +273,8 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
-
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
-#define mld_polyveck_pointwise_poly_montgomery \
-  MLD_NAMESPACE_KL(polyveck_pointwise_poly_montgomery)
-/*************************************************
- * Name:        mld_polyveck_pointwise_poly_montgomery
- *
- * Description: Pointwise multiplication of a polynomial vector of length
- *              MLDSA_K by a single polynomial in NTT domain and multiplication
- *              of the resulting polynomial vector by 2^{-32}. Destructive in
- *              the first argument: v[i] := v[i] * a * 2^{-32}.
- *
- * Arguments:   - mld_polyveck *v: pointer to input/output vector
- *              - const mld_poly *a: pointer to input polynomial
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_pointwise_poly_montgomery(mld_polyveck *v, const mld_poly *a)
-__contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  requires(forall(k0, 0, MLDSA_K, array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-);
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_chknorm MLD_NAMESPACE_KL(polyveck_chknorm)
@@ -439,32 +373,7 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
-#define mld_polyveck_use_hint MLD_NAMESPACE_KL(polyveck_use_hint)
-/*************************************************
- * Name:        mld_polyveck_use_hint
- *
- * Description: Use hint vector h to correct the high bits of u in-place.
- *
- * Arguments:   - mld_polyveck *u: input/output vector
- *              - const mld_polyveck *h: hint vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_use_hint(mld_polyveck *u, const mld_polyveck *h)
-__contract__(
-  requires(memory_no_alias(u, sizeof(mld_polyveck)))
-  requires(memory_no_alias(h, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K,
-    array_bound(u->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
-  requires(forall(k1, 0, MLDSA_K,
-    array_bound(h->vec[k1].coeffs, 0, MLDSA_N, 0, 2)))
-  assigns(memory_slice(u, sizeof(mld_polyveck)))
-  ensures(forall(k2, 0, MLDSA_K,
-    array_bound(u->vec[k2].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
-);
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
-
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyveck_pack_w1 MLD_NAMESPACE_KL(polyveck_pack_w1)
 /*************************************************
  * Name:        mld_polyveck_pack_w1
@@ -487,7 +396,7 @@ __contract__(
     array_bound(w1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
   assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_pack_eta MLD_NAMESPACE_KL(polyveck_pack_eta)
