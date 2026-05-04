@@ -139,6 +139,8 @@ jobs:
             cflags: "-flto -DMLD_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
+          # --addr-no-randomize is a workaround for benchmark instability on x86_64
+          # TODO: Investigate cause and remove workaround
           - name: AMD EPYC 4th gen (c7a)
             ec2_instance_type: c7a.medium
             ec2_ami: ubuntu-latest (x86_64)
@@ -146,6 +148,7 @@ jobs:
             cflags: "-flto -DMLD_FORCE_X86_64"
             ldflags: "-flto"
             perf: PMU
+            bench_extra_args: -w "setarch --addr-no-randomize"
           - name: Intel Xeon 4th gen (c7i)
             ec2_instance_type: c7i.metal-24xl
             ec2_ami: ubuntu-latest (x86_64)
@@ -153,6 +156,7 @@ jobs:
             cflags: "-flto -DMLD_FORCE_X86_64"
             ldflags: "-flto"
             perf: PMU
+            bench_extra_args: -w "setarch --addr-no-randomize"
           - name: AMD EPYC 3rd gen (c6a)
             ec2_instance_type: c6a.large
             ec2_ami: ubuntu-latest (x86_64)
@@ -160,6 +164,7 @@ jobs:
             cflags: "-flto -DMLD_FORCE_X86_64"
             ldflags: "-flto"
             perf: PMU
+            bench_extra_args: -w "setarch --addr-no-randomize"
           - name: Intel Xeon 3rd gen (c6i)
             ec2_instance_type: c6i.large
             ec2_ami: ubuntu-latest (x86_64)
@@ -167,6 +172,7 @@ jobs:
             cflags: "-flto -DMLD_FORCE_X86_64"
             ldflags: "-flto"
             perf: PMU
+            bench_extra_args: -w "setarch --addr-no-randomize"
     uses: ./.github/workflows/bench_ec2_reusable.yml
     if: github.repository_owner == 'pq-code-package' && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     with:
@@ -179,4 +185,5 @@ jobs:
       store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }} # Only store optimized results
       name: ${{ matrix.target.name }}
       perf: ${{ matrix.target.perf }}
+      bench_extra_args: ${{ matrix.target.bench_extra_args }}
     secrets: inherit
