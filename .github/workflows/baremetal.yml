@@ -94,7 +94,7 @@ jobs:
           func: true
           kat: true
           acvp: true
-          wycheproof: false
+          wycheproof: true
           examples: false
           stack: false
           alloc: false
