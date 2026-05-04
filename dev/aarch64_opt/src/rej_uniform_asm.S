@@ -307,10 +307,10 @@ rej_uniform_loop48_end:
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
 
-        str     val0q, [output_tmp]
+        st1     {val0.4s}, [output_tmp]
         add     output_tmp, output_tmp, ctr0, lsl #2
 
-        str     val1q, [output_tmp]
+        st1     {val1.4s}, [output_tmp]
         add     output_tmp, output_tmp, ctr1, lsl #2
 
         add     count, count, ctr0

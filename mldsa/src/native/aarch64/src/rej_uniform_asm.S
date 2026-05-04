@@ -146,9 +146,9 @@ Lrej_uniform_loop48_end:
         fmov x13, d21
         tbl v16.16b, { v16.16b }, v24.16b
         tbl v17.16b, { v17.16b }, v25.16b
-        str q16, [x7]
+        st1 { v16.4s }, [x7]
         add x7, x7, x12, lsl #2
-        str q17, [x7]
+        st1 { v17.4s }, [x7]
         add x7, x7, x13, lsl #2
         add x9, x9, x12
         add x9, x9, x13
