@@ -55,6 +55,13 @@ void mld_polyvecl_pointwise_acc_montgomery_c(mld_poly *w, const mld_polyvecl *u,
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 void mld_polyz_unpack_c(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES]);
 #endif
+unsigned int mld_rej_uniform_c(int32_t *a, unsigned int target,
+                               unsigned int offset, const uint8_t *buf,
+                               unsigned int buflen);
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
+                           const uint8_t *buf, unsigned int buflen);
+#endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
 #if defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
@@ -121,6 +128,9 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) ||                      \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
     defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
 
 /* Backend unit test helper functions for arithmetic native backends */
@@ -857,6 +867,154 @@ cleanup:
 #endif /* (MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19) \
           && (!MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API) */
 
+#ifdef MLD_USE_NATIVE_REJ_UNIFORM
+#define DEFINE_REJ_UNIFORM_TEST(NBLOCKS)                                 \
+  static int test_native_rej_uniform_nblocks_##NBLOCKS(void)             \
+  {                                                                      \
+    const unsigned buflen = (NBLOCKS) * 168; /* SHAKE128_RATE */         \
+    int ret = 1;                                                         \
+    int i;                                                               \
+    MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);                           \
+    MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);                            \
+    MLD_ALLOC(buf, uint8_t, (NBLOCKS) * 168, NULL);                      \
+                                                                         \
+    if (r_test == NULL || r_ref == NULL || buf == NULL)                  \
+    {                                                                    \
+      goto cleanup;                                                      \
+    }                                                                    \
+                                                                         \
+    for (i = 0; i < NUM_RANDOM_TESTS; i++)                               \
+    {                                                                    \
+      int native_ret;                                                    \
+      unsigned c_ret;                                                    \
+      randombytes(buf, buflen);                                          \
+                                                                         \
+      native_ret = mld_rej_uniform_native(r_test, MLDSA_N, buf, buflen); \
+      if (native_ret == MLD_NATIVE_FUNC_FALLBACK)                        \
+      {                                                                  \
+        ret = 0;                                                         \
+        goto cleanup;                                                    \
+      }                                                                  \
+                                                                         \
+      c_ret = mld_rej_uniform_c(r_ref, MLDSA_N, 0, buf, buflen);         \
+                                                                         \
+      CHECK((unsigned)native_ret == c_ret);                              \
+      CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,      \
+                               "rej_uniform", NULL));                    \
+    }                                                                    \
+                                                                         \
+    ret = 0;                                                             \
+                                                                         \
+  cleanup:                                                               \
+    MLD_FREE(buf, uint8_t, (NBLOCKS) * 168, NULL);                       \
+    MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);                             \
+    MLD_FREE(r_test, int32_t, MLDSA_N, NULL);                            \
+    return ret;                                                          \
+  }
+
+DEFINE_REJ_UNIFORM_TEST(1)
+DEFINE_REJ_UNIFORM_TEST(2)
+DEFINE_REJ_UNIFORM_TEST(3)
+DEFINE_REJ_UNIFORM_TEST(4)
+DEFINE_REJ_UNIFORM_TEST(5)
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) && MLDSA_ETA == 2
+#define REJ_UNIFORM_ETA2_BUFLEN 136 /* 1 * SHAKE256_RATE */
+static int test_native_rej_uniform_eta2(void)
+{
+  int ret = 1;
+  int i;
+  MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(buf, uint8_t, REJ_UNIFORM_ETA2_BUFLEN, NULL);
+
+  if (r_test == NULL || r_ref == NULL || buf == NULL)
+  {
+    goto cleanup;
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    int native_ret;
+    unsigned c_ret;
+    randombytes(buf, REJ_UNIFORM_ETA2_BUFLEN);
+
+    native_ret = mld_rej_uniform_eta2_native(r_test, MLDSA_N, buf,
+                                             REJ_UNIFORM_ETA2_BUFLEN);
+    if (native_ret == MLD_NATIVE_FUNC_FALLBACK)
+    {
+      ret = 0;
+      goto cleanup;
+    }
+
+    c_ret = mld_rej_eta_c(r_ref, MLDSA_N, 0, buf, REJ_UNIFORM_ETA2_BUFLEN);
+
+    CHECK((unsigned)native_ret == c_ret);
+    CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,
+                             "rej_uniform_eta2", NULL));
+  }
+
+  ret = 0;
+
+cleanup:
+  MLD_FREE(buf, uint8_t, REJ_UNIFORM_ETA2_BUFLEN, NULL);
+  MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);
+  MLD_FREE(r_test, int32_t, MLDSA_N, NULL);
+  return ret;
+}
+#undef REJ_UNIFORM_ETA2_BUFLEN
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA2 && MLDSA_ETA == 2 */
+
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) && MLDSA_ETA == 4
+#define REJ_UNIFORM_ETA4_BUFLEN 272 /* 2 * SHAKE256_RATE */
+static int test_native_rej_uniform_eta4(void)
+{
+  int ret = 1;
+  int i;
+  MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(buf, uint8_t, REJ_UNIFORM_ETA4_BUFLEN, NULL);
+
+  if (r_test == NULL || r_ref == NULL || buf == NULL)
+  {
+    goto cleanup;
+  }
+
+  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  {
+    int native_ret;
+    unsigned c_ret;
+    randombytes(buf, REJ_UNIFORM_ETA4_BUFLEN);
+
+    native_ret = mld_rej_uniform_eta4_native(r_test, MLDSA_N, buf,
+                                             REJ_UNIFORM_ETA4_BUFLEN);
+    if (native_ret == MLD_NATIVE_FUNC_FALLBACK)
+    {
+      ret = 0;
+      goto cleanup;
+    }
+
+    c_ret = mld_rej_eta_c(r_ref, MLDSA_N, 0, buf, REJ_UNIFORM_ETA4_BUFLEN);
+
+    CHECK((unsigned)native_ret == c_ret);
+    CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,
+                             "rej_uniform_eta4", NULL));
+  }
+
+  ret = 0;
+
+cleanup:
+  MLD_FREE(buf, uint8_t, REJ_UNIFORM_ETA4_BUFLEN, NULL);
+  MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);
+  MLD_FREE(r_test, int32_t, MLDSA_N, NULL);
+  return ret;
+}
+#undef REJ_UNIFORM_ETA4_BUFLEN
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 && MLDSA_ETA == 4 */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
 
 #ifdef MLD_USE_FIPS202_X1_NATIVE
 static int test_keccakf1600_permute(void)
@@ -984,6 +1142,23 @@ static int test_backend_units(void)
   CHECK(test_native_polyz_unpack() == 0);
 #endif
 
+#ifdef MLD_USE_NATIVE_REJ_UNIFORM
+  CHECK(test_native_rej_uniform_nblocks_1() == 0);
+  CHECK(test_native_rej_uniform_nblocks_2() == 0);
+  CHECK(test_native_rej_uniform_nblocks_3() == 0);
+  CHECK(test_native_rej_uniform_nblocks_4() == 0);
+  CHECK(test_native_rej_uniform_nblocks_5() == 0);
+#endif /* MLD_USE_NATIVE_REJ_UNIFORM */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) && MLDSA_ETA == 2
+  CHECK(test_native_rej_uniform_eta2() == 0);
+#endif
+#if defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) && MLDSA_ETA == 4
+  CHECK(test_native_rej_uniform_eta4() == 0);
+#endif
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
 #ifdef MLD_USE_FIPS202_X1_NATIVE
   CHECK(test_keccakf1600_permute() == 0);
 #endif
@@ -1003,7 +1178,9 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
-          MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
+          MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
+          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_FIPS202_X1_NATIVE ||      \
+          MLD_USE_FIPS202_X4_NATIVE */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
@@ -1215,6 +1392,9 @@ int main(void)
     defined(MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7) || \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_17) ||                      \
     defined(MLD_USE_NATIVE_POLYZ_UNPACK_19) ||                      \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
+    defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
     defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
@@ -1226,7 +1406,9 @@ int main(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5 ||               \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
-          MLD_USE_FIPS202_X1_NATIVE || MLD_USE_FIPS202_X4_NATIVE */
+          MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
+          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_FIPS202_X1_NATIVE ||      \
+          MLD_USE_FIPS202_X4_NATIVE */
 
 
   return 0;
