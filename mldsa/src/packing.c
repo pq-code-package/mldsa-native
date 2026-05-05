@@ -15,27 +15,6 @@
  * within a single compilation unit. */
 /* End of parameter set namespacing */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-MLD_INTERNAL_API
-void mld_pack_pk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                 const uint8_t rho[MLDSA_SEEDBYTES], const mld_polyveck *t1)
-{
-  unsigned int i;
-
-  mld_memcpy(pk, rho, MLDSA_SEEDBYTES);
-  for (i = 0; i < MLDSA_K; ++i)
-  __loop__(
-    assigns(i, memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-    invariant(i <= MLDSA_K)
-    decreases(MLDSA_K - i)
-  )
-  {
-    mld_polyt1_pack(pk + MLDSA_SEEDBYTES + i * MLDSA_POLYT1_PACKEDBYTES,
-                    &t1->vec[i]);
-  }
-}
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
-
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 void mld_unpack_pk_t1(mld_poly *t1,
@@ -55,12 +34,11 @@ void mld_pack_sk_s1(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
 }
 
 MLD_INTERNAL_API
-void mld_pack_sk_rho_key_tr_s2_t0(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                                  const uint8_t rho[MLDSA_SEEDBYTES],
-                                  const uint8_t tr[MLDSA_TRBYTES],
-                                  const uint8_t key[MLDSA_SEEDBYTES],
-                                  const mld_polyveck *t0,
-                                  const mld_polyveck *s2)
+void mld_pack_sk_rho_key_tr_s2(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                               const uint8_t rho[MLDSA_SEEDBYTES],
+                               const uint8_t tr[MLDSA_TRBYTES],
+                               const uint8_t key[MLDSA_SEEDBYTES],
+                               const mld_polyveck *s2)
 {
   mld_memcpy(sk, rho, MLDSA_SEEDBYTES);
   sk += MLDSA_SEEDBYTES;
@@ -75,9 +53,7 @@ void mld_pack_sk_rho_key_tr_s2_t0(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
   sk += MLDSA_L * MLDSA_POLYETA_PACKEDBYTES;
 
   mld_polyveck_pack_eta(sk, s2);
-  sk += MLDSA_K * MLDSA_POLYETA_PACKEDBYTES;
-
-  mld_polyveck_pack_t0(sk, t0);
+  /* t0 already packed via mld_compute_pack_t0_t1 */
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 

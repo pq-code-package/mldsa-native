@@ -153,8 +153,7 @@ typedef struct
   mld_poly vec[MLDSA_K];
 } mld_polyveck;
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
-    (!defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_REDUCE_RAM)) || \
+#if (!defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_REDUCE_RAM)) || \
     defined(MLD_UNIT_TEST)
 #define mld_polyveck_reduce MLD_NAMESPACE_KL(polyveck_reduce)
 /*************************************************
@@ -176,11 +175,10 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
-          MLD_CONFIG_REDUCE_RAM) || MLD_UNIT_TEST */
+#endif /* (!MLD_CONFIG_NO_SIGN_API && MLD_CONFIG_REDUCE_RAM) || MLD_UNIT_TEST \
+        */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
-    defined(MLD_UNIT_TEST)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #define mld_polyveck_caddq MLD_NAMESPACE_KL(polyveck_caddq)
 /*************************************************
  * Name:        mld_polyveck_caddq
@@ -200,38 +198,9 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
-          MLD_UNIT_TEST */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#define mld_polyveck_add MLD_NAMESPACE_KL(polyveck_add)
-/*************************************************
- * Name:        mld_polyveck_add
- *
- * Description: Add vectors of polynomials of length MLDSA_K.
- *              No modular reduction is performed.
- *
- * Arguments:   - mld_polyveck *u: pointer to input-output vector of polynomials
- *                                 to be added to
- *              - const mld_polyveck *v: pointer to second input vector of
- *                                       polynomials
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_add(mld_polyveck *u, const mld_polyveck *v)
-__contract__(
-  requires(memory_no_alias(u, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
-  requires(forall(p0, 0, MLDSA_K, array_abs_bound(u->vec[p0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
-  requires(forall(p1, 0, MLDSA_K,
-    array_bound(v->vec[p1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
-  assigns(memory_slice(u, sizeof(mld_polyveck)))
-  ensures(forall(q2, 0, MLDSA_K,
-                array_bound(u->vec[q2].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
-);
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
-
-#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || \
-     !defined(MLD_CONFIG_NO_SIGN_API)) &&   \
+#if (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyveck_ntt MLD_NAMESPACE_KL(polyveck_ntt)
 /*************************************************
@@ -250,11 +219,10 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
-#endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API) && \
+#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API) || \
-    defined(MLD_UNIT_TEST)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #define mld_polyveck_invntt_tomont MLD_NAMESPACE_KL(polyveck_invntt_tomont)
 /*************************************************
  * Name:        mld_polyveck_invntt_tomont
@@ -273,8 +241,7 @@ __contract__(
   assigns(memory_slice(v, sizeof(mld_polyveck)))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
-          MLD_UNIT_TEST */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_polyveck_chknorm MLD_NAMESPACE_KL(polyveck_chknorm)
@@ -303,36 +270,6 @@ __contract__(
   ensures((return_value == 0) == forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
 
-#define mld_polyveck_power2round MLD_NAMESPACE_KL(polyveck_power2round)
-/*************************************************
- * Name:        mld_polyveck_power2round
- *
- * Description: For all coefficients a of polynomials in vector of length
- *MLDSA_K, compute a0, a1 such that a mod^+ MLDSA_Q = a1*2^MLDSA_D + a0 with
- *-2^{MLDSA_D-1} < a0 <= 2^{MLDSA_D-1}. Assumes coefficients to be standard
- *representatives.
- *
- * Arguments:   - mld_polyveck *v1: pointer to output vector of polynomials with
- *                              coefficients a1
- *              - mld_polyveck *v0: pointer to output vector of polynomials with
- *                              coefficients a0; may alias the input vector v
- *              - const mld_polyveck *v: pointer to input vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_power2round(mld_polyveck *v1, mld_polyveck *v0,
-                              const mld_polyveck *v)
-__contract__(
-  requires(memory_no_alias(v1, sizeof(mld_polyveck)))
-  requires(memory_no_alias(v0, sizeof(mld_polyveck)))
-  /* The implementation does not require v0 == v, but the single call site
-   * aliases them and asserting equality simplifies the proof. */
-  requires(v0 == v)
-  requires(forall(k0, 0, MLDSA_K, array_bound(v->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
-  assigns(memory_slice(v1, sizeof(mld_polyveck)))
-  assigns(memory_slice(v0, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K, array_bound(v0->vec[k1].coeffs, 0, MLDSA_N, -(MLD_2_POW_D/2)+1, (MLD_2_POW_D/2)+1)))
-  ensures(forall(k2, 0, MLDSA_K, array_bound(v1->vec[k2].coeffs, 0, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1)))
-);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
@@ -443,27 +380,6 @@ __contract__(
   assigns(memory_slice(r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
 );
 
-#define mld_polyveck_pack_t0 MLD_NAMESPACE_KL(polyveck_pack_t0)
-/*************************************************
- * Name:        mld_polyveck_pack_t0
- *
- * Description: Bit-pack polynomial vector to with coefficients in
- *              ]-2^{MLDSA_D-1}, 2^{MLDSA_D-1}].
- *
- * Arguments:   - uint8_t *r: pointer to output byte array with
- *                            MLDSA_K * MLDSA_POLYT0_PACKEDBYTES bytes
- *              - const mld_poly *p: pointer to input polynomial vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_pack_t0(uint8_t r[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES],
-                          const mld_polyveck *p)
-__contract__(
-  requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K,
-    array_bound(p->vec[k0].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
-  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
@@ -541,29 +457,8 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
-
-#define mld_polyveck_unpack_t0 MLD_NAMESPACE_KL(polyveck_unpack_t0)
-/*************************************************
- * Name:        mld_polyveck_unpack_t0
- *
- * Description: Unpack polynomial vector with coefficients in
- *              ]-2^{MLDSA_D-1}, 2^{MLDSA_D-1}].
- *
- * Arguments:   - mld_polyveck *p: pointer to output polynomial vector
- *              - const uint8_t *r: input byte array with
- *                                  bit-packed polynomial vector
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyveck_unpack_t0(mld_polyveck *p,
-                            const uint8_t r[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
-__contract__(
-  requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  assigns(memory_slice(p, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K,
-    array_bound(p->vec[k1].coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1)))
-);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
+
 
 #endif /* !MLD_POLYVEC_H */

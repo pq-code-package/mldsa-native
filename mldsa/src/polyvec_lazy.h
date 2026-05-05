@@ -196,7 +196,8 @@ __contract__(
 
 /* s2vec */
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 static MLD_INLINE void mld_unpack_sk_s2hat_eager(
     mld_sk_s2hat_eager *s2,
     const uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
@@ -225,7 +226,8 @@ __contract__(
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = s2->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 static MLD_INLINE void mld_unpack_sk_s2hat_lazy(
     mld_sk_s2hat_lazy *s2,
@@ -257,7 +259,8 @@ __contract__(
 
 /* t0vec */
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 static MLD_INLINE void mld_unpack_sk_t0hat_eager(
     mld_sk_t0hat_eager *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
@@ -269,7 +272,20 @@ __contract__(
     array_abs_bound(t0->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 )
 {
-  mld_polyveck_unpack_t0(&t0->vec, packed_t0);
+  unsigned int i;
+  for (i = 0; i < MLDSA_K; ++i)
+  __loop__(
+    assigns(i, memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
+    invariant(i <= MLDSA_K)
+    invariant(forall(k0, 0, i,
+      array_bound(t0->vec.vec[k0].coeffs, 0, MLDSA_N,
+                  -(1 << (MLDSA_D - 1)) + 1, (1 << (MLDSA_D - 1)) + 1)))
+    decreases(MLDSA_K - i)
+  )
+  {
+    mld_polyt0_unpack(&t0->vec.vec[i],
+                      packed_t0 + i * MLDSA_POLYT0_PACKEDBYTES);
+  }
   mld_polyveck_ntt(&t0->vec);
 }
 
@@ -286,7 +302,8 @@ __contract__(
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = t0->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 #if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 static MLD_INLINE void mld_unpack_sk_t0hat_lazy(
     mld_sk_t0hat_lazy *t0,
@@ -638,45 +655,6 @@ typedef mld_yvec_eager mld_yvec;
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
-
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery
- *
- * Description: Compute matrix-vector multiplication in NTT domain with
- *              pointwise multiplication and multiplication by 2^{-32}.
- *              Input matrix and vector must be in NTT domain representation.
- *
- *              "mat" must be the output of mld_polyvec_matrix_expand(); for
- *              the eager backend its sampled coefficients lie in [0, Q-1],
- *              for the lazy backend matrix entries are sampled on demand.
- *
- *              The second input "v" is assumed to be output of an NTT, and
- *              hence must have coefficients bounded by [-9q+1, +9q-1]
- *              inclusive.
- *
- * Arguments:   - mld_polyveck *t: pointer to output vector t
- *              - mld_polymat *mat: pointer to input matrix
- *              - const mld_polyvecl *v: pointer to input vector v
- **************************************************/
-MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery(mld_polyveck *t, mld_polymat *mat,
-                                             const mld_polyvecl *v)
-__contract__(
-  requires(memory_no_alias(t, sizeof(mld_polyveck)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  MLD_IF_NOT_REDUCE_RAM(
-    requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
-      array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))))
-  requires(forall(l2, 0, MLDSA_L,
-                  array_abs_bound(v->vec[l2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t, sizeof(mld_polyveck)))
-  assigns(memory_slice(mat, sizeof(mld_polymat)))
-  ensures(forall(k0, 0, MLDSA_K,
-                 array_abs_bound(t->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-);
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

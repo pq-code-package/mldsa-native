@@ -5,6 +5,8 @@
 
 void harness(void)
 {
+#if defined(MLD_CONFIG_REDUCE_RAM)
   mld_polyveck *a;
   mld_polyveck_reduce(a);
+#endif
 }

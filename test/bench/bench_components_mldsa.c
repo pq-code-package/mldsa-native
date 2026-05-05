@@ -64,7 +64,6 @@ static int bench(void)
   MLD_ALIGN int32_t data0[256];
   MLD_ALIGN mld_poly poly_out;
   MLD_ALIGN mld_polyvecl polyvecl_a, polyvecl_b;
-  MLD_ALIGN mld_polyveck polyveck_out;
   MLD_ALIGN mld_polymat polymat;
   uint64_t cyc[NTESTS];
   unsigned i, j;
@@ -80,9 +79,9 @@ static int bench(void)
         mld_polyvecl_pointwise_acc_montgomery(&poly_out, &polyvecl_a,
                                               &polyvecl_b))
 #endif
-  BENCH("polyvec_matrix_pointwise_montgomery",
-        mld_polyvec_matrix_pointwise_montgomery(&polyveck_out, &polymat,
-                                                &polyvecl_b))
+  BENCH("polyvec_matrix_pointwise_montgomery_row",
+        mld_polyvec_matrix_pointwise_montgomery_row(&poly_out, &polymat,
+                                                    &polyvecl_b, 0))
 
   /* polyz_unpack */
   BENCH("polyz_unpack", mld_polyz_unpack(&poly_out, (const uint8_t *)data0))
