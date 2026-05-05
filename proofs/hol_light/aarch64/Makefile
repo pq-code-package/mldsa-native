@@ -53,7 +53,8 @@ endif
 
 SPLIT=tr ';' '\n'
 
-OBJ = mldsa/ntt_aarch64_asm.o \
+OBJ = mldsa/intt_aarch64_asm.o \
+      mldsa/ntt_aarch64_asm.o \
       mldsa/pointwise_montgomery_aarch64_asm.o \
       mldsa/poly_caddq_aarch64_asm.o \
       mldsa/poly_chknorm_aarch64_asm.o \

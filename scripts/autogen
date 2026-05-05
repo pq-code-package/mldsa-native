@@ -1609,6 +1609,14 @@ def gen_aarch64_hol_light_zeta_file():
         yield from print_hol_light_array(gen_aarch64_fwd_ntt_zetas_layer78())
         yield "]`;;"
         yield ""
+        yield "let intt_zetas_layer78 = define `intt_zetas_layer78:int list = ["
+        yield from print_hol_light_array(gen_aarch64_intt_zetas_layer78())
+        yield "]`;;"
+        yield ""
+        yield "let intt_zetas_layer123456 = define `intt_zetas_layer123456:int list = ["
+        yield from print_hol_light_array(gen_aarch64_intt_zetas_layer123456())
+        yield "]`;;"
+        yield ""
 
     update_file("proofs/hol_light/aarch64/proofs/mldsa_zetas.ml", "\n".join(gen()))
 

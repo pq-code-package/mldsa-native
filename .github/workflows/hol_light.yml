@@ -85,6 +85,8 @@ jobs:
           # Dependencies on {name}.{S,ml} are implicit
           - name: ntt_aarch64_asm
             needs: ["mldsa_specs.ml", "mldsa_zetas.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
+          - name: intt_aarch64_asm
+            needs: ["mldsa_specs.ml", "mldsa_zetas.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: pointwise_montgomery_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm

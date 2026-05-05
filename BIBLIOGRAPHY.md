@@ -185,6 +185,7 @@ source code and documentation.
   - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
 
 ### `REF`
@@ -296,6 +297,7 @@ source code and documentation.
   - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
 
 ### `libmceliece`

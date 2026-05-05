@@ -113,6 +113,8 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ### AArch64
 - ML-DSA Arithmetic:
+  * AArch64 forward NTT: [ntt_aarch64_asm.S](aarch64/mldsa/ntt_aarch64_asm.S)
+  * AArch64 inverse NTT: [intt_aarch64_asm.S](aarch64/mldsa/intt_aarch64_asm.S)
   * AArch64 poly_caddq: [poly_caddq_aarch64_asm.S](aarch64/mldsa/poly_caddq_aarch64_asm.S)
   * AArch64 poly_chknorm: [poly_chknorm_aarch64_asm.S](aarch64/mldsa/poly_chknorm_aarch64_asm.S)
   * AArch64 poly_use_hint (l=5,7): [poly_use_hint_32_aarch64_asm.S](aarch64/mldsa/poly_use_hint_32_aarch64_asm.S)
@@ -133,8 +135,6 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 
 ### x86_64
-
-
 - ML-DSA Arithmetic:
   * x86_64 forward NTT: [ntt_avx2_asm.S](x86_64/mldsa/ntt_avx2_asm.S)
   * x86_64 inverse NTT: [intt_avx2_asm.S](x86_64/mldsa/intt_avx2_asm.S)

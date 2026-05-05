@@ -10,6 +10,10 @@ print_string "=== bytecode start: aarch64/mldsa/ntt_aarch64_asm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/ntt_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: aarch64/mldsa/intt_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/intt_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: aarch64/mldsa/pointwise_montgomery_aarch64_asm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/pointwise_montgomery_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;

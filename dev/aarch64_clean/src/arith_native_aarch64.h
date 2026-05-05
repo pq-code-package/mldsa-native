@@ -77,7 +77,20 @@ __contract__(
 );
 
 #define mld_intt_aarch64_asm MLD_NAMESPACE(intt_aarch64_asm)
-void mld_intt_aarch64_asm(int32_t *, const int32_t *, const int32_t *);
+void mld_intt_aarch64_asm(int32_t *r, const int32_t *zetas_l78,
+                          const int32_t *zetas_l123456)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/intt_aarch64_asm.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  requires(zetas_l78 == mld_aarch64_intt_zetas_layer78)
+  requires(zetas_l123456 == mld_aarch64_intt_zetas_layer123456)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: off */
+  ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
+  /* check-magic: on */
+);
 
 #define mld_rej_uniform_aarch64_asm MLD_NAMESPACE(rej_uniform_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
