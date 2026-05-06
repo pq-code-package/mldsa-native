@@ -740,7 +740,6 @@ __contract__(
   __loop__(
     assigns(k,
             object_whole(z),
-            object_whole(t),
             object_whole(w0))
     invariant(k <= MLDSA_K)
     invariant(forall(k0, k, MLDSA_K,
@@ -753,15 +752,12 @@ __contract__(
     mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
 
-    /* TODO: Remove this workaround for CBMC performance issues */
-    *t = w0->vec[k];
-    mld_poly_sub(t, z);
-    mld_poly_reduce(t);
+    mld_poly_sub(&w0->vec[k], z);
+    mld_poly_reduce(&w0->vec[k]);
 
     /* Check that subtracting cs2 does not change high bits of w and low bits
      * do not reveal secret information */
-    w0_invalid = mld_poly_chknorm(t, MLDSA_GAMMA2 - MLDSA_BETA);
-    w0->vec[k] = *t;
+    w0_invalid = mld_poly_chknorm(&w0->vec[k], MLDSA_GAMMA2 - MLDSA_BETA);
     /* Constant time: w0_invalid may be leaked - see comment for z_invalid. */
     MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
     if (w0_invalid)
@@ -785,10 +781,7 @@ __contract__(
       goto cleanup;
     }
 
-    /* TODO: Remove this workaround for CBMC performance issues */
-    *t = w0->vec[k];
-    mld_poly_add(t, z);
-    w0->vec[k] = *t;
+    mld_poly_add(&w0->vec[k], z);
   }
 
   /* Constant time: At this point all norm checks have passed and we, hence,
