@@ -703,7 +703,7 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
  */
 /* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
 /**
- * MLD_CONFIG_REDUCE_RAM [EXPERIMENTAL]
+ * MLD_CONFIG_REDUCE_RAM
  *
  * Set this to reduce RAM usage. This trades memory for performance.
  *
@@ -713,9 +713,6 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
  * This option is useful for embedded systems with tight RAM constraints but
  * relaxed performance requirements.
  *
- * @warning This option is experimental! CBMC proofs do not currently cover
- * this configuration option. Its scope and configuration may change at any
- * time.
  */
 /* #define MLD_CONFIG_REDUCE_RAM */
 

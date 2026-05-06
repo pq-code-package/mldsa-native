@@ -59,8 +59,6 @@ mldsa-native is used in
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
 
-**Note:** The `MLD_CONFIG_REDUCE_RAM` configuration option is not currently covered by CBMC proofs.
-
 HOL-Light functional correctness proofs can be found in [proofs/hol_light](proofs/hol_light). See the [HOL-Light README](proofs/hol_light/README.md) for the list of functions that have been proven correct. These proofs utilize the verification infrastructure in [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
