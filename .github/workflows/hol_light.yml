@@ -96,9 +96,9 @@ jobs:
           - name: mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: poly_caddq_aarch64_asm
-            needs: ["aarch64_utils.ml"]
+            needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: poly_chknorm_aarch64_asm
-            needs: ["aarch64_utils.ml"]
+            needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: poly_use_hint_32_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: poly_use_hint_88_aarch64_asm

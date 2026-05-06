@@ -198,3 +198,39 @@ let MLDSA_POLY_CADDQ_SUBROUTINE_CORRECT = prove
   CONV_TAC TWEAK_CONV THEN
   ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POLY_CADDQ_EXEC
    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_CADDQ_CORRECT)));;
+
+(* ========================================================================= *)
+(* Constant-time and memory safety proof.                                    *)
+(* ========================================================================= *)
+
+needs "s2n_bignum/arm/proofs/consttime.ml";;
+needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:false
+    (assoc "mldsa_poly_caddq" subroutine_signatures)
+    MLDSA_POLY_CADDQ_SUBROUTINE_CORRECT
+    MLDSA_POLY_CADDQ_EXEC;;
+
+let MLDSA_POLY_CADDQ_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a pc returnaddress.
+           nonoverlapping (word pc,LENGTH mldsa_poly_caddq_mc) (a,1024)
+           ==> ensures arm
+               (\s.
+                    aligned_bytes_loaded s (word pc)
+                    mldsa_poly_caddq_mc /\
+                    read PC s = word pc /\
+                    read X30 s = returnaddress /\
+                    C_ARGUMENTS [a] s /\
+                    read events s = e)
+               (\s.
+                    read PC s = returnaddress /\
+                    (exists e2.
+                         read events s = APPEND e2 e /\
+                         e2 = f_events a pc returnaddress /\
+                         memaccess_inbounds e2 [a,1024]
+                         [a,1024]))
+               (\s s'. true)`,
+  ASSERT_CONCL_TAC full_spec THEN
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_CADDQ_EXEC);;

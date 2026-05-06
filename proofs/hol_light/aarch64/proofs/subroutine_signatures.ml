@@ -63,6 +63,36 @@ let subroutine_signatures = [
    ])
 );
 
+("mldsa_poly_caddq",
+  ([(*args*)
+     ("a", "int32_t[static 256]", (*is const?*)"false");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mldsa_poly_chknorm",
+  ([(*args*)
+     ("a", "int32_t[static 256]", (*is const?*)"true");
+     ("bound", "int32_t", (*is const?*)"false");
+   ],
+   "uint64_t",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
 ("mldsa_pointwise_acc_l4",
   ([(*args*)
      ("r", "int32_t[static 256]", (*is const?*)"false");
