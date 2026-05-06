@@ -104,15 +104,15 @@ jobs:
           - name: poly_use_hint_88_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
-            needs: ["keccak_spec.ml", "keccak_constants.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_v84a_aarch64_asm
-            needs: ["keccak_spec.ml", "keccak_constants.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x2_v84a_aarch64_asm
-            needs: ["keccak_spec.ml", "keccak_constants.ml"]
+            needs: ["keccak_spec.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml"]
+            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
-            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml"]
+            needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: polyz_unpack_17_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_polyz_unpack_consts.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
           - name: polyz_unpack_19_aarch64_asm
