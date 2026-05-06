@@ -4617,3 +4617,73 @@ let MLDSA_NTT_SUBROUTINE_CORRECT = prove
   CONV_TAC TWEAK_CONV THEN
   MATCH_ACCEPT_TAC(ADD_IBT_RULE
   (CONV_RULE TWEAK_CONV MLDSA_NTT_NOIBT_SUBROUTINE_CORRECT)));;
+
+(* ========================================================================= *)
+(* Constant-time and memory safety proof.                                    *)
+(* ========================================================================= *)
+
+needs "s2n_bignum/x86/proofs/consttime.ml";;
+needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
+
+let full_spec,public_vars = mk_safety_spec
+    ~keep_maychanges:true
+    (assoc "mldsa_ntt" subroutine_signatures)
+    MLDSA_NTT_CORRECT
+    MLDSA_NTT_TMC_EXEC;;
+
+let MLDSA_NTT_SAFE =
+  REWRITE_RULE [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS]
+  (time prove
+   (full_spec,
+    REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS] THEN
+    PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
+      MLDSA_NTT_TMC_EXEC));;
+
+let MLDSA_NTT_NOIBT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc stackpointer returnaddress.
+          aligned 32 a /\ aligned 32 zetas /\
+          nonoverlapping (word pc, LENGTH mldsa_ntt_tmc) (a, 1024) /\
+          nonoverlapping (word pc, LENGTH mldsa_ntt_tmc) (zetas, 2496) /\
+          nonoverlapping (a, 1024) (zetas, 2496) /\
+          nonoverlapping (stackpointer, 8) (a, 1024) /\
+          nonoverlapping (stackpointer, 8) (zetas, 2496)
+          ==> ensures x86
+               (\s. bytes_loaded s (word pc) mldsa_ntt_tmc /\
+                    read RIP s = word pc /\ read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [a; zetas] s /\ read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2. read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,1024; zetas,2496; stackpointer,8]
+                           [a,1024; stackpointer,8]))
+               (\s s'. true)`,
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_ntt_tmc
+    MLDSA_NTT_SAFE THEN DISCHARGE_SAFETY_PROPERTY_TAC);;
+
+let MLDSA_NTT_SUBROUTINE_SAFE = time prove
+ (`exists f_events.
+       forall e a zetas pc stackpointer returnaddress.
+          aligned 32 a /\ aligned 32 zetas /\
+          nonoverlapping (word pc, LENGTH mldsa_ntt_mc) (a, 1024) /\
+          nonoverlapping (word pc, LENGTH mldsa_ntt_mc) (zetas, 2496) /\
+          nonoverlapping (a, 1024) (zetas, 2496) /\
+          nonoverlapping (stackpointer, 8) (a, 1024) /\
+          nonoverlapping (stackpointer, 8) (zetas, 2496)
+          ==> ensures x86
+               (\s. bytes_loaded s (word pc) mldsa_ntt_mc /\
+                    read RIP s = word pc /\ read RSP s = stackpointer /\
+                    read (memory :> bytes64 stackpointer) s = returnaddress /\
+                    C_ARGUMENTS [a; zetas] s /\ read events s = e)
+               (\s. read RIP s = returnaddress /\
+                    read RSP s = word_add stackpointer (word 8) /\
+                    (exists e2. read events s = APPEND e2 e /\
+                         e2 = f_events zetas a pc stackpointer returnaddress /\
+                         memaccess_inbounds e2
+                           [a,1024; zetas,2496; stackpointer,8]
+                           [a,1024; stackpointer,8]))
+               (\s s'. true)`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_NTT_NOIBT_SUBROUTINE_SAFE));;

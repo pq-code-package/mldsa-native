@@ -202,11 +202,11 @@ jobs:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
           - name: ntt_avx2_asm
-            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: intt_avx2_asm
-            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: nttunpack_avx2_asm
-            needs: ["mldsa_specs.ml"]
+            needs: ["mldsa_specs.ml", "subroutine_signatures.ml"]
           - name: pointwise_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
           - name: pointwise_acc_l4_avx2_asm

@@ -90,6 +90,55 @@ let subroutine_signatures = [
 );
 
 
+("mldsa_intt",
+  ([(*args*)
+     ("a", "int32_t[static 256]", (*is const?*)"false");
+     ("zetas", "int32_t[static 624]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+    ("zetas", "624"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mldsa_ntt",
+  ([(*args*)
+     ("a", "int32_t[static 256]", (*is const?*)"false");
+     ("zetas", "int32_t[static 624]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+    ("zetas", "624"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mldsa_nttunpack",
+  ([(*args*)
+     ("a", "int32_t[static 256]", (*is const?*)"false");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
 ("keccak_f1600_x4_avx2",
   ([(*args*)
      ("bitstate_in", "uint64_t[static 100]", (*is const?*)"false");
