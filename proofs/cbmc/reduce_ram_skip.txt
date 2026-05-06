@@ -1,5 +1,0 @@
-# Copyright (c) The mldsa-native project authors
-# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
-#
-# Proofs to skip when CBMC is run with --reduce-ram. One name per line.
-# TODO(REDUCE_RAM): remove once all proofs cover the REDUCE_RAM configuration.
