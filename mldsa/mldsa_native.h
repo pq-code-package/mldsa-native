@@ -302,15 +302,24 @@ int MLD_API_NAMESPACE(keypair)(
  *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           output signature
  *     - size_t *siglen:     pointer to output length of signature
- *     - const uint8_t *m:   pointer to message to be signed
- *     - size_t mlen:        length of message
- *     - const uint8_t *pre: pointer to prefix string
- *     - size_t prelen:      length of prefix string
+ *     - const uint8_t *m:   pointer to message to be signed (when
+ *                           externalmu == 0), or to a precomputed
+ *                           message representative mu (when
+ *                           externalmu != 0).
+ *     - size_t mlen:        length of m. Must equal MLDSA_CRHBYTES
+ *                           when externalmu != 0.
+ *     - const uint8_t *pre: pointer to prefix string. Ignored when
+ *                           externalmu != 0.
+ *     - size_t prelen:      length of prefix string. Ignored when
+ *                           externalmu != 0.
  *     - const uint8_t rnd[MLDSA_RNDBYTES]:
  *                           random seed
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed secret key
- *     - int externalmu:     indicates input message m is processed as mu
+ *     - int externalmu:     0: m/mlen is the raw message; mu = H(tr, pre, m)
+ *                              is computed internally.
+ *                           non-zero: m points to a precomputed mu of
+ *                              MLDSA_CRHBYTES bytes; pre/prelen unused.
  *
  * Returns:
  *     - 0: Success
@@ -386,14 +395,20 @@ int MLD_API_NAMESPACE(signature)(
 /*************************************************
  * Name:        crypto_sign_signature_extmu
  *
- * Description: Computes signature.
+ * Description: Computes signature in "external mu" mode: the caller
+ *              has already computed the message representative
+ *              mu = SHAKE256(tr || M', 64), where tr = SHAKE256(pk, 64)
+ *              and M' is the FIPS 204 formatted message (e.g.
+ *              0x00 || ctxlen || ctx || msg for pure ML-DSA). This is
+ *              useful when the message is large or streamed and cannot
+ *              be held in memory.
  *
  * Arguments:
  *     - uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                       output signature
  *     - size_t *siglen: pointer to output length of signature
  *     - const uint8_t mu[MLDSA_CRHBYTES]:
- *                       input mu to be signed
+ *                       precomputed message representative
  *     - const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                       bit-packed secret key
  *
@@ -472,13 +487,21 @@ int MLD_API_NAMESPACE(sign)(
  * Arguments:
  *     - const uint8_t *sig: pointer to input signature
  *     - size_t siglen:      length of signature
- *     - const uint8_t *m:   pointer to message
- *     - size_t mlen:        length of message
- *     - const uint8_t *pre: pointer to prefix string
- *     - size_t prelen:      length of prefix string
+ *     - const uint8_t *m:   pointer to message (when externalmu == 0),
+ *                           or to a precomputed message representative
+ *                           mu (when externalmu != 0).
+ *     - size_t mlen:        length of m. Must equal MLDSA_CRHBYTES
+ *                           when externalmu != 0.
+ *     - const uint8_t *pre: pointer to prefix string. Ignored when
+ *                           externalmu != 0.
+ *     - size_t prelen:      length of prefix string. Ignored when
+ *                           externalmu != 0.
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
- *     - int externalmu:     indicates input message m is processed as mu
+ *     - int externalmu:     0: m/mlen is the raw message; mu = H(H(pk), pre, m)
+ *                              is computed internally.
+ *                           non-zero: m points to a precomputed mu of
+ *                              MLDSA_CRHBYTES bytes; pre/prelen unused.
  *
  * Returns:
  *     - 0: Success
@@ -543,13 +566,18 @@ int MLD_API_NAMESPACE(verify)(
 /*************************************************
  * Name:        crypto_sign_verify_extmu
  *
- * Description: Verifies signature.
+ * Description: Verifies signature in "external mu" mode: the caller
+ *              has already computed the message representative
+ *              mu = SHAKE256(tr || M', 64), where tr = SHAKE256(pk, 64)
+ *              and M' is the FIPS 204 formatted message (e.g.
+ *              0x00 || ctxlen || ctx || msg for pure ML-DSA). The
+ *              same mu must have been used at signing time.
  *
  * Arguments:
  *     - const uint8_t *sig: pointer to input signature
  *     - size_t siglen:      length of signature
  *     - const uint8_t mu[MLDSA_CRHBYTES]:
- *                           input mu
+ *                           precomputed message representative
  *     - const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]:
  *                           bit-packed public key
  *

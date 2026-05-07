@@ -181,15 +181,28 @@ __contract__(
  *              - size_t *siglen:            pointer to output length of
  *                                           signature
  *              - const uint8_t *m:          pointer to message to be signed
- *              - size_t mlen:               length of message
- *              - const uint8_t *pre:        pointer to prefix string
- *              - size_t prelen:             length of prefix string
+ *                                           (when externalmu == 0), or to a
+ *                                           precomputed message
+ *                                           representative mu (when
+ *                                           externalmu != 0).
+ *              - size_t mlen:               length of m. Must equal
+ *                                           MLDSA_CRHBYTES when
+ *                                           externalmu != 0.
+ *              - const uint8_t *pre:        pointer to prefix string. Ignored
+ *                                           when externalmu != 0.
+ *              - size_t prelen:             length of prefix string. Ignored
+ *                                           when externalmu != 0.
  *              - const uint8_t rnd[MLDSA_RNDBYTES]:
  *                                           random seed
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                           bit-packed secret key
- *              - int externalmu:            indicates input message m is
- *                                           processed as mu
+ *              - int externalmu:            0: m/mlen is the raw message;
+ *                                              mu = H(tr, pre, m) is computed
+ *                                              internally.
+ *                                           non-zero: m points to a
+ *                                              precomputed mu of
+ *                                              MLDSA_CRHBYTES bytes;
+ *                                              pre/prelen unused.
  *
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
@@ -218,8 +231,8 @@ __contract__(
   requires(memory_no_alias(m, mlen))
   requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  requires((externalmu == 0 && (prelen == 0 || memory_no_alias(pre, prelen))) ||
-           (externalmu == 1 && mlen == MLDSA_CRHBYTES))
+  requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
+  requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
@@ -284,15 +297,20 @@ __contract__(
 /*************************************************
  * Name:        mld_sign_signature_extmu
  *
- * Description: Computes signature. This function implements the randomized
- *              variant of ML-DSA. If you require the deterministic variant,
- *              use mld_sign_signature_internal directly.
+ * Description: Computes signature in "external mu" mode: the caller has
+ *              already computed the message representative
+ *              mu = SHAKE256(tr || M', 64), where tr = SHAKE256(pk, 64)
+ *              and M' is the FIPS 204 formatted message (e.g.
+ *              0x00 || ctxlen || ctx || msg for pure ML-DSA). This is
+ *              the randomized variant; for the deterministic variant,
+ *              use mld_sign_signature_internal directly with externalmu
+ *              set to non-zero and an all-zero rnd.
  *
  * Arguments:   - uint8_t sig[MLDSA_CRYPTO_BYTES]: output signature
  *              - size_t *siglen:            pointer to output length of
  *                                           signature
  *              - const uint8_t mu[MLDSA_CRHBYTES]:
- *                                           input mu to be signed
+ *                                           precomputed message representative
  *              - const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES]:
  *                                           bit-packed secret key
  *
@@ -382,14 +400,23 @@ __contract__(
  *
  * Arguments:   - const uint8_t *sig: pointer to input signature
  *              - size_t siglen:      length of signature
- *              - const uint8_t *m:   pointer to message
- *              - size_t mlen:        length of message
- *              - const uint8_t *pre: pointer to prefix string
- *              - size_t prelen:      length of prefix string
+ *              - const uint8_t *m:   pointer to message (when externalmu == 0),
+ *                                    or to a precomputed message
+ *                                    representative mu (when externalmu != 0).
+ *              - size_t mlen:        length of m. Must equal MLDSA_CRHBYTES
+ *                                    when externalmu != 0.
+ *              - const uint8_t *pre: pointer to prefix string. Ignored when
+ *                                    externalmu != 0.
+ *              - size_t prelen:      length of prefix string. Ignored when
+ *                                    externalmu != 0.
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
- *              - int externalmu:     indicates input message m is processed as
- *                                    mu
+ *              - int externalmu:     0: m/mlen is the raw message;
+ *                                       mu = H(H(pk), pre, m) is computed
+ *                                       internally.
+ *                                    non-zero: m points to a precomputed mu
+ *                                       of MLDSA_CRHBYTES bytes; pre/prelen
+ *                                       unused.
  *
  * Returns:     - 0: Success
  *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
@@ -413,8 +440,8 @@ __contract__(
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(sig, siglen))
   requires(memory_no_alias(m, mlen))
-  requires(externalmu == 0 || (externalmu == 1 && mlen == MLDSA_CRHBYTES))
-  requires(externalmu == 1 || prelen == 0 || memory_no_alias(pre, prelen))
+  requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
+  requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
@@ -463,12 +490,17 @@ __contract__(
 /*************************************************
  * Name:        mld_sign_verify_extmu
  *
- * Description: Verifies signature.
+ * Description: Verifies signature in "external mu" mode: the caller has
+ *              already computed the message representative
+ *              mu = SHAKE256(tr || M', 64), where tr = SHAKE256(pk, 64)
+ *              and M' is the FIPS 204 formatted message (e.g.
+ *              0x00 || ctxlen || ctx || msg for pure ML-DSA). The same
+ *              mu must have been used at signing time.
  *
  * Arguments:   - const uint8_t *sig: pointer to input signature
  *              - size_t siglen:      length of signature
  *              - const uint8_t mu[MLDSA_CRHBYTES]:
- *                                    input mu
+ *                                    precomputed message representative
  *              - const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES]:
  *                                    bit-packed public key
  *
