@@ -39,13 +39,11 @@
 #include "keccakf1600.h"
 #if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
-/*************************************************
- * Name:        keccak_init
+/**
+ * Initializes the Keccak state.
  *
- * Description: Initializes the Keccak state.
- *
- * Arguments:   - uint64_t *s: pointer to Keccak state
- **************************************************/
+ * @param[out] s Pointer to Keccak state.
+ */
 static void keccak_init(uint64_t s[MLD_KECCAK_LANES])
 __contract__(
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
@@ -55,19 +53,17 @@ __contract__(
   mld_memset(s, 0, sizeof(uint64_t) * MLD_KECCAK_LANES);
 }
 
-/*************************************************
- * Name:        keccak_absorb
+/**
+ * Absorb step of Keccak; incremental.
  *
- * Description: Absorb step of Keccak; incremental.
+ * @param[in,out] s     Pointer to Keccak state.
+ * @param         pos   Position in current block to be absorbed.
+ * @param         r     Rate in bytes (e.g., 168 for SHAKE128).
+ * @param[in]     in    Pointer to input to be absorbed into s.
+ * @param         inlen Length of input in bytes.
  *
- * Arguments:   - uint64_t *s: pointer to Keccak state
- *              - unsigned int pos: position in current block to be absorbed
- *              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
- *              - const uint8_t *in: pointer to input to be absorbed into s
- *              - size_t inlen: length of input in bytes
- *
- * Returns new position pos in current block
- **************************************************/
+ * @return New position pos in current block.
+ */
 static unsigned int keccak_absorb(uint64_t s[MLD_KECCAK_LANES],
                                   unsigned int pos, unsigned int r,
                                   const uint8_t *in, size_t inlen)
@@ -104,16 +100,14 @@ __contract__(
   return (unsigned)(pos + inlen);
 }
 
-/*************************************************
- * Name:        keccak_finalize
+/**
+ * Finalize absorb step.
  *
- * Description: Finalize absorb step.
- *
- * Arguments:   - uint64_t *s: pointer to Keccak state
- *              - unsigned int pos: position in current block to be absorbed
- *              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
- *              - uint8_t p: domain separation byte
- **************************************************/
+ * @param[in,out] s   Pointer to Keccak state.
+ * @param         pos Position in current block to be absorbed.
+ * @param         r   Rate in bytes (e.g., 168 for SHAKE128).
+ * @param         p   Domain separation byte.
+ */
 static void keccak_finalize(uint64_t s[MLD_KECCAK_LANES], unsigned int pos,
                             unsigned int r, uint8_t p)
 __contract__(
@@ -128,22 +122,19 @@ __contract__(
   mld_keccakf1600_xor_bytes(s, &b, r - 1, 1);
 }
 
-/*************************************************
- * Name:        keccak_squeeze
+/**
+ * Squeeze step of Keccak. Squeezes arbitrarily many bytes. Modifies the
+ * state. Can be called multiple times to keep squeezing, i.e., is
+ * incremental.
  *
- * Description: Squeeze step of Keccak. Squeezes arbitratrily many bytes.
- *              Modifies the state. Can be called multiple times to keep
- *              squeezing, i.e., is incremental.
+ * @param[out]    out    Pointer to output data.
+ * @param         outlen Number of bytes to be squeezed (written to out).
+ * @param[in,out] s      Pointer to input/output Keccak state.
+ * @param         pos    Number of bytes in current block already squeezed.
+ * @param         r      Rate in bytes (e.g., 168 for SHAKE128).
  *
- * Arguments:   - uint8_t *out: pointer to output data
- *              - size_t outlen: number of bytes to be squeezed (written to out)
- *              - uint64_t *s: pointer to input/output Keccak state
- *              - unsigned int pos: number of bytes in current block already
- *squeezed
- *              - unsigned int r: rate in bytes (e.g., 168 for SHAKE128)
- *
- * Returns new position pos in current block
- **************************************************/
+ * @return New position pos in current block.
+ */
 static unsigned int keccak_squeeze(uint8_t *out, size_t outlen,
                                    uint64_t s[MLD_KECCAK_LANES],
                                    unsigned int pos, unsigned int r)

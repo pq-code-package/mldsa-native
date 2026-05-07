@@ -440,16 +440,14 @@ __contract__(
 }
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
-/*************************************************
- * Name:        mld_polyvec_matrix_expand_eager
+/**
+ * Implementation of ExpandA. Generates matrix A with uniformly random
+ * coefficients a_{i,j} by performing rejection sampling on the output stream
+ * of SHAKE128(rho|j|i).
  *
- * Description: Implementation of ExpandA. Generates matrix A with uniformly
- *              random coefficients a_{i,j} by performing rejection
- *              sampling on the output stream of SHAKE128(rho|j|i)
- *
- * Arguments:   - mld_polymat_eager *mat: pointer to output matrix
- *              - const uint8_t rho[]: byte array containing seed rho
- **************************************************/
+ * @param[out] mat Pointer to output matrix.
+ * @param[in]  rho Byte array containing seed rho.
+ */
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
                                      const uint8_t rho[MLDSA_SEEDBYTES])
@@ -461,19 +459,18 @@ __contract__(
     array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 );
 
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery_row_eager
+/**
+ * Compute row i of matrix-vector multiplication in NTT domain with pointwise
+ * multiplication and multiplication by 2^{-32}.
  *
- * Description: Compute row i of matrix-vector multiplication in NTT domain
- *              with pointwise multiplication and multiplication by 2^{-32}.
- *              Input matrix and vector must be in NTT domain representation.
- *              Output coefficients are bounded by MLDSA_Q in absolute value.
+ * Input matrix and vector must be in NTT domain representation. Output
+ * coefficients are bounded by MLDSA_Q in absolute value.
  *
- * Arguments:   - mld_poly *t_row: pointer to output row polynomial
- *              - mld_polymat_eager *mat: pointer to input matrix
- *              - const mld_polyvecl *v: pointer to input vector v
- *              - unsigned int i: row index, 0 <= i < MLDSA_K
- **************************************************/
+ * @param[out] t_row Pointer to output row polynomial.
+ * @param[in]  mat   Pointer to input matrix.
+ * @param[in]  v     Pointer to input vector v.
+ * @param      i     Row index, 0 <= i < MLDSA_K.
+ */
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_row_eager(mld_poly *t_row,
                                                        mld_polymat_eager *mat,
@@ -493,19 +490,18 @@ __contract__(
 );
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery_yvec_eager
+/**
+ * Compute w = invNTT(A * NTT(y)) for the signing y vector.
  *
- * Description: Compute w = invNTT(A * NTT(y)) for the signing y vector.
- *              The eager variant copies y into the scratch polyvecl, NTTs
- *              it in place, calls the standard matrix-vector multiply,
- *              and finally inverse-NTTs the result into w.
+ * The eager variant copies y into the scratch polyvecl, NTTs it in place,
+ * calls the standard matrix-vector multiply, and finally inverse-NTTs the
+ * result into w.
  *
- * Arguments:   - mld_polyveck *w: pointer to output vector
- *              - mld_polymat_eager *mat: pointer to input matrix
- *              - const mld_yvec_eager *y: pointer to (non-NTT) y vector
- *              - mld_polyvecl *scratch: scratch polyvecl for NTT'd copy of y
- **************************************************/
+ * @param[out] w       Pointer to output vector.
+ * @param[in]  mat     Pointer to input matrix.
+ * @param[in]  y       Pointer to (non-NTT) y vector.
+ * @param[out] scratch Scratch polyvecl for NTT'd copy of y.
+ */
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
                                                         mld_polymat_eager *mat,
@@ -539,22 +535,19 @@ __contract__(
 );
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery_row_lazy
+/**
+ * Compute row i of matrix-vector multiplication in NTT domain with pointwise
+ * multiplication and multiplication by 2^{-32}.
  *
- * Description: Compute row i of matrix-vector multiplication in NTT domain
- *              with pointwise multiplication and multiplication by 2^{-32}.
- *              Input vector must be in NTT domain representation; the matrix
- *              entries are sampled on demand from the seed stored in mat->rho,
- *              using mat->cur as scratch.
- *              Output coefficients are bounded by MLDSA_Q in absolute value.
+ * Input vector must be in NTT domain representation; the matrix entries are
+ * sampled on demand from the seed stored in mat->rho, using mat->cur as
+ * scratch. Output coefficients are bounded by MLDSA_Q in absolute value.
  *
- * Arguments:   - mld_poly *t_row: pointer to output row polynomial
- *              - mld_polymat_lazy *mat: pointer to input matrix (seed +
- *                  scratch)
- *              - const mld_polyvecl *v: pointer to input vector v
- *              - unsigned int i: row index, 0 <= i < MLDSA_K
- **************************************************/
+ * @param[out]    t_row Pointer to output row polynomial.
+ * @param[in,out] mat   Pointer to input matrix (seed + scratch).
+ * @param[in]     v     Pointer to input vector v.
+ * @param         i     Row index, 0 <= i < MLDSA_K.
+ */
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
                                                       mld_polymat_lazy *mat,
@@ -574,23 +567,21 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/*************************************************
- * Name:        mld_polyvec_matrix_pointwise_montgomery_yvec_lazy
+/**
+ * Compute w = invNTT(A * NTT(y)) for the signing y vector.
  *
- * Description: Compute w = invNTT(A * NTT(y)) for the signing y vector.
- *              The lazy variant samples one column of y at a time, NTTs it
- *              into &scratch->vec[0], and accumulates the matrix-vector
- *              product column-by-column with on-demand sampling of A[k][l].
- *              Only the first poly of the polyvecl scratch is used; the
- *              polyvecl type is shared with the eager variant for API
- *              uniformity (the storage is provided "for free" by the
- *              caller's polyveck/polyvecl union in REDUCE_RAM mode).
+ * The lazy variant samples one column of y at a time, NTTs it into
+ * &scratch->vec[0], and accumulates the matrix-vector product
+ * column-by-column with on-demand sampling of A[k][l]. Only the first poly of
+ * the polyvecl scratch is used; the polyvecl type is shared with the eager
+ * variant for API uniformity (the storage is provided "for free" by the
+ * caller's polyveck/polyvecl union in REDUCE_RAM mode).
  *
- * Arguments:   - mld_polyveck *w: pointer to output vector
- *              - mld_polymat_lazy *mat: pointer to input matrix
- *              - const mld_yvec_lazy *y: pointer to y seed/nonce
- *              - mld_polyvecl *scratch: scratch (only &scratch->vec[0] used)
- **************************************************/
+ * @param[out]    w       Pointer to output vector.
+ * @param[in,out] mat     Pointer to input matrix.
+ * @param[in]     y       Pointer to y seed/nonce.
+ * @param[out]    scratch Scratch (only &scratch->vec[0] used).
+ */
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
                                                        mld_polymat_lazy *mat,

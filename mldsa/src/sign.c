@@ -68,20 +68,26 @@ __contract__(
 );
 
 #if defined(MLD_CONFIG_KEYGEN_PCT)
-/*************************************************
- * @[FIPS140_3_IG]
- * (https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf)
+/**
+ * Pair-wise Consistency Test (PCT) for DSA keypairs.
  *
- * TE10.35.02: Pair-wise Consistency Test (PCT) for DSA keypairs
+ * @[FIPS140_3_IG] TE10.35.02
+ * (https://csrc.nist.gov/csrc/media/Projects/cryptographic-module-validation-program/documents/fips%20140-3/FIPS%20140-3%20IG.pdf).
  *
- * Purpose: Validates that a generated public/private key pair can correctly
- * sign and verify data. Test performs signature generation using the private
- * key (sk), followed by signature verification using the public key (pk).
- * Returns 0 if the signature was successfully verified, non-zero if it cannot.
+ * Validates that a generated public/private key pair can correctly sign and
+ * verify data. Performs signature generation using the private key (sk),
+ * followed by signature verification using the public key (pk).
  *
- * Note: @[FIPS204] requires that public/private key pairs are to be used only
- * for the calculation and/of verification of digital signatures.
- **************************************************/
+ * @note @[FIPS204] requires that public/private key pairs are to be used
+ * only for the calculation and/or verification of digital signatures.
+ *
+ * @param[in] pk      Public key.
+ * @param[in] sk      Secret key.
+ * @param     context Application context (build-configurable; see
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ *
+ * @return 0 if the signature was successfully verified, non-zero otherwise.
+ */
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -196,27 +202,26 @@ __contract__(
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 }
 
-/*************************************************
- * Name:        mld_compute_pack_t0_t1
+/**
+ * Compute t = A*s1hat + s2 row by row, decompose each row into t0[k] and
+ * t1[k] via power2round, and bit-pack t1[k] into pk_t1 and t0[k] into the
+ * t0_packed buffer. Used by both keygen and pk_from_sk.
  *
- * Description: Compute t = A*s1hat + s2 row by row, decompose each row
- *              into t0[k] and t1[k] via power2round, and bit-pack t1[k]
- *              into pk_t1 and t0[k] into the t0_packed buffer. Used by
- *              both keygen and pk_from_sk.
+ * @param[out] pk_t1     Output buffer for packed t1 (size
+ *                       MLDSA_K * MLDSA_POLYT1_PACKEDBYTES; i.e. the t1
+ *                       region of pk).
+ * @param[out] t0_packed Output buffer for packed t0 (size
+ *                       MLDSA_K * MLDSA_POLYT0_PACKEDBYTES).
+ * @param[in]  s1hat     s1 in NTT domain.
+ * @param[in]  s2        s2.
+ * @param[in]  rho       Byte array containing seed rho.
+ * @param      context   Application context (build-configurable; see
+ *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
  *
- * Arguments:   - uint8_t pk_t1[]: output buffer for packed t1
- *                                 (size MLDSA_K * MLDSA_POLYT1_PACKEDBYTES;
- *                                 i.e. the t1 region of pk)
- *              - uint8_t t0_packed[]: output buffer for packed t0
- *                                     (size MLDSA_K * MLDSA_POLYT0_PACKEDBYTES)
- *              - const mld_polyvecl *s1hat: s1 in NTT domain
- *              - const mld_polyveck *s2: s2
- *              - const uint8_t rho[]: byte array containing seed rho
- *
- * Returns:     - 0: Success
- *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
- *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- **************************************************/
+ * @return - 0: Success.
+ *         - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is used and
+ *           an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ */
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_t0_t1(
     uint8_t pk_t1[MLDSA_K * MLDSA_POLYT1_PACKEDBYTES],
@@ -426,28 +431,21 @@ cleanup:
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-/*************************************************
- * Name:        mld_H
+/**
+ * Abstracts application of SHAKE256 to one, two or three blocks of data,
+ * yielding a user-requested size of output.
  *
- * Description: Abstracts application of SHAKE256 to
- *              one, two or three blocks of data,
- *              yielding a user-requested size of
- *              output.
- *
- * Arguments:   - uint8_t *out: pointer to output
- *              - size_t outlen: requested output length in bytes
- *              - const uint8_t *in1: pointer to input block 1
- *                                    Must NOT be NULL
- *              - size_t in1len: length of input in1 bytes
- *              - const uint8_t *in2: pointer to input block 2
- *                                    May be NULL if in2len=0, in which case
- *                                    this block is ignored
- *              - size_t in2len: length of input in2 bytes
- *              - const uint8_t *in3: pointer to input block 3
- *                                    May be NULL if in3len=0, in which case
- *                                    this block is ignored
- *              - size_t in3len: length of input in3 bytes
- **************************************************/
+ * @param[out] out    Pointer to output.
+ * @param      outlen Requested output length in bytes.
+ * @param[in]  in1    Pointer to input block 1. Must NOT be NULL.
+ * @param      in1len Length of input in1 in bytes.
+ * @param[in]  in2    Pointer to input block 2. May be NULL if in2len == 0,
+ *                    in which case this block is ignored.
+ * @param      in2len Length of input in2 in bytes.
+ * @param[in]  in3    Pointer to input block 3. May be NULL if in3len == 0,
+ *                    in which case this block is ignored.
+ * @param      in3len Length of input in3 in bytes.
+ */
 static void mld_H(uint8_t *out, size_t outlen, const uint8_t *in1,
                   size_t in1len, const uint8_t *in2, size_t in2len,
                   const uint8_t *in3, size_t in3len)
@@ -492,30 +490,26 @@ __contract__(
  * Explicitly checking for this explicitly allows us to prove type-safety. */
 #define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
 
-/*************************************************
- * Name:        mld_compute_pack_z
+/**
+ * Compute z = y + s1*c, check that z has coefficients smaller than
+ * MLDSA_GAMMA1 - MLDSA_BETA, and pack z into the signature buffer.
  *
- * Description: Computes z = y + s1*c, checks that z has coefficients smaller
- *              than MLDSA_GAMMA1 - MLDSA_BETA, and packs z into the
- *              signature buffer.
+ * @reference{This function is inlined into mld_sign_signature in the
+ * reference implementation.}
  *
- * Arguments:   - uint8_t *sig: output signature
- *              - const mld_poly *cp: challenge polynomial
- *              - const mld_sk_s1hat *s1hat: secret vector s1 in NTT domain
- *              - const mld_yvec *y: masking vector y (or seed in REDUCE_RAM
- * mode)
- *              - mld_poly *z: scratch polynomial for z computation
- *              - mld_poly *tmp: scratch polynomial
+ * @param[in,out] sig   Output signature.
+ * @param[in]     cp    Challenge polynomial.
+ * @param[in]     s1hat Secret vector s1 in NTT domain.
+ * @param[in]     y     Masking vector y (or seed in REDUCE_RAM mode).
+ * @param[out]    z     Scratch polynomial for z computation.
+ * @param[out]    tmp   Scratch polynomial.
  *
- * Returns:     - 0: Success (z has coefficients smaller than
- *                   MLDSA_GAMMA1 - MLDSA_BETA,)
- *              - MLD_ERR_FAIL: z rejected (norm check failed)
- *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
- *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *
- * Reference: This function is inlined into mld_sign_signature in the
- *            reference implementation.
- **************************************************/
+ * @return - 0: Success (z has coefficients smaller than
+ *           MLDSA_GAMMA1 - MLDSA_BETA).
+ *         - MLD_ERR_FAIL: z rejected (norm check failed).
+ *         - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is used and
+ *           an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ */
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
                               const mld_poly *cp, const mld_sk_s1hat *s1hat,
@@ -621,31 +615,30 @@ __contract__(
   return MLD_CONFIG_MAX_SIGNING_ATTEMPTS;
 }
 
-/*************************************************
- * Name:        attempt_signature_generation
+/**
+ * Attempt to generate a single signature.
  *
- * Description: Attempts to generate a single signature.
+ * @reference{This code differs from the reference implementation in that it
+ * factors out the core signature generation step into a distinct function
+ * here in order to improve efficiency of CBMC proof.}
  *
- * Arguments:   - uint8_t *sig: pointer to output signature
- *              - const uint8_t *mu: pointer to message or hash
- *                                   of exactly MLDSA_CRHBYTES bytes
- *              - const uint8_t *rhoprime: pointer to randomness seed
- *              - uint16_t nonce: current nonce value
- *              - const mld_polymat *mat: expanded matrix
- *              - const mld_sk_s1hat *s1hat: secret vector s1 in NTT domain
- *              - const mld_sk_s2hat *s2hat: secret vector s2 in NTT domain
- *              - const mld_sk_t0hat *t0hat: vector t0 in NTT domain
+ * @param[out] sig      Pointer to output signature.
+ * @param[in]  mu       Pointer to message or hash of exactly MLDSA_CRHBYTES
+ *                      bytes.
+ * @param[in]  rhoprime Pointer to randomness seed.
+ * @param      nonce    Current nonce value.
+ * @param[in]  mat      Expanded matrix.
+ * @param[in]  s1hat    Secret vector s1 in NTT domain.
+ * @param[in]  s2hat    Secret vector s2 in NTT domain.
+ * @param[in]  t0hat    Vector t0 in NTT domain.
+ * @param      context  Application context (build-configurable; see
+ *                      MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
  *
- * Returns:     - 0: Signature generation succeeded
- *              - MLD_ERR_FAIL: Signature rejected (norm check failed)
- *              - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is
- *                  used and an allocation via MLD_CUSTOM_ALLOC returned NULL.
- *
- * Reference: This code differs from the reference implementation
- *            in that it factors out the core signature generation
- *            step into a distinct function here in order to improve
- *            efficiency of CBMC proof.
- **************************************************/
+ * @return - 0: Signature generation succeeded.
+ *         - MLD_ERR_FAIL: Signature rejected (norm check failed).
+ *         - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is used and
+ *           an allocation via MLD_CUSTOM_ALLOC returned NULL.
+ */
 MLD_MUST_CHECK_RETURN_VALUE
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
@@ -1439,15 +1432,12 @@ int mld_sign_verify_pre_hash_shake256(
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define MLD_PRE_HASH_OID_LEN 11
 
-/*************************************************
- * Name:        mld_get_hash_oid
+/**
+ * Return the OID of a given SHA-2/SHA-3 hash function.
  *
- * Description: Returns the OID of a given SHA-2/SHA-3 hash function.
- *
- * Arguments:   - uint8_t oid[11]: pointer to output oid
- *              - int hashalg: hash algorithm constant (MLD_PREHASH_*)
- *
- ***************************************************/
+ * @param[out] oid     Pointer to output OID.
+ * @param      hashalg Hash algorithm constant (MLD_PREHASH_*).
+ */
 static void mld_get_hash_oid(uint8_t oid[MLD_PRE_HASH_OID_LEN], int hashalg)
 {
   unsigned int i;

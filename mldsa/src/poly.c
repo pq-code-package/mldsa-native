@@ -331,17 +331,15 @@ void mld_poly_ntt(mld_poly *a)
   mld_poly_ntt_c(a);
 }
 
-/*************************************************
- * Name:        mld_fqscale
+/**
+ * Scale a field element by mont/256, i.e., perform Montgomery multiplication
+ * by mont^2/256.
  *
- * Description: Scales a field element by mont/256 , i.e., performs Montgomery
- *              multiplication by mont^2/256.
- *              Input is expected to have absolute value smaller than
- *              256 * MLDSA_Q.
- *              Output has absolute value smaller than MLD_INTT_BOUND.
+ * Input is expected to have absolute value smaller than 256 * MLDSA_Q. Output
+ * has absolute value smaller than MLD_INTT_BOUND.
  *
- * Arguments:   - int32_t a: Field element to be scaled.
- **************************************************/
+ * @param a Field element to be scaled.
+ */
 static MLD_INLINE int32_t mld_fqscale(int32_t a)
 __contract__(
   requires(a > -256*MLDSA_Q && a < 256*MLDSA_Q)
@@ -587,23 +585,19 @@ __contract__(
 
   return ctr;
 }
-/*************************************************
- * Name:        mld_rej_uniform
+/**
+ * Sample uniformly random coefficients in [0, MLDSA_Q-1] by performing
+ * rejection sampling on an array of random bytes.
  *
- * Description: Sample uniformly random coefficients in [0, MLDSA_Q-1] by
- *              performing rejection sampling on array of random bytes.
+ * @param[out] a      Pointer to output array (allocated).
+ * @param      target Requested number of coefficients to sample.
+ * @param      offset Number of coefficients already sampled.
+ * @param[in]  buf    Array of random bytes to sample from.
+ * @param      buflen Length of array of random bytes (must be multiple of 3).
  *
- * Arguments:   - int32_t *a: pointer to output array (allocated)
- *              - unsigned int target:  requested number of coefficients to
- *sample
- *              - unsigned int offset:  number of coefficients already sampled
- *              - const uint8_t *buf: array of random bytes to sample from
- *              - unsigned int buflen: length of array of random bytes (must be
- *                multiple of 3)
- *
- * Returns number of sampled coefficients. Can be smaller than len if not enough
- * random bytes were given.
- **************************************************/
+ * @return Number of sampled coefficients. Can be smaller than len if not
+ *         enough random bytes were given.
+ */
 
 /* Reference: `mld_rej_uniform()` in the reference implementation @[REF].
  *            - Our signature differs from the reference implementation

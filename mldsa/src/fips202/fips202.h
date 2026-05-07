@@ -33,13 +33,11 @@ typedef struct
 } mld_shake256ctx;
 
 #define mld_shake128_init MLD_NAMESPACE(shake128_init)
-/*************************************************
- * Name:        mld_shake128_init
+/**
+ * Initializes state for use as SHAKE128 XOF.
  *
- * Description: Initializes state for use as SHAKE128 XOF
- *
- * Arguments:   - mld_shake128ctx *state: pointer to (uninitialized) state
- **************************************************/
+ * @param[out] state Pointer to (uninitialized) state.
+ */
 MLD_INTERNAL_API
 void mld_shake128_init(mld_shake128ctx *state)
 __contract__(
@@ -49,16 +47,14 @@ __contract__(
 );
 
 #define mld_shake128_absorb MLD_NAMESPACE(shake128_absorb)
-/*************************************************
- * Name:        mld_shake128_absorb
+/**
+ * Absorb step of the SHAKE128 XOF. Absorbs arbitrarily many bytes. Can be
+ * called multiple times to absorb multiple chunks of data.
  *
- * Description: Absorb step of the SHAKE128 XOF. Absorbs arbitrarily many bytes.
- *              Can be called multiple times to absorb multiple chunks of data.
- *
- * Arguments:   - mld_shake128ctx *state: pointer to (initialized) output state
- *              - const uint8_t *in: pointer to input to be absorbed into s
- *              - size_t inlen: length of input in bytes
- **************************************************/
+ * @param[in,out] state Pointer to (initialized) output state.
+ * @param[in]     in    Pointer to input to be absorbed into s.
+ * @param         inlen Length of input in bytes.
+ */
 MLD_INTERNAL_API
 void mld_shake128_absorb(mld_shake128ctx *state, const uint8_t *in,
                          size_t inlen)
@@ -72,13 +68,11 @@ __contract__(
 );
 
 #define mld_shake128_finalize MLD_NAMESPACE(shake128_finalize)
-/*************************************************
- * Name:        mld_shake128_finalize
+/**
+ * Concludes the absorb phase of the SHAKE128 XOF.
  *
- * Description: Concludes the absorb phase of the SHAKE128 XOF.
- *
- * Arguments:   - mld_shake128ctx *state: pointer to state
- **************************************************/
+ * @param[in,out] state Pointer to state.
+ */
 MLD_INTERNAL_API
 void mld_shake128_finalize(mld_shake128ctx *state)
 __contract__(
@@ -89,17 +83,14 @@ __contract__(
 );
 
 #define mld_shake128_squeeze MLD_NAMESPACE(shake128_squeeze)
-/*************************************************
- * Name:        mld_shake128_squeeze
+/**
+ * Squeeze step of SHAKE128 XOF. Squeezes arbitrarily many bytes. Can be
+ * called multiple times to keep squeezing.
  *
- * Description: Squeeze step of SHAKE128 XOF. Squeezes arbitrarily many
- *              bytes. Can be called multiple times to keep squeezing.
- *
- * Arguments:   - uint8_t *out: pointer to output blocks
- *              - size_t outlen : number of bytes to be squeezed (written to
- *output)
- *              - mld_shake128ctx *s: pointer to input/output state
- **************************************************/
+ * @param[out]    out    Pointer to output blocks.
+ * @param         outlen Number of bytes to be squeezed (written to output).
+ * @param[in,out] state  Pointer to input/output state.
+ */
 MLD_INTERNAL_API
 void mld_shake128_squeeze(uint8_t *out, size_t outlen, mld_shake128ctx *state)
 __contract__(
@@ -113,13 +104,11 @@ __contract__(
 );
 
 #define mld_shake128_release MLD_NAMESPACE(shake128_release)
-/*************************************************
- * Name:        mld_shake128_release
+/**
+ * Release and securely zero the SHAKE128 state.
  *
- * Description: Release and securely zero the SHAKE128 state.
- *
- * Arguments:   - mld_shake128ctx *state: pointer to state
- **************************************************/
+ * @param[in,out] state Pointer to state.
+ */
 MLD_INTERNAL_API
 void mld_shake128_release(mld_shake128ctx *state)
 __contract__(
@@ -128,13 +117,11 @@ __contract__(
 );
 
 #define mld_shake256_init MLD_NAMESPACE(shake256_init)
-/*************************************************
- * Name:        mld_shake256_init
+/**
+ * Initializes state for use as SHAKE256 XOF.
  *
- * Description: Initializes state for use as SHAKE256 XOF
- *
- * Arguments:   - mld_shake256ctx *state: pointer to (uninitialized) state
- **************************************************/
+ * @param[out] state Pointer to (uninitialized) state.
+ */
 MLD_INTERNAL_API
 void mld_shake256_init(mld_shake256ctx *state)
 __contract__(
@@ -144,16 +131,14 @@ __contract__(
 );
 
 #define mld_shake256_absorb MLD_NAMESPACE(shake256_absorb)
-/*************************************************
- * Name:        mld_shake256_absorb
+/**
+ * Absorb step of the SHAKE256 XOF. Absorbs arbitrarily many bytes. Can be
+ * called multiple times to absorb multiple chunks of data.
  *
- * Description: Absorb step of the SHAKE256 XOF. Absorbs arbitrarily many bytes.
- *              Can be called multiple times to absorb multiple chunks of data.
- *
- * Arguments:   - mld_shake256ctx *state: pointer to (initialized) output state
- *              - const uint8_t *in: pointer to input to be absorbed into s
- *              - size_t inlen: length of input in bytes
- **************************************************/
+ * @param[in,out] state Pointer to (initialized) output state.
+ * @param[in]     in    Pointer to input to be absorbed into s.
+ * @param         inlen Length of input in bytes.
+ */
 MLD_INTERNAL_API
 void mld_shake256_absorb(mld_shake256ctx *state, const uint8_t *in,
                          size_t inlen)
@@ -167,13 +152,11 @@ __contract__(
 );
 
 #define mld_shake256_finalize MLD_NAMESPACE(shake256_finalize)
-/*************************************************
- * Name:        mld_shake256_finalize
+/**
+ * Concludes the absorb phase of the SHAKE256 XOF.
  *
- * Description: Concludes the absorb phase of the SHAKE256 XOF.
- *
- * Arguments:   - mld_shake256ctx *state: pointer to state
- **************************************************/
+ * @param[in,out] state Pointer to state.
+ */
 MLD_INTERNAL_API
 void mld_shake256_finalize(mld_shake256ctx *state)
 __contract__(
@@ -184,17 +167,14 @@ __contract__(
 );
 
 #define mld_shake256_squeeze MLD_NAMESPACE(shake256_squeeze)
-/*************************************************
- * Name:        mld_shake256_squeeze
+/**
+ * Squeeze step of SHAKE256 XOF. Squeezes arbitrarily many bytes. Can be
+ * called multiple times to keep squeezing.
  *
- * Description: Squeeze step of SHAKE256 XOF. Squeezes arbitrarily many
- *              bytes. Can be called multiple times to keep squeezing.
- *
- * Arguments:   - uint8_t *out: pointer to output blocks
- *              - size_t outlen : number of bytes to be squeezed (written to
- *output)
- *              - mld_shake256ctx *s: pointer to input/output state
- **************************************************/
+ * @param[out]    out    Pointer to output blocks.
+ * @param         outlen Number of bytes to be squeezed (written to output).
+ * @param[in,out] state  Pointer to input/output state.
+ */
 MLD_INTERNAL_API
 void mld_shake256_squeeze(uint8_t *out, size_t outlen, mld_shake256ctx *state)
 __contract__(
@@ -208,13 +188,11 @@ __contract__(
 );
 
 #define mld_shake256_release MLD_NAMESPACE(shake256_release)
-/*************************************************
- * Name:        mld_shake256_release
+/**
+ * Release and securely zero the SHAKE256 state.
  *
- * Description: Release and securely zero the SHAKE256 state.
- *
- * Arguments:   - mld_shake256ctx *state: pointer to state
- **************************************************/
+ * @param[in,out] state Pointer to state.
+ */
 MLD_INTERNAL_API
 void mld_shake256_release(mld_shake256ctx *state)
 __contract__(
@@ -224,16 +202,14 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_CORE_API_ONLY)
 #define mld_shake256 MLD_NAMESPACE(shake256)
-/*************************************************
- * Name:        mld_shake256
+/**
+ * SHAKE256 XOF with non-incremental API.
  *
- * Description: SHAKE256 XOF with non-incremental API
- *
- * Arguments:   - uint8_t *out: pointer to output
- *              - size_t outlen: requested output length in bytes
- *              - const uint8_t *in: pointer to input
- *              - size_t inlen: length of input in bytes
- **************************************************/
+ * @param[out] out    Pointer to output.
+ * @param      outlen Requested output length in bytes.
+ * @param[in]  in     Pointer to input.
+ * @param      inlen  Length of input in bytes.
+ */
 MLD_INTERNAL_API
 void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 __contract__(

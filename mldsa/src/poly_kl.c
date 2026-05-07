@@ -163,22 +163,19 @@ void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-/*************************************************
- * Name:        mld_rej_eta
+/**
+ * Sample uniformly random coefficients in [-MLDSA_ETA, MLDSA_ETA] by
+ * performing rejection sampling on an array of random bytes.
  *
- * Description: Sample uniformly random coefficients in [-MLDSA_ETA, MLDSA_ETA]
- *by performing rejection sampling on array of random bytes.
+ * @param[out] a      Pointer to output array (allocated).
+ * @param      target Requested number of coefficients to sample.
+ * @param      offset Number of coefficients already sampled.
+ * @param[in]  buf    Array of random bytes to sample from.
+ * @param      buflen Length of array of random bytes.
  *
- * Arguments:   - int32_t *a:          pointer to output array (allocated)
- *              - unsigned int target: requested number of coefficients to
- *sample
- *              - unsigned int offset: number of coefficients already sampled
- *              - const uint8_t *buf:  array of random bytes to sample from
- *              - unsigned int buflen: length of array of random bytes
- *
- * Returns number of sampled coefficients. Can be smaller than target if not
- *enough random bytes were given.
- **************************************************/
+ * @return Number of sampled coefficients. Can be smaller than target if not
+ *         enough random bytes were given.
+ */
 
 /* Reference: `mld_rej_eta()` in the reference implementation @[REF].
  *            - Our signature differs from the reference implementation

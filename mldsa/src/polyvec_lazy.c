@@ -20,26 +20,22 @@
  * with native backends, which are currently not yet namespaced. */
 #define mld_polymat_expand_entry MLD_ADD_PARAM_SET(mld_polymat_expand_entry)
 
-/*************************************************
- * Name:        mld_polymat_expand_entry
+/**
+ * Sample a single matrix entry A[k][l] of ExpandA(rho) by rejection sampling
+ * from SHAKE128(rho|l|k), and apply the custom-order permutation when a
+ * native NTT backend is in use.
  *
- * Description: Sample a single matrix entry A[k][l] of ExpandA(rho)
- *              by rejection sampling from SHAKE128(rho|l|k), and
- *              apply the custom-order permutation when a native NTT
- *              backend is in use.
+ * The caller is expected to have copied rho into the first MLDSA_SEEDBYTES
+ * of seed_ext. This function writes the domain-separation bytes
+ * seed_ext[SEEDBYTES..+2] = {l, k} before sampling.
  *
- *              The caller is expected to have copied rho into the
- *              first MLDSA_SEEDBYTES of seed_ext. This function writes
- *              the domain-separation bytes seed_ext[SEEDBYTES..+2] =
- *              {l, k} before sampling.
- *
- * Arguments:   - mld_poly *p: pointer to output polynomial
- *              - uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)]:
- *                  seed buffer pre-filled with rho in the first
- *                  MLDSA_SEEDBYTES; the final two bytes are overwritten.
- *              - uint8_t l: column index (inner, aka nonce low byte)
- *              - uint8_t k: row index (outer, aka nonce high byte)
- **************************************************/
+ * @param[out]    p        Pointer to output polynomial.
+ * @param[in,out] seed_ext Seed buffer pre-filled with rho in the first
+ *                         MLDSA_SEEDBYTES; the final two bytes are
+ *                         overwritten.
+ * @param         l        Column index (inner, aka nonce low byte).
+ * @param         k        Row index (outer, aka nonce high byte).
+ */
 static MLD_INLINE void mld_polymat_expand_entry(
     mld_poly *p, uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)], uint8_t l,
     uint8_t k)
