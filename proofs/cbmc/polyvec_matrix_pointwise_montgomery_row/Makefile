@@ -21,9 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
 
 CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
 ifdef MLD_CONFIG_REDUCE_RAM
-USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
-USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
-USE_FUNCTION_CONTRACTS+=mld_poly_add
+USE_FUNCTION_CONTRACTS=mld_polymat_macc_cell
 USE_FUNCTION_CONTRACTS+=mld_poly_reduce
 else
 USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery

@@ -19,6 +19,7 @@
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define mld_polymat_expand_entry MLD_ADD_PARAM_SET(mld_polymat_expand_entry)
+#define mld_polymat_macc_cell MLD_ADD_PARAM_SET(mld_polymat_macc_cell)
 
 /*************************************************
  * Name:        mld_polymat_expand_entry
@@ -195,6 +196,63 @@ void mld_polyvec_matrix_expand_lazy(mld_polymat_lazy *mat,
   mld_memcpy(mat->rho, rho, MLDSA_SEEDBYTES);
 }
 
+/*************************************************
+ * Name:        mld_polymat_macc_cell
+ *
+ * Description: Multiply-accumulate one cell of a lazy matrix-vector product:
+ *
+ *                  out (op)= polymat_expand_entry(seed_ext, l, k) * operand,
+ *
+ *              where (op) is "=" on the first call (acc_count == 0) and "+="
+ *              on subsequent calls. On the first call, out is overwritten and
+ *              its prior contents are ignored; on subsequent calls, scratch
+ *              is used as temporary storage for the sampled matrix entry.
+ *
+ *              acc_count is the number of accumulations already applied to
+ *              out (0 on the first call, 1 after the first, etc.).
+ *
+ * Arguments:   - mld_poly *out: pointer to accumulator polynomial
+ *              - mld_poly *scratch: temporary polynomial storage
+ *              - uint8_t seed_ext[...]: seed buffer (last 2 bytes overwritten)
+ *              - uint8_t l: column index (inner)
+ *              - uint8_t k: row index (outer)
+ *              - const mld_poly *operand: pointer to operand polynomial
+ *              - unsigned int acc_count: number of accumulations already done
+ **************************************************/
+static MLD_INLINE void mld_polymat_macc_cell(
+    mld_poly *out, mld_poly *scratch,
+    uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)], uint8_t l, uint8_t k,
+    const mld_poly *operand, unsigned int acc_count)
+__contract__(
+  requires(memory_no_alias(out, sizeof(mld_poly)))
+  requires(memory_no_alias(scratch, sizeof(mld_poly)))
+  requires(memory_no_alias(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  requires(memory_no_alias(operand, sizeof(mld_poly)))
+  requires(array_abs_bound(operand->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  requires(acc_count < MLDSA_L)
+  requires(acc_count == 0 ||
+           array_abs_bound(out->coeffs, 0, MLDSA_N,
+                           (int)acc_count * MLDSA_Q))
+  assigns(memory_slice(out, sizeof(mld_poly)))
+  assigns(memory_slice(scratch, sizeof(mld_poly)))
+  assigns(memory_slice(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  ensures(array_abs_bound(out->coeffs, 0, MLDSA_N,
+                          ((int)acc_count + 1) * MLDSA_Q))
+)
+{
+  if (acc_count == 0)
+  {
+    mld_polymat_expand_entry(out, seed_ext, l, k);
+    mld_poly_pointwise_montgomery(out, operand);
+  }
+  else
+  {
+    mld_polymat_expand_entry(scratch, seed_ext, l, k);
+    mld_poly_pointwise_montgomery(scratch, operand);
+    mld_poly_add(out, scratch);
+  }
+}
+
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_INTERNAL_API
 void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
@@ -206,22 +264,19 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
-  mld_polymat_expand_entry(t_row, seed_ext, 0, (uint8_t)i);
-  mld_poly_pointwise_montgomery(t_row, &v->vec[0]);
-
-  for (l = 1; l < MLDSA_L; ++l)
+  for (l = 0; l < MLDSA_L; ++l)
   __loop__(
     assigns(l, object_whole(seed_ext),
             memory_slice(t_row, sizeof(mld_poly)),
             memory_slice(mat, sizeof(mld_polymat_lazy)))
-    invariant(l >= 1 && l <= MLDSA_L)
-    invariant(array_abs_bound(t_row->coeffs, 0, MLDSA_N, l * MLDSA_Q))
+    invariant(l <= MLDSA_L)
+    invariant(l == 0 ||
+              array_abs_bound(t_row->coeffs, 0, MLDSA_N, (int)l * MLDSA_Q))
     decreases(MLDSA_L - l)
   )
   {
-    mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
-    mld_poly_pointwise_montgomery(&mat->cur, &v->vec[l]);
-    mld_poly_add(t_row, &mat->cur);
+    mld_polymat_macc_cell(t_row, &mat->cur, seed_ext, (uint8_t)l, (uint8_t)i,
+                          &v->vec[l], l);
   }
   mld_poly_reduce(t_row);
 
@@ -270,31 +325,18 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
               memory_slice(w, sizeof(mld_polyveck)),
               memory_slice(mat, sizeof(mld_polymat_lazy)))
       invariant(k <= MLDSA_K)
-      invariant(l != 0 ||
-                forall(k1, 0, k,
-                       array_abs_bound(w->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
-      invariant(l == 0 ||
-                forall(k2, 0, k,
-                       array_abs_bound(w->vec[k2].coeffs, 0, MLDSA_N,
+      invariant(forall(k1, 0, k,
+                       array_abs_bound(w->vec[k1].coeffs, 0, MLDSA_N,
                                        ((int)l + 1) * MLDSA_Q)))
       invariant(l == 0 ||
-                forall(k3, k, MLDSA_K,
-                       array_abs_bound(w->vec[k3].coeffs, 0, MLDSA_N,
+                forall(k2, k, MLDSA_K,
+                       array_abs_bound(w->vec[k2].coeffs, 0, MLDSA_N,
                                        (int)l * MLDSA_Q)))
       decreases(MLDSA_K - k)
     )
     {
-      if (l == 0)
-      {
-        mld_polymat_expand_entry(&w->vec[k], seed_ext, 0, (uint8_t)k);
-        mld_poly_pointwise_montgomery(&w->vec[k], y_ntt);
-      }
-      else
-      {
-        mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
-        mld_poly_pointwise_montgomery(&mat->cur, y_ntt);
-        mld_poly_add(&w->vec[k], &mat->cur);
-      }
+      mld_polymat_macc_cell(&w->vec[k], &mat->cur, seed_ext, (uint8_t)l,
+                            (uint8_t)k, y_ntt, l);
     }
   }
 
@@ -310,3 +352,4 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_polymat_expand_entry
+#undef mld_polymat_macc_cell
