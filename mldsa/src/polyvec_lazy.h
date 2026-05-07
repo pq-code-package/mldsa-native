@@ -32,6 +32,19 @@
 #include "poly_kl.h"
 #include "polyvec.h"
 
+/* Build-time gate macros: in unit test mode both eager and lazy variants are
+ * compiled so the unit test suite can exercise both paths. */
+#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#define MLD_NEED_EAGER 1
+#else
+#define MLD_NEED_EAGER 0
+#endif
+#if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#define MLD_NEED_LAZY 1
+#else
+#define MLD_NEED_LAZY 0
+#endif
+
 /* Parameter set namespacing */
 #define mld_sk_s1hat_eager MLD_ADD_PARAM_SET(mld_sk_s1hat_eager)
 #define mld_sk_s1hat_lazy MLD_ADD_PARAM_SET(mld_sk_s1hat_lazy)
@@ -135,7 +148,7 @@ typedef struct
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 /* s1vec */
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if MLD_NEED_EAGER
 static MLD_INLINE void mld_unpack_sk_s1hat_eager(
     mld_sk_s1hat_eager *s1,
     const uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
@@ -164,8 +177,8 @@ __contract__(
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = s1->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
-#if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#endif /* MLD_NEED_EAGER */
+#if MLD_NEED_LAZY
 static MLD_INLINE void mld_unpack_sk_s1hat_lazy(
     mld_sk_s1hat_lazy *s1,
     const uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
@@ -192,12 +205,12 @@ __contract__(
   mld_poly_ntt(buf);
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_LAZY */
 
 /* s2vec */
 
 #if (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
-    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+    MLD_NEED_EAGER
 static MLD_INLINE void mld_unpack_sk_s2hat_eager(
     mld_sk_s2hat_eager *s2,
     const uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
@@ -226,9 +239,8 @@ __contract__(
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = s2->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
-          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
-#if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && MLD_NEED_EAGER */
+#if MLD_NEED_LAZY
 static MLD_INLINE void mld_unpack_sk_s2hat_lazy(
     mld_sk_s2hat_lazy *s2,
     const uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
@@ -255,12 +267,12 @@ __contract__(
   mld_poly_ntt(buf);
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_LAZY */
 
 /* t0vec */
 
 #if (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
-    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+    MLD_NEED_EAGER
 static MLD_INLINE void mld_unpack_sk_t0hat_eager(
     mld_sk_t0hat_eager *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
@@ -302,9 +314,8 @@ __contract__(
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = t0->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
-          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
-#if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && MLD_NEED_EAGER */
+#if MLD_NEED_LAZY
 static MLD_INLINE void mld_unpack_sk_t0hat_lazy(
     mld_sk_t0hat_lazy *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
@@ -331,13 +342,12 @@ __contract__(
   mld_poly_ntt(buf);
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_LAZY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 /* yvec */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) && \
-    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+#if !defined(MLD_CONFIG_NO_SIGN_API) && MLD_NEED_EAGER
 static MLD_INLINE void mld_yvec_init_eager(
     mld_yvec_eager *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
 __contract__(
@@ -363,10 +373,8 @@ __contract__(
   assigns(memory_slice(buf, sizeof(mld_poly)))
   ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 ) { *buf = y->vec.vec[i]; }
-#endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
-        */
-#if !defined(MLD_CONFIG_NO_SIGN_API) && \
-    (defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+#endif /* !MLD_CONFIG_NO_SIGN_API && MLD_NEED_EAGER */
+#if !defined(MLD_CONFIG_NO_SIGN_API) && MLD_NEED_LAZY
 static MLD_INLINE void mld_yvec_init_lazy(
     mld_yvec_lazy *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
 __contract__(
@@ -399,18 +407,17 @@ __contract__(
   mld_poly_uniform_gamma1(buf, y->rhoprime,
                           (uint16_t)(MLDSA_L * y->nonce + (int)i));
 }
-#endif /* !MLD_CONFIG_NO_SIGN_API && (MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
-        */
+#endif /* !MLD_CONFIG_NO_SIGN_API && MLD_NEED_LAZY */
 
 /* polymat */
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if MLD_NEED_EAGER
 /* Eager: precompute and store full matrix. */
 typedef struct
 {
   mld_polyvecl vec[MLDSA_K];
 } mld_polymat_eager;
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_EAGER */
 
 /* Lazy: store seed, sample elements on demand.
  * cur holds the on-demand sampled matrix element A[k][l]. */
@@ -438,7 +445,7 @@ __contract__(
 #endif
 }
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if MLD_NEED_EAGER
 /*************************************************
  * Name:        mld_polyvec_matrix_expand_eager
  *
@@ -525,9 +532,9 @@ __contract__(
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_EAGER */
 
-#if defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if MLD_NEED_LAZY
 MLD_INTERNAL_API
 void mld_polyvec_matrix_expand_lazy(mld_polymat_lazy *mat,
                                     const uint8_t rho[MLDSA_SEEDBYTES])
@@ -609,7 +616,7 @@ __contract__(
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
-#endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* MLD_NEED_LAZY */
 
 /* Dispatch: typedef and define based on MLD_CONFIG_REDUCE_RAM */
 #if defined(MLD_CONFIG_REDUCE_RAM)
@@ -655,6 +662,9 @@ typedef mld_yvec_eager mld_yvec;
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
+
+#undef MLD_NEED_EAGER
+#undef MLD_NEED_LAZY
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

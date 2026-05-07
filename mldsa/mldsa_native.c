@@ -333,6 +333,8 @@
 #undef mld_polyvecl_unpack_eta
 #undef mld_polyvecl_unpack_z
 /* mldsa/src/polyvec_lazy.h */
+#undef MLD_NEED_EAGER
+#undef MLD_NEED_LAZY
 #undef MLD_POLYVEC_LAZY_H
 #undef mld_poly_permute_bitrev_to_custom_optional
 #undef mld_polymat
