@@ -85,51 +85,53 @@
 #define mld_yvec_get_poly_lazy MLD_ADD_PARAM_SET(mld_yvec_get_poly_lazy)
 /* End of parameter set namespacing */
 
-/* Eager: precompute and store full NTT'd vector */
+/** Eager s1hat: precomputed s1 vector in NTT domain. */
 typedef struct
 {
-  mld_polyvecl vec;
+  mld_polyvecl vec; /**< s1 vector in NTT domain. */
 } mld_sk_s1hat_eager;
 
+/** Eager s2hat: precomputed s2 vector in NTT domain. */
 typedef struct
 {
-  mld_polyveck vec;
+  mld_polyveck vec; /**< s2 vector in NTT domain. */
 } mld_sk_s2hat_eager;
 
+/** Eager t0hat: precomputed t0 vector in NTT domain. */
 typedef struct
 {
-  mld_polyveck vec;
+  mld_polyveck vec; /**< t0 vector in NTT domain. */
 } mld_sk_t0hat_eager;
 
-/* Lazy: borrow packed data, unpack and NTT on demand */
+/** Lazy s1hat: borrow packed s1, unpack and convert to NTT domain on demand. */
 typedef struct
 {
-  const uint8_t *packed;
+  const uint8_t *packed; /**< Pointer to packed s1 in the secret key. */
 } mld_sk_s1hat_lazy;
 
+/** Lazy s2hat: borrow packed s2, unpack and convert to NTT domain on demand. */
 typedef struct
 {
-  const uint8_t *packed;
+  const uint8_t *packed; /**< Pointer to packed s2 in the secret key. */
 } mld_sk_s2hat_lazy;
 
+/** Lazy t0hat: borrow packed t0, unpack and convert to NTT domain on demand. */
 typedef struct
 {
-  const uint8_t *packed;
+  const uint8_t *packed; /**< Pointer to packed t0 in the secret key. */
 } mld_sk_t0hat_lazy;
 
-/* yvec (signing masking vector y).
- *
- * Eager: precompute and store the full y polyvecl.
- * Lazy:  store the seed and nonce, regenerate y[i] on demand. */
+/** Eager yvec: precomputed and stored full signing masking vector y. */
 typedef struct
 {
-  mld_polyvecl vec;
+  mld_polyvecl vec; /**< Masking vector y. */
 } mld_yvec_eager;
 
+/** Lazy yvec: store seed and nonce, regenerate y[i] on demand. */
 typedef struct
 {
-  const uint8_t *rhoprime;
-  uint16_t nonce;
+  const uint8_t *rhoprime; /**< Pointer to seed used to derive y. */
+  uint16_t nonce; /**< Base nonce; component i uses MLDSA_L*nonce + i. */
 } mld_yvec_lazy;
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
@@ -405,19 +407,18 @@ __contract__(
 /* polymat */
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
-/* Eager: precompute and store full matrix. */
+/** Eager polymat: precomputed and stored full MLDSA_K x MLDSA_L matrix. */
 typedef struct
 {
-  mld_polyvecl vec[MLDSA_K];
+  mld_polyvecl vec[MLDSA_K]; /**< Rows of the matrix. */
 } mld_polymat_eager;
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-/* Lazy: store seed, sample elements on demand.
- * cur holds the on-demand sampled matrix element A[k][l]. */
+/** Lazy polymat: store seed, sample elements A[k][l] on demand. */
 typedef struct
 {
-  mld_poly cur;
-  uint8_t rho[MLDSA_SEEDBYTES];
+  mld_poly cur; /**< On-demand sampled matrix element A[k][l]. */
+  uint8_t rho[MLDSA_SEEDBYTES]; /**< Public seed used to expand A. */
 } mld_polymat_lazy;
 
 static MLD_INLINE void mld_poly_permute_bitrev_to_custom_optional(mld_poly *p)

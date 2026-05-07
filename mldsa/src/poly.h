@@ -15,9 +15,13 @@
 /* Absolute exclusive upper bound for the output of the inverse NTT*/
 #define MLD_INTT_BOUND MLDSA_Q
 
+/**
+ * Element of R_q = Z_q[X]/(X^n + 1). Represents polynomial
+ * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1].
+ */
 typedef struct
 {
-  int32_t coeffs[MLDSA_N];
+  int32_t coeffs[MLDSA_N]; /**< Polynomial coefficients. */
 } MLD_ALIGN mld_poly;
 
 #define mld_poly_reduce MLD_NAMESPACE(poly_reduce)

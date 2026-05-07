@@ -18,10 +18,10 @@
 #define mld_polyveck MLD_ADD_PARAM_SET(mld_polyveck)
 /* End of parameter set namespacing */
 
-/* Vectors of polynomials of length MLDSA_L */
+/** Vector of MLDSA_L polynomials. */
 typedef struct
 {
-  mld_poly vec[MLDSA_L];
+  mld_poly vec[MLDSA_L]; /**< Component polynomials. */
 } mld_polyvecl;
 
 
@@ -147,10 +147,10 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
-/* Vectors of polynomials of length MLDSA_K */
+/** Vector of MLDSA_K polynomials. */
 typedef struct
 {
-  mld_poly vec[MLDSA_K];
+  mld_poly vec[MLDSA_K]; /**< Component polynomials. */
 } mld_polyveck;
 
 #if (!defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_REDUCE_RAM)) || \

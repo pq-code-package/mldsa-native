@@ -18,16 +18,18 @@
 #define SHA3_512_HASHBYTES 64
 
 
+/** Context for the incremental SHAKE128 XOF. */
 typedef struct
 {
-  uint64_t s[MLD_KECCAK_LANES];
-  unsigned int pos;
+  uint64_t s[MLD_KECCAK_LANES]; /**< Keccak state. */
+  unsigned int pos; /**< Byte position within the current Keccak block. */
 } mld_shake128ctx;
 
+/** Context for the incremental SHAKE256 XOF. */
 typedef struct
 {
-  uint64_t s[MLD_KECCAK_LANES];
-  unsigned int pos;
+  uint64_t s[MLD_KECCAK_LANES]; /**< Keccak state. */
+  unsigned int pos; /**< Byte position within the current Keccak block. */
 } mld_shake256ctx;
 
 #define mld_shake128_init MLD_NAMESPACE(shake128_init)

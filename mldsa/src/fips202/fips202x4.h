@@ -16,15 +16,18 @@
 #include "fips202.h"
 #include "keccakf1600.h"
 
-/* Context for non-incremental API */
+/** Context for the non-incremental 4-way SHAKE128 API. */
 typedef struct
 {
-  uint64_t ctx[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+  uint64_t ctx[MLD_KECCAK_LANES *
+               MLD_KECCAK_WAY]; /**< 4-way Keccak state, stored sequentially. */
 } mld_shake128x4ctx;
 
+/** Context for the 4-way batched SHAKE256 XOF. */
 typedef struct
 {
-  uint64_t ctx[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+  uint64_t ctx[MLD_KECCAK_LANES *
+               MLD_KECCAK_WAY]; /**< Interleaved 4-way Keccak state. */
 } mld_shake256x4ctx;
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
