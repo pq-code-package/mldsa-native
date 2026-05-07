@@ -98,8 +98,9 @@
  * @param[out] pk      Output public key.
  * @param[out] sk      Output private key.
  * @param[in]  seed    Input random seed.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -142,8 +143,9 @@ __contract__(
  *
  * @param[out] pk      Output public key.
  * @param[out] sk      Output private key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -199,8 +201,9 @@ __contract__(
  *                        computed internally.
  *                        non-zero: m points to a precomputed mu of
  *                        MLDSA_CRHBYTES bytes; pre/prelen unused.
- * @param      context    Application context (build-configurable; see
- *                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context    Application context. Only present when
+ *                        MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -254,8 +257,9 @@ __contract__(
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string. Should be <= 255.
  * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -302,8 +306,9 @@ __contract__(
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  mu      Precomputed message representative.
  * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -343,8 +348,9 @@ __contract__(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -400,8 +406,9 @@ __contract__(
  *                       computed internally.
  *                       non-zero: m points to a precomputed mu of
  *                       MLDSA_CRHBYTES bytes; pre/prelen unused.
- * @param     context    Application context (build-configurable; see
- *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context    Application context. Only present when
+ *                       MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -441,8 +448,9 @@ __contract__(
  * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
- * @param     context Application context (build-configurable; see
- *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -479,8 +487,9 @@ __contract__(
  * @param     siglen  Length of signature.
  * @param[in] mu      Precomputed message representative.
  * @param[in] pk      Bit-packed public key.
- * @param     context Application context (build-configurable; see
- *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -512,8 +521,9 @@ __contract__(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  pk      Bit-packed public key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -565,8 +575,9 @@ __contract__(
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key.
  * @param      hashalg Hash algorithm constant (one of MLD_PREHASH_*).
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -623,8 +634,9 @@ __contract__(
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
  * @param     hashalg Hash algorithm constant (one of MLD_PREHASH_*).
- * @param     context Application context (build-configurable; see
- *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -665,8 +677,9 @@ __contract__(
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
@@ -715,8 +728,9 @@ __contract__(
  * @param[in] ctx     Pointer to context string.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
- * @param     context Application context (build-configurable; see
- *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
@@ -812,8 +826,9 @@ __contract__(
  *
  * @param[out] pk      Output public key.
  * @param[in]  sk      Input secret key.
- * @param      context Application context (build-configurable; see
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context Application context. Only present when
+ *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
