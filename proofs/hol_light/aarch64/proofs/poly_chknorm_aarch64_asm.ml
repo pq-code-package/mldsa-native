@@ -227,23 +227,5 @@ let full_spec,public_vars = mk_safety_spec
     MLDSA_POLY_CHKNORM_EXEC;;
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e a (bound:int32) pc returnaddress.
-           nonoverlapping (word pc,LENGTH mldsa_poly_chknorm_mc) (a,1024)
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc)
-                    mldsa_poly_chknorm_mc /\
-                    read PC s = word pc /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; word_zx bound] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events a pc returnaddress /\
-                         memaccess_inbounds e2 [a,1024] []))
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_CHKNORM_EXEC);;

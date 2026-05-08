@@ -530,27 +530,7 @@ let full_spec,public_vars = mk_safety_spec
     MLDSA_NTTUNPACK_TMC_EXEC;;
 
 let MLDSA_NTTUNPACK_SAFE = time prove
- (`exists f_events.
-       forall e a pc.
-           aligned 32 a /\ nonoverlapping (word pc,1171) (a,1024)
-           ==> ensures x86
-               (\s.
-                    bytes_loaded s (word pc) (BUTLAST mldsa_nttunpack_tmc) /\
-                    read RIP s = word pc /\
-                    C_ARGUMENTS [a] s /\
-                    read events s = e)
-               (\s.
-                    read RIP s = word (pc + 1170) /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events a pc /\
-                         memaccess_inbounds e2 [a,1024] [a,1024]))
-               (MAYCHANGE [events] ,,
-                MAYCHANGE [memory :> bytes (a,1024)] ,,
-                MAYCHANGE [RIP] ,,
-                MAYCHANGE
-                [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_NTTUNPACK_TMC_EXEC);;
 
 let MLDSA_NTTUNPACK_NOIBT_SUBROUTINE_SAFE = time prove

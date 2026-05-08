@@ -529,32 +529,5 @@ let full_spec,public_vars = mk_safety_spec
     KECCAK_F1600_X1_SCALAR_EXEC;;
 
 let KECCAK_F1600_X1_SCALAR_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e a rc pc stackpointer returnaddress.
-           aligned 16 stackpointer /\
-           nonoverlapping (a,200) (word_sub stackpointer (word 128),128) /\
-           ALLPAIRS nonoverlapping
-           [a,200; word_sub stackpointer (word 128),128]
-           [word pc,LENGTH keccak_f1600_x1_scalar_mc; rc,192]
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc) keccak_f1600_x1_scalar_mc /\
-                    read PC s = word pc /\
-                    read SP s = stackpointer /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; rc] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    exists e2.
-                        read events s = APPEND e2 e /\
-                        e2 =
-                        f_events rc a pc (word_sub stackpointer (word 128))
-                        returnaddress /\
-                        memaccess_inbounds e2
-                        [a,200; rc,192;
-                         word_sub stackpointer (word 128),128]
-                        [a,200; word_sub stackpointer (word 128),128])
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X1_SCALAR_EXEC);;

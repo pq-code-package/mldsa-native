@@ -823,35 +823,5 @@ let full_spec,public_vars = mk_safety_spec
     MLDSA_NTT_EXEC;;
 
 let MLDSA_NTT_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e a z_012345 z_67 pc stackpointer returnaddress.
-           aligned 16 stackpointer /\
-           ALLPAIRS nonoverlapping
-           [a,1024; word_sub stackpointer (word 64),64]
-           [word pc,LENGTH mldsa_ntt_mc;
-            z_012345,LENGTH ntt_zetas_layer012345 * 4;
-            z_67,LENGTH ntt_zetas_layer67 * 4] /\
-           nonoverlapping (a,1024) (word_sub stackpointer (word 64),64)
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc) mldsa_ntt_mc /\
-                    read PC s = word pc /\
-                    read SP s = stackpointer /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; z_012345; z_67] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    exists e2.
-                        read events s = APPEND e2 e /\
-                        e2 =
-                        f_events z_012345 z_67 a pc
-                        (word_sub stackpointer (word 64))
-                        returnaddress /\
-                        memaccess_inbounds e2
-                        [a,1024; z_012345,576; z_67,1536;
-                         word_sub stackpointer (word 64),64]
-                        [a,1024; word_sub stackpointer (word 64),64])
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_NTT_EXEC);;

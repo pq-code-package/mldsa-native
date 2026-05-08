@@ -921,35 +921,5 @@ let full_spec,public_vars = mk_safety_spec
     MLDSA_INTT_EXEC;;
 
 let MLDSA_INTT_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e a z_78 z_123456 pc stackpointer returnaddress.
-           aligned 16 stackpointer /\
-           ALLPAIRS nonoverlapping
-           [a,1024; word_sub stackpointer (word 64),64]
-           [word pc,LENGTH mldsa_intt_mc;
-            z_78,LENGTH intt_zetas_layer78 * 4;
-            z_123456,LENGTH intt_zetas_layer123456 * 4] /\
-           nonoverlapping (a,1024) (word_sub stackpointer (word 64),64)
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc) mldsa_intt_mc /\
-                    read PC s = word pc /\
-                    read SP s = stackpointer /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; z_78; z_123456] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    exists e2.
-                        read events s = APPEND e2 e /\
-                        e2 =
-                        f_events z_78 z_123456 a pc
-                        (word_sub stackpointer (word 64))
-                        returnaddress /\
-                        memaccess_inbounds e2
-                        [a,1024; z_78,1536; z_123456,640;
-                         word_sub stackpointer (word 64),64]
-                        [a,1024; word_sub stackpointer (word 64),64])
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_INTT_EXEC);;

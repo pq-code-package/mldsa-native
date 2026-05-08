@@ -991,25 +991,5 @@ let full_spec,public_vars = mk_safety_spec
     POLY_USE_HINT_88_AARCH64_ASM_EXEC;;
 
 let POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e a h pc returnaddress.
-           nonoverlapping (word pc,LENGTH poly_use_hint_88_aarch64_asm_mc) (a,1024) /\
-           nonoverlapping (a,1024) (h,1024)
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc)
-                    poly_use_hint_88_aarch64_asm_mc /\
-                    read PC s = word pc /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; h] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events h a pc returnaddress /\
-                         memaccess_inbounds e2 [a,1024; h,1024]
-                         [a,1024]))
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_USE_HINT_88_AARCH64_ASM_EXEC);;

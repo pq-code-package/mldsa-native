@@ -638,26 +638,5 @@ let full_spec,public_vars = mk_safety_spec
     POLY_DECOMPOSE_32_AARCH64_ASM_EXEC;;
 
 let POLY_DECOMPOSE_32_AARCH64_ASM_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e pc a r1 returnaddress.
-           nonoverlapping (word pc,LENGTH poly_decompose_32_aarch64_asm_mc) (r1,1024) /\
-           nonoverlapping (word pc,LENGTH poly_decompose_32_aarch64_asm_mc) (a,1024) /\
-           nonoverlapping (r1,1024) (a,1024)
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc)
-                    poly_decompose_32_aarch64_asm_mc /\
-                    read PC s = word pc /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [r1; a] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events r1 a pc returnaddress /\
-                         memaccess_inbounds e2 [a,1024; r1,1024]
-                         [r1,1024; a,1024]))
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_DECOMPOSE_32_AARCH64_ASM_EXEC);;

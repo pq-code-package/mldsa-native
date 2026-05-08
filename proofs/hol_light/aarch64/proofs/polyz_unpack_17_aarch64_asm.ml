@@ -353,27 +353,5 @@ let full_spec,public_vars = mk_safety_spec
     MLDSA_POLYZ_UNPACK_17_EXEC;;
 
 let MLDSA_POLYZ_UNPACK_17_SUBROUTINE_SAFE = time prove
- (`exists f_events.
-       forall e r b t (l:(18 word) list) pc returnaddress.
-           LENGTH l = 256 /\
-           ALLPAIRS nonoverlapping
-            [(r,1024)]
-            [(word pc,LENGTH mldsa_polyz_unpack_17_mc); (b,576); (t,64)]
-           ==> ensures arm
-               (\s.
-                    aligned_bytes_loaded s (word pc)
-                    mldsa_polyz_unpack_17_mc /\
-                    read PC s = word pc /\
-                    read X30 s = returnaddress /\
-                    C_ARGUMENTS [r; b; t] s /\
-                    read events s = e)
-               (\s.
-                    read PC s = returnaddress /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events b t r pc returnaddress /\
-                         memaccess_inbounds e2 [b,576; t,64; r,1024]
-                         [r,1024]))
-               (\s s'. true)`,
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLYZ_UNPACK_17_EXEC);;

@@ -1128,39 +1128,7 @@ let full_spec,public_vars = mk_safety_spec
     KECCAK_F1600_X4_AVX2_EXEC;;
 
 let KECCAK_F1600_X4_AVX2_SAFE = time prove
- (`exists f_events.
-       forall e rc_pointer bitstate_in rho8_ptr rho56_ptr pc stackpointer.
-           PAIRWISE nonoverlapping
-           [word pc, LENGTH keccak_f1600_x4_avx2_tmc;
-            stackpointer, 768; bitstate_in, 800; rc_pointer, 192;
-            rho8_ptr, 32; rho56_ptr, 32]
-           ==> ensures x86
-               (\s.
-                    bytes_loaded s (word pc)
-                    (BUTLAST keccak_f1600_x4_avx2_tmc) /\
-                    read RIP s = word (pc + KECCAK_F1600_X4_AVX2_PREAMBLE_LENGTH) /\
-                    read RSP s = stackpointer /\
-                    C_ARGUMENTS [bitstate_in; rc_pointer; rho8_ptr; rho56_ptr] s /\
-                    read events s = e)
-               (\s.
-                    read RIP s = word (pc + KECCAK_F1600_X4_AVX2_CORE_END) /\
-                    (exists e2.
-                         read events s = APPEND e2 e /\
-                         e2 = f_events rc_pointer rho8_ptr rho56_ptr bitstate_in pc stackpointer /\
-                         memaccess_inbounds e2
-                         [bitstate_in,800; rc_pointer,192; rho8_ptr,32; rho56_ptr,32;
-                          stackpointer,768]
-                         [bitstate_in,800; stackpointer,768]))
-               (MAYCHANGE [RIP; R10; RSI] ,,
-                MAYCHANGE
-                [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8;
-                 ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
-                MAYCHANGE SOME_FLAGS ,,
-                MAYCHANGE [events] ,,
-                MAYCHANGE [memory :> bytes (stackpointer,768)] ,,
-                MAYCHANGE [memory :> bytes (bitstate_in,800)])`,
-  CONV_TAC(ONCE_DEPTH_CONV LENGTH_SIMPLIFY_CONV) THEN
-  ASSERT_CONCL_TAC full_spec THEN
+ (full_spec,
   REWRITE_TAC[PAIRWISE; ALL; NONOVERLAPPING_CLAUSES] THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars KECCAK_F1600_X4_AVX2_EXEC);;
 
