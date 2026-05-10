@@ -73,6 +73,7 @@
  * on the command line.
  */
 /* #define MLD_CONFIG_FILE "mldsa_native_config.h" */
+
 /**
  * MLD_CONFIG_NAMESPACE_PREFIX
  *
@@ -86,6 +87,7 @@
 #if !defined(MLD_CONFIG_NAMESPACE_PREFIX)
 #define MLD_CONFIG_NAMESPACE_PREFIX MLD_DEFAULT_NAMESPACE_PREFIX
 #endif
+
 /**
  * MLD_CONFIG_MULTILEVEL_BUILD
  *
@@ -105,6 +107,7 @@
  * This can also be set using CFLAGS.
  */
 /* #define MLD_CONFIG_MULTILEVEL_BUILD */
+
 /**
  * MLD_CONFIG_EXTERNAL_API_QUALIFIER
  *
@@ -118,6 +121,7 @@
  * even mldsa-native's public API can be marked `static`.
  */
 /* #define MLD_CONFIG_EXTERNAL_API_QUALIFIER */
+
 /**
  * MLD_CONFIG_NO_KEYPAIR_API
  *
@@ -128,6 +132,7 @@
  * those functions.
  */
 /* #define MLD_CONFIG_NO_KEYPAIR_API */
+
 /**
  * MLD_CONFIG_NO_SIGN_API
  *
@@ -140,6 +145,7 @@
  * only needed by those functions.
  */
 /* #define MLD_CONFIG_NO_SIGN_API */
+
 /**
  * MLD_CONFIG_NO_VERIFY_API
  *
@@ -153,6 +159,7 @@
  * only needed by those functions.
  */
 /* #define MLD_CONFIG_NO_VERIFY_API */
+
 /**
  * MLD_CONFIG_CORE_API_ONLY
  *
@@ -161,6 +168,7 @@
  * and crypto_sign_verify_internal.
  */
 /* #define MLD_CONFIG_CORE_API_ONLY */
+
 /**
  * MLD_CONFIG_NO_RANDOMIZED_API
  *
@@ -178,6 +186,7 @@
  * crypto_sign_signature().
  */
 /* #define MLD_CONFIG_NO_RANDOMIZED_API */
+
 /**
  * MLD_CONFIG_NO_SUPERCOP
  *
@@ -189,6 +198,7 @@
  * naming does not disambiguate between the parameter sets.
  */
 /* #define MLD_CONFIG_NO_SUPERCOP */
+
 /**
  * MLD_CONFIG_CONSTANTS_ONLY
  *
@@ -208,6 +218,7 @@
  *
  *****************************************************************************/
 #if defined(MLD_BUILD_INTERNAL)
+
 /**
  * MLD_CONFIG_MULTILEVEL_WITH_SHARED
  *
@@ -230,6 +241,7 @@
  * This can also be set using CFLAGS.
  */
 /* #define MLD_CONFIG_MULTILEVEL_WITH_SHARED */
+
 /**
  * MLD_CONFIG_MULTILEVEL_NO_SHARED
  *
@@ -249,6 +261,7 @@
  * This can also be set using CFLAGS.
  */
 /* #define MLD_CONFIG_MULTILEVEL_NO_SHARED */
+
 /**
  * MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
  *
@@ -263,6 +276,7 @@
  * This can also be set using CFLAGS.
  */
 /* #define MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
+
 /**
  * MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
@@ -284,6 +298,7 @@
 #if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* #define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif
+
 /**
  * MLD_CONFIG_ARITH_BACKEND_FILE
  *
@@ -302,6 +317,7 @@
     !defined(MLD_CONFIG_ARITH_BACKEND_FILE)
 #define MLD_CONFIG_ARITH_BACKEND_FILE "native/meta.h"
 #endif
+
 /**
  * MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *
@@ -323,6 +339,7 @@
 #if !defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #endif
+
 /**
  * MLD_CONFIG_FIPS202_BACKEND_FILE
  *
@@ -338,6 +355,7 @@
     !defined(MLD_CONFIG_FIPS202_BACKEND_FILE)
 #define MLD_CONFIG_FIPS202_BACKEND_FILE "fips202/native/auto.h"
 #endif
+
 /**
  * MLD_CONFIG_FIPS202_CUSTOM_HEADER
  *
@@ -352,6 +370,7 @@
  * the same API (see FIPS202.md).
  */
 /* #define MLD_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
+
 /**
  * MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
  *
@@ -366,6 +385,7 @@
  * the same API (see FIPS202.md).
  */
 /* #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
+
 /**
  * MLD_CONFIG_CUSTOM_ZEROIZE
  *
@@ -403,6 +423,7 @@
    }
    #endif
 */
+
 /**
  * MLD_CONFIG_CUSTOM_RANDOMBYTES
  *
@@ -428,6 +449,7 @@
    }
    #endif
 */
+
 /**
  * MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
  *
@@ -462,6 +484,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
   return 1;
 }
 #endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLD_CONFIG_CUSTOM_ALLOC_FREE
@@ -506,6 +529,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    #define MLD_CUSTOM_FREE(v, T, N) free(v)
    #endif
 */
+
 /**
  * MLD_CONFIG_CUSTOM_MEMCPY
  *
@@ -527,6 +551,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    }
    #endif
 */
+
 /**
  * MLD_CONFIG_CUSTOM_MEMSET
  *
@@ -548,6 +573,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    }
    #endif
 */
+
 /**
  * MLD_CONFIG_INTERNAL_API_QUALIFIER
  *
@@ -558,6 +584,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * in which case this option can be set to `static`.
  */
 /* #define MLD_CONFIG_INTERNAL_API_QUALIFIER */
+
 /**
  * MLD_CONFIG_CT_TESTING_ENABLED
  *
@@ -568,6 +595,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * on the exact version of valgrind installed).
  */
 /* #define MLD_CONFIG_CT_TESTING_ENABLED */
+
 /**
  * MLD_CONFIG_NO_ASM
  *
@@ -589,6 +617,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * native backends will be used.
  */
 /* #define MLD_CONFIG_NO_ASM */
+
 /**
  * MLD_CONFIG_NO_ASM_VALUE_BARRIER
  *
@@ -601,6 +630,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * 'opt blocker' instead; see ct.h.
  */
 /* #define MLD_CONFIG_NO_ASM_VALUE_BARRIER */
+
 /**
  * MLD_CONFIG_KEYGEN_PCT
  *
@@ -621,6 +651,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * requires crypto_sign_signature() and crypto_sign_verify().
  */
 /* #define MLD_CONFIG_KEYGEN_PCT */
+
 /**
  * MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  *
@@ -639,6 +670,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    }
    #endif
 */
+
 /**
  * MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *
@@ -661,6 +693,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * failure rate is < 2^{-256}.
  */
 /* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 814 */
+
 /**
  * MLD_CONFIG_SERIAL_FIPS202_ONLY
  *
@@ -682,6 +715,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * Only enable this when you have to.
  */
 /* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
+
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER
  *
@@ -692,6 +726,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  */
 /* #define MLD_CONFIG_CONTEXT_PARAMETER */
+
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER_TYPE
  *
@@ -701,6 +736,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  * This is only relevant if MLD_CONFIG_CONTEXT_PARAMETER is set.
  */
 /* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
 /**
  * MLD_CONFIG_REDUCE_RAM
  *
