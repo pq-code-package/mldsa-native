@@ -319,6 +319,15 @@ source code and documentation.
 * Referenced from:
   - [test/hal/hal.c](test/hal/hal.c)
 
+### `mlkem_native_soundness`
+
+* mlkem-native SOUNDNESS document
+* Author(s):
+  - pq-code-package
+* URL: https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
+
 ### `mupq`
 
 * Common files for pqm4, pqm3, pqriscv
@@ -341,6 +350,15 @@ source code and documentation.
 * URL: https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/hqbtIGFKIpU/m/H14H0wOlBgAJ
 * Referenced from:
   - [mldsa/src/ct.h](mldsa/src/ct.h)
+
+### `s2n_bignum_soundness`
+
+* s2n-bignum soundness documentation
+* Author(s):
+  - Amazon Web Services
+* URL: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+* Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
 
 ### `supercop`
 

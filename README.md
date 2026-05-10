@@ -65,6 +65,8 @@ Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabell
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
 on the source level.
 
+**NOTE:** Formal Verification is never absolute. See [SOUNDNESS.md](SOUNDNESS.md) for an analysis of the scope, assumptions and risks of the formal verification efforts around mldsa-native.
+
 ## Security
 
 All assembly in mldsa-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,

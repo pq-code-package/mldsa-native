@@ -6,6 +6,16 @@
   author: National Institute of Standards and Technology
   url: https://github.com/usnistgov/ACVP-Server
 
+- id: mlkem_native_soundness
+  name: mlkem-native SOUNDNESS document
+  author: pq-code-package
+  url: https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md
+
+- id: s2n_bignum_soundness
+  name: s2n-bignum soundness documentation
+  author: Amazon Web Services
+  url: https://github.com/awslabs/s2n-bignum/blob/main/doc/s2n_bignum_soundness.md
+
 - id: FIPS204
   short: FIPS 204
   name: "FIPS 204 Module-Lattice-Based Digital Signature Standard"
