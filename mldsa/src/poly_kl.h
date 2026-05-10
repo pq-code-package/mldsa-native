@@ -233,10 +233,10 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
 /*
- * polyeta_unpack produces coefficients in [-MLDSA_ETA,MLDSA_ETA] for
+ * polyeta_unpack produces coefficients in [-MLDSA_ETA, MLDSA_ETA] for
  * well-formed inputs (i.e., those produced by polyeta_pack).
  * However, when passed an arbitrary byte array, it may produce smaller values,
- * i.e, values in [MLD_POLYETA_UNPACK_LOWER_BOUND,MLDSA_ETA]
+ * i.e., values in [MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA].
  * Even though this should never happen, we use use the bound for arbitrary
  * inputs in the CBMC proofs.
  */
@@ -305,7 +305,7 @@ __contract__(
 
 #define mld_polyw1_pack MLD_NAMESPACE_KL(polyw1_pack)
 /**
- * Bit-pack polynomial w1 with coefficients in [0,15] or [0,43]. Input
+ * Bit-pack polynomial w1 with coefficients in [0, 15] or [0, 43]. Input
  * coefficients are assumed to be standard representatives.
  *
  * @param[out] r Pointer to output byte array with at least

@@ -57,7 +57,7 @@
 #define MLD_REDUCE32_RANGE_MAX 6283009
 /*
  * This is the C<->native interface allowing for the drop-in of
- * native code for performance critical arithmetic components of ML-DSA.
+ * native code for performance-critical arithmetic components of ML-DSA.
  *
  * A _backend_ is a specific implementation of (part of) this interface.
  *
@@ -159,7 +159,8 @@ __contract__(
  * integers in [0, MLDSA_Q-1].
  *
  * @param[out] r      Pointer to output buffer.
- * @param      len    Requested number of 32-bit integers (uniform mod q).
+ * @param      len    Requested number of 32-bit integers (uniform mod
+ *                    MLDSA_Q).
  * @param[in]  buf    Pointer to input buffer (assumed to be uniform random
  *                    bytes).
  * @param      buflen Length of input buffer in bytes.
@@ -259,7 +260,7 @@ __contract__(
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 /**
- * Native implementation of poly_decompose for GAMMA2 = (Q-1)/32.
+ * Native implementation of poly_decompose for GAMMA2 = (MLDSA_Q-1)/32.
  *
  * For all coefficients c of the input polynomial, compute high and low bits
  * c0, c1 such c mod MLDSA_Q = c1*(2*GAMMA2) + c0 with
@@ -291,7 +292,7 @@ __contract__(
 #if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /**
- * Native implementation of poly_decompose for GAMMA2 = (Q-1)/88.
+ * Native implementation of poly_decompose for GAMMA2 = (MLDSA_Q-1)/88.
  *
  * For all coefficients c of the input polynomial, compute high and low bits
  * c0, c1 such c mod MLDSA_Q = c1*(2*GAMMA2) + c0 with
@@ -345,7 +346,7 @@ __contract__(
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 /**
- * Native implementation of poly_use_hint for GAMMA2 = (Q-1)/32.
+ * Native implementation of poly_use_hint for GAMMA2 = (MLDSA_Q-1)/32.
  *
  * Use hint h to correct the high bits of a in-place.
  *
@@ -371,7 +372,7 @@ __contract__(
 #if defined(MLD_USE_NATIVE_POLY_USE_HINT_88)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 /**
- * Native implementation of poly_use_hint for GAMMA2 = (Q-1)/88.
+ * Native implementation of poly_use_hint for GAMMA2 = (MLDSA_Q-1)/88.
  *
  * Use hint h to correct the high bits of a in-place.
  *
@@ -483,7 +484,7 @@ __contract__(
  * Pointwise multiplication of polynomials in NTT domain with Montgomery
  * reduction. Destructive in the first argument.
  *
- * Computes a[i] = a[i] * b[i] * R^(-1) mod q for all i, where R = 2^32.
+ * Computes a[i] = a[i] * b[i] * R^(-1) mod MLDSA_Q for all i, where R = 2^32.
  *
  * @param[in,out] a First input/output polynomial.
  * @param[in]     b Second input polynomial.

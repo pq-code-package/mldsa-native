@@ -195,13 +195,13 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
           MLD_CONFIG_PARAMETER_SET == 65) &&                       \
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 &&   \
           MLD_CONFIG_PARAMETER_SET == 87 */
-  /* The first input is bounded by [0, Q-1] inclusive
-   * The second input is bounded by [-9Q+1, 9Q-1] inclusive . Hence, we can
-   * safely accumulate in 64-bits without intermediate reductions as
-   * MLDSA_L * (MLD_NTT_BOUND-1) * (Q-1) < INT64_MAX
+  /* The first input is bounded by [0, MLDSA_Q-1] inclusive.
+   * The second input is bounded by [-(9*MLDSA_Q-1), 9*MLDSA_Q-1] inclusive.
+   * Hence, we can safely accumulate in 64-bits without intermediate reductions
+   * as MLDSA_L * (MLD_NTT_BOUND-1) * (MLDSA_Q-1) < INT64_MAX.
    *
-   * The worst case is ML-DSA-87: 7 * (9Q-1) * (Q-1) < 2**52
-   * (and likewise for negative values)
+   * The worst case is ML-DSA-87: 7 * (9*MLDSA_Q-1) * (MLDSA_Q-1) < 2**52
+   * (and likewise for negative values).
    */
   mld_polyvecl_pointwise_acc_montgomery_c(w, u, v);
 }

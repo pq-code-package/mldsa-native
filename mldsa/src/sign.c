@@ -83,8 +83,9 @@ __contract__(
  *
  * @param[in] pk      Public key.
  * @param[in] sk      Secret key.
- * @param     context Application context (build-configurable; see
- *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param     context Application context. Only present when
+ *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @return 0 if the signature was successfully verified, non-zero otherwise.
  */
@@ -215,8 +216,9 @@ __contract__(
  * @param[in]  s1hat     s1 in NTT domain.
  * @param[in]  s2        s2.
  * @param[in]  rho       Byte array containing seed rho.
- * @param      context   Application context (build-configurable; see
- *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context   Application context. Only present when
+ *                       MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @return - 0: Success.
  *         - MLD_ERR_OUT_OF_MEMORY: If MLD_CONFIG_CUSTOM_ALLOC_FREE is used and
@@ -631,8 +633,9 @@ __contract__(
  * @param[in]  s1hat    Secret vector s1 in NTT domain.
  * @param[in]  s2hat    Secret vector s2 in NTT domain.
  * @param[in]  t0hat    Vector t0 in NTT domain.
- * @param      context  Application context (build-configurable; see
- *                      MLD_CONFIG_CONTEXT_PARAMETER_TYPE).
+ * @param      context  Application context. Only present when
+ *                      MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
+ *                      MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @return - 0: Signature generation succeeded.
  *         - MLD_ERR_FAIL: Signature rejected (norm check failed).

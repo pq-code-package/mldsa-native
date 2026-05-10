@@ -215,7 +215,7 @@ __contract__(
  *   - the indices for row i are strictly ascending;
  *   - on i == MLDSA_K - 1, the trailing index slots are zero.
  *
- * Callers must invoke this for every i in {0, 1, ..., MLDSA_K - 1}; if any
+ * Callers must invoke this for every i in [0, 1, .., MLDSA_K - 1]; if any
  * call returns MLD_ERR_FAIL the encoding is malformed and the signature must
  * be rejected.
  *

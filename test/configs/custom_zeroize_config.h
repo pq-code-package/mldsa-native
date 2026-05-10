@@ -267,7 +267,7 @@
  *
  * Determines whether an native arithmetic backend should be used.
  *
- * The arithmetic backend covers performance critical functions
+ * The arithmetic backend covers performance-critical functions
  * such as the number-theoretic transform (NTT).
  *
  * If this option is unset, the C backend will be used.
@@ -380,19 +380,17 @@
  * and you will need to use MLD_CONFIG_CUSTOM_ZEROIZE to provide
  * a custom implementation of `mld_zeroize()`.
  *
- * WARNING:
- * The explicit stack zeroization conducted by mldsa-native
- * reduces the likelihood of data leaking on the stack, but
- * does not eliminate it! The C standard makes no guarantee about
- * where a compiler allocates structures and whether/where it makes
- * copies of them. Also, in addition to entire structures, there
- * may also be potentially exploitable leakage of individual values
- * on the stack.
+ * @warning The explicit stack zeroization conducted by mldsa-native reduces
+ *          the likelihood of data leaking on the stack, but does not
+ *          eliminate it. The C standard makes no guarantee about where a
+ *          compiler allocates structures and whether/where it makes copies
+ *          of them. Also, in addition to entire structures, there may also
+ *          be potentially exploitable leakage of individual values on the
+ *          stack.
  *
- * If you need bullet-proof zeroization of the stack, you need to
- * consider additional measures instead of what this feature
- * provides. In this case, you can set mld_zeroize to a
- * no-op.
+ *          If you need bullet-proof zeroization of the stack, you need to
+ *          consider additional measures instead of what this feature
+ *          provides. In this case, you can set mld_zeroize to a no-op.
  */
 #define MLD_CONFIG_CUSTOM_ZEROIZE
 #if !defined(__ASSEMBLER__)
@@ -481,9 +479,9 @@ static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
  * - T: Type of structure to be freed.
  * - N: Number of elements to be freed.
  *
- * WARNING: This option is experimental!
- * Its scope, configuration and function/macro signatures may
- * change at any time. We expect a stable API for v2.
+ * @warning This option is experimental. Its scope, configuration and
+ *          function/macro signatures may change at any time. We expect a
+ *          stable API for v2.
  *
  * @note Even if this option is set, some allocations further down
  * the call stack will still be made from the stack. Those will

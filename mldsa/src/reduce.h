@@ -22,12 +22,12 @@
 
 /**
  * Generic Montgomery reduction; given a 64-bit integer a, computes a 32-bit
- * integer congruent to a * R^-1 mod q, where R=2^32.
+ * integer congruent to a * R^-1 mod MLDSA_Q, where R=2^32.
  *
  * @param a Input integer to be reduced, of absolute value smaller or equal
  *          to INT64_MAX - 2^31 * MLDSA_Q.
  *
- * @return Integer congruent to a * R^-1 modulo q, with absolute value
+ * @return Integer congruent to a * R^-1 modulo MLDSA_Q, with absolute value
  *         <= |a| / 2^32 + MLDSA_Q / 2.
  *         In particular, if |a| < 2^31 * MLDSA_Q, the absolute value of the
  *         return value is < MLDSA_Q.

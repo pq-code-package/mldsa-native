@@ -84,10 +84,10 @@ __contract__(
  * Input/output vectors are in NTT domain representation.
  *
  * The first input "u" must be the output of polyvec_matrix_expand() and so
- * have coefficients in [0, Q-1] inclusive.
+ * have coefficients in [0, MLDSA_Q-1] inclusive.
  *
  * The second input "v" is assumed to be output of an NTT, and hence must have
- * coefficients bounded by [-9q+1, +9q-1] inclusive.
+ * coefficients bounded by [-(9*MLDSA_Q-1), 9*MLDSA_Q-1] inclusive.
  *
  * @param[out] w Output polynomial.
  * @param[in]  u Pointer to first input vector.
@@ -287,7 +287,7 @@ __contract__(
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_polyveck_pack_w1 MLD_NAMESPACE_KL(polyveck_pack_w1)
 /**
- * Bit-pack polynomial vector w1 with coefficients in [0,15] or [0,43]. Input
+ * Bit-pack polynomial vector w1 with coefficients in [0, 15] or [0, 43]. Input
  * coefficients are assumed to be standard representatives.
  *
  * @param[out] r  Pointer to output byte array with at least
