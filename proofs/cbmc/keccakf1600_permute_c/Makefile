@@ -4,13 +4,13 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = keccakf1600_permute_native_harness
+HARNESS_FILE = keccakf1600_permute_c_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = keccakf1600_permute_native
+PROOF_UID = mld_keccakf1600_permute_c
 
-DEFINES += -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 -DMLD_CONFIG_FIPS202_BACKEND_FILE="\"dummy_backend_fips202_x1.h\""
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/fips202/keccakf1600.c
 
-CHECK_FUNCTION_CONTRACTS=mld_keccakf1600_permute
-USE_FUNCTION_CONTRACTS=mld_keccak_f1600_x1_native mld_keccakf1600_permute_c
+CHECK_FUNCTION_CONTRACTS=mld_keccakf1600_permute_c
+USE_FUNCTION_CONTRACTS=
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = mld_keccakf1600_permute_native
+FUNCTION_NAME = mld_keccakf1600_permute_c
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

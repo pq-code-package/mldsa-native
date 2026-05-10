@@ -93,6 +93,19 @@ static void mld_keccakf1600x4_extract_bytes_c(uint64_t *state,
                                               unsigned char *data2,
                                               unsigned char *data3,
                                               unsigned offset, unsigned length)
+__contract__(
+    requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
+         0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+    requires(memory_no_alias(data0, length))
+    requires(memory_no_alias(data1, length))
+    requires(memory_no_alias(data2, length))
+    requires(memory_no_alias(data3, length))
+    assigns(memory_slice(data0, length))
+    assigns(memory_slice(data1, length))
+    assigns(memory_slice(data2, length))
+    assigns(memory_slice(data3, length))
+)
 {
   mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
                                 length);
@@ -128,6 +141,20 @@ static void mld_keccakf1600x4_xor_bytes_c(uint64_t *state,
                                           const unsigned char *data2,
                                           const unsigned char *data3,
                                           unsigned offset, unsigned length)
+__contract__(
+    requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
+         0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+    requires(memory_no_alias(data0, length))
+    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
+    requires((data0 == data1 &&
+              data0 == data2 &&
+              data0 == data3) ||
+         (memory_no_alias(data1, length) &&
+              memory_no_alias(data2, length) &&
+              memory_no_alias(data3, length)))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+)
 {
   mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
                             length);
@@ -191,6 +218,10 @@ static const uint64_t mld_KeccakF_RoundConstants[MLD_KECCAK_NROUNDS] = {
 
 MLD_STATIC_TESTABLE
 void mld_keccakf1600_permute_c(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES))
+)
 {
   unsigned round;
 

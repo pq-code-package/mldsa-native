@@ -21,7 +21,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/fips202/keccakf1600.c
 
 CHECK_FUNCTION_CONTRACTS=mld_keccakf1600x4_xor_bytes
-USE_FUNCTION_CONTRACTS=mld_keccakf1600_xor_bytes_x4_native
+USE_FUNCTION_CONTRACTS=mld_keccakf1600_xor_bytes_x4_native mld_keccakf1600x4_xor_bytes_c
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
