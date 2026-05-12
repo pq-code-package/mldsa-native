@@ -66,11 +66,11 @@ void mld_ntt_aarch64_asm(int32_t *r, const int32_t *zetas_l123456,
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/ntt_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(zetas_l123456 == mld_aarch64_ntt_zetas_layer123456)
   requires(zetas_l78 == mld_aarch64_ntt_zetas_layer78)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   ensures(array_abs_bound(r, 0, MLDSA_N, 75423753))
   /* check-magic: on */
@@ -82,11 +82,11 @@ void mld_intt_aarch64_asm(int32_t *r, const int32_t *zetas_l78,
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/intt_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(zetas_l78 == mld_aarch64_intt_zetas_layer78)
   requires(zetas_l123456 == mld_aarch64_intt_zetas_layer123456)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
   /* check-magic: on */
@@ -120,11 +120,9 @@ void mld_poly_decompose_32_aarch64_asm(int32_t *a1, int32_t *a0)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_decompose_32_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a1, sizeof(int32_t) * MLDSA_N), (a0, sizeof(int32_t) * MLDSA_N)))
   requires(array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(a1, sizeof(int32_t) * MLDSA_N))
-  assigns(memory_slice(a0, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a1, sizeof(int32_t) * MLDSA_N), (a0, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: 16 == (MLDSA_Q - 1) / (2 * ((MLDSA_Q - 1) / 32)) */
   ensures(array_bound(a1, 0, MLDSA_N, 0, 16))
   /* check-magic: 261889 == (MLDSA_Q - 1) / 32 + 1 */
@@ -137,11 +135,9 @@ void mld_poly_decompose_88_aarch64_asm(int32_t *a1, int32_t *a0)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_decompose_88_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a1, sizeof(int32_t) * MLDSA_N), (a0, sizeof(int32_t) * MLDSA_N)))
   requires(array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(a1, sizeof(int32_t) * MLDSA_N))
-  assigns(memory_slice(a0, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a1, sizeof(int32_t) * MLDSA_N), (a0, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: 44 == (MLDSA_Q - 1) / (2 * ((MLDSA_Q - 1) / 88)) */
   ensures(array_bound(a1, 0, MLDSA_N, 0, 44))
   /* check-magic: 95233 == (MLDSA_Q - 1) / 88 + 1 */
@@ -154,9 +150,9 @@ void mld_poly_caddq_aarch64_asm(int32_t *a)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_caddq_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
-  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a, sizeof(int32_t) * MLDSA_N)))
   ensures(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
@@ -167,11 +163,10 @@ void mld_poly_use_hint_32_aarch64_asm(int32_t *a, const int32_t *h)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_use_hint_32_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N), (h, sizeof(int32_t) * MLDSA_N)))
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a, sizeof(int32_t) * MLDSA_N)))
   ensures(array_bound(a, 0, MLDSA_N, 0, 16))
 );
 
@@ -181,11 +176,10 @@ void mld_poly_use_hint_88_aarch64_asm(int32_t *a, const int32_t *h)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_use_hint_88_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N), (h, sizeof(int32_t) * MLDSA_N)))
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a, sizeof(int32_t) * MLDSA_N)))
   ensures(array_bound(a, 0, MLDSA_N, 0, 44))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -196,7 +190,7 @@ int mld_poly_chknorm_aarch64_asm(const int32_t *a, int32_t B)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/poly_chknorm_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N)))
   /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
   requires(forall(k0, 0, MLDSA_N, a[k0] > INT32_MIN))
   ensures(return_value == 0 || return_value == 1)
@@ -212,10 +206,9 @@ void mld_polyz_unpack_17_aarch64_asm(int32_t *r, const uint8_t *buf,
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/polyz_unpack_17_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(buf, 576))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N), (buf, 576)))
   requires(indices == mld_polyz_unpack_17_indices)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   ensures(array_bound(r, 0, MLDSA_N, -((1 << 17) - 1), (1 << 17) + 1))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
@@ -230,10 +223,9 @@ void mld_polyz_unpack_19_aarch64_asm(int32_t *r, const uint8_t *buf,
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/polyz_unpack_19_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(buf, 640))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N), (buf, 640)))
   requires(indices == mld_polyz_unpack_19_indices)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   ensures(array_bound(r, 0, MLDSA_N, -((1 << 19) - 1), (1 << 19) + 1))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
@@ -248,12 +240,11 @@ void mld_poly_pointwise_montgomery_aarch64_asm(int32_t *a, const int32_t *b)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/pointwise_montgomery_aarch64_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N), (b, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   requires(array_abs_bound(a, 0, MLDSA_N, 75423753))
   requires(array_abs_bound(b, 0, MLDSA_N, 75423753))
-  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(a, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -269,13 +260,11 @@ void mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm(
  * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.ml
  */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 4), (b, sizeof(*b) * 4)))
   /* check-magic: off */
   requires(forall(l0, 0, 4, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -289,13 +278,11 @@ void mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm(
  * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.ml
  */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 5), (b, sizeof(*b) * 5)))
   /* check-magic: off */
   requires(forall(l0, 0, 5, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -309,13 +296,11 @@ void mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(
  * proofs/hol_light/aarch64/proofs/mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.ml
  */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 7), (b, sizeof(*b) * 7)))
   /* check-magic: off */
   requires(forall(l0, 0, 7, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );

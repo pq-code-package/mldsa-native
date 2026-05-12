@@ -41,11 +41,9 @@
 MLD_STATIC_TESTABLE
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0)
 __contract__(
-  requires(memory_no_alias(a1,  sizeof(mld_poly)))
-  requires(memory_no_alias(a0, sizeof(mld_poly)))
+  requires(disjoint(a1, a0))
   requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(a1, sizeof(mld_poly)))
-  assigns(memory_slice(a0, sizeof(mld_poly)))
+  assigns(slices(a1, a0))
   ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1))
 )
@@ -54,7 +52,7 @@ __contract__(
   mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
   for (i = 0; i < MLDSA_N; ++i)
   __loop__(
-    assigns(i, memory_slice(a0, sizeof(mld_poly)), memory_slice(a1, sizeof(mld_poly)))
+    assigns(i, slices(a0, a1))
     invariant(i <= MLDSA_N)
     invariant(array_bound(a0->coeffs, i, MLDSA_N, 0, MLDSA_Q))
     invariant(array_bound(a1->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
@@ -106,11 +104,10 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(disjoint(a, h))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 )
 {
@@ -208,10 +205,9 @@ MLD_STATIC_TESTABLE unsigned int mld_rej_eta_c(int32_t *a, unsigned int target,
 __contract__(
   requires(offset <= target && target <= MLDSA_N)
   requires(buflen <= (MLD_POLY_UNIFORM_ETA_NBLOCKS * MLD_STREAM256_BLOCKBYTES))
-  requires(memory_no_alias(a, sizeof(int32_t) * target))
-  requires(memory_no_alias(buf, buflen))
+  requires(disjoint((a, sizeof(int32_t) * target), (buf, buflen)))
   requires(array_abs_bound(a, 0, offset, MLDSA_ETA + 1))
-  assigns(memory_slice(a, sizeof(int32_t) * target))
+  assigns(slices((a, sizeof(int32_t) * target)))
   ensures(offset <= return_value && return_value <= target)
   ensures(array_abs_bound(a, 0, return_value, MLDSA_ETA + 1))
 )
@@ -281,10 +277,9 @@ static unsigned int mld_rej_eta(int32_t *a, unsigned int target,
 __contract__(
   requires(offset <= target && target <= MLDSA_N)
   requires(buflen <= (MLD_POLY_UNIFORM_ETA_NBLOCKS * MLD_STREAM256_BLOCKBYTES))
-  requires(memory_no_alias(a, sizeof(int32_t) * target))
-  requires(memory_no_alias(buf, buflen))
+  requires(disjoint((a, sizeof(int32_t) * target), (buf, buflen)))
   requires(array_abs_bound(a, 0, offset, MLDSA_ETA + 1))
-  assigns(memory_slice(a, sizeof(int32_t) * target))
+  assigns(slices((a, sizeof(int32_t) * target)))
   ensures(offset <= return_value && return_value <= target)
   ensures(array_abs_bound(a, 0, return_value, MLDSA_ETA + 1))
 )
@@ -375,11 +370,9 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   while (ctr[0] < MLDSA_N || ctr[1] < MLDSA_N || ctr[2] < MLDSA_N ||
          ctr[3] < MLDSA_N)
   __loop__(
-    assigns(ctr, state, memory_slice(r0, sizeof(mld_poly)),
-            memory_slice(r1, sizeof(mld_poly)), memory_slice(r2, sizeof(mld_poly)),
-            memory_slice(r3, sizeof(mld_poly)), object_whole(buf[0]),
+    assigns(ctr, state, object_whole(buf[0]),
             object_whole(buf[1]), object_whole(buf[2]),
-            object_whole(buf[3]))
+            object_whole(buf[3]), slices(r0, r1, r2, r3))
     invariant(ctr[0] <= MLDSA_N && ctr[1] <= MLDSA_N)
     invariant(ctr[2] <= MLDSA_N && ctr[3] <= MLDSA_N)
     invariant(array_abs_bound(r0->coeffs, 0, ctr[0], MLDSA_ETA + 1))
@@ -445,7 +438,7 @@ void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
   while (ctr < MLDSA_N)
   __loop__(
     assigns(ctr, object_whole(&state),
-      object_whole(buf), memory_slice(r, sizeof(mld_poly)))
+      object_whole(buf), slices(r))
     invariant(ctr <= MLDSA_N)
     invariant(state.pos <= SHAKE256_RATE)
     invariant(array_abs_bound(r->coeffs, 0, ctr, MLDSA_ETA + 1)))
@@ -591,7 +584,7 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
 
   for (i = MLDSA_N - MLDSA_TAU; i < MLDSA_N; ++i)
   __loop__(
-    assigns(i, j, object_whole(buf), state, pos, memory_slice(c, sizeof(mld_poly)), signs)
+    assigns(i, j, object_whole(buf), state, pos, signs, slices(c))
     invariant(i >= MLDSA_N - MLDSA_TAU)
     invariant(i <= MLDSA_N)
     invariant(pos >= 1)
@@ -803,9 +796,8 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 MLD_STATIC_TESTABLE void mld_polyz_unpack_c(
     mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r, sizeof(mld_poly)))
-  requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
-  assigns(memory_slice(r, sizeof(mld_poly)))
+  requires(disjoint(r, (a, MLDSA_POLYZ_PACKEDBYTES)))
+  assigns(slices(r))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 )
 {

@@ -47,11 +47,9 @@
  */
 static MLD_INLINE void mld_power2round(int32_t *a0, int32_t *a1, int32_t a)
 __contract__(
-  requires(memory_no_alias(a0, sizeof(int32_t)))
-  requires(memory_no_alias(a1, sizeof(int32_t)))
+  requires(disjoint(a0, a1))
   requires(a >= 0 && a < MLDSA_Q)
-  assigns(memory_slice(a0, sizeof(int32_t)))
-  assigns(memory_slice(a1, sizeof(int32_t)))
+  assigns(slices(a0, a1))
   ensures(*a0 > -(MLD_2_POW_D/2) && *a0 <= (MLD_2_POW_D/2))
   ensures(*a1 >= 0 && *a1 <= (MLDSA_Q - 1) / MLD_2_POW_D)
   ensures((*a1 * MLD_2_POW_D + *a0 - a) % MLDSA_Q == 0)
@@ -78,11 +76,9 @@ __contract__(
  */
 static MLD_INLINE void mld_decompose(int32_t *a0, int32_t *a1, int32_t a)
 __contract__(
-  requires(memory_no_alias(a0, sizeof(int32_t)))
-  requires(memory_no_alias(a1, sizeof(int32_t)))
+  requires(disjoint(a0, a1))
   requires(a >= 0 && a < MLDSA_Q)
-  assigns(memory_slice(a0, sizeof(int32_t)))
-  assigns(memory_slice(a1, sizeof(int32_t)))
+  assigns(slices(a0, a1))
   /* a0 = -MLDSA_GAMMA2 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2),
    * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2) - 1 (@[FIPS204, Algorithm 36 (Decompose)]) */
   ensures(*a0 >= -MLDSA_GAMMA2  && *a0 <= MLDSA_GAMMA2)

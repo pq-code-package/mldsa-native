@@ -40,10 +40,8 @@ static MLD_INLINE void mld_polymat_expand_entry(
     mld_poly *p, uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)], uint8_t l,
     uint8_t k)
 __contract__(
-  requires(memory_no_alias(p, sizeof(mld_poly)))
-  requires(memory_no_alias(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
-  assigns(memory_slice(p, sizeof(mld_poly)))
-  assigns(memory_slice(seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  requires(disjoint(p, (seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2))))
+  assigns(slices(p, (seed_ext, MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2))))
   ensures(array_bound(p->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 )
 {
@@ -76,7 +74,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
   /* Sample 4 matrix entries a time. */
   for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
   __loop__(
-    assigns(i, j, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
+    assigns(i, j, object_whole(seed_ext), slices(mat))
     invariant(i <= (MLDSA_K * MLDSA_L / 4) * 4 && i % 4 == 0)
     /* vectors 0 .. i / MLDSA_L are completely sampled */
     invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
@@ -122,7 +120,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
   /* Entries omitted by the batch-sampling are sampled individually. */
   while (i < MLDSA_K * MLDSA_L)
   __loop__(
-    assigns(i, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
+    assigns(i, object_whole(seed_ext), slices(mat))
     invariant(i <= MLDSA_K * MLDSA_L)
     /* vectors 0 .. i / MLDSA_L are completely sampled */
     invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
@@ -165,7 +163,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, memory_slice(w, sizeof(mld_polyveck)))
+    assigns(i, slices(w))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, 0, i,
                      array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
@@ -207,9 +205,7 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
 
   for (l = 1; l < MLDSA_L; ++l)
   __loop__(
-    assigns(l, object_whole(seed_ext),
-            memory_slice(t_row, sizeof(mld_poly)),
-            memory_slice(mat, sizeof(mld_polymat_lazy)))
+    assigns(l, object_whole(seed_ext), slices(t_row, mat))
     invariant(l >= 1 && l <= MLDSA_L)
     invariant(array_abs_bound(t_row->coeffs, 0, MLDSA_N, l * MLDSA_Q))
     decreases(MLDSA_L - l)
@@ -246,10 +242,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
   /* Column-by-column: sample y[l], NTT, accumulate column l of A into w. */
   for (l = 0; l < MLDSA_L; l++)
   __loop__(
-    assigns(k, l, object_whole(seed_ext),
-            memory_slice(w, sizeof(mld_polyveck)),
-            memory_slice(mat, sizeof(mld_polymat_lazy)),
-            memory_slice(scratch, sizeof(mld_polyvecl)))
+    assigns(k, l, object_whole(seed_ext), slices(w, mat, scratch))
     invariant(l <= MLDSA_L)
     invariant(l == 0 ||
               forall(k0, 0, MLDSA_K,
@@ -262,9 +255,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
     mld_poly_ntt(y_ntt);
     for (k = 0; k < MLDSA_K; k++)
     __loop__(
-      assigns(k, object_whole(seed_ext),
-              memory_slice(w, sizeof(mld_polyveck)),
-              memory_slice(mat, sizeof(mld_polymat_lazy)))
+      assigns(k, object_whole(seed_ext), slices(w, mat))
       invariant(k <= MLDSA_K)
       invariant(l != 0 ||
                 forall(k1, 0, k,

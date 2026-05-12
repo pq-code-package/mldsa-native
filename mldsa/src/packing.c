@@ -118,14 +118,14 @@ int mld_pack_sig_h(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_polyveck *w0,
    * before the call), so a data-dependent early return is fine. */
   for (k = 0; k < MLDSA_K; k++)
   __loop__(
-    assigns(k, j, n, memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES))
+    assigns(k, j, n, slices((sig_h, MLDSA_POLYVECH_PACKEDBYTES)))
     invariant(k <= MLDSA_K && n <= MLDSA_OMEGA)
     decreases(MLDSA_K - k)
   )
   {
     for (j = 0; j < MLDSA_N; j++)
     __loop__(
-      assigns(j, n, memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES))
+      assigns(j, n, slices((sig_h, MLDSA_POLYVECH_PACKEDBYTES)))
       invariant(j <= MLDSA_N && n <= MLDSA_OMEGA)
       decreases(MLDSA_N - j)
     )

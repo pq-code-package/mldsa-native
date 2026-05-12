@@ -21,9 +21,9 @@ MLD_INTERNAL_DATA_DECLARATION const uint64_t
 void mld_keccak_f1600_x1_scalar_aarch64_asm(uint64_t state[25],
                                             const uint64_t rc[24])
 __contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 1)))
   requires(rc == mld_keccakf1600_round_constants)
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 1)))
 );
 
 #define mld_keccak_f1600_x1_v84a_aarch64_asm \
@@ -31,9 +31,9 @@ __contract__(
 void mld_keccak_f1600_x1_v84a_aarch64_asm(uint64_t state[25],
                                           const uint64_t rc[24])
 __contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 1)))
   requires(rc == mld_keccakf1600_round_constants)
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 1)))
 );
 
 #define mld_keccak_f1600_x2_v84a_aarch64_asm \
@@ -41,9 +41,9 @@ __contract__(
 void mld_keccak_f1600_x2_v84a_aarch64_asm(uint64_t state[50],
                                           const uint64_t rc[24])
 __contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 2))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 2)))
   requires(rc == mld_keccakf1600_round_constants)
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 2))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 2)))
 );
 
 #define mld_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm \
@@ -51,9 +51,9 @@ __contract__(
 void mld_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm(uint64_t state[100],
                                                        const uint64_t rc[24])
 __contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 4)))
   requires(rc == mld_keccakf1600_round_constants)
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 4)))
 );
 
 #define mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm \
@@ -61,9 +61,9 @@ __contract__(
 void mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(
     uint64_t state[100], const uint64_t rc[24])
 __contract__(
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 4)))
   requires(rc == mld_keccakf1600_round_constants)
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 4)))
 );
 
 #endif /* !MLD_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H */

@@ -42,10 +42,9 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
                                  const uint8_t seed[MLDSA_CRHBYTES],
                                  uint16_t nonce)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
+  requires(disjoint(v, (seed, MLDSA_CRHBYTES)))
   requires(nonce <= (UINT16_MAX - MLDSA_L) / MLDSA_L)
-  assigns(memory_slice(v, sizeof(mld_polyvecl)))
+  assigns(slices(v))
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
@@ -66,9 +65,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyvecl_ntt(mld_polyvecl *v)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(disjoint(v))
   requires(forall(k0, 0, MLDSA_L, array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(memory_slice(v, sizeof(mld_polyvecl)))
+  assigns(slices(v))
   ensures(forall(k1, 0, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
@@ -97,14 +96,12 @@ MLD_INTERNAL_API
 void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
                                            const mld_polyvecl *v)
 __contract__(
-  requires(memory_no_alias(w, sizeof(mld_poly)))
-  requires(memory_no_alias(u, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(disjoint(w, u, v))
   requires(forall(l0, 0, MLDSA_L,
                   array_bound(u->vec[l0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   requires(forall(l1, 0, MLDSA_L,
     array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(w, sizeof(mld_poly)))
+  assigns(slices(w))
   ensures(array_abs_bound(w->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
@@ -125,7 +122,7 @@ MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t B)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(disjoint(v))
   requires(0 <= B && B <= (MLDSA_Q - 1) / 8)
   requires(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
@@ -152,10 +149,10 @@ typedef struct
 MLD_INTERNAL_API
 void mld_polyveck_reduce(mld_polyveck *v)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(disjoint(v))
   requires(forall(k0, 0, MLDSA_K,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
+  assigns(slices(v))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
 );
@@ -173,10 +170,10 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyveck_caddq(mld_polyveck *v)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(disjoint(v))
   requires(forall(k0, 0, MLDSA_K,
     array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
+  assigns(slices(v))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
 );
@@ -194,9 +191,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyveck_ntt(mld_polyveck *v)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(disjoint(v))
   requires(forall(k0, 0, MLDSA_K, array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
+  assigns(slices(v))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 );
 #endif /* (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) && \
@@ -216,9 +213,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyveck_invntt_tomont(mld_polyveck *v)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(disjoint(v))
   requires(forall(k0, 0, MLDSA_K, array_abs_bound(v->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
-  assigns(memory_slice(v, sizeof(mld_polyveck)))
+  assigns(slices(v))
   ensures(forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
@@ -239,7 +236,7 @@ MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t B)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(disjoint(v))
   requires(0 <= B && B <= (MLDSA_Q - 1) / 8)
   requires(forall(k0, 0, MLDSA_K,
                   array_bound(v->vec[k0].coeffs, 0, MLDSA_N,
@@ -271,12 +268,10 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
 __contract__(
-  requires(memory_no_alias(v1,  sizeof(mld_polyveck)))
-  requires(memory_no_alias(v0, sizeof(mld_polyveck)))
+  requires(disjoint(v1, v0))
   requires(forall(k0, 0, MLDSA_K,
     array_bound(v0->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
-  assigns(memory_slice(v1, sizeof(mld_polyveck)))
-  assigns(memory_slice(v0, sizeof(mld_polyveck)))
+  assigns(slices(v1, v0))
   ensures(forall(k1, 0, MLDSA_K,
                  array_bound(v1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
   ensures(forall(k2, 0, MLDSA_K,
@@ -298,11 +293,10 @@ MLD_INTERNAL_API
 void mld_polyveck_pack_w1(uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
                           const mld_polyveck *w1)
 __contract__(
-  requires(memory_no_alias(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
-  requires(memory_no_alias(w1, sizeof(mld_polyveck)))
+  requires(disjoint((r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), w1))
   requires(forall(k1, 0, MLDSA_K,
     array_bound(w1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
-  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
+  assigns(slices((r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -319,11 +313,10 @@ MLD_INTERNAL_API
 void mld_polyveck_pack_eta(uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES],
                            const mld_polyveck *p)
 __contract__(
-  requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyveck)))
+  requires(disjoint((r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES), p))
   requires(forall(k1, 0, MLDSA_K,
     array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
+  assigns(slices((r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES)))
 );
 
 #define mld_polyvecl_pack_eta MLD_NAMESPACE_KL(polyvecl_pack_eta)
@@ -338,11 +331,10 @@ MLD_INTERNAL_API
 void mld_polyvecl_pack_eta(uint8_t r[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES],
                            const mld_polyvecl *p)
 __contract__(
-  requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyvecl)))
+  requires(disjoint((r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES), p))
   requires(forall(k1, 0, MLDSA_L,
     array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
+  assigns(slices((r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES)))
 );
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -361,9 +353,8 @@ MLD_INTERNAL_API
 void mld_polyvecl_unpack_eta(
     mld_polyvecl *p, const uint8_t r[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyvecl)))
-  assigns(memory_slice(p, sizeof(mld_polyvecl)))
+  requires(disjoint((r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES), p))
+  assigns(slices(p))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
@@ -383,9 +374,8 @@ MLD_INTERNAL_API
 void mld_polyvecl_unpack_z(mld_polyvecl *z,
                            const uint8_t r[MLDSA_L * MLDSA_POLYZ_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYZ_PACKEDBYTES))
-  requires(memory_no_alias(z, sizeof(mld_polyvecl)))
-  assigns(memory_slice(z, sizeof(mld_polyvecl)))
+  requires(disjoint((r, MLDSA_L * MLDSA_POLYZ_PACKEDBYTES), z))
+  assigns(slices(z))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(z->vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 );
@@ -405,9 +395,8 @@ MLD_INTERNAL_API
 void mld_polyveck_unpack_eta(
     mld_polyveck *p, const uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  assigns(memory_slice(p, sizeof(mld_polyveck)))
+  requires(disjoint((r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES), p))
+  assigns(slices(p))
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );

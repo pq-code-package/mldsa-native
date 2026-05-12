@@ -34,9 +34,9 @@ typedef struct
 MLD_INTERNAL_API
 void mld_poly_reduce(mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(array_bound(a->coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX))
 );
 
@@ -50,9 +50,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_caddq(mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
@@ -74,11 +74,10 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_add(mld_poly *r, const mld_poly *b)
 __contract__(
-  requires(memory_no_alias(b, sizeof(mld_poly)))
-  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(disjoint(b, r))
   requires(forall(k0, 0, MLDSA_N, (int64_t) r->coeffs[k0] + b->coeffs[k0] < MLD_REDUCE32_DOMAIN_MAX))
   requires(forall(k1, 0, MLDSA_N, (int64_t) r->coeffs[k1] + b->coeffs[k1] >= INT32_MIN))
-  assigns(memory_slice(r, sizeof(mld_poly)))
+  assigns(slices(r))
   ensures(forall(k2, 0, MLDSA_N, r->coeffs[k2] == old(*r).coeffs[k2] + b->coeffs[k2]))
   ensures(forall(k3, 0, MLDSA_N, r->coeffs[k3] < MLD_REDUCE32_DOMAIN_MAX))
   ensures(forall(k4, 0, MLDSA_N, r->coeffs[k4] >= INT32_MIN))
@@ -102,11 +101,10 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_sub(mld_poly *r, const mld_poly *b)
 __contract__(
-  requires(memory_no_alias(b, sizeof(mld_poly)))
-  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(disjoint(b, r))
   requires(array_abs_bound(r->coeffs, 0, MLDSA_N, MLDSA_Q))
   requires(array_abs_bound(b->coeffs, 0, MLDSA_N, MLDSA_Q))
-  assigns(memory_slice(r, sizeof(mld_poly)))
+  assigns(slices(r))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, INT32_MIN, MLD_REDUCE32_DOMAIN_MAX))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
@@ -122,9 +120,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_shiftl(mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << 10))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -138,9 +136,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_ntt(mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 );
 
@@ -157,9 +155,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_invntt_tomont(mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_INTT_BOUND))
 );
 
@@ -179,11 +177,10 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_pointwise_montgomery(mld_poly *a, const mld_poly *b)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(memory_no_alias(b, sizeof(mld_poly)))
+  requires(disjoint(a, b))
   requires(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   requires(array_abs_bound(b->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  assigns(slices(a))
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
@@ -204,14 +201,12 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_power2round(mld_poly *a1, mld_poly *a0, const mld_poly *a)
 __contract__(
-  requires(memory_no_alias(a0, sizeof(mld_poly)))
-  requires(memory_no_alias(a1, sizeof(mld_poly)))
+  requires(disjoint(a0, a1))
   /* The implementation does not require a0 == a, but the single call site
    * aliases them and asserting equality simplifies the proof. */
   requires(a0 == a)
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(a1, sizeof(mld_poly)))
-  assigns(memory_slice(a0, sizeof(mld_poly)))
+  assigns(slices(a1, a0))
   ensures(array_bound(a0->coeffs, 0, MLDSA_N, -(MLD_2_POW_D/2)+1, (MLD_2_POW_D/2)+1))
   ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, ((MLDSA_Q - 1) / MLD_2_POW_D) + 1))
 );
@@ -229,9 +224,8 @@ __contract__(
 MLD_INTERNAL_API
 void mld_poly_uniform(mld_poly *a, const uint8_t seed[MLDSA_SEEDBYTES + 2])
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(memory_no_alias(seed, MLDSA_SEEDBYTES + 2))
-  assigns(memory_slice(a, sizeof(mld_poly)))
+  requires(disjoint(a, (seed, MLDSA_SEEDBYTES + 2)))
+  assigns(slices(a))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
@@ -254,15 +248,8 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
                          mld_poly *vec3,
                          uint8_t seed[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)])
 __contract__(
-  requires(memory_no_alias(vec0, sizeof(mld_poly)))
-  requires(memory_no_alias(vec1, sizeof(mld_poly)))
-  requires(memory_no_alias(vec2, sizeof(mld_poly)))
-  requires(memory_no_alias(vec3, sizeof(mld_poly)))
-  requires(memory_no_alias(seed,  4 * MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
-  assigns(memory_slice(vec0, sizeof(mld_poly)))
-  assigns(memory_slice(vec1, sizeof(mld_poly)))
-  assigns(memory_slice(vec2, sizeof(mld_poly)))
-  assigns(memory_slice(vec3, sizeof(mld_poly)))
+  requires(disjoint(vec0, vec1, vec2, vec3, (seed, 4 * MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2))))
+  assigns(slices(vec0, vec1, vec2, vec3))
   ensures(array_bound(vec0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   ensures(array_bound(vec1->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   ensures(array_bound(vec2->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
@@ -284,10 +271,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 __contract__(
-  requires(memory_no_alias(r, MLDSA_POLYT1_PACKEDBYTES))
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint((r, MLDSA_POLYT1_PACKEDBYTES), a))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << 10))
-  assigns(memory_slice(r, MLDSA_POLYT1_PACKEDBYTES))
+  assigns(slices((r, MLDSA_POLYT1_PACKEDBYTES)))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -303,9 +289,8 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r, sizeof(mld_poly)))
-  requires(memory_no_alias(a, MLDSA_POLYT1_PACKEDBYTES))
-  assigns(memory_slice(r, sizeof(mld_poly)))
+  requires(disjoint(r, (a, MLDSA_POLYT1_PACKEDBYTES)))
+  assigns(slices(r))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << 10))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -322,10 +307,9 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyt0_pack(uint8_t r[MLDSA_POLYT0_PACKEDBYTES], const mld_poly *a)
 __contract__(
-  requires(memory_no_alias(r, MLDSA_POLYT0_PACKEDBYTES))
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint((r, MLDSA_POLYT0_PACKEDBYTES), a))
   requires(array_bound(a->coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1))
-  assigns(memory_slice(r, MLDSA_POLYT0_PACKEDBYTES))
+  assigns(slices((r, MLDSA_POLYT0_PACKEDBYTES)))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -340,9 +324,8 @@ __contract__(
 MLD_INTERNAL_API
 void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(r, sizeof(mld_poly)))
-  requires(memory_no_alias(a, MLDSA_POLYT0_PACKEDBYTES))
-  assigns(memory_slice(r, sizeof(mld_poly)))
+  requires(disjoint(r, (a, MLDSA_POLYT0_PACKEDBYTES)))
+  assigns(slices(r))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, -(1<<(MLDSA_D-1)) + 1, (1<<(MLDSA_D-1)) + 1))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
@@ -368,7 +351,7 @@ MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
 __contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(disjoint(a))
   requires(0 <= B && B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX)
   requires(array_bound(a->coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX))
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)

@@ -293,8 +293,7 @@ static MLD_INLINE uint8_t mld_ct_memcmp(const uint8_t *a, const uint8_t *b,
                                         const size_t len)
 __contract__(
   requires(len <= UINT16_MAX)
-  requires(memory_no_alias(a, len))
-  requires(memory_no_alias(b, len))
+  requires(disjoint((a, len), (b, len)))
   ensures((return_value == 0) || (return_value == 0xFF))
   ensures((return_value == 0) == forall(i, 0, len, (a[i] == b[i]))))
 {

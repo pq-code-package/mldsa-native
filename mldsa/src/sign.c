@@ -58,8 +58,8 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
   ensures(return_value == 0
     || return_value == MLD_ERR_FAIL
     || return_value == MLD_ERR_OUT_OF_MEMORY
@@ -153,9 +153,7 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 static void mld_sample_s1_s2(mld_polyvecl *s1, mld_polyveck *s2,
                              const uint8_t seed[MLDSA_CRHBYTES])
 __contract__(
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
+  requires(disjoint(s1, s2, (seed, MLDSA_CRHBYTES)))
   assigns(object_whole(s1), object_whole(s2))
   ensures(forall(l0, 0, MLDSA_L, array_abs_bound(s1->vec[l0].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   ensures(forall(k0, 0, MLDSA_K, array_abs_bound(s2->vec[k0].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
@@ -232,18 +230,16 @@ static int mld_compute_pack_t0_t1(
     const uint8_t rho[MLDSA_SEEDBYTES],
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES))
-  requires(memory_no_alias(t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-  requires(memory_no_alias(s1hat, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
+  requires(disjoint((pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
+                    (t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES),
+                    s1hat, s2, (rho, MLDSA_SEEDBYTES)))
   requires(forall(l1, 0, MLDSA_L,
     array_abs_bound(s1hat->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   requires(forall(k2, 0, MLDSA_K,
     array_bound(s2->vec[k2].coeffs, 0, MLDSA_N,
       MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
-  assigns(memory_slice(pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES))
-  assigns(memory_slice(t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
+  assigns(slices((pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
+                 (t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY))
 {
   unsigned int k;
@@ -263,11 +259,10 @@ __contract__(
 
   for (k = 0; k < MLDSA_K; k++)
   __loop__(
-    assigns(k, memory_slice(pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
-            memory_slice(t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES),
-            memory_slice(t0k, sizeof(mld_poly)),
-            memory_slice(t1k, sizeof(mld_poly))
-            MLD_IF_REDUCE_RAM(, memory_slice(mat, sizeof(mld_polymat))))
+    assigns(k, slices((pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
+                      (t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES),
+                      t0k, t1k)
+            MLD_IF_REDUCE_RAM(, slices(mat)))
     invariant(k <= MLDSA_K)
     decreases(MLDSA_K - k)
   )
@@ -456,11 +451,11 @@ __contract__(
   requires(in2len <= MLD_MAX_BUFFER_SIZE)
   requires(in3len <= MLD_MAX_BUFFER_SIZE)
   requires(outlen <= 8 * SHAKE256_RATE /* somewhat arbitrary bound */)
-  requires(memory_no_alias(in1, in1len))
+  requires(disjoint((in1, in1len)))
   requires(in2len == 0 || memory_no_alias(in2, in2len))
   requires(in3len == 0 || memory_no_alias(in3, in3len))
-  requires(memory_no_alias(out, outlen))
-  assigns(memory_slice(out, outlen))
+  requires(disjoint((out, outlen)))
+  assigns(slices((out, outlen)))
 )
 {
   mld_shake256ctx state;
@@ -517,12 +512,7 @@ static int mld_compute_pack_z(uint8_t sig[MLDSA_CRYPTO_BYTES],
                               const mld_poly *cp, const mld_sk_s1hat *s1hat,
                               const mld_yvec *y, mld_poly *z, mld_poly *tmp)
 __contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(cp, sizeof(mld_poly)))
-  requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
-  requires(memory_no_alias(y, sizeof(mld_yvec)))
-  requires(memory_no_alias(z, sizeof(mld_poly)))
-  requires(memory_no_alias(tmp, sizeof(mld_poly)))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), cp, s1hat, y, z, tmp))
   requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
   MLD_IF_NOT_REDUCE_RAM(
     requires(forall(k0, 0, MLDSA_L,
@@ -530,13 +520,11 @@ __contract__(
     requires(forall(k1, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
   MLD_IF_REDUCE_RAM(
-    requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-    requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+    requires(disjoint((s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES),
+                      (y->rhoprime, MLDSA_CRHBYTES)))
     requires(y->nonce <= MLD_NONCE_UB)
   )
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  assigns(memory_slice(z, sizeof(mld_poly)))
-  assigns(memory_slice(tmp, sizeof(mld_poly)))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES), z, tmp))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
 )
@@ -545,9 +533,7 @@ __contract__(
   uint32_t z_invalid;
   for (i = 0; i < MLDSA_L; i++)
   __loop__(
-    assigns(i, memory_slice(z, sizeof(mld_poly)),
-            memory_slice(tmp, sizeof(mld_poly)),
-            memory_slice(sig, MLDSA_CRYPTO_BYTES))
+    assigns(i, slices(z, tmp, (sig, MLDSA_CRYPTO_BYTES)))
     invariant(i <= MLDSA_L)
     decreases(MLDSA_L - i)
   )
@@ -649,13 +635,8 @@ static int mld_attempt_signature_generation(
     const mld_sk_s1hat *s1hat, const mld_sk_s2hat *s2hat,
     const mld_sk_t0hat *t0hat, MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(mu, MLDSA_CRHBYTES))
-  requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
-  requires(memory_no_alias(mat, sizeof(mld_polymat)))
-  requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
-  requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
-  requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), (mu, MLDSA_CRHBYTES),
+                    (rhoprime, MLDSA_CRHBYTES), mat, s1hat, s2hat, t0hat))
   requires(nonce <= MLD_NONCE_UB)
   MLD_IF_NOT_REDUCE_RAM(
     requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
@@ -665,13 +646,13 @@ __contract__(
     requires(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
   MLD_IF_REDUCE_RAM(
-    requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-    requires(memory_no_alias(s2hat->packed, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-    requires(memory_no_alias(t0hat->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
+    requires(disjoint((s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES),
+                      (s2hat->packed, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES),
+                      (t0hat->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES)))
   )
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   MLD_IF_REDUCE_RAM(
-    assigns(memory_slice(mat, sizeof(mld_polymat)))
+    assigns(slices(mat))
   )
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY)
@@ -884,11 +865,11 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   while (1)
   __loop__(
     MLD_IF_NOT_REDUCE_RAM(
-      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+      assigns(nonce, ret, object_whole(siglen), slices((sig, MLDSA_CRYPTO_BYTES)))
     )
     MLD_IF_REDUCE_RAM(
-      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
-              memory_slice(mat, sizeof(mld_polymat)))
+      assigns(nonce, ret, object_whole(siglen),
+              slices((sig, MLDSA_CRYPTO_BYTES), mat))
     )
     invariant(nonce <= nonce_limit)
 
@@ -1157,11 +1138,9 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
 
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(MLD_IF_REDUCE_RAM(memory_slice(mat, sizeof(mld_polymat)),)
+    assigns(MLD_IF_REDUCE_RAM(slices(mat),)
             i, ret,
-            memory_slice(w1, sizeof(mld_poly)),
-            memory_slice(tmp, sizeof(mld_poly)),
-            memory_slice(buf, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES)
+            slices(w1, tmp, (buf, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
     )
     invariant(i <= MLDSA_K)
     decreases(MLDSA_K - i)
@@ -1284,7 +1263,7 @@ int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
     /* All good, copy msg, return 0 */
     for (i = 0; i < *mlen; ++i)
     __loop__(
-      assigns(i, memory_slice(m, *mlen))
+      assigns(i, slices((m, *mlen)))
       invariant(i <= *mlen)
       decreases(*mlen - i)
     )

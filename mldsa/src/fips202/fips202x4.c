@@ -30,18 +30,15 @@ static void mld_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
                                       size_t inlen, uint8_t p)
 __contract__(
   requires(inlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+  requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY)))
   requires(r > 0)
   requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
-  requires(memory_no_alias(in0, inlen))
-  requires(memory_no_alias(in1, inlen))
-  requires(memory_no_alias(in2, inlen))
-  requires(memory_no_alias(in3, inlen))
-  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY)))
+  requires(disjoint((in0, inlen), (in1, inlen), (in2, inlen), (in3, inlen)))
+  assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))))
 {
   while (inlen >= r)
   __loop__(
-    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+    assigns(inlen, in0, in1, in2, in3, slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY)))
     invariant(inlen <= loop_entry(inlen))
     invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
     invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
@@ -85,26 +82,20 @@ static void mld_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
 __contract__(
     requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
-    requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(out0, nblocks * r))
-    requires(memory_no_alias(out1, nblocks * r))
-    requires(memory_no_alias(out2, nblocks * r))
-    requires(memory_no_alias(out3, nblocks * r))
-    assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    assigns(memory_slice(out0, nblocks * r))
-    assigns(memory_slice(out1, nblocks * r))
-    assigns(memory_slice(out2, nblocks * r))
-    assigns(memory_slice(out3, nblocks * r)))
+    requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY),
+                      (out0, nblocks * r), (out1, nblocks * r),
+                      (out2, nblocks * r), (out3, nblocks * r)))
+    assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY),
+                   (out0, nblocks * r), (out1, nblocks * r),
+                   (out2, nblocks * r), (out3, nblocks * r))))
 {
   size_t current_offset = 0;
   while (nblocks > 0)
   __loop__(
     assigns(nblocks, current_offset,
-            memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY),
-            memory_slice(out0, nblocks * r),
-            memory_slice(out1, nblocks * r),
-            memory_slice(out2, nblocks * r),
-            memory_slice(out3, nblocks * r))
+            slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY),
+                   (out0, nblocks * r), (out1, nblocks * r),
+                   (out2, nblocks * r), (out3, nblocks * r)))
     invariant(nblocks <= loop_entry(nblocks))
     invariant(current_offset == (loop_entry(nblocks) - nblocks) * r)
     decreases(nblocks))

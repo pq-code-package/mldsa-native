@@ -34,11 +34,11 @@ void mld_keccak_f1600_x4_avx2_asm(uint64_t states[100], const uint64_t rc[24],
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(states, sizeof(uint64_t) * 25 * 4))
+  requires(disjoint((states, sizeof(uint64_t) * 25 * 4)))
   requires(rc == mld_keccakf1600_round_constants)
   requires(rho8 == mld_keccak_rho8)
   requires(rho56 == mld_keccak_rho56)
-  assigns(memory_slice(states, sizeof(uint64_t) * 25 * 4))
+  assigns(slices((states, sizeof(uint64_t) * 25 * 4)))
 );
 
 #endif /* !MLD_DEV_FIPS202_X86_64_SRC_FIPS202_NATIVE_X86_64_H */

@@ -36,10 +36,10 @@ void mld_ntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/ntt_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   ensures(array_abs_bound(r, 0, MLDSA_N, 42035262))
   /* check-magic: on */
@@ -50,10 +50,10 @@ void mld_invntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/intt_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   ensures(array_abs_bound(r, 0, MLDSA_N, 6285313))
   /* check-magic: on */
@@ -64,9 +64,9 @@ void mld_nttunpack_avx2_asm(int32_t *r)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/nttunpack_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((r, sizeof(int32_t) * MLDSA_N)))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((r, sizeof(int32_t) * MLDSA_N)))
   /* Output is a permutation of input: every output coefficient
    * is some input coefficient */
   ensures(forall(i, 0, MLDSA_N, exists(j, 0, MLDSA_N,
@@ -126,13 +126,12 @@ void mld_pointwise_avx2_asm(int32_t *a, const int32_t *b, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/pointwise_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  requires(disjoint((a, sizeof(int32_t) * MLDSA_N), (b, sizeof(int32_t) * MLDSA_N)))
   /* check-magic: off */
   requires(array_abs_bound(a, 0, MLDSA_N, 75423753))
   requires(array_abs_bound(b, 0, MLDSA_N, 75423753))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((a, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(a, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -145,14 +144,12 @@ void mld_pointwise_acc_l4_avx2_asm(int32_t c[MLDSA_N],
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/pointwise_acc_l4_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 4 * MLDSA_N))
+  requires(disjoint((c, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 4), (b, sizeof(*b) * 4)))
   /* check-magic: off */
   requires(forall(l0, 0, 4, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((c, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -165,14 +162,12 @@ void mld_pointwise_acc_l5_avx2_asm(int32_t c[MLDSA_N],
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/pointwise_acc_l5_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 5 * MLDSA_N))
+  requires(disjoint((c, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 5), (b, sizeof(*b) * 5)))
   /* check-magic: off */
   requires(forall(l0, 0, 5, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((c, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );
@@ -185,14 +180,12 @@ void mld_pointwise_acc_l7_avx2_asm(int32_t c[MLDSA_N],
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/pointwise_acc_l7_avx2_asm.ml */
 __contract__(
-  requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
-  requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))
-  requires(memory_no_alias(b, sizeof(int32_t) * 7 * MLDSA_N))
+  requires(disjoint((c, sizeof(int32_t) * MLDSA_N), (a, sizeof(*a) * 7), (b, sizeof(*b) * 7)))
   /* check-magic: off */
   requires(forall(l0, 0, 7, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
   requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
   requires(qdata == mld_qdata)
-  assigns(memory_slice(c, sizeof(int32_t) * MLDSA_N))
+  assigns(slices((c, sizeof(int32_t) * MLDSA_N)))
   ensures(array_abs_bound(c, 0, MLDSA_N, 8380417))
   /* check-magic: on */
 );

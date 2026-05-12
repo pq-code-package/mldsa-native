@@ -122,9 +122,9 @@ int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                               const uint8_t seed[MLDSA_SEEDBYTES],
                               MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  requires(memory_no_alias(seed, MLDSA_SEEDBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES),
+                    (seed, MLDSA_SEEDBYTES)))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
@@ -166,8 +166,8 @@ int mld_sign_keypair(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                      uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                      MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
@@ -226,14 +226,12 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(siglen, sizeof(size_t)))
-  requires(memory_no_alias(m, mlen))
-  requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), siglen, (m, mlen),
+                    (rnd, MLDSA_RNDBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
   requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
   requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   assigns(object_whole(siglen))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY ||
@@ -280,13 +278,11 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(siglen, sizeof(size_t)))
-  requires(memory_no_alias(m, mlen))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), siglen, (m, mlen)))
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  requires(disjoint((sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
@@ -327,11 +323,10 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
                              const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(siglen, sizeof(size_t)))
-  requires(memory_no_alias(mu, MLDSA_CRHBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), siglen,
+                    (mu, MLDSA_CRHBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
@@ -369,13 +364,11 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sm, MLDSA_CRYPTO_BYTES + mlen))
-  requires(memory_no_alias(smlen, sizeof(size_t)))
+  requires(disjoint((sm, MLDSA_CRYPTO_BYTES + mlen), smlen))
   requires(m == sm || memory_no_alias(m, mlen))
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
+  requires(disjoint((ctx, ctxlen), (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((sm, MLDSA_CRYPTO_BYTES + mlen)))
   assigns(object_whole(smlen))
   ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
           ((return_value == MLD_ERR_FAIL
@@ -427,11 +420,10 @@ __contract__(
   requires(prelen <= MLD_MAX_BUFFER_SIZE)
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, siglen))
-  requires(memory_no_alias(m, mlen))
+  requires(disjoint((sig, siglen), (m, mlen)))
   requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
   requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
@@ -467,10 +459,9 @@ __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, siglen))
-  requires(memory_no_alias(m, mlen))
+  requires(disjoint((sig, siglen), (m, mlen)))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
@@ -504,9 +495,8 @@ int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
                           MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, siglen))
-  requires(memory_no_alias(mu, MLDSA_CRHBYTES))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((sig, siglen), (mu, MLDSA_CRHBYTES),
+                    (pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
@@ -538,14 +528,11 @@ int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
                   MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
   requires(smlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(m, smlen))
-  requires(memory_no_alias(mlen, sizeof(size_t)))
+  requires(disjoint((m, smlen), mlen))
   requires(m == sm || memory_no_alias(sm, smlen))
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  assigns(memory_slice(m, smlen))
-  assigns(memory_slice(mlen, sizeof(size_t)))
+  requires(disjoint((ctx, ctxlen), (pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
+  assigns(slices((m, smlen), mlen))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
@@ -599,13 +586,11 @@ int mld_sign_signature_pre_hash_internal(
 __contract__(
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(siglen, sizeof(size_t)))
-  requires(memory_no_alias(ph, phlen))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), siglen, (ph, phlen)))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  requires(disjoint((rnd, MLDSA_RNDBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
@@ -654,10 +639,9 @@ __contract__(
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, siglen))
-  requires(memory_no_alias(ph, phlen))
+  requires(disjoint((sig, siglen), (ph, phlen)))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -701,13 +685,11 @@ int mld_sign_signature_pre_hash_shake256(
 __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
-  requires(memory_no_alias(siglen, sizeof(size_t)))
-  requires(memory_no_alias(m, mlen))
+  requires(disjoint((sig, MLDSA_CRYPTO_BYTES), siglen, (m, mlen)))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
+  requires(disjoint((rnd, MLDSA_RNDBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((sig, MLDSA_CRYPTO_BYTES)))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
           ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
@@ -748,10 +730,9 @@ __contract__(
   requires(mlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen <= MLD_MAX_BUFFER_SIZE - 77)
   requires(siglen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sig, siglen))
-  requires(memory_no_alias(m, mlen))
+  requires(disjoint((sig, siglen), (m, mlen)))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -805,8 +786,8 @@ __contract__(
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(hashalg == MLD_PREHASH_NONE || memory_no_alias(ph, phlen))
-  requires(memory_no_alias(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
-  assigns(memory_slice(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
+  requires(disjoint((prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES)))
+  assigns(slices((prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES)))
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
@@ -841,9 +822,9 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                         const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(disjoint((pk, MLDSA_CRYPTO_PUBLICKEYBYTES),
+                    (sk, MLDSA_CRYPTO_SECRETKEYBYTES)))
+  assigns(slices((pk, MLDSA_CRYPTO_PUBLICKEYBYTES)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
