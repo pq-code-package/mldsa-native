@@ -76,9 +76,9 @@ __contract__(
   requires(memory_no_alias(in, inlen))
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
   ensures(return_value < r))
-  {
-    size_t rsize = r;
-    while (inlen >= rsize - pos)
+{
+  size_t rsize = r;
+  while (inlen >= rsize - pos)
   __loop__(
     assigns(pos, in, inlen,
       memory_slice(s, sizeof(uint64_t) *  MLD_KECCAK_LANES))
