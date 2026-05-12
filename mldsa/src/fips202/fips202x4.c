@@ -39,7 +39,7 @@ __contract__(
   requires(memory_no_alias(in3, inlen))
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY)))
 {
-  size_t rsize = r;
+  size_t rsize = r; // Safety: widen r to avoid type mismatch warning
   while (inlen >= rsize)
   __loop__(
     assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
