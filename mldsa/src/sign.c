@@ -60,11 +60,7 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  ensures(return_value == 0
-    || return_value == MLD_ERR_FAIL
-    || return_value == MLD_ERR_OUT_OF_MEMORY
-    || return_value == MLD_ERR_RNG_FAIL
-    || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
 );
 
 #if defined(MLD_CONFIG_KEYGEN_PCT)

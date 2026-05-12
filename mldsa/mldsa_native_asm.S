@@ -228,6 +228,7 @@
 /* mldsa/src/common.h */
 #undef MLD_ADD_PARAM_SET
 #undef MLD_ALLOC
+#undef MLD_ANY_ERROR
 #undef MLD_APPLY
 #undef MLD_ASM_FN_SIZE
 #undef MLD_ASM_FN_SYMBOL

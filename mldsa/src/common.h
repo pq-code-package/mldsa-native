@@ -318,6 +318,15 @@
  * has probability < 2^-256. */
 #define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED -4
 
+/* Disjunction over the full set of MLD_ERR_XXX failure codes.
+ *
+ * Intended for use in top-level `ensures` clauses that admit every
+ * possible error. Narrower contracts should enumerate only the
+ * specific errors they can actually return. */
+#define MLD_ANY_ERROR(err)                                    \
+  ((err) == MLD_ERR_FAIL || (err) == MLD_ERR_OUT_OF_MEMORY || \
+   (err) == MLD_ERR_RNG_FAIL || (err) == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+
 
 #endif /* !__ASSEMBLER__ */
 

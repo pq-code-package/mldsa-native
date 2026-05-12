@@ -127,9 +127,7 @@ __contract__(
   requires(memory_no_alias(seed, MLDSA_SEEDBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
-          return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL ||
-          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
@@ -170,9 +168,7 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
-          return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL ||
-          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
 );
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -289,7 +285,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
+          (MLD_ANY_ERROR(return_value) && *siglen == 0))
 );
 
 /**
@@ -334,7 +330,7 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(object_whole(siglen))
   ensures((return_value == 0 && *siglen == MLDSA_CRYPTO_BYTES) ||
-          ((return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_RNG_FAIL || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *siglen == 0))
+          (MLD_ANY_ERROR(return_value) && *siglen == 0))
 );
 
 /**
@@ -378,10 +374,7 @@ __contract__(
   assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
   assigns(object_whole(smlen))
   ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
-          ((return_value == MLD_ERR_FAIL
-            || return_value == MLD_ERR_OUT_OF_MEMORY
-            || return_value == MLD_ERR_RNG_FAIL
-            || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) && *smlen == 0))
+          (MLD_ANY_ERROR(return_value) && *smlen == 0))
 );
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
