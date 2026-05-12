@@ -77,7 +77,8 @@ __contract__(
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
   ensures(return_value < r))
 {
-  size_t rsize = r; // Safety: widen r to avoid type mismatch warning
+  /* Safety: widen r to avoid type mismatch warning */
+  size_t rsize = r;
   while (inlen >= rsize - pos)
   __loop__(
     assigns(pos, in, inlen,
@@ -151,7 +152,8 @@ __contract__(
   ensures(return_value <= r))
 {
   unsigned int i;
-  size_t rsize = r; // Safety: widen r to avoid type mismatch warning
+  /* Safety: widen r to avoid type mismatch warning */
+  size_t rsize = r;
   size_t out_offset = 0;
 
   /* Reference: This code is re-factored from the reference implementation
