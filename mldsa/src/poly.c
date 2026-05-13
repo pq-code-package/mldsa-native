@@ -164,128 +164,146 @@ void mld_poly_shiftl(mld_poly *a)
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-static MLD_INLINE int32_t mld_fqmul(int32_t a, int32_t b)
+/*
+ * Montgomery multiplication with precomputed twist
+ *
+ * b_twisted is the precomputed b * MLDSA_Q^{-1} mod 2^32 (signed canonical).
+ */
+static MLD_INLINE int32_t mld_fqmul(int32_t a, int32_t b, int32_t b_twisted)
 __contract__(
   requires(b > -MLDSA_Q_HALF && b < MLDSA_Q_HALF)
   ensures(return_value > -MLD_FQMUL_BOUND && return_value < MLD_FQMUL_BOUND)
 )
 {
-  /* Bounds: We argue in mld_montgomery_reduce() that the result
-   * of Montgomery reduction is < MLDSA_Q if the input is smaller
-   * than 2^31 * MLDSA_Q in absolute value. Indeed, we have:
-   *
-   *    |a * b|   = |a| * |b|
-   *              < 2^31 * MLDSA_Q_HALF
-   *              < 2^31 * MLDSA_Q
-   *
-   * So the output is < MLDSA_Q < MLD_FQMUL_BOUND.
-   */
-  return mld_montgomery_reduce((int64_t)a * (int64_t)b);
+  /* High 32 bits of the signed product a * b. */
+  const int32_t prod_hi = (int32_t)(((int64_t)a * b) >> 32);
+  /* Low 32 bits of a * b_twisted (== a * b * q^{-1} mod 2^32), taken in
+   * unsigned 64-bit then narrowed; the explicit `& UINT32_MAX` is a no-op
+   * for the value, but silences CBMC's unsigned-conversion overflow check
+   * on the implicit uint64_t->uint32_t narrowing. */
+  const uint32_t prod_lo_t_u =
+      (uint32_t)(((uint64_t)mld_cast_int32_to_uint32(a) *
+                  mld_cast_int32_to_uint32(b_twisted)) &
+                 UINT32_MAX);
+  const int32_t prod_lo_t = mld_cast_uint32_to_int32(prod_lo_t_u);
+  /* High 32 bits of prod_lo_t * Q. */
+  const int32_t correction = (int32_t)(((int64_t)prod_lo_t * MLDSA_Q) >> 32);
+  return prod_hi - correction;
 }
 
-/* mld_ntt_butterfly_block()
- *
- * Computes a block CT butterflies with a fixed twiddle factor,
- * using Montgomery multiplication.
- *
- * Parameters:
- * - r: Pointer to base of polynomial (_not_ the base of butterfly block)
- * - zeta: Twiddle factor to use for the butterfly. This must be in
- *         Montgomery form and signed canonical.
- * - start: Offset to the beginning of the butterfly block
- * - len: Index difference between coefficients subject to a butterfly
- * - bound: Ghost variable describing coefficient bound: Prior to `start`,
- *          coefficients must be bound by `bound + MLDSA_Q`. Post `start`,
- *          they must be bound by `bound`.
- * When this function returns, output coefficients in the index range
- * [start, start+2*len) have bound bumped to `bound + MLDSA_Q`.
- * Example:
- * - start=8, len=4
- *   This would compute the following four butterflies
- *          8     --    12
- *             9    --     13
- *                10   --     14
- *                   11   --     15
- * - start=4, len=2
- *   This would compute the following two butterflies
- *          4 -- 6
- *             5 -- 7
- */
-
-/* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static MLD_INLINE void mld_ntt_butterfly_block(int32_t r[MLDSA_N],
-                                               const int32_t zeta,
-                                               const unsigned start,
-                                               const unsigned len,
-                                               const unsigned bound)
-__contract__(
-  requires(start < MLDSA_N)
-  requires(1 <= len && len <= MLDSA_N / 2 && start + 2 * len <= MLDSA_N)
-  requires(0 <= bound && bound < INT32_MAX - MLD_FQMUL_BOUND)
-  requires(-MLDSA_Q_HALF < zeta && zeta < MLDSA_Q_HALF)
-  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(array_abs_bound(r, 0, start, bound + MLD_FQMUL_BOUND))
-  requires(array_abs_bound(r, start, MLDSA_N, bound))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(r, 0, start + 2*len, bound + MLD_FQMUL_BOUND))
-  ensures(array_abs_bound(r, start + 2 * len, MLDSA_N, bound)))
+/* Cooley-Tukey butterfly */
+static MLD_INLINE void mld_ct_butterfly(int32_t r[MLDSA_N], unsigned i,
+                                        unsigned j, int32_t z, int32_t zt)
 {
-  /* `bound` is a ghost variable only needed in the CBMC specification */
-  unsigned j;
+  const int32_t t = mld_fqmul(r[j], z, zt);
+  r[j] = r[i] - t;
+  r[i] = r[i] + t;
+}
+
+/* Gentleman-Sande butterfly
+ *
+ * The twiddles `z`, `zt` are implicitly negated: we compute `b - a` instead
+ * of `a - b`, which is equivalent to multiplying by `-z`. Callers therefore
+ * pass the un-negated zetas straight from `mld_zetas`. */
+static MLD_INLINE void mld_gs_butterfly(int32_t r[MLDSA_N], unsigned i,
+                                        unsigned j, int32_t z, int32_t zt)
+{
+  const int32_t a = r[i];
+  const int32_t b = r[j];
+  r[i] = a + b;
+  r[j] = mld_fqmul(b - a, z, zt);
+}
+
+/*
+ * Two merged forward-NTT layers, applied to one outer block.
+ */
+static MLD_INLINE void mld_ntt_2_layers_block(
+    int32_t r[MLDSA_N], unsigned start, unsigned len, int32_t z0, int32_t z0t,
+    int32_t z1, int32_t z1t, int32_t z2, int32_t z2t, const int32_t bound)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(0 < bound && bound < INT32_MAX - 2 * MLDSA_Q)
+  requires(1 <= len && len <= MLDSA_N / 4)
+  requires(start <= MLDSA_N - 4 * len)
+  requires(z0 > -MLDSA_Q_HALF && z0 < MLDSA_Q_HALF)
+  requires(z1 > -MLDSA_Q_HALF && z1 < MLDSA_Q_HALF)
+  requires(z2 > -MLDSA_Q_HALF && z2 < MLDSA_Q_HALF)
+  requires(array_abs_bound(r, start, MLDSA_N, bound))
+  requires(array_abs_bound(r, 0, start, bound + 2 * MLDSA_Q))
+  assigns(memory_slice(r, sizeof(uint32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
+  ensures(array_abs_bound(r, 0, start + 4 * len, bound + 2 * MLDSA_Q))
+)
+{
+  unsigned j = 0;
+  /* `bound` is a ghost variable referenced only in the CBMC contract. */
   ((void)bound);
-  for (j = start; j < start + len; j++)
+  for (j = 0; j < len; j++)
   __loop__(
-    invariant(start <= j && j <= start + len)
-    /*
-     * Coefficients are updated in strided pairs, so the bounds for the
-     * intermediate states alternate twice between the old and new bound
-     */
-    invariant(array_abs_bound(r, 0,           j,           bound + MLD_FQMUL_BOUND))
-    invariant(array_abs_bound(r, j,           start + len, bound))
-    invariant(array_abs_bound(r, start + len, j + len,     bound + MLD_FQMUL_BOUND))
-    invariant(array_abs_bound(r, j + len,     MLDSA_N,     bound))
-    decreases(start + len - j))
+    assigns(j, memory_slice(r, sizeof(uint32_t) * MLDSA_N))
+    invariant(j <= len)
+    /* Static bounds */
+    invariant(array_abs_bound(r, 0, start, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
+    /* Dynamic bounds */
+    invariant(array_abs_bound(r, start + 0 * len,     start + 0 * len + j, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 1 * len,     start + 1 * len + j, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 2 * len,     start + 2 * len + j, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 3 * len,     start + 3 * len + j, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 0 * len + j, start + 1 * len,     bound))
+    invariant(array_abs_bound(r, start + 1 * len + j, start + 2 * len,     bound))
+    invariant(array_abs_bound(r, start + 2 * len + j, start + 3 * len,     bound))
+    invariant(array_abs_bound(r, start + 3 * len + j, start + 4 * len,     bound))
+    decreases(len - j))
   {
-    int32_t t;
-    t = mld_fqmul(r[j + len], zeta);
-    r[j + len] = r[j] - t;
-    r[j] = r[j] + t;
+    const unsigned i0 = start + j;
+    const unsigned i1 = i0 + 1 * len;
+    const unsigned i2 = i0 + 2 * len;
+    const unsigned i3 = i0 + 3 * len;
+
+    mld_ct_butterfly(r, i0, i2, z0, z0t);
+    mld_ct_butterfly(r, i1, i3, z0, z0t);
+    mld_ct_butterfly(r, i0, i1, z1, z1t);
+    mld_ct_butterfly(r, i2, i3, z2, z2t);
   }
 }
 
-/* mld_ntt_layer()
- *
- * Compute one layer of forward NTT
- *
- * Parameters:
- * - r:     Pointer to base of polynomial
- * - layer: Indicates which layer is being applied.
+/*
+ * Two merged forward-NTT layers.
  */
-
-/* Reference: Embedded in `ntt()` in the reference implementation @[REF]. */
-static MLD_INLINE void mld_ntt_layer(int32_t r[MLDSA_N], const unsigned layer)
+static MLD_INLINE void mld_ntt_2_layers(int32_t r[MLDSA_N],
+                                        const unsigned layer)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(1 <= layer && layer <= 8)
-  requires(array_abs_bound(r, 0, MLDSA_N, layer * MLD_FQMUL_BOUND))
+  requires(layer == 1 || layer == 3 || layer == 5 || layer == 7)
+  requires(array_abs_bound(r, 0, MLDSA_N, layer * MLDSA_Q))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(r, 0, MLDSA_N, (layer + 1) * MLD_FQMUL_BOUND)))
+  ensures(array_abs_bound(r, 0, MLDSA_N, (layer + 2) * MLDSA_Q)))
 {
-  unsigned start, k, len;
-  /* Twiddle factors for layer n are at indices 2^(n-1)..2^n-1. */
+  const unsigned len_outer = (unsigned)MLDSA_N >> layer;
+  const unsigned len = len_outer >> 1;
+  unsigned start, k;
   k = 1u << (layer - 1);
-  len = (unsigned)MLDSA_N >> layer;
-  for (start = 0; start < MLDSA_N; start += 2 * len)
+  for (start = 0; start < MLDSA_N; start += 2 * len_outer)
   __loop__(
-    invariant(start < MLDSA_N + 2 * len)
-    invariant(k <= MLDSA_N)
-    invariant(2 * len * k == start + MLDSA_N)
-    invariant(array_abs_bound(r, 0, start, layer * MLD_FQMUL_BOUND + MLD_FQMUL_BOUND))
-    invariant(array_abs_bound(r, start, MLDSA_N, layer * MLD_FQMUL_BOUND))
+    invariant(start <= MLDSA_N)
+    invariant((1u << (layer - 1)) <= k && k <= (1u << layer))
+    invariant(2 * len_outer * k == start + MLDSA_N)
+    invariant(array_abs_bound(r, 0, start, (layer + 2) * MLDSA_Q))
+    invariant(array_abs_bound(r, start, MLDSA_N, layer * MLDSA_Q))
     decreases(MLDSA_N - start))
   {
-    int32_t zeta = mld_zetas[k++];
-    mld_ntt_butterfly_block(r, zeta, start, len, layer * MLD_FQMUL_BOUND);
+    const int32_t z0 = mld_zetas[k][0];
+    const int32_t z1 = mld_zetas[2 * k][0];
+    const int32_t z2 = mld_zetas[2 * k + 1][0];
+
+    const int32_t z0t = mld_zetas[k][1];
+    const int32_t z1t = mld_zetas[2 * k][1];
+    const int32_t z2t = mld_zetas[2 * k + 1][1];
+
+    k++;
+    mld_ntt_2_layers_block(r, start, len, z0, z0t, z1, z1t, z2, z2t,
+                           (int32_t)(layer * MLDSA_Q));
   }
 }
 
@@ -297,22 +315,15 @@ __contract__(
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 )
 {
-  unsigned int layer;
   int32_t *r;
-
 
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
   r = a->coeffs;
 
-  for (layer = 1; layer < 9; layer++)
-  __loop__(
-    invariant(1 <= layer && layer <= 9)
-    invariant(array_abs_bound(r, 0, MLDSA_N, layer * MLD_FQMUL_BOUND))
-    decreases(9 - layer)
-  )
-  {
-    mld_ntt_layer(r, layer);
-  }
+  mld_ntt_2_layers(r, 1);
+  mld_ntt_2_layers(r, 3);
+  mld_ntt_2_layers(r, 5);
+  mld_ntt_2_layers(r, 7);
 
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLD_NTT_BOUND);
 }
@@ -350,54 +361,105 @@ __contract__(
 {
   /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
   const int32_t f = 41978;
-  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bounds reasoning is just
-   * a special case of that in mld_fqmul(). */
-  return mld_montgomery_reduce((int64_t)a * f);
+  /* check-magic:
+       -8395782 == signed_mod(41978 * pow(MLDSA_Q, -1, 2^32), 2^32) */
+  const int32_t f_twisted = -8395782;
+  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bound follows directly from
+   * the postcondition of mld_fqmul(). */
+  return mld_fqmul(a, f, f_twisted);
 }
 
-/* Reference: Embedded into `invntt_tomont()` in the reference implementation
- * @[REF] */
-static MLD_INLINE void mld_invntt_layer(int32_t r[MLDSA_N], unsigned layer)
+/*
+ * Two merged inverse-NTT layers, applied to one outer block.
+ */
+static MLD_INLINE void mld_invntt_2_layers_block(
+    int32_t r[MLDSA_N], unsigned start, unsigned len, int32_t z0, int32_t z0t,
+    int32_t z1, int32_t z1t, int32_t z2, int32_t z2t, const int32_t bound)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(1 <= layer && layer <= 8)
-  requires(array_abs_bound(r, 0, MLDSA_N, (MLDSA_N >> layer) * MLDSA_Q))
-  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(r, 0, MLDSA_N, (MLDSA_N >> (layer - 1)) * MLDSA_Q)))
+  requires(MLDSA_Q <= bound && bound <= INT32_MAX / 4)
+  requires(1 <= len && len <= MLDSA_N / 4)
+  requires(start <= MLDSA_N - 4 * len)
+  requires(z0 > -MLDSA_Q_HALF && z0 < MLDSA_Q_HALF)
+  requires(z1 > -MLDSA_Q_HALF && z1 < MLDSA_Q_HALF)
+  requires(z2 > -MLDSA_Q_HALF && z2 < MLDSA_Q_HALF)
+  requires(array_abs_bound(r, start, MLDSA_N, bound))
+  requires(array_abs_bound(r, 0, start, 4 * bound))
+  assigns(memory_slice(r, sizeof(uint32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
+  ensures(array_abs_bound(r, 0, start + 4 * len, 4 * bound))
+)
 {
-  unsigned start, k, len;
-  len = (unsigned)MLDSA_N >> layer;
-  k = (1u << layer) - 1;
-  for (start = 0; start < MLDSA_N; start += 2 * len)
+  unsigned j = 0;
+  /* `bound` is a ghost variable referenced only in the CBMC contract. */
+  ((void)bound);
+  for (j = 0; j < len; j++)
   __loop__(
-    invariant(start <= MLDSA_N && k <= 255)
-    invariant(2 * len * k + start == 2 * MLDSA_N - 2 * len)
-    invariant(array_abs_bound(r, 0, start, (MLDSA_N >> (layer - 1)) * MLDSA_Q))
-    invariant(array_abs_bound(r, start, MLDSA_N, (MLDSA_N >> layer) * MLDSA_Q))
+    assigns(j, memory_slice(r, sizeof(uint32_t) * MLDSA_N))
+    invariant(j <= len)
+    /* Static bounds */
+    invariant(array_abs_bound(r, 0, start, 4 * bound))
+    invariant(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
+    /* Dynamic bounds */
+    invariant(array_abs_bound(r, start + 0 * len,     start + 0 * len + j, 4 * bound))
+    invariant(array_abs_bound(r, start + 1 * len,     start + 1 * len + j, 4 * bound))
+    invariant(array_abs_bound(r, start + 2 * len,     start + 2 * len + j, 4 * bound))
+    invariant(array_abs_bound(r, start + 3 * len,     start + 3 * len + j, 4 * bound))
+    invariant(array_abs_bound(r, start + 0 * len + j, start + 1 * len,     bound))
+    invariant(array_abs_bound(r, start + 1 * len + j, start + 2 * len,     bound))
+    invariant(array_abs_bound(r, start + 2 * len + j, start + 3 * len,     bound))
+    invariant(array_abs_bound(r, start + 3 * len + j, start + 4 * len,     bound))
+    decreases(len - j))
+  {
+    const unsigned i0 = start + j;
+    const unsigned i1 = i0 + 1 * len;
+    const unsigned i2 = i0 + 2 * len;
+    const unsigned i3 = i0 + 3 * len;
+
+    mld_gs_butterfly(r, i0, i1, z1, z1t);
+    mld_gs_butterfly(r, i2, i3, z2, z2t);
+    mld_gs_butterfly(r, i0, i2, z0, z0t);
+    mld_gs_butterfly(r, i1, i3, z0, z0t);
+  }
+}
+
+/*
+ * Two merged inverse-NTT layers.
+ */
+static MLD_INLINE void mld_invntt_2_layers(int32_t r[MLDSA_N],
+                                           const unsigned layer)
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(layer == 2 || layer == 4 || layer == 6 || layer == 8)
+  requires(array_abs_bound(r, 0, MLDSA_N, ((unsigned)MLDSA_N >> layer) * MLDSA_Q))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, ((unsigned)MLDSA_N >> (layer - 2)) * MLDSA_Q)))
+{
+  const unsigned len = (unsigned)MLDSA_N >> layer;
+  const unsigned len_outer = len << 1;
+  const int32_t bound = (int32_t)(((unsigned)MLDSA_N >> layer) * MLDSA_Q);
+  unsigned start, k;
+  k = (1u << (layer - 1)) - 1u;
+  for (start = 0; start < MLDSA_N; start += 2 * len_outer)
+  __loop__(
+    invariant(start <= MLDSA_N)
+    invariant(k < (1u << (layer - 1)))
+    invariant(2 * len_outer * k + 2 * len_outer == 2 * MLDSA_N - start)
+    invariant(array_abs_bound(r, 0, start, 4 * bound))
+    invariant(array_abs_bound(r, start, MLDSA_N, bound))
     decreases(MLDSA_N - start))
   {
-    unsigned j;
-    int32_t zeta = -mld_zetas[k--];
+    /* Zetas are passed un-negated; `mld_gs_butterfly` absorbs the negation. */
+    const int32_t z0 = mld_zetas[k][0];
+    const int32_t z1 = mld_zetas[2 * k + 1][0];
+    const int32_t z2 = mld_zetas[2 * k][0];
 
-    /* The bound `(MLDSA_N >> (layer - 1)) * MLDSA_Q` is loose enough to
-     * cover both the input bound `(MLDSA_N >> layer) * MLDSA_Q`
-     * (for layers >= 1) and the fqmul output bound `MLD_FQMUL_BOUND`
-     * (which is < 2 * MLDSA_Q <= (MLDSA_N >> (layer - 1)) * MLDSA_Q). */
-    for (j = start; j < start + len; j++)
-    __loop__(
-      invariant(start <= j && j <= start + len)
-      invariant(array_abs_bound(r, 0, start, (MLDSA_N >> (layer - 1)) * MLDSA_Q))
-      invariant(array_abs_bound(r, start, j, (MLDSA_N >> (layer - 1)) * MLDSA_Q))
-      invariant(array_abs_bound(r, j, start + len, (MLDSA_N >> layer) * MLDSA_Q))
-      invariant(array_abs_bound(r, start + len, j + len, (MLDSA_N >> (layer - 1)) * MLDSA_Q))
-      invariant(array_abs_bound(r, j + len, MLDSA_N, (MLDSA_N >> layer) * MLDSA_Q))
-      decreases(start + len - j))
-    {
-      int32_t t = r[j];
-      r[j] = t + r[j + len];
-      r[j + len] = t - r[j + len];
-      r[j + len] = mld_fqmul(r[j + len], zeta);
-    }
+    const int32_t z0t = mld_zetas[k][1];
+    const int32_t z1t = mld_zetas[2 * k + 1][1];
+    const int32_t z2t = mld_zetas[2 * k][1];
+
+    k--;
+    mld_invntt_2_layers_block(r, start, len, z0, z0t, z1, z1t, z2, z2t, bound);
   }
 }
 
@@ -409,22 +471,16 @@ __contract__(
   ensures(array_abs_bound(a->coeffs, 0, MLDSA_N, MLD_INTT_BOUND))
 )
 {
-  unsigned int layer, j;
+  unsigned int j;
   int32_t *r;
 
   mld_assert_abs_bound(a->coeffs, MLDSA_N, MLDSA_Q);
 
   r = a->coeffs;
-  for (layer = 8; layer >= 1; layer--)
-  __loop__(
-    invariant(layer <= 8)
-    /* Absolute bounds increase from 1Q before layer 8 */
-    /* up to 256Q after layer 1                        */
-    invariant(array_abs_bound(r, 0, MLDSA_N, (MLDSA_N >> layer) * MLDSA_Q))
-    decreases(layer))
-  {
-    mld_invntt_layer(r, layer);
-  }
+  mld_invntt_2_layers(r, 8);
+  mld_invntt_2_layers(r, 6);
+  mld_invntt_2_layers(r, 4);
+  mld_invntt_2_layers(r, 2);
 
   /* Coefficient bounds are now at 256Q. We now scale by mont / 256,
    * i.e., compute the Montgomery multiplication by mont^2 / 256.

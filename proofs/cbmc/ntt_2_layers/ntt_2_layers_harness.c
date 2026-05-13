@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include "params.h"
 
-void mld_invntt_layer(int32_t r[MLDSA_N], unsigned layer);
+void mld_ntt_2_layers(int32_t r[MLDSA_N], unsigned layer);
 
 void harness(void)
 {
   int32_t *r;
   unsigned layer;
-  mld_invntt_layer(r, layer);
+  mld_ntt_2_layers(r, layer);
 }
