@@ -712,6 +712,28 @@ def signed_reduce(a):
     return c
 
 
+def ntt_root_of_unity(layer, block, inv=False, scale=False):
+    """Root of unity (un-reduced) for the given (layer, block) of the NTT.
+
+    Shared by all backends; the arch-specific generators differ only in how
+    they post-process this value via their prepare_root_for_* helper.
+
+    We are computing a negacyclic NTT; the twiddles needed are the second
+    half of the twiddles for a cyclic NTT of twice the size. Layers are
+    numbered 0 through 7.
+
+    inv:   negate the exponent (inverse NTT).
+    scale: fold in the 2^{-8} of the inverse NTT and the Montgomery factor
+           2^32 (used for the final scaling twiddle)."""
+    log = bitreverse(pow(2, layer) + block, 8)
+    if inv is True:
+        log = -log
+    root = pow(root_of_unity, log, modulus)
+    if scale is True:
+        root = root * pow(2, 32 - 8, modulus)
+    return root
+
+
 def gen_c_zetas():
     """Generate source and header file for zeta values used in
     the reference NTT and invNTT"""
@@ -743,43 +765,52 @@ def gen_c_zeta_file():
     update_file("mldsa/src/zetas.inc", "\n".join(gen()), force_format=True)
 
 
-def prepare_root_for_barrett(root):
-    """Takes a constant that the code needs to Barrett-multiply with,
-    and returns the pair of (a) its signed canonical form, (b) the
-    twisted constant used in the high-mul part of the Barrett multiplication."""
+def prepare_root_for_barrett(root, sqrdmulh=False):
+    """Takes a constant that the code needs to Barrett-multiply with, and
+    returns the pair (z, w): z the signed canonical form of `root`, and w the
+    multiplier for the high-mul step that approximates t = round(a * z / q),
+    with w ~= z * 2^32 / q.
+
+    The exact form of w depends on the high-mul instruction:
+
+      sqrdmulh=True  (AArch64 NEON `sqrdmulh`, which computes
+                      round(2 * a * c / 2^32)): the multiplier is halved, so
+                      the instruction's built-in doubling restores the full
+                      value. Rounding to even before halving keeps it exact.
+      sqrdmulh=False (a plain signed `mulh`): the full round-to-nearest value.
+                      It fits int32 since |z| <= q/2 implies |w| <= 2^31."""
 
     # Signed canonical reduction
-    root = signed_reduce(root)
+    z = signed_reduce(root)
+    scaled = (z * 2**32) / modulus
 
-    def round_to_even(t):
-        rt = round(t)
-        if rt % 2 == 0:
-            return rt
-        # Make sure to pick a rounding target
-        # that's <= 1 away from x in absolute value.
-        if rt <= t:
-            return rt + 1
-        return rt - 1
+    if sqrdmulh:
 
-    root_twisted = round_to_even((root * 2**32) / modulus) // 2
-    return root, root_twisted
+        def round_to_even(t):
+            rt = round(t)
+            if rt % 2 == 0:
+                return rt
+            # Make sure to pick a rounding target
+            # that's <= 1 away from x in absolute value.
+            if rt <= t:
+                return rt + 1
+            return rt - 1
+
+        w = round_to_even(scaled) // 2
+    else:
+        w = round(scaled)
+
+    # The multiplier is stored in a signed 32-bit table lane. This holds for
+    # both forms since |z| <= q/2: the mulh value peaks near 2^31 and the
+    # (halved) sqrdmulh value near 2^30.
+    assert -(2**31) <= w < 2**31
+
+    return z, w
 
 
 def gen_aarch64_root_of_unity_for_block(layer, block, inv=False, scale=False):
-    # We are computing a negacyclic NTT; the twiddles needed here is
-    # the second half of the twiddles for a cyclic NTT of twice the size.
-    # For ease of calculating the roots, layers are numbers 0 through 7
-    # in this function.
-    log = bitreverse(pow(2, layer) + block, 8)
-    if inv is True:
-        log = -log
-    root = pow(root_of_unity, log, modulus)
-
-    if scale is True:
-        # Integrate scaling by 2**(-8) and Montgomery factor 2**32 into twiddle
-        root = root * pow(2, 32 - 8, modulus)
-
-    root, root_twisted = prepare_root_for_barrett(root)
+    root = ntt_root_of_unity(layer, block, inv=inv, scale=scale)
+    root, root_twisted = prepare_root_for_barrett(root, sqrdmulh=True)
     return root, root_twisted
 
 
@@ -956,6 +987,79 @@ def _fmt_indexed_rows(data):
     """Format rows of data with index comments."""
     for i, row in enumerate(data):
         yield ",".join(map(str, row)) + f" /* {i} */,"
+
+
+def gen_rv32im_root_for_block(layer, block):
+    """Forward NTT zeta for the given (layer, block), in plain (non-Montgomery)
+    centered form, returned as the (z, w) Barrett pair consumed by the RV32-IM
+    assembly. The RV32-IM kernel uses a plain signed `mulh` (not NEON
+    `sqrdmulh`), hence sqrdmulh=False:
+
+        t = mulh(a, w)            ~= round(a * z / q)
+        r = lo(a * z) - lo(t * q)  == (a * z) mod q   (|r| < q + epsilon).
+
+    No Montgomery factor is folded in: the Barrett multiplication computes
+    (a * z) mod q directly, which matches the input/output domain of the
+    previous Montgomery kernel (R was folded into the twiddle and cancelled
+    by R^-1, so both conventions are plain-domain)."""
+    root = ntt_root_of_unity(layer, block)
+    return prepare_root_for_barrett(root, sqrdmulh=False)
+
+
+def gen_rv32im_fwd_ntt_zetas():
+    """Yield (z, z') pairs in the order consumed by the 2+2+2+2 forward NTT.
+
+    Each of the 4 passes (L1+L2, L3+L4, L5+L6, L7+L8) emits one set of
+    3 pairs per outer iteration. Layers are 0-indexed here:
+
+        pass p uses layers (lo, hi) = (2p, 2p+1)
+
+    For outer index o in pass p:
+        zeta_lo  = layer lo, block o
+        zeta_hi0 = layer hi, block 2*o
+        zeta_hi1 = layer hi, block 2*o + 1
+
+    Total: 1 + 4 + 16 + 64 = 85 outer iters * 3 pairs = 255 pairs."""
+    for p in range(4):
+        lo = 2 * p
+        hi = 2 * p + 1
+        n_outer = 1 << lo  # 1, 4, 16, 64
+        for o in range(n_outer):
+            yield from gen_rv32im_root_for_block(lo, o)
+            yield from gen_rv32im_root_for_block(hi, 2 * o + 0)
+            yield from gen_rv32im_root_for_block(hi, 2 * o + 1)
+
+
+def gen_rv32im_zeta_file():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_RV32IM) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "arith_native_rv32im.h"'
+        yield ""
+        yield "/*"
+        yield " * Table of zeta values used in the RV32-IM forward NTT."
+        yield " * Each entry is a (zeta, w) Barrett pair, with zeta the plain"
+        yield " * centered twiddle (|zeta| <= q/2) and w = round(zeta * 2^32 / q)"
+        yield " * the Barrett multiplier. See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const int32_t",
+            "mld_rv32im_ntt_zetas",
+            gen_rv32im_fwd_ntt_zetas(),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(rv32im_zetas)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/riscv32/src/rv32im_zetas.c", "\n".join(gen()))
 
 
 def gen_aarch64_zeta_file():
@@ -1551,10 +1655,7 @@ def prepare_root_for_montmul(root, mult):
 
 
 def gen_avx2_root_of_unity_for_block(layer, block, mult=False):
-    # We are computing a negacyclic NTT; the twiddles needed here is
-    # the second half of the twiddles for a cyclic NTT of twice the size.
-    log = bitreverse(pow(2, layer) + block, 8)
-    root = pow(root_of_unity, log, modulus)
+    root = ntt_root_of_unity(layer, block)
     return prepare_root_for_montmul(root, mult)
 
 
@@ -1892,6 +1993,10 @@ def riscv64(c):
     return "/riscv64/" in c
 
 
+def rv32im(c):
+    return "/rv32im/" in c
+
+
 def armv81m(c):
     return "/armv81m/" in c
 
@@ -1937,12 +2042,17 @@ def native_arith_riscv64(c):
     return native_arith(c) and riscv64(c)
 
 
+def native_arith_rv32im(c):
+    return native_arith(c) and rv32im(c)
+
+
 def native_arith_core(c):
     return (
         native_arith(c)
         and not native_arith_x86_64(c)
         and not native_arith_aarch64(c)
         and not native_arith_riscv64(c)
+        and not native_arith_rv32im(c)
     )
 
 
@@ -2048,6 +2158,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
     )
     yield "#endif"
+    yield "#if defined(MLD_SYS_RISCV32)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_rv32im, desc="native code (Arith, RV32IM)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#endif"
     yield ""
@@ -2123,6 +2238,10 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_X86_64)"
         for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV32)"
+        for c in filter(native_arith_rv32im, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2208,6 +2327,10 @@ def gen_monolithic_asm_file():
         for c in filter(native_arith_x86_64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV32)"
+        for c in filter(native_arith_rv32im, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#endif"
         yield ""
         yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)"
@@ -2260,6 +2383,8 @@ def get_config_options():
         "MLD_FORCE_RISCV64",
         "MLD_FORCE_RISCV32",
         "MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER",
+        "MLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER",
+        "MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER",
         "MLDSA_DEBUG",  # TODO: Rename?
         "MLD_BREAK_PCT",  # Use in PCT breakage test
         "MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND",  # Internal testing escape hatch
@@ -2359,7 +2484,10 @@ def check_macro_typos():
                 return True
 
         # 5. AWS-LC importer patch
-        if is_autogen or filename == "integration/awslc/awslc.patch":
+        if is_autogen or filename in [
+            "integration/awslc/pre_import.patch",
+            "integration/awslc/post_import.patch",
+        ]:
             return True
 
         if is_autogen or filename == "mldsa/src/common.h":
@@ -2435,6 +2563,12 @@ def check_asm_loop_labels_for_file(filename):
     # Find function symbol name
     res = _RE_FUNC_SYMBOL.search(content)
     if res is None:
+        # Shared .i kernel bodies carry the loop labels but not the function
+        # symbol (which lives in the wrapper .S next to its .global). With the
+        # symbol in another file we cannot derive the label prefix here, so
+        # skip; the wrapper .S (which does carry the symbol) is checked instead.
+        if filename.endswith(".i"):
+            return
         raise Exception(f"Could not find function symbol in assembly file {filename}")
     funcname = res.group(1)
     lbl_prefix = re.sub(r"(_(aarch64|avx2|mve))?_asm$", "", funcname) + "_"
@@ -2532,7 +2666,7 @@ def normalize_asm_macro_syntax():
 
 # Architectures autogen knows how to (cross-)compile assembly for. Used to
 # expand a bare `--force-cross` (no value) into "force all architectures".
-FORCE_CROSS_ALL_ARCHES = {"aarch64", "x86_64", "armv81m"}
+FORCE_CROSS_ALL_ARCHES = {"aarch64", "x86_64", "armv81m", "rv32"}
 
 
 def resolve_force_cross(value):
@@ -2563,6 +2697,11 @@ def update_via_simpasm(
     force_cross=(),
     x86_64_syntax="att",
 ):
+    # force_cross: set of source architectures for which a missing cross
+    # toolchain is a hard error rather than a silent skip. Pass None or an
+    # empty set to skip silently for every arch.
+    if force_cross is None:
+        force_cross = set()
     _, infile = os.path.split(infile_full)
     if outfile is None:
         outfile = infile
@@ -2579,6 +2718,8 @@ def update_via_simpasm(
         source_arch = "x86_64"
     elif "armv81m" in infile_full:
         source_arch = "armv81m"
+    elif "riscv32" in infile_full or "rv32im" in infile_full:
+        source_arch = "riscv32"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -2590,6 +2731,14 @@ def update_via_simpasm(
     # Armv8.1-M is always cross-compiled
     if source_arch == "armv81m":
         cross_prefix = "arm-none-eabi-"
+        cross_gcc = cross_prefix + "gcc"
+        if shutil.which(cross_gcc) is None:
+            if source_arch not in force_cross:
+                return
+            raise Exception(f"Could not find cross toolchain {cross_prefix}")
+    # RISC-V 32-bit is always cross-compiled.
+    elif source_arch == "riscv32":
+        cross_prefix = "riscv32-unknown-linux-gnu-"
         cross_gcc = cross_prefix + "gcc"
         if shutil.which(cross_gcc) is None:
             if source_arch not in force_cross:
@@ -2613,6 +2762,8 @@ def update_via_simpasm(
                 arch = "aarch64"
             elif "armv81m" in infile_full:
                 arch = "armv81m"
+            elif "riscv32" in infile_full or "rv32im" in infile_full:
+                arch = "riscv32"
             else:
                 arch = "x86_64"
 
@@ -2924,8 +3075,11 @@ def update_via_remove(filename):
     update_file(filename, None)
 
 
-# Only synchronize sources, but not README.md, Makefile and so on
-SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".i", ".inc", ".S")
+# Only synchronize sources, but not README.md, Makefile and so on.
+# Note: .i files are dev-only kernel bodies #include'd by wrapper .S files;
+# they are flattened into the synchronized .S output by simpasm and are not
+# copied to the backend mirror themselves.
+SYNCHRONIZED_EXTENSIONS = (".c", ".h", ".inc", ".S")
 
 
 def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
@@ -3019,6 +3173,14 @@ def synchronize_backends(
             ),
         )
 
+        update_via_copy(
+            "dev/riscv32/meta.h",
+            "mldsa/src/native/rv32im/meta.h",
+            transform=lambda c: adjust_header_guard_for_filename(
+                c, "mldsa/src/native/rv32im/meta.h"
+            ),
+        )
+
     synchronize_backend(
         f"dev/aarch64_{ty}/src",
         "mldsa/src/native/aarch64/src",
@@ -3099,6 +3261,14 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Idev/fips202/armv81m -Imldsa/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+    )
+    synchronize_backend(
+        "dev/riscv32/src",
+        "mldsa/src/native/rv32im/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/riscv32/src -Imldsa/src/native/rv32im/src -march=rv32im -mabi=ilp32",
     )
 
 
@@ -4204,6 +4374,7 @@ def _main():
     def gen_zeta_tables():
         gen_c_zeta_file()
         gen_aarch64_zeta_file()
+        gen_rv32im_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_hol_light_rej_uniform_table()

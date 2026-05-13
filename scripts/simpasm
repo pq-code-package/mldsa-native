@@ -256,6 +256,11 @@ def simplify(logger, args, asm_input, asm_output=None):
         # Armv8.1-M requires explicit triple for Thumb disassembly
         if args.arch == "armv81m":
             cmd += ["--triple=thumbv8.1m.main-none-eabi"]
+        # RISC-V 32-bit ILP32 needs an explicit triple so llvm-objdump
+        # decodes the M extension (mul/mulh) instead of marking them
+        # as illegal.
+        if args.arch == "riscv32":
+            cmd += ["--triple=riscv32", "--mattr=+m"]
 
         # Add syntax option if specified
         if args.syntax and args.syntax.lower() != "att":

@@ -155,8 +155,8 @@ jobs:
           check_namespace: 'false'
       - name: build + test (cross, opt)
         uses: ./.github/actions/multi-functest
-        # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        # There is no native code yet on PPC64LE or AArch64_be, so no point running opt tests
+        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
@@ -165,14 +165,39 @@ jobs:
           opt: 'opt'
       - name: build + test (cross, opt, +debug)
         uses: ./.github/actions/multi-functest
-        # There is no native code yet on PPC64LE, riscv32 or AArch64_be, so no point running opt tests
-        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'riscv32' && matrix.target.arch != 'aarch64_be') }}
+        # There is no native code yet on PPC64LE or AArch64_be, so no point running opt tests
+        if: ${{ matrix.target.mode != 'native' && (matrix.target.arch != 'ppc64le' && matrix.target.arch != 'aarch64_be') }}
         with:
           nix-shell: ${{ matrix.target.nix_shell }}
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
           cflags: "-DMLDSA_DEBUG"
+          opt: 'opt'
+      # The RV32IM backend has two interchangeable variants of the Barrett
+      # low(t*q) reduction, selected by MLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER:
+      # a single multiply by q (default, exercised by the opt steps above) and
+      # a multiply-free shift-add chain (for cores with a slow multiplier).
+      # Exercise the slow-multiplier variant here so both are covered.
+      - name: build + test (riscv32, slow-multiplier, opt)
+        uses: ./.github/actions/multi-functest
+        if: ${{ matrix.target.arch == 'riscv32' }}
+        with:
+          nix-shell: ${{ matrix.target.nix_shell }}
+          nix-cache: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: ${{ matrix.target.mode }}
+          cflags: "-DMLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER"
+          opt: 'opt'
+      - name: build + test (riscv32, slow-multiplier, opt, +debug)
+        uses: ./.github/actions/multi-functest
+        if: ${{ matrix.target.arch == 'riscv32' }}
+        with:
+          nix-shell: ${{ matrix.target.nix_shell }}
+          nix-cache: 'true'
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          compile_mode: ${{ matrix.target.mode }}
+          cflags: "-DMLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER -DMLDSA_DEBUG"
           opt: 'opt'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})
