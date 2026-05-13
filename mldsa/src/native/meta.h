@@ -20,4 +20,8 @@
 #include "x86_64/meta.h"
 #endif
 
+#ifdef MLD_SYS_RISCV32
+#include "rv32im/meta.h"
+#endif
+
 #endif /* !MLD_NATIVE_META_H */
