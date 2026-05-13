@@ -238,7 +238,10 @@ runs:
           nix-verbose: ${{ inputs.nix-verbose }}
           gh_token: ${{ inputs.gh_token }}
           custom_shell: ${{ inputs.custom_shell }}
-          cflags: "${{ inputs.cflags }} -DMLD_FORCE_RISCV32"
+          # The RV32-IM arithmetic backend is experimental and not picked
+          # up by native/meta.h's defaults; select it explicitly here.
+          # No-op for OPT=0 builds (MLD_CONFIG_ARITH_BACKEND_FILE is unused).
+          cflags: "${{ inputs.cflags }} -DMLD_FORCE_RISCV32 -DMLD_CONFIG_ARITH_BACKEND_FILE=\\\\\\\"native/rv32im/meta.h\\\\\\\""
           ldflags: ${{ inputs.ldflags }}
           cross_prefix: riscv32-unknown-linux-gnu-
           exec_wrapper: "${{ inputs.exec_wrapper != '' && inputs.exec_wrapper || 'qemu-riscv32' }}"
@@ -255,4 +258,3 @@ runs:
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
-
