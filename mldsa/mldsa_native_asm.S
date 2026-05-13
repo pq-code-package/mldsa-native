@@ -88,6 +88,10 @@
 #include "src/native/x86_64/src/pointwise_avx2_asm.S"
 #include "src/native/x86_64/src/poly_caddq_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_RISCV32)
+#include "src/native/rv32im/src/intt_rv32im_asm.S"
+#include "src/native/rv32im/src/ntt_rv32im_asm.S"
+#endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -779,5 +783,23 @@
 #undef MLD_NATIVE_X86_64_SRC_CONSTS_H
 #undef mld_qdata
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_RISCV32)
+/*
+ * Undefine macros from native code (Arith, RV32IM)
+ */
+/* mldsa/src/native/rv32im/meta.h */
+#undef MLD_ARITH_BACKEND_RV32IM
+#undef MLD_NATIVE_RV32IM_META_H
+#undef MLD_USE_NATIVE_INTT
+#undef MLD_USE_NATIVE_NTT
+/* mldsa/src/native/rv32im/src/arith_native_rv32im.h */
+#undef MLD_NATIVE_RV32IM_SRC_ARITH_NATIVE_RV32IM_H
+#undef MLD_RV32IM_INTT_ZETAS_LEN
+#undef MLD_RV32IM_NTT_ZETAS_LEN
+#undef mld_intt_rv32im_asm
+#undef mld_ntt_rv32im_asm
+#undef mld_rv32im_intt_zetas
+#undef mld_rv32im_ntt_zetas
+#endif /* MLD_SYS_RISCV32 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
