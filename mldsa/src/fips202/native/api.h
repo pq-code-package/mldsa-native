@@ -49,8 +49,8 @@
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
-    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
-    assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
+    requires(disjoint((state, sizeof(uint64_t) * 25 * 1)))
+    assigns(slices((state, sizeof(uint64_t) * 25 * 1)))
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1))
 );
@@ -59,8 +59,8 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
-    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
-    assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+    requires(disjoint((state, sizeof(uint64_t) * 25 * 4)))
+    assigns(slices((state, sizeof(uint64_t) * 25 * 4)))
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4))
 );
@@ -92,15 +92,14 @@ static MLD_INLINE int mld_keccakf1600_xor_bytes_x4_native(
 __contract__(
   requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
            0 <= length && length <= 25 * sizeof(uint64_t) - offset)
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
-  requires(memory_no_alias(data0, length))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 4), (data0, length)))
   requires((data0 == data1 &&
             data0 == data2 &&
             data0 == data3) ||
            (memory_no_alias(data1, length) &&
             memory_no_alias(data2, length) &&
             memory_no_alias(data3, length)))
-  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
+  assigns(slices((state, sizeof(uint64_t) * 25 * 4)))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
 #endif /* MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE */
@@ -114,15 +113,11 @@ static MLD_INLINE int mld_keccakf1600_extract_bytes_x4_native(
 __contract__(
   requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
            0 <= length && length <= 25 * sizeof(uint64_t) - offset)
-  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 4))
-  requires(memory_no_alias(data0, length))
-  requires(memory_no_alias(data1, length))
-  requires(memory_no_alias(data2, length))
-  requires(memory_no_alias(data3, length))
-  assigns(memory_slice(data0, length))
-  assigns(memory_slice(data1, length))
-  assigns(memory_slice(data2, length))
-  assigns(memory_slice(data3, length))
+  requires(disjoint((state, sizeof(uint64_t) * 25 * 4),
+                    (data0, length), (data1, length),
+                    (data2, length), (data3, length)))
+  assigns(slices((data0, length), (data1, length),
+                 (data2, length), (data3, length)))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS));
 #endif /* MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
 

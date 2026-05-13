@@ -161,6 +161,94 @@
     array_unchanged_u64_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 /* clang-format on */
 
+/***************************************************
+ * Variadic compaction of memory annotations
+ *
+ * disjoint(arg, ...) -- inside requires(...): expands each arg to a
+ *   memory_no_alias(...) check and AND-joins them.
+ * slices(arg, ...)   -- inside assigns(...): expands each arg to a
+ *   memory_slice(...) target, comma-joined.
+ *
+ * Each arg is either:
+ *   - a bare object   x       -> size is sizeof(*(x))
+ *   - a pair          (x, N)  -> size is N (interpreted as a byte count)
+ *
+ * Requires a C99 preprocessor; only seen by the compiler in CBMC
+ * builds. Capped at 16 args per call.
+ ***************************************************/
+
+#define MLD_CBMC_NARGS(...)                                                  \
+  MLD_CBMC_NARGS_(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, \
+                  3, 2, 1)
+#define MLD_CBMC_NARGS_(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, \
+                        _13, _14, _15, _16, N, ...)                        \
+  N
+
+#define MLD_CBMC_PROBE_(...) ~, 1
+#define MLD_CBMC_CHECK_(...) MLD_CBMC_CHECK_N_(__VA_ARGS__, 0)
+#define MLD_CBMC_CHECK_N_(_a, _b, ...) _b
+#define MLD_CBMC_IS_PAIR(x) MLD_CBMC_CHECK_(MLD_CBMC_PROBE_ x)
+
+#define MLD_CBMC_NA(x) MLD_CBMC_NA_(MLD_CBMC_IS_PAIR(x), x)
+#define MLD_CBMC_NA_(t, x) MLD_CBMC_NA__(t, x)
+#define MLD_CBMC_NA__(t, x) MLD_CBMC_NA_##t(x)
+#define MLD_CBMC_NA_0(x) memory_no_alias((x), sizeof(*(x)))
+#define MLD_CBMC_NA_1(x) MLD_CBMC_NA_PAIR_ x
+#define MLD_CBMC_NA_PAIR_(p, n) memory_no_alias((p), (n))
+
+#define MLD_CBMC_SL(x) MLD_CBMC_SL_(MLD_CBMC_IS_PAIR(x), x)
+#define MLD_CBMC_SL_(t, x) MLD_CBMC_SL__(t, x)
+#define MLD_CBMC_SL__(t, x) MLD_CBMC_SL_##t(x)
+#define MLD_CBMC_SL_0(x) memory_slice((x), sizeof(*(x)))
+#define MLD_CBMC_SL_1(x) MLD_CBMC_SL_PAIR_ x
+#define MLD_CBMC_SL_PAIR_(p, n) memory_slice((p), (n))
+
+#define MLD_CBMC_AND_1(M, a) M(a)
+#define MLD_CBMC_AND_2(M, a, ...) M(a) && MLD_CBMC_AND_1(M, __VA_ARGS__)
+#define MLD_CBMC_AND_3(M, a, ...) M(a) && MLD_CBMC_AND_2(M, __VA_ARGS__)
+#define MLD_CBMC_AND_4(M, a, ...) M(a) && MLD_CBMC_AND_3(M, __VA_ARGS__)
+#define MLD_CBMC_AND_5(M, a, ...) M(a) && MLD_CBMC_AND_4(M, __VA_ARGS__)
+#define MLD_CBMC_AND_6(M, a, ...) M(a) && MLD_CBMC_AND_5(M, __VA_ARGS__)
+#define MLD_CBMC_AND_7(M, a, ...) M(a) && MLD_CBMC_AND_6(M, __VA_ARGS__)
+#define MLD_CBMC_AND_8(M, a, ...) M(a) && MLD_CBMC_AND_7(M, __VA_ARGS__)
+#define MLD_CBMC_AND_9(M, a, ...) M(a) && MLD_CBMC_AND_8(M, __VA_ARGS__)
+#define MLD_CBMC_AND_10(M, a, ...) M(a) && MLD_CBMC_AND_9(M, __VA_ARGS__)
+#define MLD_CBMC_AND_11(M, a, ...) M(a) && MLD_CBMC_AND_10(M, __VA_ARGS__)
+#define MLD_CBMC_AND_12(M, a, ...) M(a) && MLD_CBMC_AND_11(M, __VA_ARGS__)
+#define MLD_CBMC_AND_13(M, a, ...) M(a) && MLD_CBMC_AND_12(M, __VA_ARGS__)
+#define MLD_CBMC_AND_14(M, a, ...) M(a) && MLD_CBMC_AND_13(M, __VA_ARGS__)
+#define MLD_CBMC_AND_15(M, a, ...) M(a) && MLD_CBMC_AND_14(M, __VA_ARGS__)
+#define MLD_CBMC_AND_16(M, a, ...) M(a) && MLD_CBMC_AND_15(M, __VA_ARGS__)
+
+#define MLD_CBMC_COMMA_1(M, a) M(a)
+#define MLD_CBMC_COMMA_2(M, a, ...) M(a), MLD_CBMC_COMMA_1(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_3(M, a, ...) M(a), MLD_CBMC_COMMA_2(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_4(M, a, ...) M(a), MLD_CBMC_COMMA_3(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_5(M, a, ...) M(a), MLD_CBMC_COMMA_4(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_6(M, a, ...) M(a), MLD_CBMC_COMMA_5(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_7(M, a, ...) M(a), MLD_CBMC_COMMA_6(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_8(M, a, ...) M(a), MLD_CBMC_COMMA_7(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_9(M, a, ...) M(a), MLD_CBMC_COMMA_8(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_10(M, a, ...) M(a), MLD_CBMC_COMMA_9(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_11(M, a, ...) M(a), MLD_CBMC_COMMA_10(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_12(M, a, ...) M(a), MLD_CBMC_COMMA_11(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_13(M, a, ...) M(a), MLD_CBMC_COMMA_12(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_14(M, a, ...) M(a), MLD_CBMC_COMMA_13(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_15(M, a, ...) M(a), MLD_CBMC_COMMA_14(M, __VA_ARGS__)
+#define MLD_CBMC_COMMA_16(M, a, ...) M(a), MLD_CBMC_COMMA_15(M, __VA_ARGS__)
+
+#define MLD_CBMC_DISPATCH_(prefix, n, M, ...) prefix##n(M, __VA_ARGS__)
+#define MLD_CBMC_DISPATCH(prefix, n, M, ...) \
+  MLD_CBMC_DISPATCH_(prefix, n, M, __VA_ARGS__)
+
+#define disjoint(...)                                                         \
+  (MLD_CBMC_DISPATCH(MLD_CBMC_AND_, MLD_CBMC_NARGS(__VA_ARGS__), MLD_CBMC_NA, \
+                     __VA_ARGS__))
+
+#define slices(...)                                                            \
+  MLD_CBMC_DISPATCH(MLD_CBMC_COMMA_, MLD_CBMC_NARGS(__VA_ARGS__), MLD_CBMC_SL, \
+                    __VA_ARGS__)
+
 /* Wrapper around array_bound operating on absolute values.
  *
  * The absolute value bound `k` is exclusive.

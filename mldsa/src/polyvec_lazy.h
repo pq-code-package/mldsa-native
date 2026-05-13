@@ -142,9 +142,8 @@ static MLD_INLINE void mld_unpack_sk_s1hat_eager(
     mld_sk_s1hat_eager *s1,
     const uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(s1, sizeof(mld_sk_s1hat_eager)))
-  requires(memory_no_alias(packed_s1, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-  assigns(memory_slice(s1, sizeof(mld_sk_s1hat_eager)))
+  requires(disjoint(s1, (packed_s1, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES)))
+  assigns(slices(s1))
   ensures(forall(k1, 0, MLDSA_L,
     array_abs_bound(s1->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 )
@@ -158,11 +157,10 @@ static MLD_INLINE void mld_sk_s1hat_get_poly_eager(mld_poly *buf,
                                                    const mld_sk_s1hat_eager *s1,
                                                    unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(s1, sizeof(mld_sk_s1hat_eager)))
+  requires(disjoint(buf, s1))
   requires(i < MLDSA_L)
   requires(array_abs_bound(s1->vec.vec[i].coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = s1->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -172,8 +170,8 @@ static MLD_INLINE void mld_unpack_sk_s1hat_lazy(
     mld_sk_s1hat_lazy *s1,
     const uint8_t packed_s1[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(s1, sizeof(mld_sk_s1hat_lazy)))
-  assigns(memory_slice(s1, sizeof(mld_sk_s1hat_lazy)))
+  requires(disjoint(s1))
+  assigns(slices(s1))
   ensures(s1->packed == old(packed_s1))
 ) { s1->packed = packed_s1; }
 
@@ -182,11 +180,10 @@ static MLD_INLINE void mld_sk_s1hat_get_poly_lazy(mld_poly *buf,
                                                   const mld_sk_s1hat_lazy *s1,
                                                   unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(s1, sizeof(mld_sk_s1hat_lazy)))
+  requires(disjoint(buf, s1))
   requires(i < MLDSA_L)
-  requires(memory_no_alias(s1->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  requires(disjoint((s1->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 )
 {
@@ -204,9 +201,8 @@ static MLD_INLINE void mld_unpack_sk_s2hat_eager(
     mld_sk_s2hat_eager *s2,
     const uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(s2, sizeof(mld_sk_s2hat_eager)))
-  requires(memory_no_alias(packed_s2, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-  assigns(memory_slice(s2, sizeof(mld_sk_s2hat_eager)))
+  requires(disjoint(s2, (packed_s2, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES)))
+  assigns(slices(s2))
   ensures(forall(k1, 0, MLDSA_K,
     array_abs_bound(s2->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 )
@@ -220,11 +216,10 @@ static MLD_INLINE void mld_sk_s2hat_get_poly_eager(mld_poly *buf,
                                                    const mld_sk_s2hat_eager *s2,
                                                    unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(s2, sizeof(mld_sk_s2hat_eager)))
+  requires(disjoint(buf, s2))
   requires(i < MLDSA_K)
   requires(array_abs_bound(s2->vec.vec[i].coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = s2->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -235,8 +230,8 @@ static MLD_INLINE void mld_unpack_sk_s2hat_lazy(
     mld_sk_s2hat_lazy *s2,
     const uint8_t packed_s2[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(s2, sizeof(mld_sk_s2hat_lazy)))
-  assigns(memory_slice(s2, sizeof(mld_sk_s2hat_lazy)))
+  requires(disjoint(s2))
+  assigns(slices(s2))
   ensures(s2->packed == old(packed_s2))
 ) { s2->packed = packed_s2; }
 
@@ -245,11 +240,10 @@ static MLD_INLINE void mld_sk_s2hat_get_poly_lazy(mld_poly *buf,
                                                   const mld_sk_s2hat_lazy *s2,
                                                   unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(s2, sizeof(mld_sk_s2hat_lazy)))
+  requires(disjoint(buf, s2))
   requires(i < MLDSA_K)
-  requires(memory_no_alias(s2->packed, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  requires(disjoint((s2->packed, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 )
 {
@@ -267,9 +261,8 @@ static MLD_INLINE void mld_unpack_sk_t0hat_eager(
     mld_sk_t0hat_eager *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_eager)))
-  requires(memory_no_alias(packed_t0, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-  assigns(memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
+  requires(disjoint(t0, (packed_t0, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES)))
+  assigns(slices(t0))
   ensures(forall(k1, 0, MLDSA_K,
     array_abs_bound(t0->vec.vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
 )
@@ -277,7 +270,7 @@ __contract__(
   unsigned int i;
   for (i = 0; i < MLDSA_K; ++i)
   __loop__(
-    assigns(i, memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
+    assigns(i, slices(t0))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, 0, i,
       array_bound(t0->vec.vec[k0].coeffs, 0, MLDSA_N,
@@ -296,11 +289,10 @@ static MLD_INLINE void mld_sk_t0hat_get_poly_eager(mld_poly *buf,
                                                    const mld_sk_t0hat_eager *t0,
                                                    unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_eager)))
+  requires(disjoint(buf, t0))
   requires(i < MLDSA_K)
   requires(array_abs_bound(t0->vec.vec[i].coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 ) { *buf = t0->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -311,8 +303,8 @@ static MLD_INLINE void mld_unpack_sk_t0hat_lazy(
     mld_sk_t0hat_lazy *t0,
     const uint8_t packed_t0[MLDSA_K * MLDSA_POLYT0_PACKEDBYTES])
 __contract__(
-  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_lazy)))
-  assigns(memory_slice(t0, sizeof(mld_sk_t0hat_lazy)))
+  requires(disjoint(t0))
+  assigns(slices(t0))
   ensures(t0->packed == old(packed_t0))
 ) { t0->packed = packed_t0; }
 
@@ -321,11 +313,10 @@ static MLD_INLINE void mld_sk_t0hat_get_poly_lazy(mld_poly *buf,
                                                   const mld_sk_t0hat_lazy *t0,
                                                   unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(t0, sizeof(mld_sk_t0hat_lazy)))
+  requires(disjoint(buf, t0))
   requires(i < MLDSA_K)
-  requires(memory_no_alias(t0->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  requires(disjoint((t0->packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES)))
+  assigns(slices(buf))
   ensures(array_abs_bound(buf->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
 )
 {
@@ -343,10 +334,9 @@ __contract__(
 static MLD_INLINE void mld_yvec_init_eager(
     mld_yvec_eager *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
 __contract__(
-  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
-  requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
+  requires(disjoint(y, (rhoprime, MLDSA_CRHBYTES)))
   requires(nonce <= (UINT16_MAX - MLDSA_L) / MLDSA_L)
-  assigns(memory_slice(y, sizeof(mld_yvec_eager)))
+  assigns(slices(y))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(y->vec.vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
 )
@@ -358,11 +348,10 @@ static MLD_INLINE void mld_yvec_get_poly_eager(mld_poly *buf,
                                                const mld_yvec_eager *y,
                                                unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
+  requires(disjoint(buf, y))
   requires(i < MLDSA_L)
   requires(array_bound(y->vec.vec[i].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  assigns(slices(buf))
   ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 ) { *buf = y->vec.vec[i]; }
 #endif /* !MLD_CONFIG_NO_SIGN_API && (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
@@ -372,8 +361,8 @@ __contract__(
 static MLD_INLINE void mld_yvec_init_lazy(
     mld_yvec_lazy *y, const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce)
 __contract__(
-  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
-  assigns(memory_slice(y, sizeof(mld_yvec_lazy)))
+  requires(disjoint(y))
+  assigns(slices(y))
   ensures(y->rhoprime == old(rhoprime))
   ensures(y->nonce == old(nonce))
 )
@@ -386,12 +375,11 @@ static MLD_INLINE void mld_yvec_get_poly_lazy(mld_poly *buf,
                                               const mld_yvec_lazy *y,
                                               unsigned int i)
 __contract__(
-  requires(memory_no_alias(buf, sizeof(mld_poly)))
-  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
+  requires(disjoint(buf, y))
   requires(i < MLDSA_L)
-  requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+  requires(disjoint((y->rhoprime, MLDSA_CRHBYTES)))
   requires(y->nonce <= ((UINT16_MAX - MLDSA_L) / MLDSA_L))
-  assigns(memory_slice(buf, sizeof(mld_poly)))
+  assigns(slices(buf))
   ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 )
 {
@@ -426,9 +414,9 @@ __contract__(
   /* We don't specify that this is a permutation, only that it preserves
    * the bounds.
    * When the native NTT backend does not use the custom order, this is a no-op. */
-  requires(memory_no_alias(p, sizeof(mld_poly)))
+  requires(disjoint(p))
   requires(array_bound(p->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(p, sizeof(mld_poly)))
+  assigns(slices(p))
   ensures(array_bound(p->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 )
 {
@@ -452,9 +440,8 @@ MLD_INTERNAL_API
 void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
                                      const uint8_t rho[MLDSA_SEEDBYTES])
 __contract__(
-  requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  assigns(memory_slice(mat, sizeof(mld_polymat_eager)))
+  requires(disjoint(mat, (rho, MLDSA_SEEDBYTES)))
+  assigns(slices(mat))
   ensures(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
     array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
 );
@@ -477,15 +464,13 @@ void mld_polyvec_matrix_pointwise_montgomery_row_eager(mld_poly *t_row,
                                                        const mld_polyvecl *v,
                                                        unsigned int i)
 __contract__(
-  requires(memory_no_alias(t_row, sizeof(mld_poly)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(disjoint(t_row, mat, v))
   requires(i < MLDSA_K)
   requires(forall(l1, 0, MLDSA_L,
                   array_bound(mat->vec[i].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   requires(forall(l2, 0, MLDSA_L,
                   array_abs_bound(v->vec[l2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t_row, sizeof(mld_poly)))
+  assigns(slices(t_row))
   ensures(array_abs_bound(t_row->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 
@@ -508,16 +493,12 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
                                                         const mld_yvec_eager *y,
                                                         mld_polyvecl *scratch)
 __contract__(
-  requires(memory_no_alias(w, sizeof(mld_polyveck)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat_eager)))
-  requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
-  requires(memory_no_alias(scratch, sizeof(mld_polyvecl)))
+  requires(disjoint(w, mat, y, scratch))
   requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
     array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
   requires(forall(l2, 0, MLDSA_L,
     array_bound(y->vec.vec[l2].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
-  assigns(memory_slice(w, sizeof(mld_polyveck)))
-  assigns(memory_slice(scratch, sizeof(mld_polyvecl)))
+  assigns(slices(w, scratch))
   ensures(forall(k0, 0, MLDSA_K,
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );
@@ -529,9 +510,8 @@ MLD_INTERNAL_API
 void mld_polyvec_matrix_expand_lazy(mld_polymat_lazy *mat,
                                     const uint8_t rho[MLDSA_SEEDBYTES])
 __contract__(
-  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
-  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
-  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+  requires(disjoint(mat, (rho, MLDSA_SEEDBYTES)))
+  assigns(slices(mat))
 );
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
@@ -554,14 +534,11 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
                                                       const mld_polyvecl *v,
                                                       unsigned int i)
 __contract__(
-  requires(memory_no_alias(t_row, sizeof(mld_poly)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
-  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(disjoint(t_row, mat, v))
   requires(i < MLDSA_K)
   requires(forall(l1, 0, MLDSA_L,
                   array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
-  assigns(memory_slice(t_row, sizeof(mld_poly)))
-  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
+  assigns(slices(t_row, mat))
   ensures(array_abs_bound(t_row->coeffs, 0, MLDSA_N, MLDSA_Q))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
@@ -588,15 +565,10 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
                                                        const mld_yvec_lazy *y,
                                                        mld_polyvecl *scratch)
 __contract__(
-  requires(memory_no_alias(w, sizeof(mld_polyveck)))
-  requires(memory_no_alias(mat, sizeof(mld_polymat_lazy)))
-  requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
-  requires(memory_no_alias(scratch, sizeof(mld_polyvecl)))
-  requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
+  requires(disjoint(w, mat, y, scratch))
+  requires(disjoint((y->rhoprime, MLDSA_CRHBYTES)))
   requires(y->nonce <= ((UINT16_MAX - MLDSA_L) / MLDSA_L))
-  assigns(memory_slice(w, sizeof(mld_polyveck)))
-  assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
-  assigns(memory_slice(scratch, sizeof(mld_polyvecl)))
+  assigns(slices(w, mat, scratch))
   ensures(forall(k0, 0, MLDSA_K,
     array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
 );

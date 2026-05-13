@@ -46,8 +46,8 @@
  */
 static void keccak_init(uint64_t s[MLD_KECCAK_LANES])
 __contract__(
-  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
+  requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
+  assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
 )
 {
   mld_memset(s, 0, sizeof(uint64_t) * MLD_KECCAK_LANES);
@@ -72,15 +72,13 @@ __contract__(
   requires(r > 0)
   requires(r < sizeof(uint64_t) * MLD_KECCAK_LANES)
   requires(pos <= r)
-  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  requires(memory_no_alias(in, inlen))
-  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
+  requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES), (in, inlen)))
+  assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
   ensures(return_value < r))
 {
   while (inlen >= r - pos)
   __loop__(
-    assigns(pos, in, inlen,
-      memory_slice(s, sizeof(uint64_t) *  MLD_KECCAK_LANES))
+    assigns(pos, in, inlen, slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
     invariant(inlen <= loop_entry(inlen))
     invariant(pos <= r)
     invariant(in == loop_entry(in) + (loop_entry(inlen) - inlen))
@@ -113,8 +111,8 @@ static void keccak_finalize(uint64_t s[MLD_KECCAK_LANES], unsigned int pos,
 __contract__(
   requires(pos <= r && r < sizeof(uint64_t) * MLD_KECCAK_LANES)
   requires((r / 8) >= 1)
-  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
+  requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
+  assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES)))
 )
 {
   uint8_t b = 0x80;
@@ -143,10 +141,8 @@ __contract__(
            (r == SHAKE256_RATE && pos <= SHAKE256_RATE) ||
            (r == SHA3_512_RATE && pos <= SHA3_512_RATE))
   requires(outlen <= 8 * r /* somewhat arbitrary bound */)
-  requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  requires(memory_no_alias(out, outlen))
-  assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
-  assigns(memory_slice(out, outlen))
+  requires(disjoint((s, sizeof(uint64_t) * MLD_KECCAK_LANES), (out, outlen)))
+  assigns(slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES), (out, outlen)))
   ensures(return_value <= r))
 {
   unsigned int i;
@@ -162,7 +158,7 @@ __contract__(
 
   while (bytes_to_go > 0)
   __loop__(
-    assigns(i, bytes_to_go, pos, out_offset, memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES), memory_slice(out, outlen))
+    assigns(i, bytes_to_go, pos, out_offset, slices((s, sizeof(uint64_t) * MLD_KECCAK_LANES), (out, outlen)))
     invariant(bytes_to_go <= outlen)
     invariant(out_offset == outlen - bytes_to_go)
     invariant(pos <= r)
