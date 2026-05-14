@@ -958,6 +958,92 @@ def _fmt_indexed_rows(data):
         yield ",".join(map(str, row)) + f" /* {i} */,"
 
 
+def prepare_root_for_montgomery(root):
+    """Takes a constant that the code needs to Montgomery-multiply with,
+    and returns the pair (z, z'), where z is the signed canonical form
+    of the input, and z' = (z * QINV) mod 2^32 is the twisted constant
+    used in the low-mul part of the standard signed Montgomery
+    multiplication.
+
+    QINV = pow(MLDSA_Q, -1, 2^32) (matches mldsa/src/reduce.h)."""
+
+    QINV = 58728449  # pow(MLDSA_Q, -1, 2^32)
+
+    z = signed_reduce(root)
+
+    # Compute (z * QINV) mod 2^32, then reinterpret as int32.
+    z_twisted = (z * QINV) & 0xFFFFFFFF
+    if z_twisted >= (1 << 31):
+        z_twisted -= 1 << 32
+
+    return z, z_twisted
+
+
+def gen_rv32im_root_for_block(layer, block):
+    """Forward NTT zeta for the given (layer, block), in Montgomery form,
+    returned as the (z, z') pair consumed by the RV32-IM assembly."""
+    log = bitreverse(pow(2, layer) + block, 8)
+    # Montgomery factor R = 2^32 mod q is folded in, since the RV32-IM
+    # butterfly uses standard signed Montgomery multiplication.
+    root = pow(root_of_unity, log, modulus) * montgomery_factor
+    return prepare_root_for_montgomery(root)
+
+
+def gen_rv32im_fwd_ntt_zetas():
+    """Yield (z, z') pairs in the order consumed by the 2+2+2+2 forward NTT.
+
+    Each of the 4 passes (L1+L2, L3+L4, L5+L6, L7+L8) emits one set of
+    3 pairs per outer iteration. Layers are 0-indexed here:
+
+        pass p uses layers (lo, hi) = (2p, 2p+1)
+
+    For outer index o in pass p:
+        zeta_lo  = layer lo, block o
+        zeta_hi0 = layer hi, block 2*o
+        zeta_hi1 = layer hi, block 2*o + 1
+
+    Total: 1 + 4 + 16 + 64 = 85 outer iters * 3 pairs = 255 pairs."""
+    for p in range(4):
+        lo = 2 * p
+        hi = 2 * p + 1
+        n_outer = 1 << lo  # 1, 4, 16, 64
+        for o in range(n_outer):
+            yield from gen_rv32im_root_for_block(lo, o)
+            yield from gen_rv32im_root_for_block(hi, 2 * o + 0)
+            yield from gen_rv32im_root_for_block(hi, 2 * o + 1)
+
+
+def gen_rv32im_zeta_file():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_RV32IM) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "arith_native_rv32im.h"'
+        yield ""
+        yield "/*"
+        yield " * Table of zeta values used in the RV32-IM forward NTT."
+        yield " * Each entry is a (zeta, zeta * QINV mod 2^32) pair, with"
+        yield " * zeta in Montgomery form. See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const int32_t",
+            "mld_rv32im_ntt_zetas",
+            gen_rv32im_fwd_ntt_zetas(),
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(rv32im_zetas)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/riscv32/src/rv32im_zetas.c", "\n".join(gen()))
+
+
 def gen_aarch64_zeta_file():
     def gen():
         yield from gen_header()
@@ -4091,6 +4177,7 @@ def _main():
     def gen_zeta_tables():
         gen_c_zeta_file()
         gen_aarch64_zeta_file()
+        gen_rv32im_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_aarch64_rej_uniform_eta_table()
