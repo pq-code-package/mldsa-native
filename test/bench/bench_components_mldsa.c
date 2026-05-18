@@ -15,9 +15,17 @@
 #include "../../mldsa/src/randombytes.h"
 #include "hal.h"
 
-#define NWARMUP 50
-#define NITERATIONS 300
-#define NTESTS 20
+#ifndef MLD_BENCHMARK_NWARMUP
+#define MLD_BENCHMARK_NWARMUP 50
+#endif
+
+#ifndef MLD_BENCHMARK_NITERATIONS
+#define MLD_BENCHMARK_NITERATIONS 300
+#endif
+
+#ifndef MLD_BENCHMARK_NTESTS
+#define MLD_BENCHMARK_NTESTS 20
+#endif
 
 #define CHECK(x)                                              \
   do                                                          \
@@ -37,27 +45,28 @@ static int cmp_uint64_t(const void *a, const void *b)
 }
 
 #define BENCH(txt, code)                                                     \
-  for (i = 0; i < NTESTS; i++)                                               \
+  for (i = 0; i < MLD_BENCHMARK_NTESTS; i++)                                 \
   {                                                                          \
     CHECK(mld_randombytes((uint8_t *)data0, sizeof(data0)) == 0);            \
     CHECK(mld_randombytes((uint8_t *)&polyvecl_a, sizeof(polyvecl_a)) == 0); \
     CHECK(mld_randombytes((uint8_t *)&polyvecl_b, sizeof(polyvecl_b)) == 0); \
     CHECK(mld_randombytes((uint8_t *)&polymat, sizeof(polymat)) == 0);       \
-    for (j = 0; j < NWARMUP; j++)                                            \
+    for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)                              \
     {                                                                        \
       code;                                                                  \
     }                                                                        \
                                                                              \
     t0 = get_cyclecounter();                                                 \
-    for (j = 0; j < NITERATIONS; j++)                                        \
+    for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)                          \
     {                                                                        \
       code;                                                                  \
     }                                                                        \
     t1 = get_cyclecounter();                                                 \
     (cyc)[i] = t1 - t0;                                                      \
   }                                                                          \
-  qsort((cyc), NTESTS, sizeof(uint64_t), cmp_uint64_t);                      \
-  printf(txt " cycles=%" PRIu64 "\n", (cyc)[NTESTS >> 1] / NITERATIONS);
+  qsort((cyc), MLD_BENCHMARK_NTESTS, sizeof(uint64_t), cmp_uint64_t);        \
+  printf(txt " cycles=%" PRIu64 "\n",                                        \
+         (cyc)[MLD_BENCHMARK_NTESTS >> 1] / MLD_BENCHMARK_NITERATIONS);
 
 static int bench(void)
 {
@@ -65,7 +74,7 @@ static int bench(void)
   MLD_ALIGN mld_poly poly_out;
   MLD_ALIGN mld_polyvecl polyvecl_a, polyvecl_b;
   MLD_ALIGN mld_polymat polymat;
-  uint64_t cyc[NTESTS];
+  uint64_t cyc[MLD_BENCHMARK_NTESTS];
   unsigned i, j;
   uint64_t t0, t1;
 
