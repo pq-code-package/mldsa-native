@@ -16,3 +16,38 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Build Compress session
         run: /home/isabelle/Isabelle/bin/isabelle build -D proofs/isabelle/compress
+  neon_ntt:
+    # AArch64 is required: hw_exec.c rejects non-AArch64 hosts at compile time.
+    runs-on: ubuntu-24.04-arm
+    container:
+      # arm64 image variant; "_X11_Latex" is required because the NeonNTT
+      # ROOT builds a PDF document.
+      image: makarius/isabelle:Isabelle2025-1_ARM_X11_Latex
+      options: --user root
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install conformance build tools and missing TeX packages
+        run: |
+          apt-get update
+          # texlive-luatex supplies luacode.sty, required by hyperxmp (loaded
+          # via iacrtrans -> hyperref) when the NeonNTT document is built.
+          apt-get install -y --no-install-recommends \
+            gcc libc6-dev make python3 texlive-luatex
+      - name: Build NeonNTT session
+        run: /home/isabelle/Isabelle/bin/isabelle build -D proofs/isabelle/neon_ntt
+      - name: Upload formalization PDF
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: neon_ntt_autoformalized
+          path: proofs/isabelle/neon_ntt/output/document.pdf
+      - name: Build hw_exec (AArch64 NEON reference)
+        working-directory: proofs/isabelle/neon_ntt/model/hw
+        run: make
+      - name: Build model_exec (Isabelle SML export)
+        working-directory: proofs/isabelle/neon_ntt/model/sml
+        run: make ISABELLE_DIR=/home/isabelle/Isabelle
+      - name: Run conformance (edge + random)
+        working-directory: proofs/isabelle/neon_ntt
+        run: |
+          python3 model/conformance/run.py edge
+          python3 model/conformance/run.py random -n 50000

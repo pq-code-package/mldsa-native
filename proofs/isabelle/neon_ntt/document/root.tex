@@ -1,0 +1,154 @@
+% Copyright (c) The mldsa-native project authors
+% SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+\documentclass[preprint]{iacrtrans}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{isabelle,isabellesym}
+\usepackage{amssymb,amsmath}
+\usepackage[only,bigsqcap,bigparallel,fatsemi,interleave,sslash,llbracket,rrbracket,llparenthesis,rrparenthesis,binampersand,bindnasrepma]{stmaryrd}
+\usepackage{wasysym}
+\usepackage{eurosym}
+\usepackage[english]{babel}
+\usepackage{textcomp}
+\usepackage{titlesec}
+
+% Issue 4: uniform vertical spacing around section heads
+\titlespacing*{\section}{0pt}{3.2ex plus 1.2ex minus 0.5ex}{2ex plus 0.4ex}
+\titlespacing*{\subsection}{0pt}{2.6ex plus 1ex minus 0.4ex}{1.3ex plus 0.3ex}
+\titlespacing*{\subsubsection}{0pt}{2ex plus 0.8ex minus 0.3ex}{1ex plus 0.2ex}
+
+% iacrtrans already loads hyperref+hyperxmp; do not load Isabelle's pdfsetup.sty
+% which would load hyperref a second time and confuse hyperxmp.
+
+\isabellestyle{tt}
+
+% Syntax-highlighting colour scheme for the embedded Isar source,
+% loosely matching jEdit's default theme.
+\usepackage{xcolor}
+\definecolor{kw}{HTML}{6F00E5}     % Isabelle keywords (theorem, definition, …) – violet
+\definecolor{cmd}{HTML}{0000B0}    % outer-syntax commands – blue
+\definecolor{ty}{HTML}{006400}     % type / class names – dark green
+\definecolor{varc}{HTML}{8B4513}   % free variables / parameters – brown
+\definecolor{lit}{HTML}{B8860B}    % numeric / literal – goldenrod
+\definecolor{cmt}{HTML}{C75300}    % Isar comments (-- ‹...›) – orange
+% Isabelle emits keywords via \isakeywordONE/TWO/THREE (outer-syntax classes).
+% Map them to jEdit-style colours.
+\renewcommand{\isakeywordONE}[1]{\textcolor{cmd}{\textbf{#1}}}     % theorem, lemma, definition, …
+\renewcommand{\isakeywordTWO}[1]{\textcolor{kw}{\textbf{#1}}}      % proof, qed, by, …
+\renewcommand{\isakeywordTHREE}[1]{\textcolor{ty}{\textbf{#1}}}    % where, assumes, shows, …
+\renewcommand{\isakeyword}[1]{\textcolor{kw}{\textbf{#1}}}         % inner-syntax: if/then/else/let/in/case/of
+\renewcommand{\isadigit}[1]{\textcolor{lit}{#1}}
+% Isar inline comments ‹-- ‹...››: Isabelle wraps the content in \isamarkupcmt.
+\renewcommand{\isamarkupcmt}[1]{\textcolor{cmt}{\textit{#1}}}
+
+% Define Isabelle symbols missing in the default isabellesym.sty
+\providecommand{\isasymbmod}{\isamath{\;\bmod\;}}
+\providecommand{\isasympmod}{\isamath{\,\mathrm{mod}\,}}
+\providecommand{\isasymlaquo}{\guillemotleft}
+\providecommand{\isasymraquo}{\guillemotright}
+
+% Suppress proof bodies in PDF output
+\isafoldtag{proof}
+
+% Asides explaining why a proof is exceptionally retained.  Visible in the
+% abridged (default) build; a full-proof build can override with
+% \isadroptag{proof_note} so the aside disappears when the proof itself
+% becomes visible.
+\isakeeptag{proofnote}
+
+% Drop auxiliary helper material tagged ‹internal› from the outline-mode PDF.
+% A second session can override this with \isakeeptag{internal} for full mode.
+\isadroptag{internal}
+\isadroptag{invisible}
+
+% After \isadroptag{internal}, the comment package leaves behind kept
+% \isadeliminternal / \endisadeliminternal markers around each dropped block.
+% Override \endisadeliminternal to swallow the trailing \isanewline tokens.
+\makeatletter
+\def\isabelle@swallow@nl{%
+  \@ifnextchar\isanewline
+    {\expandafter\isabelle@swallow@nl\@gobble}
+    {}}
+\@namedef{isadeliminternal}{\isabelle@swallow@nl}
+\@namedef{endisadeliminternal}{\isabelle@swallow@nl}
+\makeatother
+
+
+% Issue 3: Fully suppress theory/imports/begin/end boilerplate
+\isadroptag{theory}
+
+% Issue 2: Allow Isabelle identifiers to break at underscores (small stretch only)
+\def\BreakableUnderscore{\discretionary{\textunderscore}{}{\textunderscore}}
+\renewcommand{\isacharunderscore}{\BreakableUnderscore}
+\renewcommand{\isacharunderscorekeyword}{\BreakableUnderscore}
+
+% iacrtrans is article-based and has no \chapter; map Isabelle chapters to top-level sections.
+\renewcommand{\isamarkupchapter}[1]{\section{#1}}
+\renewcommand{\isamarkupsection}[1]{\subsection{#1}}
+\renewcommand{\isamarkupsubsection}[1]{\subsubsection{#1}}
+\renewcommand{\isamarkupsubsubsection}[1]{\paragraph{#1}}
+
+% Override \phi to use straight phi (ϕ) rather than curly varphi (φ)
+\renewcommand{\isasymphi}{\isamath{\phi}}
+
+% Uniform styling for assembly instruction mnemonics in prose
+\newcommand{\asminst}[1]{\texttt{#1}}
+
+\title{Neon NTT -- (Auto)formalised}
+\subtitle{Human-Directed, Agentic Verification of Montgomery and Barrett Modular Arithmetic}
+\author{Hanno Becker}
+\institute{Amazon Web Services, \email{beckphan@amazon.com}}
+
+\begin{document}
+
+\maketitle
+\urlstyle{rm}
+
+\keywords{Isabelle/HOL \and Formal verification \and Auto-formalisation
+  \and Large language models \and Cryptographic implementation
+  \and Neon NTT \and Modular arithmetic
+  \and Barrett reduction \and Montgomery multiplication}
+
+\begin{abstract}
+  This document provides machine-checked Isabelle/HOL documentation for the
+  modular-arithmetic core of the Neon NTT paper of Becker, Hwang,
+  Kannwischer, Yang, and Yang~\cite{NeonNTT}. We develop
+  parametric theories of Barrett and Montgomery reduction and
+  multiplication; the equivalence of Barrett and Montgomery arithmetic;
+  the doubling- and rounding-Montgomery variants; and correctness and
+  bounds theorems for Neon assembly kernels, against a hand-written
+  model of the word arithmetic underlying the relevant Neon instructions.
+
+  The development is a directed auto-formalisation: definitions, theorem
+  statements, and proofs were produced by Claude~Opus~4.7 connecting to
+  Isabelle through \texttt{AutoCorrode}~\cite{AutoCorrode}. The human
+  author set the architecture, chose abstractions and proof strategies,
+  often nudged the model toward shorter or cleaner proofs, and
+  controlled which output entered the development.
+
+  This document is auto-generated from the Isabelle sources through
+  Isabelle's document preparation system, eliminating drift between
+  prose and formal artifact.
+\end{abstract}
+
+\tableofcontents
+
+\input{Introduction.tex}
+\input{Integer_Approximation.tex}
+\input{Montgomery_Reduction.tex}
+\input{Barrett_Reduction.tex}
+\input{Barrett_Montgomery.tex}
+\input{Barrett_Bound_Quality.tex}
+\input{Montgomery_Doubling.tex}
+\input{Bridge_Conceptual.tex}
+\input{Word_Ops.tex}
+\input{Asm_Barrett.tex}
+\input{Asm_Montgomery.tex}
+\input{Conclusions.tex}
+
+\bibliographystyle{alpha}
+\bibliography{root}
+
+\end{document}

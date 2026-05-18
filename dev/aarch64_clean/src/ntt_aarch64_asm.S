@@ -32,6 +32,10 @@
         // round-to-nearest-even-integer approximation. Following loc.cit.,
         // this is functionally the same as a signed Montgomery multiplication
         // with a suitable constant of absolute value < q.
+        //
+        // Functional correctness and the bound below are formalised in
+        // Isabelle/HOL as `barrett_mul_neon_word_correct`; see
+        // proofs/isabelle/neon_ntt, theory `Asm_Barrett`.
         sqrdmulh t2.4s,      \src\().4s, \const\().s[\idx1\()]
         mul      \dst\().4s, \src\().4s, \const\().s[\idx0\()]
         mls      \dst\().4s, t2.4s,      consts.s[0]
@@ -43,6 +47,7 @@
 
 .macro mulmod dst, src, const, const_twisted
         // Same as mulmodq, but with different multiplier across each lanes.
+        // Same formal guarantee as mulmodq, see proofs/isabelle/neon_ntt.
         sqrdmulh t2.4s,   \src\().4s, \const_twisted\().4s
         mul      \dst\().4s, \src\().4s, \const\().4s
         mls      \dst\().4s, t2.4s,   consts.s[0]

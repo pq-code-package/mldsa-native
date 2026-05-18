@@ -16,6 +16,24 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
 
+### `AutoCorrode`
+
+* AutoCorrode software verification framework for Isabelle/HOL
+* Author(s):
+  - Hanno Becker
+  - Nathan Chong
+  - Robert Dockins
+  - Jim Grundy
+  - Jason Z. S. Hu
+  - Ike Mulder
+  - Dominic P. Mulligan
+  - Paul Mure
+  - Lawrence C. Paulson
+  - Konrad Slind
+* URL: https://github.com/awslabs/autocorrode
+* Referenced from:
+  - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
+
 ### `FIPS140_3_IG`
 
 * Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program
@@ -178,6 +196,7 @@ source code and documentation.
   - Shang-Yi Yang
 * URL: https://eprint.iacr.org/2021/986
 * Referenced from:
+  - [README.md](README.md)
   - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
   - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
   - [dev/aarch64_opt/README.md](dev/aarch64_opt/README.md)
@@ -187,6 +206,7 @@ source code and documentation.
   - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
+  - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
 
 ### `REF`
 

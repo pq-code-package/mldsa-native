@@ -29,19 +29,19 @@
   url: https://csrc.nist.gov/pubs/fips/202/final
 
 - id: NIST_FAQ
-  name: "Post-Quantum Cryptography FAQs" 
+  name: "Post-Quantum Cryptography FAQs"
   author: National Institute of Standards and Technology
   url: https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7
 
 - id: NIST_FIPS204_SEC6
-  name: "FIPS 204 Section 6 Guidance" 
+  name: "FIPS 204 Section 6 Guidance"
   author: National Institute of Standards and Technology
   url: https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf
 
 - id: REF
   name: "CRYSTALS-Dilithium reference implementation"
   author:
-  - Bai, Shi  
+  - Bai, Shi
   - Ducas, Léo
   - Kiltz, Eike
   - Lepoint, Tancrède
@@ -89,13 +89,13 @@
 - id: Round3_Spec
   name: "CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1)"
   author:
-  - Bai, Shi  
-  - Ducas, Léo 
-  - Kiltz, Eike 
-  - Lepoint, Tancrède 
-  - Lyubashevsky, Vadim 
+  - Bai, Shi
+  - Ducas, Léo
+  - Kiltz, Eike
+  - Lepoint, Tancrède
+  - Lyubashevsky, Vadim
   - Schwabe, Peter
-  - Seiler, Gregor 
+  - Seiler, Gregor
   - Stehlé, Damien
   url: https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
 
@@ -119,13 +119,30 @@
   - Kannwischer, Matthias J.
   - Yang, Bo-Yin
   - Yang, Shang-Yi
+
+- id: AutoCorrode
+  name: "AutoCorrode software verification framework for Isabelle/HOL"
+  year: 2025
+  url: https://github.com/awslabs/autocorrode
+  author:
+  - Becker, Hanno
+  - Chong, Nathan
+  - Dockins, Robert
+  - Grundy, Jim
+  - Hu, Jason Z. S.
+  - Mulder, Ike
+  - Mulligan, Dominic P.
+  - Mure, Paul
+  - Paulson, Lawrence C.
+  - Slind, Konrad
+
 - id: mupq
   name: Common files for pqm4, pqm3, pqriscv
-  author: 
-  - Kannwischer, Matthias J. 
+  author:
+  - Kannwischer, Matthias J.
   - Petri, Richard
   - Rijneveld, Joost
-  - Schwabe, Peter 
+  - Schwabe, Peter
   - Stoffelen, Ko
   url: https://github.com/mupq/mupq
 

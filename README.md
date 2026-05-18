@@ -63,7 +63,9 @@ HOL-Light functional correctness proofs can be found in [proofs/hol_light](proof
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
-on the source level.
+on the source level. [proofs/isabelle/neon_ntt](proofs/isabelle/neon_ntt) additionally provides a machine-checked formalisation of the
+modular-arithmetic core of the Neon NTT paper[^NeonNTT], covering the Barrett and Montgomery primitives underlying the AArch64 NTT and
+pointwise-multiplication assembly; see its [README](proofs/isabelle/neon_ntt/README.md).
 
 **NOTE:** Formal Verification is never absolute. See [SOUNDNESS.md](SOUNDNESS.md) for an analysis of the scope, assumptions and risks of the formal verification efforts around mldsa-native.
 
@@ -229,6 +231,7 @@ through the [PQCA Discord](https://discord.com/invite/xyVnwzfg5R). See also [CON
 [^FIPS204]: National Institute of Standards and Technology: FIPS 204 Module-Lattice-Based Digital Signature Standard, [https://csrc.nist.gov/pubs/fips/204/final](https://csrc.nist.gov/pubs/fips/204/final)
 [^NIST_FAQ]: National Institute of Standards and Technology: Post-Quantum Cryptography FAQs, [https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7](https://csrc.nist.gov/Projects/post-quantum-cryptography/faqs#Rdc7)
 [^NIST_FIPS204_SEC6]: National Institute of Standards and Technology: FIPS 204 Section 6 Guidance, [https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf](https://csrc.nist.gov/csrc/media/Projects/post-quantum-cryptography/documents/faq/fips204-sec6-03192025.pdf)
+[^NeonNTT]: Becker, Hwang, Kannwischer, Yang, Yang: Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1, [https://eprint.iacr.org/2021/986](https://eprint.iacr.org/2021/986)
 [^REF]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium reference implementation, [https://github.com/pq-crystals/dilithium/tree/master/ref](https://github.com/pq-crystals/dilithium/tree/master/ref)
 [^tiny_sha3]: Markku-Juhani O. Saarinen: tiny_sha3, [https://github.com/mjosaarinen/tiny_sha3](https://github.com/mjosaarinen/tiny_sha3)
 [^wycheproof]: Community Cryptography Specification Project: Project Wycheproof, [https://github.com/C2SP/wycheproof](https://github.com/C2SP/wycheproof)
