@@ -199,6 +199,14 @@ def get_args():
                 "solvers in the canonical list (Z3, BITWUZLA, CVC5)"
             ),
         },
+        {
+            "flags": ["--default-solver-only"],
+            "action": "store_true",
+            "help": (
+                "for each harness, run only the solver named by its "
+                "CBMC_DEFAULT_SOLVER. Cannot be combined with --solver."
+            ),
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -359,6 +367,25 @@ def read_solver_matrix(proof_dir):
             continue
         out[name] = val.strip() == "1"
     return out
+
+
+def read_default_solver(proof_dir):
+    """Return CBMC_DEFAULT_SOLVER for a per-harness Makefile."""
+    cmd = ["make", "--no-print-directory", "echo-default-solver"]
+    proc = subprocess.run(
+        cmd,
+        cwd=proof_dir,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if proc.returncode:
+        logging.critical(
+            "Could not read default solver from %s: %s", proof_dir, proc.stderr
+        )
+        sys.exit(1)
+    return proc.stdout.strip()
 
 
 def read_proof_uid(proof_dir):
@@ -542,6 +569,10 @@ async def main():  # pylint: disable=too-many-locals
         logging.critical("No proof directories found")
         sys.exit(1)
 
+    if args.default_solver_only and args.solver:
+        logging.critical("--default-solver-only and --solver are mutually exclusive")
+        sys.exit(1)
+
     selected_solvers = args.solver if args.solver else list(ALL_SOLVERS)
     for s in selected_solvers:
         if s not in ALL_SOLVERS:
@@ -552,6 +583,9 @@ async def main():  # pylint: disable=too-many-locals
 
     # Enforce PROOF_UID uniqueness up-front, then expand each proof
     # directory into the Cartesian product with its solver matrix.
+    # When --default-solver-only is given, the per-harness solver list
+    # collapses to {CBMC_DEFAULT_SOLVER}; otherwise every solver in
+    # selected_solvers that the matrix declares enabled is used.
     proof_uids = {}
     pairs_to_run = []  # (proof_dir, solver)
     omitted_pairs = []  # (proof_uid, solver)
@@ -559,7 +593,11 @@ async def main():  # pylint: disable=too-many-locals
         check_uid_uniqueness(proof_dir, proof_uids)
         proof_uid = read_proof_uid(proof_dir)
         matrix = read_solver_matrix(proof_dir)
-        for solver in selected_solvers:
+        if args.default_solver_only:
+            per_harness_solvers = [read_default_solver(proof_dir)]
+        else:
+            per_harness_solvers = selected_solvers
+        for solver in per_harness_solvers:
             if matrix.get(solver):
                 pairs_to_run.append((proof_dir, solver))
             else:

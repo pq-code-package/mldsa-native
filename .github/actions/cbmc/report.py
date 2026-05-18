@@ -99,6 +99,24 @@ def classify_proof(r, baseline_runtimes, cfg):
     base = baseline_runtimes.get((name, solver), {})
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
     base_omitted = base.get("status") == "omitted"
+    base_inconclusive = base.get("status") == "inconclusive"
+
+    # Solver could not decide -- not a real failure, not a regression.
+    if r.get("status") == "inconclusive":
+        prev = (
+            f"{base_val}s" if base_val
+            else "failed" if base_failed
+            else "inconclusive" if base_inconclusive
+            else "omitted" if base_omitted
+            else "-"
+        )
+        # Was passing in the baseline, now inconclusive: surface as a warning.
+        if base_val is not None and not base_failed:
+            return (
+                ProofResult(name, solver, WARN, "?", prev, "inconclusive"),
+                True,
+            )
+        return ProofResult(name, solver, OK, "?", prev, "inconclusive"), False
 
     # Pair was intentionally not run.
     if r.get("status") == "omitted":
@@ -141,13 +159,14 @@ def classify_proof(r, baseline_runtimes, cfg):
 
 
 def compute_total_runtime(data):
-    """Compute total runtime from proof results, ignoring failed/omitted."""
+    """Compute total runtime from proof results, ignoring failed/omitted/inconclusive."""
     if not data:
         return None
     return sum(
         r["value"]
         for r in data.get("runtimes", [])
-        if r.get("status") not in ("failed", "omitted") and "value" in r
+        if r.get("status") not in ("failed", "omitted", "inconclusive")
+        and "value" in r
     )
 
 

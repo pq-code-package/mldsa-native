@@ -918,6 +918,15 @@ class Tests:
                 print(p)
             exit(0)
 
+        def solver_args():
+            args = []
+            if self.args.default_solver_only:
+                args.append("--default-solver-only")
+            if self.args.solver:
+                for s in self.args.solver:
+                    args += ["--solver", s]
+            return args
+
         def run_cbmc_single_step(mldsa_parameter_set, proofs):
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
@@ -940,6 +949,7 @@ class Tests:
                             "-p",
                             func,
                         ]
+                        + solver_args()
                         + self.make_j(),
                         cwd="proofs/cbmc",
                         env=os.environ.copy() | envvars,
@@ -1004,6 +1014,7 @@ class Tests:
                     "-p",
                 ]
                 + proofs
+                + solver_args()
                 + self.make_j()
             )
             if self.args.output_result_json:
@@ -1474,6 +1485,28 @@ def cli():
     cbmc_parser.add_argument(
         "--reduce-ram",
         help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--solver",
+        action="append",
+        help=(
+            "Restrict CBMC run to the given solver (repeatable). Forwarded "
+            "to run-cbmc-proofs.py --solver. Default: all solvers in the "
+            "canonical list (Z3, BITWUZLA, CVC5)."
+        ),
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--default-solver-only",
+        help=(
+            "For each harness, run only the solver named by its "
+            "CBMC_DEFAULT_SOLVER. Forwarded to run-cbmc-proofs.py. "
+            "Cannot be combined with --solver."
+        ),
         action="store_true",
         default=False,
     )
