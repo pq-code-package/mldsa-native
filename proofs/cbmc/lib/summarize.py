@@ -74,8 +74,19 @@ def _get_rendered_table(data):
     return "".join(table)
 
 
+def _split_pipeline_name(pipeline_name):
+    """Split a litani pipeline name of the form `<PROOF_UID>__<SOLVER>` back
+    into (proof_uid, solver). Returns (None, None) for names that don't carry
+    a solver suffix (e.g. the `print_tool_versions` pipeline)."""
+    if "__" not in pipeline_name:
+        return None, None
+    proof_uid, _, solver = pipeline_name.rpartition("__")
+    return proof_uid, solver
+
+
 def _parse_proof_pipeline(proof_pipeline):
-    """Parse a single proof pipeline, returning (name, status, duration, has_timeout)."""
+    """Parse a single proof pipeline, returning
+    (name, solver, status, duration, has_timeout)."""
     duration = 0
     has_timeout = False
     for stage in proof_pipeline["ci_stages"]:
@@ -86,10 +97,11 @@ def _parse_proof_pipeline(proof_pipeline):
                 duration += int(job["duration"])
 
     status = "Timeout" if has_timeout else proof_pipeline["status"].title()
-    return proof_pipeline["name"], status, duration, has_timeout
+    name, solver = _split_pipeline_name(proof_pipeline["name"])
+    return name, solver, status, duration, has_timeout
 
 
-def _get_status_and_proof_summaries(run_dict):
+def _get_status_and_proof_summaries(run_dict, omitted_pairs=None):
     """Parse a dict representing a Litani run and create lists summarizing the
     proof results.
 
@@ -97,26 +109,47 @@ def _get_status_and_proof_summaries(run_dict):
     ----------
     run_dict
         A dictionary representing a Litani run.
+    omitted_pairs
+        Optional iterable of (proof_uid, solver) tuples corresponding to
+        (harness, solver) pairs that were intentionally not run because the
+        harness disables that solver. They render as blank rows so they
+        remain visible.
 
 
     Returns
     -------
     A list of 2 lists.
     The first sub-list maps a status to the number of proofs with that status.
-    The second sub-list maps each proof to its status.
+    The second sub-list maps each (proof, solver) to its status.
     """
     count_statuses = {}
-    proofs = [["Proof", "Status", "Duration (in s)"]]
+    proofs = [["Proof", "Solver", "Status", "Duration (in s)"]]
     for proof_pipeline in run_dict["pipelines"]:
         if proof_pipeline["name"] == "print_tool_versions":
             continue
 
-        name, status, duration, has_timeout = _parse_proof_pipeline(proof_pipeline)
+        name, solver, status, duration, has_timeout = _parse_proof_pipeline(
+            proof_pipeline
+        )
+        if name is None:
+            # Pipelines that don't follow the <PROOF_UID>__<SOLVER> convention
+            # (e.g. legacy or other-purpose entries) are surfaced as-is.
+            name, solver = proof_pipeline["name"], "-"
         status_pretty = status.replace("_", " ")
         duration_str = "TIMEOUT" if has_timeout else str(duration)
 
         count_statuses[status_pretty] = count_statuses.get(status_pretty, 0) + 1
-        proofs.append([name, status_pretty, duration_str])
+        proofs.append([name, solver, status_pretty, duration_str])
+
+    if omitted_pairs:
+        for proof_uid, solver in omitted_pairs:
+            count_statuses["Omitted"] = count_statuses.get("Omitted", 0) + 1
+            proofs.append([proof_uid, solver, "-", ""])
+
+    # Sort body rows by (proof, solver) so paired rows are adjacent.
+    body = proofs[1:]
+    body.sort(key=lambda r: (r[0], r[1]))
+    proofs = [proofs[0]] + body
 
     statuses = [["Status", "Count"]]
     for status, count in count_statuses.items():
@@ -124,7 +157,7 @@ def _get_status_and_proof_summaries(run_dict):
     return [statuses, proofs]
 
 
-def export_result_json(output_path, run_file):
+def export_result_json(output_path, run_file, omitted_pairs=None):
     """Export JSON with summary, failures, and runtimes."""
     if output_path is None:
         return
@@ -132,17 +165,29 @@ def export_result_json(output_path, run_file):
     with open(run_file, encoding="utf-8") as f:
         run_dict = json.load(f)
 
-    _, proof_table = _get_status_and_proof_summaries(run_dict)
-    # proof_table: [["Proof", "Status", "Duration (in s)"], [name, status, duration], ...]
+    _, proof_table = _get_status_and_proof_summaries(run_dict, omitted_pairs)
+    # proof_table rows are [name, solver, status, duration_str].
 
     failures, runtimes = [], []
-    for name, status, duration_str in proof_table[1:]:  # skip header
+    for name, solver, status, duration_str in proof_table[1:]:  # skip header
         is_success = status == "Success"
+        is_omitted = status == "-"
+
+        if is_omitted:
+            runtimes.append({"name": name, "solver": solver, "status": "omitted"})
+            continue
 
         if not is_success:
-            failures.append({"name": name, "status": status, "duration": duration_str})
+            failures.append(
+                {
+                    "name": name,
+                    "solver": solver,
+                    "status": status,
+                    "duration": duration_str,
+                }
+            )
 
-        runtime = {"name": name, "unit": "seconds"}
+        runtime = {"name": name, "solver": solver, "unit": "seconds"}
         if is_success:
             runtime["value"] = int(duration_str)
         else:
@@ -152,14 +197,16 @@ def export_result_json(output_path, run_file):
     total = len(runtimes)
     failed = sum(1 for f in failures if f["status"] != "Timeout")
     timeout = sum(1 for f in failures if f["status"] == "Timeout")
+    omitted = sum(1 for r in runtimes if r.get("status") == "omitted")
 
     result = {
         "mldsa_parameter_set": os.getenv("MLD_CONFIG_PARAMETER_SET", "unknown"),
         "summary": {
             "total": total,
-            "success": total - failed - timeout,
+            "success": total - failed - timeout - omitted,
             "failed": failed,
             "timeout": timeout,
+            "omitted": omitted,
         },
         "failures": failures,
         "runtimes": runtimes,
@@ -169,7 +216,7 @@ def export_result_json(output_path, run_file):
         json.dump(result, f, indent=2)
 
 
-def print_proof_results(out_file):
+def print_proof_results(out_file, omitted_pairs=None):
     """
     Print 2 strings that summarize the proof results.
     When printing, each string will render as a GitHub flavored Markdown table.
@@ -177,7 +224,7 @@ def print_proof_results(out_file):
     output = "## Summary of CBMC proof results\n\n"
     with open(out_file, encoding="utf-8") as run_json:
         run_dict = json.load(run_json)
-    status_table, proof_table = _get_status_and_proof_summaries(run_dict)
+    status_table, proof_table = _get_status_and_proof_summaries(run_dict, omitted_pairs)
     for summary in (status_table, proof_table):
         output += _get_rendered_table(summary)
 

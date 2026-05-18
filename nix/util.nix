@@ -2,7 +2,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, z3 }:
+{ pkgs, cbmc, bitwuzla, cvc5, z3 }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -101,7 +101,7 @@ rec {
   };
 
   cbmc_pkgs = pkgs.callPackage ./cbmc {
-    inherit cbmc bitwuzla z3;
+    inherit cbmc bitwuzla cvc5 z3;
   };
 
   valgrind_varlat = pkgs.callPackage ./valgrind { };
