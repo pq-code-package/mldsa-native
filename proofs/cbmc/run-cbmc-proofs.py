@@ -190,6 +190,15 @@ def get_args():
             "metavar": "FILE",
             "help": "path to export result JSON",
         },
+        {
+            "flags": ["--solver"],
+            "action": "append",
+            "metavar": "SOLVER",
+            "help": (
+                "restrict run to the given solver (repeatable). Default: all "
+                "solvers in the canonical list (Z3, BITWUZLA, CVC5)"
+            ),
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -246,7 +255,14 @@ def get_proof_dirs(proof_root, proof_list, marker_file):
         sys.exit(1)
 
 
-def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json=None):
+def run_build(
+    litani,
+    jobs,
+    fail_on_proof_failure,
+    summarize,
+    output_result_json=None,
+    omitted_pairs=None,
+):
     cmd = [str(litani), "run-build"]
     if jobs:
         cmd.extend(["-j", str(jobs)])
@@ -264,8 +280,8 @@ def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json
         sys.exit(1)
 
     if summarize:
-        export_result_json(output_result_json, out_file)
-        print_proof_results(out_file)
+        export_result_json(output_result_json, out_file, omitted_pairs)
+        print_proof_results(out_file, omitted_pairs)
         out_file.unlink()
 
     if proc.returncode:
@@ -304,6 +320,55 @@ def get_litani_capabilities(litani_path):
     except RuntimeError:
         logging.warning("Could not load litani capabilities: '%s'", proc.stdout)
         return []
+
+
+# Canonical solver list. Kept in sync with CBMC_SOLVERS_ALL in
+# proofs/cbmc/Makefile.common.
+ALL_SOLVERS = ["Z3", "BITWUZLA", "CVC5"]
+
+
+def read_solver_matrix(proof_dir):
+    """Return the dict {solver: enabled_bool} declared by a per-harness Makefile.
+
+    Invokes `make echo-solver-matrix` in proof_dir, which prints space-
+    separated tokens of the form `<SOLVER>:<0|1>`.
+    """
+    cmd = ["make", "--no-print-directory", "echo-solver-matrix"]
+    proc = subprocess.run(
+        cmd,
+        cwd=proof_dir,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if proc.returncode:
+        logging.critical(
+            "Could not read solver matrix from %s: %s", proof_dir, proc.stderr
+        )
+        sys.exit(1)
+    out = {s: False for s in ALL_SOLVERS}
+    for tok in proc.stdout.split():
+        if ":" not in tok:
+            continue
+        name, _, val = tok.partition(":")
+        if name not in out:
+            logging.warning(
+                "Solver %s in %s not in ALL_SOLVERS; ignoring", name, proof_dir
+            )
+            continue
+        out[name] = val.strip() == "1"
+    return out
+
+
+def read_proof_uid(proof_dir):
+    """Read PROOF_UID from a per-harness Makefile."""
+    with (pathlib.Path(proof_dir) / "Makefile").open() as handle:
+        for line in handle:
+            match = re.match(r"^PROOF_UID\s*=(?P<uid>[^#]+)", line)
+            if match:
+                return match["uid"].strip()
+    return None
 
 
 def check_uid_uniqueness(proof_dir, proof_uids):
@@ -348,7 +413,6 @@ def should_enable_pools(litani_caps, args):
 async def configure_proof_dirs(  # pylint: disable=too-many-arguments
     queue,
     counter,
-    proof_uids,
     enable_pools,
     enable_memory_profiling,
     report_target,
@@ -357,9 +421,8 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
 ):
     while True:
         print_counter(counter)
-        path = str(await queue.get())
-
-        check_uid_uniqueness(path, proof_uids)
+        path, solver = await queue.get()
+        path = str(path)
 
         pools = ["ENABLE_POOLS=true"] if enable_pools else []
         profiling = ["ENABLE_MEMORY_PROFILING=true"] if enable_memory_profiling else []
@@ -368,21 +431,13 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
         env = os.environ.copy()
         env["CBMC_TIMEOUT"] = str(timeout)
 
-        # delete old reports
-        proc = await asyncio.create_subprocess_exec(
-            "make",
-            "veryclean",
-            cwd=path,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-
         # Allow interactive tasks to preempt proof configuration
         proc = await asyncio.create_subprocess_exec(
             "nice",
             "-n",
             "15",
             "make",
+            f"CBMC_SOLVER={solver}",
             *pools,
             *profiling,
             "-B",
@@ -402,7 +457,8 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
         for line in stderr.decode().splitlines():
             logging.debug(line)
 
-        counter["fail" if proc.returncode else "pass"].append(path)
+        key = f"{path}::{solver}"
+        counter["fail" if proc.returncode else "pass"].append(key)
         counter["complete"] += 1
 
         print_counter(counter)
@@ -486,19 +542,58 @@ async def main():  # pylint: disable=too-many-locals
         logging.critical("No proof directories found")
         sys.exit(1)
 
-    proof_queue = asyncio.Queue()
-    for proof_dir in proof_dirs:
-        proof_queue.put_nowait(proof_dir)
+    selected_solvers = args.solver if args.solver else list(ALL_SOLVERS)
+    for s in selected_solvers:
+        if s not in ALL_SOLVERS:
+            logging.critical(
+                "Unknown --solver %s; expected one of %s", s, ", ".join(ALL_SOLVERS)
+            )
+            sys.exit(1)
 
+    # Enforce PROOF_UID uniqueness up-front, then expand each proof
+    # directory into the Cartesian product with its solver matrix.
+    proof_uids = {}
+    pairs_to_run = []  # (proof_dir, solver)
+    omitted_pairs = []  # (proof_uid, solver)
+    for proof_dir in proof_dirs:
+        check_uid_uniqueness(proof_dir, proof_uids)
+        proof_uid = read_proof_uid(proof_dir)
+        matrix = read_solver_matrix(proof_dir)
+        for solver in selected_solvers:
+            if matrix.get(solver):
+                pairs_to_run.append((proof_dir, solver))
+            else:
+                omitted_pairs.append((proof_uid, solver))
+
+    if not pairs_to_run and not omitted_pairs:
+        logging.critical("No (proof, solver) pairs to run")
+        sys.exit(1)
+
+    # Wipe stale per-solver outputs once per proof directory before
+    # configuring any (proof, solver) pair. `make veryclean` deletes
+    # logs/, gotos/, and report/ recursively.
+    for proof_dir in proof_dirs:
+        subprocess.run(
+            ["make", "veryclean"],
+            cwd=proof_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+    proof_queue = asyncio.Queue()
+    for pair in pairs_to_run:
+        proof_queue.put_nowait(pair)
+
+    total = len(pairs_to_run)
     counter = {
         "pass": [],
         "fail": [],
         "complete": 0,
-        "total": len(proof_dirs),
-        "width": int(math.log10(len(proof_dirs))) + 1,
+        "total": total,
+        "width": int(math.log10(max(total, 1))) + 1,
     }
 
-    proof_uids = {}
     tasks = []
 
     enable_memory_profiling = should_enable_memory_profiling(litani_caps, args)
@@ -509,7 +604,6 @@ async def main():  # pylint: disable=too-many-locals
             configure_proof_dirs(
                 proof_queue,
                 counter,
-                proof_uids,
                 enable_pools,
                 enable_memory_profiling,
                 report_target,
@@ -528,7 +622,7 @@ async def main():  # pylint: disable=too-many-locals
 
     if counter["fail"]:
         logging.critical(
-            "Failed to configure the following proofs:\n%s",
+            "Failed to configure the following (proof, solver) pairs:\n%s",
             "\n".join([str(f) for f in counter["fail"]]),
         )
         sys.exit(1)
@@ -540,6 +634,7 @@ async def main():  # pylint: disable=too-many-locals
             args.fail_on_proof_failure,
             args.summarize,
             args.output_result_json,
+            omitted_pairs=omitted_pairs,
         )
 
 

@@ -6,6 +6,7 @@
 , fetchFromGitHub
 , callPackage
 , bitwuzla
+, cvc5
 , ninja
 , z3
 }:
@@ -36,7 +37,8 @@ buildEnv {
       });
 
       inherit
-        bitwuzla# 0.8.2
+        bitwuzla # 0.8.2
+        cvc5 # 1.3.2
         ninja; # 1.13.2
     };
 }
