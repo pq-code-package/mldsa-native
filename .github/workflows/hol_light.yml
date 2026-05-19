@@ -121,6 +121,8 @@ jobs:
             needs: ["aarch64_utils.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
           - name: poly_decompose_88_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
+          - name: rej_uniform_aarch64_asm
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_table.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: pqcp-arm64
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork

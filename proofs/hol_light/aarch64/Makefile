@@ -71,7 +71,8 @@ OBJ = mldsa/intt_aarch64_asm.o \
       mldsa/polyz_unpack_17_aarch64_asm.o \
       mldsa/polyz_unpack_19_aarch64_asm.o \
       mldsa/poly_use_hint_32_aarch64_asm.o \
-      mldsa/poly_use_hint_88_aarch64_asm.o
+      mldsa/poly_use_hint_88_aarch64_asm.o \
+      mldsa/rej_uniform_aarch64_asm.o
 
 # According to
 # https://developer.apple.com/documentation/xcode/writing-arm64-code-for-apple-platforms,

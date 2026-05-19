@@ -95,7 +95,18 @@ __contract__(
 #define mld_rej_uniform_aarch64_asm MLD_NAMESPACE(rej_uniform_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_aarch64_asm(int32_t *r, const uint8_t *buf,
-                                     unsigned buflen, const uint8_t *table);
+                                     unsigned buflen, const uint8_t *table)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/rej_uniform_aarch64_asm.ml. */
+__contract__(
+  requires(buflen % 24 == 0)
+  requires(memory_no_alias(buf, buflen))
+  requires(table == mld_rej_uniform_table)
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  ensures(array_bound(r, 0, (unsigned) return_value, 0, MLDSA_Q))
+);
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta2_aarch64_asm \
