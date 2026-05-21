@@ -27,10 +27,7 @@
  * Arguments:   - int32_t *r: pointer to input/output polynomial
  **************************************************/
 
-#include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 
 /*
@@ -40,10 +37,16 @@
 
 .text
 .balign 4
-.global MLD_ASM_NAMESPACE(poly_caddq_avx2_asm)
-MLD_ASM_FN_SYMBOL(poly_caddq_avx2_asm)
+#ifdef __APPLE__
+.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_caddq_avx2_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_poly_caddq_avx2_asm:
+#else
+.global PQCP_MLDSA_NATIVE_MLDSA44_poly_caddq_avx2_asm
+PQCP_MLDSA_NATIVE_MLDSA44_poly_caddq_avx2_asm:
+#endif
 
         .cfi_startproc
+        endbr64
         vpxor %xmm2, %xmm2, %xmm2
         movl $0x7fe001, %eax         # imm = 0x7FE001
         vmovd %eax, %xmm1
@@ -178,12 +181,6 @@ MLD_ASM_FN_SYMBOL(poly_caddq_avx2_asm)
         vmovdqa %ymm5, 0x3e0(%rdi)
         retq
         .cfi_endproc
-
-MLD_ASM_FN_SIZE(poly_caddq_avx2_asm)
-
-
-#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-        */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

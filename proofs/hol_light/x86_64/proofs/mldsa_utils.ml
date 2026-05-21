@@ -49,7 +49,7 @@ let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
   (* We assume that the goal has the form
      `ensure arm (\s. ... /\ read PC s = some_value /\ ...)` *)
   let extract_target_pc_from_goal goal =
-    let _, insts, _ = term_match [] `eventually arm (\s'. P) some_state` goal in
+    let _, insts, _ = term_match [] `eventually x86 (\s'. P) some_state` goal in
     insts
       |> rev_assoc `P: bool`
       |> conjuncts

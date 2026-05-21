@@ -203,6 +203,8 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
+          - name: poly_caddq_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
           - name: ntt_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: intt_avx2_asm

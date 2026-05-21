@@ -46,22 +46,43 @@ vmovdqa  \reg, \offset(%rdi)
 .balign 16
 MLD_ASM_FN_SYMBOL(poly_caddq_avx2_asm)
 
-mov $8380417, %edx
-leaq 1024(%rdi), %rax
 vpxor %xmm2, %xmm2, %xmm2
-vmovd %edx, %xmm1
+mov $8380417, %eax
+vmovd %eax, %xmm1
 vpbroadcastd %xmm1, %ymm1
-
-poly_caddq_avx2_loop:
 
 caddq_vector 0, %ymm0
 caddq_vector 32, %ymm3
 caddq_vector 64, %ymm4
 caddq_vector 96, %ymm5
-
-addq   $128, %rdi        /* advance by 128 bytes (4 vectors) */ 
-cmpq   %rdi, %rax
-jne    poly_caddq_avx2_loop   /* 8 iterations (32/4 = 8) */ 
+caddq_vector 128, %ymm0
+caddq_vector 160, %ymm3
+caddq_vector 192, %ymm4
+caddq_vector 224, %ymm5
+caddq_vector 256, %ymm0
+caddq_vector 288, %ymm3
+caddq_vector 320, %ymm4
+caddq_vector 352, %ymm5
+caddq_vector 384, %ymm0
+caddq_vector 416, %ymm3
+caddq_vector 448, %ymm4
+caddq_vector 480, %ymm5
+caddq_vector 512, %ymm0
+caddq_vector 544, %ymm3
+caddq_vector 576, %ymm4
+caddq_vector 608, %ymm5
+caddq_vector 640, %ymm0
+caddq_vector 672, %ymm3
+caddq_vector 704, %ymm4
+caddq_vector 736, %ymm5
+caddq_vector 768, %ymm0
+caddq_vector 800, %ymm3
+caddq_vector 832, %ymm4
+caddq_vector 864, %ymm5
+caddq_vector 896, %ymm0
+caddq_vector 928, %ymm3
+caddq_vector 960, %ymm4
+caddq_vector 992, %ymm5
 ret
 
 /* simpasm: footer-start */

@@ -99,7 +99,15 @@ void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0);
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_caddq_avx2_asm MLD_NAMESPACE(poly_caddq_avx2_asm)
-void mld_poly_caddq_avx2_asm(int32_t *r);
+void mld_poly_caddq_avx2_asm(int32_t *r)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/poly_caddq_avx2_asm.ml */
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(r, 0, MLDSA_N, 0, MLDSA_Q))
+);
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_use_hint_32_avx2 MLD_NAMESPACE(mld_poly_use_hint_32_avx2)

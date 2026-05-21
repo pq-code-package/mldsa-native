@@ -2735,6 +2735,12 @@ def gen_hol_light_asm():
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
     joblist_x86_64 = [
         (
+            "poly_caddq_avx2_asm.S",
+            "dev/x86_64/src",
+            f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
             "ntt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",

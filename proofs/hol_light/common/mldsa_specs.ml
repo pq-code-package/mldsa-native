@@ -1732,6 +1732,44 @@ let MLDSA_USE_HINT_88_UNFOLD = prove(
   SPEC_TAC(`mldsa_decompose_88 r`, `p:num#int`) THEN
   REWRITE_TAC[FORALL_PAIR_THM] THEN
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[]);;
+
+(* ========================================================================= *)
+(* caddq: conditional addition of q for signed-to-unsigned reduction          *)
+(*                                                                           *)
+(* Maps a coefficient in (-q, q) to [0, q) by adding q if negative.          *)
+(* ========================================================================= *)
+
+let mldsa_caddq_spec = new_definition
+  `mldsa_caddq_spec (x:int) : int =
+    if x < &0 then x + &8380417 else x`;;
+
+let MLDSA_CADDQ_SPEC_REM = prove
+ (`!x. abs x < &8380417 ==> mldsa_caddq_spec x = x rem &8380417`,
+  GEN_TAC THEN REWRITE_TAC[mldsa_caddq_spec] THEN DISCH_TAC THEN
+  COND_CASES_TAC THENL
+   [ONCE_REWRITE_TAC[EQ_SYM_EQ] THEN
+    REWRITE_TAC[INT_REM_UNIQUE] THEN
+    CONV_TAC INT_REDUCE_CONV THEN
+    CONJ_TAC THENL [ASM_INT_ARITH_TAC; CONV_TAC INTEGER_RULE];
+    MATCH_MP_TAC(GSYM INT_REM_LT) THEN ASM_INT_ARITH_TAC]);;
+
+let MLDSA_CADDQ_SPEC_BOUNDS = prove
+ (`!x. abs x < &8380417
+       ==> &0 <= mldsa_caddq_spec x /\ mldsa_caddq_spec x < &8380417`,
+  GEN_TAC THEN DISCH_TAC THEN
+  MP_TAC(SPEC `x:int` MLDSA_CADDQ_SPEC_REM) THEN ASM_REWRITE_TAC[] THEN
+  DISCH_THEN SUBST1_TAC THEN CONJ_TAC THENL
+   [MP_TAC(SPECL [`x:int`; `&8380417:int`] INT_REM_POS) THEN INT_ARITH_TAC;
+    MP_TAC(SPECL [`x:int`; `&8380417:int`] INT_LT_REM) THEN INT_ARITH_TAC]);;
+
+let MLDSA_CADDQ_SPEC_LOWER = prove
+ (`!x. abs x < &8380417 ==> &0 <= mldsa_caddq_spec x`,
+  MESON_TAC[MLDSA_CADDQ_SPEC_BOUNDS]);;
+
+let MLDSA_CADDQ_SPEC_UPPER = prove
+ (`!x. abs x < &8380417 ==> mldsa_caddq_spec x < &8380417`,
+  MESON_TAC[MLDSA_CADDQ_SPEC_BOUNDS]);;
+
 (* ========================================================================= *)
 (* decompose: bound lemmas for FST/SND of mldsa_decompose_{32,88}            *)
 (*                                                                           *)

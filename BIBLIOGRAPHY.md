@@ -263,6 +263,7 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l5_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l5_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S](proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S)
 
 ### `Round3_Spec`
 

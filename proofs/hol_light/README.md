@@ -139,6 +139,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 - ML-DSA Arithmetic:
   * x86_64 forward NTT: [ntt_avx2_asm.S](x86_64/mldsa/ntt_avx2_asm.S)
   * x86_64 inverse NTT: [intt_avx2_asm.S](x86_64/mldsa/intt_avx2_asm.S)
+  * x86_64 poly_caddq: [poly_caddq_avx2_asm.S](x86_64/mldsa/poly_caddq_avx2_asm.S)
   * x86_64 NTT unpack: [nttunpack_avx2_asm.S](x86_64/mldsa/nttunpack_avx2_asm.S)
   * x86_64 pointwise multiplication: [pointwise_avx2_asm.S](x86_64/mldsa/pointwise_avx2_asm.S)
   * x86_64 pointwise multiplication-accumulation (l=4): [pointwise_acc_l4_avx2_asm.S](x86_64/mldsa/pointwise_acc_l4_avx2_asm.S)
