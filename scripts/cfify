@@ -100,6 +100,23 @@ X86_64_MOV_REG_TO_RSP_PATTERN = re.compile(
 )
 
 
+def _x86_64_has_matching_rsp_restore(lines, start, reg):
+    """Return True if a `movq %REG, %rsp` appears before the next ret in `lines`.
+
+    Used to distinguish an alignment anchor save from a scratch base-pointer
+    copy: only the former has a matching restore in the function body.
+    """
+    reg_lower = reg.lower()
+    for j in range(start, len(lines)):
+        candidate = lines[j].rstrip()
+        m = X86_64_MOV_REG_TO_RSP_PATTERN.match(candidate)
+        if m and m.group(2).lower() == reg_lower:
+            return True
+        if X86_64_RET_PATTERN.match(candidate):
+            return False
+    return False
+
+
 # -----------------------------------------------------------------------------
 # armv81m module-scope constants and helpers
 # -----------------------------------------------------------------------------
@@ -331,14 +348,23 @@ def add_cfi_directives(text, arch):
             # data-dependent rsp move (e.g. `andq $-32, %rsp`) that may
             # follow. Only fires while the CFA is still on rsp - a
             # nested re-anchor would indicate malformed input.
+            #
+            # A `movq %rsp, %REG` may also be a scratch base-pointer
+            # copy (e.g. `rep movsb` source setup) with no intent to
+            # re-anchor. Distinguish by requiring a matching restore
+            # `movq %REG, %rsp` later in the same function body
+            # (bounded by the next ret/retq, after which cfify emits
+            # `.cfi_endproc`). Without a restore, we leave the line
+            # alone and keep the CFA on rsp.
             match = X86_64_MOV_RSP_TO_REG_PATTERN.match(line)
             if match and x86_64_cfa_reg == "rsp":
                 indent, reg = match.group(1), match.group(2)
-                result.append(line)
-                result.append(f"{indent}.cfi_def_cfa_register %{reg}")
-                x86_64_cfa_reg = reg.lower()
-                i += 1
-                continue
+                if _x86_64_has_matching_rsp_restore(lines, i + 1, reg):
+                    result.append(line)
+                    result.append(f"{indent}.cfi_def_cfa_register %{reg}")
+                    x86_64_cfa_reg = reg.lower()
+                    i += 1
+                    continue
 
             # x86_64: stack-alignment anchor restore. The CFA goes back
             # to being computed from rsp. Only fires if the source
