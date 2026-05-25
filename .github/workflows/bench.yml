@@ -38,6 +38,16 @@ jobs:
           bench_extra_args: ""
           nix_shell: bench
           only_no_opt: false
+        - system: rpi5
+          name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
+          bench_pmu: PERF
+          archflags: "-mcpu=cortex-a76 -march=armv8.2-a"
+          cflags: "-flto -DMLD_FORCE_AARCH64"
+          ldflags: "-flto"
+          bench_extra_args: ""
+          nix_shell: bench
+          only_no_opt: false
+          cross_prefix: ""
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
