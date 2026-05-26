@@ -58,8 +58,8 @@ __contract__(
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 #define mld_polyvecl_ntt MLD_NAMESPACE_KL(polyvecl_ntt)
 /**
- * Forward NTT of all polynomials in vector of length MLDSA_L. Coefficients
- * can grow by 8*MLDSA_Q in absolute value.
+ * Forward NTT of all polynomials in vector of length MLDSA_L. Output
+ * coefficients are bounded by MLD_NTT_BOUND in absolute value.
  *
  * @param[in,out] v Pointer to input/output vector.
  */
@@ -87,7 +87,7 @@ __contract__(
  * have coefficients in [0, MLDSA_Q-1] inclusive.
  *
  * The second input "v" is assumed to be output of an NTT, and hence must have
- * coefficients bounded by [-(9*MLDSA_Q-1), 9*MLDSA_Q-1] inclusive.
+ * coefficients bounded by [-(MLD_NTT_BOUND-1), MLD_NTT_BOUND-1] inclusive.
  *
  * @param[out] w Output polynomial.
  * @param[in]  u Pointer to first input vector.
@@ -186,8 +186,8 @@ __contract__(
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyveck_ntt MLD_NAMESPACE_KL(polyveck_ntt)
 /**
- * Forward NTT of all polynomials in vector of length MLDSA_K. Coefficients
- * can grow by 8*MLDSA_Q in absolute value.
+ * Forward NTT of all polynomials in vector of length MLDSA_K. Output
+ * coefficients are bounded by MLD_NTT_BOUND in absolute value.
  *
  * @param[in,out] v Pointer to input/output vector.
  */

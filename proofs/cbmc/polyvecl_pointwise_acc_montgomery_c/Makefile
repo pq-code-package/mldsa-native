@@ -42,7 +42,13 @@ FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 12
+# Optimal CBMC_OBJECT_BITS depends on the parameter set; the values below
+# avoid SMT-solver timeouts for each L. See pq-code-package/mldsa-native#1131.
+ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
+CBMC_OBJECT_BITS = 10
+else
+CBMC_OBJECT_BITS = 11
+endif
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

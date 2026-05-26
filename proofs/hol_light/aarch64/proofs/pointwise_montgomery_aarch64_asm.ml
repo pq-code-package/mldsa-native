@@ -86,8 +86,8 @@ let MLDSA_POINTWISE_CORRECT = prove
           (\s. aligned_bytes_loaded s (word pc) mldsa_pointwise_mc /\
                read PC s = word pc /\
                C_ARGUMENTS [a; b] s /\
-               (!i. i < 256 ==> abs(ival(x i)) <= &75423752) /\
-               (!i. i < 256 ==> abs(ival(y i)) <= &75423752) /\
+               (!i. i < 256 ==> abs(ival(x i)) <= &94279697) /\
+               (!i. i < 256 ==> abs(ival(y i)) <= &94279697) /\
                (!i. i < 256 ==>
                  read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                (!i. i < 256 ==>
@@ -151,14 +151,14 @@ let MLDSA_POINTWISE_CORRECT = prove
   SUBGOAL_THEN
    `!i. i < 256 ==>
      abs(ival(word_mul (word_sx ((x:num->int32) i):int64)
-                       (word_sx ((y:num->int32) i):int64))) <= &5688742365757504`
+                       (word_sx ((y:num->int32) i):int64))) <= &8888661266411809`
    ASSUME_TAC THENL
   [REPEAT STRIP_TAC THEN
    MP_TAC(ISPECL [`(x:num->int32) i`; `(y:num->int32) i`] IVAL_WORD_MUL_SX32_64) THEN
    ANTS_TAC THENL
     [ASM_MESON_TAC[]; DISCH_THEN(fun th -> REWRITE_TAC[th])] THEN
    REWRITE_TAC[INT_ABS_MUL] THEN
-   MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&75423752 * &75423752:int` THEN
+   MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&94279697 * &94279697:int` THEN
    CONJ_TAC THENL
     [MATCH_MP_TAC INT_LE_MUL2 THEN REWRITE_TAC[INT_ABS_POS] THEN ASM_MESON_TAC[];
      CONV_TAC INT_REDUCE_CONV];
@@ -218,8 +218,8 @@ let MLDSA_POINTWISE_SUBROUTINE_CORRECT = prove
                read PC s = word pc /\
                read X30 s = returnaddress /\
                C_ARGUMENTS [a; b] s /\
-               (!i. i < 256 ==> abs(ival(x i)) <= &75423752) /\
-               (!i. i < 256 ==> abs(ival(y i)) <= &75423752) /\
+               (!i. i < 256 ==> abs(ival(x i)) <= &94279697) /\
+               (!i. i < 256 ==> abs(ival(y i)) <= &94279697) /\
                (!i. i < 256 ==>
                  read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                (!i. i < 256 ==>

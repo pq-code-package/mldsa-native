@@ -37,11 +37,17 @@
  */
 #define MLD_NATIVE_FUNC_FALLBACK (-1)
 
+/* Absolute exclusive upper bound for the output of fqmul.
+ *
+ * NOTE: This is the same bound as in poly.h and has to be kept
+ * in sync. */
+#define MLD_FQMUL_BOUND ((5 * MLDSA_Q + 3) / 4)
+
 /* Bound on absolute value of coefficients after NTT.
  *
  * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
-#define MLD_NTT_BOUND (9 * MLDSA_Q)
+#define MLD_NTT_BOUND (9 * MLD_FQMUL_BOUND)
 
 /* Absolute exclusive upper bound for the output of the inverse NTT
  *

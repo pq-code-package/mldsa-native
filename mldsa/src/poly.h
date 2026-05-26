@@ -10,8 +10,10 @@
 #include "reduce.h"
 #include "rounding.h"
 
+/* Absolute exclusive upper bound for the output of fqmul */
+#define MLD_FQMUL_BOUND ((5 * MLDSA_Q + 3) / 4)
 /* Absolute exclusive upper bound for the output of the forward NTT */
-#define MLD_NTT_BOUND (9 * MLDSA_Q)
+#define MLD_NTT_BOUND (9 * MLD_FQMUL_BOUND)
 /* Absolute exclusive upper bound for the output of the inverse NTT*/
 #define MLD_INTT_BOUND MLDSA_Q
 
@@ -131,7 +133,8 @@ __contract__(
 
 #define mld_poly_ntt MLD_NAMESPACE(poly_ntt)
 /**
- * In-place forward NTT. Coefficients can grow by 8*MLDSA_Q in absolute value.
+ * In-place forward NTT. Output coefficients are bounded by MLD_NTT_BOUND in
+ * absolute value.
  *
  * @param[in,out] a Pointer to input/output polynomial.
  */

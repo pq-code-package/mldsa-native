@@ -291,7 +291,7 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
               (!i. i < 1792 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1792 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1792 ==> abs(ival(y i)) <= &94279697) /\
               (!i. i < 1792 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
               (!i. i < 1792 ==>
@@ -316,7 +316,7 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
   SUBGOAL_THEN
-    `!i. i < 1792 ==> abs(ival((x:num->int32) i)) <= &75423752`
+    `!i. i < 1792 ==> abs(ival((x:num->int32) i)) <= &94279697`
     ASSUME_TAC THENL
   [GEN_TAC THEN DISCH_TAC THEN
    MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&8380416:int` THEN
@@ -382,14 +382,14 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
   SUBGOAL_THEN
    `!i. i < 1792 ==>
      abs(ival(word_mul (word_sx ((x:num->int32) i):int64)
-                       (word_sx ((y:num->int32) i):int64))) <= &632082418040832`
+                       (word_sx ((y:num->int32) i):int64))) <= &790103081213952`
    ASSUME_TAC THENL
   [REPEAT STRIP_TAC THEN
    MP_TAC(ISPECL [`(x:num->int32) i`; `(y:num->int32) i`] IVAL_WORD_MUL_SX32_64) THEN
    ANTS_TAC THENL
     [ASM_MESON_TAC[]; DISCH_THEN(fun th -> REWRITE_TAC[th])] THEN
    REWRITE_TAC[INT_ABS_MUL] THEN
-   MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&8380416 * &75423752:int` THEN
+   MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&8380416 * &94279697:int` THEN
    CONJ_TAC THENL
     [MATCH_MP_TAC INT_LE_MUL2 THEN REWRITE_TAC[INT_ABS_POS] THEN ASM_MESON_TAC[];
      CONV_TAC INT_REDUCE_CONV];
@@ -500,7 +500,7 @@ let MLDSA_POINTWISE_ACC_L7_NOIBT_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
               (!i. i < 1792 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1792 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1792 ==> abs(ival(y i)) <= &94279697) /\
               (!i. i < 1792 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
               (!i. i < 1792 ==>
@@ -548,7 +548,7 @@ let MLDSA_POINTWISE_ACC_L7_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(consts,624) s =
                 MAP (iword: int -> 32 word) mldsa_complete_qdata /\
               (!i. i < 1792 ==> abs(ival(x i)) <= &8380416) /\
-              (!i. i < 1792 ==> abs(ival(y i)) <= &75423752) /\
+              (!i. i < 1792 ==> abs(ival(y i)) <= &94279697) /\
               (!i. i < 1792 ==>
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
               (!i. i < 1792 ==>

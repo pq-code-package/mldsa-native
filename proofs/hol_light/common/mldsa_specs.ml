@@ -423,16 +423,16 @@ let ARM_MLDSA_MONTRED_EQ = prove(
 (* ival of sign-extended product equals integer product when bounded *)
 let IVAL_WORD_MUL_SX32_64 = prove(
  `!x:int32 y:int32.
-    abs(ival x) <= &75423752 /\ abs(ival y) <= &75423752
+    abs(ival x) <= &94279697 /\ abs(ival y) <= &94279697
     ==> ival(word_mul (word_sx x:int64) (word_sx y:int64)) = ival x * ival y`,
   REPEAT STRIP_TAC THEN
   REWRITE_TAC[WORD_RULE `word_mul a b:int64 = iword(ival a * ival b)`] THEN
   SIMP_TAC[IVAL_WORD_SX; DIMINDEX_32; DIMINDEX_64; ARITH] THEN
   MATCH_MP_TAC IVAL_IWORD THEN REWRITE_TAC[DIMINDEX_64] THEN
   CONV_TAC NUM_REDUCE_CONV THEN
-  SUBGOAL_THEN `abs(ival(x:int32) * ival(y:int32)) <= &5688742365757504` MP_TAC THENL
+  SUBGOAL_THEN `abs(ival(x:int32) * ival(y:int32)) <= &8888661266411809` MP_TAC THENL
    [REWRITE_TAC[INT_ABS_MUL] THEN
-    MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&75423752 * &75423752:int` THEN
+    MATCH_MP_TAC INT_LE_TRANS THEN EXISTS_TAC `&94279697 * &94279697:int` THEN
     CONJ_TAC THENL
      [MATCH_MP_TAC INT_LE_MUL2 THEN ASM_REWRITE_TAC[INT_ABS_POS];
       CONV_TAC INT_REDUCE_CONV];

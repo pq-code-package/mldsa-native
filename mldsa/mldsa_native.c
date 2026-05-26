@@ -442,6 +442,7 @@
 #undef mld_debug_check_assert
 #undef mld_debug_check_bounds
 /* mldsa/src/poly.h */
+#undef MLD_FQMUL_BOUND
 #undef MLD_INTT_BOUND
 #undef MLD_NTT_BOUND
 #undef MLD_POLY_H
@@ -652,6 +653,7 @@
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mldsa/src/native/api.h */
+#undef MLD_FQMUL_BOUND
 #undef MLD_INTT_BOUND
 #undef MLD_NATIVE_API_H
 #undef MLD_NATIVE_FUNC_FALLBACK

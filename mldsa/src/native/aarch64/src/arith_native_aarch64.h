@@ -67,6 +67,7 @@ void mld_ntt_aarch64_asm(int32_t *r, const int32_t *zetas_l123456,
  * in proofs/hol_light/aarch64/proofs/ntt_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  /* check-magic: 8380417 == MLDSA_Q */
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
   requires(zetas_l123456 == mld_aarch64_ntt_zetas_layer123456)
   requires(zetas_l78 == mld_aarch64_ntt_zetas_layer78)
@@ -261,12 +262,14 @@ void mld_poly_pointwise_montgomery_aarch64_asm(int32_t *a, const int32_t *b)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
-  /* check-magic: off */
-  requires(array_abs_bound(a, 0, MLDSA_N, 75423753))
-  requires(array_abs_bound(b, 0, MLDSA_N, 75423753))
+  /* Input bound MLD_NTT_BOUND = 9 * MLD_FQMUL_BOUND, the guaranteed bound of
+   * any forward NTT implementation. Hardcoded here to keep this header free
+   * of poly.h. */
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  requires(array_abs_bound(a, 0, MLDSA_N, 94279698))
+  requires(array_abs_bound(b, 0, MLDSA_N, 94279698))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(array_abs_bound(a, 0, MLDSA_N, 8380417))
-  /* check-magic: on */
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
@@ -283,12 +286,11 @@ __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * 4 * MLDSA_N))
-  /* check-magic: off */
   requires(forall(l0, 0, 4, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
-  requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  requires(forall(l1, 0, 4, array_abs_bound(b[l1], 0, MLDSA_N, 94279698)))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
-  /* check-magic: on */
 );
 
 #define mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm \
@@ -303,12 +305,11 @@ __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * 5 * MLDSA_N))
-  /* check-magic: off */
   requires(forall(l0, 0, 5, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
-  requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  requires(forall(l1, 0, 5, array_abs_bound(b[l1], 0, MLDSA_N, 94279698)))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
-  /* check-magic: on */
 );
 
 #define mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm \
@@ -323,12 +324,11 @@ __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * 7 * MLDSA_N))
-  /* check-magic: off */
   requires(forall(l0, 0, 7, array_abs_bound(a[l0], 0, MLDSA_N, 8380417)))
-  requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 75423753)))
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  requires(forall(l1, 0, 7, array_abs_bound(b[l1], 0, MLDSA_N, 94279698)))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_abs_bound(r, 0, MLDSA_N, 8380417))
-  /* check-magic: on */
 );
 
 #endif /* !MLD_NATIVE_AARCH64_SRC_ARITH_NATIVE_AARCH64_H */
