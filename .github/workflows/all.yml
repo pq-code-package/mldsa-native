@@ -93,13 +93,13 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
-  opentitan_integration:
-    name: OpenTitan
+  pavona_integration:
+    name: Pavona
     permissions:
       contents: 'read'
       id-token: 'write'
     needs: [ base ]
-    uses: ./.github/workflows/integration-opentitan.yml
+    uses: ./.github/workflows/integration-pavona.yml
     secrets: inherit
   isabelle:
     name: Isabelle
