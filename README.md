@@ -52,7 +52,7 @@ make test
 mldsa-native is used in
  - AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/)
  - [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project
- - [Pavona](https://github.com/pavona/pavona) - an open source silicon Root of Trust (RoT)
+ - [Pavona](https://github.com/pavona/pavona) - a library of modular, tapeout-proven, and secure-by-default open silicon blocks
  - [CHERIoT-PQC](https://github.com/CHERIoT-Platform/cheriot-pqc) — post-quantum cryptography support for the CHERIoT platform
 
 ## Formal Verification
