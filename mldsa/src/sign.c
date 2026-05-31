@@ -353,14 +353,11 @@ int mld_sign_keypair_internal(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   mld_polyvecl_ntt(s1);
 
   /* Pack rho into pk */
-  mld_memcpy(pk, rho, MLDSA_SEEDBYTES);
+  mld_memcpy(pk + MLDSA_PK_RHO_OFFSET, rho, MLDSA_SEEDBYTES);
 
   /* Compute t = A*s1hat + s2 row by row, decompose into t1/t0, and pack
    * t1 into pk and t0 directly into the t0 region of sk. */
-  ret = mld_compute_pack_t0_t1(pk + MLDSA_SEEDBYTES,
-                               sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
-                                   MLDSA_L * MLDSA_POLYETA_PACKEDBYTES +
-                                   MLDSA_K * MLDSA_POLYETA_PACKEDBYTES,
+  ret = mld_compute_pack_t0_t1(pk + MLDSA_PK_T1_OFFSET, sk + MLDSA_SK_T0_OFFSET,
                                s1, s2, rho, context);
   if (ret != 0)
   {
@@ -1118,7 +1115,7 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   }
 
   mld_memcpy(c, sig, MLDSA_CTILDEBYTES);
-  mld_polyvecl_unpack_z(z, sig + MLDSA_CTILDEBYTES);
+  mld_polyvecl_unpack_z(z, sig + MLDSA_SIG_Z_OFFSET);
 
   /* mld_polyvecl_chknorm signals failure through a single non-zero error code
    * that's not yet aligned with MLD_ERR_XXX. Map it to MLD_ERR_FAIL. */
@@ -1572,12 +1569,11 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Inline unpack_sk: mld_unpack_sk uses lazy types for s1/s2/t0 which
    * we cannot use here. t0 stays in packed form -- we compare it against
    * the recomputed value below. */
-  mld_memcpy(rho, sk, MLDSA_SEEDBYTES);
-  mld_memcpy(key, sk + MLDSA_SEEDBYTES, MLDSA_SEEDBYTES);
-  mld_memcpy(tr, sk + 2 * MLDSA_SEEDBYTES, MLDSA_TRBYTES);
-  mld_polyvecl_unpack_eta(s1, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES);
-  mld_polyveck_unpack_eta(s2, sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
-                                  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES);
+  mld_memcpy(rho, sk + MLDSA_SK_RHO_OFFSET, MLDSA_SEEDBYTES);
+  mld_memcpy(key, sk + MLDSA_SK_KEY_OFFSET, MLDSA_SEEDBYTES);
+  mld_memcpy(tr, sk + MLDSA_SK_TR_OFFSET, MLDSA_TRBYTES);
+  mld_polyvecl_unpack_eta(s1, sk + MLDSA_SK_S1_OFFSET);
+  mld_polyveck_unpack_eta(s2, sk + MLDSA_SK_S2_OFFSET);
 
   /* Validate s1 and s2 coefficients are within [-MLDSA_ETA, MLDSA_ETA] */
   chk1 = mld_polyvecl_chknorm(s1, MLDSA_ETA + 1) & 0xFF;
@@ -1587,11 +1583,11 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   mld_polyvecl_ntt(s1);
 
   /* Pack rho into pk */
-  mld_memcpy(pk, rho, MLDSA_SEEDBYTES);
+  mld_memcpy(pk + MLDSA_PK_RHO_OFFSET, rho, MLDSA_SEEDBYTES);
 
   /* Recompute t row by row, decompose, and pack t1 into pk and t0 into
    * t0_packed. */
-  ret = mld_compute_pack_t0_t1(pk + MLDSA_SEEDBYTES, t0_packed, s1, s2, rho,
+  ret = mld_compute_pack_t0_t1(pk + MLDSA_PK_T1_OFFSET, t0_packed, s1, s2, rho,
                                context);
   if (ret != 0)
   {
@@ -1599,10 +1595,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   }
 
   /* Compare recomputed packed t0 against the t0 region of sk. */
-  cmp0 = mld_ct_memcmp(t0_packed,
-                       sk + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
-                           MLDSA_L * MLDSA_POLYETA_PACKEDBYTES +
-                           MLDSA_K * MLDSA_POLYETA_PACKEDBYTES,
+  cmp0 = mld_ct_memcmp(t0_packed, sk + MLDSA_SK_T0_OFFSET,
                        MLDSA_K * MLDSA_POLYT0_PACKEDBYTES);
 
   /* Compute tr_computed = H(pk) and compare to the stored tr */

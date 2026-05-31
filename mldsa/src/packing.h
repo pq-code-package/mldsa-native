@@ -98,9 +98,7 @@ __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(w0, sizeof(mld_polyveck)))
   requires(memory_no_alias(w1, sizeof(mld_polyveck)))
-  assigns(memory_slice(
-    sig + MLDSA_CTILDEBYTES + MLDSA_L * MLDSA_POLYZ_PACKEDBYTES,
-    MLDSA_POLYVECH_PACKEDBYTES))
+  assigns(memory_slice(sig + MLDSA_SIG_H_OFFSET, MLDSA_POLYVECH_PACKEDBYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
 );
 
@@ -193,11 +191,9 @@ __contract__(
       array_abs_bound(s2->vec.vec[k2].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
   )
   MLD_IF_REDUCE_RAM(
-    ensures(s1->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES)
-    ensures(s2->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
-                          MLDSA_L * MLDSA_POLYETA_PACKEDBYTES)
-    ensures(t0->packed == old(sk) + 2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES +
-                          (MLDSA_L + MLDSA_K) * MLDSA_POLYETA_PACKEDBYTES)
+    ensures(s1->packed == old(sk) + MLDSA_SK_S1_OFFSET)
+    ensures(s2->packed == old(sk) + MLDSA_SK_S2_OFFSET)
+    ensures(t0->packed == old(sk) + MLDSA_SK_T0_OFFSET)
   )
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
