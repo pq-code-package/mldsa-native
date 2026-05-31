@@ -2623,6 +2623,12 @@ def gen_hol_light_asm():
             "aarch64",
         ),
         (
+            "intt_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
             "poly_caddq_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",

@@ -22,6 +22,7 @@
 
 /* AArch64 ML-DSA inverse NTT following @[NeonNTT] and @[SLOTHY_Paper] */
 
+
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
  *   dev/aarch64_opt/src/intt_aarch64_asm.S using scripts/simpasm. Do not modify it directly.
@@ -745,7 +746,6 @@ Lintt_layer1234_start:
         .cfi_adjust_cfa_offset -0x40
         ret
         .cfi_endproc
-
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits
