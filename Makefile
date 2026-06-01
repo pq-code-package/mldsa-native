@@ -75,7 +75,7 @@ run_unit_87: unit_87
 run_unit: run_unit_44 run_unit_65 run_unit_87
 
 run_acvp: acvp
-	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION))
+	EXEC_WRAPPER="$(EXEC_WRAPPER)" python3 ./test/acvp/acvp_client.py $(if $(ACVP_VERSION),--version $(ACVP_VERSION)) $(ACVP_OPTIONS)
 
 func_44: $(MLDSA44_DIR)/bin/test_mldsa44
 	$(Q)echo "  FUNC       ML-DSA-44:   $^"
