@@ -52,6 +52,10 @@ on:
       quickcheck:
         type: boolean
         default: true
+      acvp_options:
+        type: string
+        description: Extra options for the ACVP client (e.g. --skip-unsupported)
+        default: ""
       lint:
         type: boolean
         default: true
@@ -158,6 +162,8 @@ jobs:
     runs-on: ${{ needs.start-ec2-runner.outputs.label }}
     container:
       localhost:5000/${{ inputs.container }}
+    env:
+      ACVP_OPTIONS: ${{ inputs.acvp_options }}
     steps:
       # We're not using the checkout action here because on it's not supported
       # on all containers we want to test. Resort to a manual checkout.

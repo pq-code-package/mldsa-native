@@ -640,17 +640,20 @@ jobs:
       matrix:
         container:
           - id: amazonlinux-2-aarch:base
-            # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
-            quickcheck: false
-            acvptest: false
+            # Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; skip the affected acvp test cases.
+            quickcheck: true
+            acvptest: true
+            acvp_options: --skip-unsupported
           - id: amazonlinux-2-aarch:gcc-7x
-            # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
-            quickcheck: false
-            acvptest: false
+            # Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; skip the affected acvp test cases.
+            quickcheck: true
+            acvptest: true
+            acvp_options: --skip-unsupported
           - id: amazonlinux-2-aarch:clang-7x
-            # TODO: Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; set to false to skip acvp.
-            quickcheck: false
-            acvptest: false
+            # Python 3.7 on Amazon Linux 2 lacks `sha512_224` in hashlib; skip the affected acvp test cases.
+            quickcheck: true
+            acvptest: true
+            acvp_options: --skip-unsupported
           - id: amazonlinux-2023-aarch:base
             quickcheck: true
             acvptest: true
@@ -715,6 +718,7 @@ jobs:
       kattest: true
       acvptest: ${{ matrix.container.acvptest }}
       quickcheck: ${{ matrix.container.quickcheck }}
+      acvp_options: ${{ matrix.container.acvp_options }}
       lint: false
       verbose: true
       cflags: "-O0"
