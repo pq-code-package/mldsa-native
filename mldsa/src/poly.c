@@ -1005,6 +1005,58 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
   return mld_poly_chknorm_c(a, B);
 }
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    MLD_CONFIG_PARAMETER_SET == 44
+MLD_INTERNAL_API
+void mld_polyw1_pack_88(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_88],
+                        const mld_poly *a)
+{
+  unsigned int i;
+
+  mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_88));
+
+  for (i = 0; i < MLDSA_N / 4; ++i)
+  __loop__(
+    invariant(i <= MLDSA_N/4)
+    decreases(MLDSA_N / 4 - i))
+  {
+    r[3 * i + 0] = (uint8_t)((a->coeffs[4 * i + 0]) & 0xFF);
+    r[3 * i + 0] |= (uint8_t)((a->coeffs[4 * i + 1] << 6) & 0xFF);
+    r[3 * i + 1] = (uint8_t)((a->coeffs[4 * i + 1] >> 2) & 0xFF);
+    r[3 * i + 1] |= (uint8_t)((a->coeffs[4 * i + 2] << 4) & 0xFF);
+    r[3 * i + 2] = (uint8_t)((a->coeffs[4 * i + 2] >> 4) & 0xFF);
+    r[3 * i + 2] |= (uint8_t)((a->coeffs[4 * i + 3] << 2) & 0xFF);
+  }
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_INTERNAL_API
+void mld_polyw1_pack_32(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_32],
+                        const mld_poly *a)
+{
+  unsigned int i;
+
+  mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_32));
+
+  for (i = 0; i < MLDSA_N / 2; ++i)
+  __loop__(
+    invariant(i <= MLDSA_N/2)
+    decreases(MLDSA_N / 2 - i))
+  {
+    r[i] =
+        (uint8_t)((a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4)) & 0xFF);
+  }
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+
 #else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 MLD_EMPTY_CU(mld_poly)
 #endif /* MLD_CONFIG_MULTILEVEL_NO_SHARED */

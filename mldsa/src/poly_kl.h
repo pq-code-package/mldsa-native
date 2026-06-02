@@ -305,21 +305,30 @@ __contract__(
 
 #define mld_polyw1_pack MLD_NAMESPACE_KL(polyw1_pack)
 /**
- * Bit-pack polynomial w1 with coefficients in [0, 15] or [0, 43]. Input
- * coefficients are assumed to be standard representatives.
+ * Bit-pack polynomial w1. Input coefficients must be in
+ * [0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)), i.e. [0, 43] for ML-DSA-44 and [0, 15]
+ * for ML-DSA-65/87. Dispatches to the value-specialized variant for the
+ * selected parameter set.
  *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYW1_PACKEDBYTES bytes.
  * @param[in]  a Pointer to input polynomial.
  */
-MLD_INTERNAL_API
-void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
+static MLD_INLINE void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES],
+                                       const mld_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES))
-);
+)
+{
+#if MLD_CONFIG_PARAMETER_SET == 44
+  mld_polyw1_pack_88(r, a);
+#else
+  mld_polyw1_pack_32(r, a);
+#endif
+}
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #endif /* !MLD_POLY_KL_H */

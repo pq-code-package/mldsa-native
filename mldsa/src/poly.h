@@ -378,4 +378,51 @@ __contract__(
   ensures((return_value == 0) == array_abs_bound(a->coeffs, 0, MLDSA_N, B))
 );
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+#define mld_polyw1_pack_88 MLD_NAMESPACE(polyw1_pack_88)
+/**
+ * Bit-pack polynomial w1, using 6 bits per coefficient.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44), for which w1 coefficients lie in [0, 43].
+ *
+ * @param[out] r Pointer to output byte array (MLDSA_POLYW1_PACKEDBYTES_88).
+ * @param[in]  a Pointer to input polynomial.
+ */
+MLD_INTERNAL_API
+void mld_polyw1_pack_88(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_88],
+                        const mld_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES_88))
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+  assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES_88))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+#define mld_polyw1_pack_32 MLD_NAMESPACE(polyw1_pack_32)
+/**
+ * Bit-pack polynomial w1, using 4 bits per coefficient.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87), for which w1 coefficients lie in [0, 15].
+ *
+ * @param[out] r Pointer to output byte array (MLDSA_POLYW1_PACKEDBYTES_32).
+ * @param[in]  a Pointer to input polynomial.
+ */
+MLD_INTERNAL_API
+void mld_polyw1_pack_32(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_32],
+                        const mld_poly *a)
+__contract__(
+  requires(memory_no_alias(r, MLDSA_POLYW1_PACKEDBYTES_32))
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+  assigns(memory_slice(r, MLDSA_POLYW1_PACKEDBYTES_32))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+
 #endif /* !MLD_POLY_H */

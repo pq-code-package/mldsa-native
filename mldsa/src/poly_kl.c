@@ -893,38 +893,6 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 
   mld_polyz_unpack_c(r, a);
 }
-
-MLD_INTERNAL_API
-void mld_polyw1_pack(uint8_t r[MLDSA_POLYW1_PACKEDBYTES], const mld_poly *a)
-{
-  unsigned int i;
-
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-
-#if MLD_CONFIG_PARAMETER_SET == 44
-  for (i = 0; i < MLDSA_N / 4; ++i)
-  __loop__(
-    invariant(i <= MLDSA_N/4)
-    decreases(MLDSA_N / 4 - i))
-  {
-    r[3 * i + 0] = (uint8_t)((a->coeffs[4 * i + 0]) & 0xFF);
-    r[3 * i + 0] |= (uint8_t)((a->coeffs[4 * i + 1] << 6) & 0xFF);
-    r[3 * i + 1] = (uint8_t)((a->coeffs[4 * i + 1] >> 2) & 0xFF);
-    r[3 * i + 1] |= (uint8_t)((a->coeffs[4 * i + 2] << 4) & 0xFF);
-    r[3 * i + 2] = (uint8_t)((a->coeffs[4 * i + 2] >> 4) & 0xFF);
-    r[3 * i + 2] |= (uint8_t)((a->coeffs[4 * i + 3] << 2) & 0xFF);
-  }
-#else  /* MLD_CONFIG_PARAMETER_SET == 44 */
-  for (i = 0; i < MLDSA_N / 2; ++i)
-  __loop__(
-    invariant(i <= MLDSA_N/2)
-    decreases(MLDSA_N / 2 - i))
-  {
-    r[i] =
-        (uint8_t)((a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4)) & 0xFF);
-  }
-#endif /* MLD_CONFIG_PARAMETER_SET != 44 */
-}
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros. */
