@@ -10,3 +10,5 @@ self-hosted-runner:
     # PQCP runners
     - pqcp-arm64
     - pqcp-x64
+    # RISE RISC-V runner
+    - ubuntu-24.04-riscv
