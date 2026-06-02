@@ -12,31 +12,19 @@ Isabelle/HOL proofs for the Barrett division used in ML-DSA's `Decompose` routin
 
 ## Building
 
-Assuming the `isabelle` binary is in your PATH, you can build via.
+See [../README.md](../README.md) for how to obtain Isabelle. With the
+`isabelle` binary on your `PATH`, build via
 
 ```
 isabelle build -D .
 ```
 
-Tested with Isabelle2025.1 and Isabelle2025.2.
-
-Alternatively, you can use the provided [Makefile](Makefile). Use
+Alternatively, use the provided [Makefile](Makefile):
 
 ```
-make jedit
+make jedit     # interactive proof session in Isabelle/jEdit
+make           # build the proofs from the command line
 ```
-
-to start an interactive proof session in Isabelle/jEdit, and
-
-```
-make
-```
-
-to build the proofs from the command line.
-
-To use the Makefile, you need to set the `ISABELLE_VERSION` to your
-Isabelle version, and `ISABELLE_HOME` to the full path of the directory
-containing the `isabelle` binary.
 
 ## Limitation
 

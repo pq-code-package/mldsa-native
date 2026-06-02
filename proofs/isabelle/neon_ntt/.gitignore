@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Isabelle build output
+output/
+neon_ntt_autoformalized.pdf

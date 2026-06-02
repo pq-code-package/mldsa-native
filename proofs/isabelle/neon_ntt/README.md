@@ -81,10 +81,10 @@ and conformance testing of the word model against actual hardware.
 
 ## Prerequisites
 
-- [Isabelle/HOL](https://isabelle.in.tum.de/) (tested with `Isabelle2025-2`;
-  CI builds against the
-  [`makarius/isabelle:Isabelle2025-1_ARM_X11_Latex`](https://hub.docker.com/r/makarius/isabelle)
-  Docker image).
+- Isabelle/HOL — see [../README.md](../README.md) for installation (tested
+  with `Isabelle2025-2`). CI builds against the
+  [`makarius/isabelle:Isabelle2025-2_ARM_X11_Latex`](https://hub.docker.com/r/makarius/isabelle)
+  Docker image.
 - A TeX distribution providing `luacode.sty` (loaded transitively by
   `iacrtrans` → `hyperref` → `hyperxmp`). On Debian/Ubuntu this is
   `texlive-luatex`; the Isabelle macOS app already bundles it.
@@ -101,9 +101,8 @@ make           # build PDF
 make jedit     # open Asm_Montgomery.thy in Isabelle/jEdit
 ```
 
-The Makefile defaults assume the macOS `Isabelle2025-2.app` install layout.
-On other platforms, set `ISABELLE_HOME` to the directory containing the
-`isabelle` binary (and `ISABELLE_VERSION` if your version differs).
+See [../README.md](../README.md) for how to obtain Isabelle and point the
+Makefile at it.
 
 The default build is heavily abridged — auxiliary lemmas and most proof
 bodies are elided via Isabelle document tags. A full-proof build can be

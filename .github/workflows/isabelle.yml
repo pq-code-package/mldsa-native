@@ -11,7 +11,7 @@ on:
 jobs:
   compress:
     runs-on: ubuntu-latest
-    container: makarius/isabelle:Isabelle2025-1
+    container: makarius/isabelle:Isabelle2025-2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Build Compress session
@@ -22,7 +22,7 @@ jobs:
     container:
       # arm64 image variant; "_X11_Latex" is required because the NeonNTT
       # ROOT builds a PDF document.
-      image: makarius/isabelle:Isabelle2025-1_ARM_X11_Latex
+      image: makarius/isabelle:Isabelle2025-2_ARM_X11_Latex
       options: --user root
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -51,3 +51,18 @@ jobs:
         run: |
           python3 model/conformance/run.py edge
           python3 model/conformance/run.py random -n 50000
+  nix_shell:
+    name: Isabelle proofs (nix shell)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'isabelle'
+      - name: Build Compress proof
+        run: nix develop .#isabelle -c make -C proofs/isabelle/compress
+      - name: Build NeonNTT proof
+        run: nix develop .#isabelle -c make -C proofs/isabelle/neon_ntt

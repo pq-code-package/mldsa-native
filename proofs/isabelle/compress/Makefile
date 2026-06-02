@@ -1,7 +1,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-ISABELLE_VERSION ?= Isabelle2025
+ISABELLE_VERSION ?= Isabelle2025-2
 ISABELLE_HOME ?= /Applications/$(ISABELLE_VERSION).app/bin
 
 all:

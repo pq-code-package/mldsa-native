@@ -65,6 +65,7 @@
                 clang_22 = pkgs-unstable.clang_22;
                 gcc16 = pkgs-unstable.gcc16;
                 zig_0_16 = pkgs-unstable.zig;
+                isabelle = pkgs-unstable.isabelle;
               })
             ];
           };
@@ -123,6 +124,25 @@
           devShells.slothy = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) slothy linters toolchains_native; };
           };
+
+
+          devShells.isabelle = (util.mkShell {
+            # texlive provides lualatex for the NeonNTT PDF document.
+            packages = [
+              pkgs.isabelle
+              (pkgs.texlive.combine {
+                inherit (pkgs.texlive)
+                  scheme-medium hyperxmp ifmtarg sectsty lastpage floatrow titlesec;
+              })
+            ];
+          }).overrideAttrs (old: {
+            shellHook = (old.shellHook or "") + ''
+              export ISABELLE_VERSION="Isabelle${pkgs.isabelle.version}"
+              export ISABELLE_DIR="${pkgs.isabelle}"
+              export ISABELLE_HOME="${pkgs.isabelle}/bin"
+            '';
+          });
+
           devShells.cross = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains; };
           };
