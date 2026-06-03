@@ -146,6 +146,16 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 }
 #endif /* !MLD_CONFIG_KEYGEN_PCT */
 
+/**
+ * Sample the short secret vectors s1 (length MLDSA_L) and s2 (length MLDSA_K)
+ * with coefficients in [-MLDSA_ETA, MLDSA_ETA] from the seed.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 33, ExpandS].}
+ *
+ * @param[out] s1   Output vector s1.
+ * @param[out] s2   Output vector s2.
+ * @param[in]  seed Byte array with seed of length MLDSA_CRHBYTES.
+ */
 static void mld_sample_s1_s2(mld_polyvecl *s1, mld_polyveck *s2,
                              const uint8_t seed[MLDSA_CRHBYTES])
 __contract__(
@@ -203,6 +213,9 @@ __contract__(
  * Compute t = A*s1hat + s2 row by row, decompose each row into t0[k] and
  * t1[k] via power2round, and bit-pack t1[k] into pk_t1 and t0[k] into the
  * t0_packed buffer. Used by both keygen and pk_from_sk.
+ *
+ * @spec{Partially implements @[FIPS204, Algorithm 22, pkEncode] (t1) and
+ * @[FIPS204, Algorithm 24, skEncode] (t0).}
  *
  * @param[out] pk_t1     Output buffer for packed t1 (size
  *                       MLDSA_K * MLDSA_POLYT1_PACKEDBYTES; i.e. the t1

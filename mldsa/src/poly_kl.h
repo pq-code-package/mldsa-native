@@ -2,6 +2,16 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS204]
+ *   FIPS 204 Module-Lattice-Based Digital Signature Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/204/final
+ */
+
 #ifndef MLD_POLY_KL_H
 #define MLD_POLY_KL_H
 
@@ -68,6 +78,9 @@ __contract__(
  * [-MLDSA_ETA, MLDSA_ETA] by performing rejection sampling on the output
  * stream from SHAKE256(seed|nonce_i).
  *
+ * @spec{Implements @[FIPS204, Algorithm 31, RejBoundedPoly] (four-way
+ * batched).}
+ *
  * @param[out] r0     Pointer to first output polynomial.
  * @param[out] r1     Pointer to second output polynomial.
  * @param[out] r2     Pointer to third output polynomial.
@@ -106,6 +119,8 @@ __contract__(
  * Sample polynomial with uniformly random coefficients in
  * [-MLDSA_ETA, MLDSA_ETA] by performing rejection sampling on the output
  * stream from SHAKE256(seed|nonce).
+ *
+ * @spec{Implements @[FIPS204, Algorithm 31, RejBoundedPoly].}
  *
  * @param[out] r     Pointer to output polynomial.
  * @param[in]  seed  Byte array with seed of length MLDSA_CRHBYTES.
@@ -198,6 +213,8 @@ __contract__(
  * Implementation of H. Samples polynomial with MLDSA_TAU nonzero coefficients
  * in {-1, 1} using the output stream of SHAKE256(seed).
  *
+ * @spec{Implements @[FIPS204, Algorithm 29, SampleInBall].}
+ *
  * @param[out] c    Pointer to output polynomial.
  * @param[in]  seed Byte array containing seed of length MLDSA_CTILDEBYTES.
  */
@@ -216,6 +233,8 @@ __contract__(
 #define mld_polyeta_pack MLD_NAMESPACE_KL(polyeta_pack)
 /**
  * Bit-pack polynomial with coefficients in [-MLDSA_ETA, MLDSA_ETA].
+ *
+ * @spec{Implements @[FIPS204, Algorithm 17, BitPack].}
  *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYETA_PACKEDBYTES bytes.
@@ -252,6 +271,8 @@ __contract__(
 /**
  * Unpack polynomial with coefficients in [-MLDSA_ETA, MLDSA_ETA].
  *
+ * @spec{Implements @[FIPS204, Algorithm 19, BitUnpack].}
+ *
  * @param[out] r Pointer to output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.
  */
@@ -270,6 +291,8 @@ __contract__(
 /**
  * Bit-pack polynomial with coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1].
+ *
+ * @spec{Implements @[FIPS204, Algorithm 17, BitPack].}
  *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYZ_PACKEDBYTES bytes.
@@ -291,6 +314,8 @@ __contract__(
  * Unpack polynomial z with coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1].
  *
+ * @spec{Implements @[FIPS204, Algorithm 19, BitUnpack].}
+ *
  * @param[out] r Pointer to output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.
  */
@@ -309,6 +334,8 @@ __contract__(
  * [0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)), i.e. [0, 43] for ML-DSA-44 and [0, 15]
  * for ML-DSA-65/87. Dispatches to the value-specialized variant for the
  * selected parameter set.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 16, SimpleBitPack].}
  *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYW1_PACKEDBYTES bytes.

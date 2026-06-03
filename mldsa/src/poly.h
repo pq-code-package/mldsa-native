@@ -2,6 +2,16 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS204]
+ *   FIPS 204 Module-Lattice-Based Digital Signature Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/204/final
+ */
+
 #ifndef MLD_POLY_H
 #define MLD_POLY_H
 
@@ -63,6 +73,8 @@ __contract__(
 #define mld_poly_add MLD_NAMESPACE(poly_add)
 /**
  * Add polynomials. No modular reduction is performed.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 44, AddNTT].}
  *
  * @param[in,out] r Pointer to input-output polynomial to be added to.
  * @param[in]     b Pointer to input polynomial that should be added to r.
@@ -136,6 +148,8 @@ __contract__(
  * In-place forward NTT. Output coefficients are bounded by MLD_NTT_BOUND in
  * absolute value.
  *
+ * @spec{Implements @[FIPS204, Algorithm 41, NTT].}
+ *
  * @param[in,out] a Pointer to input/output polynomial.
  */
 MLD_INTERNAL_API
@@ -155,6 +169,8 @@ __contract__(
  * Input coefficients need to be less than MLDSA_Q in absolute value and
  * output coefficients are bounded by MLD_INTT_BOUND.
  *
+ * @spec{Implements @[FIPS204, Algorithm 42, NTT^{-1}].}
+ *
  * @param[in,out] a Pointer to input/output polynomial.
  */
 MLD_INTERNAL_API
@@ -173,6 +189,8 @@ __contract__(
  * Pointwise multiplication of polynomials in NTT domain representation and
  * multiplication of resulting polynomial by 2^{-32}. Destructive in the first
  * argument.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 45, MultiplyNTT].}
  *
  * @param[in,out] a Pointer to first input/output polynomial. On entry, holds
  *                  the first multiplicand; on exit, holds the product
@@ -225,6 +243,8 @@ __contract__(
  * Sample polynomial with uniformly random coefficients in [0, MLDSA_Q-1] by
  * performing rejection sampling on the output stream of SHAKE128(seed|nonce).
  *
+ * @spec{Implements @[FIPS204, Algorithm 30, RejNTTPoly].}
+ *
  * @param[out] a    Pointer to output polynomial.
  * @param[in]  seed Byte array with seed of length MLDSA_SEEDBYTES and the
  *                  packed 2-byte nonce.
@@ -244,6 +264,8 @@ __contract__(
 /**
  * Generate four polynomials using rejection sampling on (pseudo-)uniformly
  * random bytes sampled from a seed.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 30, RejNTTPoly] (four-way batched).}
  *
  * @param[out] vec0 Pointer to first polynomial to be sampled.
  * @param[out] vec1 Pointer to second polynomial to be sampled.
@@ -280,6 +302,8 @@ __contract__(
  * Bit-pack polynomial t1 with coefficients fitting in 10 bits. Input
  * coefficients are assumed to be standard representatives.
  *
+ * @spec{Implements @[FIPS204, Algorithm 16, SimpleBitPack].}
+ *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYT1_PACKEDBYTES bytes.
  * @param[in]  a Pointer to input polynomial.
@@ -300,6 +324,8 @@ __contract__(
  * Unpack polynomial t1 with 10-bit coefficients. Output coefficients are
  * standard representatives.
  *
+ * @spec{Implements @[FIPS204, Algorithm 18, SimpleBitUnpack].}
+ *
  * @param[out] r Pointer to output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.
  */
@@ -317,6 +343,8 @@ __contract__(
 #define mld_polyt0_pack MLD_NAMESPACE(polyt0_pack)
 /**
  * Bit-pack polynomial t0 with coefficients in ]-2^{MLDSA_D-1}, 2^{MLDSA_D-1}].
+ *
+ * @spec{Implements @[FIPS204, Algorithm 17, BitPack].}
  *
  * @param[out] r Pointer to output byte array with at least
  *               MLDSA_POLYT0_PACKEDBYTES bytes.
@@ -336,6 +364,8 @@ __contract__(
 #define mld_polyt0_unpack MLD_NAMESPACE(polyt0_unpack)
 /**
  * Unpack polynomial t0 with coefficients in ]-2^{MLDSA_D-1}, 2^{MLDSA_D-1}].
+ *
+ * @spec{Implements @[FIPS204, Algorithm 19, BitUnpack].}
  *
  * @param[out] r Pointer to output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.

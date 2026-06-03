@@ -2,6 +2,16 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+
+/* References
+ * ==========
+ *
+ * - [FIPS204]
+ *   FIPS 204 Module-Lattice-Based Digital Signature Standard
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/pubs/fips/204/final
+ */
+
 #ifndef MLD_REDUCE_H
 #define MLD_REDUCE_H
 
@@ -23,6 +33,8 @@
 /**
  * Generic Montgomery reduction; given a 64-bit integer a, computes a 32-bit
  * integer congruent to a * R^-1 mod MLDSA_Q, where R=2^32.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 49, MontgomeryReduce].}
  *
  * @param a Input integer to be reduced, of absolute value smaller or equal
  *          to INT64_MAX - 2^31 * MLDSA_Q.

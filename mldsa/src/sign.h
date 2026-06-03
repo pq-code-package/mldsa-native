@@ -93,7 +93,7 @@
  * When MLD_CONFIG_KEYGEN_PCT is set, performs a Pairwise Consistency Test
  * (PCT) as required by FIPS 140-3 IG.
  *
- * @spec{Implements @[FIPS204 Algorithm 6 (ML-DSA.KeyGen_internal)].}
+ * @spec{Implements @[FIPS204, Algorithm 6, ML-DSA.KeyGen_internal].}
  *
  * @param[out] pk      Output public key.
  * @param[out] sk      Output private key.
@@ -137,7 +137,7 @@ __contract__(
  * When MLD_CONFIG_KEYGEN_PCT is set, performs a Pairwise Consistency Test
  * (PCT) as required by FIPS 140-3 IG.
  *
- * @spec{Implements @[FIPS204 Algorithm 1 (ML-DSA.KeyGen)].}
+ * @spec{Implements @[FIPS204, Algorithm 1, ML-DSA.KeyGen].}
  *
  * @param[out] pk      Output public key.
  * @param[out] sk      Output private key.
@@ -179,6 +179,8 @@ __contract__(
  *
  * If the returned value is non-zero, then the values of *sig and *siglen
  * should not be referenced.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 7, ML-DSA.Sign_internal].}
  *
  * @param[out] sig        Output signature.
  * @param[out] siglen     Pointer to output length of signature.
@@ -244,7 +246,7 @@ __contract__(
  * ML-DSA. If you require the deterministic variant, use
  * mld_sign_signature_internal directly.
  *
- * @spec{Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign)].}
+ * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign].}
  *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
@@ -296,7 +298,7 @@ __contract__(
  * variant; for the deterministic variant, use mld_sign_signature_internal
  * directly with externalmu set to non-zero and an all-zero rnd.
  *
- * @spec{Implements @[FIPS204 Algorithm 2 (ML-DSA.Sign external mu variant)].}
+ * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign external mu variant].}
  *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
@@ -383,7 +385,7 @@ __contract__(
 /**
  * Verify signature.
  *
- * @spec{Implements @[FIPS204 Algorithm 8 (ML-DSA.Verify_internal)].}
+ * @spec{Implements @[FIPS204, Algorithm 8, ML-DSA.Verify_internal].}
  *
  * @param[in] sig        Pointer to input signature.
  * @param     siglen     Length of signature.
@@ -432,7 +434,7 @@ __contract__(
 /**
  * Verify signature.
  *
- * @spec{Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify)].}
+ * @spec{Implements @[FIPS204, Algorithm 3, ML-DSA.Verify].}
  *
  * @param[in] sig     Pointer to input signature.
  * @param     siglen  Length of signature.
@@ -474,7 +476,7 @@ __contract__(
  * 0x00 || ctxlen || ctx || msg for pure ML-DSA). The same mu must have been
  * used at signing time.
  *
- * @spec{Implements @[FIPS204 Algorithm 3 (ML-DSA.Verify external mu variant)].}
+ * @spec{Implements @[FIPS204, Algorithm 3, ML-DSA.Verify external mu variant].}
  *
  * @param[in] sig     Pointer to input signature.
  * @param     siglen  Length of signature.

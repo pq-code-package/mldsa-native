@@ -38,6 +38,8 @@
  * -2^{MLDSA_D-1} < a0 <= 2^{MLDSA_D-1}. Assumes a to be standard
  * representative.
  *
+ * @spec{Implements @[FIPS204, Algorithm 35, Power2Round].}
+ *
  * @reference{In the reference implementation, a1 is passed as a return value
  * instead.}
  *
@@ -69,6 +71,8 @@ __contract__(
  * -MLDSA_GAMMA2 <= a0 = a mod^+ MLDSA_Q - MLDSA_Q < 0. Assumes a to be
  * standard representative.
  *
+ * @spec{Implements @[FIPS204, Algorithm 36, Decompose].}
+ *
  * @reference{In the reference implementation, a1 is passed as a return value
  * instead.}
  *
@@ -84,7 +88,7 @@ __contract__(
   assigns(memory_slice(a0, sizeof(int32_t)))
   assigns(memory_slice(a1, sizeof(int32_t)))
   /* a0 = -MLDSA_GAMMA2 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2),
-   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2) - 1 (@[FIPS204, Algorithm 36 (Decompose)]) */
+   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2) - 1 (@[FIPS204, Algorithm 36, Decompose]) */
   ensures(*a0 >= -MLDSA_GAMMA2  && *a0 <= MLDSA_GAMMA2)
   ensures(*a1 >= 0 && *a1 < (MLDSA_Q-1)/(2*MLDSA_GAMMA2))
   ensures((*a1 * 2 * MLDSA_GAMMA2 + *a0 - a) % MLDSA_Q == 0)
@@ -174,6 +178,8 @@ __contract__(
  * Compute hint bit indicating whether the low bits of the input element
  * overflow into the high bits.
  *
+ * @spec{Implements @[FIPS204, Algorithm 39, MakeHint].}
+ *
  * @param a0 Low bits of input element.
  * @param a1 High bits of input element.
  *
@@ -196,6 +202,8 @@ __contract__(
 
 /**
  * Correct high bits according to hint.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 40, UseHint].}
  *
  * @param a    Input element.
  * @param hint Hint bit.
