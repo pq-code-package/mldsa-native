@@ -85,6 +85,13 @@
 .global MLD_ASM_NAMESPACE(poly_decompose_32_aarch64_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(poly_decompose_32_aarch64_asm)
+        // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+        // are clobbered, so none are saved/restored.
+        //
+        // Function signature:
+        //   void mld_poly_decompose_32_aarch64_asm(int32_t *a1, int32_t *a0)
+        //   x0: pointer to output polynomial a1
+        //   x1: pointer to input/output polynomial a0
         // Load constants into SIMD registers
         movz w4, #57345
         movk w4, #127, lsl #16

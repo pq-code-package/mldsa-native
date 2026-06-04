@@ -369,6 +369,14 @@ vmovdqa         %ymm7,384+32*\off(%rdi)
 .balign 4
 .global MLD_ASM_NAMESPACE(invntt_avx2_asm)
 MLD_ASM_FN_SYMBOL(invntt_avx2_asm)
+// ABI: System V AMD64. No callee-saved registers (rbx, rbp, r12-r15)
+// are clobbered, so none are saved/restored. All XMM/YMM registers
+// are caller-saved.
+//
+// Function signature:
+//   void mld_invntt_avx2_asm(int32_t *a, const __m256i *qdata)
+//   rdi: pointer to input/output polynomial a
+//   rsi: pointer to qdata constants
 
 vmovdqa MLD_AVX2_BACKEND_DATA_OFFSET_8XQ*4(%rsi),%ymm0
 

@@ -45,6 +45,13 @@ vmovdqa  \reg, \offset(%rdi)
 .global MLD_ASM_NAMESPACE(poly_caddq_avx2_asm)
 .balign 16
 MLD_ASM_FN_SYMBOL(poly_caddq_avx2_asm)
+// ABI: System V AMD64. No callee-saved registers (rbx, rbp, r12-r15)
+// are clobbered, so none are saved/restored. All XMM/YMM registers
+// are caller-saved.
+//
+// Function signature:
+//   void mld_poly_caddq_avx2_asm(int32_t *a)
+//   rdi: pointer to input/output polynomial coefficients
 
 vpxor %xmm2, %xmm2, %xmm2
 mov $8380417, %eax

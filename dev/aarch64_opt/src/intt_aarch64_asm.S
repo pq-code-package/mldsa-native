@@ -222,6 +222,18 @@
         .global MLD_ASM_NAMESPACE(intt_aarch64_asm)
         .balign 4
 MLD_ASM_FN_SYMBOL(intt_aarch64_asm)
+        // ABI: AArch64 AAPCS. Callee-saved vector registers v8-v15 are
+        // used; their lower 64 bits (d8-d15) are saved/restored on the
+        // stack via push_stack/pop_stack. No callee-saved GPRs are
+        // touched.
+        //
+        // Function signature:
+        //   void mld_intt_aarch64_asm(int32_t *in,
+        //                             const int32_t *r78,
+        //                             const int32_t *r123456)
+        //   x0: pointer to in/out polynomial
+        //   x1: pointer to layer 7-8 twiddles
+        //   x2: pointer to layer 1-6 twiddles
         push_stack
 
         // Load MLDSA_Q = 8380417

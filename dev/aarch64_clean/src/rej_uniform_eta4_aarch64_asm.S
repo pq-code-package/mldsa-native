@@ -98,6 +98,20 @@
     .global MLD_ASM_NAMESPACE(rej_uniform_eta4_aarch64_asm)
     .balign 4
 MLD_ASM_FN_SYMBOL(rej_uniform_eta4_aarch64_asm)
+    // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+    // are clobbered. push_stack/pop_stack only allocate a scratch
+    // output buffer on the stack, not save/restore registers.
+    //
+    // Function signature:
+    //   unsigned mld_rej_uniform_eta4_aarch64_asm(int32_t *r,
+    //                                             const uint8_t *buf,
+    //                                             unsigned buflen,
+    //                                             const void *table)
+    //   x0: pointer to output polynomial r
+    //   x1: pointer to input byte buffer buf
+    //   x2: number of bytes available in buf
+    //   x3: pointer to TBL index table
+    //   x0: return value (number of coefficients sampled)
     push_stack
 
     // Load 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80

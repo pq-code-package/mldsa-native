@@ -13,6 +13,17 @@
 .balign 4
 .global MLD_ASM_NAMESPACE(keccak_f1600_x4_avx2_asm)
 MLD_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
+// ABI: System V AMD64. No callee-saved registers (rbx, rbp, r12-r15)
+// are clobbered, so none are saved/restored. The caller-saved r11
+// is used to stash the entry rsp before the stack is realigned to
+// 32 bytes, and is restored before ret. All XMM/YMM registers are
+// caller-saved.
+//
+// Function signature:
+//   void mld_keccak_f1600_x4_avx2_asm(uint64_t state[100],
+//                                     const uint64_t rc[24])
+//   rdi: pointer to four sequential Keccak states (100 x uint64_t, in/out)
+//   rsi: pointer to round constants (24 x uint64_t)
 
    // **** Bitstates Allocation Map **** //
    // 0x0(%rsp)     A0    (state0[0), state1[0], state2[0], state3[0]]     Input (%rdi) offsets: 0x00, 0xC8, 0x190, 0x258

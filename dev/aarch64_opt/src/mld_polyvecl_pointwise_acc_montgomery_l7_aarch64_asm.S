@@ -91,6 +91,15 @@
 .global MLD_ASM_NAMESPACE(polyvecl_pointwise_acc_montgomery_l7_aarch64_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(polyvecl_pointwise_acc_montgomery_l7_aarch64_asm)
+    // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+    // are clobbered, so none are saved/restored.
+    //
+    // Function signature:
+    //   void mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(
+    //       int32_t *c, const int32_t *a, const int32_t *b)
+    //   x0: pointer to output polynomial c
+    //   x1: pointer to input polynomial vector a (7 polynomials)
+    //   x2: pointer to input polynomial vector b (7 polynomials)
     // Load MLDSA_Q = 8380417
     movz wtmp, #0xe001
     movk wtmp, #0x7f, lsl #16

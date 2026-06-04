@@ -171,6 +171,16 @@
     .global MLD_ASM_NAMESPACE(keccak_f1600_x1_scalar_aarch64_asm)
     .balign 4
 MLD_ASM_FN_SYMBOL(keccak_f1600_x1_scalar_aarch64_asm)
+    // ABI: AArch64 AAPCS. Callee-saved GPRs x19-x28 plus the frame
+    // pointer x29 and link register x30 are saved/restored on the
+    // stack via save_gprs/restore_gprs. No callee-saved vector
+    // registers (v8-v15) are touched.
+    //
+    // Function signature:
+    //   void mld_keccak_f1600_x1_scalar_aarch64_asm(uint64_t state[25],
+    //                                               const uint64_t rc[24])
+    //   x0: pointer to Keccak state (25 x uint64_t, in/out)
+    //   x1: pointer to round constants (24 x uint64_t)
     alloc_stack
     save_gprs
 

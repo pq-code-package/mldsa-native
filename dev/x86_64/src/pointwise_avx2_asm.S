@@ -41,6 +41,16 @@
         .balign 4
         .global MLD_ASM_NAMESPACE(pointwise_avx2_asm)
 MLD_ASM_FN_SYMBOL(pointwise_avx2_asm)
+// ABI: System V AMD64. No callee-saved registers (rbx, rbp, r12-r15)
+// are clobbered, so none are saved/restored. All XMM/YMM registers
+// are caller-saved.
+//
+// Function signature:
+//   void mld_pointwise_avx2_asm(__m256i *a, const __m256i *b,
+//                               const __m256i *qdata)
+//   rdi: pointer to first input/output polynomial a
+//   rsi: pointer to second input polynomial b
+//   rdx: pointer to qdata constants
 
 // Load constants
         vmovdqa ymm0, [rdx + (MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV)*4]

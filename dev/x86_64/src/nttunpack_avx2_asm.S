@@ -84,6 +84,13 @@ vmovdqa  %ymm11, (\offset + 224)(%rdi)
 .balign 4
 .global MLD_ASM_NAMESPACE(nttunpack_avx2_asm)
 MLD_ASM_FN_SYMBOL(nttunpack_avx2_asm)
+// ABI: System V AMD64. No callee-saved registers (rbx, rbp, r12-r15)
+// are clobbered, so none are saved/restored. All XMM/YMM registers
+// are caller-saved.
+//
+// Function signature:
+//   void mld_nttunpack_avx2_asm(int32_t *a)
+//   rdi: pointer to input/output polynomial a
 
 nttunpack_64_coefficients 0
 nttunpack_64_coefficients 4*64

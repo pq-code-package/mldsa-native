@@ -74,6 +74,16 @@
 .global MLD_ASM_NAMESPACE(poly_pointwise_montgomery_aarch64_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_aarch64_asm)
+    // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+    // are clobbered, so none are saved/restored.
+    //
+    // Function signature:
+    //   void mld_poly_pointwise_montgomery_aarch64_asm(int32_t *c,
+    //                                                  const int32_t *a,
+    //                                                  const int32_t *b)
+    //   x0: pointer to output polynomial c
+    //   x1: pointer to input polynomial a
+    //   x2: pointer to input polynomial b
     // Load MLDSA_Q = 8380417
     movz wtmp, #0xe001
     movk wtmp, #0x7f, lsl #16

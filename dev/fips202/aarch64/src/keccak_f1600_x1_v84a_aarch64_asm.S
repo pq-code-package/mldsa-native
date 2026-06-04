@@ -346,6 +346,16 @@
     .global MLD_ASM_NAMESPACE(keccak_f1600_x1_v84a_aarch64_asm)
     .balign 4
 MLD_ASM_FN_SYMBOL(keccak_f1600_x1_v84a_aarch64_asm)
+    // ABI: AArch64 AAPCS. Callee-saved vector registers v8-v15 are
+    // used; their lower 64 bits (d8-d15) are saved/restored on the
+    // stack via save_vregs/restore_vregs. No callee-saved GPRs are
+    // touched.
+    //
+    // Function signature:
+    //   void mld_keccak_f1600_x1_v84a_aarch64_asm(uint64_t state[25],
+    //                                             const uint64_t rc[24])
+    //   x0: pointer to Keccak state (25 x uint64_t, in/out)
+    //   x1: pointer to round constants (24 x uint64_t)
     alloc_stack
     save_vregs
     load_input

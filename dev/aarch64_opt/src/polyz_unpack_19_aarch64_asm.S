@@ -45,6 +45,16 @@
 .global MLD_ASM_NAMESPACE(polyz_unpack_19_aarch64_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(polyz_unpack_19_aarch64_asm)
+        // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+        // are clobbered, so none are saved/restored.
+        //
+        // Function signature:
+        //   void mld_polyz_unpack_19_aarch64_asm(int32_t *r,
+        //                                        const uint8_t *buf,
+        //                                        const void *indices)
+        //   x0: pointer to output polynomial r
+        //   x1: pointer to input byte buffer buf
+        //   x2: pointer to TBL index table
         // Load indices
         ldr q24, [indices]
         ldr q25, [indices, #1*16]

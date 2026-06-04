@@ -27,6 +27,14 @@
 .global MLD_ASM_NAMESPACE(poly_chknorm_aarch64_asm)
 .balign 4
 MLD_ASM_FN_SYMBOL(poly_chknorm_aarch64_asm)
+        // ABI: AArch64 AAPCS. No callee-saved registers (x19-x29, v8-v15)
+        // are clobbered, so none are saved/restored.
+        //
+        // Function signature:
+        //   int mld_poly_chknorm_aarch64_asm(const int32_t *a, int32_t B)
+        //   x0: pointer to input polynomial a
+        //   w1: norm bound B
+        //   w0: return value (1 if any |a[i]| >= B, else 0)
         // Load constants
         dup bound.4s, B
 
