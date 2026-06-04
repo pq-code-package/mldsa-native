@@ -2,50 +2,21 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ stdenvNoCC
-, fetchFromGitHub
-, python3
-, pkgs
-, llvm
-, gcc
-}:
+# slothy is packaged in nixpkgs (>= 26.05) and used by default.
+#
+# To pin a specific upstream revision instead, comment out `pkgs.slothy`
+# below and uncomment the override, adjusting `version`/`sha256`.
 
-let
-  pythonEnv = python3.withPackages (ps: with ps; [
-    ortools
-    sympy
-    unicorn
-  ]);
-in
-stdenvNoCC.mkDerivation rec {
-  pname = "slothy-cli";
-  version = "08ead1f2e5d07617025e00152d1a701fb1195eb9";
-  src = fetchFromGitHub {
-    owner = "slothy-optimizer";
-    repo = "slothy";
-    rev = version;
-    sha256 = "sha256-yZ4ZW2S946VJUNNHlO4hFBNpPfIJpCjNbaWTiLmz/Js=";
-  };
+{ pkgs }:
 
-  nativeBuildInputs = [ pkgs.makeWrapper ];
-  dontConfigure = true;
+pkgs.slothy
 
-  installPhase = ''
-    mkdir -p $out/bin
-    cp slothy-cli $out/bin/
-    cp -r slothy $out/bin
-    wrapProgram $out/bin/slothy-cli \
-            --set DYLD_LIBRARY_PATH ${pythonEnv}/lib \
-            --set PYTHONPATH ${pythonEnv}/bin \
-            --run exec
-  '';
-
-  dontStrip = true;
-  noAuditTmpdir = true;
-  propagatedBuildInputs = [ pythonEnv llvm gcc ];
-
-  meta = {
-    description = "Slothy: assembly-level superoptimizer";
-    homepage = "https://slothy-optimizer.github.io/slothy/";
-  };
-}
+# pkgs.slothy.overrideAttrs (old: rec {
+#   version = "6d35cc147a0859f53f8bfc0d0f2ea3b947c8c4eb";
+#   src = pkgs.fetchFromGitHub {
+#     owner = "slothy-optimizer";
+#     repo = "slothy";
+#     rev = version;
+#     sha256 = "sha256-TplnMBjNvY7f8RTOwRWcv+cqxcRZ8KHx6toczNC5QGo=";
+#   };
+# })
