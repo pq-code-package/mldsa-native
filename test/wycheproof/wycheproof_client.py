@@ -18,8 +18,8 @@ from pathlib import Path
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
-# Pinned to a specific commit (2026-05-03).
-WYCHEPROOF_COMMIT = "6d9d6de30f02e229dfc160323722c3ddac866181"
+# Pinned to a specific commit (2026-06-04).
+WYCHEPROOF_COMMIT = "4f5e05f71e6b724c20e2c1b6934c7bd7ef6d89e7"
 WYCHEPROOF_BASE_URL = f"https://raw.githubusercontent.com/C2SP/wycheproof/{WYCHEPROOF_COMMIT}/testvectors_v1"
 
 WYCHEPROOF_FILES = [
