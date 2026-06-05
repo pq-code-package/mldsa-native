@@ -624,7 +624,17 @@ __contract__(
 }
 
 /**
- * Attempt to generate a single signature.
+ * Attempt to generate a single signature: one iteration of the
+ * ML-DSA.Sign_internal rejection-sampling loop.
+ *
+ * @spec{Implements one iteration of the rejection-sampling loop body of
+ * @[FIPS204, Algorithm 7, ML-DSA.Sign_internal] (lines 11-30) plus, on success,
+ * the sigEncode step (line 33). The per-signature setup (Algorithm 7 lines 1-7:
+ * skDecode, NTT of s1/s2/t0, ExpandA, and computation of mu and rhoprime) and
+ * the loop itself (lines 8-10, 31-32, including the counter kappa) live in the
+ * caller mld_sign_signature_internal; nonce is that caller's iteration counter,
+ * from which the spec counter kappa = nonce*MLDSA_L is derived when sampling
+ * y.}
  *
  * @reference{This code differs from the reference implementation in that it
  * factors out the core signature generation step into a distinct function
@@ -713,15 +723,26 @@ __contract__(
   w1 = &w1tmp->w1;
   tmp = &w1tmp->tmp;
 
-  /* Sample/initialize intermediate vector y */
+  /* @[FIPS204, Algorithm 7, line 11] y <- ExpandMask(rhoprime, kappa), with
+   * spec counter kappa = nonce*MLDSA_L derived from nonce inside mld_yvec_init.
+   */
   mld_yvec_init(y, rhoprime, nonce);
 
-  /* Matrix-vector multiplication, fused with y sampling in REDUCE_RAM mode */
+  /* @[FIPS204, Algorithm 7, line 12] w <- invNTT(A_hat o NTT(y)). This call
+   * performs the whole line: it NTTs y, accumulates the pointwise product with
+   * A_hat, and applies the inverse NTT. In REDUCE_RAM mode the y sampling is
+   * fused into the same pass. */
   mld_polyvec_matrix_pointwise_montgomery_yvec(w0, mat, y, tmp);
 
-  /* Decompose w and call the random oracle */
+  /* @[FIPS204, Algorithm 7, line 13] w1 <- HighBits(w), here together with the
+   * low part: Decompose yields w = 2*GAMMA2*w1 + w0, keeping both w1 and w0
+   * (w0 is reused below in the line-21/26 alternative, see further down). */
   mld_polyveck_caddq(w0);
   mld_polyveck_decompose(w1, w0);
+
+  /* @[FIPS204, Algorithm 7, line 15] ctilde <- H(mu || w1Encode(w1), lambda/4).
+   * w1Encode(w1) is packed into the w1 region of sig (mld_polyveck_pack_w1),
+   * then absorbed by H together with mu. */
   mld_polyveck_pack_w1(sig, w1);
 
   mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
@@ -731,18 +752,56 @@ __contract__(
    * This also applies to challenges for rejected signatures.
    * See Section 5.5 of @[Round3_Spec]. */
   MLD_CT_TESTING_DECLASSIFY(challenge_bytes, MLDSA_CTILDEBYTES);
+  /* @[FIPS204, Algorithm 7, line 16] c <- SampleInBall(ctilde) and
+   * @[FIPS204, Algorithm 7, line 17] c_hat <- NTT(c). */
   mld_poly_challenge(cp, challenge_bytes);
   mld_poly_ntt(cp);
 
-  /* Compute z, reject if it reveals secret */
+  /* @[FIPS204, Algorithm 7, lines 18+20] cs1 <- invNTT(c_hat o s1_hat) and
+   * z <- y + cs1, followed by the line-23 norm check ||z||_inf >= GAMMA1 -
+   * BETA. mld_compute_pack_z fuses all three per polynomial and, on success,
+   * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z. */
   ret = mld_compute_pack_z(sig, cp, s1hat, y, t, z);
   if (ret != 0)
   {
     goto cleanup;
   }
 
-  /* Compute w0 - cs2 + ct0 per-component, checking norms incrementally.
-   * This avoids allocating a full polyveck for h. */
+  /* The remaining steps realize @[FIPS204, Algorithm 7, lines 21-28] (the
+   * low-bits norm check and the hint h) via the faster alternative formulation
+   * of @[Round3_Spec, Section 5.1]. @[FIPS204] explicitly permits this: the
+   * note accompanying Algorithm 7 states that the validity checks on z and the
+   * computation of h may instead be implemented "as described in Section 5.1 of
+   * [6]", and that reference is @[Round3_Spec, Section 5.1].
+   *
+   * The loop below builds w0 - cs2 + ct0 in place in w0; w1 is unmodified, and
+   * is HighBits(w) from line 13. Those are the inputs to the streamlined
+   * computation of MakeHint explained below.
+   *
+   * Low-bits norm check:
+   *   @[FIPS204, Algorithm 7, line 21] computes r0 = LowBits(w - cs2) and line
+   *   23 rejects when ||r0||_inf >= GAMMA2 - BETA. By @[Round3_Spec, Section
+   *   5.1] (Lemma 3), this line-23 check on r0 = LowBits(w - cs2) is implied by
+   *   ||w0 - cs2||_inf < GAMMA2 - BETA, where w0 is the low part of w. In our
+   *   context, w0 already holds the low part of w from the line-13 Decompose;
+   *   after subtracting cs2 from it in place, the mld_poly_chknorm(w0, GAMMA2 -
+   *   BETA) call below is exactly that check.
+   *
+   * Hint:
+   *   @[FIPS204, Algorithm 7, line 26] sets h = MakeHint(-ct0, w - cs2 + ct0),
+   *   and line 28 rejects when ||ct0||_inf >= GAMMA2 or h has more than OMEGA
+   *   nonzero coefficients. @[Round3_Spec, Section 5.1] provides the following
+   *   alternative description for MakeHint(-ct0, w - cs2 + ct0): a hint bit is
+   *   zero exactly when the coefficient of w0 - cs2 + ct0 lies in
+   *   (-GAMMA2, GAMMA2], or equals -GAMMA2 while the matching w1 coefficient is
+   *   zero (the Decompose border case), and is set otherwise. This equivalence
+   *   is precisely what mld_pack_sig_h -> mld_make_hint compute from w0
+   *   (= w0 - cs2 + ct0) and w1. The line-28 ||ct0||_inf >= GAMMA2 check is the
+   *   mld_poly_chknorm(z, GAMMA2) call on ct0 below; the weight bound is
+   *   enforced by mld_pack_sig_h.
+   *
+   * Building w0 per-component and checking norms incrementally also avoids
+   * allocating a full polyveck for h. */
   for (k = 0; k < MLDSA_K; k++)
   __loop__(
     assigns(k,
@@ -754,7 +813,8 @@ __contract__(
     decreases(MLDSA_K - k)
   )
   {
-    /* Compute cs2[k] and subtract from w0[k] */
+    /* @[FIPS204, Algorithm 7, line 19] cs2[k] <- invNTT(c_hat o s2_hat)[k],
+     * then subtract from w0[k] to form (w0 - cs2)[k]. */
     mld_sk_s2hat_get_poly(z, s2hat, k);
     mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
@@ -762,8 +822,8 @@ __contract__(
     mld_poly_sub(&w0->vec[k], z);
     mld_poly_reduce(&w0->vec[k]);
 
-    /* Check that subtracting cs2 does not change high bits of w and low bits
-     * do not reveal secret information */
+    /* Low-bits norm check (see block comment above): the line-23 check on
+     * r0 = LowBits(w - cs2) holds via ||w0 - cs2||_inf < GAMMA2 - BETA. */
     w0_invalid = mld_poly_chknorm(&w0->vec[k], MLDSA_GAMMA2 - MLDSA_BETA);
     /* Constant time: w0_invalid may be leaked - see comment for z_invalid. */
     MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
@@ -773,12 +833,14 @@ __contract__(
       goto cleanup;
     }
 
-    /* Compute ct0[k], check norm, and add to w0[k] */
+    /* @[FIPS204, Algorithm 7, line 25] ct0[k] <- invNTT(c_hat o t0_hat)[k]. */
     mld_sk_t0hat_get_poly(z, t0hat, k);
     mld_poly_pointwise_montgomery(z, cp);
     mld_poly_invntt_tomont(z);
     mld_poly_reduce(z);
 
+    /* @[FIPS204, Algorithm 7, line 28] reject when ||ct0||_inf >= GAMMA2 (the
+     * second part, the OMEGA weight bound, is enforced by mld_pack_sig_h). */
     h_invalid = mld_poly_chknorm(z, MLDSA_GAMMA2);
     /* Constant time: h_invalid may be leaked - see comment for z_invalid. */
     MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
@@ -788,6 +850,8 @@ __contract__(
       goto cleanup;
     }
 
+    /* Add ct0[k] to (w0 - cs2)[k], leaving (w0 - cs2 + ct0)[k] in w0[k] -- the
+     * MakeHint input prepared for mld_pack_sig_h (see block comment above). */
     mld_poly_add(&w0->vec[k], z);
   }
 
@@ -804,9 +868,16 @@ __contract__(
   MLD_CT_TESTING_DECLASSIFY(w0, sizeof(*w0));
   MLD_CT_TESTING_DECLASSIFY(w1, sizeof(*w1));
 
-  /* Pack challenge bytes and hints. */
+  /* @[FIPS204, Algorithm 7, line 33] sigEncode(ctilde, z mod+/- q, h) is split
+   * across three calls: z was already packed by mld_compute_pack_z, this call
+   * packs ctilde, and mld_pack_sig_h below packs the hint h. */
   mld_pack_sig_c(sig, challenge_bytes);
 
+  /* @[FIPS204, Algorithm 7, line 26] h <- MakeHint(-ct0, w - cs2 + ct0),
+   * computed from (w0 = w0 - cs2 + ct0, w1) as described in the block comment
+   * above, and packed as the h component of the line-33 sigEncode. Returns
+   * MLD_ERR_FAIL if h would exceed OMEGA nonzero coefficients (the remaining
+   * part of the line-28 check), in which case we reject. */
   ret = mld_pack_sig_h(sig, w0, w1);
   if (ret != 0)
   {
@@ -863,27 +934,38 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   key = tr + MLDSA_TRBYTES;
   mu = key + MLDSA_SEEDBYTES;
   rhoprime = mu + MLDSA_CRHBYTES;
+  /* @[FIPS204, Algorithm 7, line 1] (rho, K, tr, s1, s2, t0) <- skDecode(sk)
+   * and @[FIPS204, Algorithm 7, lines 2-4] s1_hat/s2_hat/t0_hat <- NTT(...):
+   * mld_unpack_sk returns s1hat, s2hat, t0hat already in NTT domain. The spec's
+   * private random seed K is held in the local variable key. */
   mld_unpack_sk(rho, tr, key, t0hat, s1hat, s2hat, sk);
 
   if (!externalmu)
   {
-    /* Compute mu = CRH(tr, pre, msg) */
+    /* @[FIPS204, Algorithm 7, line 6] mu <- H(BytesToBits(tr) || M', 64). */
     mld_H(mu, MLDSA_CRHBYTES, tr, MLDSA_TRBYTES, pre, prelen, m, mlen);
   }
   else
   {
-    /* mu has been provided directly */
+    /* mu has been provided directly (external-mu variant; line 6 done by the
+     * caller in a separate cryptographic module). */
     mld_memcpy(mu, m, MLDSA_CRHBYTES);
   }
 
-  /* Compute rhoprime = CRH(key, rnd, mu) */
+  /* @[FIPS204, Algorithm 7, line 7] rhoprime <- H(K || rnd || mu, 64). */
   mld_H(rhoprime, MLDSA_CRHBYTES, key, MLDSA_SEEDBYTES, rnd, MLDSA_RNDBYTES, mu,
         MLDSA_CRHBYTES);
 
   /* Constant time: rho is part of the public key and, hence, public. */
   MLD_CT_TESTING_DECLASSIFY(rho, MLDSA_SEEDBYTES);
-  /* Expand matrix and transform vectors */
+  /* @[FIPS204, Algorithm 7, line 5] A_hat <- ExpandA(rho). */
   mld_polyvec_matrix_expand(mat, rho);
+
+  /* @[FIPS204, Algorithm 7, lines 8-10 and 31-32] the rejection-sampling loop:
+   * the spec counter kappa starts at 0 and is incremented by MLDSA_L each
+   * iteration; here it is tracked by nonce (kappa = nonce*MLDSA_L), incremented
+   * by 1 per iteration. Each iteration's body (lines 11-30) plus, on success,
+   * the line-33 sigEncode are performed by mld_attempt_signature_generation. */
 
   /* Reference: This code is re-structured using a while(1),  */
   /* with explicit "continue" statements (rather than "goto") */

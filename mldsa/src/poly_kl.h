@@ -148,6 +148,9 @@ __contract__(
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output stream of
  * SHAKE256(seed|nonce).
  *
+ * @spec{Partially implements @[FIPS204, Algorithm 34, ExpandMask] (one
+ * polynomial, i.e. the loop body of lines 3-5).}
+ *
  * @param[out] a     Pointer to output polynomial.
  * @param[in]  seed  Byte array with seed of length MLDSA_CRHBYTES.
  * @param      nonce 16-bit nonce.
@@ -171,6 +174,9 @@ __contract__(
  * Sample four polynomials with uniformly random coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output streams of
  * SHAKE256(seed|nonce_i).
+ *
+ * @spec{Partially implements @[FIPS204, Algorithm 34, ExpandMask] (four-way
+ * batched, i.e. four iterations of the loop body of lines 3-5).}
  *
  * @param[out] r0     Pointer to first output polynomial.
  * @param[out] r1     Pointer to second output polynomial.
@@ -210,8 +216,8 @@ __contract__(
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_poly_challenge MLD_NAMESPACE_KL(poly_challenge)
 /**
- * Implementation of H. Samples polynomial with MLDSA_TAU nonzero coefficients
- * in {-1, 1} using the output stream of SHAKE256(seed).
+ * Samples polynomial with MLDSA_TAU nonzero coefficients in {-1, 1} using the
+ * output stream of SHAKE256(seed).
  *
  * @spec{Implements @[FIPS204, Algorithm 29, SampleInBall].}
  *

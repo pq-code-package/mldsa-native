@@ -74,7 +74,8 @@ __contract__(
 /**
  * Add polynomials. No modular reduction is performed.
  *
- * @spec{Implements @[FIPS204, Algorithm 44, AddNTT].}
+ * @spec{Implements @[FIPS204, Algorithm 44, AddNTT] (coefficientwise
+ * polynomial addition; also used for addition in the normal domain).}
  *
  * @param[in,out] r Pointer to input-output polynomial to be added to.
  * @param[in]     b Pointer to input polynomial that should be added to r.
@@ -164,12 +165,15 @@ __contract__(
 
 #define mld_poly_invntt_tomont MLD_NAMESPACE(poly_invntt_tomont)
 /**
- * In-place inverse NTT and multiplication by 2^{32}.
+ * In-place inverse NTT.
  *
  * Input coefficients need to be less than MLDSA_Q in absolute value and
  * output coefficients are bounded by MLD_INTT_BOUND.
  *
- * @spec{Implements @[FIPS204, Algorithm 42, NTT^{-1}].}
+ * @spec{Implements @[FIPS204, Algorithm 42, NTT^{-1}] up to scaling:
+ * The input is scaled by 2^{-32} as a result of the Montgomery base
+ * multiplication. The output is in normal domain. In other words, this
+ * function implements `NTT^{-1} o mult(2^32)`.}
  *
  * @param[in,out] a Pointer to input/output polynomial.
  */
@@ -186,11 +190,12 @@ __contract__(
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_pointwise_montgomery MLD_NAMESPACE(poly_pointwise_montgomery)
 /**
- * Pointwise multiplication of polynomials in NTT domain representation and
- * multiplication of resulting polynomial by 2^{-32}. Destructive in the first
- * argument.
+ * Pointwise multiplication of polynomials. Destructive in the first argument.
  *
- * @spec{Implements @[FIPS204, Algorithm 45, MultiplyNTT].}
+ * @spec{Implements @[FIPS204, Algorithm 45, MultiplyNTT], up to scaling: The
+ * input is in normal domain, the output is scaled by 2^{-32} as a result of
+ * the use of Montgomery multiplication. In other words, this function
+ * implements `mult(2^{-32}) o MultiplyNTT`.}
  *
  * @param[in,out] a Pointer to first input/output polynomial. On entry, holds
  *                  the first multiplicand; on exit, holds the product
@@ -385,11 +390,12 @@ __contract__(
  * Check infinity norm of polynomial against given bound. Assumes input
  * coefficients were reduced by mld_reduce32().
  *
- * @spec{The definition in FIPS-204 requires signed canonical reduction prior
- * to applying the bounds check. However, `-B < (a mod± MLDSA_Q) < B` is
- * equivalent to `-B < a < B` under the assumption that
- * `B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX` (cf. the assertion in the code).
- * Hence, the present spec and implementation are correct without reduction.}
+ * @spec{@[FIPS204] defines the infinity norm via signed canonical reduction
+ * (mod± MLDSA_Q) prior to applying the bounds check. However,
+ * `-B < (a mod± MLDSA_Q) < B` is equivalent to `-B < a < B` under the
+ * assumption that `B <= MLDSA_Q - MLD_REDUCE32_RANGE_MAX` (cf. the assertion in
+ * the code). Hence, this contract and implementation are correct without
+ * reduction.}
  *
  * @param[in] a Pointer to polynomial.
  * @param     B Norm bound.

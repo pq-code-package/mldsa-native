@@ -441,9 +441,10 @@ __contract__(
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 /**
- * Implementation of ExpandA. Generates matrix A with uniformly random
- * coefficients a_{i,j} by performing rejection sampling on the output stream
- * of SHAKE128(rho|j|i).
+ * Generates matrix A with uniformly random coefficients a_{i,j} by performing
+ * rejection sampling on the output stream of SHAKE128(rho|j|i).
+ *
+ * @spec{Implements @[FIPS204, Algorithm 32, ExpandA].}
  *
  * @param[out] mat Pointer to output matrix.
  * @param[in]  rho Byte array containing seed rho.

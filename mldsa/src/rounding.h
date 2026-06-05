@@ -87,8 +87,9 @@ __contract__(
   requires(a >= 0 && a < MLDSA_Q)
   assigns(memory_slice(a0, sizeof(int32_t)))
   assigns(memory_slice(a1, sizeof(int32_t)))
-  /* a0 = -MLDSA_GAMMA2 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2),
-   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2) - 1 (@[FIPS204, Algorithm 36, Decompose]) */
+  /* a0 = -MLDSA_GAMMA2 occurs exactly when a = MLDSA_Q - MLDSA_GAMMA2: the
+   * border case of Decompose where a1 = (MLDSA_Q-1)/(2*MLDSA_GAMMA2) is
+   * wrapped to 0 and a0 = a - MLDSA_Q (@[FIPS204, Algorithm 36, Decompose]) */
   ensures(*a0 >= -MLDSA_GAMMA2  && *a0 <= MLDSA_GAMMA2)
   ensures(*a1 >= 0 && *a1 < (MLDSA_Q-1)/(2*MLDSA_GAMMA2))
   ensures((*a1 * 2 * MLDSA_GAMMA2 + *a0 - a) % MLDSA_Q == 0)
@@ -175,10 +176,21 @@ __contract__(
 }
 
 /**
- * Compute hint bit indicating whether the low bits of the input element
- * overflow into the high bits.
+ * Decide a single hint bit from the low part a0 and high part a1 of a
+ * coefficient: return 1 unless a0 lies in the range (-GAMMA2, GAMMA2] that
+ * LowBits would produce, with the boundary value -GAMMA2 also admitted when
+ * a1 == 0 (the Decompose border case).
  *
- * @spec{Implements @[FIPS204, Algorithm 39, MakeHint].}
+ * @note This is not a line-for-line implementation of FIPS 204's MakeHint(z, r)
+ * (@[FIPS204, Algorithm 39, MakeHint]), which takes two ring elements and
+ * returns [[HighBits(r) != HighBits(r + z)]]. Instead, it takes the already
+ * decomposed low/high parts (a0, a1) of a coefficient and decides the hint bit
+ * from them directly. As explained in the block comment of
+ * mld_attempt_signature_generation (sign.c), for the specific values that arise
+ * during signing -- a0 = w0 - cs2 + ct0 and a1 = w1 = HighBits(w) -- this is
+ * equivalent to the spec's MakeHint(-ct0, w - cs2 + ct0) coefficient-wise.
+ * Because it consumes (a0, a1) rather than (z, r), it relies on the caller
+ * having computed a compatible decomposition.
  *
  * @param a0 Low bits of input element.
  * @param a1 High bits of input element.

@@ -115,6 +115,7 @@ source code and documentation.
   - [mldsa/src/poly_kl.h](mldsa/src/poly_kl.h)
   - [mldsa/src/polyvec.h](mldsa/src/polyvec.h)
   - [mldsa/src/polyvec_lazy.c](mldsa/src/polyvec_lazy.c)
+  - [mldsa/src/polyvec_lazy.h](mldsa/src/polyvec_lazy.h)
   - [mldsa/src/reduce.h](mldsa/src/reduce.h)
   - [mldsa/src/rounding.h](mldsa/src/rounding.h)
   - [mldsa/src/sign.c](mldsa/src/sign.c)

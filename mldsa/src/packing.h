@@ -99,9 +99,13 @@ __contract__(
 /**
  * Compute hints from (w0, w1) and pack them into the hint section of sig.
  *
- * @spec{Implements @[FIPS204, Algorithm 20, HintBitPack], computing the hints
- * via @[FIPS204, Algorithm 39, MakeHint] (h component of @[FIPS204,
- * Algorithm 26, sigEncode]).}
+ * @spec{Combines the hint computation @[FIPS204, Algorithm 39, MakeHint] with
+ * the packing @[FIPS204, Algorithm 20, HintBitPack] (the h component of
+ * @[FIPS204, Algorithm 26, sigEncode]): it computes the hint vector h from
+ * (w0, w1) and packs it, rather than receiving a ready-made h as HintBitPack
+ * does. The hints are computed via mld_make_hint (rounding.h), a specialized
+ * MakeHint valid only for the values arising during signing; see the block
+ * comment in mld_attempt_signature_generation (sign.c).}
  *
  * @param[in,out] sig Byte array containing signature.
  * @param[in]     w0  Pointer to low part of input vector.

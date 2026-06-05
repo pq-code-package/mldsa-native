@@ -549,8 +549,9 @@ __contract__(
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /**
- * FIPS 204: Algorithm 4 HashML-DSA.Sign. Compute signature with pre-hashed
- * message.
+ * Compute signature with pre-hashed message.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 4, HashML-DSA.Sign].}
  *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
@@ -609,8 +610,9 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 /**
- * FIPS 204: Algorithm 5 HashML-DSA.Verify. Verify signature with pre-hashed
- * message.
+ * Verify signature with pre-hashed message.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 5, HashML-DSA.Verify].}
  *
  * Supported hash algorithm constants:
  *   MLD_PREHASH_SHA2_224, MLD_PREHASH_SHA2_256, MLD_PREHASH_SHA2_384,
@@ -659,10 +661,11 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /**
- * FIPS 204: Algorithm 4 HashML-DSA.Sign with SHAKE256.
- *
  * Compute signature with pre-hashed message using SHAKE256. This function
  * computes the SHAKE256 hash of the message internally.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 4, HashML-DSA.Sign] with SHAKE256 as
+ * the pre-hash.}
  *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
@@ -711,10 +714,11 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 /**
- * FIPS 204: Algorithm 5 HashML-DSA.Verify with SHAKE256.
- *
  * Verify signature with pre-hashed message using SHAKE256. This function
  * computes the SHAKE256 hash of the message internally.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 5, HashML-DSA.Verify] with SHAKE256 as
+ * the pre-hash.}
  *
  * @param[in] sig     Pointer to input signature.
  * @param     siglen  Length of signature.
@@ -769,15 +773,15 @@ __contract__(
  * This function is useful for building incremental signing APIs.
  *
  * @spec{For HashML-DSA (hashalg != MLD_PREHASH_NONE), implements
- * @[FIPS204, Algorithm 4, L23]. For Pure ML-DSA (hashalg == MLD_PREHASH_NONE),
- * implements
+ * @[FIPS204, Algorithm 4, line 23]. For Pure ML-DSA
+ * (hashalg == MLD_PREHASH_NONE), implements
  * ```
  *    M' <- BytesToBits(IntegerToBytes(0, 1)
  *           || IntegerToBytes(|ctx|, 1)
  *           || ctx
  * ```
- * which is part of @[FIPS204, Algorithm 2 (ML-DSA.Sign), L10] and
- * @[FIPS204, Algorithm 3 (ML-DSA.Verify), L5].}
+ * which is part of @[FIPS204, Algorithm 2, ML-DSA.Sign, line 10] and
+ * @[FIPS204, Algorithm 3, ML-DSA.Verify, line 5].}
  *
  * @param[out] prefix  Output domain separation prefix buffer.
  * @param[in]  ph      Pointer to pre-hashed message (ignored for pure
@@ -811,7 +815,7 @@ __contract__(
  * Perform basic validity checks on secret key, and derive public key.
  *
  * Referring to the decoding of the secret key `sk=(rho, K, tr, s1, s2, t0)`
- * (cf. @[FIPS204, Algorithm 25 skDecode]), the following checks are
+ * (cf. @[FIPS204, Algorithm 25, skDecode]), the following checks are
  * performed:
  *   - Check that s1 and s2 have coefficients in [-MLDSA_ETA, MLDSA_ETA].
  *   - Check that t0 and tr stored in sk match recomputed values.
