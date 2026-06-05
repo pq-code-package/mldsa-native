@@ -122,9 +122,9 @@ def _parse_proof_pipeline(proof_pipeline):
             # wrapper_arguments (the args passed to `litani add-job`).
             wa = job.get("wrapper_arguments") or {}
             desc = wa.get("description") or ""
-            if desc.endswith(": checking safety properties") and _is_solver_inconclusive(
-                wa.get("stdout_file")
-            ):
+            if desc.endswith(
+                ": checking safety properties"
+            ) and _is_solver_inconclusive(wa.get("stdout_file")):
                 inconclusive = True
 
     if has_timeout:

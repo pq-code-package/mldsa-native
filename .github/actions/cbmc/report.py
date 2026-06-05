@@ -104,10 +104,14 @@ def classify_proof(r, baseline_runtimes, cfg):
     # Solver could not decide -- not a real failure, not a regression.
     if r.get("status") == "inconclusive":
         prev = (
-            f"{base_val}s" if base_val
-            else "failed" if base_failed
-            else "inconclusive" if base_inconclusive
-            else "omitted" if base_omitted
+            f"{base_val}s"
+            if base_val
+            else "failed"
+            if base_failed
+            else "inconclusive"
+            if base_inconclusive
+            else "omitted"
+            if base_omitted
             else "-"
         )
         # Was passing in the baseline, now inconclusive: surface as a warning.
@@ -165,8 +169,7 @@ def compute_total_runtime(data):
     return sum(
         r["value"]
         for r in data.get("runtimes", [])
-        if r.get("status") not in ("failed", "omitted", "inconclusive")
-        and "value" in r
+        if r.get("status") not in ("failed", "omitted", "inconclusive") and "value" in r
     )
 
 

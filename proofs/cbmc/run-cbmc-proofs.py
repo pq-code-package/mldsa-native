@@ -195,16 +195,24 @@ def get_args():
             "action": "append",
             "metavar": "SOLVER",
             "help": (
-                "restrict run to the given solver (repeatable). Default: all "
-                "solvers in the canonical list (Z3, BITWUZLA, CVC5)"
+                "select which solver(s) to run, intersected with each "
+                "harness's enabled solver matrix: a harness is only run "
+                "under solvers it declares support for. Repeatable. "
+                "Accepts a concrete solver (Z3, BITWUZLA, CVC5), 'all' "
+                "(every solver each harness enables), or 'default' (only "
+                "each harness's CBMC_DEFAULT_SOLVER). 'all' and 'default' "
+                "cannot be combined with other values. Default: all"
             ),
         },
         {
-            "flags": ["--default-solver-only"],
+            "flags": ["--force"],
             "action": "store_true",
             "help": (
-                "for each harness, run only the solver named by its "
-                "CBMC_DEFAULT_SOLVER. Cannot be combined with --solver."
+                "run the --solver selection on every harness, bypassing "
+                "each harness's enabled solver matrix (no pairs are "
+                "omitted, and the per-harness ENABLED guard is overridden). "
+                "With '--solver all' this is the full solver x harness cross "
+                "product. Cannot be combined with '--solver default'."
             ),
         },
     ]:
@@ -334,6 +342,12 @@ def get_litani_capabilities(litani_path):
 # proofs/cbmc/Makefile.common.
 ALL_SOLVERS = ["Z3", "BITWUZLA", "CVC5"]
 
+# Special --solver tokens (compared case-insensitively, hence upper-case).
+# SELECT_ALL runs every solver each harness enables; SELECT_DEFAULT runs
+# only each harness's CBMC_DEFAULT_SOLVER.
+SELECT_ALL = "ALL"
+SELECT_DEFAULT = "DEFAULT"
+
 
 def read_solver_matrix(proof_dir):
     """Return the dict {solver: enabled_bool} declared by a per-harness Makefile.
@@ -445,6 +459,7 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
     report_target,
     debug,
     timeout,
+    force,
 ):
     while True:
         print_counter(counter)
@@ -453,6 +468,9 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
 
         pools = ["ENABLE_POOLS=true"] if enable_pools else []
         profiling = ["ENABLE_MEMORY_PROFILING=true"] if enable_memory_profiling else []
+        # --force runs solvers a harness has not opted into, so override
+        # the per-harness CBMC_SOLVER_<X>_ENABLED guard at make time.
+        force_enable = [f"CBMC_SOLVER_{solver}_ENABLED=1"] if force else []
 
         # Set up environment with CBMC_TIMEOUT
         env = os.environ.copy()
@@ -465,6 +483,7 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
             "15",
             "make",
             f"CBMC_SOLVER={solver}",
+            *force_enable,
             *pools,
             *profiling,
             "-B",
@@ -569,31 +588,72 @@ async def main():  # pylint: disable=too-many-locals
         logging.critical("No proof directories found")
         sys.exit(1)
 
-    if args.default_solver_only and args.solver:
-        logging.critical("--default-solver-only and --solver are mutually exclusive")
+    # Resolve the --solver selection. Values are case-insensitive. The
+    # special tokens 'all' and 'default' are mutually exclusive with
+    # each other and with any concrete solver name.
+    raw_solvers = args.solver if args.solver else [SELECT_ALL]
+    normalized = [s.strip().upper() for s in raw_solvers]
+    concrete = [s for s in normalized if s not in (SELECT_ALL, SELECT_DEFAULT)]
+    has_special = any(s in (SELECT_ALL, SELECT_DEFAULT) for s in normalized)
+
+    if has_special and (concrete or len(set(normalized)) != 1):
+        logging.critical(
+            "--solver '%s' and '%s' cannot be combined with other --solver values",
+            SELECT_ALL.lower(),
+            SELECT_DEFAULT.lower(),
+        )
         sys.exit(1)
 
-    selected_solvers = args.solver if args.solver else list(ALL_SOLVERS)
-    for s in selected_solvers:
+    for s in concrete:
         if s not in ALL_SOLVERS:
             logging.critical(
-                "Unknown --solver %s; expected one of %s", s, ", ".join(ALL_SOLVERS)
+                "Unknown --solver %s; expected a concrete solver (%s), "
+                "'%s', or '%s'",
+                s,
+                ", ".join(ALL_SOLVERS),
+                SELECT_ALL.lower(),
+                SELECT_DEFAULT.lower(),
             )
             sys.exit(1)
 
+    # Past the combine check, a special token (if present) is the only
+    # distinct value, so a plain membership test is enough.
+    use_default = SELECT_DEFAULT in normalized
+    # When concrete solvers are named, restrict the candidate set to
+    # those; 'all'/'default' consider every solver each harness enables.
+    selected_solvers = concrete if concrete else list(ALL_SOLVERS)
+
+    # --force ignores the matrix, so pairing it with 'default' (which is
+    # *defined* by the matrix's CBMC_DEFAULT_SOLVER) is contradictory.
+    if args.force and use_default:
+        logging.critical("--force cannot be combined with '--solver default'")
+        sys.exit(1)
+
     # Enforce PROOF_UID uniqueness up-front, then expand each proof
-    # directory into the Cartesian product with its solver matrix.
-    # When --default-solver-only is given, the per-harness solver list
-    # collapses to {CBMC_DEFAULT_SOLVER}; otherwise every solver in
-    # selected_solvers that the matrix declares enabled is used.
+    # directory into its set of (proof, solver) pairs.
+    #
+    # Without --force, --solver intersects the selection with the
+    # harness's enabled solver matrix: a harness only runs under solvers
+    # it declares support for; selected-but-unsupported pairs are
+    # omitted rather than forced. With 'default', the per-harness solver
+    # list collapses to {CBMC_DEFAULT_SOLVER}.
+    #
+    # With --force, the matrix is bypassed entirely: every selected
+    # solver is run on every harness, nothing is omitted, and the
+    # per-harness ENABLED guard is overridden at make time (see
+    # configure_proof_dirs).
     proof_uids = {}
     pairs_to_run = []  # (proof_dir, solver)
     omitted_pairs = []  # (proof_uid, solver)
     for proof_dir in proof_dirs:
         check_uid_uniqueness(proof_dir, proof_uids)
         proof_uid = read_proof_uid(proof_dir)
+        if args.force:
+            for solver in selected_solvers:
+                pairs_to_run.append((proof_dir, solver))
+            continue
         matrix = read_solver_matrix(proof_dir)
-        if args.default_solver_only:
+        if use_default:
             per_harness_solvers = [read_default_solver(proof_dir)]
         else:
             per_harness_solvers = selected_solvers
@@ -647,6 +707,7 @@ async def main():  # pylint: disable=too-many-locals
                 report_target,
                 args.debug,
                 args.per_proof_timeout,
+                args.force,
             )
         )
         tasks.append(task)

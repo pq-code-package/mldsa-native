@@ -35,10 +35,9 @@ buildEnv {
           hash = "sha256-Lw037Z0t0ySxkgMXkbjNW5CB4QQLRrrSEBsLJqiomZ4=";
         };
       });
-
       inherit
         bitwuzla# 0.9.0
-        cvc5 # 1.3.2
+        cvc5# 1.3.3 (taken from nixpkgs-unstable -- see flake.nix)
         ninja; # 1.13.2
     };
 }
