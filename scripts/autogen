@@ -1065,6 +1065,29 @@ def gen_aarch64_rej_uniform_eta_table():
 
     update_file("dev/aarch64_clean/src/rej_uniform_eta_table.c", "\n".join(gen()))
 
+    def gen_aarch64_hol_light_rej_uniform_eta_table():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Constant table values used in the AArch64 eta rejection sampling."
+        yield " * Each entry is 16 bytes. There are 256 entries (one per 8-bit mask),"
+        yield " * for a total of 4096 bytes. Entries use 2-byte (16-bit) coefficient"
+        yield " * indices since ML-DSA eta samples are stored as 16-bit halfwords"
+        yield " * on the stack before being converted to 32-bit in the final copy."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield "let mldsa_rej_uniform_eta_table = (REWRITE_RULE[MAP] o define)"
+        yield "  `mldsa_rej_uniform_eta_table:byte list = MAP word ["
+        data = [v for row in gen_aarch64_rej_uniform_eta_table_rows() for v in row]
+        yield from print_hol_light_array(data, as_int=False, entries_per_line=16, pad=3)
+        yield "  ]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml",
+        "\n".join(gen_aarch64_hol_light_rej_uniform_eta_table()),
+    )
+
 
 def gen_aarch64_rej_uniform_table_rows():
     # The index into the lookup table is an 4-bit bitmap, i.e. a number 0..15.
@@ -2731,6 +2754,18 @@ def hol_light_asm_joblist():
         ),
         (
             "rej_uniform_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "rej_uniform_eta2_aarch64_asm.S",
+            "dev/aarch64_opt/src",
+            f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
+            "rej_uniform_eta4_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",

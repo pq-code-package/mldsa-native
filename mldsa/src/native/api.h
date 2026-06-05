@@ -221,7 +221,8 @@ __contract__(
   requires(memory_no_alias(buf, buflen))
   assigns(memory_slice(r, sizeof(int32_t) * len))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
-  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
+  /* check-magic: 3 == 2 + 1 (decl gated on MLDSA_ETA == 2) */
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, 3)))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2 */
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA2 */
@@ -255,7 +256,8 @@ __contract__(
   requires(memory_no_alias(buf, buflen))
   assigns(memory_slice(r, sizeof(int32_t) * len))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || (0 <= return_value && return_value <= len))
-  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, MLDSA_ETA + 1)))
+  /* check-magic: 5 == 4 + 1 (decl gated on MLDSA_ETA == 4) */
+  ensures((return_value != MLD_NATIVE_FUNC_FALLBACK) ==> (array_abs_bound(r, 0, return_value, 5)))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 */

@@ -114,15 +114,39 @@ __contract__(
   MLD_NAMESPACE(rej_uniform_eta2_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta2_aarch64_asm(int32_t *r, const uint8_t *buf,
-                                          unsigned buflen,
-                                          const uint8_t *table);
+                                          unsigned buflen, const uint8_t *table)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/rej_uniform_eta2_aarch64_asm.ml */
+__contract__(
+  requires(buflen % 8 == 0)
+  requires(buflen >= 8)
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, buflen))
+  requires(table == mld_rej_uniform_eta_table)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  /* check-magic: 3 == 2 + 1 (asm is eta=2-specific) */
+  ensures(array_abs_bound(r, 0, return_value, 3))
+);
 
 #define mld_rej_uniform_eta4_aarch64_asm \
   MLD_NAMESPACE(rej_uniform_eta4_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta4_aarch64_asm(int32_t *r, const uint8_t *buf,
-                                          unsigned buflen,
-                                          const uint8_t *table);
+                                          unsigned buflen, const uint8_t *table)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/aarch64/proofs/rej_uniform_eta4_aarch64_asm.ml */
+__contract__(
+  requires(buflen % 8 == 0)
+  requires(buflen >= 8)
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, buflen))
+  requires(table == mld_rej_uniform_eta_table)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  /* check-magic: 5 == 4 + 1 (asm is eta=4-specific) */
+  ensures(array_abs_bound(r, 0, return_value, 5))
+);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)

@@ -65,3 +65,11 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: aarch64/mldsa/rej_uniform_aarch64_asm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/rej_uniform_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/rej_uniform_eta2_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/rej_uniform_eta2_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/rej_uniform_eta4_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/rej_uniform_eta4_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;

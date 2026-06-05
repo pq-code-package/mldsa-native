@@ -63,6 +63,8 @@ OBJ = mldsa/intt_aarch64_asm.o \
       mldsa/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.o \
       mldsa/mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.o \
       mldsa/mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.o \
+      mldsa/rej_uniform_eta2_aarch64_asm.o \
+      mldsa/rej_uniform_eta4_aarch64_asm.o \
       mldsa/keccak_f1600_x1_scalar_aarch64_asm.o \
       mldsa/keccak_f1600_x1_v84a_aarch64_asm.o \
       mldsa/keccak_f1600_x2_v84a_aarch64_asm.o \

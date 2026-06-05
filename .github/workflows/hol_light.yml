@@ -103,6 +103,10 @@ jobs:
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: poly_use_hint_88_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
+          - name: rej_uniform_eta2_aarch64_asm
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
+          - name: rej_uniform_eta4_aarch64_asm
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
             needs: ["keccak_spec.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_v84a_aarch64_asm

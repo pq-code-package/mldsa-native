@@ -2011,3 +2011,24 @@ let REJ_SAMPLE_APPEND = prove
  (`!l1 l2. REJ_SAMPLE(APPEND l1 l2) =
            APPEND (REJ_SAMPLE l1) (REJ_SAMPLE l2)`,
   REWRITE_TAC[REJ_SAMPLE; MAP_APPEND; FILTER_APPEND]);;
+
+(* ========================================================================= *)
+(* ML-DSA rejection sampling specification, eta variants.                    *)
+(*                                                                           *)
+(* The top-level spec takes a list of 4-bit nibbles and is a plain           *)
+(* filter+map -- mirroring REJ_SAMPLE for the q-filter case.                 *)
+(*   eta=2: keep nibble n if n < 15, then map to (2 - n MOD 5) :int32        *)
+(*   eta=4: keep nibble n if n <  9, then map to (4 - n)        :int32       *)
+(* ========================================================================= *)
+
+let REJ_SAMPLE_ETA2 = define
+  `REJ_SAMPLE_ETA2 (l:(4 word) list) =
+   MAP (\x:4 word.
+          word_sx (word_sub (word 2:4 word)
+                            (word_umod x (word 5:4 word))):int32)
+       (FILTER (\x:4 word. val x < 15) l)`;;
+
+let REJ_SAMPLE_ETA4 = define
+  `REJ_SAMPLE_ETA4 (l:(4 word) list) =
+   MAP (\x:4 word. word_sx (word_sub (word 4:4 word) x):int32)
+       (FILTER (\x:4 word. val x < 9) l)`;;
