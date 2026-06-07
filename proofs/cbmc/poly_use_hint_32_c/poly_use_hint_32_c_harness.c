@@ -3,13 +3,13 @@
 
 #include "poly.h"
 
+// Prototype for the function under test
+void mld_poly_use_hint_32_c(mld_poly *a, const mld_poly *h);
 
 void harness(void)
 {
+#if MLD_CONFIG_PARAMETER_SET != 44
   mld_poly *a, *h;
-#if MLD_CONFIG_PARAMETER_SET == 44
-  mld_poly_use_hint_88(a, h);
-#else
-  mld_poly_use_hint_32(a, h);
+  mld_poly_use_hint_32_c(a, h);
 #endif
 }

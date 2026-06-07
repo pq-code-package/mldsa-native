@@ -1,15 +1,15 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "poly_kl.h"
+#include "poly.h"
 
 // Prototype for the function under test
-#define mld_poly_use_hint_c MLD_ADD_PARAM_SET(mld_poly_use_hint_c)
-void mld_poly_use_hint_c(mld_poly *a, mld_poly *h);
-
+void mld_poly_use_hint_88_c(mld_poly *a, const mld_poly *h);
 
 void harness(void)
 {
+#if MLD_CONFIG_PARAMETER_SET == 44
   mld_poly *a, *h;
-  mld_poly_use_hint_c(a, h);
+  mld_poly_use_hint_88_c(a, h);
+#endif
 }

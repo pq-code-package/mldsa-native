@@ -1057,6 +1057,218 @@ void mld_polyw1_pack_32(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_32],
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_STATIC_TESTABLE
+void mld_poly_decompose_88_c(mld_poly *a1, mld_poly *a0)
+__contract__(
+  requires(memory_no_alias(a1,  sizeof(mld_poly)))
+  requires(memory_no_alias(a0, sizeof(mld_poly)))
+  requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(mld_poly)))
+  assigns(memory_slice(a0, sizeof(mld_poly)))
+  ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+  ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2_88+1))
+)
+{
+  unsigned int i;
+  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
+  for (i = 0; i < MLDSA_N; ++i)
+  __loop__(
+    assigns(i, memory_slice(a0, sizeof(mld_poly)), memory_slice(a1, sizeof(mld_poly)))
+    invariant(i <= MLDSA_N)
+    invariant(array_bound(a0->coeffs, i, MLDSA_N, 0, MLDSA_Q))
+    invariant(array_bound(a1->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+    invariant(array_abs_bound(a0->coeffs, 0, i, MLDSA_GAMMA2_88+1))
+    decreases(MLDSA_N - i)
+  )
+  {
+    mld_decompose_88(&a0->coeffs[i], &a1->coeffs[i], a0->coeffs[i]);
+  }
+
+  mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2_88 + 1);
+  mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_88));
+}
+
+MLD_INTERNAL_API
+void mld_poly_decompose_88(mld_poly *a1, mld_poly *a0)
+{
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)
+  int ret;
+  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
+  ret = mld_poly_decompose_88_native(a1->coeffs, a0->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2_88 + 1);
+    mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_88));
+    return;
+  }
+#endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_88 */
+  mld_poly_decompose_88_c(a1, a0);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_STATIC_TESTABLE
+void mld_poly_decompose_32_c(mld_poly *a1, mld_poly *a0)
+__contract__(
+  requires(memory_no_alias(a1,  sizeof(mld_poly)))
+  requires(memory_no_alias(a0, sizeof(mld_poly)))
+  requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(mld_poly)))
+  assigns(memory_slice(a0, sizeof(mld_poly)))
+  ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+  ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2_32+1))
+)
+{
+  unsigned int i;
+  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
+  for (i = 0; i < MLDSA_N; ++i)
+  __loop__(
+    assigns(i, memory_slice(a0, sizeof(mld_poly)), memory_slice(a1, sizeof(mld_poly)))
+    invariant(i <= MLDSA_N)
+    invariant(array_bound(a0->coeffs, i, MLDSA_N, 0, MLDSA_Q))
+    invariant(array_bound(a1->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+    invariant(array_abs_bound(a0->coeffs, 0, i, MLDSA_GAMMA2_32+1))
+    decreases(MLDSA_N - i)
+  )
+  {
+    mld_decompose_32(&a0->coeffs[i], &a1->coeffs[i], a0->coeffs[i]);
+  }
+
+  mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2_32 + 1);
+  mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_32));
+}
+
+MLD_INTERNAL_API
+void mld_poly_decompose_32(mld_poly *a1, mld_poly *a0)
+{
+#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32)
+  int ret;
+  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
+  ret = mld_poly_decompose_32_native(a1->coeffs, a0->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2_32 + 1);
+    mld_assert_bound(a1->coeffs, MLDSA_N, 0,
+                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_32));
+    return;
+  }
+#endif /* MLD_USE_NATIVE_POLY_DECOMPOSE_32 */
+  mld_poly_decompose_32_c(a1, a0);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_STATIC_TESTABLE
+void mld_poly_use_hint_88_c(mld_poly *a, const mld_poly *h)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+)
+{
+  unsigned int i;
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
+
+  for (i = 0; i < MLDSA_N; ++i)
+  __loop__(
+    invariant(i <= MLDSA_N)
+    invariant(array_bound(a->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+    invariant(array_bound(a->coeffs, i, MLDSA_N, 0, MLDSA_Q))
+    decreases(MLDSA_N - i)
+  )
+  {
+    a->coeffs[i] = mld_use_hint_88(a->coeffs[i], h->coeffs[i]);
+  }
+  mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_88));
+}
+
+MLD_INTERNAL_API
+void mld_poly_use_hint_88(mld_poly *a, const mld_poly *h)
+{
+#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88)
+  int ret;
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
+  ret = mld_poly_use_hint_88_native(a->coeffs, h->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_88));
+    return;
+  }
+#endif /* MLD_USE_NATIVE_POLY_USE_HINT_88 */
+  mld_poly_use_hint_88_c(a, h);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_STATIC_TESTABLE
+void mld_poly_use_hint_32_c(mld_poly *a, const mld_poly *h)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+)
+{
+  unsigned int i;
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
+
+  for (i = 0; i < MLDSA_N; ++i)
+  __loop__(
+    invariant(i <= MLDSA_N)
+    invariant(array_bound(a->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+    invariant(array_bound(a->coeffs, i, MLDSA_N, 0, MLDSA_Q))
+    decreases(MLDSA_N - i)
+  )
+  {
+    a->coeffs[i] = mld_use_hint_32(a->coeffs[i], h->coeffs[i]);
+  }
+  mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                   (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_32));
+}
+
+MLD_INTERNAL_API
+void mld_poly_use_hint_32(mld_poly *a, const mld_poly *h)
+{
+#if defined(MLD_USE_NATIVE_POLY_USE_HINT_32)
+  int ret;
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
+  ret = mld_poly_use_hint_32_native(a->coeffs, h->coeffs);
+  if (ret == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    mld_assert_bound(a->coeffs, MLDSA_N, 0,
+                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2_32));
+    return;
+  }
+#endif /* MLD_USE_NATIVE_POLY_USE_HINT_32 */
+  mld_poly_use_hint_32_c(a, h);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
 #else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 MLD_EMPTY_CU(mld_poly)
 #endif /* MLD_CONFIG_MULTILEVEL_NO_SHARED */

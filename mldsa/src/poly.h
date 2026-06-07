@@ -425,4 +425,124 @@ __contract__(
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+#define mld_poly_decompose_88 MLD_NAMESPACE(poly_decompose_88)
+/**
+ * For all coefficients c of the input polynomial, compute high and low bits
+ * c0, c1 such c mod MLDSA_Q = c1*ALPHA + c0 with -ALPHA/2 < c0 <= ALPHA/2
+ * except c1 = (MLDSA_Q-1)/ALPHA where we set c1 = 0 and
+ * -ALPHA/2 <= c0 = c mod MLDSA_Q - MLDSA_Q < 0, where
+ * ALPHA = 2*MLDSA_GAMMA2_88. Assumes coefficients to be standard
+ * representatives.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44).
+ *
+ * @reference{The reference implementation has the input polynomial as a
+ * separate argument that may be aliased with either of the outputs. Removing
+ * the aliasing eases CBMC proofs.}
+ *
+ * @param[out]    a1 Pointer to output polynomial with coefficients c1.
+ * @param[in,out] a0 Pointer to input/output polynomial. Output polynomial has
+ *                   coefficients c0.
+ */
+MLD_INTERNAL_API
+void mld_poly_decompose_88(mld_poly *a1, mld_poly *a0)
+__contract__(
+  requires(memory_no_alias(a1,  sizeof(mld_poly)))
+  requires(memory_no_alias(a0, sizeof(mld_poly)))
+  requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(mld_poly)))
+  assigns(memory_slice(a0, sizeof(mld_poly)))
+  ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+  ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2_88+1))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+#define mld_poly_decompose_32 MLD_NAMESPACE(poly_decompose_32)
+/**
+ * For all coefficients c of the input polynomial, compute high and low bits
+ * c0, c1 such c mod MLDSA_Q = c1*ALPHA + c0 with -ALPHA/2 < c0 <= ALPHA/2
+ * except c1 = (MLDSA_Q-1)/ALPHA where we set c1 = 0 and
+ * -ALPHA/2 <= c0 = c mod MLDSA_Q - MLDSA_Q < 0, where
+ * ALPHA = 2*MLDSA_GAMMA2_32. Assumes coefficients to be standard
+ * representatives.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87).
+ *
+ * @reference{The reference implementation has the input polynomial as a
+ * separate argument that may be aliased with either of the outputs. Removing
+ * the aliasing eases CBMC proofs.}
+ *
+ * @param[out]    a1 Pointer to output polynomial with coefficients c1.
+ * @param[in,out] a0 Pointer to input/output polynomial. Output polynomial has
+ *                   coefficients c0.
+ */
+MLD_INTERNAL_API
+void mld_poly_decompose_32(mld_poly *a1, mld_poly *a0)
+__contract__(
+  requires(memory_no_alias(a1,  sizeof(mld_poly)))
+  requires(memory_no_alias(a0, sizeof(mld_poly)))
+  requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  assigns(memory_slice(a1, sizeof(mld_poly)))
+  assigns(memory_slice(a0, sizeof(mld_poly)))
+  ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+  ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2_32+1))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+#define mld_poly_use_hint_88 MLD_NAMESPACE(poly_use_hint_88)
+/**
+ * Use hint polynomial h to correct the high bits of a in-place.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44).
+ *
+ * @param[in,out] a Input/output polynomial.
+ * @param[in]     h Hint polynomial.
+ */
+MLD_INTERNAL_API
+void mld_poly_use_hint_88(mld_poly *a, const mld_poly *h)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88)))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+#define mld_poly_use_hint_32 MLD_NAMESPACE(poly_use_hint_32)
+/**
+ * Use hint polynomial h to correct the high bits of a in-place.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87).
+ *
+ * @param[in,out] a Input/output polynomial.
+ * @param[in]     h Hint polynomial.
+ */
+MLD_INTERNAL_API
+void mld_poly_use_hint_32(mld_poly *a, const mld_poly *h)
+__contract__(
+  requires(memory_no_alias(a, sizeof(mld_poly)))
+  requires(memory_no_alias(h, sizeof(mld_poly)))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(mld_poly)))
+  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32)))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
 #endif /* !MLD_POLY_H */

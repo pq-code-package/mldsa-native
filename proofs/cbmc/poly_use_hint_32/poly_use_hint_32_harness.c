@@ -3,13 +3,10 @@
 
 #include "poly.h"
 
-
 void harness(void)
 {
-  mld_poly *a0, *a1;
-#if MLD_CONFIG_PARAMETER_SET == 44
-  mld_poly_decompose_88(a1, a0);
-#else
-  mld_poly_decompose_32(a1, a0);
+#if MLD_CONFIG_PARAMETER_SET != 44
+  mld_poly *a, *h;
+  mld_poly_use_hint_32(a, h);
 #endif
 }

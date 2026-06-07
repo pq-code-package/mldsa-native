@@ -1,12 +1,12 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "rounding.h"
-
+#include "poly.h"
 
 void harness(void)
 {
-  int32_t *a0, *a1;
-  int32_t a;
-  mld_decompose(a0, a1, a);
+#if MLD_CONFIG_PARAMETER_SET != 44
+  mld_poly *a0, *a1;
+  mld_poly_decompose_32(a1, a0);
+#endif
 }

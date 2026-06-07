@@ -17,16 +17,16 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint
-USE_FUNCTION_CONTRACTS=mld_poly_use_hint_c
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
-	USE_FUNCTION_CONTRACTS+=mld_poly_use_hint_88_native
-else ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
-	USE_FUNCTION_CONTRACTS+=mld_poly_use_hint_32_native
-else ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
-	USE_FUNCTION_CONTRACTS+=mld_poly_use_hint_32_native
+CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_88
+USE_FUNCTION_CONTRACTS=mld_poly_use_hint_88_c
+USE_FUNCTION_CONTRACTS+=mld_poly_use_hint_88_native
+else
+CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_32
+USE_FUNCTION_CONTRACTS=mld_poly_use_hint_32_c
+USE_FUNCTION_CONTRACTS+=mld_poly_use_hint_32_native
 endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

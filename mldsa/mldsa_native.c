@@ -416,10 +416,12 @@
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H
-#undef mld_decompose
+#undef mld_decompose_32
+#undef mld_decompose_88
 #undef mld_make_hint
 #undef mld_power2round
-#undef mld_use_hint
+#undef mld_use_hint_32
+#undef mld_use_hint_88
 /* mldsa/src/sign.h */
 #undef MLD_DOMAIN_SEPARATION_MAX_BYTES
 #undef MLD_PREHASH_NONE
@@ -478,6 +480,8 @@
 #undef mld_poly_add
 #undef mld_poly_caddq
 #undef mld_poly_chknorm
+#undef mld_poly_decompose_32
+#undef mld_poly_decompose_88
 #undef mld_poly_invntt_tomont
 #undef mld_poly_ntt
 #undef mld_poly_pointwise_montgomery
@@ -487,6 +491,8 @@
 #undef mld_poly_sub
 #undef mld_poly_uniform
 #undef mld_poly_uniform_4x
+#undef mld_poly_use_hint_32
+#undef mld_poly_use_hint_88
 #undef mld_polyt0_pack
 #undef mld_polyt0_unpack
 #undef mld_polyt1_pack
