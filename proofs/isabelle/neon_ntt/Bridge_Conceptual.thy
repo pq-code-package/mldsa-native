@@ -12,7 +12,8 @@ text \<open>
 The \autoref{ch:barrett_montgomery} bridge was proved by direct algebraic
 manipulation. This chapter recasts it as a corollary of a (trivial) duality
 between Euclidean and 2-adic \emph{rounding} of a rational number, plus some
-arithmetic properties of the 2-adic side.
+arithmetic properties of the 2-adic side. The recasting was first sketched in the
+talk \cite{Becker2022NeonNTTtalk} presenting \cite{NeonNTT} at CHES 2022.
 
 Rounding can be described as the process of expressing a continuum as the sum of
 something discrete and something small (relatively compact); the choice of
@@ -692,23 +693,21 @@ theorem (in BarrettContext) bridge_signed_conceptual:
   shows \<open>bar\<^sup>\<plusminus>\<lbrakk>N, n, f\<rbrakk> z = mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (z * (R mod\<lbrakk>f\<rbrakk> N))\<close>
 proof %visible -
   have cong: \<open>(z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R - (- ((z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> (N * R)))) \<in> \<int>\<^sub>[\<^sub>2\<^sub>]\<close>
-    using magic_const_cong(2)[of z] by %invisible (simp add: field_simps of_int_mult)
+    using magic_const_cong(2)[of z] by (simp add: field_simps of_int_mult)
   have key: \<open>N\<^sub>\<rat> * (z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R) + (z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> R = z\<^sub>\<rat>\<close>
-    unfolding mod_approx_def by %invisible (simp add: field_simps)
+    unfolding mod_approx_def by (simp add: field_simps)
   have \<open>(bar\<^sup>\<plusminus>\<lbrakk>N, n, f\<rbrakk> z)\<^sub>\<rat> = z\<^sub>\<rat> - N\<^sub>\<rat> * \<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil>\<^sub>[\<^sub>\<infinity>\<^sub>]\<close>
-    by %invisible (rule bar_signed_as_round_E)
+    by (rule bar_signed_as_round_E)
   also have \<open>\<dots> = z\<^sub>\<rat> - N\<^sub>\<rat> * (z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R - \<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil>\<^sub>[\<^sub>2\<^sub>])\<close>
-    using complementarity[OF int_div_pow2_dyadic[of \<open>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk>\<close> n]] by %invisible simp
-  also have \<open>\<dots> = z\<^sub>\<rat> - N\<^sub>\<rat> * (z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R)
-                  + N\<^sub>\<rat> * \<lfloor>- ((z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> (N * R))\<rceil>\<^sub>[\<^sub>2\<^sub>]\<close>
-    using round_2_invariance[OF cong] by %invisible (simp add: algebra_simps)
-  also have \<open>\<dots> = z\<^sub>\<rat> - N\<^sub>\<rat> * (z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R)
-                  + ((mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (z * (R mod\<lbrakk>f\<rbrakk> N)))\<^sub>\<rat>
-                     - (z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> R)\<close>
-    using mont_add_signed_as_round_2[of \<open>z * (R mod\<lbrakk>f\<rbrakk> N)\<close>] by %invisible simp
+    using complementarity[OF int_div_pow2_dyadic[of \<open>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk>\<close> n]] by simp
+  also have \<open>\<dots> = (z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> R + N\<^sub>\<rat> * \<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil>\<^sub>[\<^sub>2\<^sub>]\<close>
+    using key by (simp add: algebra_simps)
+  also have \<open>\<dots> = (z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> R + N\<^sub>\<rat> * \<lfloor>- ((z * (R mod\<lbrakk>f\<rbrakk> N)) /\<^sub>\<rat> (N * R))\<rceil>\<^sub>[\<^sub>2\<^sub>]\<close>
+    using round_2_invariance[OF cong] by simp
   also have \<open>\<dots> = (mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (z * (R mod\<lbrakk>f\<rbrakk> N)))\<^sub>\<rat>\<close>
-    using key by %invisible (simp add: algebra_simps)
-  finally show ?thesis by %invisible (metis of_int_eq_iff)
+    using mont_add_signed_as_round_2[of \<open>z * (R mod\<lbrakk>f\<rbrakk> N)\<close>] by (simp add: algebra_simps)
+  finally show ?thesis
+    by (metis of_int_eq_iff)
 qed
 
 

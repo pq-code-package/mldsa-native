@@ -56,12 +56,26 @@ definition \<open>is_int_approx f \<longleftrightarrow> (\<forall>z. \<bar>z - \
 
 text \<open>
 Standard instances of integer approximations are round-to-nearest \<open>\<lfloor>\<cdot>\<rceil>\<close>,
-floor \<open>\<lfloor>\<cdot>\<rfloor>\<close>, and ceiling \<open>\<lceil>\<cdot>\<rceil>\<close>. Less canonically, the following is an
-integer approximation as well:
+round-half-down \<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close>, floor \<open>\<lfloor>\<cdot>\<rfloor>\<close>, and ceiling \<open>\<lceil>\<cdot>\<rceil>\<close>. Less canonically, the following is an integer
+approximation as well:
 \<close>
 
 notation %internal round (\<open>\<lfloor>_\<rceil>\<close>)
+definition round_half_down :: \<open>rat \<Rightarrow> int\<close> (\<open>\<lfloor>_\<rceil>\<^sub>\<down>\<close>) where
+  \<open>round_half_down x = - round (-x)\<close>
 definition round_even (\<open>\<lfloor>_\<rceil>\<^sub>2\<close>) where \<open>\<lfloor>z\<rceil>\<^sub>2 \<equiv> 2 * \<lfloor>z/2\<rceil>\<close>
+
+lemma %internal round_eq_iff:
+  shows \<open>round x = y \<longleftrightarrow> (-1/2 \<le> x - rat_of_int y \<and> x - rat_of_int y < 1/2)\<close>
+  by (metis add.commute diff_le_eq diff_less_eq minus_diff_eq minus_divide_left minus_le_iff
+    of_int_round_gt of_int_round_le round_unique)
+
+lemma %internal round_half_down_eq_iff:
+  shows \<open>\<lfloor>x\<rceil>\<^sub>\<down> = y \<longleftrightarrow> (-1/2 < x - rat_of_int y \<and> x - rat_of_int y \<le> 1/2)\<close>
+proof -
+  have \<dagger>: \<open>\<And>x y. - round x = y \<longleftrightarrow> round x = -y\<close> by auto
+  show ?thesis unfolding round_half_down_def by (auto simp add: round_eq_iff \<dagger>)
+qed
 
 text %internal \<open>We also register notation for the unapplied forms of the approximation operators.
 Unfortunately we have to drop down to a print AST translation here: If we introduced the new syntax
@@ -69,45 +83,82 @@ as an output notation, it would apply regardless of whether an argument is suppl
 to e.g. \<^verbatim>\<open>floor x\<close> being printed as \<^verbatim>\<open>\<lfloor>\<cdot>\<rfloor> x\<close> instead of the desired \<open>\<lfloor>z\<rfloor>\<close>. With a print-AST-translation,
 we can restrict the translation to unapplied occurrences.\<close>
 
-notation %internal (input) round      (\<open>\<lfloor>\<cdot>\<rceil>\<close>)
-notation %internal (input) round_even (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close>)
-notation %internal (input) floor      (\<open>\<lfloor>\<cdot>\<rfloor>\<close>)
-notation %internal (input) ceiling    (\<open>\<lceil>\<cdot>\<rceil>\<close>)
+notation %internal (input) round           (\<open>\<lfloor>\<cdot>\<rceil>\<close>)
+notation %internal (input) round_half_down (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close>)
+notation %internal (input) round_even      (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close>)
+notation %internal (input) floor           (\<open>\<lfloor>\<cdot>\<rfloor>\<close>)
+notation %internal (input) ceiling         (\<open>\<lceil>\<cdot>\<rceil>\<close>)
 
-syntax %internal "_round_even_dot" :: "'a" (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close>)
-syntax %internal "_round_dot"      :: "'a" (\<open>\<lfloor>\<cdot>\<rceil>\<close>)
-syntax %internal "_floor_dot"      :: "'a" (\<open>\<lfloor>\<cdot>\<rfloor>\<close>)
-syntax %internal "_ceiling_dot"    :: "'a" (\<open>\<lceil>\<cdot>\<rceil>\<close>)
+syntax %internal "_round_dot"           :: "'a" (\<open>\<lfloor>\<cdot>\<rceil>\<close>)
+syntax %internal "_round_half_down_dot" :: "'a" (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close>)
+syntax %internal "_round_even_dot"      :: "'a" (\<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close>)
+syntax %internal "_floor_dot"           :: "'a" (\<open>\<lfloor>\<cdot>\<rfloor>\<close>)
+syntax %internal "_ceiling_dot"         :: "'a" (\<open>\<lceil>\<cdot>\<rceil>\<close>)
 print_ast_translation %internal \<open>
    let
     fun unapplied c _ [] = Ast.Constant c
       | unapplied _ _ _ = raise Match
   in
-    [(\<^const_syntax>\<open>round\<close>,      unapplied \<^syntax_const>\<open>_round_dot\<close>),
-     (\<^const_syntax>\<open>round_even\<close>, unapplied \<^syntax_const>\<open>_round_even_dot\<close>),
-     (\<^const_syntax>\<open>floor\<close>,      unapplied \<^syntax_const>\<open>_floor_dot\<close>),
-     (\<^const_syntax>\<open>ceiling\<close>,    unapplied \<^syntax_const>\<open>_ceiling_dot\<close>)]
+    [(\<^const_syntax>\<open>round\<close>,           unapplied \<^syntax_const>\<open>_round_dot\<close>),
+     (\<^const_syntax>\<open>round_half_down\<close>, unapplied \<^syntax_const>\<open>_round_half_down_dot\<close>),
+     (\<^const_syntax>\<open>round_even\<close>,      unapplied \<^syntax_const>\<open>_round_even_dot\<close>),
+     (\<^const_syntax>\<open>floor\<close>,           unapplied \<^syntax_const>\<open>_floor_dot\<close>),
+     (\<^const_syntax>\<open>ceiling\<close>,         unapplied \<^syntax_const>\<open>_ceiling_dot\<close>)]
   end
-\<close>                      
+\<close>
 
-text \<open>We confirm that indeed all of the above are integer approximations:\<close>
+text\<open>We quickly confirm that \<^term>\<open>\<lfloor>\<cdot>\<rceil>\<close> is round-half-up and \<^term>\<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close> is round-half-down:\<close>
+
+lemma %visible shows \<open>\<lfloor>1 /\<^sub>\<rat> 2\<rceil>\<^sub>\<down> = 0\<close> and \<open>\<lfloor>1 /\<^sub>\<rat> 2\<rceil> = 1\<close> by eval+
+
+text \<open>We also confirm that indeed all of the above are integer approximations:\<close>
 
 theorem is_int_approx_instances:
-  shows is_int_approx_floor:      \<open>is_int_approx \<lfloor>\<cdot>\<rfloor>\<close>
-    and is_int_approx_ceiling:    \<open>is_int_approx \<lceil>\<cdot>\<rceil>\<close>
-    and is_int_approx_round:      \<open>is_int_approx \<lfloor>\<cdot>\<rceil>\<close>
-    and is_int_approx_round_even: \<open>is_int_approx \<lfloor>\<cdot>\<rceil>\<^sub>2\<close>
-  unfolding is_int_approx_def round_even_def round_def by (linarith+)
+  shows is_int_approx_floor:           \<open>is_int_approx \<lfloor>\<cdot>\<rfloor>\<close>
+    and is_int_approx_ceiling:         \<open>is_int_approx \<lceil>\<cdot>\<rceil>\<close>
+    and is_int_approx_round:           \<open>is_int_approx \<lfloor>\<cdot>\<rceil>\<close>
+    and is_int_approx_round_half_down: \<open>is_int_approx \<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close>
+    and is_int_approx_round_even:      \<open>is_int_approx \<lfloor>\<cdot>\<rceil>\<^sub>2\<close>
+  unfolding is_int_approx_def round_even_def round_half_down_def round_def by (linarith+)
+
+text %internal \<open>Specialised to a rational \<^term>\<open>z /\<^sub>\<rat> N\<close> with \<^term>\<open>N > 0\<close> and cleared of
+denominators, the round-half-down characterisation pins the quotient by an
+integer window on the residue \<^term>\<open>z - N * q\<close>: the half-open interval
+\<open>(-N/2, N/2]\<close>.\<close>
+
+lemma %internal round_half_down_window:
+  fixes N z q :: int
+  assumes Npos: \<open>N > 0\<close>
+  shows \<open>\<lfloor>z /\<^sub>\<rat> N\<rceil>\<^sub>\<down> = q \<longleftrightarrow> - N < 2 * (z - N * q) \<and> 2 * (z - N * q) \<le> N\<close>
+proof -
+  have Nr: \<open>(rat_of_int N) > 0\<close> using Npos by simp
+  have step: \<open>(\<lfloor>z /\<^sub>\<rat> N\<rceil>\<^sub>\<down> = q) = (- (1/2) < z /\<^sub>\<rat> N - rat_of_int q \<and> z /\<^sub>\<rat> N - rat_of_int q \<le> 1/2)\<close>
+    using round_half_down_eq_iff[of \<open>z /\<^sub>\<rat> N\<close> q] by simp
+  have A: \<open>(- (1/2) < z /\<^sub>\<rat> N - rat_of_int q) = (- N < 2 * (z - N * q))\<close>
+  proof -
+    have \<open>(- (1/2) < z /\<^sub>\<rat> N - rat_of_int q) = (rat_of_int (- N) < rat_of_int (2 * (z - N * q)))\<close>
+      using Nr by (simp add: of_int_mult field_simps)
+    thus ?thesis by (simp only: of_int_less_iff)
+  qed
+  have B: \<open>(z /\<^sub>\<rat> N - rat_of_int q \<le> 1/2) = (2 * (z - N * q) \<le> N)\<close>
+  proof -
+    have \<open>(z /\<^sub>\<rat> N - rat_of_int q \<le> 1/2) = (rat_of_int (2 * (z - N * q)) \<le> rat_of_int N)\<close>
+      using Nr by (simp add: of_int_mult field_simps)
+    thus ?thesis by (simp only: of_int_le_iff)
+  qed
+  show ?thesis using step A B by blast
+qed
 
 
 section \<open>Approximation quality\<close>
 
 text \<open>
 The predicate \<open>is_int_approx \<lbrakk>_\<rbrakk>\<close> only requires the rounding error \<open>\<bar>z - \<lbrakk>z\<rbrakk>\<^sub>\<rat>\<bar>\<close> to be
-bounded by \<^term>\<open>1\<close>. Different approximations enjoy tighter uniform bounds: \<open>\<lfloor>\<cdot>\<rceil>\<close> never
-errs by more than \<^term>\<open>1/2\<close>, while \<open>\<lfloor>\<cdot>\<rfloor>\<close>, \<open>\<lceil>\<cdot>\<rceil>\<close>, and \<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close> can come
-arbitrarily close to \<^term>\<open>1\<close>. We capture this as the \emph{approximation quality}
-\<open>\<epsilon>(\<lbrakk>_\<rbrakk>)\<close>, the smallest rational bound on \<open>\<bar>z - \<lbrakk>z\<rbrakk>\<^sub>\<rat>\<bar>\<close>.
+bounded by \<^term>\<open>1\<close>. Different approximations enjoy tighter uniform bounds: \<open>\<lfloor>\<cdot>\<rceil>\<close> and
+\<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down>\<close> never err by more than \<^term>\<open>1/2\<close>, while \<open>\<lfloor>\<cdot>\<rfloor>\<close>, \<open>\<lceil>\<cdot>\<rceil>\<close>, and \<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close>
+can come arbitrarily close to \<^term>\<open>1\<close>. We capture this as the
+\emph{approximation quality} \<open>\<epsilon>(\<lbrakk>_\<rbrakk>)\<close>, the smallest rational bound on
+\<open>\<bar>z - \<lbrakk>z\<rbrakk>\<^sub>\<rat>\<bar>\<close>.
 
 In general, the supremum of the rounding error need not be a rational number
 (see \S\ref{sec:golden} for a concrete example), so we characterise
@@ -183,16 +234,18 @@ lemma %internal quality_at_le:
   using quality_bounds[OF assms] .
 
 text \<open>
-The four standard approximations admit explicit quality witnesses. Round-to-nearest
-attains the ideal quality \<^term>\<open>1/2\<close>; the other three only come arbitrarily close to \<^term>\<open>1\<close>
-but no rational below \<^term>\<open>1\<close> is a uniform bound, so their quality is exactly \<^term>\<open>1\<close>.
+The five standard approximations admit explicit quality witnesses. Round-to-nearest
+and round-half-down attain the ideal quality \<^term>\<open>1/2\<close>; the other three
+only come arbitrarily close to \<^term>\<open>1\<close> but no rational below \<^term>\<open>1\<close> is a
+uniform bound, so their quality is exactly \<^term>\<open>1\<close>.
 \<close>
 
 theorem %internal is_int_approx_quality_instances:
-  shows is_int_approx_quality_round:      \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil> (1/2)\<close>
-    and is_int_approx_quality_floor:      \<open>is_int_approx_quality \<lfloor>\<cdot>\<rfloor> 1\<close>
-    and is_int_approx_quality_ceiling:    \<open>is_int_approx_quality \<lceil>\<cdot>\<rceil> 1\<close>
-    and is_int_approx_quality_round_even: \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil>\<^sub>2 1\<close>
+  shows is_int_approx_quality_round:           \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil> (1/2)\<close>
+    and is_int_approx_quality_round_half_down: \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil>\<^sub>\<down> (1/2)\<close>
+    and is_int_approx_quality_floor:           \<open>is_int_approx_quality \<lfloor>\<cdot>\<rfloor> 1\<close>
+    and is_int_approx_quality_ceiling:         \<open>is_int_approx_quality \<lceil>\<cdot>\<rceil> 1\<close>
+    and is_int_approx_quality_round_even:      \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil>\<^sub>2 1\<close>
 proof -
   show \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil> (1/2)\<close>
   proof (rule quality_charI)
@@ -203,6 +256,19 @@ proof -
     have \<open>\<lfloor>\<cdot>\<rceil> (1/2 :: rat) = 1\<close> unfolding round_def by simp
     hence eq: \<open>\<bar>(1/2 :: rat) - (\<lfloor>\<cdot>\<rceil> (1/2 :: rat))\<^sub>\<rat>\<bar> = 1/2\<close> by simp
     show \<open>1/2 \<le> e'\<close> using H[of \<open>1/2\<close>] eq by simp
+  qed
+next
+  show \<open>is_int_approx_quality \<lfloor>\<cdot>\<rceil>\<^sub>\<down> (1/2)\<close>
+  proof (rule quality_charI)
+    fix z :: rat show \<open>\<bar>z - (\<lfloor>\<cdot>\<rceil>\<^sub>\<down> z)\<^sub>\<rat>\<bar> \<le> 1/2\<close>
+      unfolding round_half_down_def round_def by linarith
+  next
+    fix e' :: rat
+    assume H: \<open>\<And>z. \<bar>z - (\<lfloor>\<cdot>\<rceil>\<^sub>\<down> z)\<^sub>\<rat>\<bar> \<le> e'\<close>
+    have \<open>\<lfloor>\<cdot>\<rceil>\<^sub>\<down> (-1/2 :: rat) = -1\<close>
+      unfolding round_half_down_def round_def by simp
+    hence eq: \<open>\<bar>(-1/2 :: rat) - (\<lfloor>\<cdot>\<rceil>\<^sub>\<down> (-1/2 :: rat))\<^sub>\<rat>\<bar> = 1/2\<close> by simp
+    show \<open>1/2 \<le> e'\<close> using H[of \<open>-1/2\<close>] eq by simp
   qed
 next
   show \<open>is_int_approx_quality \<lfloor>\<cdot>\<rfloor> 1\<close>
@@ -300,30 +366,33 @@ next
 qed
 
 corollary int_approx_quality_instances:
-  shows quality_round:      \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>) = 1/2\<close>
-    and quality_floor:      \<open>\<epsilon>(\<lfloor>\<cdot>\<rfloor>) = 1\<close>
-    and quality_ceiling:    \<open>\<epsilon>(\<lceil>\<cdot>\<rceil>) = 1\<close>
-    and quality_round_even: \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2) = 1\<close>
+  shows quality_round:           \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>) = 1/2\<close>
+    and quality_round_half_down: \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>) = 1/2\<close>
+    and quality_floor:           \<open>\<epsilon>(\<lfloor>\<cdot>\<rfloor>) = 1\<close>
+    and quality_ceiling:         \<open>\<epsilon>(\<lceil>\<cdot>\<rceil>) = 1\<close>
+    and quality_round_even:      \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2) = 1\<close>
   using int_approx_quality_eq[OF is_int_approx_quality_instances(1)]
         int_approx_quality_eq[OF is_int_approx_quality_instances(2)]
         int_approx_quality_eq[OF is_int_approx_quality_instances(3)]
         int_approx_quality_eq[OF is_int_approx_quality_instances(4)]
+        int_approx_quality_eq[OF is_int_approx_quality_instances(5)]
   by simp_all
 
-text \<open>For each of the four standard approximations, the worst-case error
-\<^term>\<open>\<epsilon>(f)\<close> is attained only at the supremum locus: for \<^term>\<open>round\<close> at
-half-integers, and approached but never attained for \<^term>\<open>floor\<close>,
-\<^term>\<open>ceiling\<close>, \<^term>\<open>round_even\<close> at integers. Outside these loci the
-pointwise error is strictly smaller. Note: for \<^term>\<open>floor\<close> and
-\<^term>\<open>ceiling\<close> the strict inequality holds unconditionally — the residue
-\<open>x - of_int (floor x)\<close> always lies in \<open>[0, 1)\<close>, so no precondition is
-needed.\<close>
+text \<open>For each of the five standard approximations, the worst-case error
+\<^term>\<open>\<epsilon>(f)\<close> is attained only at the supremum locus: for \<^term>\<open>round\<close> and
+\<^term>\<open>round_half_down\<close> at half-integers, and approached but never attained
+for \<^term>\<open>floor\<close>, \<^term>\<open>ceiling\<close>, \<^term>\<open>round_even\<close> at integers.
+Outside these loci the pointwise error is strictly smaller. Note: for
+\<^term>\<open>floor\<close> and \<^term>\<open>ceiling\<close> the strict inequality holds
+unconditionally — the residue \<open>x - of_int (floor x)\<close> always lies in \<open>[0, 1)\<close>,
+so no precondition is needed.\<close>
 
 lemma quality_at_strict:
-  shows quality_at_strict_round:      \<open>2 * x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>)\<close>
-    and quality_at_strict_round_even: \<open>x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2)\<close>
-    and quality_at_strict_floor:      \<open>\<epsilon>(\<lfloor>\<cdot>\<rfloor>, x) < \<epsilon>(\<lfloor>\<cdot>\<rfloor>)\<close>
-    and quality_at_strict_ceiling:    \<open>\<epsilon>(\<lceil>\<cdot>\<rceil>, x) < \<epsilon>(\<lceil>\<cdot>\<rceil>)\<close>
+  shows quality_at_strict_round:           \<open>2 * x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>)\<close>
+    and quality_at_strict_round_half_down: \<open>2 * x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>)\<close>
+    and quality_at_strict_round_even:      \<open>x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2)\<close>
+    and quality_at_strict_floor:           \<open>\<epsilon>(\<lfloor>\<cdot>\<rfloor>, x) < \<epsilon>(\<lfloor>\<cdot>\<rfloor>)\<close>
+    and quality_at_strict_ceiling:         \<open>\<epsilon>(\<lceil>\<cdot>\<rceil>, x) < \<epsilon>(\<lceil>\<cdot>\<rceil>)\<close>
 proof -
   show \<open>2 * x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>)\<close>
   proof -
@@ -342,6 +411,29 @@ proof -
       thus False using A by simp
     qed
     thus \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>)\<close> using quality_round by simp
+  qed
+next
+  show \<open>2 * x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>)\<close>
+  proof -
+    assume A: \<open>2 * x \<notin> \<int>\<close>
+    have negA: \<open>2 * (- x) \<notin> \<int>\<close> using A by simp
+    have abs_le: \<open>\<bar>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x))\<bar> \<le> 1/2\<close>
+      using of_int_round_abs_le by (simp add: abs_minus_commute)
+    have \<open>\<bar>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x))\<bar> < 1/2\<close>
+    proof (rule ccontr)
+      assume \<open>\<not> \<bar>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x))\<bar> < 1/2\<close>
+      hence eq: \<open>\<bar>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x))\<bar> = 1/2\<close> using abs_le by simp
+      hence \<open>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x)) = 1/2 \<or> (-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x)) = -(1/2)\<close>
+        by linarith
+      hence \<open>2 * (-x) = of_int (2 * \<lfloor>\<cdot>\<rceil> (-x) + 1) \<or> 2 * (-x) = of_int (2 * \<lfloor>\<cdot>\<rceil> (-x) - 1)\<close>
+        by (auto simp: algebra_simps)
+      hence \<open>2 * (-x) \<in> \<int>\<close> using Ints_of_int by metis
+      thus False using negA by simp
+    qed
+    moreover have \<open>\<bar>(-x) - of_int (\<lfloor>\<cdot>\<rceil> (-x))\<bar> = \<bar>x - of_int (\<lfloor>\<cdot>\<rceil>\<^sub>\<down> x)\<bar>\<close>
+      unfolding round_half_down_def by simp
+    ultimately have \<open>\<bar>x - of_int (\<lfloor>\<cdot>\<rceil>\<^sub>\<down> x)\<bar> < 1/2\<close> by simp
+    thus \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>\<down>)\<close> using quality_round_half_down by simp
   qed
 next
   show \<open>x \<notin> \<int> \<Longrightarrow> \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2, x) < \<epsilon>(\<lfloor>\<cdot>\<rceil>\<^sub>2)\<close>
@@ -1388,21 +1480,22 @@ section \<open>Standard locales \label{sec:standard_locales}\<close>
 
 text \<open>
 The Barrett and Montgomery analyses repeatedly need the same side conditions on
-the modulus \<open>N\<close> and the bit-width \<open>n\<close>: \<open>N > 1\<close>, \<open>N\<close> odd, \<open>n > 0\<close>, and
-\<open>N < 2^n\<close>. The integer-approximation analyses likewise rely on
-\<open>is_int_approx f\<close>. We capture each context in an Isabelle \isakeywordONE{locale}
---- \<open>StandardModulus\<close> for the modulus side conditions,
+the modulus \<open>N\<close> and the bit-width \<open>n\<close>: \<open>N > 1\<close>, \<open>n > 0\<close>, \<open>N < 2^n\<close>, and --- for
+the parts of the development that need it --- \<open>N\<close> odd. The integer-approximation
+analyses likewise rely on \<open>is_int_approx f\<close>. We capture each context in an
+Isabelle \isakeywordONE{locale} --- \<open>AnyModulus\<close> for the parity-agnostic modulus
+side conditions, \<open>OddModulus\<close> for \<open>AnyModulus\<close> plus oddness of \<open>N\<close>,
 \<open>IntegerApproximation\<close> for the rounding hypothesis, and \<open>BarrettContext\<close>
-combining the two (defined in \autoref{ch:barrett_red}). Lemmas that depend
-on these conditions are introduced with the locale annotation
-\<open>(in StandardModulus)\<close> or \<open>(in BarrettContext)\<close> and take no explicit
-\<open>assumes\<close>; the side conditions are inherited from the locale, and
-abbreviations like \<open>R \<equiv> 2^n\<close> become visible.
+combining \<open>OddModulus\<close> with \<open>IntegerApproximation\<close> (defined in
+\autoref{ch:barrett_red}). Lemmas that depend on these conditions are introduced
+with the locale annotation \<open>(in AnyModulus)\<close>, \<open>(in OddModulus)\<close>, or
+\<open>(in BarrettContext)\<close> and take no explicit \<open>assumes\<close>; the side conditions are
+inherited from the locale, and abbreviations like \<open>R \<equiv> 2^n\<close> become visible.
 \<close>
 
-locale StandardModulus =
+locale AnyModulus =
   fixes N :: int and n :: nat
-  assumes Ngt1: \<open>N > 1\<close> and Nodd: \<open>odd N\<close> and npos: \<open>n > 0\<close>
+  assumes Ngt1: \<open>N > 1\<close> and npos: \<open>n > 0\<close>
       and N_lt_R: \<open>N < 2^n\<close>
 begin
 
@@ -1422,6 +1515,14 @@ lemma %internal R_eq: \<open>R = 2 * 2^(n-1)\<close> using npos by (cases n) aut
 lemma %internal R_hlv: \<open>2^(n-1) = R /\<^sub>\<rat> 2\<close> by (simp add: Suc_le_eq npos power_diff)
 
 end
+
+locale OddModulus = AnyModulus +
+  assumes Nodd: \<open>odd N\<close>
+
+text \<open>\<^locale>\<open>OddModulus\<close> is \<^locale>\<open>AnyModulus\<close> with the extra hypothesis
+that \<^term>\<open>N\<close> is odd. Parity-agnostic material lives in \<^locale>\<open>AnyModulus\<close>;
+lemmas that genuinely need oddness stay in \<^locale>\<open>OddModulus\<close>, and can be
+migrated to \<^locale>\<open>AnyModulus\<close> as the dependence on parity is removed.\<close>
 
 locale IntegerApproximation =
   fixes f :: \<open>rat \<Rightarrow> int\<close>

@@ -165,17 +165,17 @@ proof -
   thus ?thesis unfolding cong_def by simp
 qed
 
-text \<open>Inside \<^locale>\<open>StandardModulus\<close>, the side conditions
+text \<open>Inside \<^locale>\<open>OddModulus\<close>, the side conditions
 \<^term>\<open>n > 0\<close> and \<^term>\<open>odd N\<close> are inherited from the locale, and the
 modulus \<^term>\<open>2^n\<close> is exposed as the abbreviation \<^term>\<open>R\<close>.\<close>
 
-lemma %internal (in StandardModulus) mod_inverse_correct [simp]:
+lemma %internal (in OddModulus) mod_inverse_correct [simp]:
   shows \<open>0 \<le> N\<^sup>-\<^sup>1 mod R\<close>
     and \<open>N\<^sup>-\<^sup>1 mod R < R\<close>
     and \<open>(N * (N\<^sup>-\<^sup>1 mod R)) mod R = 1 mod R\<close>
   using mod_inverse_correct[OF npos Nodd] by simp_all
 
-lemma %internal (in StandardModulus) mod_inverse_neg_correct:
+lemma %internal (in OddModulus) mod_inverse_neg_correct:
   \<open>(N * ((- (N\<^sup>-\<^sup>1 mod R)) mod R)) mod R = (- 1) mod R\<close>
   using mod_inverse_correct(3)
   by (metis mod_minus_eq mod_mult_right_eq mult_minus_right)
@@ -190,7 +190,7 @@ reduction along two independent axes: \emph{additive} vs \emph{subtractive}
 where \<^term>\<open>R = 2^n\<close>; the canonical inverse \<open>\<plusminus>N\<^sup>-\<^sup>1\<close> is supplied via the notation \<^term>\<open>N\<^sup>-\<^sup>1 mod 2^n\<close>.\<close>
 
 definition mont_sub_signed (\<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>_,_\<rbrakk>\<close>) where
-  \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z \<equiv> (z - ((z * (N\<^sup>-\<^sup>1 mod 2^n)) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close>
+  \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z \<equiv> (z - ((z * (N\<^sup>-\<^sup>1 mod 2^n)) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close> for N
 
 definition mont_add_signed (\<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>_,_\<rbrakk>\<close>) where
   \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z \<equiv> (z + ((z * (- (N\<^sup>-\<^sup>1 mod 2^n) mod 2^n)) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close>
@@ -207,7 +207,7 @@ text %internal \<open>Each operator equals the same expression with any \<^latex
 substituted for the canonical \<^term>\<open>N\<^sup>-\<^sup>1 mod 2^n\<close>; downstream reasoning uses this
 user-supplied \<^term>\<open>T\<close>.\<close>
 
-lemma %internal (in StandardModulus) mont_unfold:
+lemma %internal (in OddModulus) mont_unfold:
   shows mont_sub_signed_unfold:
     \<open>(N * T) mod 2^n = 1 mod 2^n
        \<Longrightarrow> mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z = (z - ((z * T) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close>
@@ -277,7 +277,7 @@ equivalent to the simpler condition \<^term>\<open>z mod R = 2^(n-1)\<close>. Th
 \<^term>\<open>T\<close> is odd (since \<^term>\<open>(N * T) mod R = 1 mod R\<close> with \<^term>\<open>R\<close> even forces \<^term>\<open>T\<close> odd) and
 \<^term>\<open>(2^(n-1) * m) mod 2^n = 2^(n-1)\<close> for any odd \<^term>\<open>m\<close>.\<close>
 
-lemma %internal (in StandardModulus) exceptional_iff:
+lemma %internal (in OddModulus) exceptional_iff:
   shows \<open>((z * (N\<^sup>-\<^sup>1 mod 2^n)) mod 2^n = 2^(n-1)) \<longleftrightarrow> (z mod 2^n = 2^(n-1))\<close>
 proof -
   define T where \<open>T = N\<^sup>-\<^sup>1 mod 2^n\<close>
@@ -319,7 +319,7 @@ proof -
   qed
 qed
 
-lemma (in StandardModulus) mont_sub_eq_add_signed_generic:
+lemma (in OddModulus) mont_sub_eq_add_signed_generic:
   assumes \<open>z mod 2^n \<noteq> 2^(n-1)\<close>
   shows \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z = mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z\<close>
 proof -
@@ -347,7 +347,7 @@ proof -
   finally show ?thesis using lhs rhs by simp
 qed
 
-lemma (in StandardModulus) mont_sub_eq_add_signed_exceptional:
+lemma (in OddModulus) mont_sub_eq_add_signed_exceptional:
   assumes \<open>z mod 2^n = 2^(n-1)\<close>
   shows \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z - N\<close>
 proof -
@@ -473,7 +473,7 @@ proof -
   thus ?thesis by (simp add: mod_eq_0_iff_dvd)
 qed
 
-theorem (in StandardModulus) mont_correct:
+theorem (in OddModulus) mont_correct:
   shows \<open>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z * 2^n) mod N = z mod N\<close>
     and \<open>(mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z * 2^n) mod N = z mod N\<close>
     and \<open>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+\<lbrakk>N, n\<rbrakk> z * 2^n) mod N = z mod N\<close>
@@ -556,10 +556,10 @@ proof -
   qed
 qed
 
-lemmas %internal (in StandardModulus) mont_add_signed_correct   = mont_correct(1)
-lemmas %internal (in StandardModulus) mont_sub_signed_correct   = mont_correct(2)
-lemmas %internal (in StandardModulus) mont_add_unsigned_correct = mont_correct(3)
-lemmas %internal (in StandardModulus) mont_sub_unsigned_correct = mont_correct(4)
+lemmas %internal (in OddModulus) mont_add_signed_correct   = mont_correct(1)
+lemmas %internal (in OddModulus) mont_sub_signed_correct   = mont_correct(2)
+lemmas %internal (in OddModulus) mont_add_unsigned_correct = mont_correct(3)
+lemmas %internal (in OddModulus) mont_sub_unsigned_correct = mont_correct(4)
 
 text %internal \<open>The triangle inequality \<^term>\<open>\<bar>z + k*N\<bar> \<le> \<bar>z\<bar> + \<bar>k\<bar>*N\<close> makes the bound depend
 only on the range of \<^term>\<open>k\<close>:
@@ -597,7 +597,7 @@ proof -
   show ?thesis using abs_eq abs_u by (simp add: mult.assoc mult.commute)
 qed
 
-lemma %internal (in StandardModulus) mont_add_signed_bound_int:
+lemma %internal (in OddModulus) mont_add_signed_bound_int:
   shows \<open>2 * \<bar>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z\<bar> * 2^n \<le> 2 * \<bar>z\<bar> + N * 2^n\<close>
 proof -
   define T where \<open>T = (- (N\<^sup>-\<^sup>1 mod 2^n)) mod 2^n\<close>
@@ -639,7 +639,7 @@ proof -
   show ?thesis using abs_eq abs_u by (simp add: mult.assoc mult.commute)
 qed
 
-lemma %internal (in StandardModulus) mont_sub_signed_bound_int:
+lemma %internal (in OddModulus) mont_sub_signed_bound_int:
   shows \<open>2 * \<bar>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z\<bar> * 2^n \<le> 2 * \<bar>z\<bar> + N * 2^n\<close>
 proof -
   define T where \<open>T = N\<^sup>-\<^sup>1 mod 2^n\<close>
@@ -672,7 +672,7 @@ proof -
   finally show ?thesis by (simp add: algebra_simps)
 qed
 
-lemma %internal (in StandardModulus) mont_add_unsigned_bound_int:
+lemma %internal (in OddModulus) mont_add_unsigned_bound_int:
   shows \<open>\<bar>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+\<lbrakk>N, n\<rbrakk> z\<bar> * 2^n \<le> \<bar>z\<bar> + N * 2^n - N\<close>
 proof -
   define T where \<open>T = (- (N\<^sup>-\<^sup>1 mod 2^n)) mod 2^n\<close>
@@ -705,7 +705,7 @@ proof -
   finally show ?thesis by (simp add: algebra_simps)
 qed
 
-lemma %internal (in StandardModulus) mont_sub_unsigned_bound_int:
+lemma %internal (in OddModulus) mont_sub_unsigned_bound_int:
   shows \<open>\<bar>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>+\<lbrakk>N, n\<rbrakk> z\<bar> * 2^n \<le> \<bar>z\<bar> + N * 2^n - N\<close>
 proof -
   define T where \<open>T = N\<^sup>-\<^sup>1 mod 2^n\<close>
@@ -723,7 +723,7 @@ by \<open>|z|/R + N - N/R\<close> in the unsigned forms. Both are sharp; they sa
 that Montgomery reduction shrinks any input to \<^emph>\<open>roughly\<close> the canonical
 range, with a residual error tied to \<^term>\<open>N\<close>.\<close>
 
-theorem (in StandardModulus) mont_bound:
+theorem (in OddModulus) mont_bound:
   shows \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z)\<^sub>\<rat>\<bar> \<le> \<bar>z\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> / 2\<close>
     and \<open>\<bar>(mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z)\<^sub>\<rat>\<bar> \<le> \<bar>z\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> / 2\<close>
     and \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+\<lbrakk>N, n\<rbrakk> z)\<^sub>\<rat>\<bar> \<le> \<bar>z\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> - N /\<^sub>\<rat> 2^n\<close>
@@ -772,10 +772,10 @@ proof -
   qed
 qed
 
-lemmas %internal (in StandardModulus) mont_add_signed_bound   = mont_bound(1)
-lemmas %internal (in StandardModulus) mont_sub_signed_bound   = mont_bound(2)
-lemmas %internal (in StandardModulus) mont_add_unsigned_bound = mont_bound(3)
-lemmas %internal (in StandardModulus) mont_sub_unsigned_bound = mont_bound(4)
+lemmas %internal (in OddModulus) mont_add_signed_bound   = mont_bound(1)
+lemmas %internal (in OddModulus) mont_sub_signed_bound   = mont_bound(2)
+lemmas %internal (in OddModulus) mont_add_unsigned_bound = mont_bound(3)
+lemmas %internal (in OddModulus) mont_sub_unsigned_bound = mont_bound(4)
 
 text \<open>The signed bounds are tight: there exist inputs at which the
 inequality is an equality. As an example, we pick \<open>n = 3\<close>, \<open>N = 3\<close>, 
@@ -785,7 +785,7 @@ so \<open>R = 8\<close>: then \<^term>\<open>N\<^sup>-\<^sup>1 mod R = 3\<close>
 lemma mont_add_signed_bound_tight:
   shows \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>3, 3\<rbrakk> (-4))\<^sub>\<rat>\<bar> = \<bar>-4\<bar> /\<^sub>\<rat> 2^3 + 3 /\<^sub>\<rat> 2\<close>
 proof -
-  interpret SM: StandardModulus 3 3 by unfold_locales auto
+  interpret SM: OddModulus 3 3 by unfold_locales auto
   have inv: \<open>(3 * (5::int)) mod 2^3 = (- 1) mod 2^3\<close> by simp
   have h: \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>3, 3\<rbrakk> (-4) = ((-4) + ((-4 * 5) mod\<^sup>\<plusminus> 2^3) * 3) div 2^3\<close>
     using SM.mont_add_signed_unfold[OF inv, of \<open>-4\<close>] by simp
@@ -798,7 +798,7 @@ qed
 lemma mont_sub_signed_bound_tight:
   shows \<open>\<bar>(mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>3, 3\<rbrakk> 4)\<^sub>\<rat>\<bar> = \<bar>4\<bar> /\<^sub>\<rat> 2^3 + 3 /\<^sub>\<rat> 2\<close>
 proof -
-  interpret SM: StandardModulus 3 3 by unfold_locales auto
+  interpret SM: OddModulus 3 3 by unfold_locales auto
   have inv: \<open>(3 * (3::int)) mod 2^3 = 1 mod 2^3\<close> by simp
   have h: \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>3, 3\<rbrakk> 4 = (4 - ((4 * 3) mod\<^sup>\<plusminus> 2^3) * 3) div 2^3\<close>
     using SM.mont_sub_signed_unfold[OF inv, of 4] by simp
@@ -816,7 +816,7 @@ and \<open>m = 3\<close>, matching \<^term>\<open>\<bar>z\<bar> /\<^sub>\<rat> R
 lemma mont_add_unsigned_bound_tight:
   shows \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+\<lbrakk>3, 3\<rbrakk> 3)\<^sub>\<rat>\<bar> = \<bar>3\<bar> /\<^sub>\<rat> 2^3 + 3 - 3 /\<^sub>\<rat> 2^3\<close>
 proof -
-  interpret SM: StandardModulus 3 3 by unfold_locales auto
+  interpret SM: OddModulus 3 3 by unfold_locales auto
   have inv: \<open>(3 * (5::int)) mod 2^3 = (- 1) mod 2^3\<close> by simp
   have h: \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+\<lbrakk>3, 3\<rbrakk> 3 = (3 + ((3 * 5) mod\<^sup>+ 2^3) * 3) div 2^3\<close>
     using SM.mont_add_unsigned_unfold[OF inv, of 3] by simp
@@ -1103,7 +1103,7 @@ proof -
   qed
 qed
 
-theorem (in StandardModulus) mont_signed_bound_iff:
+theorem (in OddModulus) mont_signed_bound_iff:
   shows mont_add_signed_bound_iff:
     \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> z)\<^sub>\<rat>\<bar> = \<bar>z\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> / 2 \<longleftrightarrow> z mod\<^sup>+ 2^n = 2^(n-1) \<and> z \<le> 0\<close>
   and mont_sub_signed_bound_iff:
@@ -1287,7 +1287,7 @@ lemma %internal mul_umod_shift:
   shows \<open>(a * b_tw) mod\<^sup>+ 2^n = (a * bT) mod\<^sup>+ 2^n\<close>
   using mod_approx_umod_cong[OF assms(1), of b_tw bT a] assms(2) by simp
 
-lemma %internal (in StandardModulus) mont_mul_sub_signed_unfold:
+lemma %internal (in OddModulus) mont_mul_sub_signed_unfold:
   assumes T_inv: \<open>(N * T) mod 2^n = 1 mod 2^n\<close>
   assumes bT_def: \<open>b_tw mod 2^n = (b * T) mod 2^n\<close>
   shows \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = (a * b - ((a * b_tw) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close>
@@ -1309,7 +1309,7 @@ proof -
     unfolding mont_mul_sub_signed_def Let_def c_def[symmetric] by simp
 qed
 
-lemma %internal (in StandardModulus) mont_mul_add_signed_unfold:
+lemma %internal (in OddModulus) mont_mul_add_signed_unfold:
   assumes T_inv: \<open>(N * T) mod 2^n = (- 1) mod 2^n\<close>
   assumes bT_def: \<open>b_tw mod 2^n = (b * T) mod 2^n\<close>
   shows \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = (a * b + ((a * b_tw) mod\<^sup>\<plusminus> 2^n) * N) div 2^n\<close>
@@ -1329,7 +1329,7 @@ proof -
     unfolding mont_mul_add_signed_def Let_def c_def[symmetric] by simp
 qed
 
-lemma %internal (in StandardModulus) mont_mul_add_unsigned_unfold:
+lemma %internal (in OddModulus) mont_mul_add_unsigned_unfold:
   assumes T_inv: \<open>(N * T) mod 2^n = (- 1) mod 2^n\<close>
   assumes bT_def: \<open>b_tw mod 2^n = (b * T) mod 2^n\<close>
   shows \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+ \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = (a * b + ((a * b_tw) mod\<^sup>+ 2^n) * N) div 2^n\<close>
@@ -1353,7 +1353,7 @@ qed
 text \<open>The multiplication operator coincides with the reduction operator applied
 to \<^term>\<open>a*b\<close>: by associativity, \<^term>\<open>(a * b_tw) mod R = (a*b * T) mod R\<close>.\<close>
 
-lemma (in StandardModulus) mont_mul_eq_red:
+lemma (in OddModulus) mont_mul_eq_red:
   shows \<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk> (a * b)\<close>
     and \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk> (a * b)\<close>
     and \<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+ \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> = mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+ \<lbrakk>N, n\<rbrakk> (a * b)\<close>
@@ -1427,9 +1427,9 @@ proof -
   qed
 qed
 
-lemmas %internal (in StandardModulus) mont_mul_sub_signed_eq_red   = mont_mul_eq_red(1)
-lemmas %internal (in StandardModulus) mont_mul_add_signed_eq_red   = mont_mul_eq_red(2)
-lemmas %internal (in StandardModulus) mont_mul_add_unsigned_eq_red = mont_mul_eq_red(3)
+lemmas %internal (in OddModulus) mont_mul_sub_signed_eq_red   = mont_mul_eq_red(1)
+lemmas %internal (in OddModulus) mont_mul_add_signed_eq_red   = mont_mul_eq_red(2)
+lemmas %internal (in OddModulus) mont_mul_add_unsigned_eq_red = mont_mul_eq_red(3)
 
 subsection \<open>Correctness and bounds\<close>
 
@@ -1437,7 +1437,7 @@ text \<open>Since Montgomery multiplication is the same as Montgomery reduction
 of the product, the bounds from the previous section readily carry over to
 Montgomery multiplication:\<close>
 
-theorem (in StandardModulus) mont_mul_correct:
+theorem (in OddModulus) mont_mul_correct:
   shows \<open>(mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> * 2^n) mod N = (a * b) mod N\<close>
     and \<open>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> * 2^n) mod N = (a * b) mod N\<close>
     and \<open>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+ \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle> * 2^n) mod N = (a * b) mod N\<close>
@@ -1456,11 +1456,11 @@ proof -
     by simp
 qed
 
-lemmas %internal (in StandardModulus) mont_mul_sub_signed_correct   = mont_mul_correct(1)
-lemmas %internal (in StandardModulus) mont_mul_add_signed_correct   = mont_mul_correct(2)
-lemmas %internal (in StandardModulus) mont_mul_add_unsigned_correct = mont_mul_correct(3)
+lemmas %internal (in OddModulus) mont_mul_sub_signed_correct   = mont_mul_correct(1)
+lemmas %internal (in OddModulus) mont_mul_add_signed_correct   = mont_mul_correct(2)
+lemmas %internal (in OddModulus) mont_mul_add_unsigned_correct = mont_mul_correct(3)
 
-theorem (in StandardModulus) mont_mul_bound:
+theorem (in OddModulus) mont_mul_bound:
   shows \<open>\<bar>(mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle>)\<^sub>\<rat>\<bar> \<le> \<bar>a * b\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> / 2\<close>
     and \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus> \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle>)\<^sub>\<rat>\<bar> \<le> \<bar>a * b\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> / 2\<close>
     and \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>+ \<lbrakk>N, n\<rbrakk>\<langle>a, b\<rangle>)\<^sub>\<rat>\<bar> \<le> \<bar>a * b\<bar> /\<^sub>\<rat> 2^n + N\<^sub>\<rat> - N /\<^sub>\<rat> 2^n\<close>
@@ -1479,9 +1479,9 @@ proof -
     by simp
 qed
 
-lemmas %internal (in StandardModulus) mont_mul_sub_signed_bound   = mont_mul_bound(1)
-lemmas %internal (in StandardModulus) mont_mul_add_signed_bound   = mont_mul_bound(2)
-lemmas %internal (in StandardModulus) mont_mul_add_unsigned_bound = mont_mul_bound(3)
+lemmas %internal (in OddModulus) mont_mul_sub_signed_bound   = mont_mul_bound(1)
+lemmas %internal (in OddModulus) mont_mul_add_signed_bound   = mont_mul_bound(2)
+lemmas %internal (in OddModulus) mont_mul_add_unsigned_bound = mont_mul_bound(3)
 
 end
 

@@ -31,7 +31,7 @@ definition \<open>mont_mul_doubling N n T a b \<equiv>
 
 text \<open>Algorithm~7 computes \<^term>\<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close> for arbitrary \<^term>\<open>a\<close>, \<^term>\<open>b\<close>:\<close>
 
-theorem (in StandardModulus) mont_mul_doubling_eq:
+theorem (in OddModulus) mont_mul_doubling_eq:
   assumes T_inv: \<open>(N * T) mod 2^n = 1 mod 2^n\<close>
   shows \<open>mont_mul_doubling N n T a b = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>
 proof -
@@ -126,7 +126,7 @@ text \<open>Under the standard Montgomery side-conditions, Algorithm~8 computes
 exactly \<^term>\<open>mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close> for all \<^term>\<open>a\<close>, \<^term>\<open>b\<close>. The parity assumption of \cite[Algorithm~8]{NeonNTT}
 that either \<^term>\<open>a\<close> or \<^term>\<open>b\<close> be odd is unnecessary.\<close>
 
-theorem (in StandardModulus) mont_mul_rounding_eq:
+theorem (in OddModulus) mont_mul_rounding_eq:
   assumes T_inv: \<open>(N * T) mod 2^n = (- 1) mod 2^n\<close>
   shows \<open>mont_mul_rounding N n T a b = mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>
 proof -
@@ -290,7 +290,7 @@ signed Montgomery reduction. The hypothesis
 \<^term>\<open>(2*a*b) mod 2^n \<noteq> 2^(n-1)\<close> rules out the only configuration in which the
 two \<open>SQRDMULH\<close> roundings would together contribute \<^term>\<open>2\<close> rather than \<^term>\<open>1\<close>.\<close>
 
-theorem (in StandardModulus) mont_mul_rounding_doubled_eq:
+theorem (in OddModulus) mont_mul_rounding_doubled_eq:
   assumes T_inv: \<open>(N * T) mod 2^n = (- 1) mod 2^n\<close>
       and parity: \<open>2 * a * b mod 2^n \<noteq> 2^(n-1)\<close>
   shows \<open>mont_mul_rounding_doubled_int N n T a b = 2 * mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>

@@ -2,7 +2,7 @@
    SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT *)
 
 theory Asm_Barrett
-  imports Word_Ops Barrett_Montgomery
+  imports Word_Ops Barrett_Montgomery Barrett_Division_Even
 begin
 
 unbundle %invisible ASM_syntax
@@ -135,7 +135,7 @@ theorem barrett_mul_neon_word_correct:
   fixes N a b bt :: \<open>'a::len word\<close> and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
   assumes bt_eq: \<open>sint bt = \<lfloor>sint b * 2^n /\<^sub>\<rat> sint N\<rceil>\<^sub>2 div 2\<close>
-      and N_std: \<open>StandardModulus (sint N) (n-1)\<close>
+      and N_std: \<open>OddModulus (sint N) (n-1)\<close>
       and b_bound: \<open>\<bar>sint b\<bar>\<^sub>\<rat> < (sint N)\<^sub>\<rat>\<close>
   defines \<open>out \<equiv> let ASM \<guillemotleft>
                     MUL      z1 a b;
@@ -154,7 +154,7 @@ proof -
   define m where \<open>m \<equiv> \<lfloor>sint b * 2^n /\<^sub>\<rat> sint N\<rceil>\<^sub>2\<close>
   have halfBT_eq: \<open>sint bt = m div 2\<close> using bt_eq unfolding m_def .
 
-  interpret SM: StandardModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
+  interpret SM: OddModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
   have npos: \<open>0 < n\<close> using SM.npos by simp
   have N_lt: \<open>sint N < 2^(n-1)\<close> using SM.N_lt_R .
   have R_eq: \<open>(2::int)^n = 2 * 2^(n-1)\<close> using npos by (cases n) auto
@@ -363,7 +363,7 @@ text \<open>Replacing \<^verbatim>\<open>SQRDMULH\<close> with truncating \<^ver
 \<^term>\<open>barM\<^sup>+\<lbrakk>N, n, \<lfloor>\<cdot>\<rceil>\<rbrakk>\<langle>a, b\<rangle>\<close> on signed lanes. The coarse output
 bound is \<^term>\<open>5*N /\<^sub>\<rat> 4\<close> rather than \<^term>\<open>(N::int)\<close>, requiring a
 correspondingly tighter modulus constraint
-\<^term>\<open>StandardModulus N (n-2)\<close>.\<close>
+\<^term>\<open>OddModulus N (n-2)\<close>.\<close>
 
 
 
@@ -441,7 +441,7 @@ theorem barrett_mul_unsigned_neon_word_correct:
   fixes N a b m :: \<open>'a::len word\<close> and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
   assumes m_eq: \<open>sint m = \<lfloor>sint b * 2^n /\<^sub>\<rat> sint N\<rceil>\<close>
-      and N_std: \<open>StandardModulus (sint N) (n-2)\<close>
+      and N_std: \<open>OddModulus (sint N) (n-2)\<close>
       and b_bound: \<open>\<bar>sint b\<bar>\<^sub>\<rat> < (sint N)\<^sub>\<rat>\<close>
   defines \<open>out \<equiv> let ASM \<guillemotleft>
                     MUL  z1 a b;
@@ -458,7 +458,7 @@ theorem barrett_mul_unsigned_neon_word_correct:
         \<comment> \<open>coarse output bound\<close>
 
 proof -
-  interpret SM: StandardModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
+  interpret SM: OddModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
   have npos: \<open>0 < n\<close> using SM.npos by simp
   have N_lt: \<open>sint N < 2^(n-2)\<close> using SM.N_lt_R .
   have N_lt_R: \<open>sint N < 2^n\<close>
@@ -681,7 +681,7 @@ theorem barrett_red_neon_word_correct:
     and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
   assumes Nt_eq: \<open>sint Nt = \<lfloor>2^n /\<^sub>\<rat> sint N\<rceil>\<^sub>2 div 2\<close>
-      and N_std: \<open>StandardModulus (sint N) (n-2)\<close>
+      and N_std: \<open>OddModulus (sint N) (n-2)\<close>
   defines \<open>out \<equiv> let ASM \<guillemotleft>
                     SQRDMULH t z Nt;
                     MLS      r z t N
@@ -698,7 +698,7 @@ theorem barrett_red_neon_word_correct:
 proof -
   define m where \<open>m \<equiv> \<lfloor>2^n /\<^sub>\<rat> sint N\<rceil>\<^sub>2\<close>
   have halfM_eq: \<open>sint Nt = m div 2\<close> using Nt_eq unfolding m_def .
-  interpret SM: StandardModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
+  interpret SM: OddModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
 
   have n_ge_2: \<open>n \<ge> 2\<close> using SM.npos by simp
   have npos: \<open>0 < n\<close> using n_ge_2 by simp
@@ -815,7 +815,7 @@ output is only guaranteed to be canonical for inputs with
 \<^term>\<open>\<bar>sint z\<bar> \<le> 2^(n-2)\<close>. The statement of \cite[Algorithm~11]{NeonNTT} as 
 published misses this and is wrong as stated. However, we note --- and show below ---
 that the assumption \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) < 1/4\<close> does hold in the context
-of ML-KEM and ML-DSA, so for those applications the error is of no consequence.\<close>
+of ML-KEM~\cite{FIPS203} and ML-DSA~\cite{FIPS204}, so for those applications the error is of no consequence.\<close>
 
 definition %internal \<open>barrett_red_refined_neon_int n \<alpha> N V z \<equiv>
      (let t = sqdmulh_int n z V;
@@ -871,7 +871,7 @@ theorem barrett_red_refined_neon_word_correct:
   assumes V_eq: \<open>sint V = \<lfloor>2^(n+\<alpha>-1) /\<^sub>\<rat> sint N\<rceil>\<close>
         \<comment> \<open>magic constant; the RHS fits in a signed \<^term>\<open>n\<close>-bit word
             because \<^term>\<open>2^\<alpha> < sint N\<close>\<close>
-      and N_std: \<open>StandardModulus (sint N) n\<close>
+      and N_std: \<open>OddModulus (sint N) n\<close>
       and N_alpha: \<open>2^\<alpha> < sint N\<close> \<open>sint N < 2^(\<alpha>+1)\<close>
         \<comment> \<open>\<open>\<alpha> = \<lfloor>log\<^sub>2 (sint N)\<rfloor>\<close>\<close>
       and \<delta>_quality: \<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) \<le> 1/2^\<delta>\<close>
@@ -926,7 +926,7 @@ proof -
     thus \<open>y = x mod\<^sup>\<plusminus> N\<close> using r_def by simp
   qed
 
-  interpret SM: StandardModulus \<open>sint N\<close> n by (rule N_std)
+  interpret SM: OddModulus \<open>sint N\<close> n by (rule N_std)
   have \<alpha>_pos: \<open>1 \<le> \<alpha>\<close>
     using N_alpha SM.Ngt1 power_less_imp_less_exp[of \<open>2::int\<close> 1 \<open>\<alpha>+1\<close>] by simp
 
@@ -1053,7 +1053,7 @@ theorem barrett_red_refined_neon_word_correct_ml_kem:
 proof -
   have V_eq: \<open>sint (20159 :: 16 word) = \<lfloor>2^(16+11-1) /\<^sub>\<rat> sint (3329 :: 16 word)\<rceil>\<close>
     by eval
-  have N_std: \<open>StandardModulus (sint (3329 :: 16 word)) 16\<close>
+  have N_std: \<open>OddModulus (sint (3329 :: 16 word)) 16\<close>
     by unfold_locales eval+
   have N_alpha1: \<open>(2::int)^11 < sint (3329 :: 16 word)\<close>
     by eval
@@ -1101,7 +1101,7 @@ theorem barrett_red_refined_neon_word_correct_ml_dsa:
 proof -
   have V_eq: \<open>sint (1074791297 :: 32 word) = \<lfloor>2^(32+22-1) /\<^sub>\<rat> sint (8380417 :: 32 word)\<rceil>\<close>
     by eval
-  have N_std: \<open>StandardModulus (sint (8380417 :: 32 word)) 32\<close>
+  have N_std: \<open>OddModulus (sint (8380417 :: 32 word)) 32\<close>
     by unfold_locales eval+
   have N_alpha1: \<open>(2::int)^22 < sint (8380417 :: 32 word)\<close>
     by eval
@@ -1139,7 +1139,7 @@ lemma refined_barrett_example_3947:
       and \<open>V \<equiv> (17002 :: 16 word)\<close>
       and \<open>z \<equiv> (17762 :: 16 word)\<close>
   shows \<open>sint V = \<lfloor>2^(n+\<alpha>-1) /\<^sub>\<rat> sint N\<rceil>\<close>
-    and \<open>StandardModulus (sint N) n\<close>
+    and \<open>OddModulus (sint N) n\<close>
     and \<open>2^\<alpha> < sint N\<close> \<open>sint N < 2^(\<alpha>+1)\<close>
         \<comment>\<open>Assumptions of @{thm [source] barrett_red_refined_neon_word_correct} are satisfied,
            except for \<^term>\<open>\<bar>sint z\<bar> \<le> 2^(n-1-(2-\<delta>))\<close>: We only have \<^term>\<open>\<bar>sint z\<bar> \<le> 2^(n-1)\<close>.\<close>
@@ -1154,7 +1154,7 @@ lemma refined_barrett_example_3947:
 proof -
   show \<open>sint V = \<lfloor>2^(n+\<alpha>-1) /\<^sub>\<rat> sint N\<rceil>\<close>
     unfolding V_def n_def \<alpha>_def N_def by eval
-  show \<open>StandardModulus (sint N) n\<close>
+  show \<open>OddModulus (sint N) n\<close>
     unfolding N_def n_def by unfold_locales eval+
   show \<open>2^\<alpha> < sint N\<close>
     unfolding \<alpha>_def N_def by eval
@@ -1170,6 +1170,147 @@ proof -
     unfolding N_def V_def z_def \<alpha>_def by eval
 qed
 
+section \<open>AArch64 Barrett division for ML-DSA \<^emph>\<open>decompose\<close> \label{sec:aarch64_decompose}\<close>
+
+text \<open>The AArch64 \<^emph>\<open>decompose\<close> kernel of \texttt{mldsa-native} computes the
+high part of \cite[Algorithm~36]{FIPS204} with a two-instruction
+\<^verbatim>\<open>SQDMULH\<close>/\<^verbatim>\<open>SRSHR\<close> sequence --- a doubling high-multiply by the magic constant,
+then a rounding shift. We show it equals the round-half-down division proved exact
+in \autoref{ch:barrett_division_even}.\<close>
+
+text %internal \<open>The doubling in \<^const>\<open>sqdmulh_int\<close> and the rounding shift compose
+into a single round-to-nearest at the combined radix. The shift must be at least
+one bit (\<^term>\<open>k \<ge> 1\<close>), so that the floor discarded by \<^const>\<open>sqdmulh_int\<close> sits
+strictly below the final rounding position; this is the divisor-nesting identity.\<close>
+
+lemma %internal div_nest_round:
+  fixes d :: int and p k :: nat
+  assumes \<open>k \<ge> 1\<close>
+  shows \<open>((d div 2^p) + 2^(k-1)) div 2^k = (d + 2^(p+k-1)) div 2^(p+k)\<close>
+proof -
+  have num: \<open>(2::int)^(p+k-1) = 2^p * 2^(k-1)\<close> using assms by (simp add: power_add[symmetric])
+  have den: \<open>(2::int)^(p+k) = 2^p * 2^k\<close> by (simp add: power_add)
+  have split: \<open>(d + 2^p * 2^(k-1)) div (2^p * 2^k) = (d + 2^p * 2^(k-1)) div 2^p div 2^k\<close>
+    by (simp add: zdiv_zmult2_eq)
+  have \<open>(d + 2^(p+k-1)) div 2^(p+k) = (d + 2^p * 2^(k-1)) div 2^p div 2^k\<close>
+    by (simp only: num den split)
+  also have \<open>(d + 2^p * 2^(k-1)) div 2^p = d div 2^p + 2^(k-1)\<close>
+    by simp
+  finally show ?thesis by (simp add: add.commute)
+qed
+
+text %internal \<open>Hence the \<^verbatim>\<open>SQDMULH\<close>/\<^verbatim>\<open>SRSHR\<close> integer kernel rounds the
+multiply-shift at the combined radix \<^term>\<open>2^(n-1+k)\<close>:\<close>
+
+lemma %internal decompose_high_neon_int_eq:
+  fixes a M :: int and n k :: nat
+  assumes \<open>n \<ge> 1\<close> and \<open>k \<ge> 1\<close>
+  shows \<open>srshr_int k (sqdmulh_int n a M) = \<lfloor>a * M /\<^sub>\<rat> 2^(n-1+k)\<rceil>\<close>
+proof -
+  have kpos: \<open>0 < k\<close> using assms(2) by simp
+  have nkpos: \<open>0 < n + k\<close> using assms by simp
+  have sq: \<open>sqdmulh_int n a M = (2 * a * M) div 2^n\<close> unfolding sqdmulh_int_def by simp
+  have kk: \<open>n + k - 1 = n - 1 + k\<close> using assms(1) by simp
+  have \<open>srshr_int k (sqdmulh_int n a M) = \<lfloor>((2*a*M) div 2^n) /\<^sub>\<rat> 2^k\<rceil>\<close>
+    unfolding srshr_int_def sq by simp
+  also have \<open>\<dots> = (((2*a*M) div 2^n) + 2^(k-1)) div 2^k\<close>
+    using round_div_by_power2[OF kpos, of \<open>(2*a*M) div 2^n\<close>] by simp
+  also have \<open>\<dots> = (2 * a * M + 2^(n+k-1)) div 2^(n+k)\<close>
+    using div_nest_round[OF assms(2), of \<open>2*a*M\<close> n] by simp
+  also have \<open>\<dots> = \<lfloor>(2 * a * M) /\<^sub>\<rat> 2^(n+k)\<rceil>\<close>
+    using round_div_by_power2[OF nkpos, of \<open>2*a*M\<close>] by simp
+  also have \<open>\<dots> = \<lfloor>a * M /\<^sub>\<rat> 2^(n-1+k)\<rceil>\<close>
+  proof -
+    have pw: \<open>(2::int)^(n+k) = 2 * 2^(n-1+k)\<close>
+      using assms(1) by (simp add: power_eq_if)
+    have \<open>(2 * a * M) /\<^sub>\<rat> 2^(n+k) = (a * M) /\<^sub>\<rat> 2^(n-1+k)\<close>
+      by (simp add: pw of_int_mult)
+    thus ?thesis by simp
+  qed
+  finally show ?thesis .
+qed
+
+text %internal \<open>The kernel as a fixed-width word computation: the two instructions on a
+signed lane, with \<^term>\<open>z\<close> the coefficient and \<^term>\<open>M\<close> the magic constant.\<close>
+
+definition %internal decompose_high_neon_word
+  :: \<open>nat \<Rightarrow> 'a::len word \<Rightarrow> 'a word \<Rightarrow> 'a word\<close> where
+  \<open>decompose_high_neon_word k M z \<equiv>
+     let ASM \<guillemotleft>
+       SQDMULH t z M;
+       SRSHR   q t #k
+     \<guillemotright> in q\<close>
+
+text %internal \<open>The word kernel transcribes onto signed lanes, provided the
+\<^const>\<open>sqdmulh_word\<close> saturation case is excluded.\<close>
+
+lemma %internal sint_decompose_high_neon_word:
+  fixes M z :: \<open>'a::len word\<close> and n k :: nat
+  assumes n_def: \<open>n = LENGTH('a)\<close>
+  assumes nondeg: \<open>\<not> (sint z = -(2^(n-1)) \<and> sint M = -(2^(n-1)))\<close>
+  shows \<open>sint (decompose_high_neon_word k M z)
+            = srshr_int k (sqdmulh_int n (sint z) (sint M))\<close>
+proof -
+  define t :: \<open>'a word\<close> where \<open>t = sqdmulh_word z M\<close>
+  have expand: \<open>decompose_high_neon_word k M z = srshr_word k t\<close>
+    unfolding decompose_high_neon_word_def Let_def t_def by simp
+  have t_int: \<open>sint t = sqdmulh_int n (sint z) (sint M)\<close>
+    unfolding t_def by (rule sint_sqdmulh_word[OF n_def nondeg])
+  show ?thesis
+    unfolding expand using sint_srshr_word[OF n_def, of k t] t_int by simp
+qed
+
+text \<open>The following AArch64 kernel can be used to ML-DSA-65/87's \<open>decompose\<close> routine:\<close>
+
+theorem decompose_high_neon_word_correct_32:
+  fixes z :: \<open>32 word\<close>
+  assumes z_nn: \<open>0 \<le> sint z\<close> and z_lt: \<open>sint z < MLDSA_Q\<close>
+  defines \<open>out \<equiv> let ASM \<guillemotleft>
+                    SQDMULH t z 1074791425;
+                    SRSHR   q t #18
+                  \<guillemotright> in q\<close>
+  shows \<open>sint out = \<lfloor>sint z /\<^sub>\<rat> (2 * MLDSA_GAMMA2_32)\<rceil>\<^sub>\<down>\<close>
+proof -
+  have n_def: \<open>(32::nat) = LENGTH(32)\<close> by simp
+  have sM: \<open>sint (1074791425 :: 32 word) = 1074791425\<close> by eval
+  have nondeg: \<open>\<not> (sint z = -(2^(32-1)) \<and> sint (1074791425 :: 32 word) = -(2^(32-1)))\<close>
+    using z_nn by simp
+  have out_eq: \<open>out = decompose_high_neon_word 18 (1074791425 :: 32 word) z\<close>
+    unfolding out_def decompose_high_neon_word_def by simp
+  have \<open>sint out = srshr_int 18 (sqdmulh_int 32 (sint z) (sint (1074791425 :: 32 word)))\<close>
+    unfolding out_eq by (rule sint_decompose_high_neon_word[OF n_def nondeg])
+  also have \<open>\<dots> = \<lfloor>sint z * 1074791425 /\<^sub>\<rat> 2^49\<rceil>\<close>
+    using decompose_high_neon_int_eq[of 32 18 \<open>sint z\<close> \<open>sint (1074791425 :: 32 word)\<close>] sM by simp
+  also have \<open>\<dots> = \<lfloor>sint z /\<^sub>\<rat> (2 * MLDSA_GAMMA2_32)\<rceil>\<^sub>\<down>\<close>
+    using barrett_decompose_32_aarch64[OF z_nn z_lt] by simp
+  finally show ?thesis .
+qed
+
+text \<open>The following AArch64 kernel can be used to compoute ML-DSA-44's \<open>decompose\<close> routine:\<close>
+
+theorem decompose_high_neon_word_correct_88:
+  fixes z :: \<open>32 word\<close>
+  assumes z_nn: \<open>0 \<le> sint z\<close> and z_lt: \<open>sint z < MLDSA_Q\<close>
+  defines \<open>out \<equiv> let ASM \<guillemotleft>
+                    SQDMULH t z 1477838209;
+                    SRSHR   q t #17
+                  \<guillemotright> in q\<close>
+  shows \<open>sint out = \<lfloor>sint z /\<^sub>\<rat> (2 * MLDSA_GAMMA2_88)\<rceil>\<^sub>\<down>\<close>
+proof -
+  have n_def: \<open>(32::nat) = LENGTH(32)\<close> by simp
+  have sM: \<open>sint (1477838209 :: 32 word) = 1477838209\<close> by eval
+  have nondeg: \<open>\<not> (sint z = -(2^(32-1)) \<and> sint (1477838209 :: 32 word) = -(2^(32-1)))\<close>
+    using z_nn by simp
+  have out_eq: \<open>out = decompose_high_neon_word 17 (1477838209 :: 32 word) z\<close>
+    unfolding out_def decompose_high_neon_word_def by simp
+  have \<open>sint out = srshr_int 17 (sqdmulh_int 32 (sint z) (sint (1477838209 :: 32 word)))\<close>
+    unfolding out_eq by (rule sint_decompose_high_neon_word[OF n_def nondeg])
+  also have \<open>\<dots> = \<lfloor>sint z * 1477838209 /\<^sub>\<rat> 2^48\<rceil>\<close>
+    using decompose_high_neon_int_eq[of 32 17 \<open>sint z\<close> \<open>sint (1477838209 :: 32 word)\<close>] sM by simp
+  also have \<open>\<dots> = \<lfloor>sint z /\<^sub>\<rat> (2 * MLDSA_GAMMA2_88)\<rceil>\<^sub>\<down>\<close>
+    using barrett_decompose_88_aarch64[OF z_nn z_lt] by simp
+  finally show ?thesis .
+qed
 end
 
 

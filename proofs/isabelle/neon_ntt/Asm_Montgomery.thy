@@ -43,7 +43,7 @@ Montgomery operator: provided \<^term>\<open>T\<close> is a multiplicative inver
 \<^term>\<open>R\<close> and the modulus satisfies the standard cryptographic conditions, the
 kernel returns \<^term>\<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk>(a*b)\<close>.\<close>
 
-lemma %internal (in StandardModulus) mont_mul_neon_int_correct:
+lemma %internal (in OddModulus) mont_mul_neon_int_correct:
   fixes a b T :: int
   assumes T_inv: \<open>(N * T) mod 2^n = 1 mod 2^n\<close>
   shows \<open>mont_mul_neon_int n N (b * T) a b = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>
@@ -127,7 +127,7 @@ computes \<^term>\<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>
 theorem mont_mul_neon_word_correct:
   fixes N bT a b :: \<open>'a::len word\<close> and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
-  assumes N_std: \<open>StandardModulus (sint N) (n-1)\<close>
+  assumes N_std: \<open>OddModulus (sint N) (n-1)\<close>
       and bT_eq: \<open>sint bT = (sint b * ((sint N)\<^sup>-\<^sup>1 mod 2^n)) mod\<^sup>\<plusminus> 2^n\<close>
       and nondeg_b: \<open>\<bar>sint b\<bar> < 2^(n-1)\<close>
   defines \<open>out \<equiv> let ASM \<guillemotleft>
@@ -146,7 +146,7 @@ theorem mont_mul_neon_word_correct:
 
         \<comment> \<open>coarse output bound\<close>
 proof -
-  interpret SM0: StandardModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
+  interpret SM0: OddModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
   have N_lo: \<open>1 < sint N\<close> using SM0.Ngt1 .
   have N_lt: \<open>sint N < 2^(n-1)\<close> using SM0.N_lt_R .
   have N_odd: \<open>odd (sint N)\<close> using SM0.Nodd .
@@ -187,7 +187,7 @@ proof -
       using n_pos by (simp add: power_strict_increasing)
     show ?thesis using h N_lt by linarith
   qed
-  interpret SM: StandardModulus \<open>sint N\<close> n
+  interpret SM: OddModulus \<open>sint N\<close> n
     by unfold_locales (use N_lo N_odd n_pos N_lt_R in auto)
   have step3: \<open>mont_mul_neon_int n (sint N) (sint b * T) (sint a) (sint b)
                  = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>sint N, n\<rbrakk> (sint a * sint b)\<close>
@@ -298,7 +298,7 @@ expansion of \<open>SQRDMULH\<close>'s correction \<open>round(2(kN)/R)\<close> 
 \emph{exact} integer \<^term>\<open>2*q\<close>, with no rounding ambiguity. Hence the kernel
 returns \<^term>\<open>mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk>(a * b)\<close> unconditionally.\<close>
 
-lemma %internal (in StandardModulus) mont_mul_neon_rounding_int_correct:
+lemma %internal (in OddModulus) mont_mul_neon_rounding_int_correct:
   fixes a b T :: int
   assumes T_inv: \<open>(N * T) mod 2^n = 1 mod 2^n\<close>
   shows \<open>mont_mul_neon_rounding_int n N (b * T) a b = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>
@@ -403,7 +403,7 @@ qed
 theorem mont_mul_neon_rounding_word_correct:
   fixes N bT a b :: \<open>'a::len word\<close> and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
-  assumes N_std: \<open>StandardModulus (sint N) (n-1)\<close>
+  assumes N_std: \<open>OddModulus (sint N) (n-1)\<close>
       and bT_eq: \<open>sint bT = (sint b * ((sint N)\<^sup>-\<^sup>1 mod 2^n)) mod\<^sup>\<plusminus> 2^n\<close>
       and nondeg_b: \<open>\<bar>sint b\<bar> < 2^(n-1)\<close>
   defines \<open>out \<equiv> let ASM \<guillemotleft>
@@ -423,7 +423,7 @@ theorem mont_mul_neon_rounding_word_correct:
         \<comment> \<open>coarse output bound\<close>
 
 proof -
-  interpret SM0: StandardModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
+  interpret SM0: OddModulus \<open>sint N\<close> \<open>n-1\<close> by (rule N_std)
   have N_lo: \<open>1 < sint N\<close> using SM0.Ngt1 .
   have N_lt: \<open>sint N < 2^(n-1)\<close> using SM0.N_lt_R .
   have N_odd: \<open>odd (sint N)\<close> using SM0.Nodd .
@@ -465,7 +465,7 @@ proof -
       using n_pos by (simp add: power_strict_increasing)
     show ?thesis using h N_lt by linarith
   qed
-  interpret SM: StandardModulus \<open>sint N\<close> n
+  interpret SM: OddModulus \<open>sint N\<close> n
     by unfold_locales (use N_lo N_odd n_pos N_lt_R in auto)
   have step3: \<open>mont_mul_neon_rounding_int n (sint N) (sint b * T) (sint a) (sint b)
                   = mont\<^sub>s\<^sub>u\<^sub>b\<^sup>\<plusminus>\<lbrakk>sint N, n\<rbrakk> (sint a * sint b)\<close>
@@ -575,7 +575,7 @@ lemma %internal mont_mul_neon_rounding_doubled_int_eq_doubled:
             Let_def sqrdmulh_int_def
   by (simp add: algebra_simps)
 
-lemma %internal (in StandardModulus) mont_mul_neon_rounding_doubled_int_correct:
+lemma %internal (in OddModulus) mont_mul_neon_rounding_doubled_int_correct:
   fixes a b T :: int
   assumes T_inv: \<open>(N * T) mod 2^n = (- 1) mod 2^n\<close>
       and parity: \<open>2 * a * b mod 2^n \<noteq> 2^(n-1)\<close>
@@ -693,7 +693,7 @@ qed
 theorem mont_mul_neon_rounding_doubled_word_correct:
   fixes N bT a b :: \<open>'a::len word\<close> and n :: nat
   assumes n_def: \<open>n = LENGTH('a)\<close>
-  assumes N_std: \<open>StandardModulus (sint N) (n-2)\<close>
+  assumes N_std: \<open>OddModulus (sint N) (n-2)\<close>
       and bT_eq: \<open>sint bT = (sint b * ((- ((sint N)\<^sup>-\<^sup>1 mod 2^n)) mod 2^n)) mod\<^sup>\<plusminus> 2^n\<close>
       and small_a: \<open>\<bar>sint a\<bar> < 2^(n-2)\<close>
       and odd_b: \<open>odd (sint b)\<close>
@@ -709,7 +709,7 @@ theorem mont_mul_neon_rounding_doubled_word_correct:
     and \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> \<le> (2^(n-1))\<^sub>\<rat>\<close>
         \<comment> \<open>coarse output bound\<close>
 proof -
-  interpret SM0: StandardModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
+  interpret SM0: OddModulus \<open>sint N\<close> \<open>n-2\<close> by (rule N_std)
   have N_lo: \<open>1 < sint N\<close> using SM0.Ngt1 .
   have N_lt_n2: \<open>sint N < 2^(n-2)\<close> using SM0.N_lt_R .
   have N_small: \<open>sint N \<le> 2^(n-2)\<close> using N_lt_n2 by linarith
@@ -758,7 +758,7 @@ proof -
       using n_pos by (simp add: power_strict_increasing)
     show ?thesis using h N_lt by linarith
   qed
-  interpret SM: StandardModulus \<open>sint N\<close> n
+  interpret SM: OddModulus \<open>sint N\<close> n
     by unfold_locales (use N_lo N_odd n_pos N_lt_R in auto)
   define T where \<open>T \<equiv> (- ((sint N)\<^sup>-\<^sup>1 mod 2^n)) mod 2^n\<close>
   have T_inv: \<open>(sint N * T) mod 2^n = (- 1) mod 2^n\<close>

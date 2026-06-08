@@ -31,11 +31,11 @@ definition barrett_red_unsigned (\<open>bar\<^sup>+ \<lbrakk>_,_,_\<rbrakk>\<clo
   \<open>bar\<^sup>+\<lbrakk>N, n, f\<rbrakk> z \<equiv> z - N * \<lfloor>z * \<lbrakk>2^n /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> 2^n\<rfloor>\<close> for f ("\<lbrakk>_\<rbrakk>")
 
 text \<open>We bundle the standing assumptions of this and the next chapter into a
-locale \<open>BarrettContext\<close> = \<open>StandardModulus\<close> (a positive odd modulus \<^term>\<open>N\<close> and a
+locale \<open>BarrettContext\<close> = \<open>OddModulus\<close> (a positive odd modulus \<^term>\<open>N\<close> and a
 splitting exponent \<^term>\<open>n\<close> with \<^term>\<open>R = (2::int)^n\<close> and \<^term>\<open>R > N\<close>) plus \<open>IntegerApproximation\<close> (an
 integer approximation \<open>\<lbrakk>_\<rbrakk>\<close> of the rationals).\<close>
 
-locale BarrettContext = StandardModulus + IntegerApproximation
+locale BarrettContext = OddModulus + IntegerApproximation
 
 text \<open>\cite[Fact~2]{NeonNTT} provides a coarse bound for the
 approximation error between the signed variant and the canonical signed residue:\<close>

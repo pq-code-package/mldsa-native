@@ -300,7 +300,7 @@ divisible by \<^term>\<open>N\<close>, and since \<^term>\<open>N\<close> is odd
 \<^term>\<open>2 * b * R\<close>. So the pointwise rounding error at \<^term>\<open>(b * R) /\<^sub>\<rat> N\<close> is
 strictly below the uniform quality, yielding strict output bounds.\<close>
 
-theorem (in StandardModulus) barrett_mul_narrow:
+theorem (in OddModulus) barrett_mul_narrow:
   assumes \<open>\<bar>a\<bar> \<le> 2^(n-1)\<close>
       and \<open>\<bar>b\<bar> < N\<close> and \<open>b \<noteq> 0\<close>
   shows \<open>\<bar>(barM\<^sup>\<plusminus> \<lbrakk>N, n, \<lfloor>\<cdot>\<rceil>\<^sub>2\<rbrakk>\<langle>a, b\<rangle>)\<^sub>\<rat>\<bar> < N\<^sub>\<rat>\<close>
@@ -400,7 +400,7 @@ qed
 
 text \<open>Specializing at \<^term>\<open>b=1\<close>, we obtain the same bounds for Barrett reduction:\<close>
 
-theorem (in StandardModulus) barrett_red_narrow:
+theorem (in OddModulus) barrett_red_narrow:
   assumes \<open>\<bar>z\<bar> \<le> 2^(n-1)\<close>
   shows \<open>\<bar>(bar\<^sup>\<plusminus>\<lbrakk>N, n, \<lfloor>\<cdot>\<rceil>\<^sub>2\<rbrakk> z)\<^sub>\<rat>\<bar> < N\<^sub>\<rat>\<close>
     and \<open>\<bar>(bar\<^sup>\<plusminus>\<lbrakk>N, n, \<lfloor>\<cdot>\<rceil>\<rbrakk> z)\<^sub>\<rat>\<bar> < 3 * N /\<^sub>\<rat> 4\<close>
@@ -526,6 +526,59 @@ proof -
   also have \<open>(N\<^sub>\<rat> - 1) / 2 < N /\<^sub>\<rat> 2\<close> using Ngt1 by simp
   finally show ?thesis .
 qed
+
+(*<*) context BarrettContext begin (*>*)
+text \<open>Signed-canonicity can also be interpreted as saying the Barrett quotient
+\<^term>\<open>\<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil>\<close> is \<^emph>\<open>exact\<close>, i.e. equal to \<^term>\<open>\<lfloor>z /\<^sub>\<rat> N\<rceil>\<close>:\<close>
+(*<*) end (*>*)
+
+corollary (in BarrettContext) barrett_red_signed_exact_iff:
+  shows \<open>\<bar>(bar\<^sup>\<plusminus>\<lbrakk>N, n, f\<rbrakk> z)\<^sub>\<rat>\<bar> < N /\<^sub>\<rat> 2 \<longleftrightarrow> \<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil> = \<lfloor>z /\<^sub>\<rat> N\<rceil>\<close>
+proof -
+  define q where \<open>q = \<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil>\<close>
+  define b where \<open>b = z - N * q\<close>
+  have bar: \<open>bar\<^sup>\<plusminus>\<lbrakk>N, n, f\<rbrakk> z = b\<close> unfolding b_def q_def barrett_red_signed_def by simp
+  have Npos: \<open>(0::rat) < (N)\<^sub>\<rat>\<close> using Ngt1 by simp
+  have eq1: \<open>z /\<^sub>\<rat> N - (q)\<^sub>\<rat> = (b)\<^sub>\<rat> / (N)\<^sub>\<rat>\<close>
+    unfolding b_def using Npos by (simp add: field_simps of_int_mult of_int_diff)
+  have upper: \<open>(z /\<^sub>\<rat> N - (q)\<^sub>\<rat> < 1/2) \<longleftrightarrow> (b)\<^sub>\<rat> < N /\<^sub>\<rat> 2\<close>
+    using eq1 Npos by (simp add: field_simps of_int_mult)
+  have lower: \<open>(- (1/2) \<le> z /\<^sub>\<rat> N - (q)\<^sub>\<rat>) \<longleftrightarrow> - (N /\<^sub>\<rat> 2) \<le> (b)\<^sub>\<rat>\<close>
+    using eq1 Npos by (simp add: field_simps of_int_mult)
+  \<comment> \<open>Oddness rules out the half-integer lower endpoint, closing the window.\<close>
+  have lower_strict: \<open>- (N /\<^sub>\<rat> 2) \<le> (b)\<^sub>\<rat> \<longleftrightarrow> - (N /\<^sub>\<rat> 2) < (b)\<^sub>\<rat>\<close>
+  proof
+    assume \<open>- (N /\<^sub>\<rat> 2) \<le> (b)\<^sub>\<rat>\<close>
+    moreover have \<open>(b)\<^sub>\<rat> \<noteq> - (N /\<^sub>\<rat> 2)\<close>
+    proof
+      assume \<open>(b)\<^sub>\<rat> = - (N /\<^sub>\<rat> 2)\<close>
+      hence \<open>(2 * b)\<^sub>\<rat> = (- N)\<^sub>\<rat>\<close> by simp
+      hence \<open>2 * b = - N\<close> by (simp only: of_int_eq_iff)
+      thus False using Nodd by presburger
+    qed
+    ultimately show \<open>- (N /\<^sub>\<rat> 2) < (b)\<^sub>\<rat>\<close> by simp
+  next
+    show \<open>- (N /\<^sub>\<rat> 2) < (b)\<^sub>\<rat> \<Longrightarrow> - (N /\<^sub>\<rat> 2) \<le> (b)\<^sub>\<rat>\<close> by simp
+  qed
+  have split: \<open>\<bar>(b)\<^sub>\<rat>\<bar> < N /\<^sub>\<rat> 2 \<longleftrightarrow> - (N /\<^sub>\<rat> 2) < (b)\<^sub>\<rat> \<and> (b)\<^sub>\<rat> < N /\<^sub>\<rat> 2\<close>
+    unfolding abs_less_iff by (simp add: of_int_mult) linarith
+  have win: \<open>(q = \<lfloor>z /\<^sub>\<rat> N\<rceil>) \<longleftrightarrow> - (1/2) \<le> z /\<^sub>\<rat> N - (q)\<^sub>\<rat> \<and> z /\<^sub>\<rat> N - (q)\<^sub>\<rat> < 1/2\<close>
+    using round_eq_iff[of \<open>z /\<^sub>\<rat> N\<close> q] by auto
+  show ?thesis unfolding bar q_def[symmetric]
+    using upper lower lower_strict split win by blast
+qed
+
+text \<open>Combined with \<open>barrett_red_signed_canonical\<close>, this gives a sufficient condition
+for the Barrett quotient to be exact, accounting for approximation quality and input bound:\<close>
+
+corollary (in BarrettContext) barrett_red_signed_exact:
+  assumes eps_le: \<open>\<epsilon>(f, R /\<^sub>\<rat> N) \<le> 1/2^\<delta>\<close>
+      and z_le:   \<open>\<bar>z\<bar> \<le> 2^(n-1-\<gamma>)\<close>
+      and \<gamma>_le:   \<open>\<gamma> \<le> n-1\<close>
+      and N_lt:   \<open>N < 2^(\<gamma>+\<delta>)\<close>
+  shows \<open>\<lfloor>z * \<lbrakk>R /\<^sub>\<rat> N\<rbrakk> /\<^sub>\<rat> R\<rceil> = \<lfloor>z /\<^sub>\<rat> N\<rceil>\<close>
+  using barrett_red_signed_canonical[OF eps_le z_le \<gamma>_le N_lt]
+  unfolding barrett_red_signed_exact_iff[symmetric] .
 
 
 end

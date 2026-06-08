@@ -9,9 +9,9 @@ chapter \<open>Introduction\<close>
 
 text \<open>
 The Number Theoretic Transform (NTT) is a performance-critical component of
-lattice-based cryptography: ML-KEM and ML-DSA both spend the majority of their
-arithmetic time in NTTs and the modular arithmetic operations they are comprised
-of. Fast implementations of ML-KEM and ML-DSA --- including
+lattice-based cryptography: ML-KEM~\cite{FIPS203} and ML-DSA~\cite{FIPS204} both
+spend the majority of their arithmetic time in NTTs and the modular arithmetic
+operations they are comprised of. Fast implementations of ML-KEM and ML-DSA --- including
 \texttt{mlkem-native}~\cite{mlkemnative} and
 \texttt{mldsa-native}~\cite{mldsanative} --- handle those modular
 arithmetic cores through bespoke assembly instruction kernels tailored to the
@@ -28,8 +28,8 @@ parity hypothesis, or a silently shared assumption between the Barrett and
 Montgomery analyses can compromise an otherwise-audited NTT.
 
 This document provides a machine-checked Isabelle/HOL formalisation of this
-modular-arithmetic core of~\cite{NeonNTT}. At the level of abstract
-algebraic operations: we develop parametric theories of Barrett and Montgomery
+modular-arithmetic core of~\cite{NeonNTT}. First, at the level of abstract
+algebraic operations: We develop parametric theories of Barrett and Montgomery
 reduction and multiplication, uniform in modulus, word width, and integer
 approximation, prove the identity linking Barrett and Montgomery arithmetic, and
 treat the doubling- and rounding-Montgomery variants. We also offer a conceptual
@@ -44,7 +44,7 @@ NTT- and butterfly-level correctness, and a decoder from the abstract model to
 concrete binaries, are out of scope.
 
 Beyond its technical content, the development serves as a case study in
-human-directed, model-generated formalisation. Claude Opus~4.7, connecting to
+human-directed, model-generated formalisation. Claude Opus~4.7 and~4.8, connecting to
 Isabelle through the open-source \texttt{AutoCorrode}~\cite{AutoCorrode} toolkit,
 drafted the Isabelle source under the author's direction --- the author owned the
 architecture and proof strategy, while the model supplied the formal text and
@@ -148,7 +148,7 @@ would like to consume. It was the task of the human author to then
 gradually nudge the agent to adjust the narrative, compact proofs, tweak
 definitions, introduce suitable syntax, and decide on what to abridge and
 what to include. No proof was ultimately written by the human --- even under
-strong editorial direction, the formal text remained entirely
+strong editorial direction, the formal text remained
 model-generated. Despite this heavy involvement, the development was much
 faster than had the human formalised the material themselves. In addition to
 the time-saving of not having to write definitions and proofs manually, the
@@ -200,78 +200,57 @@ We provide a brief summary of each chapter:
 \item[\autoref{ch:integer_approx} (\<open>Integer_Approximation\<close>)]
   develops the parametric notion of integer approximation
   \<open>\<lbrakk>_\<rbrakk> : \<rat> \<rightarrow> \<int>\<close> and the residue operator
-  \<^term>\<open>z mod\<lbrakk>f\<rbrakk> N\<close>. Both round-to-nearest and floor are special cases.
+  \<^term>\<open>z mod\<lbrakk>f\<rbrakk> N\<close>.
 
 \item[\autoref{ch:montgomery_red} (\<open>Montgomery_Reduction\<close>)] develops
-  abstract Montgomery reduction and multiplication along two
-  independent axes --- additive vs.\ subtractive correction, and signed
-  vs.\ unsigned twist --- with divisibility, correctness, and absolute
-  bounds for each variant, plus Fact~3 of
-  \cite[\S2.4.2]{NeonNTT} relating the subtractive and
-  additive forms.
+  Montgomery reduction and multiplication operators. We distinguish
+  additive vs.\ subtractive and signed vs.\ unsigned versions.
 
 \item[\autoref{ch:barrett_red} (\<open>Barrett_Reduction\<close>)] develops
-  signed and unsigned Barrett reduction operations
-  @{term "barrett_red_signed N n f"} and
-  @{term "barrett_red_unsigned N n f"}, as well as Barrett
-  multiplication operations @{term "barrett_mul_signed N n f a b"} and
-  @{term "barrett_mul_unsigned N n f a b"}, all parametric in an
-  integer approximation \<open>\<lbrakk>_\<rbrakk>\<close>. We also introduce a refined Barrett
-  reduction at an inflated effective radix \<open>2\<^sup>n\<^sup>+\<^sup>\<alpha>\<^sup>-\<^sup>1\<close>, used by the
-  \asminst{SQDMULH}/\asminst{SRSHR}-based kernel in
-  \autoref{ch:asm_barrett}. Output absolute bounds for Barrett are
+  signed and unsigned Barrett reduction and multiplication operators,
+  parametric in a choice of integer approximation \<open>\<lbrakk>_\<rbrakk>\<close>. We also introduce a 'refined' 
+  Barrett reduction at an inflated radix. Output bounds are
   deferred to \autoref{ch:barrett_montgomery}, where they fall out of
   the Barrett--Montgomery equivalence.
 
 \item[\autoref{ch:barrett_montgomery} (\<open>Barrett_Montgomery\<close>)] proves
   the Barrett--Montgomery equivalence: Barrett reduction of \<^term>\<open>z\<close> equals
-  Montgomery reduction of \<open>z \<cdot> (R mod\<lbrakk>f\<rbrakk> N)\<close>, with the corresponding
-  statement for multiplication, in both signed and unsigned forms
-  \cite[\S3.1.1, Propositions~1 and~2]{NeonNTT}. This
+  Montgomery reduction of \<open>z \<cdot> (R mod\<lbrakk>f\<rbrakk> N)\<close>. This
   collapses the bounds proofs of the two families
   \cite[Corollaries~1 and~2]{NeonNTT} into a single
-  argument, and the chapter hosts all Barrett output absolute bounds.
+  argument.
 
 \item[\autoref{ch:barrett_bound_quality}
   (\<open>Barrett_Bound_Quality\<close>)] checks the quality of the abstract
   Barrett bounds against empirical maxima at three concrete moduli:
   a small illustrative prime ($N = 97$), the ML-KEM modulus
-  ($N = 3329$), and the ML-DSA modulus ($N = 8380417$). The
-  evaluation uses Isabelle's code extractor and the code-equation
-  mechanism to register efficiently computable alternative definitions,
-  making exhaustive sweeps over large input ranges feasible within
-  the prover.
+  ($N = 3329$), and the ML-DSA modulus ($N = 8380417$).
 
 \item[\autoref{ch:montgomery_doubling} (\<open>Montgomery_Doubling\<close>)]
   formalises the doubling- and rounding-Montgomery variants
   \cite[Algorithms~7 and~8]{NeonNTT}.
 
 \item[\autoref{ch:bridge_conceptual} (\<open>Bridge_Conceptual\<close>)] revisits
-  the Barrett--Montgomery equivalence from a higher vantage point,
+  the Barrett--Montgomery equivalence from a conceptual viewpoint,
   casting it as a consequence of the duality between Euclidean and
   2-adic rounding of a rational number.
 
-\item[\autoref{ch:word_ops} (\<open>Word_Ops\<close>)] models the relevant Neon
-  instructions --- low-half \asminst{MUL}, \asminst{MLA}, \asminst{MLS};
-  high-half \asminst{MULH}, \asminst{UMULH}; the doubling high-half
-  \asminst{SQDMULH} and \asminst{SQRDMULH} (saturating); the
-  multiply-accumulate \asminst{SQRDMLAH}; the halving subtract
-  \asminst{SHSUB}; and the rounding right shift \asminst{SRSHR} --- as
-  parametric operations on \<open>'a::len\<close>-bit lanes, with each \<^term>\<open>sint\<close> (or
-  \<^term>\<open>uint\<close>) of the word operation tied back to an integer-level
-  specification. Working at this width-parametric level lets every kernel
-  correctness theorem be stated once.
+\item[\autoref{ch:barrett_division_even} (\<open>Barrett_Division_Even\<close>)]
+  generalises the bridge to an arbitrary modulus, replacing the use of 
+  modular inverses by choices of modular quotients. This is relevant
+  for the \<open>decompose\<close> routine in ML-DSA..
+
+\item[\autoref{ch:word_ops} (\<open>Word_Ops\<close>)] models the per-lane behavior 
+  of relevant Neon instructions as parametric operations on arbitrary-width words.
 
 \item[\autoref{ch:asm_barrett} (\<open>Asm_Barrett\<close>)] proves correctness of
-  the Neon-style Barrett kernels of \cite[\S3.2.1, \S3.2.2]{NeonNTT} ---
-  Barrett multiplication, plain Barrett reduction, and the refined
-  Barrett reduction at an inflated radix \<open>2\<^sup>n\<^sup>+\<^sup>\<alpha>\<^sup>-\<^sup>1\<close> --- against the models of
+  some Barrett Neon kernels --- Barrett multiplication, plain Barrett reduction, refined
+  Barrett reduction, and 'even' Barrett reduction --- against the models of
   \autoref{ch:word_ops}.
 
 \item[\autoref{ch:asm_montgomery} (\<open>Asm_Montgomery\<close>)] proves
-  correctness of the Neon-style Montgomery kernel of
-  \cite[\S3.2.3]{NeonNTT}, including the doubling- and
-  rounding-based variants.
+  correctness of some Montgomery Neon kernels --- including the doubling- and
+  rounding-based variants --- against the models of \autoref{ch:word_ops}.
 
 \end{description}
 \<close>

@@ -13,6 +13,7 @@ session NeonNTT = "HOL-Number_Theory" +
     Barrett_Bound_Quality
     Montgomery_Doubling
     Bridge_Conceptual
+    Barrett_Division_Even
     Word_Ops
     Asm_Barrett
     Asm_Montgomery

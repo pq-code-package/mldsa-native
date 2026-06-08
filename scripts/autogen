@@ -2347,6 +2347,12 @@ def check_macro_typos():
             if filename.endswith(".ml"):
                 return True
 
+        # 3b. Isabelle .thy files: <name>_def is the auto-generated
+        # unfolding-rule name for a `definition <name> = ...`. Allow it.
+        if is_autogen or filename.startswith("proofs/isabelle"):
+            if filename.endswith(".thy") and m.endswith("_def"):
+                return True
+
         # 4. Exclude regexp patterns in `autogen`
         if is_autogen:
             if rest.startswith("\\") or m in ["MLD_XXX", "MLD_SOURCE_XXX"]:

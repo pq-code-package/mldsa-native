@@ -13,7 +13,7 @@ modular-arithmetic core of~\cite{NeonNTT}: parametric Barrett and
 Montgomery reduction and multiplication uniform in modulus, word
 width, and integer approximation; the Barrett--Montgomery equivalence
 and its recasting through Euclidean--2-adic rounding duality; an
-empirical bound-quality study at the ML-KEM and ML-DSA moduli; and
+empirical bound-quality study at the ML-KEM~\cite{FIPS203} and ML-DSA~\cite{FIPS204} moduli; and
 correctness theorems for the signed-word Neon kernels shipped by
 \texttt{mlkem-native} and \texttt{mldsa-native}. A small algorithmic
 improvement surfaced in the process: the parity hypothesis on

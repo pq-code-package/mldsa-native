@@ -390,7 +390,7 @@ of slack.\<close>
 
 section \<open>Example 2: \<open>N = 3329\<close>, \<open>n = 16\<close> (ML-KEM modulus)\<close>
 
-text\<open>In this section, we look at \<^term>\<open>N=3329\<close>, the modulus underlying ML-KEM, together
+text\<open>In this section, we look at \<^term>\<open>N=3329\<close>, the modulus underlying ML-KEM~\cite{FIPS203}, together
 with \<^term>\<open>n=16\<close> (ML-KEM is computed in 16-bit arithmetic). As before, we first instantiate
 the Barrett context:\<close>
 
@@ -429,7 +429,7 @@ text \<open>Neither the signed nor the unsigned theoretical bound is attained, b
 
 section \<open>Example 3: \<open>N = 8380417\<close>, \<open>n = 32\<close> (ML-DSA modulus)\<close>
 
-text\<open>In this section, we look at \<^term>\<open>N=8380417\<close>, the modulus underlying ML-DSA, together
+text\<open>In this section, we look at \<^term>\<open>N=8380417\<close>, the modulus underlying ML-DSA~\cite{FIPS204}, together
 with \<^term>\<open>n=32\<close> (ML-DSA is computed in 32-bit arithmetic). As before, we first instantiate
 the Barrett context:\<close>
 
