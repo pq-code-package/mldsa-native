@@ -167,6 +167,7 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 pointwise multiplication-accumulation (l=4): [pointwise_acc_l4_avx2_asm.S](x86_64/mldsa/pointwise_acc_l4_avx2_asm.S)
   * x86_64 pointwise multiplication-accumulation (l=5): [pointwise_acc_l5_avx2_asm.S](x86_64/mldsa/pointwise_acc_l5_avx2_asm.S)
   * x86_64 pointwise multiplication-accumulation (l=7): [pointwise_acc_l7_avx2_asm.S](x86_64/mldsa/pointwise_acc_l7_avx2_asm.S)
+  * x86_64 poly_chknorm: [poly_chknorm_avx2_asm.S](x86_64/mldsa/poly_chknorm_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
 

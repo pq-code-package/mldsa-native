@@ -87,6 +87,7 @@
 #include "src/native/x86_64/src/pointwise_acc_l7_avx2_asm.S"
 #include "src/native/x86_64/src/pointwise_avx2_asm.S"
 #include "src/native/x86_64/src/poly_caddq_avx2_asm.S"
+#include "src/native/x86_64/src/poly_chknorm_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
@@ -792,7 +793,7 @@
 #undef mld_pointwise_acc_l7_avx2_asm
 #undef mld_pointwise_avx2_asm
 #undef mld_poly_caddq_avx2_asm
-#undef mld_poly_chknorm_avx2
+#undef mld_poly_chknorm_avx2_asm
 #undef mld_poly_decompose_32_avx2
 #undef mld_poly_decompose_88_avx2
 #undef mld_poly_use_hint_32_avx2

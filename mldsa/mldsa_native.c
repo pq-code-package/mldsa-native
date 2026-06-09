@@ -83,7 +83,6 @@
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
 #include "src/native/x86_64/src/consts.c"
-#include "src/native/x86_64/src/poly_chknorm_avx2.c"
 #include "src/native/x86_64/src/poly_decompose_32_avx2.c"
 #include "src/native/x86_64/src/poly_decompose_88_avx2.c"
 #include "src/native/x86_64/src/poly_use_hint_32_avx2.c"
@@ -785,7 +784,7 @@
 #undef mld_pointwise_acc_l7_avx2_asm
 #undef mld_pointwise_avx2_asm
 #undef mld_poly_caddq_avx2_asm
-#undef mld_poly_chknorm_avx2
+#undef mld_poly_chknorm_avx2_asm
 #undef mld_poly_decompose_32_avx2
 #undef mld_poly_decompose_88_avx2
 #undef mld_poly_use_hint_32_avx2

@@ -1,0 +1,162 @@
+/*
+ * Copyright (c) The mldsa-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/* References
+ * ==========
+ *
+ * - [REF_AVX2]
+ *   CRYSTALS-Dilithium optimized AVX2 implementation
+ *   Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé
+ *   https://github.com/pq-crystals/dilithium/tree/master/avx2
+ */
+
+/*
+ * This file is derived from the public domain
+ * AVX2 Dilithium implementation @[REF_AVX2].
+ */
+
+
+/*************************************************
+ * Name:        mld_poly_chknorm_avx2_asm
+ *
+ * Description: Check infinity norm of polynomial against given bound.
+ *              Returns 0 if norm is strictly smaller than B; otherwise
+ *              returns 1.
+ *
+ * Arguments:   - const int32_t *a: pointer to input polynomial
+ *              - int32_t B:  bound
+ *
+ * Returns:     - 1 if any |coefficient| >= B, 0 otherwise.
+ **************************************************/
+
+
+
+
+/*
+ * WARNING: This file is auto-derived from the mldsa-native source file
+ *   dev/x86_64/src/poly_chknorm_avx2_asm.S using scripts/simpasm. Do not modify it directly.
+ */
+
+.text
+.balign 4
+#ifdef __APPLE__
+.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_avx2_asm
+_PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_avx2_asm:
+#else
+.global PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_avx2_asm
+PQCP_MLDSA_NATIVE_MLDSA44_poly_chknorm_avx2_asm:
+#endif
+
+        .cfi_startproc
+        endbr64
+        subl $0x1, %esi
+        vpxor %xmm1, %xmm1, %xmm1
+        vmovd %esi, %xmm2
+        vpbroadcastd %xmm2, %ymm2
+        vpabsd (%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x20(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x40(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x60(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x80(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0xa0(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0xc0(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0xe0(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x100(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x120(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x140(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x160(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x180(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x1a0(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x1c0(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x1e0(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x200(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x220(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x240(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x260(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x280(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x2a0(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x2c0(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x2e0(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x300(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x320(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x340(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x360(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        vpabsd 0x380(%rdi), %ymm0
+        vpcmpgtd %ymm2, %ymm0, %ymm0
+        vpor %ymm0, %ymm1, %ymm1
+        vpabsd 0x3a0(%rdi), %ymm3
+        vpcmpgtd %ymm2, %ymm3, %ymm3
+        vpor %ymm3, %ymm1, %ymm1
+        vpabsd 0x3c0(%rdi), %ymm4
+        vpcmpgtd %ymm2, %ymm4, %ymm4
+        vpor %ymm4, %ymm1, %ymm1
+        vpabsd 0x3e0(%rdi), %ymm5
+        vpcmpgtd %ymm2, %ymm5, %ymm5
+        vpor %ymm5, %ymm1, %ymm1
+        xorl %eax, %eax
+        vptest %ymm1, %ymm1
+        setne %al
+        retq
+        .cfi_endproc
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

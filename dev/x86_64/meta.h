@@ -223,7 +223,7 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  return mld_poly_chknorm_avx2(a, B);
+  return mld_poly_chknorm_avx2_asm(a, B);
 }
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)

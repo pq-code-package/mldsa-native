@@ -248,7 +248,7 @@ source code and documentation.
   - [dev/x86_64/src/pointwise_acc_l7_avx2_asm.S](dev/x86_64/src/pointwise_acc_l7_avx2_asm.S)
   - [dev/x86_64/src/pointwise_avx2_asm.S](dev/x86_64/src/pointwise_avx2_asm.S)
   - [dev/x86_64/src/poly_caddq_avx2_asm.S](dev/x86_64/src/poly_caddq_avx2_asm.S)
-  - [dev/x86_64/src/poly_chknorm_avx2.c](dev/x86_64/src/poly_chknorm_avx2.c)
+  - [dev/x86_64/src/poly_chknorm_avx2_asm.S](dev/x86_64/src/poly_chknorm_avx2_asm.S)
   - [dev/x86_64/src/poly_decompose_32_avx2.c](dev/x86_64/src/poly_decompose_32_avx2.c)
   - [dev/x86_64/src/poly_decompose_88_avx2.c](dev/x86_64/src/poly_decompose_88_avx2.c)
   - [dev/x86_64/src/poly_use_hint_32_avx2.c](dev/x86_64/src/poly_use_hint_32_avx2.c)
@@ -266,7 +266,7 @@ source code and documentation.
   - [mldsa/src/native/x86_64/src/pointwise_acc_l7_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_acc_l7_avx2_asm.S)
   - [mldsa/src/native/x86_64/src/pointwise_avx2_asm.S](mldsa/src/native/x86_64/src/pointwise_avx2_asm.S)
   - [mldsa/src/native/x86_64/src/poly_caddq_avx2_asm.S](mldsa/src/native/x86_64/src/poly_caddq_avx2_asm.S)
-  - [mldsa/src/native/x86_64/src/poly_chknorm_avx2.c](mldsa/src/native/x86_64/src/poly_chknorm_avx2.c)
+  - [mldsa/src/native/x86_64/src/poly_chknorm_avx2_asm.S](mldsa/src/native/x86_64/src/poly_chknorm_avx2_asm.S)
   - [mldsa/src/native/x86_64/src/poly_decompose_32_avx2.c](mldsa/src/native/x86_64/src/poly_decompose_32_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c](mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_use_hint_32_avx2.c](mldsa/src/native/x86_64/src/poly_use_hint_32_avx2.c)
@@ -284,6 +284,7 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_acc_l7_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S](proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/poly_chknorm_avx2_asm.S](proofs/hol_light/x86_64/mldsa/poly_chknorm_avx2_asm.S)
 
 ### `Round3_Spec`
 

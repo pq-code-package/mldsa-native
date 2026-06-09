@@ -77,6 +77,7 @@ static int bench(void)
   uint64_t cyc[MLD_BENCHMARK_NTESTS];
   unsigned i, j;
   uint64_t t0, t1;
+  uint32_t chknorm_acc = 0;
 
   /* ntt */
   BENCH("poly_ntt", mld_poly_ntt((mld_poly *)data0))
@@ -97,7 +98,11 @@ static int bench(void)
 
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
 
-  return 0;
+  BENCH("poly_chknorm",
+        chknorm_acc ^=
+        mld_poly_chknorm((const mld_poly *)data0, MLDSA_GAMMA1 - MLDSA_BETA);)
+
+  return (int)chknorm_acc;
 }
 
 int main(void)

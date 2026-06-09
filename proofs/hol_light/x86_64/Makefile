@@ -54,6 +54,7 @@ OBJ = mldsa/ntt_avx2_asm.o \
       mldsa/intt_avx2_asm.o \
       mldsa/nttunpack_avx2_asm.o \
       mldsa/poly_caddq_avx2_asm.o \
+      mldsa/poly_chknorm_avx2_asm.o \
       mldsa/pointwise_avx2_asm.o \
       mldsa/pointwise_acc_l4_avx2_asm.o \
       mldsa/pointwise_acc_l5_avx2_asm.o \

@@ -118,9 +118,20 @@ void mld_poly_use_hint_32_avx2(int32_t *a, const int32_t *h);
 void mld_poly_use_hint_88_avx2(int32_t *a, const int32_t *h);
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-#define mld_poly_chknorm_avx2 MLD_NAMESPACE(mld_poly_chknorm_avx2)
+#define mld_poly_chknorm_avx2_asm MLD_NAMESPACE(poly_chknorm_avx2_asm)
 MLD_MUST_CHECK_RETURN_VALUE
-int mld_poly_chknorm_avx2(const int32_t *a, int32_t B);
+int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/poly_chknorm_avx2_asm.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
+  requires(forall(k0, 0, MLDSA_N, a[k0] > INT32_MIN))
+  /* HOL Light precondition: 0 <= ival bound (asm computes B-1 internally) */
+  requires(B >= 0)
+  ensures(return_value == 0 || return_value == 1)
+  ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
+);
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyz_unpack_17_avx2 MLD_NAMESPACE(mld_polyz_unpack_17_avx2)
