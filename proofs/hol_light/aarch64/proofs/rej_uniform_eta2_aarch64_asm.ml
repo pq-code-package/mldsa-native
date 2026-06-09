@@ -2276,13 +2276,14 @@ let MLDSA_REJ_UNIFORM_ETA2_SUBROUTINE_CORRECT = prove
   REWRITE_TAC[]);;
 
 (* ========================================================================= *)
-(* Constant-time and memory safety proof.                                    *)
+(* Memory safety proof (variable-time: rejection sampling depends on data).  *)
 (*                                                                           *)
-(* Strategy: follow mlkem-native's mlkem_rej_uniform_VARIABLE_TIME.ml MEMSAFE *)
-(* pattern. PROVE_SAFETY_SPEC_TAC's auto-symbolic-execution fails for variable*)
-(* loops with pure-register sequences > chunk size (50). Instead, we write a *)
-(* custom MEMSAFE spec with ENSURES_SEQUENCE_TAC + ENSURES_WHILE_UP_TAC and  *)
-(* event-tracking loop invariants, then DISCHARGE_MEMSAFE_TAC at boundaries. *)
+(* Memory safety alone (not constant-time). The standard _SAFE_ proof        *)
+(* pattern (exists f_events. forall ... e2 = f_events <public_params>)       *)
+(* cannot be used here because the microarchitectural events depend on       *)
+(* private data (which nibbles pass the rejection filter).                   *)
+(*                                                                           *)
+(* TODO: constant-time / secret-independent timing not yet proved.           *)
 (* ========================================================================= *)
 
 needs "s2n_bignum/arm/proofs/consttime.ml";;

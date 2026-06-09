@@ -1881,9 +1881,11 @@ let MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_CORRECT = prove
 (* Memory safety proof (variable-time: rejection sampling depends on data).  *)
 (*                                                                           *)
 (* Memory safety alone (not constant-time). The standard _SAFE_ proof        *)
-(* pattern (exists f_events. forall ... e2 = f_events <public_params>)      *)
+(* pattern (exists f_events. forall ... e2 = f_events <public_params>)       *)
 (* cannot be used here because the microarchitectural events depend on       *)
-(* private data (which nibbles pass the < 9 filter).                         *)
+(* private data (which nibbles pass the rejection filter).                   *)
+(*                                                                           *)
+(* TODO: constant-time / secret-independent timing not yet proved.           *)
 (* ========================================================================= *)
 
 needs "s2n_bignum/arm/proofs/consttime.ml";;
