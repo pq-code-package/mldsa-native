@@ -1,13 +1,29 @@
 [//]: # (SPDX-License-Identifier: CC-BY-4.0)
 
-# HOL Light functional correctness proofs
+# HOL Light proofs
 
-This directory contains functional correctness proofs for AArch64 and x86_64 assembly routines
+This directory contains HOL Light proofs for the AArch64 and x86_64 assembly routines
 used in mldsa-native. The proofs are written in the [HOL Light](https://hol-light.github.io/) theorem
 prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
 Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
 contains the byte code being verified, as well as the specification that is being proved.
+
+## What is proven
+
+Unless documented otherwise, for each assembly routine listed below, we prove three properties:
+
+1. **Functional correctness** — the routine computes the specified mathematical function (e.g., that `mldsa_ntt` computes the ML-DSA forward NTT modulo `q = 8380417`).
+2. **Memory safety** — the routine accesses only those memory regions permitted by its specification (input/output buffers, stack frame).
+3. **Secret-independent timing** — the sequence of microarchitectural events (e.g. memory accesses, branch decisions) emitted by the routine is a function of public inputs only, and does not depend on secret data.
+
+### Known gap: rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
+
+The AArch64 kernels `rej_uniform_eta{2,4}` have secret-independent timing, but we do not yet prove it (see
+[#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)): Their memory access pattern depends on which
+coefficients fall inside vs. outside the acceptance interval, but no other information about the secret coefficients is
+leaked. The indices of in bound vs. out of bounds coefficients are statistically independent of the secret key; see
+Section 5.5 of @[Round3_Spec].
 
 ## Primer
 
@@ -109,7 +125,9 @@ Alternatively, send commands using netcat:
 echo '1+1;;' | nc -w 5 127.0.0.1 2012
 ```
 
-## What is covered?
+## Routines covered
+
+All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for `rej_uniform_eta{2,4}` which are proven memory-safe only (see [Known gap](#known-gap-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
 
 ### AArch64
 - ML-DSA Arithmetic:
