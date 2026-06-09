@@ -30,22 +30,19 @@ same TCB, and therefore the same shared mitigations and residual risks.
 
 ### Incomplete HOL Light proof coverage
 
-Unlike mlkem-native, where all AArch64 and x86_64 assembly routines have HOL Light
-specifications, mldsa-native's HOL Light proof coverage is not yet complete.
+The AArch64 backend is fully covered, but the x86_64 backend is not yet complete.
 The full list of functions that are covered today is
 maintained in [proofs/hol_light/README.md](proofs/hol_light/README.md).
 
-The remaining HOL Light proof work is tracked in two umbrella issues:
-
-- AArch64 backend: [#918](https://github.com/pq-code-package/mldsa-native/issues/918)
-- x86_64 backend:  [#912](https://github.com/pq-code-package/mldsa-native/issues/912)
+The remaining HOL Light proof work for the x86_64 backend is tracked in
+[#912](https://github.com/pq-code-package/mldsa-native/issues/912).
 
 For the routines without HOL Light specifications, functional correctness, memory safety,
 and constant-time properties are validated empirically through the full test suite (functional
 tests, KAT, ACVP, unit tests, and `valgrind`-based constant-time tests on AArch64 and x86_64),
 but they are not formally proved.
 
-We aim to close this gap and achieve full HOL Light coverage of the AArch64 and x86_64 backends
+We aim to close this gap and achieve full HOL Light coverage of the x86_64 backend
 prior to the first stable release of mldsa-native.
 
 <!--- bibliography --->
