@@ -399,7 +399,7 @@ __contract__(
    * i < MLDSA_L, so MLDSA_L * y->nonce + i fits in uint16_t. See
    * MLD_NONCE_UB comment in sign.c. */
   mld_poly_uniform_gamma1(buf, y->rhoprime,
-                          (uint16_t)(MLDSA_L * y->nonce + (int)i));
+                          (uint16_t)(MLDSA_L * (unsigned)y->nonce + i));
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API && (MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
         */

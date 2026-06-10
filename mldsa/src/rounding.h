@@ -146,7 +146,7 @@ __contract__(
    *
    * See proofs/isabelle/compress for a formalization of the above argument.
    */
-  *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
+  *a1 = (*a1 * 11275 + ((int32_t)1 << 23)) >> 24;
   mld_assert(*a1 >= 0 && *a1 <= 44);
 
   *a1 = mld_ct_sel_int32(0, *a1, mld_ct_cmask_neg_i32(43 - *a1));
@@ -162,7 +162,7 @@ __contract__(
    * eps = 1 / 4290772992 ≈ 2^(-31.99) < 2^(-31), therefore f1' * eps <
    * 2^16 * 2^(-31) = 1 / 2^15 < 1 / 2^12 < 1 / B.
    */
-  *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
+  *a1 = (*a1 * 1025 + ((int32_t)1 << 21)) >> 22;
   mld_assert(*a1 >= 0 && *a1 <= 16);
 
   *a1 &= 15;

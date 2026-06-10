@@ -24,7 +24,7 @@
 #define MLD_MONT (-4186625)
 
 /* Upper bound for domain of mld_reduce32() */
-#define MLD_REDUCE32_DOMAIN_MAX (INT32_MAX - (1 << 22))
+#define MLD_REDUCE32_DOMAIN_MAX (INT32_MAX - ((int32_t)1 << 22))
 
 /* Absolute bound for range of mld_reduce32() */
 /* check-magic: 6283009 == (MLD_REDUCE32_DOMAIN_MAX - 255 * MLDSA_Q + 1) */
@@ -114,7 +114,7 @@ __contract__(
 {
   int32_t t;
 
-  t = (a + (1 << 22)) >> 23;
+  t = (a + ((int32_t)1 << 22)) >> 23;
   t = a - t * MLDSA_Q;
   mld_assert((t - a) % MLDSA_Q == 0);
   return t;

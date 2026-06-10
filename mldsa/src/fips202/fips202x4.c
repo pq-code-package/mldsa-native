@@ -24,7 +24,7 @@
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
     defined(MLD_UNIT_TEST)
-static void mld_keccak_absorb_once_x4(uint64_t *s, uint32_t r,
+static void mld_keccak_absorb_once_x4(uint64_t *s, unsigned r,
                                       const uint8_t *in0, const uint8_t *in1,
                                       const uint8_t *in2, const uint8_t *in3,
                                       size_t inlen, uint8_t p)
@@ -81,7 +81,7 @@ __contract__(
 
 static void mld_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
                                         uint8_t *out2, uint8_t *out3,
-                                        size_t nblocks, uint64_t *s, uint32_t r)
+                                        size_t nblocks, uint64_t *s, unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
