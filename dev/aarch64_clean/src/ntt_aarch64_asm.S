@@ -14,13 +14,18 @@
  *   Becker, Hwang, Kannwischer, Yang, Yang
  *   https://eprint.iacr.org/2021/986
  *
+ * - [NeonNTT_Autoformalised]
+ *   Neon NTT - (Auto)formalised
+ *   Hanno Becker
+ *   https://eprint.iacr.org/2026/1223
+ *
  * - [SLOTHY_Paper]
  *   Fast and Clean: Auditable high-performance assembly via constraint solving
  *   Abdulrahman, Becker, Kannwischer, Klein
  *   https://eprint.iacr.org/2022/1303
  */
 
-/* AArch64 ML-DSA forward NTT following @[NeonNTT] and @[SLOTHY_Paper] */
+/* AArch64 ML-DSA forward NTT following @[NeonNTT], @[SLOTHY_Paper], and @[NeonNTT_Autoformalised] */
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \

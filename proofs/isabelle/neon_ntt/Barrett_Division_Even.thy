@@ -22,7 +22,7 @@ The main observation is that the Montgomery reduction of \<^term>\<open>z\<close
 This quotient can exist even if \<^term>\<open>N\<^sup>-\<^sup>1 mod R\<close> doesn't, though it is also non-unique
 in this case. We generalize the definition of Montgomery arithmetic to the choice of
 such modular quotients, and show how to express the Barrett--Montgomery bridge in this setting.
-Signed canonicity of Barrett reduction follows along the sames lines as before, and the exactness
+Signed canonicity of Barrett reduction follows along the same lines as before, and the exactness
 of Barrett division is a corollary.
 \<close>
 section \<open>Montgomery arithmetic again -- for any modulus\<close>
@@ -541,8 +541,8 @@ strategies,
 both used among the backends of \texttt{mldsa-native}.\<close>
 
 definition \<open>MLDSA_Q :: int \<equiv> 2^23 - 2^13 + 1\<close>
- \<comment>\<open>The 32-bit modulus underlying ML-DSA\<close>
-definition \<open>MLDSA_GAMMA2_88 :: int \<equiv> (MLDSA_Q - 1) div 88\<close> 
+\<comment>\<open>The ML-DSA modulus\<close>
+definition \<open>MLDSA_GAMMA2_88 :: int \<equiv> (MLDSA_Q - 1) div 88\<close>
 \<comment>\<open>The value of \<open>\<gamma>\<^sub>2\<close> in ML-DSA-44\<close>
 definition \<open>MLDSA_GAMMA2_32 :: int \<equiv> (MLDSA_Q - 1) div 32\<close> 
 \<comment>\<open>The value of \<open>\<gamma>\<^sub>2\<close> in ML-DSA-65 and ML-DSA-87\<close>

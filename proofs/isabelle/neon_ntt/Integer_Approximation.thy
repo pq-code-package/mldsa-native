@@ -48,7 +48,7 @@ section \<open>Integer approximations\<close>
 
 text \<open>
 Following \cite[\S2.4]{NeonNTT}, \<open>is_int_approx \<lbrakk>_\<rbrakk>\<close> requires only that
-\<open>\<bar>z - \<lbrakk>z\<rbrakk>\<^sub>\<rat>\<bar> \<le> 1\<close> — not the stronger \<open>\<lbrakk>z\<rbrakk> = z\<close> on integer inputs, which the
+\<open>\<bar>z - \<lbrakk>z\<rbrakk>\<^sub>\<rat>\<bar> \<le> 1\<close>, not the stronger \<open>\<lbrakk>z\<rbrakk> = z\<close> on integer inputs, which the
 even-rounding function \<open>\<lfloor>\<cdot>\<rceil>\<^sub>2\<close> fails.
 \<close>
 
@@ -380,8 +380,9 @@ corollary int_approx_quality_instances:
 
 text \<open>For each of the five standard approximations, the worst-case error
 \<^term>\<open>\<epsilon>(f)\<close> is attained only at the supremum locus: for \<^term>\<open>round\<close> and
-\<^term>\<open>round_half_down\<close> at half-integers, and approached but never attained
-for \<^term>\<open>floor\<close>, \<^term>\<open>ceiling\<close>, \<^term>\<open>round_even\<close> at integers.
+\<^term>\<open>round_half_down\<close> at half-integers, approached but never attained
+for \<^term>\<open>floor\<close> and \<^term>\<open>ceiling\<close> at integers, and attained at
+odd integers for \<^term>\<open>round_even\<close> (e.g. \<open>\<lfloor>1\<rceil>\<^sub>2 = 2\<close>).
 Outside these loci the pointwise error is strictly smaller. Note: for
 \<^term>\<open>floor\<close> and \<^term>\<open>ceiling\<close> the strict inequality holds
 unconditionally — the residue \<open>x - of_int (floor x)\<close> always lies in \<open>[0, 1)\<close>,
@@ -1212,8 +1213,8 @@ For the signed and unsigned residues, both pinned to canonical intervals,
 the bound \<^term>\<open>\<epsilon>(f) * N\<close> from @{thm [source] mod_approx_bound_eps} specialises to the integer-form
 inequalities below: the signed residue lies in
 \<^latex>\<open>$\{-\lfloor N/2\rfloor, \dots, \lfloor (N-1)/2 \rfloor\}$\<close> (matching
-\<^term>\<open>\<epsilon>(round) = 1/2\<close>), and the unsigned residue in \<open>\<lbrace>0, \<dots>, N - 1\<rbrace>\<close>
-(matching \<^term>\<open>\<epsilon>(floor) = 1\<close>).
+\<^term>\<open>\<epsilon>(round) = 1/2\<close>), and the unsigned residue in
+\<^latex>\<open>$\{0, \dots, N-1\}$\<close> (matching \<^term>\<open>\<epsilon>(floor) = 1\<close>).
 \<close>
 
 lemma mod_canonical_bounds:

@@ -208,6 +208,23 @@ source code and documentation.
   - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
   - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
 
+### `NeonNTT_Autoformalised`
+
+* Neon NTT - (Auto)formalised
+* Author(s):
+  - Hanno Becker
+* URL: https://eprint.iacr.org/2026/1223
+* Referenced from:
+  - [dev/aarch64_clean/src/intt_aarch64_asm.S](dev/aarch64_clean/src/intt_aarch64_asm.S)
+  - [dev/aarch64_clean/src/ntt_aarch64_asm.S](dev/aarch64_clean/src/ntt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/intt_aarch64_asm.S](dev/aarch64_opt/src/intt_aarch64_asm.S)
+  - [dev/aarch64_opt/src/ntt_aarch64_asm.S](dev/aarch64_opt/src/ntt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/intt_aarch64_asm.S](mldsa/src/native/aarch64/src/intt_aarch64_asm.S)
+  - [mldsa/src/native/aarch64/src/ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/ntt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/intt_aarch64_asm.S)
+  - [proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/ntt_aarch64_asm.S)
+  - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
+
 ### `REF`
 
 * CRYSTALS-Dilithium reference implementation

@@ -13,7 +13,7 @@ output absolute bounds for Barrett from the Montgomery ones.\<close>
 
 text \<open>Throughout the chapter, we fix an integer approximation \<open>f=\<lbrakk>_\<rbrakk>\<close>, an odd modulus \<^term>\<open>N\<close>, 
 and an exponent \<^term>\<open>n\<close> with \<^term>\<open>2^n > N\<close>. We abbreviate \<^term>\<open>R = 2^n\<close>. This will be indicated
-in by the \<^verbatim>\<open>(in BarrettContext)\<close> below.\<close>
+by the \<^verbatim>\<open>(in BarrettContext)\<close> below.\<close>
 
 section \<open>Bridge: Barrett reduction and multiplication as Montgomery\<close>
 

@@ -120,6 +120,13 @@
   - Yang, Bo-Yin
   - Yang, Shang-Yi
 
+- id: NeonNTT_Autoformalised
+  name: "Neon NTT - (Auto)formalised"
+  year: 2026
+  url: https://eprint.iacr.org/2026/1223
+  author:
+  - Becker, Hanno
+
 - id: AutoCorrode
   name: "AutoCorrode software verification framework for Isabelle/HOL"
   year: 2025

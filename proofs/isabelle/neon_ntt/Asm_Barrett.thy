@@ -9,7 +9,7 @@ unbundle %invisible ASM_syntax
 
 chapter \<open>Neon kernels for Barrett-style modular arithmetic \label{ch:asm_barrett}\<close>
 
-text \<open>In this chapter we analyse three Neon ASM kernels for Barrett-style
+text \<open>In this chapter we analyse four Neon ASM kernel families for Barrett-style
 modular arithmetic and connect them to the corresponding abstract operators.
 In consequence, we obtain correctness and bounds statements for the kernel
 output.\<close>
@@ -22,7 +22,10 @@ text \<open>We verify \cite[Algorithm~10, \S 3.2]{NeonNTT}: the three-instructio
 constant \<^term>\<open>bt\<close> carries half the round-to-even magic constant (halving
 is exact since round-to-even produces an even integer). The bound
 \<^term>\<open>\<bar>sint b\<bar> < sint N\<close> ensures \<^term>\<open>bt\<close> avoids the extreme negative
-value, excluding \<^verbatim>\<open>SQRDMULH\<close> saturation for any \<^term>\<open>a\<close>.\<close>
+value, excluding \<^verbatim>\<open>SQRDMULH\<close> saturation for any \<^term>\<open>a\<close>.
+We sharpen the published coarse bound \<^term>\<open>\<bar>m\<bar> \<le> 3 * N / 2\<close> of
+\cite[Algorithm~10]{NeonNTT} to the strict \<^term>\<open>\<bar>m\<bar> < N\<close>, available
+from the round-to-nearest-even narrowed bound (\autoref{ch:barrett_montgomery}).\<close>
 
 definition %internal \<open>barrett_mul_neon_int n N b halfBT a \<equiv>
      let R  = 2^n;
@@ -596,7 +599,10 @@ section \<open>Single-input Barrett reduction\<close>
 
 text \<open>We verify \cite[Algorithm~9, \S 3.2]{NeonNTT}: the two-instruction
 \<^verbatim>\<open>SQRDMULH\<close>/\<^verbatim>\<open>MLS\<close> sequence computes
-\<^term>\<open>bar\<^sup>\<plusminus>\<lbrakk>N,n,\<lfloor>\<cdot>\<rceil>\<^sub>2\<rbrakk> z\<close> on signed lanes.\<close>
+\<^term>\<open>bar\<^sup>\<plusminus>\<lbrakk>N,n,\<lfloor>\<cdot>\<rceil>\<^sub>2\<rbrakk> z\<close> on signed lanes. As for
+\cite[Algorithm~10]{NeonNTT} above, we sharpen the published coarse bound
+\<^term>\<open>\<bar>m\<bar> \<le> 3 * N / 2\<close> of \cite[Algorithm~9]{NeonNTT} to the strict
+\<^term>\<open>\<bar>m\<bar> < N\<close>.\<close>
 
 
 definition %internal \<open>barrett_red_neon_int n N halfM z \<equiv>
@@ -692,7 +698,7 @@ theorem barrett_red_neon_word_correct:
         \<comment> \<open>correctness\<close>
     and \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> \<le> \<bar>sint z\<bar>\<^sub>\<rat> * (sint N)\<^sub>\<rat> / (2^n)\<^sub>\<rat> + (sint N)\<^sub>\<rat> / 2\<close>
         \<comment> \<open>fine output bound\<close>
-    and \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> \<le> 3/2 * (sint N)\<^sub>\<rat>\<close>
+    and \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> < (sint N)\<^sub>\<rat>\<close>
         \<comment> \<open>coarse output bound\<close>
 
 proof -
@@ -795,13 +801,8 @@ proof -
     by (simp add: quality_round_even)
   have out_lt: \<open>\<bar>sint out\<bar> < sint N\<close>
     using abs_eq abs_bound by simp
-  hence \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> < (sint N)\<^sub>\<rat>\<close>
+  thus \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> < (sint N)\<^sub>\<rat>\<close>
     by (metis of_int_abs of_int_less_iff)
-  thus \<open>\<bar>(sint out)\<^sub>\<rat>\<bar> \<le> 3/2 * (sint N)\<^sub>\<rat>\<close>
-    using SM.Npos by linarith
-
-
-
 qed
 
 section \<open>Refined Barrett reduction\<close>
@@ -809,12 +810,12 @@ section \<open>Refined Barrett reduction\<close>
 text \<open>\cite[Algorithm~11, \S 3.2]{NeonNTT} discusses a three-instruction
 \<^verbatim>\<open>SQDMULH\<close>/\<^verbatim>\<open>SRSHR\<close>/\<^verbatim>\<open>MLS\<close> sequence implementing refined Barrett reduction
 at effective radix \<^term>\<open>2^(n+\<alpha>-1) :: int\<close>. The output is canonical
-if we assume \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) < 1/4\<close> instead of the
-guaranteed \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) < 1/2\<close>. Otherwise, the
+if we assume \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) \<le> 1/4\<close> instead of the
+guaranteed \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) \<le> 1/2\<close>. Otherwise, the
 output is only guaranteed to be canonical for inputs with
 \<^term>\<open>\<bar>sint z\<bar> \<le> 2^(n-2)\<close>. The statement of \cite[Algorithm~11]{NeonNTT} as 
 published misses this and is wrong as stated. However, we note --- and show below ---
-that the assumption \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) < 1/4\<close> does hold in the context
+that the assumption \<^term>\<open>\<epsilon>(\<lfloor>\<cdot>\<rceil>, 2^(n+\<alpha>-1) /\<^sub>\<rat> sint N) \<le> 1/4\<close> does hold in the context
 of ML-KEM~\cite{FIPS203} and ML-DSA~\cite{FIPS204}, so for those applications the error is of no consequence.\<close>
 
 definition %internal \<open>barrett_red_refined_neon_int n \<alpha> N V z \<equiv>
@@ -1260,7 +1261,7 @@ proof -
     unfolding expand using sint_srshr_word[OF n_def, of k t] t_int by simp
 qed
 
-text \<open>The following AArch64 kernel can be used to ML-DSA-65/87's \<open>decompose\<close> routine:\<close>
+text \<open>The following AArch64 kernel can be used to compute ML-DSA-65/87's \<open>decompose\<close> routine:\<close>
 
 theorem decompose_high_neon_word_correct_32:
   fixes z :: \<open>32 word\<close>
@@ -1286,7 +1287,7 @@ proof -
   finally show ?thesis .
 qed
 
-text \<open>The following AArch64 kernel can be used to compoute ML-DSA-44's \<open>decompose\<close> routine:\<close>
+text \<open>The following AArch64 kernel can be used to compute ML-DSA-44's \<open>decompose\<close> routine:\<close>
 
 theorem decompose_high_neon_word_correct_88:
   fixes z :: \<open>32 word\<close>

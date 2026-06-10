@@ -25,10 +25,11 @@ correctness theorem once, without committing to a specific lane width.
 For each instruction --- the low-half multiplies \asminst{MUL}, \asminst{MLA},
 \asminst{MLS}; the high-half multiplies \asminst{MULH} and \asminst{UMULH};
 the doubling high-half multipliers \asminst{SQDMULH} and \asminst{SQRDMULH};
-the multiply-accumulate \asminst{SQRDMLAH}; and the halving subtract
-\asminst{SHSUB} --- we give an abstract integer specification, define the
-corresponding word operation on \<open>'a::len\<close>-bit lanes, and prove that
-\<open>sint\<close> (or \<open>uint\<close>) of the word operation matches the spec.\<close>
+the multiply-accumulate \asminst{SQRDMLAH}; the halving subtract
+\asminst{SHSUB}; and the rounding right shift \asminst{SRSHR} --- we give
+an abstract integer specification, define the corresponding word operation
+on \<open>'a::len\<close>-bit lanes, and prove that \<open>sint\<close> (or \<open>uint\<close>) of the word
+operation matches the spec.\<close>
 
 section %internal \<open>Word \<^latex>\<open>$\leftrightarrow$\<close> int interpretation\<close>
 

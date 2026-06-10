@@ -6,10 +6,11 @@ This directory provides additional formal documentation of the approach to
 modular arithmetic used in various assembly kernels in `mldsa-native` and
 `mlkem-native`. Specifically, it contains the source for an Isabelle/HOL
 formalisation of the original "Neon NTT" paper [^NeonNTT] of Becker, Hwang,
-Kannwischer, Yang, and Yang. A companion PDF — generated directly from the
+Kannwischer, Yang, and Yang. The companion PDF — generated directly from the
 theory sources via Isabelle's document-preparation system — is produced by
 [`make`](#building) and is also published as the `neon_ntt_autoformalized`
 artifact of the [Isabelle CI workflow](../../../.github/workflows/isabelle.yml).
+It is available on ePrint[^NeonNTT_Autoformalised].
 
 ## What the PDF covers
 
@@ -145,3 +146,4 @@ The underlying driver also exposes `full` (exhaustive, 8-bit only) and
 <!--- bibliography --->
 [^AutoCorrode]: Becker, Chong, Dockins, Grundy, Hu, Mulder, Mulligan, Mure, Paulson, Slind: AutoCorrode software verification framework for Isabelle/HOL, [https://github.com/awslabs/autocorrode](https://github.com/awslabs/autocorrode)
 [^NeonNTT]: Becker, Hwang, Kannwischer, Yang, Yang: Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1, [https://eprint.iacr.org/2021/986](https://eprint.iacr.org/2021/986)
+[^NeonNTT_Autoformalised]: Hanno Becker: Neon NTT - (Auto)formalised, [https://eprint.iacr.org/2026/1223](https://eprint.iacr.org/2026/1223)

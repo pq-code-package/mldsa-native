@@ -780,7 +780,7 @@ lemmas %internal (in OddModulus) mont_sub_unsigned_bound = mont_bound(4)
 text \<open>The signed bounds are tight: there exist inputs at which the
 inequality is an equality. As an example, we pick \<open>n = 3\<close>, \<open>N = 3\<close>, 
 so \<open>R = 8\<close>: then \<^term>\<open>N\<^sup>-\<^sup>1 mod R = 3\<close>, \<open>k = -4\<close> at \<open>z = -4\<close> (additive) or
-\<open>z = 4\<close> (subtractive), with \<open>\<bar>m\<bar> = 2\<close> matching\<^term>\<open>\<bar>z\<bar> /\<^sub>\<rat> R + N\<^sub>\<rat> / 2\<close>.\<close>
+\<open>z = 4\<close> (subtractive), with \<open>\<bar>m\<bar> = 2\<close> matching \<^term>\<open>\<bar>z\<bar> /\<^sub>\<rat> R + N\<^sub>\<rat> / 2\<close>.\<close>
 
 lemma mont_add_signed_bound_tight:
   shows \<open>\<bar>(mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>3, 3\<rbrakk> (-4))\<^sub>\<rat>\<bar> = \<bar>-4\<bar> /\<^sub>\<rat> 2^3 + 3 /\<^sub>\<rat> 2\<close>

@@ -225,10 +225,11 @@ rounding multiply-accumulate \<open>SQRDMLAH\<close>. Without the halving step t
 is no longer a \<^term>\<open>(1/2 :: rat)\<close> to absorb the \<^term>\<open>{0,1}\<close> ambiguity at the boundary
 \<^term>\<open>(2*a*b) mod 2^n = 2^(n-1)\<close>, so we exclude this case by hypothesis.
 Under that hypothesis the kernel computes exactly
-\<^term>\<open>2 * mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>. In implementation contexts the
-hypothesis is discharged by \<^term>\<open>odd a \<and> odd b\<close> together with the standard
-input bound \<^term>\<open>\<bar>a\<bar> < R/2 \<and> \<bar>b\<bar> < R/2\<close>, recovering the ``one factor odd''
-assumption of \cite[Algorithm~8]{NeonNTT}.\<close>
+\<^term>\<open>2 * mont\<^sub>a\<^sub>d\<^sub>d\<^sup>\<plusminus>\<lbrakk>N, n\<rbrakk> (a * b)\<close>. In implementation contexts, this hypothesis can for example be discharged
+by \<^term>\<open>odd b\<close> together with the input bound \<^term>\<open>\<bar>a\<bar> < R/4\<close>,
+matching the ``\<open>a\<close> odd or \<open>b\<close> odd'' assumption of \cite[Algorithm~8]{NeonNTT}:
+\<^term>\<open>odd b\<close> alone forces \<^term>\<open>(2*a*b) mod 2^n \<noteq> 2^(n-1)\<close> when
+\<^term>\<open>\<bar>a\<bar> < 2^(n-2)\<close>.\<close>
 
 definition \<open>mont_mul_rounding_doubled_int N n T a b \<equiv>
      (let z = \<lfloor>2 * a * b /\<^sub>\<rat> 2^n\<rceil>;

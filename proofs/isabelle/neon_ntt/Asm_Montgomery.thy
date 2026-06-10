@@ -63,10 +63,11 @@ lemma %internal mont_mul_neon_int_via_shsub:
   unfolding mont_mul_neon_int_def shsub_int_def Let_def by simp
 
 
-text \<open>The first \<^verbatim>\<open>SQDMULH\<close> needs \<^term>\<open>a\<close> and \<^term>\<open>b\<close> away from \<^term>\<open>-(2^(n-1)) :: int\<close>; the second
-needs the same for \<^term>\<open>N\<close>, granted by the standard precondition, and \<^term>\<open>\<bar>k\<bar> \<le> R div 2\<close>,
-automatic from \<^verbatim>\<open>MUL\<close>. \<^verbatim>\<open>SHSUB\<close> is non-saturating. The strict input bounds
-are exactly the non-saturation conditions.\<close>
+text \<open>The first \<^verbatim>\<open>SQDMULH\<close> needs \<^term>\<open>b\<close> away from \<^term>\<open>-(2^(n-1)) :: int\<close>
+(one operand non-extreme suffices); the second needs the same for \<^term>\<open>N\<close>,
+granted by the standard precondition, and \<^term>\<open>\<bar>k\<bar> \<le> R div 2\<close>, automatic
+from \<^verbatim>\<open>MUL\<close>. \<^verbatim>\<open>SHSUB\<close> is non-saturating. The strict input bound on \<^term>\<open>b\<close>
+is exactly the non-saturation condition.\<close>
 
 definition %internal mont_mul_neon_word
   :: \<open>'a::len word \<Rightarrow> 'a word \<Rightarrow> 'a word \<Rightarrow> 'a word \<Rightarrow> 'a word\<close> where

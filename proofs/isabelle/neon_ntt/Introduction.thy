@@ -35,8 +35,10 @@ approximation, prove the identity linking Barrett and Montgomery arithmetic, and
 treat the doubling- and rounding-Montgomery variants. We also offer a conceptual
 recasting of the Barrett--Montgomery equivalence through the duality between
 Euclidean and 2-adic rounding. Second, at the level of concrete assembly kernels:
-we model the relevant Neon instructions --- \asminst{MUL}, \asminst{MULH}, \asminst{MLA}, \asminst{MLS}, \asminst{SQDMULH},
-\asminst{SQRDMULH}, and \asminst{SHSUB} --- as operations on machine words, and prove correctness
+we model the relevant Neon instructions --- \asminst{MUL}, \asminst{MLA},
+\asminst{MLS}, \asminst{MULH}, \asminst{UMULH}, \asminst{SQDMULH},
+\asminst{SQRDMULH}, \asminst{SQRDMLAH}, \asminst{SHSUB}, and \asminst{SRSHR}
+--- as operations on machine words, and prove correctness
 and bounds theorems for the signed-word kernels shipped by \texttt{mlkem-native}
 and \texttt{mldsa-native}. The kernel-level theorems are stated against this
 abstract word model, assumed to match the corresponding Armv8-A ISA semantics;
@@ -82,8 +84,8 @@ such results (see next section).
 \medskip\noindent\textbf{Related work.}
 \cite{NeonNTT} is the reference for the algorithms and bounds formalised
 here; its Lemma~1, Propositions~1--4, Facts~1--3, Corollaries~1 and~2, and
-Algorithms~2, 5, 7, 8, 9, 10, 12, and~13 each have a named counterpart in this
-development. Algorithms~1, 3, 4, 6, and~11 are pseudocode renderings of the same
+Algorithms~2, 5, 7, 8, 9, 10, 11, 12, and~13 each have a named counterpart in this
+development. Algorithms~1, 3, 4, and~6 are pseudocode renderings of the same
 operators, captured at the operator level rather than as separate formal artifacts.
 
 Multiple prior efforts have established formal correctness for assembly-level
@@ -125,7 +127,7 @@ includes two agent--prover interfaces for Isabelle. First, Isabelle/Q
 (``I/Q'') is an Isabelle/jEdit plugin exposing proof editing and exploration
 as an MCP server --- the agent edits theory files and observes prover
 feedback in the same way a human would, without triggering a rebuild after
-every change. However, it is not conducive to concurrent edits by both human
+every change. However, it is not conducive to concurrent edits by both the human
 and the agent. For that, Isabelle/REPL (``I/R'') lets the agent talk
 directly to the Isabelle/ML prover process in a REPL loop, bypassing jEdit
 and PIDE. I/R is integrated into I/Q: the agent can fork a REPL at an
@@ -163,7 +165,10 @@ instead of relying on the Barrett--Montgomery equivalence to establish
 bounds for Barrett arithmetic, the agent proved those bounds directly. This
 is interesting per se, but directly opposed to the approach of
 \cite{NeonNTT}, which demonstrates how the obvious Montgomery
-bound can be carried over to Barrett using the equivalence. Second,
+bound can be carried over to Barrett using the equivalence; in the present
+development we follow \cite{NeonNTT} via the equivalence
+(\autoref{ch:barrett_montgomery}), and the agent's direct route was discarded.
+Second,
 \cite[Algorithm~8]{NeonNTT} states the correctness of Montgomery
 multiplication with rounding under a parity hypothesis (\<open>a\<close> odd or \<open>b\<close>
 odd). The agent correctly noted that this assumption is unnecessary and
@@ -171,8 +176,7 @@ proved the algorithm unconditionally correct --- a genuine improvement over
 \cite{NeonNTT} surfaced by the
 formalisation.\footnote{Interestingly, a recent contribution
 (\url{https://github.com/pq-code-package/mlkem-native/pull/1184}) to
-\texttt{mlkem-native} had independently used this algorithm: the PPC64
-compiler developers had discovered and implemented it without the parity
+\texttt{mlkem-native} had independently used this algorithm without the parity
 assumption
 (\url{https://github.com/pq-code-package/mlkem-native/pull/1184\#issuecomment-4485661049}).}
 
@@ -218,7 +222,8 @@ We provide a brief summary of each chapter:
   Montgomery reduction of \<open>z \<cdot> (R mod\<lbrakk>f\<rbrakk> N)\<close>. This
   collapses the bounds proofs of the two families
   \cite[Corollaries~1 and~2]{NeonNTT} into a single
-  argument.
+  argument, and yields output bounds for both standard and refined
+  Barrett reduction.
 
 \item[\autoref{ch:barrett_bound_quality}
   (\<open>Barrett_Bound_Quality\<close>)] checks the quality of the abstract
@@ -238,7 +243,7 @@ We provide a brief summary of each chapter:
 \item[\autoref{ch:barrett_division_even} (\<open>Barrett_Division_Even\<close>)]
   generalises the bridge to an arbitrary modulus, replacing the use of 
   modular inverses by choices of modular quotients. This is relevant
-  for the \<open>decompose\<close> routine in ML-DSA..
+  for the \<open>decompose\<close> routine in ML-DSA.
 
 \item[\autoref{ch:word_ops} (\<open>Word_Ops\<close>)] models the per-lane behavior 
   of relevant Neon instructions as parametric operations on arbitrary-width words.
