@@ -188,8 +188,7 @@
 
 
 
-          # TODO: AVR shell not yet available for mldsa-native
-          # devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
+          devShells.cross-avr = util.mkShell (import ./nix/avr { inherit pkgs; });
 
           devShells.clang19 = util.mkShellWithCC' pkgs.clang_19;
           devShells.clang20 = util.mkShellWithCC' pkgs.clang_20;

@@ -24,6 +24,8 @@ jobs:
            acvp: true
            wycheproof: false
            alloc: true
+           unit: true
+           rng_fail: true
            bench: true
            opt: all
          - runner: ubuntu-latest
@@ -35,7 +37,23 @@ jobs:
            acvp: true
            wycheproof: false
            alloc: true
+           unit: true
+           rng_fail: true
            bench: true
+           opt: no_opt
+         - runner: ubuntu-latest
+           name: 'AVR ATmega128RFR2 (modified for 63.5K RAM)'
+           makefile: test/baremetal/platform/avr/platform.mk
+           nix-shell: cross-avr
+           func: true
+           acvp: true
+           # Other tests are disabled to keep the CI runtime manageable.
+           kat: false
+           wycheproof: false
+           alloc: false
+           unit: false
+           rng_fail: false
+           bench: false
            opt: no_opt
     runs-on: ${{ matrix.target.runner }}
     steps:
@@ -55,7 +73,8 @@ jobs:
           examples: false
           stack: false
           alloc: ${{ matrix.target.alloc }}
-          rng_fail: true
+          unit: ${{ matrix.target.unit }}
+          rng_fail: ${{ matrix.target.rng_fail }}
       - name: Baremetal bench
         if: ${{ matrix.target.bench }}
         uses: ./.github/actions/bench
