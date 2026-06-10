@@ -130,12 +130,16 @@ static unsigned char decode_hex_char(char hex)
   }
 }
 
-static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
-                      const char *hex)
+/* Decode the value of a `prefix=HEX` argument in place, overwriting the
+ * hex encoding with the raw bytes. Returns a pointer to the decoded bytes
+ * inside the argument string, or NULL on parse failure. */
+static unsigned char *decode_hex(const char *prefix, size_t out_len, char *hex)
 {
   size_t i;
+  const char *arg = hex;
   size_t hex_len = strlen(hex);
   size_t prefix_len = strlen(prefix);
+  unsigned char *out;
 
   /*
    * Check that hex starts with `prefix=`
@@ -155,26 +159,27 @@ static int decode_hex(const char *prefix, unsigned char *out, size_t out_len,
     goto hex_usage;
   }
 
-  for (i = 0; i < out_len; i++, hex += 2, out++)
+  out = (unsigned char *)hex;
+  for (i = 0; i < out_len; i++)
   {
-    unsigned hex0 = decode_hex_char(hex[0]);
-    unsigned hex1 = decode_hex_char(hex[1]);
+    unsigned hex0 = decode_hex_char(hex[2 * i]);
+    unsigned hex1 = decode_hex_char(hex[2 * i + 1]);
     if (hex0 == 0xFF || hex1 == 0xFF)
     {
       goto hex_usage;
     }
 
-    *out = ((hex0 << 4) | hex1) & 0XFF;
+    out[i] = ((hex0 << 4) | hex1) & 0XFF;
   }
 
-  return 0;
+  return out;
 
 hex_usage:
   fprintf(stderr,
           "Argument %s invalid: Expected argument of the form '%s=HEX' with "
           "HEX being a hex encoding of %u bytes\n",
-          hex, prefix, (unsigned)out_len);
-  return 1;
+          arg, prefix, (unsigned)out_len);
+  return NULL;
 }
 
 
@@ -651,9 +656,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
     case keyGen:
     {
-      unsigned char seed[MLDSA_SEEDBYTES];
+      unsigned char *seed;
       /* Parse seed */
-      if (argc == 0 || decode_hex("seed", seed, sizeof(seed), *argv) != 0)
+      if (argc == 0 ||
+          (seed = decode_hex("seed", MLDSA_SEEDBYTES, *argv)) == NULL)
       {
         goto keygen_usage;
       }
@@ -668,10 +674,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGen:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *rnd;
+      unsigned char *context;
+      unsigned char *sk;
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -681,14 +687,15 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_usage;
       }
@@ -701,14 +708,14 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_usage;
       }
       argc--, argv++;
 
       /* Parse rnd */
-      if (argc == 0 || decode_hex("rnd", rnd, sizeof(rnd), *argv) != 0)
+      if (argc == 0 || (rnd = decode_hex("rnd", MLDSA_RNDBYTES, *argv)) == NULL)
       {
         goto siggen_usage;
       }
@@ -720,9 +727,9 @@ int main(int argc, char *argv[])
     }
     case sigGenInternal:
     {
-      unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
-      unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *rnd;
+      unsigned char *sk;
       int externalMu;
       size_t mlen;
 
@@ -732,15 +739,16 @@ int main(int argc, char *argv[])
         goto siggen_internal_usage;
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
-      if (mlen > sizeof(message) ||
-          decode_hex("message", message, mlen, *argv) != 0)
+      if (mlen > MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2 ||
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_internal_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_internal_usage;
       }
@@ -756,7 +764,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse rnd */
-      if (argc == 0 || decode_hex("rnd", rnd, sizeof(rnd), *argv) != 0)
+      if (argc == 0 || (rnd = decode_hex("rnd", MLDSA_RNDBYTES, *argv)) == NULL)
       {
         goto siggen_internal_usage;
       }
@@ -770,9 +778,9 @@ int main(int argc, char *argv[])
 
     case sigGenDeterministic:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *context;
+      unsigned char *sk;
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -782,14 +790,15 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_deterministic_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_deterministic_usage;
       }
@@ -802,7 +811,7 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_deterministic_usage;
       }
@@ -815,8 +824,8 @@ int main(int argc, char *argv[])
 
     case sigGenInternalDeterministic:
     {
-      unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *sk;
       int externalMu;
       size_t mlen;
 
@@ -826,15 +835,16 @@ int main(int argc, char *argv[])
         goto siggen_internal_deterministic_usage;
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
-      if (mlen > sizeof(message) ||
-          decode_hex("message", message, mlen, *argv) != 0)
+      if (mlen > MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2 ||
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_internal_deterministic_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_internal_deterministic_usage;
       }
@@ -858,10 +868,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVer:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char *message;
+      unsigned char *context;
+      unsigned char *signature;
+      unsigned char *pk;
       size_t mlen, ctxlen;
 
       /* Parse message */
@@ -871,7 +881,7 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto sigver_usage;
       }
@@ -884,7 +894,7 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto sigver_usage;
       }
@@ -892,7 +902,7 @@ int main(int argc, char *argv[])
 
       /* Parse signature */
       if (argc == 0 ||
-          decode_hex("signature", signature, sizeof(signature), *argv) != 0)
+          (signature = decode_hex("signature", CRYPTO_BYTES, *argv)) == NULL)
       {
         goto sigver_usage;
       }
@@ -900,7 +910,8 @@ int main(int argc, char *argv[])
 
 
       /* Parse pk */
-      if (argc == 0 || decode_hex("pk", pk, sizeof(pk), *argv) != 0)
+      if (argc == 0 ||
+          (pk = decode_hex("pk", CRYPTO_PUBLICKEYBYTES, *argv)) == NULL)
       {
         goto sigver_usage;
       }
@@ -915,9 +926,9 @@ int main(int argc, char *argv[])
 
     case sigVerInternal:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char *message;
+      unsigned char *signature;
+      unsigned char *pk;
       size_t mlen;
       int externalMu;
 
@@ -928,7 +939,7 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto sigver_internal_usage;
       }
@@ -936,7 +947,7 @@ int main(int argc, char *argv[])
 
       /* Parse signature */
       if (argc == 0 ||
-          decode_hex("signature", signature, sizeof(signature), *argv) != 0)
+          (signature = decode_hex("signature", CRYPTO_BYTES, *argv)) == NULL)
       {
         goto sigver_internal_usage;
       }
@@ -944,7 +955,8 @@ int main(int argc, char *argv[])
 
 
       /* Parse pk */
-      if (argc == 0 || decode_hex("pk", pk, sizeof(pk), *argv) != 0)
+      if (argc == 0 ||
+          (pk = decode_hex("pk", CRYPTO_PUBLICKEYBYTES, *argv)) == NULL)
       {
         goto sigver_internal_usage;
       }
@@ -970,10 +982,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGenPreHash:
     {
-      unsigned char ph[64];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *ph;
+      unsigned char *context;
+      unsigned char *rnd;
+      unsigned char *sk;
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -984,7 +996,7 @@ int main(int argc, char *argv[])
         goto siggen_prehash_usage;
       }
       phlen = (strlen(*argv) - strlen("ph=")) / 2;
-      if (phlen > 64 || decode_hex("ph", ph, phlen, *argv) != 0)
+      if (phlen > 64 || (ph = decode_hex("ph", phlen, *argv)) == NULL)
       {
         goto siggen_prehash_usage;
       }
@@ -997,14 +1009,15 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_prehash_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_usage;
       }
@@ -1019,7 +1032,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse rnd */
-      if (argc == 0 || decode_hex("rnd", rnd, sizeof(rnd), *argv) != 0)
+      if (argc == 0 || (rnd = decode_hex("rnd", MLDSA_RNDBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_usage;
       }
@@ -1034,10 +1047,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVerPreHash:
     {
-      unsigned char ph[64];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char *ph;
+      unsigned char *context;
+      unsigned char *signature;
+      unsigned char *pk;
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -1048,7 +1061,7 @@ int main(int argc, char *argv[])
         goto sigver_prehash_usage;
       }
       phlen = (strlen(*argv) - strlen("ph=")) / 2;
-      if (phlen > 64 || decode_hex("ph", ph, phlen, *argv) != 0)
+      if (phlen > 64 || (ph = decode_hex("ph", phlen, *argv)) == NULL)
       {
         goto sigver_prehash_usage;
       }
@@ -1061,7 +1074,7 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto sigver_prehash_usage;
       }
@@ -1069,7 +1082,7 @@ int main(int argc, char *argv[])
 
       /* Parse signature */
       if (argc == 0 ||
-          decode_hex("signature", signature, sizeof(signature), *argv) != 0)
+          (signature = decode_hex("signature", CRYPTO_BYTES, *argv)) == NULL)
       {
         goto sigver_prehash_usage;
       }
@@ -1077,7 +1090,8 @@ int main(int argc, char *argv[])
 
 
       /* Parse pk */
-      if (argc == 0 || decode_hex("pk", pk, sizeof(pk), *argv) != 0)
+      if (argc == 0 ||
+          (pk = decode_hex("pk", CRYPTO_PUBLICKEYBYTES, *argv)) == NULL)
       {
         goto sigver_prehash_usage;
       }
@@ -1102,10 +1116,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_SIGN_API)
     case sigGenPreHashShake256:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char rnd[MLDSA_RNDBYTES];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *context;
+      unsigned char *rnd;
+      unsigned char *sk;
       size_t mlen;
       size_t ctxlen;
 
@@ -1116,7 +1130,7 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_usage;
       }
@@ -1129,21 +1143,22 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_usage;
       }
       argc--, argv++;
 
       /* Parse rnd */
-      if (argc == 0 || decode_hex("rnd", rnd, sizeof(rnd), *argv) != 0)
+      if (argc == 0 || (rnd = decode_hex("rnd", MLDSA_RNDBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_usage;
       }
@@ -1156,9 +1171,9 @@ int main(int argc, char *argv[])
 
     case sigGenPreHashDeterministic:
     {
-      unsigned char ph[64];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *ph;
+      unsigned char *context;
+      unsigned char *sk;
       char hashAlg[100];
       size_t phlen;
       size_t ctxlen;
@@ -1169,7 +1184,7 @@ int main(int argc, char *argv[])
         goto siggen_prehash_deterministic_usage;
       }
       phlen = (strlen(*argv) - strlen("ph=")) / 2;
-      if (phlen > 64 || decode_hex("ph", ph, phlen, *argv) != 0)
+      if (phlen > 64 || (ph = decode_hex("ph", phlen, *argv)) == NULL)
       {
         goto siggen_prehash_deterministic_usage;
       }
@@ -1182,14 +1197,15 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_prehash_deterministic_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_deterministic_usage;
       }
@@ -1210,9 +1226,9 @@ int main(int argc, char *argv[])
 
     case sigGenPreHashShake256Deterministic:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char sk[CRYPTO_SECRETKEYBYTES];
+      unsigned char *message;
+      unsigned char *context;
+      unsigned char *sk;
       size_t mlen;
       size_t ctxlen;
 
@@ -1223,7 +1239,7 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_deterministic_usage;
       }
@@ -1236,14 +1252,15 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_deterministic_usage;
       }
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || decode_hex("sk", sk, sizeof(sk), *argv) != 0)
+      if (argc == 0 ||
+          (sk = decode_hex("sk", CRYPTO_SECRETKEYBYTES, *argv)) == NULL)
       {
         goto siggen_prehash_shake256_deterministic_usage;
       }
@@ -1258,10 +1275,10 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
     case sigVerPreHashShake256:
     {
-      unsigned char message[MAX_MSG_LENGTH];
-      unsigned char context[MAX_CTX_LENGTH];
-      unsigned char signature[CRYPTO_BYTES];
-      unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+      unsigned char *message;
+      unsigned char *context;
+      unsigned char *signature;
+      unsigned char *pk;
       size_t mlen;
       size_t ctxlen;
 
@@ -1272,7 +1289,7 @@ int main(int argc, char *argv[])
       }
       mlen = (strlen(*argv) - strlen("message=")) / 2;
       if (mlen > MAX_MSG_LENGTH ||
-          decode_hex("message", message, mlen, *argv) != 0)
+          (message = decode_hex("message", mlen, *argv)) == NULL)
       {
         goto sigver_prehash_shake256_usage;
       }
@@ -1285,7 +1302,7 @@ int main(int argc, char *argv[])
       }
       ctxlen = (strlen(*argv) - strlen("context=")) / 2;
       if (ctxlen > MAX_CTX_LENGTH ||
-          decode_hex("context", context, ctxlen, *argv) != 0)
+          (context = decode_hex("context", ctxlen, *argv)) == NULL)
       {
         goto sigver_prehash_shake256_usage;
       }
@@ -1293,14 +1310,15 @@ int main(int argc, char *argv[])
 
       /* Parse signature */
       if (argc == 0 ||
-          decode_hex("signature", signature, sizeof(signature), *argv) != 0)
+          (signature = decode_hex("signature", CRYPTO_BYTES, *argv)) == NULL)
       {
         goto sigver_prehash_shake256_usage;
       }
       argc--, argv++;
 
       /* Parse pk */
-      if (argc == 0 || decode_hex("pk", pk, sizeof(pk), *argv) != 0)
+      if (argc == 0 ||
+          (pk = decode_hex("pk", CRYPTO_PUBLICKEYBYTES, *argv)) == NULL)
       {
         goto sigver_prehash_shake256_usage;
       }
