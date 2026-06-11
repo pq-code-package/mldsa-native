@@ -32,6 +32,7 @@
 MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[256][8];
 
 #define mld_ntt_avx2_asm MLD_NAMESPACE(ntt_avx2_asm)
+MLD_SYSV_ABI
 void mld_ntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/ntt_avx2_asm.ml */
@@ -47,6 +48,7 @@ __contract__(
 );
 
 #define mld_invntt_avx2_asm MLD_NAMESPACE(invntt_avx2_asm)
+MLD_SYSV_ABI
 void mld_invntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/intt_avx2_asm.ml */
@@ -61,6 +63,7 @@ __contract__(
 );
 
 #define mld_nttunpack_avx2_asm MLD_NAMESPACE(nttunpack_avx2_asm)
+MLD_SYSV_ABI
 void mld_nttunpack_avx2_asm(int32_t *r)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/nttunpack_avx2_asm.ml */
@@ -100,6 +103,7 @@ void mld_poly_decompose_88_avx2(int32_t *a1, int32_t *a0);
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #define mld_poly_caddq_avx2_asm MLD_NAMESPACE(poly_caddq_avx2_asm)
+MLD_SYSV_ABI
 void mld_poly_caddq_avx2_asm(int32_t *r)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/poly_caddq_avx2_asm.ml */
@@ -119,7 +123,7 @@ void mld_poly_use_hint_88_avx2(int32_t *a, const int32_t *h);
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_poly_chknorm_avx2_asm MLD_NAMESPACE(poly_chknorm_avx2_asm)
-MLD_MUST_CHECK_RETURN_VALUE
+MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
 int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/poly_chknorm_avx2_asm.ml */
@@ -142,6 +146,7 @@ void mld_polyz_unpack_19_avx2(int32_t *r, const uint8_t *a);
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #define mld_pointwise_avx2_asm MLD_NAMESPACE(pointwise_avx2_asm)
+MLD_SYSV_ABI
 void mld_pointwise_avx2_asm(int32_t *a, const int32_t *b, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/pointwise_avx2_asm.ml */
@@ -160,6 +165,7 @@ __contract__(
 );
 
 #define mld_pointwise_acc_l4_avx2_asm MLD_NAMESPACE(pointwise_acc_l4_avx2_asm)
+MLD_SYSV_ABI
 void mld_pointwise_acc_l4_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t a[4][MLDSA_N],
                                    const int32_t b[4][MLDSA_N],
@@ -179,6 +185,7 @@ __contract__(
 );
 
 #define mld_pointwise_acc_l5_avx2_asm MLD_NAMESPACE(pointwise_acc_l5_avx2_asm)
+MLD_SYSV_ABI
 void mld_pointwise_acc_l5_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t a[5][MLDSA_N],
                                    const int32_t b[5][MLDSA_N],
@@ -198,6 +205,7 @@ __contract__(
 );
 
 #define mld_pointwise_acc_l7_avx2_asm MLD_NAMESPACE(pointwise_acc_l7_avx2_asm)
+MLD_SYSV_ABI
 void mld_pointwise_acc_l7_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t a[7][MLDSA_N],
                                    const int32_t b[7][MLDSA_N],

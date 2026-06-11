@@ -28,6 +28,7 @@ MLD_INTERNAL_DATA_DECLARATION const uint64_t mld_keccak_rho8[4];
 MLD_INTERNAL_DATA_DECLARATION const uint64_t mld_keccak_rho56[4];
 
 #define mld_keccak_f1600_x4_avx2_asm MLD_NAMESPACE(keccak_f1600_x4_avx2_asm)
+MLD_SYSV_ABI
 void mld_keccak_f1600_x4_avx2_asm(uint64_t states[100], const uint64_t rc[24],
                                   const uint64_t rho8[4],
                                   const uint64_t rho56[4])
