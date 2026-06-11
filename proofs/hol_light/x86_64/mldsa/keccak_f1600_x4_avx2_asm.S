@@ -13,11 +13,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_avx2_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_avx2_asm:
+.global _mld_keccak_f1600_x4_avx2_asm
+_mld_keccak_f1600_x4_avx2_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_avx2_asm
-PQCP_MLDSA_NATIVE_MLDSA44_keccak_f1600_x4_avx2_asm:
+.global mld_keccak_f1600_x4_avx2_asm
+mld_keccak_f1600_x4_avx2_asm:
 #endif
 
         .cfi_startproc

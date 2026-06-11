@@ -31,11 +31,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_ntt_aarch64_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_ntt_aarch64_asm:
+.global _mld_ntt_aarch64_asm
+_mld_ntt_aarch64_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_ntt_aarch64_asm
-PQCP_MLDSA_NATIVE_MLDSA44_ntt_aarch64_asm:
+.global mld_ntt_aarch64_asm
+mld_ntt_aarch64_asm:
 #endif
 
         .cfi_startproc

@@ -2633,10 +2633,14 @@ def update_via_simpasm(
 
 def gen_hol_light_asm_file(job):
     infile, indir, cflags, arch = job
+    # Override the default namespace (PQCP_MLDSA_NATIVE_MLDSA44) with a short
+    # `mld_` prefix in the proofs/hol_light/ assembly drops. The exported symbol
+    # is determined by MLD_ASM_NAMESPACE() at preprocessing time, which expands
+    # via MLD_CONFIG_NAMESPACE_PREFIX with a trailing underscore appended.
     update_via_simpasm(
         f"{indir}/{infile}",
         "proofs/hol_light/" + arch + "/mldsa",
-        cflags=cflags,
+        cflags=cflags + " -DMLD_CONFIG_NAMESPACE_PREFIX=mld",
         preserve_header=False,
     )
 

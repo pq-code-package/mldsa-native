@@ -11,11 +11,11 @@
 .text
 .balign 4
 #ifdef __APPLE__
-.global _PQCP_MLDSA_NATIVE_MLDSA44_poly_pointwise_montgomery_aarch64_asm
-_PQCP_MLDSA_NATIVE_MLDSA44_poly_pointwise_montgomery_aarch64_asm:
+.global _mld_poly_pointwise_montgomery_aarch64_asm
+_mld_poly_pointwise_montgomery_aarch64_asm:
 #else
-.global PQCP_MLDSA_NATIVE_MLDSA44_poly_pointwise_montgomery_aarch64_asm
-PQCP_MLDSA_NATIVE_MLDSA44_poly_pointwise_montgomery_aarch64_asm:
+.global mld_poly_pointwise_montgomery_aarch64_asm
+mld_poly_pointwise_montgomery_aarch64_asm:
 #endif
 
         .cfi_startproc
