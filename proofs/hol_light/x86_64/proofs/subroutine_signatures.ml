@@ -70,6 +70,40 @@ let subroutine_signatures = [
    ])
 );
 
+("mldsa_poly_decompose_32_x86",
+  ([(*args*)
+     ("a1", "int32_t[static 256]", (*is const?*)"false");
+     ("a0", "int32_t[static 256]", (*is const?*)"false");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a0", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a1", "256"(* num elems *), 4(* elem bytesize *));
+    ("a0", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
+("mldsa_poly_decompose_88_x86",
+  ([(*args*)
+     ("a1", "int32_t[static 256]", (*is const?*)"false");
+     ("a0", "int32_t[static 256]", (*is const?*)"false");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a0", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a1", "256"(* num elems *), 4(* elem bytesize *));
+    ("a0", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+
 ("mldsa_pointwise_x86",
   ([(*args*)
      ("a", "int32_t[static 256]", (*is const?*)"false");

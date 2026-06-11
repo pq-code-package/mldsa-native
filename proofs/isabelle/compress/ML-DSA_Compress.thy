@@ -26,8 +26,8 @@ subsection \<open>C and AVX2 implementations\<close>
 
 text \<open>
   The C reference \<^file>\<open>../../../mldsa/src/rounding.h\<close> and AVX2 implementations
-  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_32_avx2.c\<close> and
-  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_88_avx2.c\<close>
+  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_32_avx2_asm.S\<close> and
+  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_88_avx2_asm.S\<close>
   first compute \<^verbatim>\<open>ceil(f / 128)\<close>, then Barrett divide by \<^verbatim>\<open>B = 2*GAMMA2 / 128\<close>.
 \<close>
 

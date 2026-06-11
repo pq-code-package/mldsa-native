@@ -88,6 +88,8 @@
 #include "src/native/x86_64/src/pointwise_avx2_asm.S"
 #include "src/native/x86_64/src/poly_caddq_avx2_asm.S"
 #include "src/native/x86_64/src/poly_chknorm_avx2_asm.S"
+#include "src/native/x86_64/src/poly_decompose_32_avx2_asm.S"
+#include "src/native/x86_64/src/poly_decompose_88_avx2_asm.S"
 #include "src/native/x86_64/src/polyz_unpack_17_avx2_asm.S"
 #include "src/native/x86_64/src/polyz_unpack_19_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
@@ -796,8 +798,8 @@
 #undef mld_pointwise_avx2_asm
 #undef mld_poly_caddq_avx2_asm
 #undef mld_poly_chknorm_avx2_asm
-#undef mld_poly_decompose_32_avx2
-#undef mld_poly_decompose_88_avx2
+#undef mld_poly_decompose_32_avx2_asm
+#undef mld_poly_decompose_88_avx2_asm
 #undef mld_poly_use_hint_32_avx2
 #undef mld_poly_use_hint_88_avx2
 #undef mld_polyz_unpack_17_avx2_asm

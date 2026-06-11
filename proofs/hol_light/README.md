@@ -168,6 +168,8 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 pointwise multiplication-accumulation (l=5): [pointwise_acc_l5_avx2_asm.S](x86_64/mldsa/pointwise_acc_l5_avx2_asm.S)
   * x86_64 pointwise multiplication-accumulation (l=7): [pointwise_acc_l7_avx2_asm.S](x86_64/mldsa/pointwise_acc_l7_avx2_asm.S)
   * x86_64 poly_chknorm: [poly_chknorm_avx2_asm.S](x86_64/mldsa/poly_chknorm_avx2_asm.S)
+  * x86_64 poly_decompose (l=5,7): [poly_decompose_32_avx2_asm.S](x86_64/mldsa/poly_decompose_32_avx2_asm.S)
+  * x86_64 poly_decompose (l=4): [poly_decompose_88_avx2_asm.S](x86_64/mldsa/poly_decompose_88_avx2_asm.S)
   * x86_64 polyz_unpack (l=4): [polyz_unpack_17_avx2_asm.S](x86_64/mldsa/polyz_unpack_17_avx2_asm.S)
   * x86_64 polyz_unpack (l=5,7): [polyz_unpack_19_avx2_asm.S](x86_64/mldsa/polyz_unpack_19_avx2_asm.S)
 - FIPS202:

@@ -2889,6 +2889,18 @@ def hol_light_asm_joblist():
             "x86_64",
         ),
         (
+            "poly_decompose_32_avx2_asm.S",
+            "dev/x86_64/src",
+            f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "poly_decompose_88_avx2_asm.S",
+            "dev/x86_64/src",
+            f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
+            "x86_64",
+        ),
+        (
             "polyz_unpack_17_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",

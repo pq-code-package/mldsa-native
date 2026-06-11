@@ -153,7 +153,7 @@ static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_32_avx2(a1, a0);
+  mld_poly_decompose_32_avx2_asm(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
@@ -167,7 +167,7 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_decompose_88_avx2(a1, a0);
+  mld_poly_decompose_88_avx2_asm(a1, a0);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \

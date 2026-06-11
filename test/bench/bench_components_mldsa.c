@@ -102,6 +102,8 @@ static int bench(void)
         chknorm_acc ^=
         mld_poly_chknorm((const mld_poly *)data0, MLDSA_GAMMA1 - MLDSA_BETA);)
 
+  BENCH("poly_decompose", mld_poly_decompose((mld_poly *)data0, &poly_out))
+
   return (int)chknorm_acc;
 }
 
