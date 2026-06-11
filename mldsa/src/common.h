@@ -262,14 +262,18 @@
 #if !defined(MLD_CONFIG_CUSTOM_ALLOC_FREE)
 /* Default: stack allocation */
 
+/* This is a declaration macro, not an expression macro: T is a type and v is
+ * a declarator, neither of which can be wrapped in parentheses. The
+ * bugprone-macro-parentheses diagnostic is therefore a false positive here. */
 #define MLD_ALLOC(v, T, N, context) \
   MLD_ALIGN T mld_alloc_##v[N];     \
-  T *v = mld_alloc_##v
+  T *v = mld_alloc_##v /* NOLINT(bugprone-macro-parentheses) */
 
-/* TODO: This leads to a circular dependency between common and ct.h
- * It just works out before we're at the end of the file, but it's still
- * prone to issues in the future. */
-#include "ct.h"
+/* The MLD_FREE macro body references mld_zeroize(), which is declared in
+ * ct.h. We deliberately do NOT include ct.h here: doing so would create a
+ * circular dependency (ct.h includes common.h), and common.h itself never
+ * calls mld_zeroize() -- only the macro expansion does. Each translation
+ * unit that uses MLD_FREE therefore includes ct.h directly. */
 #define MLD_FREE(v, T, N, context)                     \
   do                                                   \
   {                                                    \
@@ -305,18 +309,18 @@
 /****************************** Error codes ***********************************/
 
 /* Generic failure condition */
-#define MLD_ERR_FAIL -1
+#define MLD_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
-#define MLD_ERR_OUT_OF_MEMORY -2
+#define MLD_ERR_OUT_OF_MEMORY (-2)
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
-#define MLD_ERR_RNG_FAIL -3
+#define MLD_ERR_RNG_FAIL (-3)
 /* The signing rejection-sampling loop exceeded
  * MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations without producing a valid
  * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
  * has probability < 2^-256. */
-#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED -4
+#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
 
 /* Disjunction over the full set of MLD_ERR_XXX failure codes.
  *

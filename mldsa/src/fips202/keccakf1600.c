@@ -33,7 +33,7 @@
 #if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #define MLD_KECCAK_NROUNDS 24
-#define MLD_KECCAK_ROL(a, offset) ((a << offset) ^ (a >> (64 - offset)))
+#define MLD_KECCAK_ROL(a, offset) (((a) << (offset)) ^ ((a) >> (64 - (offset))))
 
 MLD_INTERNAL_API
 void mld_keccakf1600_extract_bytes(uint64_t *state, unsigned char *data,

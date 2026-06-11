@@ -636,6 +636,7 @@ __contract__(
  *           an allocation via MLD_CUSTOM_ALLOC returned NULL.
  */
 MLD_MUST_CHECK_RETURN_VALUE
+/* NOLINTNEXTLINE(readability-function-cognitive-complexity) */
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
     const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
@@ -1502,8 +1503,9 @@ static int mld_validate_hash_length(int hashalg, size_t len)
       return (len == 256 / 8) ? 0 : -1;
     case MLD_PREHASH_SHAKE_256:
       return (len == 512 / 8) ? 0 : -1;
+    default:
+      return -1;
   }
-  return -1;
 }
 
 size_t mld_prepare_domain_separation_prefix(

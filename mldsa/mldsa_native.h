@@ -125,18 +125,18 @@
 /****************************** Error codes ***********************************/
 
 /* Generic failure condition */
-#define MLD_ERR_FAIL -1
+#define MLD_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
-#define MLD_ERR_OUT_OF_MEMORY -2
+#define MLD_ERR_OUT_OF_MEMORY (-2)
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
-#define MLD_ERR_RNG_FAIL -3
+#define MLD_ERR_RNG_FAIL (-3)
 /* The signing rejection-sampling loop exceeded
  * MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations without producing a valid
  * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
  * has probability < 2^-256. */
-#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED -4
+#define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
 
 /****************************** Function API **********************************/
 
