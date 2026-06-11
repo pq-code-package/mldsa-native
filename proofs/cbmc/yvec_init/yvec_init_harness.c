@@ -1,0 +1,13 @@
+// Copyright (c) The mldsa-native project authors
+// SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+#include "polyvec_lazy.h"
+
+void harness(void)
+{
+  mld_yvec *y;
+  uint8_t *rhoprime;
+  uint16_t nonce;
+
+  mld_yvec_init(y, rhoprime, nonce);
+}

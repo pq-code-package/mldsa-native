@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+# Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+#
+# Looks for CBMC contracts without proof, and for loop annotations
+# missing a decreases clause (needed for termination proofs).
+#
+
+import re
+import sys
+import pathlib
+
+
+def get_c_source_files():
+    return get_files("mldsa/**/*.c")
+
+
+def get_header_files():
+    return get_files("mldsa/**/*.h")
+
+
+def get_files(pattern):
+    return list(map(str, pathlib.Path().glob(pattern)))
+
+
+def get_proof_check_contracts():
+    """Map proof directory name -> set of mld_-stripped function names that
+    appear in any CHECK_FUNCTION_CONTRACTS assignment in that proof's
+    Makefile."""
+    result = {}
+    for makefile in pathlib.Path("proofs/cbmc").glob("*/Makefile"):
+        names = set()
+        with open(makefile) as f:
+            for line in f:
+                m = re.match(r"\s*CHECK_FUNCTION_CONTRACTS\s*[+:]?=\s*(\S+)", line)
+                if m:
+                    names.add(m.group(1).removeprefix("mld_"))
+        result[makefile.parent.name] = names
+    return result
+
+
+def strip_comments(content):
+    """Replace block and line comments with whitespace, preserving line numbers."""
+
+    def repl(m):
+        return re.sub(r"[^\n]", " ", m.group(0))
+
+    # Block comments and line comments.
+    return re.sub(r"/\*[\s\S]*?\*/|//[^\n]*", repl, content)
+
+
+# Source-level macro names that expand to a different symbol via
+# MLD_NAMESPACE / MLD_NAMESPACE_KL. CBMC and CHECK_FUNCTION_CONTRACTS see
+# the symbol on the right.
+NAMESPACE_ALIASES = {
+    "sign": "sign",
+    "sign_keypair": "keypair",
+    "sign_keypair_internal": "keypair_internal",
+    "sign_open": "open",
+    "sign_pk_from_sk": "pk_from_sk",
+    "sign_signature": "signature",
+    "sign_signature_extmu": "signature_extmu",
+    "sign_signature_internal": "signature_internal",
+    "sign_signature_pre_hash_internal": "signature_pre_hash_internal",
+    "sign_signature_pre_hash_shake256": "signature_pre_hash_shake256",
+    "sign_verify": "verify",
+    "sign_verify_extmu": "verify_extmu",
+    "sign_verify_internal": "verify_internal",
+    "sign_verify_pre_hash_internal": "verify_pre_hash_internal",
+    "sign_verify_pre_hash_shake256": "verify_pre_hash_shake256",
+}
+
+
+def gen_contracts():
+    files = get_c_source_files() + get_header_files()
+
+    for filename in files:
+        with open(filename, "r") as f:
+            content = f.read()
+
+        content = strip_comments(content)
+
+        contract_pattern = r"(\w+)\s*\([^)]*\)\s*__contract__"
+        matches = re.finditer(contract_pattern, content)
+        for m in matches:
+            line = content.count("\n", 0, m.start())
+            yield (filename, line, m.group(1).removeprefix("mld_"))
+
+
+def is_exception(funcname):
+    # The functions passing this filter are known not to have a proof
+
+    if funcname == "poly_permute_bitrev_to_custom":
+        return True
+
+    if (
+        funcname.endswith("_native")
+        or funcname.endswith("_asm")
+        or funcname.endswith("_avx2")
+    ):
+        # CBMC proofs are axiomatized against contracts of the backends
+        return True
+
+    if funcname == "ct_get_optblocker_u64":
+        # As documented in the code, this contract is treated as an axiom
+        return True
+
+    if funcname in ["memcmp", "randombytes"]:
+        # External functions
+        return True
+
+    if funcname in ["zeroize"]:
+        # Implemented using inline ASM or external functions
+        return True
+
+    if funcname == "get_max_signing_attempts":
+        # Trivial config accessor; bounds checked statically via preprocessor
+        return True
+
+    return False
+
+
+def check_contracts():
+    contracts = set(gen_contracts())
+    proof_checks = get_proof_check_contracts()
+
+    bad = []
+
+    for filename, line, funcname in contracts:
+        # Convention: the proof directory is named after the function,
+        # except for eager/lazy variants which share a directory whose
+        # name drops the suffix.
+        dirname = funcname.removesuffix("_eager").removesuffix("_lazy")
+
+        # The Makefile in that directory must contain a corresponding
+        # CHECK_FUNCTION_CONTRACTS line.  Makefiles use base names
+        # (without _lazy/_eager suffix); Makefile.common appends the
+        # right suffix.
+        symbol = NAMESPACE_ALIASES.get(funcname, funcname)
+        symbol_base = symbol.removesuffix("_eager").removesuffix("_lazy")
+        if symbol_base in proof_checks.get(dirname, set()):
+            continue
+
+        if is_exception(funcname):
+            print(
+                f"{filename}:{line}:{funcname} has contract but no proof, "
+                "but is listed as exception"
+            )
+            continue
+
+        print(
+            f"{filename}:{line}:{funcname}: has contract but no proof. FAIL",
+            file=sys.stderr,
+        )
+        bad.append(funcname)
+
+    return len(bad) == 0
+
+
+# Loops that only terminate probabilistically (rejection sampling)
+# and therefore cannot have a decreases clause.
+# The value is the number of loops allowed to lack a decreases clause (default 1).
+DECREASES_EXCEPTIONS = {
+    ("mldsa/src/poly.c", "mld_poly_uniform"): 1,
+    ("mldsa/src/poly.c", "mld_poly_uniform_4x"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta_4x"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_challenge"): 1,
+}
+
+
+def find_enclosing_function(content, pos):
+    """Find the name of the function enclosing the given position."""
+    prefix = content[:pos]
+    # Match function definitions: look for 'name(' at the start of a line
+    # or after a type, followed eventually by '{' on its own line
+    matches = list(re.finditer(r"\n\w+\s+(\w+)\s*\(", prefix))
+    if matches:
+        return matches[-1].group(1)
+    return None
+
+
+def check_decreases():
+    files = get_c_source_files() + get_header_files()
+    bad = []
+
+    # Count loops without decreases per (filename, func)
+    missing = {}
+
+    for filename in files:
+        with open(filename, "r") as f:
+            content = f.read()
+
+        # Find __loop__( that are actual loop annotations (not macro defs)
+        for m in re.finditer(r"__loop__\(", content):
+            start = m.start()
+            line = content.count("\n", 0, start) + 1
+
+            # Skip macro definitions like #define __loop__(x)
+            line_start = content.rfind("\n", 0, start) + 1
+            line_text = content[line_start : content.find("\n", start)]
+            if "#define" in line_text:
+                continue
+
+            # Extract the full __loop__(...) content by matching parentheses
+            depth = 0
+            i = m.end() - 1
+            for i in range(m.end() - 1, len(content)):
+                if content[i] == "(":
+                    depth += 1
+                elif content[i] == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+            loop_body = content[m.start() : i + 1]
+
+            if "decreases(" in loop_body:
+                continue
+
+            func = find_enclosing_function(content, start)
+            key = (filename, func)
+            missing.setdefault(key, []).append(line)
+
+    for (filename, func), lines in missing.items():
+        key = (filename, func)
+        allowed = DECREASES_EXCEPTIONS.get(key, 0)
+        count = len(lines)
+
+        if count <= allowed:
+            for line in lines:
+                print(
+                    f"{filename}:{line}: __loop__ without decreases in "
+                    f"{func}(), but is listed as exception"
+                )
+            continue
+
+        if allowed > 0:
+            print(
+                f"{filename}: {func}() has {count} loops without decreases "
+                f"but only {allowed} allowed. FAIL",
+                file=sys.stderr,
+            )
+        else:
+            for line in lines:
+                print(
+                    f"{filename}:{line}: __loop__ without decreases clause "
+                    f"in {func}(). FAIL",
+                    file=sys.stderr,
+                )
+        bad.append((filename, func))
+
+    return len(bad) == 0
+
+
+def _main():
+    ok = True
+    if not check_contracts():
+        ok = False
+    if not check_decreases():
+        ok = False
+    if not ok:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    _main()
