@@ -31,136 +31,9 @@
  * within a single compilation unit. */
 #define mld_rej_eta MLD_ADD_PARAM_SET(mld_rej_eta)
 #define mld_rej_eta_c MLD_ADD_PARAM_SET(mld_rej_eta_c)
-#define mld_poly_decompose_c MLD_ADD_PARAM_SET(mld_poly_decompose_c)
-#define mld_poly_use_hint_c MLD_ADD_PARAM_SET(mld_poly_use_hint_c)
 #define mld_polyz_unpack_c MLD_ADD_PARAM_SET(mld_polyz_unpack_c)
 /* End of parameter set namespacing */
 
-
-#if !defined(MLD_CONFIG_NO_SIGN_API)
-MLD_STATIC_TESTABLE
-void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0)
-__contract__(
-  requires(memory_no_alias(a1,  sizeof(mld_poly)))
-  requires(memory_no_alias(a0, sizeof(mld_poly)))
-  requires(array_bound(a0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
-  assigns(memory_slice(a1, sizeof(mld_poly)))
-  assigns(memory_slice(a0, sizeof(mld_poly)))
-  ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-  ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1))
-)
-{
-  unsigned int i;
-  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
-  for (i = 0; i < MLDSA_N; ++i)
-  __loop__(
-    assigns(i, memory_slice(a0, sizeof(mld_poly)), memory_slice(a1, sizeof(mld_poly)))
-    invariant(i <= MLDSA_N)
-    invariant(array_bound(a0->coeffs, i, MLDSA_N, 0, MLDSA_Q))
-    invariant(array_bound(a1->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-    invariant(array_abs_bound(a0->coeffs, 0, i, MLDSA_GAMMA2+1))
-    decreases(MLDSA_N - i)
-  )
-  {
-    mld_decompose(&a0->coeffs[i], &a1->coeffs[i], a0->coeffs[i]);
-  }
-
-  mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
-  mld_assert_bound(a1->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-}
-
-MLD_INTERNAL_API
-void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
-{
-#if defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88) && MLD_CONFIG_PARAMETER_SET == 44
-  int ret;
-  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
-  ret = mld_poly_decompose_88_native(a1->coeffs, a0->coeffs);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
-    mld_assert_bound(a1->coeffs, MLDSA_N, 0,
-                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-    return;
-  }
-#elif defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) && \
-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  int ret;
-  mld_assert_bound(a0->coeffs, MLDSA_N, 0, MLDSA_Q);
-  ret = mld_poly_decompose_32_native(a1->coeffs, a0->coeffs);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_abs_bound(a0->coeffs, MLDSA_N, MLDSA_GAMMA2 + 1);
-    mld_assert_bound(a1->coeffs, MLDSA_N, 0,
-                     (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-    return;
-  }
-#endif /* !(MLD_USE_NATIVE_POLY_DECOMPOSE_88 && MLD_CONFIG_PARAMETER_SET ==    \
-          44) && MLD_USE_NATIVE_POLY_DECOMPOSE_32 && (MLD_CONFIG_PARAMETER_SET \
-          == 65 || MLD_CONFIG_PARAMETER_SET == 87) */
-  mld_poly_decompose_c(a1, a0);
-}
-
-#endif /* !MLD_CONFIG_NO_SIGN_API */
-
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
-MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h)
-__contract__(
-  requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(memory_no_alias(h, sizeof(mld_poly)))
-  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
-  requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
-  assigns(memory_slice(a, sizeof(mld_poly)))
-  ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-)
-{
-  unsigned int i;
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-
-  for (i = 0; i < MLDSA_N; ++i)
-  __loop__(
-    invariant(i <= MLDSA_N)
-    invariant(array_bound(a->coeffs, 0, i, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-    invariant(array_bound(a->coeffs, i, MLDSA_N, 0, MLDSA_Q))
-    decreases(MLDSA_N - i)
-  )
-  {
-    a->coeffs[i] = mld_use_hint(a->coeffs[i], h->coeffs[i]);
-  }
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-}
-
-MLD_INTERNAL_API
-void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
-{
-#if defined(MLD_USE_NATIVE_POLY_USE_HINT_88) && MLD_CONFIG_PARAMETER_SET == 44
-  int ret;
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  ret = mld_poly_use_hint_88_native(a->coeffs, h->coeffs);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-    return;
-  }
-#elif defined(MLD_USE_NATIVE_POLY_USE_HINT_32) && \
-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
-  int ret;
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, MLDSA_Q);
-  mld_assert_bound(h->coeffs, MLDSA_N, 0, 2);
-  ret = mld_poly_use_hint_32_native(a->coeffs, h->coeffs);
-  if (ret == MLD_NATIVE_FUNC_SUCCESS)
-  {
-    mld_assert_bound(a->coeffs, MLDSA_N, 0, (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-    return;
-  }
-#endif /* !(MLD_USE_NATIVE_POLY_USE_HINT_88 && MLD_CONFIG_PARAMETER_SET == 44) \
-          && MLD_USE_NATIVE_POLY_USE_HINT_32 && (MLD_CONFIG_PARAMETER_SET ==   \
-          65 || MLD_CONFIG_PARAMETER_SET == 87) */
-  mld_poly_use_hint_c(a, h);
-}
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /**
@@ -901,8 +774,6 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_rej_eta
 #undef mld_rej_eta_c
-#undef mld_poly_decompose_c
-#undef mld_poly_use_hint_c
 #undef mld_polyz_unpack_c
 #undef MLD_POLY_UNIFORM_ETA_NBLOCKS
 #undef MLD_POLY_UNIFORM_ETA_NBLOCKS

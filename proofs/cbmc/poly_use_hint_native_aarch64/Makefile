@@ -19,7 +19,7 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
 ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
     CHECK_FUNCTION_CONTRACTS=mld_poly_use_hint_88_native

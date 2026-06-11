@@ -25,9 +25,11 @@
  * of mldsa-native (e.g. with varying parameter sets)
  * within a single compilation unit. */
 #define mld_power2round MLD_ADD_PARAM_SET(mld_power2round)
-#define mld_decompose MLD_ADD_PARAM_SET(mld_decompose)
+#define mld_decompose_88 MLD_ADD_PARAM_SET(mld_decompose_88)
+#define mld_decompose_32 MLD_ADD_PARAM_SET(mld_decompose_32)
 #define mld_make_hint MLD_ADD_PARAM_SET(mld_make_hint)
-#define mld_use_hint MLD_ADD_PARAM_SET(mld_use_hint)
+#define mld_use_hint_88 MLD_ADD_PARAM_SET(mld_use_hint_88)
+#define mld_use_hint_32 MLD_ADD_PARAM_SET(mld_use_hint_32)
 /* End of parameter set namespacing */
 
 #define MLD_2_POW_D (1 << MLDSA_D)
@@ -63,11 +65,14 @@ __contract__(
 
 /**
  * For finite field element a, compute high and low bits a0, a1 such that
- * a mod^+ MLDSA_Q = a1 * 2 * MLDSA_GAMMA2 + a0 with
- * -MLDSA_GAMMA2 < a0 <= MLDSA_GAMMA2 except if
- * a1 = (MLDSA_Q-1)/(MLDSA_GAMMA2*2) where we set a1 = 0 and
- * -MLDSA_GAMMA2 <= a0 = a mod^+ MLDSA_Q - MLDSA_Q < 0. Assumes a to be
+ * a mod^+ MLDSA_Q = a1 * 2 * MLDSA_GAMMA2_88 + a0 with
+ * -MLDSA_GAMMA2_88 < a0 <= MLDSA_GAMMA2_88 except if
+ * a1 = (MLDSA_Q-1)/(MLDSA_GAMMA2_88*2) where we set a1 = 0 and
+ * -MLDSA_GAMMA2_88 <= a0 = a mod^+ MLDSA_Q - MLDSA_Q < 0. Assumes a to be
  * standard representative.
+ *
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44).
  *
  * @reference{In the reference implementation, a1 is passed as a return value
  * instead.}
@@ -76,18 +81,18 @@ __contract__(
  * @param[out] a1 Pointer to output element a1.
  * @param      a  Input element.
  */
-static MLD_INLINE void mld_decompose(int32_t *a0, int32_t *a1, int32_t a)
+static MLD_INLINE void mld_decompose_88(int32_t *a0, int32_t *a1, int32_t a)
 __contract__(
   requires(memory_no_alias(a0, sizeof(int32_t)))
   requires(memory_no_alias(a1, sizeof(int32_t)))
   requires(a >= 0 && a < MLDSA_Q)
   assigns(memory_slice(a0, sizeof(int32_t)))
   assigns(memory_slice(a1, sizeof(int32_t)))
-  /* a0 = -MLDSA_GAMMA2 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2),
-   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2) - 1 (@[FIPS204, Algorithm 36 (Decompose)]) */
-  ensures(*a0 >= -MLDSA_GAMMA2  && *a0 <= MLDSA_GAMMA2)
-  ensures(*a1 >= 0 && *a1 < (MLDSA_Q-1)/(2*MLDSA_GAMMA2))
-  ensures((*a1 * 2 * MLDSA_GAMMA2 + *a0 - a) % MLDSA_Q == 0)
+  /* a0 = -MLDSA_GAMMA2_88 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2_88),
+   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2_88) - 1 (@[FIPS204, Algorithm 36 (Decompose)]) */
+  ensures(*a0 >= -MLDSA_GAMMA2_88  && *a0 <= MLDSA_GAMMA2_88)
+  ensures(*a1 >= 0 && *a1 < (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88))
+  ensures((*a1 * 2 * MLDSA_GAMMA2_88 + *a0 - a) % MLDSA_Q == 0)
 )
 {
   /*
@@ -109,7 +114,6 @@ __contract__(
   /* check-magic: 65472 == round((MLDSA_Q-1)/128) */
   mld_assert(*a1 >= 0 && *a1 <= 65472);
 
-#if MLD_CONFIG_PARAMETER_SET == 44
   /* check-magic: 1488 == 2 * intdiv(intdiv(MLDSA_Q - 1, 88), 128) */
   /* check-magic: 11275 == floor(2**24 / 1488) */
   /* check-magic: 1560281088 == 1 / (1 / 1488 - 11275 / 2**24) */
@@ -146,16 +150,59 @@ __contract__(
 
   *a1 = mld_ct_sel_int32(0, *a1, mld_ct_cmask_neg_i32(43 - *a1));
   mld_assert(*a1 >= 0 && *a1 <= 43);
-#else /* MLD_CONFIG_PARAMETER_SET == 44 */
+
+  *a0 = a - *a1 * 2 * MLDSA_GAMMA2_88;
+  *a0 = mld_ct_sel_int32(*a0 - MLDSA_Q, *a0,
+                         mld_ct_cmask_neg_i32((MLDSA_Q - 1) / 2 - *a0));
+}
+
+/**
+ * For finite field element a, compute high and low bits a0, a1 such that
+ * a mod^+ MLDSA_Q = a1 * 2 * MLDSA_GAMMA2_32 + a0 with
+ * -MLDSA_GAMMA2_32 < a0 <= MLDSA_GAMMA2_32 except if
+ * a1 = (MLDSA_Q-1)/(MLDSA_GAMMA2_32*2) where we set a1 = 0 and
+ * -MLDSA_GAMMA2_32 <= a0 = a mod^+ MLDSA_Q - MLDSA_Q < 0. Assumes a to be
+ * standard representative.
+ *
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87).
+ *
+ * @reference{In the reference implementation, a1 is passed as a return value
+ * instead.}
+ *
+ * @param[out] a0 Pointer to output element a0.
+ * @param[out] a1 Pointer to output element a1.
+ * @param      a  Input element.
+ */
+static MLD_INLINE void mld_decompose_32(int32_t *a0, int32_t *a1, int32_t a)
+__contract__(
+  requires(memory_no_alias(a0, sizeof(int32_t)))
+  requires(memory_no_alias(a1, sizeof(int32_t)))
+  requires(a >= 0 && a < MLDSA_Q)
+  assigns(memory_slice(a0, sizeof(int32_t)))
+  assigns(memory_slice(a1, sizeof(int32_t)))
+  /* a0 = -MLDSA_GAMMA2_32 can only occur when (q-1) = a - (a mod MLDSA_GAMMA2_32),
+   * then a1=1; and a0 = a - (a mod MLDSA_GAMMA2_32) - 1 (@[FIPS204, Algorithm 36 (Decompose)]) */
+  ensures(*a0 >= -MLDSA_GAMMA2_32  && *a0 <= MLDSA_GAMMA2_32)
+  ensures(*a1 >= 0 && *a1 < (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32))
+  ensures((*a1 * 2 * MLDSA_GAMMA2_32 + *a0 - a) % MLDSA_Q == 0)
+)
+{
+  /* See mld_decompose_88 for the derivation of the computation of f1. */
+  *a1 = (a + 127) >> 7;
+  /* We know a >= 0 and a < MLDSA_Q, so... */
+  /* check-magic: 65472 == round((MLDSA_Q-1)/128) */
+  mld_assert(*a1 >= 0 && *a1 <= 65472);
+
   /* check-magic: 4092 == 2 * intdiv(intdiv(MLDSA_Q - 1, 32), 128) */
   /* check-magic: 1025 == floor(2**22 / 4092) */
   /* check-magic: 4290772992 == 1 / (1 / 4092 - 1025 / 2**22) */
   /*
    * Compute f1 = round-(f1' / B) ≈ round(f1' * 1025 / 2^22). This is exact for
-   * 0 <= f1' < 2^16. Following the same argument above, it suffices to show
-   * that f1' * eps < 1 / B, where eps := 1 / B - 1025 / 2^22. Indeed, we have
-   * eps = 1 / 4290772992 ≈ 2^(-31.99) < 2^(-31), therefore f1' * eps <
-   * 2^16 * 2^(-31) = 1 / 2^15 < 1 / 2^12 < 1 / B.
+   * 0 <= f1' < 2^16. Following the same argument as in mld_decompose_88, it
+   * suffices to show that f1' * eps < 1 / B, where eps := 1 / B - 1025 / 2^22.
+   * Indeed, we have eps = 1 / 4290772992 ≈ 2^(-31.99) < 2^(-31), therefore
+   * f1' * eps < 2^16 * 2^(-31) = 1 / 2^15 < 1 / 2^12 < 1 / B.
    */
   *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
   mld_assert(*a1 >= 0 && *a1 <= 16);
@@ -163,9 +210,7 @@ __contract__(
   *a1 &= 15;
   mld_assert(*a1 >= 0 && *a1 <= 15);
 
-#endif /* MLD_CONFIG_PARAMETER_SET != 44 */
-
-  *a0 = a - *a1 * 2 * MLDSA_GAMMA2;
+  *a0 = a - *a1 * 2 * MLDSA_GAMMA2_32;
   *a0 = mld_ct_sel_int32(*a0 - MLDSA_Q, *a0,
                          mld_ct_cmask_neg_i32((MLDSA_Q - 1) / 2 - *a0));
 }
@@ -197,28 +242,30 @@ __contract__(
 /**
  * Correct high bits according to hint.
  *
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44).
+ *
  * @param a    Input element.
  * @param hint Hint bit.
  *
  * @return Corrected high bits.
  */
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int32_t mld_use_hint(int32_t a, int32_t hint)
+static MLD_INLINE int32_t mld_use_hint_88(int32_t a, int32_t hint)
 __contract__(
   requires(hint >= 0 && hint <= 1)
   requires(a >= 0 && a < MLDSA_Q)
-  ensures(return_value >= 0 && return_value < (MLDSA_Q-1)/(2*MLDSA_GAMMA2))
+  ensures(return_value >= 0 && return_value < (MLDSA_Q-1)/(2*MLDSA_GAMMA2_88))
 )
 {
   int32_t a0, a1;
 
-  mld_decompose(&a0, &a1, a);
+  mld_decompose_88(&a0, &a1, a);
   if (hint == 0)
   {
     return a1;
   }
 
-#if MLD_CONFIG_PARAMETER_SET == 44
   if (a0 > 0)
   {
     return (a1 == 43) ? 0 : a1 + 1;
@@ -227,7 +274,35 @@ __contract__(
   {
     return (a1 == 0) ? 43 : a1 - 1;
   }
-#else  /* MLD_CONFIG_PARAMETER_SET == 44 */
+}
+
+/**
+ * Correct high bits according to hint.
+ *
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87).
+ *
+ * @param a    Input element.
+ * @param hint Hint bit.
+ *
+ * @return Corrected high bits.
+ */
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int32_t mld_use_hint_32(int32_t a, int32_t hint)
+__contract__(
+  requires(hint >= 0 && hint <= 1)
+  requires(a >= 0 && a < MLDSA_Q)
+  ensures(return_value >= 0 && return_value < (MLDSA_Q-1)/(2*MLDSA_GAMMA2_32))
+)
+{
+  int32_t a0, a1;
+
+  mld_decompose_32(&a0, &a1, a);
+  if (hint == 0)
+  {
+    return a1;
+  }
+
   if (a0 > 0)
   {
     return (a1 + 1) & 15;
@@ -236,8 +311,6 @@ __contract__(
   {
     return (a1 - 1) & 15;
   }
-#endif /* MLD_CONFIG_PARAMETER_SET != 44 */
 }
-
 
 #endif /* !MLD_ROUNDING_H */

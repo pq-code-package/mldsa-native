@@ -16,7 +16,8 @@
  * c0, c1 such c mod MLDSA_Q = c1*ALPHA + c0 with -ALPHA/2 < c0 <= ALPHA/2
  * except c1 = (MLDSA_Q-1)/ALPHA where we set c1 = 0 and
  * -ALPHA/2 <= c0 = c mod MLDSA_Q - MLDSA_Q < 0. Assumes coefficients to be
- * standard representatives.
+ * standard representatives. Dispatches to the value-specialized variant for
+ * the selected parameter set.
  *
  * @reference{The reference implementation has the input polynomial as a
  * separate argument that may be aliased with either of the outputs. Removing
@@ -26,8 +27,7 @@
  * @param[in,out] a0 Pointer to input/output polynomial. Output polynomial has
  *                   coefficients c0.
  */
-MLD_INTERNAL_API
-void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
+static MLD_INLINE void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
 __contract__(
   requires(memory_no_alias(a1,  sizeof(mld_poly)))
   requires(memory_no_alias(a0, sizeof(mld_poly)))
@@ -36,7 +36,14 @@ __contract__(
   assigns(memory_slice(a0, sizeof(mld_poly)))
   ensures(array_bound(a1->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1))
-);
+)
+{
+#if MLD_CONFIG_PARAMETER_SET == 44
+  mld_poly_decompose_88(a1, a0);
+#else
+  mld_poly_decompose_32(a1, a0);
+#endif
+}
 
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -44,12 +51,12 @@ __contract__(
 #define mld_poly_use_hint MLD_NAMESPACE_KL(poly_use_hint)
 /**
  * Use hint polynomial h to correct the high bits of a in-place.
+ * Dispatches to the value-specialized variant for the selected parameter set.
  *
  * @param[in,out] a Input/output polynomial.
  * @param[in]     h Hint polynomial.
  */
-MLD_INTERNAL_API
-void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
+static MLD_INLINE void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
   requires(memory_no_alias(h, sizeof(mld_poly)))
@@ -57,7 +64,14 @@ __contract__(
   requires(array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
-);
+)
+{
+#if MLD_CONFIG_PARAMETER_SET == 44
+  mld_poly_use_hint_88(a, h);
+#else
+  mld_poly_use_hint_32(a, h);
+#endif
+}
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)

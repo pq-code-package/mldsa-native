@@ -41,11 +41,19 @@ void mld_poly_ntt_c(mld_poly *a);
 void mld_poly_invntt_tomont_c(mld_poly *a);
 void mld_poly_caddq_c(mld_poly *a);
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0);
+#if MLD_CONFIG_PARAMETER_SET == 44
+void mld_poly_decompose_88_c(mld_poly *a1, mld_poly *a0);
+#else
+void mld_poly_decompose_32_c(mld_poly *a1, mld_poly *a0);
 #endif
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h);
+#if MLD_CONFIG_PARAMETER_SET == 44
+void mld_poly_use_hint_88_c(mld_poly *a, const mld_poly *h);
+#else
+void mld_poly_use_hint_32_c(mld_poly *a, const mld_poly *h);
 #endif
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B);
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 void mld_poly_pointwise_montgomery_c(mld_poly *a, const mld_poly *b);
@@ -444,7 +452,11 @@ static int test_poly_decompose_core(const mld_poly *input_poly,
   mld_memcpy(ref_a0, input_poly, sizeof(mld_poly));
 
   mld_poly_decompose(test_a1, test_a0);
-  mld_poly_decompose_c(ref_a1, ref_a0);
+#if MLD_CONFIG_PARAMETER_SET == 44
+  mld_poly_decompose_88_c(ref_a1, ref_a0);
+#else
+  mld_poly_decompose_32_c(ref_a1, ref_a0);
+#endif
 
   CHECK(compare_i32_arrays(test_a1->coeffs, ref_a1->coeffs, MLDSA_N, test_name,
                            input_poly->coeffs));
@@ -568,7 +580,11 @@ static int test_poly_use_hint_core(const mld_poly *poly_a,
   *test_a = *poly_a;
   *ref_a = *poly_a;
   mld_poly_use_hint(test_a, poly_h);
-  mld_poly_use_hint_c(ref_a, poly_h);
+#if MLD_CONFIG_PARAMETER_SET == 44
+  mld_poly_use_hint_88_c(ref_a, poly_h);
+#else
+  mld_poly_use_hint_32_c(ref_a, poly_h);
+#endif
 
   CHECK(compare_i32_arrays(test_a->coeffs, ref_a->coeffs, MLDSA_N, test_name,
                            poly_a->coeffs));
