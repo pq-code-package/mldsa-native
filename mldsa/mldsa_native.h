@@ -187,7 +187,7 @@
 #define MLD_API_NAMESPACE(sym) \
   MLD_API_CONCAT_UNDERSCORE(MLD_CONFIG_API_NAMESPACE_PREFIX, sym)
 
-#if defined(__GNUC__) || defined(clang)
+#if defined(__GNUC__) || defined(__clang__)
 #define MLD_API_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
 #else
 #define MLD_API_MUST_CHECK_RETURN_VALUE
@@ -917,7 +917,6 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #undef MLD_API_NAMESPACE
 #undef MLD_API_MUST_CHECK_RETURN_VALUE
 #undef MLD_API_QUALIFIER
-#undef MLD_API_LEGACY_CONFIG
 
 #endif /* MLD_CONFIG_API_NO_SUPERCOP */
 #endif /* !MLD_CONFIG_API_CONSTANTS_ONLY */
@@ -1008,5 +1007,7 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87                                             \
   MLD_MAX4_(MLD_TOTAL_ALLOC_87_KEYPAIR, MLD_TOTAL_ALLOC_87_PK_FROM_SK, \
             MLD_TOTAL_ALLOC_87_SIGN, MLD_TOTAL_ALLOC_87_VERIFY)
+
+#undef MLD_API_LEGACY_CONFIG
 
 #endif /* !MLD_H */
