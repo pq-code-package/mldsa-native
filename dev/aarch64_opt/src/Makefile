@@ -95,10 +95,10 @@ poly_chknorm_aarch64_asm.S: ../../aarch64_clean/src/poly_chknorm_aarch64_asm.S
 	cp $< $@
 
 poly_decompose_32_aarch64_asm.S: ../../aarch64_clean/src/poly_decompose_32_aarch64_asm.S
-	cp $< $@
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_decompose_32_loop $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_decompose_88_aarch64_asm.S: ../../aarch64_clean/src/poly_decompose_88_aarch64_asm.S
-	cp $< $@
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $@ -l poly_decompose_88_loop $(SLOTHY_FLAGS) $(RESERVE_ALL_FLAG)
 
 poly_use_hint_32_aarch64_asm.S: ../../aarch64_clean/src/poly_use_hint_32_aarch64_asm.S
 	cp $< $@
