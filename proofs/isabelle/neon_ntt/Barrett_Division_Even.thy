@@ -555,7 +555,9 @@ lemma %visible \<open>2 * MLDSA_GAMMA2_88 = 190464\<close>
 
 text\<open>The following results are at the heart of the correctness of the AArch64
 assembly computing \cite[Algorithm~36]{FIPS204} in \texttt{mldsa-native}, proved
-against the instruction model in \autoref{sec:aarch64_decompose}:\<close>
+against the instruction model in \autoref{sec:aarch64_decompose}. The C reference
+implementation uses the same direct Barrett-division strategy (the corollary names
+carry the \texttt{aarch64} suffix for historical reasons but apply to it as well):\<close>
 
 corollary barrett_decompose_32_aarch64:
   assumes \<open>a \<ge> 0\<close> and \<open>a < MLDSA_Q\<close>
@@ -585,8 +587,8 @@ proof -
   thus ?thesis unfolding g using m by simp
 qed
 
-text \<open>The C and AVX2 backends in mldsa-native instead divide by \<^term>\<open>128\<close> first --- rounding \<^emph>\<open>up\<close>,
-i.e.\ taking \<^term>\<open>\<lceil>a /\<^sub>\<rat> 128\<rceil>\<close> --- and then Barrett-divide by \<^term>\<open>(2 * \<gamma>\<^sub>2) div 128\<close>:\<close>
+text \<open>The AVX2 backend in mldsa-native instead divides by \<^term>\<open>128\<close> first --- rounding \<^emph>\<open>up\<close>,
+i.e.\ taking \<^term>\<open>\<lceil>a /\<^sub>\<rat> 128\<rceil>\<close> --- and then Barrett-divides by \<^term>\<open>(2 * \<gamma>\<^sub>2) div 128\<close>:\<close>
 
 corollary barrett_decompose_32_c_avx2:
   assumes \<open>a \<ge> 0\<close> and \<open>a < MLDSA_Q\<close>

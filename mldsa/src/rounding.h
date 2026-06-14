@@ -91,78 +91,34 @@ __contract__(
 )
 {
   /*
-   * The goal is to compute f1 = round-(f / (2*GAMMA2)), which can be computed
-   * alternatively as round-(f / (128B)) = round-(ceil(f / 128) / B) where
-   * B = 2*GAMMA2 / 128. Here round-() denotes "round half down".
-   *
-   * The equality round-(f / (128B)) = round-(ceil(f / 128) / B) can deduced
-   * as follows. Since changing f to align-up(f, 128) can move f onto but not
-   * across a rounding boundary for division by 128*B (note that we need B to be
-   * even for this to work), and round- rounds down on the boundary, we have
-   *
-   *   round-(f / (128B)) = round-(align-up(f, 128) / (128B))
-   *                      = round-((align-up(f, 128) / 128) / B)
-   *                      = round-(ceil(f / 128) / B).
+   * Compute a1 = round-(a / (2*GAMMA2)) with a single Barrett-style high
+   * multiplication, where round-() denotes "round half down". This mirrors the
+   * AArch64 backend (which uses sqdmulh + srshr) and is exact for
+   * 0 <= a < MLDSA_Q. See proofs/isabelle/compress for a formalization of the
+   * argument.
    */
-  *a1 = (a + 127) >> 7;
-  /* We know a >= 0 and a < MLDSA_Q, so... */
-  /* check-magic: 65472 == round((MLDSA_Q-1)/128) */
-  mld_assert(*a1 >= 0 && *a1 <= 65472);
-
 #if MLD_CONFIG_PARAMETER_SET == 44
-  /* check-magic: 1488 == 2 * intdiv(intdiv(MLDSA_Q - 1, 88), 128) */
-  /* check-magic: 11275 == floor(2**24 / 1488) */
-  /* check-magic: 1560281088 == 1 / (1 / 1488 - 11275 / 2**24) */
+  /* check-magic: 1477838209 == floor(2**48 / 190464) */
   /*
-   * Compute f1 = round-(f1' / B) ≈ round(f1' * 11275 / 2^24). This is exact for
-   * 0 <= f1' < 2^16.
-   *
-   * To see this, consider the (signed) error f1' * (1 / B - 11275 / 2^24)
-   * between f1' / B and the (under-)approximation f1' * 11275 / 2^24. Because
-   * eps := 1 / B - 11275 / 2^24 is 1 / 1560281088 ≈ 2^(-30.54) < 2^(-30), we
-   * have 0 <= f1' * eps < 2^16 * 2^(-30) = 1 / 2^14 < 1 / 2^11 < 1 / B (note
-   * that f1' is non-negative).
-   *
-   * On the other hand, 1 / B is the spacing between the integral multiples
-   * of 1 / B, which includes all rounding boundaries n + 0.5 (since B is even).
-   * Hence, if f1' / B is not of the form n + 0.5, then it is at least 1 / B
-   * away from the nearest rounding boundary, so moving from f1' / B to
-   * f1' * 11275 / 2^24 does not affect the rounding result, no matter the type
-   * of rounding used in either side. In particular, we have round-(f1' / B) =
-   * round(f1' * 11275 / 2^24) as claimed.
-   *
-   * As for the remaining case where f1' / B _is_ of the form n + 0.5, because
-   * f1' * 11275 / 2^24 is slightly but strictly below f1' / B = n + 0.5 (note
-   * that f1' and thus the error f1' * eps cannot be 0 here), it is always
-   * rounded down to n. More precisely, we have round-(f1' / B) =
-   * round(f1' * 11275 / 2^24), where the round-down on the LHS is essential,
-   * and on the RHS the type of rounding again does not matter. This concludes
-   * the proof.
-   *
-   * See proofs/isabelle/compress for a formalization of the above argument.
+   * a1 = round-(a / (2*GAMMA2)) = round(a * 1477838209 / 2^48). Half is rounded
+   * down since 1477838209 / 2^48 < 1 / (2*GAMMA2).
    */
-  *a1 = (*a1 * 11275 + (1 << 23)) >> 24;
+  *a1 = (int32_t)(((int64_t)a * 1477838209 + ((int64_t)1 << 47)) >> 48);
   mld_assert(*a1 >= 0 && *a1 <= 44);
 
   *a1 = mld_ct_sel_int32(0, *a1, mld_ct_cmask_neg_i32(43 - *a1));
   mld_assert(*a1 >= 0 && *a1 <= 43);
-#else /* MLD_CONFIG_PARAMETER_SET == 44 */
-  /* check-magic: 4092 == 2 * intdiv(intdiv(MLDSA_Q - 1, 32), 128) */
-  /* check-magic: 1025 == floor(2**22 / 4092) */
-  /* check-magic: 4290772992 == 1 / (1 / 4092 - 1025 / 2**22) */
+#else  /* MLD_CONFIG_PARAMETER_SET == 44 */
+  /* check-magic: 1074791425 == floor(2**49 / 523776) */
   /*
-   * Compute f1 = round-(f1' / B) ≈ round(f1' * 1025 / 2^22). This is exact for
-   * 0 <= f1' < 2^16. Following the same argument above, it suffices to show
-   * that f1' * eps < 1 / B, where eps := 1 / B - 1025 / 2^22. Indeed, we have
-   * eps = 1 / 4290772992 ≈ 2^(-31.99) < 2^(-31), therefore f1' * eps <
-   * 2^16 * 2^(-31) = 1 / 2^15 < 1 / 2^12 < 1 / B.
+   * a1 = round-(a / (2*GAMMA2)) = round(a * 1074791425 / 2^49). Half is rounded
+   * down since 1074791425 / 2^49 < 1 / (2*GAMMA2).
    */
-  *a1 = (*a1 * 1025 + (1 << 21)) >> 22;
+  *a1 = (int32_t)(((int64_t)a * 1074791425 + ((int64_t)1 << 48)) >> 49);
   mld_assert(*a1 >= 0 && *a1 <= 16);
 
   *a1 &= 15;
   mld_assert(*a1 >= 0 && *a1 <= 15);
-
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
 
   *a0 = a - *a1 * 2 * MLDSA_GAMMA2;
