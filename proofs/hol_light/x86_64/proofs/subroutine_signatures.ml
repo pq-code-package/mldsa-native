@@ -10,6 +10,36 @@
 (* ========================================================================= *)
 
 let subroutine_signatures = [
+("mldsa_polyz_unpack_17_x86",
+  ([(*args*)
+     ("r", "int32_t[static 256]", (*is const?*)"false");
+     ("a", "uint8_t[static 576]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "576"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
+("mldsa_polyz_unpack_19_x86",
+  ([(*args*)
+     ("r", "int32_t[static 256]", (*is const?*)"false");
+     ("a", "uint8_t[static 640]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "640"(* num elems *), 1(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("r", "256"(* num elems *), 4(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
 ("mldsa_poly_caddq_x86",
   ([(*args*)
      ("a", "int32_t[static 256]", (*is const?*)"false");

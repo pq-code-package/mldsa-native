@@ -212,6 +212,10 @@ jobs:
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
           - name: poly_chknorm_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
+          - name: polyz_unpack_17_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
+          - name: polyz_unpack_19_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
           - name: ntt_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: intt_avx2_asm

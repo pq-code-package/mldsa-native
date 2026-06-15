@@ -235,7 +235,7 @@ static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_polyz_unpack_17_avx2(r, a);
+  mld_polyz_unpack_17_avx2_asm(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
@@ -250,7 +250,7 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_polyz_unpack_19_avx2(r, a);
+  mld_polyz_unpack_19_avx2_asm(r, a);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \

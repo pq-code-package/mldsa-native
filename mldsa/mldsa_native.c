@@ -87,8 +87,6 @@
 #include "src/native/x86_64/src/poly_decompose_88_avx2.c"
 #include "src/native/x86_64/src/poly_use_hint_32_avx2.c"
 #include "src/native/x86_64/src/poly_use_hint_88_avx2.c"
-#include "src/native/x86_64/src/polyz_unpack_17_avx2.c"
-#include "src/native/x86_64/src/polyz_unpack_19_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_eta2_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_eta4_avx2.c"
@@ -791,8 +789,8 @@
 #undef mld_poly_decompose_88_avx2
 #undef mld_poly_use_hint_32_avx2
 #undef mld_poly_use_hint_88_avx2
-#undef mld_polyz_unpack_17_avx2
-#undef mld_polyz_unpack_19_avx2
+#undef mld_polyz_unpack_17_avx2_asm
+#undef mld_polyz_unpack_19_avx2_asm
 #undef mld_rej_uniform_avx2
 #undef mld_rej_uniform_eta2_avx2
 #undef mld_rej_uniform_eta4_avx2

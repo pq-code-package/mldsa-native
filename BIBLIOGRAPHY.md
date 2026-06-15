@@ -270,8 +270,8 @@ source code and documentation.
   - [dev/x86_64/src/poly_decompose_88_avx2.c](dev/x86_64/src/poly_decompose_88_avx2.c)
   - [dev/x86_64/src/poly_use_hint_32_avx2.c](dev/x86_64/src/poly_use_hint_32_avx2.c)
   - [dev/x86_64/src/poly_use_hint_88_avx2.c](dev/x86_64/src/poly_use_hint_88_avx2.c)
-  - [dev/x86_64/src/polyz_unpack_17_avx2.c](dev/x86_64/src/polyz_unpack_17_avx2.c)
-  - [dev/x86_64/src/polyz_unpack_19_avx2.c](dev/x86_64/src/polyz_unpack_19_avx2.c)
+  - [dev/x86_64/src/polyz_unpack_17_avx2_asm.S](dev/x86_64/src/polyz_unpack_17_avx2_asm.S)
+  - [dev/x86_64/src/polyz_unpack_19_avx2_asm.S](dev/x86_64/src/polyz_unpack_19_avx2_asm.S)
   - [dev/x86_64/src/rej_uniform_avx2.c](dev/x86_64/src/rej_uniform_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta2_avx2.c](dev/x86_64/src/rej_uniform_eta2_avx2.c)
   - [dev/x86_64/src/rej_uniform_eta4_avx2.c](dev/x86_64/src/rej_uniform_eta4_avx2.c)
@@ -288,8 +288,8 @@ source code and documentation.
   - [mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c](mldsa/src/native/x86_64/src/poly_decompose_88_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_use_hint_32_avx2.c](mldsa/src/native/x86_64/src/poly_use_hint_32_avx2.c)
   - [mldsa/src/native/x86_64/src/poly_use_hint_88_avx2.c](mldsa/src/native/x86_64/src/poly_use_hint_88_avx2.c)
-  - [mldsa/src/native/x86_64/src/polyz_unpack_17_avx2.c](mldsa/src/native/x86_64/src/polyz_unpack_17_avx2.c)
-  - [mldsa/src/native/x86_64/src/polyz_unpack_19_avx2.c](mldsa/src/native/x86_64/src/polyz_unpack_19_avx2.c)
+  - [mldsa/src/native/x86_64/src/polyz_unpack_17_avx2_asm.S](mldsa/src/native/x86_64/src/polyz_unpack_17_avx2_asm.S)
+  - [mldsa/src/native/x86_64/src/polyz_unpack_19_avx2_asm.S](mldsa/src/native/x86_64/src/polyz_unpack_19_avx2_asm.S)
   - [mldsa/src/native/x86_64/src/rej_uniform_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_avx2.c)
   - [mldsa/src/native/x86_64/src/rej_uniform_eta2_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_eta2_avx2.c)
   - [mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c](mldsa/src/native/x86_64/src/rej_uniform_eta4_avx2.c)
@@ -302,6 +302,8 @@ source code and documentation.
   - [proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S](proofs/hol_light/x86_64/mldsa/pointwise_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S](proofs/hol_light/x86_64/mldsa/poly_caddq_avx2_asm.S)
   - [proofs/hol_light/x86_64/mldsa/poly_chknorm_avx2_asm.S](proofs/hol_light/x86_64/mldsa/poly_chknorm_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/polyz_unpack_17_avx2_asm.S](proofs/hol_light/x86_64/mldsa/polyz_unpack_17_avx2_asm.S)
+  - [proofs/hol_light/x86_64/mldsa/polyz_unpack_19_avx2_asm.S](proofs/hol_light/x86_64/mldsa/polyz_unpack_19_avx2_asm.S)
 
 ### `Round3_Spec`
 
