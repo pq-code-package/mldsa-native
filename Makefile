@@ -51,11 +51,11 @@ test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
-	$(W) $(MLDSA44_DIR)/bin/gen_KAT44 | ./META.sh ML-DSA-44 kat-sha256
+	$(W) $(MLDSA44_DIR)/bin/gen_KAT44 | python3 META.py --scheme 44
 run_kat_65: kat_65
-	$(W) $(MLDSA65_DIR)/bin/gen_KAT65 | ./META.sh ML-DSA-65 kat-sha256
+	$(W) $(MLDSA65_DIR)/bin/gen_KAT65 | python3 META.py --scheme 65
 run_kat_87: kat_87
-	$(W) $(MLDSA87_DIR)/bin/gen_KAT87 | ./META.sh ML-DSA-87 kat-sha256
+	$(W) $(MLDSA87_DIR)/bin/gen_KAT87 | python3 META.py --scheme 87
 run_kat: run_kat_44 run_kat_65 run_kat_87
 
 run_func_44: func_44

@@ -112,15 +112,42 @@ acvp_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BU
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\acvp_mldsa87 $** /link
 
+# compile KAT generator for mldsa44
+gen_KAT44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\gen_KAT44 $** /link
+
+# compile KAT generator for mldsa65
+gen_KAT65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\gen_KAT65 $** /link
+
+# compile KAT generator for mldsa87
+gen_KAT87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\gen_KAT87 $** /link
+
 acvp: acvp_mldsa44 acvp_mldsa65 acvp_mldsa87
+
+gen_KAT: gen_KAT44 gen_KAT65 gen_KAT87
+
+run_kat: gen_KAT
+    $(MLDSA44_BUILD_DIR)\bin\gen_KAT44.exe | python META.py --scheme 44
+    $(MLDSA65_BUILD_DIR)\bin\gen_KAT65.exe | python META.py --scheme 65
+    $(MLDSA87_BUILD_DIR)\bin\gen_KAT87.exe | python META.py --scheme 87
 
 run_acvp: acvp
     python test/acvp/acvp_client.py
 
-quickcheck: test_mldsa44 test_mldsa65 test_mldsa87 run_acvp
+run_func: test_mldsa44 test_mldsa65 test_mldsa87
     $(MLDSA44_BUILD_DIR)\bin\test_mldsa44.exe
-	$(MLDSA65_BUILD_DIR)\bin\test_mldsa65.exe
-	$(MLDSA87_BUILD_DIR)\bin\test_mldsa87.exe
+    $(MLDSA65_BUILD_DIR)\bin\test_mldsa65.exe
+    $(MLDSA87_BUILD_DIR)\bin\test_mldsa87.exe
+
+test: run_func run_acvp run_kat
+    @echo   Everything checks fine!
+
+quickcheck: test
 
 clean:
     -DEL $(BUILD_DIR)
