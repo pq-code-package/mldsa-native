@@ -9,6 +9,8 @@
 
 /* Set of primitives this backend replaces (grown incrementally per kernel). */
 #define MLD_USE_NATIVE_POLY_CADDQ
+#define MLD_USE_NATIVE_NTT
+#define MLD_USE_NATIVE_INTT
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
@@ -70,6 +72,18 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif
+
+static MLD_INLINE int mld_ntt_native(int32_t a[MLDSA_N])
+{
+  mld_ntt_ppc64le_asm(a, mld_ppc64le_zetas);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+static MLD_INLINE int mld_intt_native(int32_t a[MLDSA_N])
+{
+  mld_intt_ppc64le_asm(a, mld_ppc64le_zetas);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
 
 #endif /* !__ASSEMBLER__ */
 

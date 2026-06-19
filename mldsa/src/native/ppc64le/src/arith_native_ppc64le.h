@@ -35,4 +35,13 @@ void mld_polyvecl_pointwise_acc_montgomery_l7_ppc64le_asm(
     int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
     const int32_t v[7][MLDSA_N]);
 
+#define mld_ppc64le_zetas MLD_NAMESPACE(ppc64le_zetas)
+extern const int32_t mld_ppc64le_zetas[MLDSA_N];
+
+#define mld_ntt_ppc64le_asm MLD_NAMESPACE(ntt_ppc64le_asm)
+void mld_ntt_ppc64le_asm(int32_t *a, const int32_t *zetas);
+
+#define mld_intt_ppc64le_asm MLD_NAMESPACE(intt_ppc64le_asm)
+void mld_intt_ppc64le_asm(int32_t *a, const int32_t *zetas);
+
 #endif
