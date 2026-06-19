@@ -16,7 +16,7 @@
 #include "aarch64/meta.h"
 #endif
 
-#ifdef MLD_SYS_PPC64LE
+#if defined(MLD_SYS_PPC64LE) || defined(MLD_SYS_PPC64BE)
 #include "ppc64le/meta.h"
 #endif
 
