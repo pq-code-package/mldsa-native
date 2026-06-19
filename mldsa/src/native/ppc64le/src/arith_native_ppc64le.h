@@ -11,4 +11,28 @@
 #define mld_poly_caddq_ppc64le_asm MLD_NAMESPACE(poly_caddq_ppc64le_asm)
 void mld_poly_caddq_ppc64le_asm(int32_t a[MLDSA_N]);
 
+
+#define mld_poly_pointwise_montgomery_ppc64le_asm \
+  MLD_NAMESPACE(poly_pointwise_montgomery_ppc64le_asm)
+void mld_poly_pointwise_montgomery_ppc64le_asm(int32_t a[MLDSA_N],
+                                               const int32_t b[MLDSA_N]);
+
+#define mld_polyvecl_pointwise_acc_montgomery_l4_ppc64le_asm \
+  MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l4_ppc64le_asm)
+void mld_polyvecl_pointwise_acc_montgomery_l4_ppc64le_asm(
+    int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
+    const int32_t v[4][MLDSA_N]);
+
+#define mld_polyvecl_pointwise_acc_montgomery_l5_ppc64le_asm \
+  MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l5_ppc64le_asm)
+void mld_polyvecl_pointwise_acc_montgomery_l5_ppc64le_asm(
+    int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
+    const int32_t v[5][MLDSA_N]);
+
+#define mld_polyvecl_pointwise_acc_montgomery_l7_ppc64le_asm \
+  MLD_NAMESPACE(polyvecl_pointwise_acc_montgomery_l7_ppc64le_asm)
+void mld_polyvecl_pointwise_acc_montgomery_l7_ppc64le_asm(
+    int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
+    const int32_t v[7][MLDSA_N]);
+
 #endif
