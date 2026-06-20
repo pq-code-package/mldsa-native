@@ -918,6 +918,15 @@ class Tests:
                 print(p)
             exit(0)
 
+        def solver_args():
+            args = []
+            if self.args.solver:
+                for s in self.args.solver:
+                    args += ["--solver", s]
+            if self.args.force_solver:
+                args.append("--force")
+            return args
+
         def run_cbmc_single_step(mldsa_parameter_set, proofs):
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
@@ -940,6 +949,7 @@ class Tests:
                             "-p",
                             func,
                         ]
+                        + solver_args()
                         + self.make_j(),
                         cwd="proofs/cbmc",
                         env=os.environ.copy() | envvars,
@@ -1004,6 +1014,7 @@ class Tests:
                     "-p",
                 ]
                 + proofs
+                + solver_args()
                 + self.make_j()
             )
             if self.args.output_result_json:
@@ -1474,6 +1485,35 @@ def cli():
     cbmc_parser.add_argument(
         "--reduce-ram",
         help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--solver",
+        action="append",
+        help=(
+            "Select which solver(s) to run, intersected with each harness's "
+            "enabled solver matrix: a harness only runs under solvers it "
+            "declares support for. Repeatable. Accepts a concrete solver "
+            "(Z3, BITWUZLA, CVC5), 'all' (every solver each harness enables), "
+            "or 'default' (only each harness's CBMC_DEFAULT_SOLVER). 'all' and "
+            "'default' cannot be combined with other values. Forwarded to "
+            "run-cbmc-proofs.py --solver. Default: all."
+        ),
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--force-solver",
+        help=(
+            "Run the --solver selection on every harness, bypassing each "
+            "harness's enabled solver matrix (no pairs are omitted, and the "
+            "per-harness ENABLED guard is overridden). With '--solver all' "
+            "this is the full solver x harness cross product. Cannot be "
+            "combined with '--solver default'. Forwarded to "
+            "run-cbmc-proofs.py --force."
+        ),
         action="store_true",
         default=False,
     )

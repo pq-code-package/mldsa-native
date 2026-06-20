@@ -25,8 +25,12 @@ WARN = "⚠️"
 FAIL = "❌"
 
 ProofResult = namedtuple(
-    "ProofResult", ["name", "status", "current", "previous", "change"]
+    "ProofResult", ["name", "solver", "status", "current", "previous", "change"]
 )
+
+# Solver assigned to baseline runtime entries that lack a `solver` field.
+# Older baseline JSONs predate multi-solver support and mostly ran under Z3.
+LEGACY_DEFAULT_SOLVER = "Z3"
 
 
 def get_args():
@@ -78,11 +82,11 @@ def fetch_baseline(cfg):
 def render_table(rows):
     """Render a markdown table from ProofResult rows."""
     lines = [
-        "| Proof | Status | Current | Previous | Change |",
-        "|-------|--------|---------|----------|--------|",
+        "| Proof | Solver | Status | Current | Previous | Change |",
+        "|-------|--------|--------|---------|----------|--------|",
     ]
     lines.extend(
-        f"| `{r.name}` | {r.status} | {r.current} | {r.previous} | {r.change} |"
+        f"| `{r.name}` | {r.solver} | {r.status} | {r.current} | {r.previous} | {r.change} |"
         for r in rows
     )
     return lines
@@ -91,41 +95,90 @@ def render_table(rows):
 def classify_proof(r, baseline_runtimes, cfg):
     """Classify a single proof result, returning (ProofResult, is_alert)."""
     name = r["name"]
-    base = baseline_runtimes.get(name, {})
+    solver = r.get("solver", LEGACY_DEFAULT_SOLVER)
+    base = baseline_runtimes.get((name, solver), {})
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
+    base_omitted = base.get("status") == "omitted"
+    base_inconclusive = base.get("status") == "inconclusive"
+
+    # Solver could not decide -- not a real failure, not a regression.
+    if r.get("status") == "inconclusive":
+        prev = (
+            f"{base_val}s"
+            if base_val
+            else "failed"
+            if base_failed
+            else "inconclusive"
+            if base_inconclusive
+            else "omitted"
+            if base_omitted
+            else "-"
+        )
+        # Was passing in the baseline, now inconclusive: surface as a warning.
+        if base_val is not None and not base_failed:
+            return (
+                ProofResult(name, solver, WARN, "?", prev, "inconclusive"),
+                True,
+            )
+        return ProofResult(name, solver, OK, "?", prev, "inconclusive"), False
+
+    # Pair was intentionally not run.
+    if r.get("status") == "omitted":
+        # Was passing in the baseline, now omitted: surface as a warning.
+        if base_val is not None and not base_failed:
+            return (
+                ProofResult(name, solver, WARN, "-", f"{base_val}s", "omitted"),
+                True,
+            )
+        return ProofResult(name, solver, OK, "-", "-", "omitted"), False
 
     if r.get("status") == "failed":
         prev = "failed" if base_failed else (f"{base_val}s" if base_val else "-")
-        return ProofResult(name, FAIL, "-", prev, "-"), True
+        if base_omitted:
+            prev = "omitted"
+        return ProofResult(name, solver, FAIL, "-", prev, "-"), True
 
     cur_val = r["value"]
     if base_failed:
-        return ProofResult(name, OK, f"{cur_val}s", "failed", "fixed"), False
+        return (
+            ProofResult(name, solver, OK, f"{cur_val}s", "failed", "fixed"),
+            False,
+        )
+    if base_omitted:
+        return (
+            ProofResult(name, solver, OK, f"{cur_val}s", "omitted", "new"),
+            False,
+        )
     if base_val is None:
-        return ProofResult(name, OK, f"{cur_val}s", "-", "new"), False
+        return ProofResult(name, solver, OK, f"{cur_val}s", "-", "new"), False
 
     ratio = cur_val / base_val if base_val > 0 else 1
     change = f"{(ratio - 1) * 100:+.0f}%" if base_val > 0 else "-"
     is_regression = cur_val >= cfg.min_runtime and ratio >= cfg.regression_threshold
     status = WARN if is_regression else OK
     return (
-        ProofResult(name, status, f"{cur_val}s", f"{base_val}s", change),
+        ProofResult(name, solver, status, f"{cur_val}s", f"{base_val}s", change),
         is_regression,
     )
 
 
 def compute_total_runtime(data):
-    """Compute total runtime from proof results."""
+    """Compute total runtime from proof results, ignoring failed/omitted/inconclusive."""
     if not data:
         return None
     return sum(
-        r["value"] for r in data.get("runtimes", []) if r.get("status") != "failed"
+        r["value"]
+        for r in data.get("runtimes", [])
+        if r.get("status") not in ("failed", "omitted", "inconclusive") and "value" in r
     )
 
 
 def build_comment(current, baseline, cfg):
     """Build the PR comment markdown."""
-    baseline_runtimes = {r["name"]: r for r in (baseline or {}).get("runtimes", [])}
+    baseline_runtimes = {
+        (r["name"], r.get("solver", LEGACY_DEFAULT_SOLVER)): r
+        for r in (baseline or {}).get("runtimes", [])
+    }
     alerts, all_rows = [], []
 
     for r in current.get("runtimes", []):
@@ -136,8 +189,8 @@ def build_comment(current, baseline, cfg):
 
     def sort_key(r):
         if r.current == "-":
-            return -1
-        return -int(r.current.rstrip("s"))
+            return (-1, r.name, r.solver)
+        return (-int(r.current.rstrip("s")), r.name, r.solver)
 
     all_rows.sort(key=sort_key)
 
@@ -153,6 +206,7 @@ def build_comment(current, baseline, cfg):
         total_status = OK
     total_row = ProofResult(
         "**TOTAL**",
+        "-",
         total_status,
         f"{cur_total}s",
         f"{base_total}s" if base_total else "-",

@@ -190,6 +190,31 @@ def get_args():
             "metavar": "FILE",
             "help": "path to export result JSON",
         },
+        {
+            "flags": ["--solver"],
+            "action": "append",
+            "metavar": "SOLVER",
+            "help": (
+                "select which solver(s) to run, intersected with each "
+                "harness's enabled solver matrix: a harness is only run "
+                "under solvers it declares support for. Repeatable. "
+                "Accepts a concrete solver (Z3, BITWUZLA, CVC5), 'all' "
+                "(every solver each harness enables), or 'default' (only "
+                "each harness's CBMC_DEFAULT_SOLVER). 'all' and 'default' "
+                "cannot be combined with other values. Default: all"
+            ),
+        },
+        {
+            "flags": ["--force"],
+            "action": "store_true",
+            "help": (
+                "run the --solver selection on every harness, bypassing "
+                "each harness's enabled solver matrix (no pairs are "
+                "omitted, and the per-harness ENABLED guard is overridden). "
+                "With '--solver all' this is the full solver x harness cross "
+                "product. Cannot be combined with '--solver default'."
+            ),
+        },
     ]:
         flags = arg.pop("flags")
         pars.add_argument(*flags, **arg)
@@ -246,7 +271,14 @@ def get_proof_dirs(proof_root, proof_list, marker_file):
         sys.exit(1)
 
 
-def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json=None):
+def run_build(
+    litani,
+    jobs,
+    fail_on_proof_failure,
+    summarize,
+    output_result_json=None,
+    omitted_pairs=None,
+):
     cmd = [str(litani), "run-build"]
     if jobs:
         cmd.extend(["-j", str(jobs)])
@@ -264,8 +296,8 @@ def run_build(litani, jobs, fail_on_proof_failure, summarize, output_result_json
         sys.exit(1)
 
     if summarize:
-        export_result_json(output_result_json, out_file)
-        print_proof_results(out_file)
+        export_result_json(output_result_json, out_file, omitted_pairs)
+        print_proof_results(out_file, omitted_pairs)
         out_file.unlink()
 
     if proc.returncode:
@@ -304,6 +336,80 @@ def get_litani_capabilities(litani_path):
     except RuntimeError:
         logging.warning("Could not load litani capabilities: '%s'", proc.stdout)
         return []
+
+
+# Canonical solver list. Kept in sync with CBMC_SOLVERS_ALL in
+# proofs/cbmc/Makefile.common.
+ALL_SOLVERS = ["Z3", "BITWUZLA", "CVC5"]
+
+# Special --solver tokens (compared case-insensitively, hence upper-case).
+# SELECT_ALL runs every solver each harness enables; SELECT_DEFAULT runs
+# only each harness's CBMC_DEFAULT_SOLVER.
+SELECT_ALL = "ALL"
+SELECT_DEFAULT = "DEFAULT"
+
+
+def read_solver_matrix(proof_dir):
+    """Return the dict {solver: enabled_bool} declared by a per-harness Makefile.
+
+    Invokes `make echo-solver-matrix` in proof_dir, which prints space-
+    separated tokens of the form `<SOLVER>:<0|1>`.
+    """
+    cmd = ["make", "--no-print-directory", "echo-solver-matrix"]
+    proc = subprocess.run(
+        cmd,
+        cwd=proof_dir,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if proc.returncode:
+        logging.critical(
+            "Could not read solver matrix from %s: %s", proof_dir, proc.stderr
+        )
+        sys.exit(1)
+    out = {s: False for s in ALL_SOLVERS}
+    for tok in proc.stdout.split():
+        if ":" not in tok:
+            continue
+        name, _, val = tok.partition(":")
+        if name not in out:
+            logging.warning(
+                "Solver %s in %s not in ALL_SOLVERS; ignoring", name, proof_dir
+            )
+            continue
+        out[name] = val.strip() == "1"
+    return out
+
+
+def read_default_solver(proof_dir):
+    """Return CBMC_DEFAULT_SOLVER for a per-harness Makefile."""
+    cmd = ["make", "--no-print-directory", "echo-default-solver"]
+    proc = subprocess.run(
+        cmd,
+        cwd=proof_dir,
+        universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if proc.returncode:
+        logging.critical(
+            "Could not read default solver from %s: %s", proof_dir, proc.stderr
+        )
+        sys.exit(1)
+    return proc.stdout.strip()
+
+
+def read_proof_uid(proof_dir):
+    """Read PROOF_UID from a per-harness Makefile."""
+    with (pathlib.Path(proof_dir) / "Makefile").open() as handle:
+        for line in handle:
+            match = re.match(r"^PROOF_UID\s*=(?P<uid>[^#]+)", line)
+            if match:
+                return match["uid"].strip()
+    return None
 
 
 def check_uid_uniqueness(proof_dir, proof_uids):
@@ -348,34 +454,27 @@ def should_enable_pools(litani_caps, args):
 async def configure_proof_dirs(  # pylint: disable=too-many-arguments
     queue,
     counter,
-    proof_uids,
     enable_pools,
     enable_memory_profiling,
     report_target,
     debug,
     timeout,
+    force,
 ):
     while True:
         print_counter(counter)
-        path = str(await queue.get())
-
-        check_uid_uniqueness(path, proof_uids)
+        path, solver = await queue.get()
+        path = str(path)
 
         pools = ["ENABLE_POOLS=true"] if enable_pools else []
         profiling = ["ENABLE_MEMORY_PROFILING=true"] if enable_memory_profiling else []
+        # --force runs solvers a harness has not opted into, so override
+        # the per-harness CBMC_SOLVER_<X>_ENABLED guard at make time.
+        force_enable = [f"CBMC_SOLVER_{solver}_ENABLED=1"] if force else []
 
         # Set up environment with CBMC_TIMEOUT
         env = os.environ.copy()
         env["CBMC_TIMEOUT"] = str(timeout)
-
-        # delete old reports
-        proc = await asyncio.create_subprocess_exec(
-            "make",
-            "veryclean",
-            cwd=path,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
 
         # Allow interactive tasks to preempt proof configuration
         proc = await asyncio.create_subprocess_exec(
@@ -383,6 +482,8 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
             "-n",
             "15",
             "make",
+            f"CBMC_SOLVER={solver}",
+            *force_enable,
             *pools,
             *profiling,
             "-B",
@@ -402,7 +503,8 @@ async def configure_proof_dirs(  # pylint: disable=too-many-arguments
         for line in stderr.decode().splitlines():
             logging.debug(line)
 
-        counter["fail" if proc.returncode else "pass"].append(path)
+        key = f"{path}::{solver}"
+        counter["fail" if proc.returncode else "pass"].append(key)
         counter["complete"] += 1
 
         print_counter(counter)
@@ -486,19 +588,110 @@ async def main():  # pylint: disable=too-many-locals
         logging.critical("No proof directories found")
         sys.exit(1)
 
-    proof_queue = asyncio.Queue()
-    for proof_dir in proof_dirs:
-        proof_queue.put_nowait(proof_dir)
+    # Resolve the --solver selection. Values are case-insensitive. The
+    # special tokens 'all' and 'default' are mutually exclusive with
+    # each other and with any concrete solver name.
+    raw_solvers = args.solver if args.solver else [SELECT_ALL]
+    normalized = [s.strip().upper() for s in raw_solvers]
+    concrete = [s for s in normalized if s not in (SELECT_ALL, SELECT_DEFAULT)]
+    has_special = any(s in (SELECT_ALL, SELECT_DEFAULT) for s in normalized)
 
+    if has_special and (concrete or len(set(normalized)) != 1):
+        logging.critical(
+            "--solver '%s' and '%s' cannot be combined with other --solver values",
+            SELECT_ALL.lower(),
+            SELECT_DEFAULT.lower(),
+        )
+        sys.exit(1)
+
+    for s in concrete:
+        if s not in ALL_SOLVERS:
+            logging.critical(
+                "Unknown --solver %s; expected a concrete solver (%s), "
+                "'%s', or '%s'",
+                s,
+                ", ".join(ALL_SOLVERS),
+                SELECT_ALL.lower(),
+                SELECT_DEFAULT.lower(),
+            )
+            sys.exit(1)
+
+    # Past the combine check, a special token (if present) is the only
+    # distinct value, so a plain membership test is enough.
+    use_default = SELECT_DEFAULT in normalized
+    # When concrete solvers are named, restrict the candidate set to
+    # those; 'all'/'default' consider every solver each harness enables.
+    selected_solvers = concrete if concrete else list(ALL_SOLVERS)
+
+    # --force ignores the matrix, so pairing it with 'default' (which is
+    # *defined* by the matrix's CBMC_DEFAULT_SOLVER) is contradictory.
+    if args.force and use_default:
+        logging.critical("--force cannot be combined with '--solver default'")
+        sys.exit(1)
+
+    # Enforce PROOF_UID uniqueness up-front, then expand each proof
+    # directory into its set of (proof, solver) pairs.
+    #
+    # Without --force, --solver intersects the selection with the
+    # harness's enabled solver matrix: a harness only runs under solvers
+    # it declares support for; selected-but-unsupported pairs are
+    # omitted rather than forced. With 'default', the per-harness solver
+    # list collapses to {CBMC_DEFAULT_SOLVER}.
+    #
+    # With --force, the matrix is bypassed entirely: every selected
+    # solver is run on every harness, nothing is omitted, and the
+    # per-harness ENABLED guard is overridden at make time (see
+    # configure_proof_dirs).
+    proof_uids = {}
+    pairs_to_run = []  # (proof_dir, solver)
+    omitted_pairs = []  # (proof_uid, solver)
+    for proof_dir in proof_dirs:
+        check_uid_uniqueness(proof_dir, proof_uids)
+        proof_uid = read_proof_uid(proof_dir)
+        if args.force:
+            for solver in selected_solvers:
+                pairs_to_run.append((proof_dir, solver))
+            continue
+        matrix = read_solver_matrix(proof_dir)
+        if use_default:
+            per_harness_solvers = [read_default_solver(proof_dir)]
+        else:
+            per_harness_solvers = selected_solvers
+        for solver in per_harness_solvers:
+            if matrix.get(solver):
+                pairs_to_run.append((proof_dir, solver))
+            else:
+                omitted_pairs.append((proof_uid, solver))
+
+    if not pairs_to_run and not omitted_pairs:
+        logging.critical("No (proof, solver) pairs to run")
+        sys.exit(1)
+
+    # Wipe stale per-solver outputs once per proof directory before
+    # configuring any (proof, solver) pair. `make veryclean` deletes
+    # logs/, gotos/, and report/ recursively.
+    for proof_dir in proof_dirs:
+        subprocess.run(
+            ["make", "veryclean"],
+            cwd=proof_dir,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+    proof_queue = asyncio.Queue()
+    for pair in pairs_to_run:
+        proof_queue.put_nowait(pair)
+
+    total = len(pairs_to_run)
     counter = {
         "pass": [],
         "fail": [],
         "complete": 0,
-        "total": len(proof_dirs),
-        "width": int(math.log10(len(proof_dirs))) + 1,
+        "total": total,
+        "width": int(math.log10(max(total, 1))) + 1,
     }
 
-    proof_uids = {}
     tasks = []
 
     enable_memory_profiling = should_enable_memory_profiling(litani_caps, args)
@@ -509,12 +702,12 @@ async def main():  # pylint: disable=too-many-locals
             configure_proof_dirs(
                 proof_queue,
                 counter,
-                proof_uids,
                 enable_pools,
                 enable_memory_profiling,
                 report_target,
                 args.debug,
                 args.per_proof_timeout,
+                args.force,
             )
         )
         tasks.append(task)
@@ -528,7 +721,7 @@ async def main():  # pylint: disable=too-many-locals
 
     if counter["fail"]:
         logging.critical(
-            "Failed to configure the following proofs:\n%s",
+            "Failed to configure the following (proof, solver) pairs:\n%s",
             "\n".join([str(f) for f in counter["fail"]]),
         )
         sys.exit(1)
@@ -540,6 +733,7 @@ async def main():  # pylint: disable=too-many-locals
             args.fail_on_proof_failure,
             args.summarize,
             args.output_result_json,
+            omitted_pairs=omitted_pairs,
         )
 
 
