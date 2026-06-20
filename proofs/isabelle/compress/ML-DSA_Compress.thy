@@ -13,8 +13,8 @@ text \<open>
   \<^item> Parameter set 44 (ML-DSA-44): \<^verbatim>\<open>GAMMA2 = 95232\<close>, divisor \<^verbatim>\<open>2*GAMMA2 = 190464\<close>
 
   The implementations use different Barrett division strategies:
-  \<^item> C and AVX2: Factor out \<^verbatim>\<open>128\<close> first, then Barrett divide by \<^verbatim>\<open>4092\<close> or \<^verbatim>\<open>1488\<close>
-  \<^item> AArch64: Barrett divide directly by \<^verbatim>\<open>523776\<close> or \<^verbatim>\<open>190464\<close>
+  \<^item> AVX2: Factor out \<^verbatim>\<open>128\<close> first, then Barrett divide by \<^verbatim>\<open>4092\<close> or \<^verbatim>\<open>1488\<close>
+  \<^item> C and AArch64: Barrett divide directly by \<^verbatim>\<open>523776\<close> or \<^verbatim>\<open>190464\<close>
 
   \<^bold>\<open>Limitation:\<close> The results below operate on unbounded integers (@{typ int}), not
   fixed-width machine words. Connecting these results to the actual implementations
@@ -22,10 +22,10 @@ text \<open>
   \<^verbatim>\<open>mulhi\<close>, overflow behavior) which is left for future work.
 \<close>
 
-subsection \<open>C and AVX2 implementations\<close>
+subsection \<open>AVX2 implementation\<close>
 
 text \<open>
-  The C reference \<^file>\<open>../../../mldsa/src/rounding.h\<close> and AVX2 implementations
+  The AVX2 implementations
   \<^file>\<open>../../../dev/x86_64/src/poly_decompose_32_avx2.c\<close> and
   \<^file>\<open>../../../dev/x86_64/src/poly_decompose_88_avx2.c\<close>
   first compute \<^verbatim>\<open>ceil(f / 128)\<close>, then Barrett divide by \<^verbatim>\<open>B = 2*GAMMA2 / 128\<close>.
@@ -41,13 +41,14 @@ corollary barrett_decompose_88_c_avx2:
   shows \<open>round_half_down (rat_of_int a / 1488) = (a * 11275 + 2^23) div 2^24\<close>
   using barrett_division_correct[where b=1488 and N=24, simplified barrett_division, eval] assms by simp
 
-subsection \<open>AArch64 implementation\<close>
+subsection \<open>C and AArch64 implementations\<close>
 
 text \<open>
-  The AArch64 implementations
+  The C reference \<^file>\<open>../../../mldsa/src/rounding.h\<close> and the AArch64 implementations
   \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_32_aarch64_asm.S\<close> and
   \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_88_aarch64_asm.S\<close>
-  Barrett divide directly by \<^verbatim>\<open>2*GAMMA2\<close> using \<^verbatim>\<open>sqdmulh\<close> and \<^verbatim>\<open>srshr\<close>.
+  Barrett divide directly by \<^verbatim>\<open>2*GAMMA2\<close> (the AArch64 backend using \<^verbatim>\<open>sqdmulh\<close> and \<^verbatim>\<open>srshr\<close>).
+  The corollaries below carry the suffix \<^verbatim>\<open>aarch64\<close> for historical reasons but apply to the C reference as well.
 \<close>
 
 corollary barrett_decompose_32_aarch64:
