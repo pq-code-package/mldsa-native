@@ -364,8 +364,8 @@ __contract__(
   /* check-magic:
        -8395782 == signed_mod(41978 * pow(MLDSA_Q, -1, 2^32), 2^32) */
   const int32_t f_twisted = -8395782;
-  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, so the bound follows directly from
-   * the postcondition of mld_fqmul(). */
+  /* Bounds: MLD_INTT_BOUND is MLD_FQMUL_BOUND, so the bound follows directly
+   * from the postcondition of mld_fqmul(). */
   return mld_fqmul(a, f, f_twisted);
 }
 
