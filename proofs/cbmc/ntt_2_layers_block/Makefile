@@ -23,7 +23,7 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla  #--smt2
+CBMCFLAGS=--bitwuzla
 
 FUNCTION_NAME = mld_ntt_2_layers_block
 

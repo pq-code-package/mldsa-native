@@ -222,17 +222,17 @@ static MLD_INLINE void mld_ntt_2_layers_block(
     int32_t z1, int32_t z1t, int32_t z2, int32_t z2t, const int32_t bound)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
-  requires(0 < bound && bound < INT32_MAX - 2 * MLDSA_Q)
+  requires(0 < bound && bound < INT32_MAX - 2 * MLD_FQMUL_BOUND)
   requires(1 <= len && len <= MLDSA_N / 4)
   requires(start <= MLDSA_N - 4 * len)
   requires(z0 > -MLDSA_Q_HALF && z0 < MLDSA_Q_HALF)
   requires(z1 > -MLDSA_Q_HALF && z1 < MLDSA_Q_HALF)
   requires(z2 > -MLDSA_Q_HALF && z2 < MLDSA_Q_HALF)
   requires(array_abs_bound(r, start, MLDSA_N, bound))
-  requires(array_abs_bound(r, 0, start, bound + 2 * MLDSA_Q))
+  requires(array_abs_bound(r, 0, start, bound + 2 * MLD_FQMUL_BOUND))
   assigns(memory_slice(r, sizeof(uint32_t) * MLDSA_N))
   ensures(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
-  ensures(array_abs_bound(r, 0, start + 4 * len, bound + 2 * MLDSA_Q))
+  ensures(array_abs_bound(r, 0, start + 4 * len, bound + 2 * MLD_FQMUL_BOUND))
 )
 {
   unsigned j = 0;
@@ -243,13 +243,13 @@ __contract__(
     assigns(j, memory_slice(r, sizeof(uint32_t) * MLDSA_N))
     invariant(j <= len)
     /* Static bounds */
-    invariant(array_abs_bound(r, 0, start, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, 0, start, bound + 2 * MLD_FQMUL_BOUND))
     invariant(array_abs_bound(r, start + 4 * len, MLDSA_N, bound))
     /* Dynamic bounds */
-    invariant(array_abs_bound(r, start + 0 * len,     start + 0 * len + j, bound + 2 * MLDSA_Q))
-    invariant(array_abs_bound(r, start + 1 * len,     start + 1 * len + j, bound + 2 * MLDSA_Q))
-    invariant(array_abs_bound(r, start + 2 * len,     start + 2 * len + j, bound + 2 * MLDSA_Q))
-    invariant(array_abs_bound(r, start + 3 * len,     start + 3 * len + j, bound + 2 * MLDSA_Q))
+    invariant(array_abs_bound(r, start + 0 * len,     start + 0 * len + j, bound + 2 * MLD_FQMUL_BOUND))
+    invariant(array_abs_bound(r, start + 1 * len,     start + 1 * len + j, bound + 2 * MLD_FQMUL_BOUND))
+    invariant(array_abs_bound(r, start + 2 * len,     start + 2 * len + j, bound + 2 * MLD_FQMUL_BOUND))
+    invariant(array_abs_bound(r, start + 3 * len,     start + 3 * len + j, bound + 2 * MLD_FQMUL_BOUND))
     invariant(array_abs_bound(r, start + 0 * len + j, start + 1 * len,     bound))
     invariant(array_abs_bound(r, start + 1 * len + j, start + 2 * len,     bound))
     invariant(array_abs_bound(r, start + 2 * len + j, start + 3 * len,     bound))
@@ -276,9 +276,9 @@ static MLD_INLINE void mld_ntt_2_layers(int32_t r[MLDSA_N],
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(layer == 1 || layer == 3 || layer == 5 || layer == 7)
-  requires(array_abs_bound(r, 0, MLDSA_N, layer * MLDSA_Q))
+  requires(array_abs_bound(r, 0, MLDSA_N, layer * MLD_FQMUL_BOUND))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  ensures(array_abs_bound(r, 0, MLDSA_N, (layer + 2) * MLDSA_Q)))
+  ensures(array_abs_bound(r, 0, MLDSA_N, (layer + 2) * MLD_FQMUL_BOUND)))
 {
   const unsigned len_outer = (unsigned)MLDSA_N >> layer;
   const unsigned len = len_outer >> 1;
@@ -289,8 +289,8 @@ __contract__(
     invariant(start <= MLDSA_N)
     invariant((1u << (layer - 1)) <= k && k <= (1u << layer))
     invariant(2 * len_outer * k == start + MLDSA_N)
-    invariant(array_abs_bound(r, 0, start, (layer + 2) * MLDSA_Q))
-    invariant(array_abs_bound(r, start, MLDSA_N, layer * MLDSA_Q))
+    invariant(array_abs_bound(r, 0, start, (layer + 2) * MLD_FQMUL_BOUND))
+    invariant(array_abs_bound(r, start, MLDSA_N, layer * MLD_FQMUL_BOUND))
     decreases(MLDSA_N - start))
   {
     const int32_t z0 = mld_zetas[k][0];
@@ -303,7 +303,7 @@ __contract__(
 
     k++;
     mld_ntt_2_layers_block(r, start, len, z0, z0t, z1, z1t, z2, z2t,
-                           (int32_t)(layer * MLDSA_Q));
+                           (int32_t)(layer * MLD_FQMUL_BOUND));
   }
 }
 
