@@ -53,7 +53,7 @@
  *
  * NOTE: This is the same bound as in poly.h and has to be kept
  * in sync. */
-#define MLD_INTT_BOUND MLD_FQMUL_BOUND
+#define MLD_INTT_BOUND MLDSA_Q
 
 /* Absolute bound for range of mld_reduce32()
  *

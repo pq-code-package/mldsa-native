@@ -364,8 +364,14 @@ __contract__(
   /* check-magic:
        -8395782 == signed_mod(41978 * pow(MLDSA_Q, -1, 2^32), 2^32) */
   const int32_t f_twisted = -8395782;
-  /* Bounds: MLD_INTT_BOUND is MLD_FQMUL_BOUND, so the bound follows directly
-   * from the postcondition of mld_fqmul(). */
+
+  /* Bounds: MLD_INTT_BOUND is MLDSA_Q, but mld_fqmul() returns
+   * a value bounded by MLD_FQMUL_BOUND, which is too weak.
+   *
+   * This proof is expected to fail at the moment on the c_ntt_2 branch.
+   *
+   * TODO: update this code to avoid or specialize the call to mld_fqmul()
+   * so that the output really is bounded to MLDSA_Q                     */
   return mld_fqmul(a, f, f_twisted);
 }
 

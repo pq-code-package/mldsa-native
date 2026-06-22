@@ -25,7 +25,7 @@
 /* Absolute exclusive upper bound for the output of the forward NTT */
 #define MLD_NTT_BOUND (9 * MLD_FQMUL_BOUND)
 /* Absolute exclusive upper bound for the output of the inverse NTT*/
-#define MLD_INTT_BOUND MLD_FQMUL_BOUND
+#define MLD_INTT_BOUND MLDSA_Q
 
 /**
  * Element of R_q = Z_q[X]/(X^n + 1). Represents polynomial
