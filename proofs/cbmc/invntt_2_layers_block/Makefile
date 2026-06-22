@@ -27,6 +27,6 @@ CBMCFLAGS=--bitwuzla
 
 FUNCTION_NAME = mld_invntt_2_layers_block
 
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 10
 
 include ../Makefile.common
