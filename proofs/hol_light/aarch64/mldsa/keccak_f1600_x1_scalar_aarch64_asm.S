@@ -10,10 +10,12 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 /*yaml
-  Name: keccak_f1600_x1_scalar_asm
+  Name: keccak_f1600_x1_scalar_aarch64_asm
   Description: AArch64 scalar implementation of Keccak-f[1600] permutation for single state
   Signature: void mld_keccak_f1600_x1_scalar_aarch64_asm(uint64_t state[25], const uint64_t rc[24])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
     x0:
       type: buffer
       size_bytes: 200

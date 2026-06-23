@@ -266,7 +266,9 @@ typedef enum
   /* x86_64 */
   MLD_SYS_CAP_AVX2,
   /* AArch64 */
-  MLD_SYS_CAP_SHA3
+  MLD_SYS_CAP_SHA3,
+  /* Armv8.1-M */
+  MLD_SYS_CAP_MVE
 } mld_sys_cap;
 
 #if !defined(MLD_CONFIG_CUSTOM_CAPABILITY_FUNC)

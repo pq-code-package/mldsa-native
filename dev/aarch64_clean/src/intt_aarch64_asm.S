@@ -27,6 +27,33 @@
 
 /* AArch64 ML-DSA inverse NTT following @[NeonNTT], @[SLOTHY_Paper], and @[NeonNTT_Autoformalised] */
 
+/*yaml
+  Name: intt_aarch64_asm
+  Description: AArch64 ML-DSA inverse NTT
+  Signature: void mld_intt_aarch64_asm(int32_t *r, const int32_t *zetas_l78, const int32_t *zetas_l123456)
+  ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    x0:
+      type: buffer
+      size_bytes: 1024
+      permissions: read/write
+      c_parameter: int32_t *r
+      description: Input/output polynomial (256 x int32_t)
+    x1:
+      type: buffer
+      size_bytes: 1536
+      permissions: read-only
+      c_parameter: const int32_t *zetas_l78
+      description: Twiddle factors for layers 7-8 (384 x int32_t)
+    x2:
+      type: buffer
+      size_bytes: 640
+      permissions: read-only
+      c_parameter: const int32_t *zetas_l123456
+      description: Twiddle factors for layers 1-6 (160 x int32_t)
+*/
+
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)

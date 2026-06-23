@@ -4,6 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+/*yaml
+  Name: polyz_unpack_17_aarch64_asm
+  Description: AArch64 unpacking of 17-bit packed coefficients
+  Signature: void mld_polyz_unpack_17_aarch64_asm(int32_t *r, const uint8_t *buf, const uint8_t *indices)
+  ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    x0:
+      type: buffer
+      size_bytes: 1024
+      permissions: write-only
+      c_parameter: int32_t *r
+      description: Output polynomial (256 x int32_t)
+    x1:
+      type: buffer
+      size_bytes: 576
+      permissions: read-only
+      c_parameter: const uint8_t *buf
+      description: Packed input bytes
+    x2:
+      type: buffer
+      size_bytes: 64
+      permissions: read-only
+      c_parameter: const uint8_t *indices
+      description: Permutation index table (64 x uint8_t)
+*/
+
  #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
            (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)) && \

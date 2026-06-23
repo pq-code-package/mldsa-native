@@ -2,6 +2,21 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+/*yaml
+  Name: poly_caddq_aarch64_asm
+  Description: AArch64 conditional addition of q to each coefficient
+  Signature: void mld_poly_caddq_aarch64_asm(int32_t *a)
+  ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    x0:
+      type: buffer
+      size_bytes: 1024
+      permissions: read/write
+      c_parameter: int32_t *a
+      description: Input/output polynomial (256 x int32_t)
+*/
+
 #include "../../../common.h"
 
 #if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)

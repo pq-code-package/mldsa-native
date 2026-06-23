@@ -2,6 +2,26 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
+/*yaml
+  Name: poly_chknorm_aarch64_asm
+  Description: AArch64 infinity-norm bound check on polynomial coefficients
+  Signature: int mld_poly_chknorm_aarch64_asm(const int32_t *a, int32_t B)
+  ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    x0:
+      type: buffer
+      size_bytes: 1024
+      permissions: read-only
+      c_parameter: const int32_t *a
+      description: Input polynomial (256 x int32_t)
+    x1:
+      type: scalar
+      c_parameter: int32_t B
+      description: Norm bound
+      test_with: 131072  # representative non-negative bound (1 << 17)
+*/
+
 #include "../../../common.h"
 
 #if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)

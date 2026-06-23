@@ -29,6 +29,28 @@
  *              - const uint8_t *a: pointer to packed input (640 bytes)
  **************************************************/
 
+/*yaml
+  Name: polyz_unpack_19_avx2_asm
+  Description: x86_64 AVX2 unpacking of 19-bit packed coefficients
+  Signature: void mld_polyz_unpack_19_avx2_asm(int32_t *r, const uint8_t *a)
+  ABI:
+    Architecture: x86_64
+    CallingConvention: SysV
+    Features: [AVX2]
+    rdi:
+      type: buffer
+      size_bytes: 1024
+      permissions: write-only
+      c_parameter: int32_t *r
+      description: Output polynomial (256 x int32_t)
+    rsi:
+      type: buffer
+      size_bytes: 640
+      permissions: read-only
+      c_parameter: const uint8_t *a
+      description: Packed input bytes
+*/
+
 
 
 

@@ -216,6 +216,7 @@ class TEST_TYPES(Enum):
     BASIC_LOWRAM = 21
     RNG_FAIL = 22
     WYCHEPROOF = 23
+    ABICHECK = 24
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -299,6 +300,8 @@ class TEST_TYPES(Enum):
             return "Alloc Test"
         if self == TEST_TYPES.RNG_FAIL:
             return "RNG Failure Test"
+        if self == TEST_TYPES.ABICHECK:
+            return "ABI Compliance Test"
 
     def make_dir(self):
         if self == TEST_TYPES.BRING_YOUR_OWN_FIPS202:
@@ -374,6 +377,8 @@ class TEST_TYPES(Enum):
             return "alloc"
         if self == TEST_TYPES.RNG_FAIL:
             return "rng_fail"
+        if self == TEST_TYPES.ABICHECK:
+            return "abicheck"
 
     def make_run_target(self, scheme):
         t = self.make_target()
@@ -699,6 +704,17 @@ class Tests:
 
         self.check_fail()
 
+    def abicheck(self):
+        """Run ABI compliance tests for assembly functions."""
+        if not self.do_opt():
+            return
+
+        self._compile_schemes(TEST_TYPES.ABICHECK, True)
+        if self.args.run:
+            self._run_scheme(TEST_TYPES.ABICHECK, True, None)
+
+        self.check_fail()
+
     def acvp(self):
         def _acvp(opt):
             self._compile_schemes(TEST_TYPES.ACVP, opt)
@@ -848,6 +864,7 @@ class Tests:
         unit = self.args.unit
         alloc = self.args.alloc
         rng_fail = self.args.rng_fail
+        abicheck = self.args.abicheck
 
         def _all(opt):
             if func is True:
@@ -866,6 +883,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.ALLOC, opt)
             if rng_fail is True:
                 self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
+            if abicheck is True and opt:
+                self._compile_schemes(TEST_TYPES.ABICHECK, opt)
 
             if self.args.check_namespace is True:
                 p = subprocess.run(
@@ -895,6 +914,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.ALLOC, opt)
             if rng_fail is True:
                 self._run_schemes(TEST_TYPES.RNG_FAIL, opt)
+            if abicheck is True and opt:
+                self._run_scheme(TEST_TYPES.ABICHECK, opt, None)
 
         if self.do_no_opt():
             _all(False)
@@ -1320,6 +1341,21 @@ def cli():
         help="Do not run RNG failure tests",
     )
 
+    abicheck_group = all_parser.add_mutually_exclusive_group()
+    abicheck_group.add_argument(
+        "--abicheck",
+        action="store_true",
+        dest="abicheck",
+        help="Run ABI compliance tests",
+        default=True,
+    )
+    abicheck_group.add_argument(
+        "--no-abicheck",
+        action="store_false",
+        dest="abicheck",
+        help="Do not run ABI compliance tests",
+    )
+
     # acvp arguments
     acvp_parser = cmd_subparsers.add_parser(
         "acvp", help="Run ACVP client", parents=[common_parser]
@@ -1559,6 +1595,13 @@ def cli():
         parents=[common_parser],
     )
 
+    # abicheck arguments
+    cmd_subparsers.add_parser(
+        "abicheck",
+        help="Run ABI compliance tests for assembly functions",
+        parents=[common_parser],
+    )
+
     args = main_parser.parse_args()
 
     if not hasattr(args, "mac_taskpolicy"):
@@ -1596,6 +1639,8 @@ def cli():
         Tests(args).alloc()
     elif args.cmd == "rng_fail":
         Tests(args).rng_fail()
+    elif args.cmd == "abicheck":
+        Tests(args).abicheck()
 
 
 if __name__ == "__main__":

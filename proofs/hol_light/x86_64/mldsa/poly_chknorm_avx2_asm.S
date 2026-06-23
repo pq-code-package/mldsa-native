@@ -31,6 +31,27 @@
  * Returns:     - 1 if any |coefficient| >= B, 0 otherwise.
  **************************************************/
 
+/*yaml
+  Name: poly_chknorm_avx2_asm
+  Description: x86_64 AVX2 infinity-norm bound check on polynomial coefficients
+  Signature: int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
+  ABI:
+    Architecture: x86_64
+    CallingConvention: SysV
+    Features: [AVX2]
+    rdi:
+      type: buffer
+      size_bytes: 1024
+      permissions: read-only
+      c_parameter: const int32_t *a
+      description: Input polynomial (256 x int32_t)
+    rsi:
+      type: scalar
+      c_parameter: int32_t B
+      description: Norm bound (must be non-negative)
+      test_with: 131072  # representative non-negative bound (1 << 17)
+*/
+
 
 
 

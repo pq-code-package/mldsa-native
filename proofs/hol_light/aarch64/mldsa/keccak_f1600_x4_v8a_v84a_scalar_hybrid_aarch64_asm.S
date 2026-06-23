@@ -10,10 +10,13 @@
 // Author: Matthias Kannwischer <matthias@kannwischer.eu>
 
 /*yaml
-  Name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_asm
+  Name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
   Description: AArch64 hybrid scalar/vector implementation of Keccak-f[1600] permutation for four sequential states with ARMv8.4-A optimizations
   Signature: void mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm(uint64_t state[100], const uint64_t rc[24])
   ABI:
+    Architecture: aarch64
+    CallingConvention: AAPCS64
+    Features: [SHA3]
     x0:
       type: buffer
       size_bytes: 800
@@ -24,7 +27,7 @@
       type: buffer
       size_bytes: 192
       permissions: read-only
-      c_parameter: const uint64_t rc[24]
+      c_parameter: uint64_t const *rc
       description: Round constants (24 x uint64_t)
   Stack:
     bytes: 224
