@@ -202,18 +202,26 @@ def compute_hash(msg, alg):
     return h.hexdigest() if xof_len is None else h.hexdigest(xof_len)
 
 
+def _available_hash_algs():
+    """Determine hashes supported by the underlying hashlib implementation"""
+    available = set()
+    for alg, (name, _) in HASH_ALG_TO_HASHLIB.items():
+        try:
+            hashlib.new(name)
+            available.add(alg)
+        except (ValueError, TypeError):
+            pass
+    return available
+
+
+AVAILABLE_HASH_ALGS = _available_hash_algs()
+
+
 def hashlib_can_compute(hashAlg):
     # SHAKE-256 pre-hash is computed inside the ACVP binary, not via hashlib.
     if hashAlg in (None, "none", "SHAKE-256"):
         return True
-    name, _ = HASH_ALG_TO_HASHLIB.get(hashAlg, (None, None))
-    if name is None:
-        return False
-    try:
-        hashlib.new(name)
-        return True
-    except (ValueError, TypeError):
-        return False
+    return hashAlg in AVAILABLE_HASH_ALGS
 
 
 def unwrap_acvts(data):
