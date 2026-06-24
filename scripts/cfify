@@ -160,6 +160,19 @@ ARMV81M_ADD_SP_PATTERN = re.compile(
 ARMV81M_BX_LR_PATTERN = re.compile(r"(\s*)bx\s+lr\s*$", re.IGNORECASE)
 
 
+# -----------------------------------------------------------------------------
+# riscv32 module-scope constants
+# -----------------------------------------------------------------------------
+# `addi sp, sp, -OFF` (allocate) and `addi sp, sp, +OFF` (free).
+RISCV32_SUB_SP_PATTERN = re.compile(
+    r"(\s*)addi\s+sp,\s*sp,\s*-(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+RISCV32_ADD_SP_PATTERN = re.compile(
+    r"(\s*)addi\s+sp,\s*sp,\s*(0x[0-9a-fA-F]+|\d+)", re.IGNORECASE
+)
+RISCV32_RET_PATTERN = re.compile(r"(\s*)ret\s*$", re.IGNORECASE)
+
+
 def armv81m_parse_reg(s):
     """Parse a single register token, returning its canonical name
     (e.g. 'r14' -> 'lr'). Raises ValueError on unrecognised input."""
@@ -524,6 +537,44 @@ def add_cfi_directives(text, arch):
                 i += 1
                 continue
 
+        elif arch == "riscv32":
+            # addi sp, sp, -OFF — stack allocation
+            match = RISCV32_SUB_SP_PATTERN.match(line)
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset {offset:#x}")
+                i += 1
+                continue
+
+            # addi sp, sp, +OFF — stack deallocation
+            match = RISCV32_ADD_SP_PATTERN.match(line)
+            if match:
+                indent, offset_str = match.groups()
+                offset = (
+                    int(offset_str, 16)
+                    if offset_str.lower().startswith("0x")
+                    else int(offset_str)
+                )
+                result.append(line)
+                result.append(f"{indent}.cfi_adjust_cfa_offset -{offset:#x}")
+                i += 1
+                continue
+
+            # ret — function return
+            match = RISCV32_RET_PATTERN.match(line)
+            if match:
+                indent = match.group(1)
+                result.append(line)
+                result.append(f"{indent}.cfi_endproc")
+                i += 1
+                continue
+
         result.append(line)
         i += 1
 
@@ -543,7 +594,7 @@ def main():
     )
     parser.add_argument(
         "--arch",
-        choices=["aarch64", "x86_64", "armv81m"],
+        choices=["aarch64", "x86_64", "armv81m", "riscv32"],
         default="aarch64",
         help="Target architecture (default: aarch64)",
     )

@@ -23,7 +23,7 @@ mldsa-native allows developers to support ML-DSA with minimal performance and ma
 
 **Maintainability and Safety:** Memory safety, type safety and absence of various classes of timing leakage are automatically checked on every change, using a combination of static model checking (using CBMC) and dynamic instrumentation (using valgrind). This reduces review and maintenance burden and accelerates safe code delivery. See [Formal Verification](#formal-verification) and [Security](#security).
 
-**Architecture Support:** Native backends are added under a unified interface, minimizing duplicated code and reasoning. mldsa-native comes with backends for AArch64 and x86-64. See [Design](#design).
+**Architecture Support:** Native backends are added under a unified interface, minimizing duplicated code and reasoning. mldsa-native comes with backends for AArch64 and x86-64, and experimental backends for Armv8.1-M and RV32-IM. See [Design](#design).
 
 ## Quickstart for Ubuntu
 
@@ -94,6 +94,7 @@ mldsa-native currently offers the following backends:
 * 64-bit Arm backend (using Neon)
 * 64-bit Intel/AMD backend (using AVX2)
 * 32-bit Armv8.1-M backend (using Helium/MVE). This is still experimental and disabled by default.
+* 32-bit RISC-V backend (RV32-IM, base integer + M-extension only). This is still experimental and disabled by default.
 
 If you'd like contribute new backends, please reach out!
 
