@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = ntt_butterfly_block_harness
+HARNESS_FILE = invntt_2_layers_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mld_ntt_butterfly_block
+PROOF_UID = mld_invntt_2_layers
 
 DEFINES +=
 INCLUDES +=
@@ -19,8 +19,8 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c
 
-CHECK_FUNCTION_CONTRACTS=mld_ntt_butterfly_block
-USE_FUNCTION_CONTRACTS=mld_fqmul
+CHECK_FUNCTION_CONTRACTS=mld_invntt_2_layers
+USE_FUNCTION_CONTRACTS=mld_invntt_2_layers_block
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -28,7 +28,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--bitwuzla
 
-FUNCTION_NAME = mld_ntt_butterfly_block
+FUNCTION_NAME = mld_invntt_2_layers
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
