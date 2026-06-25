@@ -45,6 +45,7 @@
 #define mld_validate_hash_length MLD_ADD_PARAM_SET(mld_validate_hash_length)
 #define mld_get_hash_oid MLD_ADD_PARAM_SET(mld_get_hash_oid)
 #define mld_H MLD_ADD_PARAM_SET(mld_H)
+#define mld_prepare_verify_mu MLD_ADD_PARAM_SET(mld_prepare_verify_mu)
 #define mld_compute_pack_z MLD_ADD_PARAM_SET(mld_compute_pack_z)
 #define mld_attempt_signature_generation \
   MLD_ADD_PARAM_SET(mld_attempt_signature_generation) MLD_CONTEXT_PARAMETERS_8
@@ -488,6 +489,36 @@ __contract__(
   mld_zeroize(&state, sizeof(state));
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+MLD_MUST_CHECK_RETURN_VALUE
+static int mld_prepare_verify_mu(uint8_t mu[MLDSA_CRHBYTES], const uint8_t *m,
+                                 size_t mlen, const uint8_t *pre, size_t prelen,
+                                 const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                                 int externalmu)
+{
+  MLD_ALIGN uint8_t hpk[MLDSA_CRHBYTES];
+
+  if (externalmu)
+  {
+    if (mlen != MLDSA_CRHBYTES)
+    {
+      return MLD_ERR_FAIL;
+    }
+    mld_memcpy(mu, m, MLDSA_CRHBYTES);
+    return 0;
+  }
+
+  /* Compute CRH(H(rho, t1), pre, msg) */
+  mld_H(hpk, MLDSA_TRBYTES, pk, MLDSA_CRYPTO_PUBLICKEYBYTES, NULL, 0, NULL, 0);
+  mld_H(mu, MLDSA_CRHBYTES, hpk, MLDSA_TRBYTES, pre, prelen, m, mlen);
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(hpk, sizeof(hpk));
+
+  return 0;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Sampling y from counter kappa uses nonces kappa, ..., kappa+L-1, which fit in
@@ -951,6 +982,11 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   {
     /* mu has been provided directly (external-mu variant; line 6 done by the
      * caller in a separate cryptographic module). */
+    if (mlen != MLDSA_CRHBYTES)
+    {
+      ret = MLD_ERR_FAIL;
+      goto cleanup;
+    }
     mld_memcpy(mu, m, MLDSA_CRHBYTES);
   }
 
@@ -1191,21 +1227,10 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
     goto cleanup;
   }
 
-  if (!externalmu)
+  ret = mld_prepare_verify_mu(mu, m, mlen, pre, prelen, pk, externalmu);
+  if (ret != 0)
   {
-    /* Compute CRH(H(rho, t1), pre, msg) */
-    MLD_ALIGN uint8_t hpk[MLDSA_CRHBYTES];
-    mld_H(hpk, MLDSA_TRBYTES, pk, MLDSA_CRYPTO_PUBLICKEYBYTES, NULL, 0, NULL,
-          0);
-    mld_H(mu, MLDSA_CRHBYTES, hpk, MLDSA_TRBYTES, pre, prelen, m, mlen);
-
-    /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-    mld_zeroize(hpk, sizeof(hpk));
-  }
-  else
-  {
-    /* mu has been provided directly */
-    mld_memcpy(mu, m, MLDSA_CRHBYTES);
+    goto cleanup;
   }
 
   /* Matrix-vector multiplication and per-row reconstruction of w1. */
@@ -1536,6 +1561,10 @@ size_t mld_prepare_domain_separation_prefix(
   {
     return 0;
   }
+  if (ctxlen > 0 && ctx == NULL)
+  {
+    return 0;
+  }
 
   if (hashalg != MLD_PREHASH_NONE)
   {
@@ -1661,6 +1690,7 @@ cleanup:
 #undef mld_validate_hash_length
 #undef mld_get_hash_oid
 #undef mld_H
+#undef mld_prepare_verify_mu
 #undef mld_compute_pack_z
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1

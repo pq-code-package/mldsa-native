@@ -13,6 +13,7 @@
 #include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
 #include "../../mldsa/src/polyvec_lazy.h"
+#include "../../mldsa/src/sign.h"
 
 #ifndef NUM_RANDOM_TESTS
 #ifdef MLDSA_DEBUG
@@ -1402,15 +1403,130 @@ cleanup:
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
+static int test_signature_internal_rejects_short_external_mu(void)
+{
+  size_t siglen = 0;
+  uint8_t seed[MLDSA_SEEDBYTES] = {0};
+  uint8_t rnd[MLDSA_RNDBYTES] = {0};
+  uint8_t mu[MLDSA_CRHBYTES] = {0};
+  uint8_t short_mu[1] = {0};
+  MLD_ALLOC(pk, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, NULL);
+  MLD_ALLOC(sk, uint8_t, MLDSA_CRYPTO_SECRETKEYBYTES, NULL);
+  MLD_ALLOC(sig, uint8_t, MLDSA_CRYPTO_BYTES, NULL);
+  int ret = 1;
+
+  if (pk == NULL || sk == NULL || sig == NULL)
+  {
+    goto cleanup;
+  }
+
+  CHECK(mld_sign_keypair_internal(pk, sk, seed, NULL) == 0);
+  CHECK(mld_sign_signature_internal(sig, &siglen, short_mu, sizeof(short_mu),
+                                    NULL, 0, rnd, sk, 1, NULL) == MLD_ERR_FAIL);
+  CHECK(mld_sign_signature_internal(sig, &siglen, mu, sizeof(mu), NULL, 0, rnd,
+                                    sk, 1, NULL) == 0);
+  CHECK(mld_sign_verify_internal(sig, siglen, short_mu, sizeof(short_mu), NULL,
+                                 0, pk, 1, NULL) == MLD_ERR_FAIL);
+
+  ret = 0;
+
+cleanup:
+  MLD_FREE(sig, uint8_t, MLDSA_CRYPTO_BYTES, NULL);
+  MLD_FREE(sk, uint8_t, MLDSA_CRYPTO_SECRETKEYBYTES, NULL);
+  MLD_FREE(pk, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, NULL);
+  return ret;
+}
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#define TEST_PRE_HASH_OID_LEN 11
+
+static int test_domain_separation_prefix_boundaries(void)
+{
+  static const struct
+  {
+    int hashalg;
+    size_t phlen;
+  } cases[] = {
+      {MLD_PREHASH_SHA2_224, 224 / 8},     {MLD_PREHASH_SHA2_256, 256 / 8},
+      {MLD_PREHASH_SHA2_384, 384 / 8},     {MLD_PREHASH_SHA2_512, 512 / 8},
+      {MLD_PREHASH_SHA2_512_224, 224 / 8}, {MLD_PREHASH_SHA2_512_256, 256 / 8},
+      {MLD_PREHASH_SHA3_224, 224 / 8},     {MLD_PREHASH_SHA3_256, 256 / 8},
+      {MLD_PREHASH_SHA3_384, 384 / 8},     {MLD_PREHASH_SHA3_512, 512 / 8},
+      {MLD_PREHASH_SHAKE_128, 256 / 8},    {MLD_PREHASH_SHAKE_256, 512 / 8},
+  };
+  uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  uint8_t ph[64];
+  uint8_t ctx[256];
+  size_t i, len;
+
+  for (i = 0; i < sizeof(ph); i++)
+  {
+    ph[i] = (uint8_t)(0x80u + i);
+  }
+
+  for (i = 0; i < sizeof(ctx); i++)
+  {
+    ctx[i] = (uint8_t)i;
+  }
+
+  CHECK(mld_prepare_domain_separation_prefix(prefix, NULL, 0, NULL, 1,
+                                             MLD_PREHASH_NONE) == 0);
+  len = mld_prepare_domain_separation_prefix(prefix, NULL, 0, ctx, 255,
+                                             MLD_PREHASH_NONE);
+  CHECK(len == 2 + 255);
+  CHECK(prefix[0] == 0);
+  CHECK(prefix[1] == 255);
+  CHECK(memcmp(prefix + 2, ctx, 255) == 0);
+  CHECK(mld_prepare_domain_separation_prefix(prefix, NULL, 0, ctx, 256,
+                                             MLD_PREHASH_NONE) == 0);
+
+  for (i = 0; i < sizeof(cases) / sizeof(cases[0]); i++)
+  {
+    len = mld_prepare_domain_separation_prefix(prefix, ph, cases[i].phlen, ctx,
+                                               3, cases[i].hashalg);
+    CHECK(len == 2 + 3 + TEST_PRE_HASH_OID_LEN + cases[i].phlen);
+    CHECK(prefix[0] == 1);
+    CHECK(prefix[1] == 3);
+    CHECK(memcmp(prefix + 2, ctx, 3) == 0);
+    CHECK(memcmp(prefix + 2 + 3 + TEST_PRE_HASH_OID_LEN, ph, cases[i].phlen) ==
+          0);
+
+    CHECK(mld_prepare_domain_separation_prefix(prefix, ph, cases[i].phlen - 1,
+                                               ctx, 3, cases[i].hashalg) == 0);
+    CHECK(mld_prepare_domain_separation_prefix(prefix, ph, cases[i].phlen + 1,
+                                               ctx, 3, cases[i].hashalg) == 0);
+    CHECK(mld_prepare_domain_separation_prefix(prefix, NULL, cases[i].phlen,
+                                               ctx, 3, cases[i].hashalg) == 0);
+  }
+
+  CHECK(mld_prepare_domain_separation_prefix(prefix, ph, sizeof(ph), ctx, 3,
+                                             MLD_PREHASH_SHAKE_256 + 1) == 0);
+
+  return 0;
+}
+
+#undef TEST_PRE_HASH_OID_LEN
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
 int main(void);
 #endif
+
 int main(void)
 {
   /* WARNING: Test-only
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
   randombytes_reset();
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
+  CHECK(test_signature_internal_rejects_short_external_mu() == 0);
+#endif
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+  CHECK(test_domain_separation_prefix_boundaries() == 0);
+#endif
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK(test_polyvec_lazy_eager() == 0);
