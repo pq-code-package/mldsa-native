@@ -7,6 +7,22 @@
 #include <stdio.h>
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
+
+#if defined(MLD_CONFIG_FILE)
+#if !defined(MLD_BUILD_INTERNAL)
+#define TEST_DEFINED_MLD_BUILD_INTERNAL
+#define MLD_BUILD_INTERNAL
+#endif
+#include MLD_CONFIG_FILE
+#if defined(TEST_DEFINED_MLD_BUILD_INTERNAL)
+#undef MLD_BUILD_INTERNAL
+#undef TEST_DEFINED_MLD_BUILD_INTERNAL
+#endif
+#if defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND)
+#define TEST_ALLOW_SIGN_ATTEMPTS_EXHAUSTED
+#endif
+#endif
+
 #include "expected_test_vectors.h"
 #include "mldsa_native.h"
 #include "src/sys.h"
@@ -41,19 +57,20 @@
 
 /* For test-configurations with a low threshold of signing attempts,
  * consider the possibility of signatures failing. */
-#if defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND)
-#define CHECK_SIGN_RC(rc)                      \
-  do                                           \
-  {                                            \
-    if (rc == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) \
-    {                                          \
-      return 0;                                \
-    }                                          \
-    CHECK(rc == 0);                            \
+#if defined(TEST_ALLOW_SIGN_ATTEMPTS_EXHAUSTED)
+#define CHECK_SIGN_RC(rc)                              \
+  do                                                   \
+  {                                                    \
+    int sign_rc = (rc);                                \
+    if (sign_rc == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)     \
+    {                                                  \
+      return 0;                                        \
+    }                                                  \
+    CHECK(sign_rc == 0);                               \
   } while (0)
-#else /* MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND */
+#else /* TEST_ALLOW_SIGN_ATTEMPTS_EXHAUSTED */
 #define CHECK_SIGN_RC(rc) CHECK(rc == 0)
-#endif /* !MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND */
+#endif /* !TEST_ALLOW_SIGN_ATTEMPTS_EXHAUSTED */
 
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
