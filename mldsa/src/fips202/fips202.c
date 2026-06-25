@@ -111,7 +111,7 @@ __contract__(
 static void keccak_finalize(uint64_t s[MLD_KECCAK_LANES], unsigned int pos,
                             unsigned int r, uint8_t p)
 __contract__(
-  requires(pos <= r && r < sizeof(uint64_t) * MLD_KECCAK_LANES)
+  requires(pos < r && r < sizeof(uint64_t) * MLD_KECCAK_LANES)
   requires((r / 8) >= 1)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
@@ -142,7 +142,7 @@ __contract__(
   requires((r == SHAKE128_RATE && pos <= SHAKE128_RATE) ||
            (r == SHAKE256_RATE && pos <= SHAKE256_RATE) ||
            (r == SHA3_512_RATE && pos <= SHA3_512_RATE))
-  requires(outlen <= 8 * r /* somewhat arbitrary bound */)
+  requires(outlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
   requires(memory_no_alias(out, outlen))
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
@@ -202,7 +202,10 @@ void mld_shake128_absorb(mld_shake128ctx *state, const uint8_t *in,
 MLD_INTERNAL_API
 void mld_shake128_finalize(mld_shake128ctx *state)
 {
-  keccak_finalize(state->s, state->pos, SHAKE128_RATE, 0x1F);
+  if (state->pos < SHAKE128_RATE)
+  {
+    keccak_finalize(state->s, state->pos, SHAKE128_RATE, 0x1F);
+  }
   state->pos = SHAKE128_RATE;
 }
 
@@ -236,7 +239,10 @@ void mld_shake256_absorb(mld_shake256ctx *state, const uint8_t *in,
 MLD_INTERNAL_API
 void mld_shake256_finalize(mld_shake256ctx *state)
 {
-  keccak_finalize(state->s, state->pos, SHAKE256_RATE, 0x1F);
+  if (state->pos < SHAKE256_RATE)
+  {
+    keccak_finalize(state->s, state->pos, SHAKE256_RATE, 0x1F);
+  }
   state->pos = SHAKE256_RATE;
 }
 

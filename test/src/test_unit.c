@@ -8,6 +8,7 @@
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
 
+#include "../../mldsa/src/fips202/fips202.h"
 #include "../../mldsa/src/fips202/keccakf1600.h"
 #include "../../mldsa/src/poly.h"
 #include "../../mldsa/src/poly_kl.h"
@@ -63,6 +64,75 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
                            const uint8_t *buf, unsigned int buflen);
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
+
+static void fill_shake_input(uint8_t *input, size_t inlen, unsigned int round)
+{
+  size_t i;
+
+  for (i = 0; i < inlen; i++)
+  {
+    input[i] = (uint8_t)((19 * i + 43 * round + (i >> 2)) & 0xFF);
+  }
+}
+
+static int test_shake_finalize_idempotent(void)
+{
+  static const size_t input_lengths[] = {0,
+                                         1,
+                                         SHAKE256_RATE - 1,
+                                         SHAKE256_RATE,
+                                         SHAKE128_RATE - 1,
+                                         SHAKE128_RATE,
+                                         SHAKE128_RATE + 1};
+  uint8_t input[SHAKE128_RATE + 1];
+  uint8_t once[2 * SHAKE128_RATE];
+  uint8_t twice[2 * SHAKE128_RATE];
+  mld_shake128ctx shake128_once;
+  mld_shake128ctx shake128_twice;
+  mld_shake256ctx shake256_once;
+  mld_shake256ctx shake256_twice;
+  size_t round;
+
+  for (round = 0; round < sizeof(input_lengths) / sizeof(input_lengths[0]);
+       round++)
+  {
+    fill_shake_input(input, input_lengths[round], (unsigned int)round);
+
+    memset(once, 0, sizeof(once));
+    memset(twice, 0, sizeof(twice));
+    mld_shake128_init(&shake128_once);
+    mld_shake128_absorb(&shake128_once, input, input_lengths[round]);
+    mld_shake128_finalize(&shake128_once);
+    mld_shake128_squeeze(once, sizeof(once), &shake128_once);
+    mld_shake128_release(&shake128_once);
+
+    mld_shake128_init(&shake128_twice);
+    mld_shake128_absorb(&shake128_twice, input, input_lengths[round]);
+    mld_shake128_finalize(&shake128_twice);
+    mld_shake128_finalize(&shake128_twice);
+    mld_shake128_squeeze(twice, sizeof(twice), &shake128_twice);
+    mld_shake128_release(&shake128_twice);
+    CHECK(memcmp(once, twice, sizeof(once)) == 0);
+
+    memset(once, 0, sizeof(once));
+    memset(twice, 0, sizeof(twice));
+    mld_shake256_init(&shake256_once);
+    mld_shake256_absorb(&shake256_once, input, input_lengths[round]);
+    mld_shake256_finalize(&shake256_once);
+    mld_shake256_squeeze(once, sizeof(once), &shake256_once);
+    mld_shake256_release(&shake256_once);
+
+    mld_shake256_init(&shake256_twice);
+    mld_shake256_absorb(&shake256_twice, input, input_lengths[round]);
+    mld_shake256_finalize(&shake256_twice);
+    mld_shake256_finalize(&shake256_twice);
+    mld_shake256_squeeze(twice, sizeof(twice), &shake256_twice);
+    mld_shake256_release(&shake256_twice);
+    CHECK(memcmp(once, twice, sizeof(once)) == 0);
+  }
+
+  return 0;
+}
 
 #if defined(MLD_USE_NATIVE_FIPS202_X1)
 static void print_u64_array(const char *label, const uint64_t *array,
@@ -1411,6 +1481,8 @@ int main(void)
   /* WARNING: Test-only
    * Normally, you would want to seed a PRNG with trustworthy entropy here. */
   randombytes_reset();
+
+  CHECK(test_shake_finalize_idempotent() == 0);
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   CHECK(test_polyvec_lazy_eager() == 0);
