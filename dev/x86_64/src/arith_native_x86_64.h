@@ -137,6 +137,7 @@ void mld_poly_caddq_avx2_asm(int32_t *r)
  * in proofs/hol_light/x86_64/proofs/poly_caddq_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)r % MLD_DEFAULT_ALIGN) == 0)
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_bound(r, 0, MLDSA_N, 0, MLDSA_Q))
@@ -151,6 +152,8 @@ void mld_poly_use_hint_32_avx2_asm(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)a % MLD_DEFAULT_ALIGN) == 0)
+  requires(((uintptr_t)h % MLD_DEFAULT_ALIGN) == 0)
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
@@ -166,6 +169,8 @@ void mld_poly_use_hint_88_avx2_asm(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)a % MLD_DEFAULT_ALIGN) == 0)
+  requires(((uintptr_t)h % MLD_DEFAULT_ALIGN) == 0)
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
@@ -197,6 +202,7 @@ void mld_polyz_unpack_17_avx2_asm(int32_t *r, const uint8_t *a)
  * in proofs/hol_light/x86_64/proofs/polyz_unpack_17_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)r % MLD_DEFAULT_ALIGN) == 0)
   requires(memory_no_alias(a, 576))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_bound(r, 0, MLDSA_N, -((1 << 17) - 1), (1 << 17) + 1))
@@ -209,6 +215,7 @@ void mld_polyz_unpack_19_avx2_asm(int32_t *r, const uint8_t *a)
  * in proofs/hol_light/x86_64/proofs/polyz_unpack_19_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)r % MLD_DEFAULT_ALIGN) == 0)
   requires(memory_no_alias(a, 640))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_bound(r, 0, MLDSA_N, -((1 << 19) - 1), (1 << 19) + 1))

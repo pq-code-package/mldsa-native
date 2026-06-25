@@ -334,12 +334,13 @@ __contract__(
 /**
  * For all coefficients of in/out polynomial add Q if coefficient is negative.
  *
- * @param[in,out] a Pointer to input/output polynomial.
+ * @param[in,out] a Pointer to 32-byte-aligned input/output polynomial.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)a % MLD_DEFAULT_ALIGN) == 0)
   requires(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
@@ -358,14 +359,16 @@ __contract__(
  *
  * Use hint h to correct the high bits of a in-place.
  *
- * @param[in,out] a Input/output polynomial.
- * @param[in]     h Hint polynomial.
+ * @param[in,out] a 32-byte-aligned input/output polynomial.
+ * @param[in]     h 32-byte-aligned hint polynomial.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)a % MLD_DEFAULT_ALIGN) == 0)
+  requires(((uintptr_t)h % MLD_DEFAULT_ALIGN) == 0)
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
@@ -384,14 +387,16 @@ __contract__(
  *
  * Use hint h to correct the high bits of a in-place.
  *
- * @param[in,out] a Input/output polynomial.
- * @param[in]     h Hint polynomial.
+ * @param[in,out] a 32-byte-aligned input/output polynomial.
+ * @param[in]     h 32-byte-aligned hint polynomial.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)a % MLD_DEFAULT_ALIGN) == 0)
+  requires(((uintptr_t)h % MLD_DEFAULT_ALIGN) == 0)
   requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
   requires(array_bound(h, 0, MLDSA_N, 0, 2))
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
@@ -441,13 +446,14 @@ __contract__(
  * Unpack polynomial z with coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1].
  *
- * @param[out] r Pointer to output polynomial.
+ * @param[out] r Pointer to 32-byte-aligned output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *a)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)r % MLD_DEFAULT_ALIGN) == 0)
   requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
@@ -467,13 +473,14 @@ __contract__(
  * Unpack polynomial z with coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1].
  *
- * @param[out] r Pointer to output polynomial.
+ * @param[out] r Pointer to 32-byte-aligned output polynomial.
  * @param[in]  a Byte array with bit-packed polynomial.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *a)
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(((uintptr_t)r % MLD_DEFAULT_ALIGN) == 0)
   requires(memory_no_alias(a, MLDSA_POLYZ_PACKEDBYTES))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
