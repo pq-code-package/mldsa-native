@@ -315,7 +315,11 @@ int MLD_API_NAMESPACE(keypair)(
  * @param      prelen     Length of prefix string. Ignored when
  *                        externalmu != 0.
  * @param[in]  rnd        Random seed.
- * @param[in]  sk         Bit-packed secret key.
+ * @param[in]  sk         Bit-packed valid secret key. Signing does not perform
+ *                        full serialized secret-key validation; callers
+ *                        importing serialized keys can use
+ *                        crypto_sign_pk_from_sk to validate them before
+ *                        signing.
  * @param      externalmu 0: m/mlen is the raw message; mu = H(tr, pre, m) is
  *                        computed internally.
  *                        non-zero: m points to a precomputed mu of
@@ -361,7 +365,10 @@ int MLD_API_NAMESPACE(signature_internal)(
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string. Should be <= 255.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed valid secret key. Signing does not perform
+ *                     full serialized secret-key validation; callers importing
+ *                     serialized keys can use crypto_sign_pk_from_sk to
+ *                     validate them before signing.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
@@ -400,7 +407,10 @@ int MLD_API_NAMESPACE(signature)(
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  mu      Precomputed message representative.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed valid secret key. Signing does not perform
+ *                     full serialized secret-key validation; callers importing
+ *                     serialized keys can use crypto_sign_pk_from_sk to
+ *                     validate them before signing.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
@@ -439,7 +449,10 @@ int MLD_API_NAMESPACE(signature_extmu)(
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed valid secret key. Signing does not perform
+ *                     full serialized secret-key validation; callers importing
+ *                     serialized keys can use crypto_sign_pk_from_sk to
+ *                     validate them before signing.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
@@ -648,7 +661,10 @@ int MLD_API_NAMESPACE(open)(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed valid secret key. Signing does not perform
+ *                     full serialized secret-key validation; callers importing
+ *                     serialized keys can use crypto_sign_pk_from_sk to
+ *                     validate them before signing.
  * @param      hashalg Hash algorithm constant (one of MLD_PREHASH_*).
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -739,7 +755,10 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed valid secret key. Signing does not perform
+ *                     full serialized secret-key validation; callers importing
+ *                     serialized keys can use crypto_sign_pk_from_sk to
+ *                     validate them before signing.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
