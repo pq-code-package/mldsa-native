@@ -38,7 +38,7 @@ int check_pointwise_acc_l7_avx2_asm(void)
   MLD_ALIGN uint8_t
       buf_rsi[7168]; /* Input polynomial vector a (7 x 256 x int32_t) */
 
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check pointwise_acc_l7_avx2_asm: host lacks AVX2, skipping\n");

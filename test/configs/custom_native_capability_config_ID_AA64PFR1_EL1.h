@@ -483,7 +483,7 @@
 
 static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 {
-  if (cap == MLD_SYS_CAP_SHA3)
+  if (cap == MLD_SYS_CAP_AARCH64_SHA3)
   {
     uint64_t id_aa64pfr1_el1;
 

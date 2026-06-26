@@ -31,7 +31,7 @@ int check_poly_chknorm_avx2_asm(void)
   int violations;
   MLD_ALIGN uint8_t buf_rdi[1024]; /* Input polynomial (256 x int32_t) */
 
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check poly_chknorm_avx2_asm: host lacks AVX2, skipping\n");

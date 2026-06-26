@@ -32,7 +32,7 @@ int check_invntt_avx2_asm(void)
   MLD_ALIGN uint8_t buf_rdi[1024]; /* Input/output polynomial (256 x int32_t) */
   MLD_ALIGN uint8_t buf_rsi[2496]; /* Precomputed constants (624 x int32_t) */
 
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr, "ABI check invntt_avx2_asm: host lacks AVX2, skipping\n");
     return MLD_ABICHECK_SKIPPED;

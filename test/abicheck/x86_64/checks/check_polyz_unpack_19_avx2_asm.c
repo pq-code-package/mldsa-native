@@ -32,7 +32,7 @@ int check_polyz_unpack_19_avx2_asm(void)
   MLD_ALIGN uint8_t buf_rdi[1024]; /* Output polynomial (256 x int32_t) */
   MLD_ALIGN uint8_t buf_rsi[640];  /* Packed input bytes */
 
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check polyz_unpack_19_avx2_asm: host lacks AVX2, skipping\n");

@@ -37,7 +37,7 @@ int check_keccak_f1600_x4_avx2_asm(void)
   MLD_ALIGN uint8_t buf_rdx[32];  /* Rotation constant rho8 (4 x uint64_t) */
   MLD_ALIGN uint8_t buf_rsi[192]; /* Round constants (24 x uint64_t) */
 
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_X86_64_AVX2))
   {
     fprintf(stderr,
             "ABI check keccak_f1600_x4_avx2_asm: host lacks AVX2, skipping\n");
