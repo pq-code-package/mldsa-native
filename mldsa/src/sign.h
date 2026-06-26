@@ -259,6 +259,9 @@ __contract__(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
+ * On failure, *smlen is set to 0. No partial signed-message output is
+ * preserved, but if sm == m, the input message bytes remain unchanged.
+ *
  * @retval 0                               Success.
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
  *                                         used and an allocation via

@@ -1151,7 +1151,16 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   int ret;
+  uint8_t sig[MLDSA_CRYPTO_BYTES];
+  size_t siglen;
   size_t i;
+
+  ret = mld_sign_signature(sig, &siglen, m, mlen, ctx, ctxlen, sk, context);
+  if (ret != 0)
+  {
+    *smlen = 0;
+    goto cleanup;
+  }
 
   for (i = 0; i < mlen; ++i)
   __loop__(
@@ -1162,12 +1171,12 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
   {
     sm[MLDSA_CRYPTO_BYTES + mlen - 1 - i] = m[mlen - 1 - i];
   }
-  ret = mld_sign_signature(sm, smlen, sm + MLDSA_CRYPTO_BYTES, mlen, ctx,
-                           ctxlen, sk, context);
-  if (ret == 0)
-  {
-    *smlen += mlen;
-  }
+
+  mld_memcpy(sm, sig, MLDSA_CRYPTO_BYTES);
+  *smlen = siglen + mlen;
+
+cleanup:
+  mld_zeroize(sig, sizeof(sig));
   return ret;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
