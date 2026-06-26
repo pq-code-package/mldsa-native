@@ -18,8 +18,8 @@ from pathlib import Path
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
 
-# Pinned to a specific commit (2026-06-04).
-WYCHEPROOF_COMMIT = "4f5e05f71e6b724c20e2c1b6934c7bd7ef6d89e7"
+# Pinned to a specific commit (2026-06-06).
+WYCHEPROOF_COMMIT = "6d7cccd0fcb1917368579adeeac10fe802f1b521"
 WYCHEPROOF_BASE_URL = f"https://raw.githubusercontent.com/C2SP/wycheproof/{WYCHEPROOF_COMMIT}/testvectors_v1"
 
 WYCHEPROOF_FILES = [
@@ -53,6 +53,14 @@ def download_wycheproof_files(data_dir):
     """Download Wycheproof test vector files if not present."""
     data_dir = Path(data_dir)
     data_dir.mkdir(parents=True, exist_ok=True)
+    commit_file = data_dir / ".wycheproof-commit"
+
+    if (
+        not commit_file.exists()
+        or commit_file.read_text(encoding="utf-8").strip() != WYCHEPROOF_COMMIT
+    ):
+        for filename in WYCHEPROOF_FILES:
+            (data_dir / filename).unlink(missing_ok=True)
 
     for filename in WYCHEPROOF_FILES:
         local_file = data_dir / filename
@@ -67,6 +75,7 @@ def download_wycheproof_files(data_dir):
                 print(f"Error downloading {filename}: {e}", file=sys.stderr)
                 local_file.unlink(missing_ok=True)
                 return False
+    commit_file.write_text(f"{WYCHEPROOF_COMMIT}\n", encoding="utf-8")
     return True
 
 
@@ -118,6 +127,13 @@ def run_binary(args_list):
     return out
 
 
+def append_optional_rnd(args_list, tc):
+    rnd = tc.get("rnd")
+    if rnd is not None:
+        args_list.append(f"rnd={rnd}")
+    return args_list
+
+
 class TestResult(Enum):
     OK = auto()
     SKIPPED = auto()
@@ -159,25 +175,31 @@ def run_sign_seed_test(data_file):
             info(f"  tcId={tc['tcId']} ... ", end="")
             if "Internal" in tc.get("flags", []):
                 out = run_binary(
-                    [
-                        binary,
-                        "sigGenSeedDeterministic",
-                        f"seed={seed_hex}",
-                        f"message={tc['mu']}",
-                        "context=",
-                        "externalMu=1",
-                    ]
+                    append_optional_rnd(
+                        [
+                            binary,
+                            "sigGenSeedDeterministic",
+                            f"seed={seed_hex}",
+                            f"message={tc['mu']}",
+                            "context=",
+                            "externalMu=1",
+                        ],
+                        tc,
+                    )
                 )
             else:
                 out = run_binary(
-                    [
-                        binary,
-                        "sigGenSeedDeterministic",
-                        f"seed={seed_hex}",
-                        f"message={tc['msg']}",
-                        f"context={tc.get('ctx', '')}",
-                        "externalMu=0",
-                    ]
+                    append_optional_rnd(
+                        [
+                            binary,
+                            "sigGenSeedDeterministic",
+                            f"seed={seed_hex}",
+                            f"message={tc['msg']}",
+                            f"context={tc.get('ctx', '')}",
+                            "externalMu=0",
+                        ],
+                        tc,
+                    )
                 )
             result = check_sign_result(tc, out)
             info("skipped" if result == TestResult.SKIPPED else "ok")
@@ -199,23 +221,29 @@ def run_sign_noseed_test(data_file):
             info(f"  tcId={tc['tcId']} ... ", end="")
             if "Internal" in tc.get("flags", []):
                 out = run_binary(
-                    [
-                        binary,
-                        "sigGenInternalDeterministic",
-                        f"message={tc['mu']}",
-                        f"sk={sk_hex}",
-                        "externalMu=1",
-                    ]
+                    append_optional_rnd(
+                        [
+                            binary,
+                            "sigGenInternalDeterministic",
+                            f"message={tc['mu']}",
+                            f"sk={sk_hex}",
+                            "externalMu=1",
+                        ],
+                        tc,
+                    )
                 )
             else:
                 out = run_binary(
-                    [
-                        binary,
-                        "sigGenDeterministic",
-                        f"message={tc['msg']}",
-                        f"context={tc.get('ctx', '')}",
-                        f"sk={sk_hex}",
-                    ]
+                    append_optional_rnd(
+                        [
+                            binary,
+                            "sigGenDeterministic",
+                            f"message={tc['msg']}",
+                            f"context={tc.get('ctx', '')}",
+                            f"sk={sk_hex}",
+                        ],
+                        tc,
+                    )
                 )
             result = check_sign_result(tc, out)
             info("skipped" if result == TestResult.SKIPPED else "ok")
