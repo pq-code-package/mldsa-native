@@ -43,7 +43,7 @@ on:
            - opt
            - no_opt
       bench_extra_args:
-        description: Additional command line to be appended to `tests bench` script
+        description: Newline-delimited additional arguments for `tests bench`
         default: ''
       compiler:
         description: Compiler to use. When unset, default nix shell is used.
