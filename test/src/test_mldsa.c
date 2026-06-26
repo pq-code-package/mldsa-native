@@ -134,6 +134,73 @@ static int test_sign_unaligned(void)
   return test_sign_core(pk + 1, sk + 1, sm + 1, m + 1, m2 + 1, ctx + 1);
 }
 
+static int test_sign_inplace_success(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t expected[MLEN];
+  uint8_t m2[MLEN + CRYPTO_BYTES];
+  uint8_t ctx[CTXLEN];
+  size_t smlen;
+  size_t mlen;
+  int rc;
+
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, sizeof(ctx)) == 0);
+  MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
+  CHECK(randombytes(sm, MLEN) == 0);
+  MLD_CT_TESTING_SECRET(sm, MLEN);
+  memcpy(expected, sm, MLEN);
+  MLD_CT_TESTING_SECRET(expected, sizeof(expected));
+
+  CHECK_SIGN_RC(crypto_sign(sm, &smlen, sm, MLEN, ctx, sizeof(ctx), sk));
+  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, sizeof(ctx), pk);
+
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  MLD_CT_TESTING_DECLASSIFY(expected, sizeof(expected));
+  MLD_CT_TESTING_DECLASSIFY(m2, sizeof(m2));
+
+  CHECK(rc == 0);
+  CHECK(smlen == MLEN + CRYPTO_BYTES);
+  CHECK(mlen == MLEN);
+  CHECK(memcmp(expected, m2, MLEN) == 0);
+
+  return 0;
+}
+
+static int test_sign_inplace_context_failure_preserves_message(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t expected[MLEN];
+  uint8_t ctx[256];
+  size_t smlen = MLEN + CRYPTO_BYTES;
+  int rc;
+
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, sizeof(ctx)) == 0);
+  MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
+  CHECK(randombytes(sm, MLEN) == 0);
+  MLD_CT_TESTING_SECRET(sm, MLEN);
+  memcpy(expected, sm, MLEN);
+  MLD_CT_TESTING_SECRET(expected, sizeof(expected));
+
+  rc = crypto_sign(sm, &smlen, sm, MLEN, ctx, sizeof(ctx), sk);
+
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  MLD_CT_TESTING_DECLASSIFY(&smlen, sizeof(smlen));
+  MLD_CT_TESTING_DECLASSIFY(sm, MLEN);
+  MLD_CT_TESTING_DECLASSIFY(expected, sizeof(expected));
+
+  CHECK(rc == MLD_ERR_FAIL);
+  CHECK(smlen == 0);
+  CHECK(memcmp(sm, expected, MLEN) == 0);
+
+  return 0;
+}
+
 static int test_sign_extmu(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
@@ -509,6 +576,8 @@ int main(void)
     !defined(MLD_CONFIG_NO_VERIFY_API)
     r |= test_sign();
     r |= test_sign_unaligned();
+    r |= test_sign_inplace_success();
+    r |= test_sign_inplace_context_failure_preserves_message();
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();

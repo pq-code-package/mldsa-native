@@ -158,6 +158,46 @@ static int test_sign_combined_rng_failure(void)
   return 0;
 }
 
+static int test_sign_combined_inplace_rng_failure_preserves_message(void)
+{
+  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
+  uint8_t expected[TEST_VECTOR_MSG_LEN];
+  size_t smlen = CRYPTO_BYTES + TEST_VECTOR_MSG_LEN;
+  int rc;
+
+  memcpy(sm, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
+  memcpy(expected, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
+
+  reset_all();
+  randombytes_fail_on_counter = 0;
+  rc = crypto_sign(sm, &smlen, sm, TEST_VECTOR_MSG_LEN,
+                   (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                   test_vector_sk);
+  if (rc != MLD_ERR_RNG_FAIL)
+  {
+    fprintf(stderr,
+            "ERROR: crypto_sign returned %d on in-place RNG failure "
+            "(expected %d)\n",
+            rc, MLD_ERR_RNG_FAIL);
+    return 1;
+  }
+  if (smlen != 0)
+  {
+    fprintf(stderr,
+            "ERROR: crypto_sign returned smlen=%zu on in-place RNG failure\n",
+            smlen);
+    return 1;
+  }
+  if (memcmp(sm, expected, TEST_VECTOR_MSG_LEN) != 0)
+  {
+    fprintf(stderr,
+            "ERROR: crypto_sign changed the in-place message on RNG failure\n");
+    return 1;
+  }
+
+  return 0;
+}
+
 static int test_signature_extmu_rng_failure(void)
 {
   uint8_t sig[CRYPTO_BYTES];
@@ -249,6 +289,7 @@ int main(void)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   r |= test_sign_rng_failure();
   r |= test_sign_combined_rng_failure();
+  r |= test_sign_combined_inplace_rng_failure_preserves_message();
   r |= test_signature_extmu_rng_failure();
   r |= test_signature_pre_hash_shake256_rng_failure();
 #endif /* !MLD_CONFIG_NO_SIGN_API */
