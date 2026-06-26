@@ -253,7 +253,7 @@ __contract__(
  * @param[in]  m       Pointer to message to be signed.
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
- * @param      ctxlen  Length of context string. Should be <= 255.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param[in]  sk      Bit-packed secret key.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -281,7 +281,7 @@ __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(siglen, sizeof(size_t)))
   requires(memory_no_alias(m, mlen))
-  requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
+  requires(ctxlen <= 255)
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
@@ -342,9 +342,10 @@ __contract__(
  *                     MLDSA_CRYPTO_BYTES + mlen bytes); can be equal to m.
  * @param[out] smlen   Pointer to output length of signed message.
  * @param[in]  m       Pointer to message to be signed.
- * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
+ * @param      mlen    Length of message. Must be <= SIZE_MAX -
+ *                     MLDSA_CRYPTO_BYTES.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param[in]  sk      Bit-packed secret key.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -370,8 +371,8 @@ __contract__(
   requires(memory_no_alias(sm, MLDSA_CRYPTO_BYTES + mlen))
   requires(memory_no_alias(smlen, sizeof(size_t)))
   requires(m == sm || memory_no_alias(m, mlen))
-  requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(ctx, ctxlen))
+  requires(ctxlen <= 255)
+  requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
   assigns(object_whole(smlen))
@@ -787,8 +788,8 @@ __contract__(
  * @param[in]  ph      Pointer to pre-hashed message (ignored for pure
  *                     ML-DSA).
  * @param      phlen   Length of pre-hashed message (ignored for pure ML-DSA).
- * @param[in]  ctx     Pointer to context string (may be NULL).
- * @param      ctxlen  Length of context string.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param      hashalg Hash algorithm constant (MLD_PREHASH_NONE for pure
  *                     ML-DSA, or MLD_PREHASH_* for HashML-DSA).
  *

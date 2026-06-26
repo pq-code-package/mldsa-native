@@ -4,6 +4,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
@@ -19,6 +20,8 @@
   MLD_API_NAMESPACE(signature_pre_hash_shake256)
 #define crypto_sign_verify_pre_hash_shake256 \
   MLD_API_NAMESPACE(verify_pre_hash_shake256)
+#define crypto_sign_prepare_domain_separation_prefix \
+  MLD_API_NAMESPACE(prepare_domain_separation_prefix)
 #define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
 
 #ifndef NTESTS
@@ -132,6 +135,42 @@ static int test_sign_unaligned(void)
   MLD_ALIGN uint8_t ctx[CTXLEN + 1];
 
   return test_sign_core(pk + 1, sk + 1, sm + 1, m + 1, m2 + 1, ctx + 1);
+}
+
+static int test_sign_oversized_message_rejected(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sm[CRYPTO_BYTES];
+  uint8_t m[1] = {0};
+  uint8_t ctx[CTXLEN];
+  size_t smlen = CRYPTO_BYTES;
+  int rc;
+
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, sizeof(ctx)) == 0);
+  MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
+
+  rc = crypto_sign(sm, &smlen, m, SIZE_MAX, ctx, sizeof(ctx), sk);
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  MLD_CT_TESTING_DECLASSIFY(&smlen, sizeof(smlen));
+
+  CHECK(rc == MLD_ERR_FAIL);
+  CHECK(smlen == 0);
+
+  return 0;
+}
+
+static int test_prepare_prefix_null_context_rejected(void)
+{
+  uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+
+  CHECK(crypto_sign_prepare_domain_separation_prefix(prefix, NULL, 0, NULL, 0,
+                                                     MLD_PREHASH_NONE) == 2);
+  CHECK(crypto_sign_prepare_domain_separation_prefix(prefix, NULL, 0, NULL, 1,
+                                                     MLD_PREHASH_NONE) == 0);
+
+  return 0;
 }
 
 static int test_sign_extmu(void)
@@ -509,6 +548,8 @@ int main(void)
     !defined(MLD_CONFIG_NO_VERIFY_API)
     r |= test_sign();
     r |= test_sign_unaligned();
+    r |= test_sign_oversized_message_rejected();
+    r |= test_prepare_prefix_null_context_rejected();
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();
