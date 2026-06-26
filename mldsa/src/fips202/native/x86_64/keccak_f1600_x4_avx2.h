@@ -12,7 +12,7 @@
 #define MLD_FIPS202_X86_64_NEED_X4_AVX2
 
 /* Part of backend API */
-#define MLD_USE_FIPS202_X4_NATIVE
+#define MLD_USE_NATIVE_FIPS202_X4
 
 #if !defined(__ASSEMBLER__)
 #include "../api.h"

@@ -8,7 +8,7 @@
 #define MLD_DEV_FIPS202_AARCH64_X4_V8A_SCALAR_H
 
 /* Part of backend API */
-#define MLD_USE_FIPS202_X4_NATIVE
+#define MLD_USE_NATIVE_FIPS202_X4
 /* Guard for assembly file */
 #define MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 

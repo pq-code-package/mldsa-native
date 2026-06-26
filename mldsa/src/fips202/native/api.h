@@ -39,13 +39,13 @@
  * A _backend_ is a specific implementation of parts of this interface.
  *
  * You can replace 1-fold or 4-fold batched Keccak-F1600.
- * To enable, set MLD_USE_FIPS202_X1_NATIVE or MLD_USE_FIPS202_X4_NATIVE
+ * To enable, set MLD_USE_NATIVE_FIPS202_X1 or MLD_USE_NATIVE_FIPS202_X4
  * in your backend, and define the inline wrappers mld_keccak_f1600_x1_native()
  * and/or mld_keccak_f1600_x4_native(), respectively, to forward to your
  * implementation.
  */
 
-#if defined(MLD_USE_FIPS202_X1_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X1)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
@@ -54,8 +54,8 @@ __contract__(
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1))
 );
-#endif /* MLD_USE_FIPS202_X1_NATIVE */
-#if defined(MLD_USE_FIPS202_X4_NATIVE)
+#endif /* MLD_USE_NATIVE_FIPS202_X1 */
+#if defined(MLD_USE_NATIVE_FIPS202_X4)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 __contract__(
@@ -64,7 +64,7 @@ __contract__(
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4))
 );
-#endif /* MLD_USE_FIPS202_X4_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4 */
 
 /*
  * Native x4 XOR bytes and extract bytes interface.
@@ -78,12 +78,12 @@ __contract__(
  * NOTE: We assume that the custom representation of the zero state is the
  * all-zero state.
  *
- * MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE: Backend provides native XOR bytes
- * MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE: Backend provides native extract
+ * MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES: Backend provides native XOR bytes
+ * MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES: Backend provides native extract
  * bytes
  */
 
-#if defined(MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccakf1600_xor_bytes_x4_native(
     uint64_t *state, const unsigned char *data0, const unsigned char *data1,
@@ -103,9 +103,9 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4)));
-#endif /* MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES */
 
-#if defined(MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, unsigned char *data0, unsigned char *data1,
@@ -124,6 +124,6 @@ __contract__(
   assigns(memory_slice(data2, length))
   assigns(memory_slice(data3, length))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS));
-#endif /* MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES */
 
 #endif /* !MLD_FIPS202_NATIVE_API_H */

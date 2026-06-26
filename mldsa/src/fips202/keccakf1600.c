@@ -123,14 +123,14 @@ void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
                                      unsigned char *data3, unsigned offset,
                                      unsigned length)
 {
-#if defined(MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
   if (mld_keccakf1600_extract_bytes_x4_native(state, data0, data1, data2, data3,
                                               offset, length) ==
       MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_FIPS202_X4_EXTRACT_BYTES_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES */
   mld_keccakf1600x4_extract_bytes_c(state, data0, data1, data2, data3, offset,
                                     length);
 }
@@ -173,14 +173,14 @@ void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
                                  const unsigned char *data3, unsigned offset,
                                  unsigned length)
 {
-#if defined(MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES)
   if (mld_keccakf1600_xor_bytes_x4_native(state, data0, data1, data2, data3,
                                           offset,
                                           length) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_FIPS202_X4_XOR_BYTES_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES */
   mld_keccakf1600x4_xor_bytes_c(state, data0, data1, data2, data3, offset,
                                 length);
 }
@@ -188,12 +188,12 @@ void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
 MLD_INTERNAL_API
 void mld_keccakf1600x4_permute(uint64_t *state)
 {
-#if defined(MLD_USE_FIPS202_X4_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X4)
   if (mld_keccak_f1600_x4_native(state) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_FIPS202_X4_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4 */
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 0);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 1);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
@@ -491,12 +491,12 @@ __contract__(
 MLD_INTERNAL_API
 void mld_keccakf1600_permute(uint64_t *state)
 {
-#if defined(MLD_USE_FIPS202_X1_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X1)
   if (mld_keccak_f1600_x1_native(state) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_FIPS202_X1_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X1 */
   mld_keccakf1600_permute_c(state);
 }
 

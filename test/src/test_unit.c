@@ -64,7 +64,7 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
-#if defined(MLD_USE_FIPS202_X1_NATIVE)
+#if defined(MLD_USE_NATIVE_FIPS202_X1)
 static void print_u64_array(const char *label, const uint64_t *array,
                             size_t len)
 {
@@ -112,7 +112,7 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
   }
   return 1;
 }
-#endif /* MLD_USE_FIPS202_X1_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X1 */
 
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
@@ -130,7 +130,7 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
-    defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
+    defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
 
 /* Backend unit test helper functions for arithmetic native backends */
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
@@ -1015,7 +1015,7 @@ cleanup:
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 
-#ifdef MLD_USE_FIPS202_X1_NATIVE
+#ifdef MLD_USE_NATIVE_FIPS202_X1
 static int test_keccakf1600_permute(void)
 {
   int ret = 1;
@@ -1047,13 +1047,13 @@ cleanup:
   MLD_FREE(state, uint64_t, MLD_KECCAK_LANES, NULL);
   return ret;
 }
-#endif /* MLD_USE_FIPS202_X1_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X1 */
 
 /*
  * Test that x4 Keccak (xor_bytes, permute, extract_bytes) produces
  * the same results as the x1 C reference.
  */
-#ifdef MLD_USE_FIPS202_X4_NATIVE
+#ifdef MLD_USE_NATIVE_FIPS202_X4
 #define MAX_RATE 136
 
 static int test_keccakf1600x4_xor_permute_extract(void)
@@ -1123,7 +1123,7 @@ cleanup:
 }
 
 #undef MAX_RATE
-#endif /* MLD_USE_FIPS202_X4_NATIVE */
+#endif /* MLD_USE_NATIVE_FIPS202_X4 */
 
 static int test_backend_units(void)
 {
@@ -1193,11 +1193,11 @@ static int test_backend_units(void)
 #endif
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
-#ifdef MLD_USE_FIPS202_X1_NATIVE
+#ifdef MLD_USE_NATIVE_FIPS202_X1
   CHECK(test_keccakf1600_permute() == 0);
 #endif
 
-#ifdef MLD_USE_FIPS202_X4_NATIVE
+#ifdef MLD_USE_NATIVE_FIPS202_X4
   CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
 #endif
 
@@ -1213,8 +1213,8 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
           MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
-          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_FIPS202_X1_NATIVE ||      \
-          MLD_USE_FIPS202_X4_NATIVE */
+          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_NATIVE_FIPS202_X1 ||      \
+          MLD_USE_NATIVE_FIPS202_X4 */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
@@ -1429,7 +1429,7 @@ int main(void)
     defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
-    defined(MLD_USE_FIPS202_X1_NATIVE) || defined(MLD_USE_FIPS202_X4_NATIVE)
+    defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
@@ -1441,8 +1441,8 @@ int main(void)
           MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7 ||               \
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
           MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
-          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_FIPS202_X1_NATIVE ||      \
-          MLD_USE_FIPS202_X4_NATIVE */
+          MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_NATIVE_FIPS202_X1 ||      \
+          MLD_USE_NATIVE_FIPS202_X4 */
 
 
   return 0;

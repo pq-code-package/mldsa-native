@@ -10,7 +10,7 @@
 #include "../api.h"
 #include "src/sha3.h"
 /* Replace (single) Keccak-F1600 by tiny-SHA3's */
-#define MLD_USE_FIPS202_X1_NATIVE
+#define MLD_USE_NATIVE_FIPS202_X1
 static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 {
   tiny_sha3_keccakf(state);

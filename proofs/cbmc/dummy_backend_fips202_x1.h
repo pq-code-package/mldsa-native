@@ -7,7 +7,7 @@
 #define MLD_DUMMY_FIPS202X1_BACKEND_H
 
 
-#define MLD_USE_FIPS202_X1_NATIVE
+#define MLD_USE_NATIVE_FIPS202_X1
 
 #include "../../mldsa/src/fips202/native/api.h"
 

@@ -31,7 +31,7 @@ The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.
 
 A custom backend consists of:
 1. A metadata header (e.g., [custom.h](mldsa_native/src/fips202/native/custom/custom.h)) that:
-   - Sets `MLD_USE_FIPS202_X1_NATIVE` (and/or `X4`) to indicate which functions are replaced
+   - Sets `MLD_USE_NATIVE_FIPS202_X1` (and/or `X4`) to indicate which functions are replaced
    - Includes the implementation header
 2. An implementation providing `mld_keccakf1600_native()` (and/or batched variants)
 
@@ -41,7 +41,7 @@ Example backend metadata file:
 #define CUSTOM_FIPS202_BACKEND_H
 
 /* Indicate we're replacing 1-fold Keccak-f1600 */
-#define MLD_USE_FIPS202_X1_NATIVE
+#define MLD_USE_NATIVE_FIPS202_X1
 
 /* Include the implementation */
 #include "custom/src/keccak_impl.h"
