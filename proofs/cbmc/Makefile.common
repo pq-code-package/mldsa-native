@@ -395,18 +395,6 @@ else ifeq ($(CBMC_TARGET),riscv64-linux)
   CBMC_TARGET_POINTER_BYTES = 8
   CBMC_TARGET_SIZE_T_BYTES = 8
   CBMC_TARGET_LONG_BYTES = 8
-else ifeq ($(CBMC_TARGET),riscv32-linux)
-  ifeq ($(strip $(CBMC_TARGET_CC)),)
-    CBMC_TARGET_CC = riscv32-unknown-linux-gnu-gcc
-  endif
-  CBMC_TARGET_CBMC_FLAGS = --arch riscv32 --os linux --ILP32
-  ifeq ($(strip $(CBMC_TARGET_GCC_AS_GCC_DIR)),)
-    CBMC_TARGET_GCC_AS_GCC_DIR = $(PROOF_ROOT)/tools/riscv32-gcc-as-gcc
-  endif
-  CBMC_TARGET_INSTRUMENT_ENV = PATH=$(CBMC_TARGET_GCC_AS_GCC_DIR):$(CBMC_TARGET_HOST_PATH) CC=$(CBMC_TARGET_CC) GCC=$(CBMC_TARGET_CC)
-  CBMC_TARGET_POINTER_BYTES = 4
-  CBMC_TARGET_SIZE_T_BYTES = 4
-  CBMC_TARGET_LONG_BYTES = 4
 else ifeq ($(CBMC_TARGET),ppc64le-linux)
   ifeq ($(strip $(CBMC_TARGET_CC)),)
     CBMC_TARGET_CC = powerpc64le-unknown-linux-gnu-gcc
@@ -420,7 +408,7 @@ else ifeq ($(CBMC_TARGET),ppc64le-linux)
   CBMC_TARGET_SIZE_T_BYTES = 8
   CBMC_TARGET_LONG_BYTES = 8
 else
-  $(error Unsupported CBMC_TARGET '$(CBMC_TARGET)'; expected i386-linux, x86_64-linux, aarch64-linux, riscv64-linux, riscv32-linux, ppc64le-linux, or unset)
+  $(error Unsupported CBMC_TARGET '$(CBMC_TARGET)'; expected i386-linux, x86_64-linux, aarch64-linux, riscv64-linux, ppc64le-linux, or unset)
 endif
 
 # Flags to pass to goto-cc for compilation and linking

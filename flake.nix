@@ -125,7 +125,6 @@
                 toolchain_x86_64
                 toolchain_aarch64
                 toolchain_riscv64
-                toolchain_riscv32
                 toolchain_ppc64le;
             } ++ [ pkgs.gh ];
           };

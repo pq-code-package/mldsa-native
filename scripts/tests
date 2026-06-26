@@ -1485,7 +1485,6 @@ def cli():
             "x86_64-linux",
             "aarch64-linux",
             "riscv64-linux",
-            "riscv32-linux",
             "ppc64le-linux",
         ],
         default=None,
