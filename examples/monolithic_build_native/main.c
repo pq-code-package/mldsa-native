@@ -102,7 +102,7 @@ int main(void)
   int r = 0;
 
   printf("ML-DSA-%d monolithic_build_native Example\n",
-         MLD_CONFIG_API_PARAMETER_SET);
+         MLD_CONFIG_PARAMETER_SET);
   printf("======================\n\n");
 
   printf("Message: %s\n", TEST_VECTOR_MSG);

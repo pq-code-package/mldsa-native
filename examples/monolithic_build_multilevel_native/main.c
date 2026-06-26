@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "mldsa_native_all.c"
-#define MLD_CONFIG_API_CONSTANTS_ONLY
+#define MLD_CONFIG_CONSTANTS_ONLY
 #include <mldsa_native.h>
 #include "expected_test_vectors_multilevel.h"
 #include "test_only_rng/notrandombytes.h"

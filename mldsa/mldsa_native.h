@@ -31,45 +31,6 @@
  * MLD_CONFIG_PARAMETER_SET accordingly for each, and #undef'ing the MLD_H
  * guard to allow multiple inclusions.
  *
- * # Legacy configuration (deprecated)
- *
- * Instead of providing the config file used for the build, you can
- * alternatively set the following configuration options prior to
- * including this header.
- *
- * This method of configuration is deprecated.
- * It will be removed in mldsa-native-v2.
- *
- * - MLD_CONFIG_API_PARAMETER_SET [required]
- *
- *   The parameter set used for the build; 44, 65, or 87.
- *
- * - MLD_CONFIG_API_NAMESPACE_PREFIX [required]
- *
- *   The namespace prefix used for the build.
- *
- *   NOTE:
- *   For a multi-level build, you must include the 44/65/87 suffixes
- *   in MLD_CONFIG_API_NAMESPACE_PREFIX.
- *
- * - MLD_CONFIG_API_NO_SUPERCOP [optional]
- *
- *   By default, this header will also expose the mldsa-native API in the
- *   SUPERCOP naming convention crypto_sign_xxx. If you don't want/need this,
- *   set MLD_CONFIG_API_NO_SUPERCOP. You must set this for a multi-level build.
- *
- * - MLD_CONFIG_API_CONSTANTS_ONLY [optional]
- *
- *   If you don't want this header to expose any function declarations,
- *   but only constants for the sizes of key material, set
- *   MLD_CONFIG_API_CONSTANTS_ONLY. In this case, you don't need to set
- *   MLD_CONFIG_API_PARAMETER_SET or MLD_CONFIG_API_NAMESPACE_PREFIX,
- *   nor include a configuration.
- *
- * - MLD_CONFIG_API_QUALIFIER [optional]
- *
- *   Qualifier to apply to external API.
- *
  ******************************************************************************/
 
 /******************************* Key sizes ************************************/
@@ -144,13 +105,6 @@
 #define MLD_API_CONCAT(x, y) MLD_API_CONCAT_(x, y)
 #define MLD_API_CONCAT_UNDERSCORE(x, y) MLD_API_CONCAT(MLD_API_CONCAT(x, _), y)
 
-#if !defined(MLD_CONFIG_API_PARAMETER_SET)
-/* Recommended configuration via same config file as used for the build. */
-
-/* For now, we derive the legacy API configuration MLD_CONFIG_API_XXX from
- * the config file. In mldsa-native-v2, this will be removed and we will
- * exclusively work with MLD_CONFIG_XXX. */
-
 /* You need to make sure the config file is in the include path. */
 #if defined(MLD_CONFIG_FILE)
 #include MLD_CONFIG_FILE
@@ -158,34 +112,17 @@
 #include "mldsa_native_config.h"
 #endif
 
-#define MLD_CONFIG_API_PARAMETER_SET MLD_CONFIG_PARAMETER_SET
-
+/* Namespace prefix for the public API symbols. For multi-level builds, the
+ * parameter set is appended to disambiguate the security levels. */
 #if defined(MLD_CONFIG_MULTILEVEL_BUILD)
-#define MLD_CONFIG_API_NAMESPACE_PREFIX \
+#define MLD_API_NAMESPACE_PREFIX \
   MLD_API_CONCAT(MLD_CONFIG_NAMESPACE_PREFIX, MLD_CONFIG_PARAMETER_SET)
 #else
-#define MLD_CONFIG_API_NAMESPACE_PREFIX MLD_CONFIG_NAMESPACE_PREFIX
+#define MLD_API_NAMESPACE_PREFIX MLD_CONFIG_NAMESPACE_PREFIX
 #endif
-
-#if defined(MLD_CONFIG_NO_SUPERCOP)
-#define MLD_CONFIG_API_NO_SUPERCOP
-#endif
-
-#if defined(MLD_CONFIG_CONSTANTS_ONLY)
-#define MLD_CONFIG_API_CONSTANTS_ONLY
-#endif
-
-#if defined(MLD_CONFIG_EXTERNAL_API_QUALIFIER)
-#define MLD_CONFIG_API_QUALIFIER MLD_CONFIG_EXTERNAL_API_QUALIFIER
-#endif
-
-#else /* !MLD_CONFIG_API_PARAMETER_SET */
-#define MLD_API_LEGACY_CONFIG
-
-#endif /* MLD_CONFIG_API_PARAMETER_SET */
 
 #define MLD_API_NAMESPACE(sym) \
-  MLD_API_CONCAT_UNDERSCORE(MLD_CONFIG_API_NAMESPACE_PREFIX, sym)
+  MLD_API_CONCAT_UNDERSCORE(MLD_API_NAMESPACE_PREFIX, sym)
 
 #if defined(__GNUC__) || defined(__clang__)
 #define MLD_API_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
@@ -193,13 +130,13 @@
 #define MLD_API_MUST_CHECK_RETURN_VALUE
 #endif
 
-#if defined(MLD_CONFIG_API_QUALIFIER)
-#define MLD_API_QUALIFIER MLD_CONFIG_API_QUALIFIER
+#if defined(MLD_CONFIG_EXTERNAL_API_QUALIFIER)
+#define MLD_API_QUALIFIER MLD_CONFIG_EXTERNAL_API_QUALIFIER
 #else
 #define MLD_API_QUALIFIER
 #endif
 
-#if !defined(MLD_CONFIG_API_CONSTANTS_ONLY)
+#if !defined(MLD_CONFIG_CONSTANTS_ONLY)
 
 #include <stddef.h>
 #include <stdint.h>
@@ -245,8 +182,8 @@ extern "C"
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair_internal)(
-    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
+    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
     const uint8_t seed[MLDSA_SEEDBYTES]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
@@ -284,8 +221,8 @@ int MLD_API_NAMESPACE(keypair_internal)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(keypair)(
-    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
+    uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -336,10 +273,10 @@ int MLD_API_NAMESPACE(keypair)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_internal)(
-    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)], size_t *siglen,
     const uint8_t *m, size_t mlen, const uint8_t *pre, size_t prelen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
     int externalmu
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
@@ -379,9 +316,9 @@ int MLD_API_NAMESPACE(signature_internal)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature)(
-    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)], size_t *siglen,
     const uint8_t *m, size_t mlen, const uint8_t *ctx, size_t ctxlen,
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -418,9 +355,9 @@ int MLD_API_NAMESPACE(signature)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_extmu)(
-    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)], size_t *siglen,
     const uint8_t mu[MLDSA_CRHBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -464,7 +401,7 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *pre, size_t prelen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
     int externalmu
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
@@ -499,7 +436,7 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -532,7 +469,7 @@ MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_extmu)(
     const uint8_t *sig, size_t siglen, const uint8_t mu[MLDSA_CRHBYTES],
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -598,10 +535,10 @@ int MLD_API_NAMESPACE(verify_extmu)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_internal)(
-    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)], size_t *siglen,
     const uint8_t *ph, size_t phlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
     int hashalg
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
@@ -647,7 +584,7 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_internal)(
     const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
     int hashalg
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
@@ -688,10 +625,10 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
-    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)], size_t *siglen,
+    uint8_t sig[MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)], size_t *siglen,
     const uint8_t *m, size_t mlen, const uint8_t *ctx, size_t ctxlen,
     const uint8_t rnd[MLDSA_RNDBYTES],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -728,7 +665,7 @@ MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
     const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -807,8 +744,8 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 int MLD_API_NAMESPACE(pk_from_sk)(
-    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)],
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
+    uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)],
+    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)]
 #ifdef MLD_CONFIG_CONTEXT_PARAMETER
     ,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
@@ -823,28 +760,21 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 
 /****************************** SUPERCOP API *********************************/
 
-#if !defined(MLD_CONFIG_API_NO_SUPERCOP)
+#if !defined(MLD_CONFIG_NO_SUPERCOP)
 /* Export API in SUPERCOP naming scheme CRYPTO_xxx / crypto_sign_xxx */
-#define CRYPTO_SECRETKEYBYTES MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
-#define CRYPTO_PUBLICKEYBYTES MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)
-#define CRYPTO_BYTES MLDSA_BYTES(MLD_CONFIG_API_PARAMETER_SET)
+#define CRYPTO_SECRETKEYBYTES MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)
+#define CRYPTO_PUBLICKEYBYTES MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)
+#define CRYPTO_BYTES MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)
 
 #define crypto_sign_keypair MLD_API_NAMESPACE(keypair)
 #define crypto_sign_signature MLD_API_NAMESPACE(signature)
 #define crypto_sign_verify MLD_API_NAMESPACE(verify)
 
-#else /* !MLD_CONFIG_API_NO_SUPERCOP */
+#else /* !MLD_CONFIG_NO_SUPERCOP */
 
 /* If the SUPERCOP API is not needed, we can undefine the various helper macros
  * above. Otherwise, they are needed for lazy evaluation of crypto_sign_xxx. */
-#if !defined(MLD_API_LEGACY_CONFIG)
-#undef MLD_CONFIG_API_PARAMETER_SET
-#undef MLD_CONFIG_API_NAMESPACE_PREFIX
-#undef MLD_CONFIG_API_NO_SUPERCOP
-#undef MLD_CONFIG_API_CONSTANTS_ONLY
-#undef MLD_CONFIG_API_QUALIFIER
-#endif /* !MLD_API_LEGACY_CONFIG */
-
+#undef MLD_API_NAMESPACE_PREFIX
 #undef MLD_API_CONCAT
 #undef MLD_API_CONCAT_
 #undef MLD_API_CONCAT_UNDERSCORE
@@ -852,8 +782,8 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #undef MLD_API_MUST_CHECK_RETURN_VALUE
 #undef MLD_API_QUALIFIER
 
-#endif /* MLD_CONFIG_API_NO_SUPERCOP */
-#endif /* !MLD_CONFIG_API_CONSTANTS_ONLY */
+#endif /* MLD_CONFIG_NO_SUPERCOP */
+#endif /* !MLD_CONFIG_CONSTANTS_ONLY */
 
 
 /***************************** Memory Usage **********************************/
@@ -874,7 +804,7 @@ int MLD_API_NAMESPACE(pk_from_sk)(
  * fixed-sized buffer and a simple allocator (e.g., bump allocator).
  */
 /* check-magic: off */
-#if defined(MLD_API_LEGACY_CONFIG) || !defined(MLD_CONFIG_REDUCE_RAM)
+#if !defined(MLD_CONFIG_REDUCE_RAM)
 #define MLD_TOTAL_ALLOC_44_KEYPAIR_NO_PCT 26912
 #define MLD_TOTAL_ALLOC_44_KEYPAIR_PCT 48480
 #define MLD_TOTAL_ALLOC_44_PK_FROM_SK 28480
@@ -890,7 +820,7 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87_PK_FROM_SK 78272
 #define MLD_TOTAL_ALLOC_87_SIGN 108224
 #define MLD_TOTAL_ALLOC_87_VERIFY 68800
-#else /* MLD_API_LEGACY_CONFIG || !MLD_CONFIG_REDUCE_RAM */
+#else /* !MLD_CONFIG_REDUCE_RAM */
 #define MLD_TOTAL_ALLOC_44_KEYPAIR_NO_PCT 11584
 #define MLD_TOTAL_ALLOC_44_KEYPAIR_PCT 16896
 #define MLD_TOTAL_ALLOC_44_PK_FROM_SK 13152
@@ -906,15 +836,13 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87_PK_FROM_SK 21984
 #define MLD_TOTAL_ALLOC_87_SIGN 21344
 #define MLD_TOTAL_ALLOC_87_VERIFY 12512
-#endif /* !(MLD_API_LEGACY_CONFIG || !MLD_CONFIG_REDUCE_RAM) */
+#endif /* MLD_CONFIG_REDUCE_RAM */
 /* check-magic: on */
 
 /*
  * MLD_TOTAL_ALLOC_*_KEYPAIR adapts based on MLD_CONFIG_KEYGEN_PCT.
- * For legacy config, we don't know which options are used, so assume
- * the worst case (PCT enabled).
  */
-#if defined(MLD_API_LEGACY_CONFIG) || defined(MLD_CONFIG_KEYGEN_PCT)
+#if defined(MLD_CONFIG_KEYGEN_PCT)
 #define MLD_TOTAL_ALLOC_44_KEYPAIR MLD_TOTAL_ALLOC_44_KEYPAIR_PCT
 #define MLD_TOTAL_ALLOC_65_KEYPAIR MLD_TOTAL_ALLOC_65_KEYPAIR_PCT
 #define MLD_TOTAL_ALLOC_87_KEYPAIR MLD_TOTAL_ALLOC_87_KEYPAIR_PCT
@@ -941,7 +869,5 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87                                             \
   MLD_MAX4_(MLD_TOTAL_ALLOC_87_KEYPAIR, MLD_TOTAL_ALLOC_87_PK_FROM_SK, \
             MLD_TOTAL_ALLOC_87_SIGN, MLD_TOTAL_ALLOC_87_VERIFY)
-
-#undef MLD_API_LEGACY_CONFIG
 
 #endif /* !MLD_H */

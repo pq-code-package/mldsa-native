@@ -2271,11 +2271,9 @@ def get_config_options():
         "MLD_BREAK_PCT",  # Use in PCT breakage test
         "MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND",  # Internal testing escape hatch
         "MLD_CHECK_APIS",
-        "MLD_CONFIG_API_XXX",
         "MLD_ERR_XXX",
         "MLD_USE_NATIVE_XXX",
         "MLD_CONFIG_XXX",
-        "MLD_CONFIG_API_CONSTANTS_ONLY",
         "MLD_PREHASH_",
         "MLD_UNIT_TEST",
     ]
