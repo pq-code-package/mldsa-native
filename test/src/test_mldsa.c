@@ -152,6 +152,13 @@ static int test_sign_pre_hash(void)
   CHECK(mld_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
                                           pk) == 0);
 
+  /* MLD_PREHASH_NONE must be rejected by the internal prehash APIs. */
+  CHECK(mld_sign_verify_pre_hash_internal(sig, siglen, m, MLEN, ctx, CTXLEN, pk,
+                                          MLD_PREHASH_NONE) == MLD_ERR_FAIL);
+  CHECK(mld_sign_signature_pre_hash_internal(sig, &siglen, m, MLEN, ctx, CTXLEN,
+                                             rnd, sk,
+                                             MLD_PREHASH_NONE) == MLD_ERR_FAIL);
+
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \

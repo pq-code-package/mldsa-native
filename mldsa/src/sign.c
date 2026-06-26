@@ -1336,6 +1336,12 @@ int mld_sign_signature_pre_hash_internal(
   size_t pre_len;
   int ret;
 
+  if (hashalg == MLD_PREHASH_NONE)
+  {
+    ret = MLD_ERR_FAIL;
+    goto cleanup;
+  }
+
   pre_len = mld_prepare_domain_separation_prefix(pre, ph, phlen, ctx, ctxlen,
                                                  hashalg);
   if (pre_len == 0)
@@ -1377,6 +1383,12 @@ int mld_sign_verify_pre_hash_internal(
   MLD_ALIGN uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
   size_t pre_len;
   int ret;
+
+  if (hashalg == MLD_PREHASH_NONE)
+  {
+    ret = MLD_ERR_FAIL;
+    goto cleanup;
+  }
 
   pre_len = mld_prepare_domain_separation_prefix(pre, ph, phlen, ctx, ctxlen,
                                                  hashalg);
