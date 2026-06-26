@@ -423,7 +423,7 @@ class Tests:
         return res
 
     def make_j(self):
-        if self.args.j is None or int(self.args.j) == 1:
+        if self.args.j is None:
             return []
         return [f"-j{self.args.j}"]
 
@@ -939,8 +939,14 @@ class Tests:
                 print(p)
             exit(0)
 
-        def run_cbmc_single_step(mldsa_parameter_set, proofs):
+        def cbmc_envvars(mldsa_parameter_set):
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+            if self.args.cbmc_target is not None:
+                envvars["CBMC_TARGET"] = self.args.cbmc_target
+            return envvars
+
+        def run_cbmc_single_step(mldsa_parameter_set, proofs):
+            envvars = cbmc_envvars(mldsa_parameter_set)
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             scheme = SCHEME.from_mode(mldsa_parameter_set)
@@ -1011,7 +1017,7 @@ class Tests:
             if self.args.single_step:
                 run_cbmc_single_step(mldsa_parameter_set, proofs)
                 return
-            envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+            envvars = cbmc_envvars(mldsa_parameter_set)
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             cmd = (
@@ -1506,6 +1512,19 @@ def cli():
     cbmc_parser.add_argument(
         "--output-result-json",
         help="Path to export result JSON",
+        default=None,
+    )
+
+    cbmc_parser.add_argument(
+        "--cbmc-target",
+        help="CBMC target platform; omit to use the default host model",
+        choices=[
+            "i386-linux",
+            "x86_64-linux",
+            "aarch64-linux",
+            "riscv64-linux",
+            "ppc64le-linux",
+        ],
         default=None,
     )
 
