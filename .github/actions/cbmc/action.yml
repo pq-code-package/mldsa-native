@@ -24,6 +24,24 @@ inputs:
   reduce_ram:
     description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled"
     default: "false"
+  cbmc-target:
+    description: "CBMC target platform; empty uses the default host model"
+    default: ""
+  proofs:
+    description: "Space-separated proof patterns to run; empty runs all proofs"
+    default: ""
+  single-step:
+    description: "Run proofs one at a time"
+    default: "false"
+  timeout:
+    description: "Timeout for individual CBMC proofs, in seconds"
+    default: "3600"
+  per-proof-timeout:
+    description: "Timeout passed to run-cbmc-proofs.py for each proof"
+    default: "1800"
+  report:
+    description: "Publish CBMC runtime regression report"
+    default: "true"
   gh_token:
     description: Github access token to use
     required: true
@@ -57,23 +75,52 @@ runs:
         env:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
-          echo "::group::cbmc_${{ inputs.mldsa_parameter_set }}"
-          reduce_ram_flag=""
+          cbmc_failed=false
+          cbmc_target="${{ inputs.cbmc-target }}"
+          group_name="cbmc_${{ inputs.mldsa_parameter_set }}"
+          result_suffix=""
+          if [ -n "$cbmc_target" ]; then
+            group_name="${group_name}_${cbmc_target}"
+            result_suffix="_${cbmc_target//[^A-Za-z0-9_.-]/_}"
+          fi
+          result_json="${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}${result_suffix}.json"
+          cbmc_args=(
+            --mldsa-parameter-set "${{ inputs.mldsa_parameter_set }}"
+            --timeout "${{ inputs.timeout }}"
+            --per-proof-timeout "${{ inputs.per-proof-timeout }}"
+          )
           data_dir="dev/cbmc"
           variant=""
           if [ "${{ inputs.reduce_ram }}" = "true" ]; then
-            reduce_ram_flag="--reduce-ram"
+            cbmc_args+=(--reduce-ram)
             data_dir="dev/cbmc-reduce-ram"
             variant="reduce-ram"
           fi
-          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json $reduce_ram_flag || cbmc_failed=true
+          if [ -n "$cbmc_target" ]; then
+            cbmc_args+=(--cbmc-target "$cbmc_target")
+          fi
+          proofs="${{ inputs.proofs }}"
+          if [ -n "$proofs" ]; then
+            read -r -a proof_args <<< "$proofs"
+            cbmc_args+=(-p "${proof_args[@]}")
+          fi
+          if [ "${{ inputs.single-step }}" = "true" ]; then
+            cbmc_args+=(--single-step --fail-upon-error)
+          fi
+          if [ "${{ inputs.report }}" = "true" ]; then
+            cbmc_args+=(--output-result-json "$result_json")
+          fi
+          echo "::group::$group_name"
+          tests cbmc "${cbmc_args[@]}" || cbmc_failed=true
           echo "::endgroup::"
-          python3 ${{ github.action_path }}/report.py \
-            --results-json "${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json" \
-            --mldsa-parameter-set "${{ inputs.mldsa_parameter_set }}" \
-            --min-runtime 20 \
-            --regression-threshold 1.5 \
-            --gh-pages-branch gh-pages \
-            --data-dir "$data_dir" \
-            --variant "$variant"
+          if [ "${{ inputs.report }}" = "true" ]; then
+            python3 ${{ github.action_path }}/report.py \
+              --results-json "$result_json" \
+              --mldsa-parameter-set "${{ inputs.mldsa_parameter_set }}" \
+              --min-runtime 20 \
+              --regression-threshold 1.5 \
+              --gh-pages-branch gh-pages \
+              --data-dir "$data_dir" \
+              --variant "$variant"
+          fi
           if [ "$cbmc_failed" = "true" ]; then exit 1; fi
