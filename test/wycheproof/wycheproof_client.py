@@ -167,7 +167,10 @@ class TestResult(Enum):
 def check_sign_result(tc, out):
     if tc["result"] == "invalid":
         flags = tc.get("flags", [])
-        # InvalidPrivateKey: signing does not validate sk; tested via pk_from_sk
+        # FIPS 204 does not require signing to validate serialized private keys.
+        # Checking only s1/s2 would be incomplete: full validation also checks
+        # t0 and tr and is exposed through pk_from_sk. These InvalidPrivateKey
+        # vectors are skipped for signing and still tested through pkFromSk.
         if "InvalidPrivateKey" in flags:
             return TestResult.SKIPPED
         # If new invalid-flag classes appear, fail loudly so we can handle them.

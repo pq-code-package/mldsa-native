@@ -180,6 +180,10 @@ __contract__(
  *
  * @spec{Implements @[FIPS204, Algorithm 7, ML-DSA.Sign_internal].}
  *
+ * @warning This function does not perform secret key validation.
+ *          Callers importing serialized keys can use mld_sign_pk_from_sk
+ *          to validate them before signing.
+ *
  * @param[out] sig        Output signature.
  * @param[out] siglen     Pointer to output length of signature.
  * @param[in]  m          Pointer to message to be signed (when
@@ -192,7 +196,7 @@ __contract__(
  * @param      prelen     Length of prefix string. Ignored when
  *                        externalmu != 0.
  * @param[in]  rnd        Random seed.
- * @param[in]  sk         Bit-packed secret key.
+ * @param[in]  sk         Bit-packed secret key; assumed to be valid.
  * @param      externalmu 0: m/mlen is the raw message; mu = H(tr, pre, m) is
  *                        computed internally.
  *                        non-zero: m points to a precomputed mu of
@@ -246,13 +250,17 @@ __contract__(
  *
  * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign].}
  *
+ * @warning This function does not perform secret key validation.
+ *          Callers importing serialized keys can use mld_sign_pk_from_sk
+ *          to validate them before signing.
+ *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  m       Pointer to message to be signed.
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string. Should be <= 255.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed secret key; assumed to be valid.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
@@ -298,10 +306,14 @@ __contract__(
  *
  * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign external mu variant].}
  *
+ * @warning This function does not perform secret key validation.
+ *          Callers importing serialized keys can use mld_sign_pk_from_sk
+ *          to validate them before signing.
+ *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  mu      Precomputed message representative.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed secret key; assumed to be valid.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
@@ -479,6 +491,10 @@ __contract__(
  * @warning This is an unstable API that may change in the future. If you need
  * a stable API use mld_sign_signature_pre_hash_shake256.
  *
+ * @warning This function does not perform secret key validation.
+ *          Callers importing serialized keys can use mld_sign_pk_from_sk
+ *          to validate them before signing.
+ *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  ph      Pointer to pre-hashed message.
@@ -486,7 +502,7 @@ __contract__(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed secret key; assumed to be valid.
  * @param      hashalg Hash algorithm constant (one of MLD_PREHASH_*).
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -584,6 +600,10 @@ __contract__(
  * @spec{Implements @[FIPS204, Algorithm 4, HashML-DSA.Sign] with SHAKE256 as
  * the pre-hash.}
  *
+ * @warning This function does not perform secret key validation.
+ *          Callers importing serialized keys can use mld_sign_pk_from_sk
+ *          to validate them before signing.
+ *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
  * @param[in]  m       Pointer to message to be hashed and signed.
@@ -591,7 +611,7 @@ __contract__(
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
- * @param[in]  sk      Bit-packed secret key.
+ * @param[in]  sk      Bit-packed secret key; assumed to be valid.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
