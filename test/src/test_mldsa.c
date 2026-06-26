@@ -19,6 +19,10 @@
   MLD_API_NAMESPACE(signature_pre_hash_shake256)
 #define crypto_sign_verify_pre_hash_shake256 \
   MLD_API_NAMESPACE(verify_pre_hash_shake256)
+#define crypto_sign_signature_pre_hash_internal \
+  MLD_API_NAMESPACE(signature_pre_hash_internal)
+#define crypto_sign_verify_pre_hash_internal \
+  MLD_API_NAMESPACE(verify_pre_hash_internal)
 #define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
 
 #ifndef NTESTS
@@ -176,6 +180,62 @@ static int test_sign_pre_hash(void)
                                                         ctx, CTXLEN, rnd, sk));
   CHECK(crypto_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
                                              pk) == 0);
+
+  return 0;
+}
+
+static int test_sign_prehash_none_rejected(void)
+{
+  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t sig[CRYPTO_BYTES];
+  uint8_t ph1[MLDSA_CRHBYTES];
+  uint8_t ph2[MLDSA_CRHBYTES];
+  uint8_t ctx[CTXLEN];
+  uint8_t rnd[MLDSA_RNDBYTES];
+  size_t siglen = CRYPTO_BYTES;
+  int rc;
+
+  CHECK(crypto_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, sizeof(ctx)) == 0);
+  MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
+  CHECK(randombytes(ph1, sizeof(ph1)) == 0);
+  MLD_CT_TESTING_SECRET(ph1, sizeof(ph1));
+  CHECK(randombytes(ph2, sizeof(ph2)) == 0);
+  MLD_CT_TESTING_SECRET(ph2, sizeof(ph2));
+  CHECK(randombytes(rnd, sizeof(rnd)) == 0);
+  MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
+  CHECK(randombytes(sig, sizeof(sig)) == 0);
+  MLD_CT_TESTING_SECRET(sig, sizeof(sig));
+
+  rc = crypto_sign_signature_pre_hash_internal(sig, &siglen, ph1, sizeof(ph1),
+                                               ctx, sizeof(ctx), rnd, sk,
+                                               MLD_PREHASH_NONE);
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  MLD_CT_TESTING_DECLASSIFY(&siglen, sizeof(siglen));
+  CHECK(rc == MLD_ERR_FAIL);
+  CHECK(siglen == 0);
+
+  siglen = CRYPTO_BYTES;
+  rc = crypto_sign_signature_pre_hash_internal(sig, &siglen, ph2, sizeof(ph2),
+                                               ctx, sizeof(ctx), rnd, sk,
+                                               MLD_PREHASH_NONE);
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  MLD_CT_TESTING_DECLASSIFY(&siglen, sizeof(siglen));
+  CHECK(rc == MLD_ERR_FAIL);
+  CHECK(siglen == 0);
+
+  rc = crypto_sign_verify_pre_hash_internal(sig, CRYPTO_BYTES, ph1, sizeof(ph1),
+                                            ctx, sizeof(ctx), pk,
+                                            MLD_PREHASH_NONE);
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  CHECK(rc == MLD_ERR_FAIL);
+
+  rc = crypto_sign_verify_pre_hash_internal(sig, CRYPTO_BYTES, ph2, sizeof(ph2),
+                                            ctx, sizeof(ctx), pk,
+                                            MLD_PREHASH_NONE);
+  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
+  CHECK(rc == MLD_ERR_FAIL);
 
   return 0;
 }
@@ -514,6 +574,7 @@ int main(void)
     r |= test_wrong_ctx();
     r |= test_sign_extmu();
     r |= test_sign_pre_hash();
+    r |= test_sign_prehash_none_rejected();
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
           !MLD_CONFIG_NO_VERIFY_API */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)

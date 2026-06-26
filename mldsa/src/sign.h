@@ -558,6 +558,7 @@ __contract__(
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
  *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
+ * MLD_PREHASH_NONE is rejected by this HashML-DSA API.
  *
  * @warning This is an unstable API that may change in the future. If you need
  * a stable API use mld_sign_signature_pre_hash_shake256.
@@ -619,6 +620,7 @@ __contract__(
  *   MLD_PREHASH_SHA2_512, MLD_PREHASH_SHA2_512_224, MLD_PREHASH_SHA2_512_256,
  *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
+ * MLD_PREHASH_NONE is rejected by this HashML-DSA API.
  *
  * @warning This is an unstable API that may change in the future. If you need
  * a stable API use mld_sign_verify_pre_hash_shake256.
