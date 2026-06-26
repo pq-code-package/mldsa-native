@@ -360,7 +360,7 @@ int MLD_API_NAMESPACE(signature_internal)(
  * @param[in]  m       Pointer to message to be signed.
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
- * @param      ctxlen  Length of context string. Should be <= 255.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param[in]  sk      Bit-packed secret key.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -436,9 +436,10 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *                     MLDSA{44,65,87}_BYTES + mlen bytes); can be equal to m.
  * @param[out] smlen   Pointer to output length of signed message.
  * @param[in]  m       Pointer to message to be signed.
- * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
+ * @param      mlen    Length of message. Must be <= SIZE_MAX -
+ *                     MLDSA{44,65,87}_BYTES.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param[in]  sk      Bit-packed secret key.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
@@ -835,8 +836,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  * @param[in]  ph      Pointer to pre-hashed message (ignored for pure
  *                     ML-DSA).
  * @param      phlen   Length of pre-hashed message (ignored for pure ML-DSA).
- * @param[in]  ctx     Pointer to context string (may be NULL).
- * @param      ctxlen  Length of context string.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
+ * @param      ctxlen  Length of context string. Must be <= 255.
  * @param      hashalg Hash algorithm constant (MLD_PREHASH_NONE for pure
  *                     ML-DSA, or MLD_PREHASH_* for HashML-DSA).
  *

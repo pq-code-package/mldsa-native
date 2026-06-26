@@ -915,6 +915,14 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   uint16_t nonce = 0;
   const uint16_t nonce_limit = mld_get_max_signing_attempts();
+
+  if (externalmu && mlen != MLDSA_CRHBYTES)
+  {
+    *siglen = 0;
+    mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
+    return MLD_ERR_FAIL;
+  }
+
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
@@ -1052,6 +1060,14 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 {
   size_t pre_len;
   int ret;
+
+  if (ctxlen > 255 || (ctx == NULL && ctxlen != 0))
+  {
+    *siglen = 0;
+    mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
+    return MLD_ERR_FAIL;
+  }
+
   MLD_ALLOC(pre, uint8_t, MLD_DOMAIN_SEPARATION_MAX_BYTES, context);
   MLD_ALLOC(rnd, uint8_t, MLDSA_RNDBYTES, context);
 
@@ -1153,6 +1169,12 @@ int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
   int ret;
   size_t i;
 
+  if (mlen > SIZE_MAX - MLDSA_CRYPTO_BYTES)
+  {
+    *smlen = 0;
+    return MLD_ERR_FAIL;
+  }
+
   for (i = 0; i < mlen; ++i)
   __loop__(
     assigns(i, object_whole(sm))
@@ -1187,6 +1209,11 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
   int ret, cmp;
   unsigned int i;
 
+  if (siglen != MLDSA_CRYPTO_BYTES || (externalmu && mlen != MLDSA_CRHBYTES))
+  {
+    return MLD_ERR_FAIL;
+  }
+
   MLD_ALLOC(buf, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(mu, uint8_t, MLDSA_CRHBYTES, context);
   MLD_ALLOC(c, uint8_t, MLDSA_CTILDEBYTES, context);
@@ -1201,12 +1228,6 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
       cp == NULL || mat == NULL || w1 == NULL || tmp == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
-    goto cleanup;
-  }
-
-  if (siglen != MLDSA_CRYPTO_BYTES)
-  {
-    ret = MLD_ERR_FAIL;
     goto cleanup;
   }
 
@@ -1607,7 +1628,7 @@ size_t mld_prepare_domain_separation_prefix(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg)
 {
-  if (ctxlen > 255)
+  if (ctxlen > 255 || (ctx == NULL && ctxlen != 0))
   {
     return 0;
   }

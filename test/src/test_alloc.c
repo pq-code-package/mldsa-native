@@ -336,6 +336,29 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
+#define TEST_NO_ALLOC_FAILURE(test_name, call, expected_rc)                  \
+  do                                                                         \
+  {                                                                          \
+    int rc;                                                                  \
+    ctx->high_mark = 0;                                                      \
+    reset_all(ctx);                                                          \
+    ctx->fail_on_counter = 0;                                                \
+    rc = call;                                                               \
+    if (rc != (expected_rc))                                                 \
+    {                                                                        \
+      fprintf(stderr, "ERROR: %s failed with %d (expected %d)\n", test_name, \
+              rc, expected_rc);                                              \
+      return 1;                                                              \
+    }                                                                        \
+    if (ctx->alloc_counter != 0 || ctx->alloc_stack_top != 0 ||              \
+        ctx->offset != 0)                                                    \
+    {                                                                        \
+      fprintf(stderr, "ERROR: %s performed allocation before rejection\n",   \
+              test_name);                                                    \
+      return 1;                                                              \
+    }                                                                        \
+  } while (0)
+
 /* Keygen tests */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
@@ -374,6 +397,49 @@ static int test_sign_alloc_failure(test_ctx_t *ctx)
                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                     TEST_VECTOR_CTX_LEN, test_vector_sk, ctx),
       MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+  return 0;
+}
+
+static int test_sign_invalid_context_preflight(test_ctx_t *ctx)
+{
+  uint8_t sig[CRYPTO_BYTES];
+  uint8_t ctx_bytes[256] = {0};
+  size_t siglen = CRYPTO_BYTES;
+
+  TEST_NO_ALLOC_FAILURE(
+      "mld_signature invalid context length",
+      mld_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                    TEST_VECTOR_MSG_LEN, ctx_bytes, sizeof(ctx_bytes),
+                    test_vector_sk, ctx),
+      MLD_ERR_FAIL);
+  return 0;
+}
+
+static int test_sign_null_context_preflight(test_ctx_t *ctx)
+{
+  uint8_t sig[CRYPTO_BYTES];
+  size_t siglen = CRYPTO_BYTES;
+
+  TEST_NO_ALLOC_FAILURE(
+      "mld_signature null nonempty context",
+      mld_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                    TEST_VECTOR_MSG_LEN, NULL, 1, test_vector_sk, ctx),
+      MLD_ERR_FAIL);
+  return 0;
+}
+
+static int test_signature_internal_invalid_externalmu_preflight(test_ctx_t *ctx)
+{
+  uint8_t sig[CRYPTO_BYTES];
+  uint8_t mu[MLDSA_CRHBYTES] = {0};
+  uint8_t rnd[MLDSA_RNDBYTES] = {0};
+  size_t siglen = CRYPTO_BYTES;
+
+  TEST_NO_ALLOC_FAILURE(
+      "mld_signature_internal invalid external mu length",
+      mld_signature_internal(sig, &siglen, mu, MLDSA_CRHBYTES - 1, NULL, 0, rnd,
+                             test_vector_sk, 1, ctx),
+      MLD_ERR_FAIL);
   return 0;
 }
 
@@ -420,6 +486,28 @@ static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
+static int test_verify_invalid_siglen_preflight(test_ctx_t *ctx)
+{
+  TEST_NO_ALLOC_FAILURE(
+      "mld_verify_internal invalid signature length",
+      mld_verify_internal(test_vector_sig, CRYPTO_BYTES - 1,
+                          (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                          (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                          test_vector_pk, 0, ctx),
+      MLD_ERR_FAIL);
+  return 0;
+}
+
+static int test_verify_invalid_externalmu_preflight(test_ctx_t *ctx)
+{
+  TEST_NO_ALLOC_FAILURE(
+      "mld_verify_internal invalid external mu length",
+      mld_verify_internal(test_vector_sig_extmu, CRYPTO_BYTES, test_vector_mu,
+                          MLDSA_CRHBYTES - 1, NULL, 0, test_vector_pk, 1, ctx),
+      MLD_ERR_FAIL);
+  return 0;
+}
+
 static int test_verify_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE(
@@ -517,16 +605,21 @@ int main(void)
   r |= test_pk_from_sk_alloc_failure(&ctx);
 #endif
 
-  /* Sign tests */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+  /* Sign tests */
   r |= test_sign_alloc_failure(&ctx);
+  r |= test_sign_invalid_context_preflight(&ctx);
+  r |= test_sign_null_context_preflight(&ctx);
+  r |= test_signature_internal_invalid_externalmu_preflight(&ctx);
   r |= test_sign_combined_alloc_failure(&ctx);
   r |= test_signature_extmu_alloc_failure(&ctx);
   r |= test_signature_pre_hash_shake256_alloc_failure(&ctx);
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-  /* Verify tests */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
+  /* Verify tests */
+  r |= test_verify_invalid_siglen_preflight(&ctx);
+  r |= test_verify_invalid_externalmu_preflight(&ctx);
   r |= test_verify_alloc_failure(&ctx);
   r |= test_verify_extmu_alloc_failure(&ctx);
   r |= test_verify_pre_hash_shake256_alloc_failure(&ctx);
