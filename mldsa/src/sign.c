@@ -1141,36 +1141,6 @@ cleanup:
   return ret;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
-
-#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
-MLD_MUST_CHECK_RETURN_VALUE
-MLD_EXTERNAL_API
-int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
-             const uint8_t *ctx, size_t ctxlen,
-             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
-{
-  int ret;
-  size_t i;
-
-  for (i = 0; i < mlen; ++i)
-  __loop__(
-    assigns(i, object_whole(sm))
-    invariant(i <= mlen)
-    decreases(mlen - i)
-  )
-  {
-    sm[MLDSA_CRYPTO_BYTES + mlen - 1 - i] = m[mlen - 1 - i];
-  }
-  ret = mld_sign_signature(sm, smlen, sm + MLDSA_CRYPTO_BYTES, mlen, ctx,
-                           ctxlen, sk, context);
-  if (ret == 0)
-  {
-    *smlen += mlen;
-  }
-  return ret;
-}
-#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -1347,51 +1317,6 @@ int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
 {
   return mld_sign_verify_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0, pk,
                                   1, context);
-}
-
-MLD_MUST_CHECK_RETURN_VALUE
-MLD_EXTERNAL_API
-int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
-                  const uint8_t *ctx, size_t ctxlen,
-                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                  MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
-{
-  int ret;
-  size_t i;
-
-  if (smlen < MLDSA_CRYPTO_BYTES)
-  {
-    ret = MLD_ERR_FAIL;
-    goto cleanup;
-  }
-
-  *mlen = smlen - MLDSA_CRYPTO_BYTES;
-  ret = mld_sign_verify(sm, MLDSA_CRYPTO_BYTES, sm + MLDSA_CRYPTO_BYTES, *mlen,
-                        ctx, ctxlen, pk, context);
-  if (ret == 0)
-  {
-    /* All good, copy msg, return 0 */
-    for (i = 0; i < *mlen; ++i)
-    __loop__(
-      assigns(i, memory_slice(m, *mlen))
-      invariant(i <= *mlen)
-      decreases(*mlen - i)
-    )
-    {
-      m[i] = sm[MLDSA_CRYPTO_BYTES + i];
-    }
-  }
-
-cleanup:
-
-  if (ret != 0)
-  {
-    /* To be on the safe-side, we zeroize the message buffer. */
-    *mlen = 0;
-    mld_memset(m, 0, smlen);
-  }
-
-  return ret;
 }
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */

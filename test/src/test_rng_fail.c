@@ -145,19 +145,6 @@ static int test_sign_rng_failure(void)
   return 0;
 }
 
-static int test_sign_combined_rng_failure(void)
-{
-  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  size_t smlen;
-
-  TEST_RNG_FAILURE(
-      "crypto_sign",
-      crypto_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-                  TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                  TEST_VECTOR_CTX_LEN, test_vector_sk));
-  return 0;
-}
-
 static int test_signature_extmu_rng_failure(void)
 {
   uint8_t sig[CRYPTO_BYTES];
@@ -197,23 +184,6 @@ static int test_verify_rng_failure(void)
   return 0;
 }
 
-static int test_open_rng_failure(void)
-{
-  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  uint8_t msg_out[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  size_t smlen = CRYPTO_BYTES + TEST_VECTOR_MSG_LEN;
-  size_t mlen;
-
-  memcpy(sm, test_vector_sig, CRYPTO_BYTES);
-  memcpy(sm + CRYPTO_BYTES, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
-
-  TEST_RNG_FAILURE("crypto_sign_open",
-                   crypto_sign_open(msg_out, &mlen, sm, smlen,
-                                    (const uint8_t *)TEST_VECTOR_CTX,
-                                    TEST_VECTOR_CTX_LEN, test_vector_pk));
-  return 0;
-}
-
 static int test_verify_extmu_rng_failure(void)
 {
   TEST_RNG_FAILURE(
@@ -248,18 +218,16 @@ int main(void)
   /* Sign tests */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   r |= test_sign_rng_failure();
-  r |= test_sign_combined_rng_failure();
   r |= test_signature_extmu_rng_failure();
   r |= test_signature_pre_hash_shake256_rng_failure();
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif
 
   /* Verify tests */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
   r |= test_verify_rng_failure();
-  r |= test_open_rng_failure();
   r |= test_verify_extmu_rng_failure();
   r |= test_verify_pre_hash_shake256_rng_failure();
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif
 
   if (r)
   {

@@ -377,20 +377,6 @@ static int test_sign_alloc_failure(test_ctx_t *ctx)
   return 0;
 }
 
-static int test_sign_combined_alloc_failure(test_ctx_t *ctx)
-{
-  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  size_t smlen;
-
-  TEST_ALLOC_FAILURE(
-      "mld_sign",
-      mld_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-               TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-               TEST_VECTOR_CTX_LEN, test_vector_sk, ctx),
-      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
-  return 0;
-}
-
 static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[CRYPTO_BYTES];
@@ -454,26 +440,6 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
-
-static int test_open_alloc_failure(test_ctx_t *ctx)
-{
-  /* crypto_sign_open needs a signed message (sig || msg).
-   * Construct it from test vectors. */
-  uint8_t sm[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  uint8_t msg_out[CRYPTO_BYTES + TEST_VECTOR_MSG_LEN];
-  size_t smlen = CRYPTO_BYTES + TEST_VECTOR_MSG_LEN;
-  size_t mlen;
-
-  memcpy(sm, test_vector_sig, CRYPTO_BYTES);
-  memcpy(sm + CRYPTO_BYTES, TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN);
-
-  TEST_ALLOC_FAILURE(
-      "mld_open",
-      mld_open(msg_out, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
-               TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
-      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
-  return 0;
-}
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 /*
@@ -520,18 +486,16 @@ int main(void)
   /* Sign tests */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   r |= test_sign_alloc_failure(&ctx);
-  r |= test_sign_combined_alloc_failure(&ctx);
   r |= test_signature_extmu_alloc_failure(&ctx);
   r |= test_signature_pre_hash_shake256_alloc_failure(&ctx);
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif
 
   /* Verify tests */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
   r |= test_verify_alloc_failure(&ctx);
   r |= test_verify_extmu_alloc_failure(&ctx);
   r |= test_verify_pre_hash_shake256_alloc_failure(&ctx);
-  r |= test_open_alloc_failure(&ctx);
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif
 
   if (r)
   {

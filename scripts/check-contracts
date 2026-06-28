@@ -55,10 +55,8 @@ def strip_comments(content):
 # MLD_NAMESPACE / MLD_NAMESPACE_KL. CBMC and CHECK_FUNCTION_CONTRACTS see
 # the symbol on the right.
 NAMESPACE_ALIASES = {
-    "sign": "sign",
     "sign_keypair": "keypair",
     "sign_keypair_internal": "keypair_internal",
-    "sign_open": "open",
     "sign_pk_from_sk": "pk_from_sk",
     "sign_signature": "signature",
     "sign_signature_extmu": "signature_extmu",

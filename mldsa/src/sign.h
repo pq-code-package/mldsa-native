@@ -51,13 +51,11 @@
 #define mld_sign_signature MLD_NAMESPACE_KL(signature) MLD_CONTEXT_PARAMETERS_7
 #define mld_sign_signature_extmu \
   MLD_NAMESPACE_KL(signature_extmu) MLD_CONTEXT_PARAMETERS_4
-#define mld_sign MLD_NAMESPACE_KL(sign) MLD_CONTEXT_PARAMETERS_7
 #define mld_sign_verify_internal \
   MLD_NAMESPACE_KL(verify_internal) MLD_CONTEXT_PARAMETERS_8
 #define mld_sign_verify MLD_NAMESPACE_KL(verify) MLD_CONTEXT_PARAMETERS_7
 #define mld_sign_verify_extmu \
   MLD_NAMESPACE_KL(verify_extmu) MLD_CONTEXT_PARAMETERS_4
-#define mld_sign_open MLD_NAMESPACE_KL(open) MLD_CONTEXT_PARAMETERS_7
 #define mld_sign_signature_pre_hash_internal \
   MLD_NAMESPACE_KL(signature_pre_hash_internal) MLD_CONTEXT_PARAMETERS_9
 #define mld_sign_verify_pre_hash_internal \
@@ -335,49 +333,6 @@ __contract__(
           (MLD_ANY_ERROR(return_value) && *siglen == 0))
 );
 
-/**
- * Compute signed message.
- *
- * @param[out] sm      Pointer to output signed message (allocated array with
- *                     MLDSA_CRYPTO_BYTES + mlen bytes); can be equal to m.
- * @param[out] smlen   Pointer to output length of signed message.
- * @param[in]  m       Pointer to message to be signed.
- * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
- * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context. Only present when
- *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
- *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
- */
-MLD_MUST_CHECK_RETURN_VALUE
-MLD_EXTERNAL_API
-int mld_sign(uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
-             const uint8_t *ctx, size_t ctxlen,
-             const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-             MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
-__contract__(
-  requires(mlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(sm, MLDSA_CRYPTO_BYTES + mlen))
-  requires(memory_no_alias(smlen, sizeof(size_t)))
-  requires(m == sm || memory_no_alias(m, mlen))
-  requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  assigns(memory_slice(sm, MLDSA_CRYPTO_BYTES + mlen))
-  assigns(object_whole(smlen))
-  ensures((return_value == 0 && *smlen == MLDSA_CRYPTO_BYTES + mlen) ||
-          (MLD_ANY_ERROR(return_value) && *smlen == 0))
-);
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -505,44 +460,6 @@ __contract__(
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
-/**
- * Verify signed message.
- *
- * @param[out] m       Pointer to output message (allocated array with smlen
- *                     bytes); can be equal to sm.
- * @param[out] mlen    Pointer to output length of message.
- * @param[in]  sm      Pointer to signed message.
- * @param      smlen   Length of signed message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
- * @param[in]  pk      Bit-packed public key.
- * @param      context Application context. Only present when
- *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
- *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
- */
-MLD_MUST_CHECK_RETURN_VALUE
-MLD_EXTERNAL_API
-int mld_sign_open(uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
-                  const uint8_t *ctx, size_t ctxlen,
-                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
-                  MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
-__contract__(
-  requires(smlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(m, smlen))
-  requires(memory_no_alias(mlen, sizeof(size_t)))
-  requires(m == sm || memory_no_alias(sm, smlen))
-  requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
-  requires(memory_no_alias(ctx, ctxlen))
-  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  assigns(memory_slice(m, smlen))
-  assigns(memory_slice(mlen, sizeof(size_t)))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
-);
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

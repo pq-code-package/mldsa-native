@@ -97,33 +97,6 @@ static int example_verify(void)
 }
 #endif /* MLD_CONFIG_NO_VERIFY_API */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_NO_VERIFY_API)
-static int example_sign_message(void)
-{
-  uint8_t sm[TEST_VECTOR_MSG_LEN + CRYPTO_BYTES];
-  uint8_t m2[TEST_VECTOR_MSG_LEN + CRYPTO_BYTES];
-  size_t smlen;
-  size_t mlen;
-
-  printf("Sign and open message... ");
-  CHECK(crypto_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-                    TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                    TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
-  CHECK(crypto_sign_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
-                         TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
-  CHECK(mlen == TEST_VECTOR_MSG_LEN);
-  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
-  printf("DONE\n");
-  return 0;
-}
-#else  /* !MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API */
-static int example_sign_message(void)
-{
-  printf("Sign and open message... SKIPPED (requires sign+verify APIs)\n");
-  return 0;
-}
-#endif /* !(!MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API) */
-
 int main(void)
 {
   int r = 0;
@@ -147,7 +120,6 @@ int main(void)
   r |= example_sign();
 
   r |= example_verify();
-  r |= example_sign_message();
 
   if (r)
   {

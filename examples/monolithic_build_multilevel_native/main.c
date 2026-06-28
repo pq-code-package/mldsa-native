@@ -203,83 +203,6 @@ static int example_mldsa87_verify(void)
 }
 #endif /* MLD_CONFIG_NO_VERIFY_API */
 
-/* Sign-and-open examples */
-
-#if !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_NO_VERIFY_API)
-static int example_mldsa44_sign_message(void)
-{
-  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA44_BYTES];
-  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA44_BYTES];
-  size_t smlen;
-  size_t mlen;
-
-  printf("  Sign and open message... ");
-  CHECK(mldsa44_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_sk_44) == 0);
-  CHECK(mldsa44_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_pk_44) == 0);
-  CHECK(mlen == TEST_VECTOR_MSG_LEN);
-  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
-  printf("DONE\n");
-  return 0;
-}
-
-static int example_mldsa65_sign_message(void)
-{
-  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA65_BYTES];
-  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA65_BYTES];
-  size_t smlen;
-  size_t mlen;
-
-  printf("  Sign and open message... ");
-  CHECK(mldsa65_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_sk_65) == 0);
-  CHECK(mldsa65_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_pk_65) == 0);
-  CHECK(mlen == TEST_VECTOR_MSG_LEN);
-  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
-  printf("DONE\n");
-  return 0;
-}
-
-static int example_mldsa87_sign_message(void)
-{
-  uint8_t sm[TEST_VECTOR_MSG_LEN + MLDSA87_BYTES];
-  uint8_t m2[TEST_VECTOR_MSG_LEN + MLDSA87_BYTES];
-  size_t smlen;
-  size_t mlen;
-
-  printf("  Sign and open message... ");
-  CHECK(mldsa87_sign(sm, &smlen, (const uint8_t *)TEST_VECTOR_MSG,
-                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_sk_87) == 0);
-  CHECK(mldsa87_open(m2, &mlen, sm, smlen, (const uint8_t *)TEST_VECTOR_CTX,
-                     TEST_VECTOR_CTX_LEN, test_vector_pk_87) == 0);
-  CHECK(mlen == TEST_VECTOR_MSG_LEN);
-  CHECK(memcmp(TEST_VECTOR_MSG, m2, TEST_VECTOR_MSG_LEN) == 0);
-  printf("DONE\n");
-  return 0;
-}
-#else  /* !MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API */
-static int example_mldsa44_sign_message(void)
-{
-  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
-  return 0;
-}
-static int example_mldsa65_sign_message(void)
-{
-  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
-  return 0;
-}
-static int example_mldsa87_sign_message(void)
-{
-  printf("  Sign and open message... SKIPPED (requires sign+verify APIs)\n");
-  return 0;
-}
-#endif /* !(!MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_NO_VERIFY_API) */
-
 int main(void)
 {
   int r = 0;
@@ -299,7 +222,6 @@ int main(void)
   randombytes_reset();
   r |= example_mldsa44_sign();
   r |= example_mldsa44_verify();
-  r |= example_mldsa44_sign_message();
 
   printf("\nML-DSA-65\n");
   randombytes_reset();
@@ -307,7 +229,6 @@ int main(void)
   randombytes_reset();
   r |= example_mldsa65_sign();
   r |= example_mldsa65_verify();
-  r |= example_mldsa65_sign_message();
 
   printf("\nML-DSA-87\n");
   randombytes_reset();
@@ -315,7 +236,6 @@ int main(void)
   randombytes_reset();
   r |= example_mldsa87_sign();
   r |= example_mldsa87_verify();
-  r |= example_mldsa87_sign_message();
 
   if (r)
   {

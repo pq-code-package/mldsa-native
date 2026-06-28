@@ -60,11 +60,10 @@
     !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
                           uint8_t sk[CRYPTO_SECRETKEYBYTES],
-                          uint8_t sm[MLEN + CRYPTO_BYTES], uint8_t m[MLEN],
-                          uint8_t m2[MLEN + CRYPTO_BYTES], uint8_t ctx[CTXLEN])
+                          uint8_t sig[CRYPTO_BYTES], uint8_t m[MLEN],
+                          uint8_t ctx[CTXLEN])
 {
-  size_t smlen;
-  size_t mlen;
+  size_t siglen;
   int rc;
 
 
@@ -74,36 +73,22 @@ static int test_sign_core(uint8_t pk[CRYPTO_PUBLICKEYBYTES],
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, MLEN);
 
-  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(crypto_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-  MLD_CT_TESTING_DECLASSIFY(m, MLEN);
-  MLD_CT_TESTING_DECLASSIFY(m2, (MLEN + CRYPTO_BYTES));
 
   if (rc)
   {
-    printf("ERROR: crypto_sign_open\n");
+    printf("ERROR: crypto_sign_verify\n");
     return 1;
   }
 
-  if (memcmp(m, m2, MLEN))
+  if (siglen != CRYPTO_BYTES)
   {
-    printf("ERROR: crypto_sign_open - wrong message\n");
-    return 1;
-  }
-
-  if (smlen != MLEN + CRYPTO_BYTES)
-  {
-    printf("ERROR: crypto_sign_open - wrong smlen\n");
-    return 1;
-  }
-
-  if (mlen != MLEN)
-  {
-    printf("ERROR: crypto_sign_open - wrong mlen\n");
+    printf("ERROR: crypto_sign_signature - wrong siglen\n");
     return 1;
   }
 
@@ -114,24 +99,22 @@ static int test_sign(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
-  uint8_t m2[MLEN + CRYPTO_BYTES];
   uint8_t ctx[CTXLEN];
 
-  return test_sign_core(pk, sk, sm, m, m2, ctx);
+  return test_sign_core(pk, sk, sig, m, ctx);
 }
 
 static int test_sign_unaligned(void)
 {
   MLD_ALIGN uint8_t pk[CRYPTO_PUBLICKEYBYTES + 1];
   MLD_ALIGN uint8_t sk[CRYPTO_SECRETKEYBYTES + 1];
-  MLD_ALIGN uint8_t sm[MLEN + CRYPTO_BYTES + 1];
+  MLD_ALIGN uint8_t sig[CRYPTO_BYTES + 1];
   MLD_ALIGN uint8_t m[MLEN + 1];
-  MLD_ALIGN uint8_t m2[MLEN + CRYPTO_BYTES + 1];
   MLD_ALIGN uint8_t ctx[CTXLEN + 1];
 
-  return test_sign_core(pk + 1, sk + 1, sm + 1, m + 1, m2 + 1, ctx + 1);
+  return test_sign_core(pk + 1, sk + 1, sig + 1, m + 1, ctx + 1);
 }
 
 static int test_sign_extmu(void)
@@ -249,15 +232,12 @@ static int test_wrong_pk(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
-  uint8_t m2[MLEN + CRYPTO_BYTES] = {0};
   uint8_t ctx[CTXLEN];
-  size_t smlen;
-  size_t mlen;
+  size_t siglen;
   int rc;
   size_t idx;
-  size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
@@ -265,7 +245,7 @@ static int test_wrong_pk(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(crypto_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in public key */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -273,25 +253,15 @@ static int test_wrong_pk(void)
 
   pk[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-  MLD_CT_TESTING_DECLASSIFY(m2, sizeof(m2));
 
   if (!rc)
   {
-    printf("ERROR: wrong_pk: crypto_sign_open\n");
+    printf("ERROR: wrong_pk: crypto_sign_verify\n");
     return 1;
-  }
-
-  for (i = 0; i < MLEN; i++)
-  {
-    if (m2[i] != 0)
-    {
-      printf("ERROR: wrong_pk: crypto_sign_open - message should be zero\n");
-      return 1;
-    }
   }
   return 0;
 }
@@ -300,15 +270,12 @@ static int test_wrong_sig(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
-  uint8_t m2[MLEN + CRYPTO_BYTES] = {0};
   uint8_t ctx[CTXLEN];
-  size_t smlen;
-  size_t mlen;
+  size_t siglen;
   int rc;
   size_t idx;
-  size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
@@ -316,33 +283,23 @@ static int test_wrong_sig(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(crypto_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
 
-  /* flip bit in signed message */
+  /* flip bit in signature */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
-  idx %= MLEN + CRYPTO_BYTES;
+  idx %= CRYPTO_BYTES;
 
-  sm[idx] ^= 1;
+  sig[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-  MLD_CT_TESTING_DECLASSIFY(m2, sizeof(m2));
 
   if (!rc)
   {
-    printf("ERROR: wrong_sig: crypto_sign_open\n");
+    printf("ERROR: wrong_sig: crypto_sign_verify\n");
     return 1;
-  }
-
-  for (i = 0; i < MLEN; i++)
-  {
-    if (m2[i] != 0)
-    {
-      printf("ERROR: wrong_sig: crypto_sign_open - message should be zero\n");
-      return 1;
-    }
   }
   return 0;
 }
@@ -352,15 +309,12 @@ static int test_wrong_ctx(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[MLEN + CRYPTO_BYTES];
+  uint8_t sig[CRYPTO_BYTES];
   uint8_t m[MLEN];
-  uint8_t m2[MLEN + CRYPTO_BYTES] = {0};
   uint8_t ctx[CTXLEN];
-  size_t smlen;
-  size_t mlen;
+  size_t siglen;
   int rc;
   size_t idx;
-  size_t i;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
@@ -368,7 +322,7 @@ static int test_wrong_ctx(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(crypto_sign(sm, &smlen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(crypto_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in ctx */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -376,25 +330,15 @@ static int test_wrong_ctx(void)
 
   ctx[idx] ^= 1;
 
-  rc = crypto_sign_open(m2, &mlen, sm, smlen, ctx, CTXLEN, pk);
+  rc = crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-  MLD_CT_TESTING_DECLASSIFY(m2, sizeof(m2));
 
   if (!rc)
   {
-    printf("ERROR: wrong_sig: crypto_sign_open\n");
+    printf("ERROR: wrong_ctx: crypto_sign_verify\n");
     return 1;
-  }
-
-  for (i = 0; i < MLEN; i++)
-  {
-    if (m2[i] != 0)
-    {
-      printf("ERROR: wrong_sig: crypto_sign_open - message should be zero\n");
-      return 1;
-    }
   }
   return 0;
 }

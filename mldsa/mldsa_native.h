@@ -427,43 +427,6 @@ int MLD_API_NAMESPACE(signature_extmu)(
 #endif
 );
 
-/**
- * Compute signed message. This function implements the randomized variant of
- * ML-DSA. If you require the deterministic variant, use
- * crypto_sign_signature_internal directly.
- *
- * @param[out] sm      Pointer to output signed message (allocated array with
- *                     MLDSA{44,65,87}_BYTES + mlen bytes); can be equal to m.
- * @param[out] smlen   Pointer to output length of signed message.
- * @param[in]  m       Pointer to message to be signed.
- * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
- * @param[in]  sk      Bit-packed secret key.
- * @param      context Application context. Only present when
- *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
- *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
- */
-MLD_API_QUALIFIER
-MLD_API_MUST_CHECK_RETURN_VALUE
-int MLD_API_NAMESPACE(sign)(
-    uint8_t *sm, size_t *smlen, const uint8_t *m, size_t mlen,
-    const uint8_t *ctx, size_t ctxlen,
-    const uint8_t sk[MLDSA_SECRETKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
-#ifdef MLD_CONFIG_CONTEXT_PARAMETER
-    ,
-    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-);
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -576,37 +539,6 @@ int MLD_API_NAMESPACE(verify_extmu)(
 #endif
 );
 
-/**
- * Verify signed message.
- *
- * @param[out] m       Pointer to output message (allocated array with smlen
- *                     bytes); can be equal to sm.
- * @param[out] mlen    Pointer to output length of message.
- * @param[in]  sm      Pointer to signed message.
- * @param      smlen   Length of signed message.
- * @param[in]  ctx     Pointer to context string.
- * @param      ctxlen  Length of context string.
- * @param[in]  pk      Bit-packed public key.
- * @param      context Application context. Only present when
- *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
- *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
- *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
- */
-MLD_API_QUALIFIER
-MLD_API_MUST_CHECK_RETURN_VALUE
-int MLD_API_NAMESPACE(open)(
-    uint8_t *m, size_t *mlen, const uint8_t *sm, size_t smlen,
-    const uint8_t *ctx, size_t ctxlen,
-    const uint8_t pk[MLDSA_PUBLICKEYBYTES(MLD_CONFIG_API_PARAMETER_SET)]
-#ifdef MLD_CONFIG_CONTEXT_PARAMETER
-    ,
-    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-);
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -899,9 +831,7 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 
 #define crypto_sign_keypair MLD_API_NAMESPACE(keypair)
 #define crypto_sign_signature MLD_API_NAMESPACE(signature)
-#define crypto_sign MLD_API_NAMESPACE(sign)
 #define crypto_sign_verify MLD_API_NAMESPACE(verify)
-#define crypto_sign_open MLD_API_NAMESPACE(open)
 
 #else /* !MLD_CONFIG_API_NO_SUPERCOP */
 

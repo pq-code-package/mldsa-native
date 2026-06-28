@@ -140,7 +140,7 @@
  *
  * By default, mldsa-native includes support for creating
  * signatures. If you don't need this, set MLD_CONFIG_NO_SIGN_API
- * to exclude crypto_sign, crypto_sign_signature,
+ * to exclude crypto_sign_signature,
  * crypto_sign_signature_extmu, crypto_sign_signature_internal,
  * crypto_sign_signature_pre_hash_internal,
  * crypto_sign_signature_pre_hash_shake256, and all internal APIs
@@ -153,9 +153,8 @@
  *
  * By default, mldsa-native includes support for verifying
  * signatures. If you don't need this, set
- * MLD_CONFIG_NO_VERIFY_API to exclude crypto_sign_open,
- * crypto_sign_verify, crypto_sign_verify_extmu,
- * crypto_sign_verify_internal,
+ * MLD_CONFIG_NO_VERIFY_API to exclude crypto_sign_verify,
+ * crypto_sign_verify_extmu, crypto_sign_verify_internal,
  * crypto_sign_verify_pre_hash_internal,
  * crypto_sign_verify_pre_hash_shake256, and all internal APIs
  * only needed by those functions.
@@ -176,8 +175,7 @@
  *
  * If this option is set, mldsa-native will be built without the
  * randomized API functions (crypto_sign_keypair,
- * crypto_sign, crypto_sign_signature, and
- * crypto_sign_signature_extmu).
+ * crypto_sign_signature, and crypto_sign_signature_extmu).
  * This allows users to build mldsa-native without providing a
  * randombytes() implementation if they only need the
  * internal deterministic API

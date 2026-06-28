@@ -223,9 +223,7 @@
 #undef MLD_TOTAL_ALLOC_87_PK_FROM_SK
 #undef MLD_TOTAL_ALLOC_87_SIGN
 #undef MLD_TOTAL_ALLOC_87_VERIFY
-#undef crypto_sign
 #undef crypto_sign_keypair
-#undef crypto_sign_open
 #undef crypto_sign_signature
 #undef crypto_sign_verify
 /* mldsa/src/common.h */
@@ -447,10 +445,8 @@
 #undef MLD_PREHASH_SHAKE_256
 #undef MLD_SIGN_H
 #undef mld_prepare_domain_separation_prefix
-#undef mld_sign
 #undef mld_sign_keypair
 #undef mld_sign_keypair_internal
-#undef mld_sign_open
 #undef mld_sign_pk_from_sk
 #undef mld_sign_signature
 #undef mld_sign_signature_extmu
