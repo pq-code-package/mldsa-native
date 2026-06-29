@@ -914,7 +914,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   int ret;
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
   uint16_t nonce = 0;
-  const uint16_t nonce_limit = mld_get_max_signing_attempts();
+  const uint16_t max_signing_attempts = mld_get_max_signing_attempts();
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
@@ -967,10 +967,14 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
    * by 1 per iteration. Each iteration's body (lines 11-30) plus, on success,
    * the line-33 sigEncode are performed by mld_attempt_signature_generation. */
 
-  /* Reference: This code is re-structured using a while(1),  */
-  /* with explicit "continue" statements (rather than "goto") */
-  /* to implement rejection of invalid signatures.            */
-  while (1)
+  /* Reference: the reference implementation uses an unbounded loop. We instead
+   * iterate nonce over the statically bounded range [0, max_signing_attempts),
+   * which gives predictable termination and makes the increment of nonce
+   * provably type-safe. The loop is left early via goto cleanup once an attempt
+   * succeeds or fails fatally; if it instead runs to completion, every attempt
+   * was rejected and signing has exhausted its budget. With a FIPS-compliant
+   * value of MLD_CONFIG_MAX_SIGNING_ATTEMPTS, this should never happen. */
+  for (; nonce < max_signing_attempts; nonce++)
   __loop__(
     MLD_IF_NOT_REDUCE_RAM(
       assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
@@ -979,7 +983,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
               memory_slice(mat, sizeof(mld_polymat)))
     )
-    invariant(nonce <= nonce_limit)
+    invariant(nonce <= max_signing_attempts)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
     /* loop. We can therefore re-assert their bounds here as part of the     */
@@ -991,35 +995,29 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
       invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     )
-    decreases(nonce_limit - nonce)
+    decreases(max_signing_attempts - nonce)
   )
   {
-    /* Reference: this code explicitly checks for exhaustion of signing */
-    /* attempts to provide predictable termination and results in that  */
-    /* case. Checking here also means that incrementing nonce below can */
-    /* be proven to be type-safe.                                       */
-    if (nonce == nonce_limit)
-    {
-      ret = MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED;
-      break;
-    }
-
     ret = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat, s1hat,
                                            s2hat, t0hat, context);
-    nonce++;
     if (ret == 0)
     {
       *siglen = MLDSA_CRYPTO_BYTES;
-      break;
+      goto cleanup;
     }
     else if (ret != MLD_ERR_FAIL)
     {
       /* For failures such as out-of-memory, propagate and exit immediately. */
-      break;
+      goto cleanup;
     }
 
-    /* Otherwise, try again. */
+    /* Otherwise, the signature was rejected; try the next nonce. */
   }
+
+  /* The loop ran to completion: every attempt in [0, max_signing_attempts) was
+   * rejected, so signing has exhausted its budget. With a FIPS-compliant value
+   * of MLD_CONFIG_MAX_SIGNING_ATTEMPTS, this should never happen. */
+  ret = MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED;
 
 cleanup:
 
