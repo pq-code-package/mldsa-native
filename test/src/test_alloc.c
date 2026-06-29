@@ -366,13 +366,11 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 static int test_sign_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
-  size_t siglen;
-
   TEST_ALLOC_FAILURE(
       "mld_signature",
-      mld_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
-                    TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                    TEST_VECTOR_CTX_LEN, test_vector_sk, ctx),
+      mld_signature(sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                    (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                    test_vector_sk, ctx),
       MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
@@ -381,10 +379,8 @@ static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[64] = {0};
-  size_t siglen;
-
   TEST_ALLOC_FAILURE("mld_signature_extmu",
-                     mld_signature_extmu(sig, &siglen, mu, test_vector_sk, ctx),
+                     mld_signature_extmu(sig, mu, test_vector_sk, ctx),
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
@@ -393,11 +389,9 @@ static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t rnd[32] = {0};
-  size_t siglen;
-
   TEST_ALLOC_FAILURE("mld_signature_pre_hash_shake256",
                      mld_signature_pre_hash_shake256(
-                         sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                         sig, (const uint8_t *)TEST_VECTOR_MSG,
                          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                          TEST_VECTOR_CTX_LEN, rnd, test_vector_sk, ctx),
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
@@ -410,10 +404,9 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE(
       "mld_verify",
-      mld_verify(test_vector_sig, MLDSA_SIG_BYTES,
-                 (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                 (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                 test_vector_pk, ctx),
+      mld_verify(test_vector_sig, (const uint8_t *)TEST_VECTOR_MSG,
+                 TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                 TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
       MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
@@ -423,21 +416,21 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
 static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE("mld_verify_extmu",
-                     mld_verify_extmu(test_vector_sig_extmu, MLDSA_SIG_BYTES,
-                                      test_vector_mu, test_vector_pk, ctx),
+                     mld_verify_extmu(test_vector_sig_extmu, test_vector_mu,
+                                      test_vector_pk, ctx),
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
 
 static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
-  TEST_ALLOC_FAILURE("mld_verify_pre_hash_shake256",
-                     mld_verify_pre_hash_shake256(
-                         test_vector_sig_pre_hash_shake256, MLDSA_SIG_BYTES,
-                         (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                         (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                         test_vector_pk, ctx),
-                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+  TEST_ALLOC_FAILURE(
+      "mld_verify_pre_hash_shake256",
+      mld_verify_pre_hash_shake256(
+          test_vector_sig_pre_hash_shake256, (const uint8_t *)TEST_VECTOR_MSG,
+          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+          TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
+      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */

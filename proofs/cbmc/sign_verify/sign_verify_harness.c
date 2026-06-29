@@ -6,7 +6,6 @@
 void harness(void)
 {
   const uint8_t *sig;
-  size_t siglen;
   const uint8_t *m;
   size_t mlen;
   const uint8_t *ctx;
@@ -15,6 +14,6 @@ void harness(void)
 
   int r;
 
-  r = mld_sign_verify(sig, siglen, m, mlen, ctx, ctxlen, pk,
+  r = mld_sign_verify(sig, m, mlen, ctx, ctxlen, pk,
                       NULL /* context will be dropped by preprocessor */);
 }

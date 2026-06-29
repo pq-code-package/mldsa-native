@@ -3656,6 +3656,9 @@ def get_oqs_shared_sources(backend):
         and not f == "mldsa_native.h"
     ]
 
+    # add the public header, which the glue consumes
+    sources.append("mldsa/mldsa_native.h")
+
     if backend != "ref":
         # add files mldsa/native/* (API definitions)
         sources += [
@@ -3663,10 +3666,11 @@ def get_oqs_shared_sources(backend):
             for f in os.listdir(f"{mldsa_dir}/native")
             if os.path.isfile(f"{mldsa_dir}/native/{f}")
         ]
-    # Add FIPS202 glue code
+    # Add FIPS202 glue code and the signature API glue
     sources += [
         "integration/liboqs/fips202_glue.h",
         "integration/liboqs/fips202x4_glue.h",
+        "integration/liboqs/sig_glue.c",
     ]
     # Add custom config
     if backend == "ref":

@@ -90,7 +90,6 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t message[1] = {0};
-  size_t siglen;
   int ret;
   MLD_ALLOC(signature, uint8_t, MLDSA_CRYPTO_BYTES, context);
   MLD_ALLOC(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, context);
@@ -105,8 +104,8 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   mld_memcpy(pk_test, pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
 
   /* Sign a test message using the original secret key */
-  ret = mld_sign_signature(signature, &siglen, message, sizeof(message), NULL,
-                           0, sk, context);
+  ret = mld_sign_signature(signature, message, sizeof(message), NULL, 0, sk,
+                           context);
   if (ret != 0)
   {
     goto cleanup;
@@ -121,8 +120,8 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 #endif /* MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
   /* Verify the signature using the (potentially corrupted) public key */
-  ret = mld_sign_verify(signature, siglen, message, sizeof(message), NULL, 0,
-                        pk_test, context);
+  ret = mld_sign_verify(signature, message, sizeof(message), NULL, 0, pk_test,
+                        context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -905,7 +904,7 @@ cleanup:
 }
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
+int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
                                 const uint8_t *m, size_t mlen,
                                 const uint8_t *pre, size_t prelen,
                                 const uint8_t rnd[MLDSA_RNDBYTES],
@@ -976,10 +975,10 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   for (; attempt < max_signing_attempts; attempt++)
   __loop__(
     MLD_IF_NOT_REDUCE_RAM(
-      assigns(attempt, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+      assigns(attempt, ret, memory_slice(sig, MLDSA_CRYPTO_BYTES))
     )
     MLD_IF_REDUCE_RAM(
-      assigns(attempt, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
+      assigns(attempt, ret, memory_slice(sig, MLDSA_CRYPTO_BYTES),
               memory_slice(mat, sizeof(mld_polymat)))
     )
     invariant(attempt <= max_signing_attempts)
@@ -1002,18 +1001,18 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
     const uint16_t kappa = (uint16_t)(attempt * MLDSA_L);
     ret = mld_attempt_signature_generation(sig, mu, rhoprime, kappa, mat, s1hat,
                                            s2hat, t0hat, context);
-    if (ret == 0)
-    {
-      *siglen = MLDSA_CRYPTO_BYTES;
-      goto cleanup;
-    }
-    else if (ret != MLD_ERR_FAIL)
-    {
-      /* For failures such as out-of-memory, propagate and exit immediately. */
-      goto cleanup;
-    }
 
-    /* Otherwise, the signature was rejected; try the next attempt. */
+    /* Decide whether to keep trying based on the return value:
+     *  - ret == 0: a valid signature was produced; we are done.
+     *  - ret == MLD_ERR_FAIL: this candidate was rejected by one of the norm
+     *    or hint checks. We continue the loop and try again with the next
+     *    nonce.
+     *  - any other value (e.g. MLD_ERR_OUT_OF_MEMORY): an unrecoverable error
+     *    occurred, so we propagate it to the caller. */
+    if (ret != MLD_ERR_FAIL)
+    {
+      goto cleanup;
+    }
   }
 
   /* Loop ran to completion: all attempts rejected, budget exhausted.
@@ -1026,7 +1025,6 @@ cleanup:
   if (ret != 0)
   {
     /* To be on the safe-side, we zeroize the signature buffer. */
-    *siglen = 0;
     mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
   }
 
@@ -1044,9 +1042,8 @@ cleanup:
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
-                       const uint8_t *m, size_t mlen, const uint8_t *ctx,
-                       size_t ctxlen,
+int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m,
+                       size_t mlen, const uint8_t *ctx, size_t ctxlen,
                        const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
@@ -1079,19 +1076,18 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   }
   MLD_CT_TESTING_SECRET(rnd, MLDSA_RNDBYTES);
 
-  ret = mld_sign_signature_internal(sig, siglen, m, mlen, pre, pre_len, rnd, sk,
-                                    0, context);
+  ret = mld_sign_signature_internal(sig, m, mlen, pre, pre_len, rnd, sk, 0,
+                                    context);
 
 cleanup:
   if (ret != 0)
   {
-    /* To be on the safe-side, make sure *siglen and sig have a well-defined
-     * value, even in the case of error.
+    /* To be on the safe-side, make sure sig has a well-defined value, even in
+     * the case of error.
      *
-     * If we come from mld_sign_signature_internal, both are redundant,
-     * but the error case should not be the norm, and the added cost of the
-     * memset insignificant. */
-    *siglen = 0;
+     * If we come from mld_sign_signature_internal, this is redundant, but the
+     * error case should not be the norm, and the added cost of the memset
+     * insignificant. */
     mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
   }
 
@@ -1106,7 +1102,7 @@ cleanup:
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
+int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES],
                              const uint8_t mu[MLDSA_CRHBYTES],
                              const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                              MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -1116,7 +1112,6 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 
   if (rnd == NULL)
   {
-    *siglen = 0;
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
@@ -1125,14 +1120,13 @@ int mld_sign_signature_extmu(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
    * call mld_sign_signature_internal directly with all-zero rnd. */
   if (mld_randombytes(rnd, MLDSA_RNDBYTES) != 0)
   {
-    *siglen = 0;
     ret = MLD_ERR_RNG_FAIL;
     goto cleanup;
   }
   MLD_CT_TESTING_SECRET(rnd, MLDSA_RNDBYTES);
 
-  ret = mld_sign_signature_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0,
-                                    rnd, sk, 1, context);
+  ret = mld_sign_signature_internal(sig, mu, MLDSA_CRHBYTES, NULL, 0, rnd, sk,
+                                    1, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1147,7 +1141,7 @@ cleanup:
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
+int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
                              const uint8_t *m, size_t mlen, const uint8_t *pre,
                              size_t prelen,
                              const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
@@ -1171,12 +1165,6 @@ int mld_sign_verify_internal(const uint8_t *sig, size_t siglen,
       cp == NULL || mat == NULL || w1 == NULL || tmp == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
-    goto cleanup;
-  }
-
-  if (siglen != MLDSA_CRYPTO_BYTES)
-  {
-    ret = MLD_ERR_FAIL;
     goto cleanup;
   }
 
@@ -1281,7 +1269,7 @@ cleanup:
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
+int mld_sign_verify(const uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m,
                     size_t mlen, const uint8_t *ctx, size_t ctxlen,
                     const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -1298,8 +1286,7 @@ int mld_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m,
     goto cleanup;
   }
 
-  ret = mld_sign_verify_internal(sig, siglen, m, mlen, pre, pre_len, pk, 0,
-                                 context);
+  ret = mld_sign_verify_internal(sig, m, mlen, pre, pre_len, pk, 0, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1310,13 +1297,13 @@ cleanup:
 
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
-int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
+int mld_sign_verify_extmu(const uint8_t sig[MLDSA_CRYPTO_BYTES],
                           const uint8_t mu[MLDSA_CRHBYTES],
                           const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                           MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
-  return mld_sign_verify_internal(sig, siglen, mu, MLDSA_CRHBYTES, NULL, 0, pk,
-                                  1, context);
+  return mld_sign_verify_internal(sig, mu, MLDSA_CRHBYTES, NULL, 0, pk, 1,
+                                  context);
 }
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -1326,9 +1313,8 @@ int mld_sign_verify_extmu(const uint8_t *sig, size_t siglen,
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_pre_hash_internal(
-    uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *ph,
-    size_t phlen, const uint8_t *ctx, size_t ctxlen,
-    const uint8_t rnd[MLDSA_RNDBYTES],
+    uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *ph, size_t phlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
     const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES], int hashalg,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
@@ -1350,18 +1336,17 @@ int mld_sign_signature_pre_hash_internal(
     goto cleanup;
   }
 
-  ret = mld_sign_signature_internal(sig, siglen, pre, pre_len, NULL, 0, rnd, sk,
-                                    0, context);
+  ret = mld_sign_signature_internal(sig, pre, pre_len, NULL, 0, rnd, sk, 0,
+                                    context);
 cleanup:
   if (ret != 0)
   {
-    /* To be on the safe-side, make sure *siglen and sig have a well-defined
-     * value, even in the case of error.
+    /* To be on the safe-side, make sure sig has a well-defined value, even in
+     * the case of error.
      *
-     * If we come from mld_sign_signature_internal, both are redundant,
-     * but the error case should not be the norm, and the added cost of the
-     * memset insignificant. */
-    *siglen = 0;
+     * If we come from mld_sign_signature_internal, this is redundant, but the
+     * error case should not be the norm, and the added cost of the memset
+     * insignificant. */
     mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
   }
 
@@ -1375,7 +1360,7 @@ cleanup:
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_internal(
-    const uint8_t *sig, size_t siglen, const uint8_t *ph, size_t phlen,
+    const uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *ph, size_t phlen,
     const uint8_t *ctx, size_t ctxlen,
     const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES], int hashalg,
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -1398,8 +1383,7 @@ int mld_sign_verify_pre_hash_internal(
     goto cleanup;
   }
 
-  ret = mld_sign_verify_internal(sig, siglen, pre, pre_len, NULL, 0, pk, 0,
-                                 context);
+  ret = mld_sign_verify_internal(sig, pre, pre_len, NULL, 0, pk, 0, context);
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1412,18 +1396,17 @@ cleanup:
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_signature_pre_hash_shake256(
-    uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen, const uint8_t *m,
-    size_t mlen, const uint8_t *ctx, size_t ctxlen,
-    const uint8_t rnd[MLDSA_RNDBYTES],
+    uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m, size_t mlen,
+    const uint8_t *ctx, size_t ctxlen, const uint8_t rnd[MLDSA_RNDBYTES],
     const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 {
   MLD_ALIGN uint8_t ph[64];
   int ret;
   mld_shake256(ph, sizeof(ph), m, mlen);
-  ret = mld_sign_signature_pre_hash_internal(sig, siglen, ph, sizeof(ph), ctx,
-                                             ctxlen, rnd, sk,
-                                             MLD_PREHASH_SHAKE_256, context);
+  ret = mld_sign_signature_pre_hash_internal(sig, ph, sizeof(ph), ctx, ctxlen,
+                                             rnd, sk, MLD_PREHASH_SHAKE_256,
+                                             context);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return ret;
@@ -1434,7 +1417,7 @@ int mld_sign_signature_pre_hash_shake256(
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify_pre_hash_shake256(
-    const uint8_t *sig, size_t siglen, const uint8_t *m, size_t mlen,
+    const uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m, size_t mlen,
     const uint8_t *ctx, size_t ctxlen,
     const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -1442,9 +1425,8 @@ int mld_sign_verify_pre_hash_shake256(
   MLD_ALIGN uint8_t ph[64];
   int ret;
   mld_shake256(ph, sizeof(ph), m, mlen);
-  ret = mld_sign_verify_pre_hash_internal(sig, siglen, ph, sizeof(ph), ctx,
-                                          ctxlen, pk, MLD_PREHASH_SHAKE_256,
-                                          context);
+  ret = mld_sign_verify_pre_hash_internal(sig, ph, sizeof(ph), ctx, ctxlen, pk,
+                                          MLD_PREHASH_SHAKE_256, context);
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   mld_zeroize(ph, sizeof(ph));
   return ret;

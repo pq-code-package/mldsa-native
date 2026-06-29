@@ -30,14 +30,13 @@ static void test_sign_only(void)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   unsigned char sk[MLDSA_SK_BYTES] = {0};
   unsigned char sig[MLDSA_SIG_BYTES];
-  size_t siglen;
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
 
   /* Only call signature - this is what we're measuring */
   /* sk is zero-initialized (invalid key, but OK for stack measurement) */
-  int ret = mld_sign_signature(sig, &siglen, msg, sizeof(msg) - 1, ctx,
-                               sizeof(ctx) - 1, sk);
+  int ret =
+      mld_sign_signature(sig, msg, sizeof(msg) - 1, ctx, sizeof(ctx) - 1, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_SIGN_API */
   printf("sign test skipped (API disabled)\n");
@@ -54,8 +53,8 @@ static void test_verify_only(void)
 
   /* Only call verify - this is what we're measuring */
   /* pk and sig are zero-initialized (invalid, but OK for stack measurement) */
-  int ret = mld_sign_verify(sig, MLDSA_SIG_BYTES, msg, sizeof(msg) - 1, ctx,
-                            sizeof(ctx) - 1, pk);
+  int ret =
+      mld_sign_verify(sig, msg, sizeof(msg) - 1, ctx, sizeof(ctx) - 1, pk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_VERIFY_API */
   printf("verify test skipped (API disabled)\n");

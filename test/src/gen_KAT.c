@@ -75,7 +75,6 @@ int main(void)
   uint8_t *m;
   /* empty ctx */
   uint8_t pre[2] = {0, 0};
-  size_t slen;
 
   const uint8_t seed[64] = {
       32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -110,12 +109,12 @@ int main(void)
     print_hex(pk, MLDSA_PK_BYTES);
     print_hex(sk, MLDSA_SK_BYTES);
 
-    CHECK(mld_sign_signature_internal(s, &slen, m, i, pre, sizeof(pre),
+    CHECK(mld_sign_signature_internal(s, m, i, pre, sizeof(pre),
                                       coins + MLDSA_SEEDBYTES, sk, 0) == 0);
 
-    print_hex(s, slen);
+    print_hex(s, MLDSA_SIG_BYTES);
 
-    rc = mld_sign_verify(s, slen, m, i, NULL, CTXLEN, pk);
+    rc = mld_sign_verify(s, m, i, NULL, CTXLEN, pk);
 
     if (rc)
     {

@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char pre[MAX_CTX_LENGTH + 2];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
-    size_t mlen, ctxlen, siglen;
+    size_t mlen, ctxlen;
     int externalMu;
 
     if (argc != 6)
@@ -210,8 +210,8 @@ int main(int argc, char *argv[])
 
     if (externalMu)
     {
-      CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0,
-                                        rnd, sk, 1) == 0);
+      CHECK(mld_sign_signature_internal(sig, message, mlen, NULL, 0, rnd, sk,
+                                        1) == 0);
     }
     else
     {
@@ -219,10 +219,10 @@ int main(int argc, char *argv[])
       /* Safety: Truncation is safe due to the check above. */
       pre[1] = (uint8_t)ctxlen;
       memcpy(pre + 2, context, ctxlen);
-      CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                        ctxlen + 2, rnd, sk, 0) == 0);
+      CHECK(mld_sign_signature_internal(sig, message, mlen, pre, ctxlen + 2,
+                                        rnd, sk, 0) == 0);
     }
-    print_hex("signature", sig, siglen);
+    print_hex("signature", sig, MLDSA_SIG_BYTES);
   }
   else
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char pre[MAX_CTX_LENGTH + 2];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
-    size_t mlen, ctxlen, siglen;
+    size_t mlen, ctxlen;
 
     if (argc != 5)
     {
@@ -270,9 +270,9 @@ int main(int argc, char *argv[])
     pre[1] = (uint8_t)ctxlen;
     memcpy(pre + 2, context, ctxlen);
 
-    CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                      ctxlen + 2, rnd, sk, 0) == 0);
-    print_hex("signature", sig, siglen);
+    CHECK(mld_sign_signature_internal(sig, message, mlen, pre, ctxlen + 2, rnd,
+                                      sk, 0) == 0);
+    print_hex("signature", sig, MLDSA_SIG_BYTES);
   }
   else if (strcmp(argv[1], "sigGenInternalDeterministic") == 0)
   {
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     unsigned char sk[MLDSA_SK_BYTES];
     unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
-    size_t mlen, siglen;
+    size_t mlen;
     int externalMu;
 
     if (argc != 5)
@@ -317,9 +317,9 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0, rnd,
-                                      sk, externalMu) == 0);
-    print_hex("signature", sig, siglen);
+    CHECK(mld_sign_signature_internal(sig, message, mlen, NULL, 0, rnd, sk,
+                                      externalMu) == 0);
+    print_hex("signature", sig, MLDSA_SIG_BYTES);
   }
   else
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -366,8 +366,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    return mld_sign_verify(signature, sizeof(signature), message, mlen, context,
-                           ctxlen, pk);
+    return mld_sign_verify(signature, message, mlen, context, ctxlen, pk);
   }
   else
 #endif /* !MLD_CONFIG_NO_VERIFY_API */

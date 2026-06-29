@@ -294,7 +294,6 @@ static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
                                   const unsigned char *context, size_t ctxlen)
 {
   unsigned char sig[MLDSA_SIG_BYTES];
-  size_t siglen;
   unsigned char pre[MAX_CTX_LENGTH + 2];
 
   CHECK(ctxlen <= 255);
@@ -303,8 +302,8 @@ static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
   pre[1] = (uint8_t)ctxlen;
   memcpy(pre + 2, context, ctxlen);
 
-  CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                    ctxlen + 2, rnd, sk, 0) == 0);
+  CHECK(mld_sign_signature_internal(sig, message, mlen, pre, ctxlen + 2, rnd,
+                                    sk, 0) == 0);
   print_hex("signature", sig, sizeof(sig));
 }
 
@@ -314,9 +313,8 @@ static void acvp_mldsa_sigGenInternal_AFT(
     const unsigned char sk[MLDSA_SK_BYTES], int externalMu)
 {
   unsigned char sig[MLDSA_SIG_BYTES];
-  size_t siglen;
-  CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0, rnd,
-                                    sk, externalMu) == 0);
+  CHECK(mld_sign_signature_internal(sig, message, mlen, NULL, 0, rnd, sk,
+                                    externalMu) == 0);
   print_hex("signature", sig, sizeof(sig));
 }
 
@@ -328,7 +326,6 @@ static void acvp_mldsa_sigGenDeterministic_AFT(
     size_t ctxlen)
 {
   unsigned char sig[MLDSA_SIG_BYTES];
-  size_t siglen;
   unsigned char rnd[MLDSA_SEEDBYTES] = {0}; /* Zero rnd for deterministic */
 
   unsigned char pre[MAX_CTX_LENGTH + 2];
@@ -339,8 +336,8 @@ static void acvp_mldsa_sigGenDeterministic_AFT(
   pre[1] = (uint8_t)ctxlen;
   memcpy(pre + 2, context, ctxlen);
 
-  CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                    ctxlen + 2, rnd, sk, 0) == 0);
+  CHECK(mld_sign_signature_internal(sig, message, mlen, pre, ctxlen + 2, rnd,
+                                    sk, 0) == 0);
   print_hex("signature", sig, sizeof(sig));
 }
 
@@ -349,11 +346,10 @@ static void acvp_mldsa_sigGenInternalDeterministic_AFT(
     const unsigned char sk[MLDSA_SK_BYTES], int externalMu)
 {
   unsigned char sig[MLDSA_SIG_BYTES];
-  size_t siglen;
   unsigned char rnd[MLDSA_SEEDBYTES] = {0}; /* Zero rnd for deterministic */
 
-  CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0, rnd,
-                                    sk, externalMu) == 0);
+  CHECK(mld_sign_signature_internal(sig, message, mlen, NULL, 0, rnd, sk,
+                                    externalMu) == 0);
   print_hex("signature", sig, sizeof(sig));
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -365,8 +361,7 @@ static int acvp_mldsa_sigVer_AFT(const unsigned char *message, size_t mlen,
                                  const unsigned char signature[MLDSA_SIG_BYTES],
                                  const unsigned char pk[MLDSA_PK_BYTES])
 {
-  return mld_sign_verify(signature, MLDSA_SIG_BYTES, message, mlen, context,
-                         ctxlen, pk);
+  return mld_sign_verify(signature, message, mlen, context, ctxlen, pk);
 }
 
 
@@ -377,12 +372,11 @@ static int acvp_mldsa_sigVerInternal_AFT(
 {
   if (externalMu)
   {
-    return mld_sign_verify_extmu(signature, MLDSA_SIG_BYTES, message, pk);
+    return mld_sign_verify_extmu(signature, message, pk);
   }
   else
   {
-    return mld_sign_verify_internal(signature, MLDSA_SIG_BYTES, message, mlen,
-                                    NULL, 0, pk, 0);
+    return mld_sign_verify_internal(signature, message, mlen, NULL, 0, pk, 0);
   }
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -453,16 +447,14 @@ static int acvp_mldsa_sigGenPreHash_AFT(const unsigned char *ph, size_t phlen,
                                         const char *hashAlg)
 {
   unsigned char signature[MLDSA_SIG_BYTES];
-  size_t siglen;
-
-  if (mld_sign_signature_pre_hash_internal(signature, &siglen, ph, phlen,
-                                           context, ctxlen, rng, sk,
+  if (mld_sign_signature_pre_hash_internal(signature, ph, phlen, context,
+                                           ctxlen, rng, sk,
                                            str_to_hash_alg(hashAlg)) != 0)
   {
     return 1;
   }
 
-  print_hex("signature", signature, siglen);
+  print_hex("signature", signature, MLDSA_SIG_BYTES);
   return 0;
 }
 
@@ -474,9 +466,8 @@ static int acvp_mldsa_sigVerPreHash_AFT(
     size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
     const unsigned char pk[MLDSA_PK_BYTES], const char *hashAlg)
 {
-  return mld_sign_verify_pre_hash_internal(signature, MLDSA_SIG_BYTES, ph,
-                                           phlen, context, ctxlen, pk,
-                                           str_to_hash_alg(hashAlg));
+  return mld_sign_verify_pre_hash_internal(
+      signature, ph, phlen, context, ctxlen, pk, str_to_hash_alg(hashAlg));
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -487,15 +478,13 @@ static int acvp_mldsa_sigGenPreHashShake256_AFT(
     const unsigned char sk[MLDSA_SK_BYTES])
 {
   unsigned char signature[MLDSA_SIG_BYTES];
-  size_t siglen;
-
-  if (mld_sign_signature_pre_hash_shake256(signature, &siglen, message, mlen,
-                                           context, ctxlen, rnd, sk) != 0)
+  if (mld_sign_signature_pre_hash_shake256(signature, message, mlen, context,
+                                           ctxlen, rnd, sk) != 0)
   {
     return 1;
   }
 
-  print_hex("signature", signature, siglen);
+  print_hex("signature", signature, MLDSA_SIG_BYTES);
   return 0;
 }
 
@@ -507,8 +496,8 @@ static int acvp_mldsa_sigVerPreHashShake256_AFT(
     size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
     const unsigned char pk[MLDSA_PK_BYTES])
 {
-  return mld_sign_verify_pre_hash_shake256(signature, MLDSA_SIG_BYTES, message,
-                                           mlen, context, ctxlen, pk);
+  return mld_sign_verify_pre_hash_shake256(signature, message, mlen, context,
+                                           ctxlen, pk);
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -519,17 +508,16 @@ static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
     size_t ctxlen, const unsigned char sk[MLDSA_SK_BYTES], const char *hashAlg)
 {
   unsigned char signature[MLDSA_SIG_BYTES];
-  size_t siglen;
   unsigned char rnd[MLDSA_RNDBYTES] = {0}; /* Zero rnd for deterministic */
 
-  if (mld_sign_signature_pre_hash_internal(signature, &siglen, ph, phlen,
-                                           context, ctxlen, rnd, sk,
+  if (mld_sign_signature_pre_hash_internal(signature, ph, phlen, context,
+                                           ctxlen, rnd, sk,
                                            str_to_hash_alg(hashAlg)) != 0)
   {
     return 1;
   }
 
-  print_hex("signature", signature, siglen);
+  print_hex("signature", signature, MLDSA_SIG_BYTES);
   return 0;
 }
 
@@ -538,16 +526,15 @@ static int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
     size_t ctxlen, const unsigned char sk[MLDSA_SK_BYTES])
 {
   unsigned char signature[MLDSA_SIG_BYTES];
-  size_t siglen;
   unsigned char rnd[MLDSA_RNDBYTES] = {0}; /* Zero rnd for deterministic */
 
-  if (mld_sign_signature_pre_hash_shake256(signature, &siglen, message, mlen,
-                                           context, ctxlen, rnd, sk) != 0)
+  if (mld_sign_signature_pre_hash_shake256(signature, message, mlen, context,
+                                           ctxlen, rnd, sk) != 0)
   {
     return 1;
   }
 
-  print_hex("signature", signature, siglen);
+  print_hex("signature", signature, MLDSA_SIG_BYTES);
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */

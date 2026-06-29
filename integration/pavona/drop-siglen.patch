@@ -1,0 +1,103 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Adapt the crypto library wrapper to the updated mldsa-native
+# API, where signing/verification no longer take a siglen argument
+# (signatures have a fixed length). The sign output length was unused and
+# is dropped; verification now validates the signature length itself,
+# since mldsa-native no longer does so internally.
+
+diff --git a/sw/device/lib/crypto/impl/mldsa.c b/sw/device/lib/crypto/impl/mldsa.c
+index 4c43482..b855c71 100644
+--- a/sw/device/lib/crypto/impl/mldsa.c
++++ b/sw/device/lib/crypto/impl/mldsa.c
+@@ -178,9 +178,8 @@ otcrypto_status_t otcrypto_mldsa44_sign_derand(
+     memcpy(pre + 2, context.data, context.len);
+   }
+ 
+-  size_t signature_len;
+   int result = mldsa44_signature_internal(
+-      signature.data, &signature_len, message.data, message.len, pre,
++      signature.data, message.data, message.len, pre,
+       2 + context.len, rnd.data, (const uint8_t *)sk_share0, 0, &ctx);
+ 
+   if (result != 0) {
+@@ -205,6 +204,9 @@ otcrypto_status_t otcrypto_mldsa44_verify(
+   if (public_key->key_length != kOtcryptoMldsa44PublicKeyBytes) {
+     return OTCRYPTO_BAD_ARGS;
+   }
++  if (signature.len != kOtcryptoMldsa44SignatureBytes) {
++    return OTCRYPTO_BAD_ARGS;
++  }
+   if (sign_mode != kOtcryptoMldsaSignModeMldsa) {
+     return OTCRYPTO_BAD_ARGS;
+   }
+@@ -218,7 +220,7 @@ otcrypto_status_t otcrypto_mldsa44_verify(
+   mld_alloc_ctx_t ctx = {.base = work,
+                          .size_words = kOtcryptoMldsa44WorkBufferVerifyWords,
+                          .offset_words = 0};
+-  int result = mldsa44_verify(signature.data, signature.len, message.data,
++  int result = mldsa44_verify(signature.data, message.data,
+                               message.len, context.data, context.len,
+                               (const uint8_t *)public_key->key, &ctx);
+ 
+@@ -359,9 +361,8 @@ otcrypto_status_t otcrypto_mldsa65_sign_derand(
+     memcpy(pre + 2, context.data, context.len);
+   }
+ 
+-  size_t signature_len;
+   int result = mldsa65_signature_internal(
+-      signature.data, &signature_len, message.data, message.len, pre,
++      signature.data, message.data, message.len, pre,
+       2 + context.len, rnd.data, (const uint8_t *)sk_share0, 0, &ctx);
+ 
+   if (result != 0) {
+@@ -386,6 +387,9 @@ otcrypto_status_t otcrypto_mldsa65_verify(
+   if (public_key->key_length != kOtcryptoMldsa65PublicKeyBytes) {
+     return OTCRYPTO_BAD_ARGS;
+   }
++  if (signature.len != kOtcryptoMldsa65SignatureBytes) {
++    return OTCRYPTO_BAD_ARGS;
++  }
+   if (sign_mode != kOtcryptoMldsaSignModeMldsa) {
+     return OTCRYPTO_BAD_ARGS;
+   }
+@@ -399,7 +403,7 @@ otcrypto_status_t otcrypto_mldsa65_verify(
+   mld_alloc_ctx_t ctx = {.base = work,
+                          .size_words = kOtcryptoMldsa65WorkBufferVerifyWords,
+                          .offset_words = 0};
+-  int result = mldsa65_verify(signature.data, signature.len, message.data,
++  int result = mldsa65_verify(signature.data, message.data,
+                               message.len, context.data, context.len,
+                               (const uint8_t *)public_key->key, &ctx);
+ 
+@@ -540,9 +544,8 @@ otcrypto_status_t otcrypto_mldsa87_sign_derand(
+     memcpy(pre + 2, context.data, context.len);
+   }
+ 
+-  size_t signature_len;
+   int result = mldsa87_signature_internal(
+-      signature.data, &signature_len, message.data, message.len, pre,
++      signature.data, message.data, message.len, pre,
+       2 + context.len, rnd.data, (const uint8_t *)sk_share0, 0, &ctx);
+ 
+   if (result != 0) {
+@@ -567,6 +570,9 @@ otcrypto_status_t otcrypto_mldsa87_verify(
+   if (public_key->key_length != kOtcryptoMldsa87PublicKeyBytes) {
+     return OTCRYPTO_BAD_ARGS;
+   }
++  if (signature.len != kOtcryptoMldsa87SignatureBytes) {
++    return OTCRYPTO_BAD_ARGS;
++  }
+   if (sign_mode != kOtcryptoMldsaSignModeMldsa) {
+     return OTCRYPTO_BAD_ARGS;
+   }
+@@ -580,7 +586,7 @@ otcrypto_status_t otcrypto_mldsa87_verify(
+   mld_alloc_ctx_t ctx = {.base = work,
+                          .size_words = kOtcryptoMldsa87WorkBufferVerifyWords,
+                          .offset_words = 0};
+-  int result = mldsa87_verify(signature.data, signature.len, message.data,
++  int result = mldsa87_verify(signature.data, message.data,
+                               message.len, context.data, context.len,
+                               (const uint8_t *)public_key->key, &ctx);
+ 

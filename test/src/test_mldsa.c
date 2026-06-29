@@ -55,7 +55,6 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
                           uint8_t sig[MLDSA_SIG_BYTES], uint8_t m[MLEN],
                           uint8_t ctx[CTXLEN])
 {
-  size_t siglen;
   int rc;
 
 
@@ -65,9 +64,9 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, MLEN);
 
-  CHECK_SIGN_RC(mld_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(mld_sign_signature(sig, m, MLEN, ctx, CTXLEN, sk));
 
-  rc = mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -75,12 +74,6 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
   if (rc)
   {
     printf("ERROR: verify\n");
-    return 1;
-  }
-
-  if (siglen != MLDSA_SIG_BYTES)
-  {
-    printf("ERROR: signature - wrong siglen\n");
     return 1;
   }
 
@@ -115,14 +108,13 @@ static int test_sign_extmu(void)
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[MLDSA_CRHBYTES];
-  size_t siglen;
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
   MLD_CT_TESTING_SECRET(mu, sizeof(mu));
 
-  CHECK_SIGN_RC(mld_sign_signature_extmu(sig, &siglen, mu, sk));
-  CHECK(mld_sign_verify_extmu(sig, siglen, mu, pk) == 0);
+  CHECK_SIGN_RC(mld_sign_signature_extmu(sig, mu, sk));
+  CHECK(mld_sign_verify_extmu(sig, mu, pk) == 0);
 
   return 0;
 }
@@ -136,7 +128,6 @@ static int test_sign_pre_hash(void)
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
   uint8_t rnd[MLDSA_RNDBYTES];
-  size_t siglen;
 
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
@@ -147,16 +138,14 @@ static int test_sign_pre_hash(void)
   CHECK(randombytes(rnd, MLDSA_RNDBYTES) == 0);
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
 
-  CHECK_SIGN_RC(mld_sign_signature_pre_hash_shake256(sig, &siglen, m, MLEN, ctx,
-                                                     CTXLEN, rnd, sk));
-  CHECK(mld_sign_verify_pre_hash_shake256(sig, siglen, m, MLEN, ctx, CTXLEN,
-                                          pk) == 0);
+  CHECK_SIGN_RC(
+      mld_sign_signature_pre_hash_shake256(sig, m, MLEN, ctx, CTXLEN, rnd, sk));
+  CHECK(mld_sign_verify_pre_hash_shake256(sig, m, MLEN, ctx, CTXLEN, pk) == 0);
 
   /* MLD_PREHASH_NONE must be rejected by the internal prehash APIs. */
-  CHECK(mld_sign_verify_pre_hash_internal(sig, siglen, m, MLEN, ctx, CTXLEN, pk,
+  CHECK(mld_sign_verify_pre_hash_internal(sig, m, MLEN, ctx, CTXLEN, pk,
                                           MLD_PREHASH_NONE) == MLD_ERR_FAIL);
-  CHECK(mld_sign_signature_pre_hash_internal(sig, &siglen, m, MLEN, ctx, CTXLEN,
-                                             rnd, sk,
+  CHECK(mld_sign_signature_pre_hash_internal(sig, m, MLEN, ctx, CTXLEN, rnd, sk,
                                              MLD_PREHASH_NONE) == MLD_ERR_FAIL);
 
   return 0;
@@ -234,7 +223,6 @@ static int test_wrong_pk(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  size_t siglen;
   int rc;
   size_t idx;
 
@@ -244,7 +232,7 @@ static int test_wrong_pk(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(mld_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(mld_sign_signature(sig, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in public key */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -252,7 +240,7 @@ static int test_wrong_pk(void)
 
   pk[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -272,7 +260,6 @@ static int test_wrong_sig(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  size_t siglen;
   int rc;
   size_t idx;
 
@@ -282,7 +269,7 @@ static int test_wrong_sig(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(mld_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(mld_sign_signature(sig, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in signature */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -290,7 +277,7 @@ static int test_wrong_sig(void)
 
   sig[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -311,7 +298,6 @@ static int test_wrong_ctx(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  size_t siglen;
   int rc;
   size_t idx;
 
@@ -321,7 +307,7 @@ static int test_wrong_ctx(void)
   CHECK(randombytes(m, MLEN) == 0);
   MLD_CT_TESTING_SECRET(m, sizeof(m));
 
-  CHECK_SIGN_RC(mld_sign_signature(sig, &siglen, m, MLEN, ctx, CTXLEN, sk));
+  CHECK_SIGN_RC(mld_sign_signature(sig, m, MLEN, ctx, CTXLEN, sk));
 
   /* flip bit in ctx */
   CHECK(randombytes((uint8_t *)&idx, sizeof(size_t)) == 0);
@@ -329,7 +315,7 @@ static int test_wrong_ctx(void)
 
   ctx[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
@@ -372,7 +358,6 @@ static int test_sign_expected_keypair(void)
 static int test_sign_expected_sign(void)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
-  size_t siglen;
 
   /* WARNING: Test-only
    * Normally, you would seed a PRNG _once_ with trustworthy entropy
@@ -380,9 +365,8 @@ static int test_sign_expected_sign(void)
    * independent and reproducible. */
   randombytes_reset();
   CHECK_SIGN_RC(mld_sign_signature(
-      sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+      sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN, test_vector_sk));
-  CHECK(siglen == MLDSA_SIG_BYTES);
   CHECK(memcmp(sig, test_vector_sig, MLDSA_SIG_BYTES) == 0);
 
   return 0;
@@ -392,10 +376,9 @@ static int test_sign_expected_sign(void)
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
 static int test_sign_expected_verify(void)
 {
-  CHECK(mld_sign_verify(test_vector_sig, MLDSA_SIG_BYTES,
-                        (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                        (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                        test_vector_pk) == 0);
+  CHECK(mld_sign_verify(test_vector_sig, (const uint8_t *)TEST_VECTOR_MSG,
+                        TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                        TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
 
   return 0;
 }

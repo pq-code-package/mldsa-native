@@ -99,7 +99,6 @@ static int bench(void)
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
   unsigned char sig_rand[MLDSA_SEEDBYTES];
-  size_t siglen;
   unsigned char pre[CTXLEN + 2];
   uint64_t cycles_sign[MLD_BENCHMARK_NTESTS];
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API */
@@ -150,14 +149,14 @@ static int bench(void)
 
       for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
       {
-        ret |= mld_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                           CTXLEN + 2, sig_rand, sk, 0);
+        ret |= mld_sign_signature_internal(sig, m, MLEN, pre, CTXLEN + 2,
+                                           sig_rand, sk, 0);
       }
       t0 = get_cyclecounter();
       for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
       {
-        ret |= mld_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                           CTXLEN + 2, sig_rand, sk, 0);
+        ret |= mld_sign_signature_internal(sig, m, MLEN, pre, CTXLEN + 2,
+                                           sig_rand, sk, 0);
       }
       t1 = get_cyclecounter();
       cycles_sign[i] = t1 - t0;
@@ -174,12 +173,12 @@ static int bench(void)
       /* Verification */
       for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
       {
-        ret |= mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+        ret |= mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
       }
       t0 = get_cyclecounter();
       for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
       {
-        ret |= mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+        ret |= mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
       }
       t1 = get_cyclecounter();
       cycles_verify[i] = t1 - t0;

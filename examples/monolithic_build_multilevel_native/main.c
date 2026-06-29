@@ -91,14 +91,12 @@ static int example_mldsa87_keygen(void)
 static int example_mldsa44_sign(void)
 {
   uint8_t sig[MLDSA44_BYTES];
-  size_t siglen;
 
   printf("  Signing message... ");
-  CHECK(mldsa44_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+  CHECK(mldsa44_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_44) == 0);
-  CHECK(siglen == sizeof(test_vector_sig_44));
-  CHECK(memcmp(sig, test_vector_sig_44, siglen) == 0);
+  CHECK(memcmp(sig, test_vector_sig_44, sizeof(test_vector_sig_44)) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -106,14 +104,12 @@ static int example_mldsa44_sign(void)
 static int example_mldsa65_sign(void)
 {
   uint8_t sig[MLDSA65_BYTES];
-  size_t siglen;
 
   printf("  Signing message... ");
-  CHECK(mldsa65_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+  CHECK(mldsa65_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_65) == 0);
-  CHECK(siglen == sizeof(test_vector_sig_65));
-  CHECK(memcmp(sig, test_vector_sig_65, siglen) == 0);
+  CHECK(memcmp(sig, test_vector_sig_65, sizeof(test_vector_sig_65)) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -121,14 +117,12 @@ static int example_mldsa65_sign(void)
 static int example_mldsa87_sign(void)
 {
   uint8_t sig[MLDSA87_BYTES];
-  size_t siglen;
 
   printf("  Signing message... ");
-  CHECK(mldsa87_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+  CHECK(mldsa87_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_87) == 0);
-  CHECK(siglen == sizeof(test_vector_sig_87));
-  CHECK(memcmp(sig, test_vector_sig_87, siglen) == 0);
+  CHECK(memcmp(sig, test_vector_sig_87, sizeof(test_vector_sig_87)) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -156,10 +150,9 @@ static int example_mldsa87_sign(void)
 static int example_mldsa44_verify(void)
 {
   printf("  Verifying signature... ");
-  CHECK(mldsa44_verify(test_vector_sig_44, sizeof(test_vector_sig_44),
-                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                       test_vector_pk_44) == 0);
+  CHECK(mldsa44_verify(test_vector_sig_44, (const uint8_t *)TEST_VECTOR_MSG,
+                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                       TEST_VECTOR_CTX_LEN, test_vector_pk_44) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -167,10 +160,9 @@ static int example_mldsa44_verify(void)
 static int example_mldsa65_verify(void)
 {
   printf("  Verifying signature... ");
-  CHECK(mldsa65_verify(test_vector_sig_65, sizeof(test_vector_sig_65),
-                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                       test_vector_pk_65) == 0);
+  CHECK(mldsa65_verify(test_vector_sig_65, (const uint8_t *)TEST_VECTOR_MSG,
+                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                       TEST_VECTOR_CTX_LEN, test_vector_pk_65) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -178,10 +170,9 @@ static int example_mldsa65_verify(void)
 static int example_mldsa87_verify(void)
 {
   printf("  Verifying signature... ");
-  CHECK(mldsa87_verify(test_vector_sig_87, sizeof(test_vector_sig_87),
-                       (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                       (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                       test_vector_pk_87) == 0);
+  CHECK(mldsa87_verify(test_vector_sig_87, (const uint8_t *)TEST_VECTOR_MSG,
+                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                       TEST_VECTOR_CTX_LEN, test_vector_pk_87) == 0);
   printf("DONE\n");
   return 0;
 }

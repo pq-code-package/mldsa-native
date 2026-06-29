@@ -78,7 +78,6 @@ static int example_keygen(void)
 static int example_sign(void)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
-  size_t siglen;
   uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* prefix string (0, ctxlen, ctx) */
 
   printf("Signing message... ");
@@ -88,13 +87,12 @@ static int example_sign(void)
   pre[1] = TEST_VECTOR_CTX_LEN;
   memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
 
-  CHECK(mldsa_signature_internal(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+  CHECK(mldsa_signature_internal(sig, (const uint8_t *)TEST_VECTOR_MSG,
                                  TEST_VECTOR_MSG_LEN, pre, sizeof(pre),
                                  test_vector_rnd, test_vector_sk, 0) == 0);
 
   /* Deterministic signing with explicit randomness -- always compare */
-  CHECK(siglen == sizeof(test_vector_sig));
-  CHECK(memcmp(sig, test_vector_sig, siglen) == 0);
+  CHECK(memcmp(sig, test_vector_sig, sizeof(test_vector_sig)) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -110,10 +108,9 @@ static int example_sign(void)
 static int example_verify(void)
 {
   printf("Verifying signature... ");
-  CHECK(mldsa_verify(test_vector_sig, sizeof(test_vector_sig),
-                     (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                     (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                     test_vector_pk) == 0);
+  CHECK(mldsa_verify(test_vector_sig, (const uint8_t *)TEST_VECTOR_MSG,
+                     TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                     TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
   printf("DONE\n");
   return 0;
 }
