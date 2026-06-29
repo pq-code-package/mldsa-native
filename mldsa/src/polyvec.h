@@ -41,22 +41,22 @@ typedef struct
 /**
  * Sample vector of polynomials with uniformly random coefficients in
  * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output stream of
- * SHAKE256(seed|nonce).
+ * SHAKE256(seed|kappa+i) for component i.
  *
  * @spec{Implements @[FIPS204, Algorithm 34, ExpandMask].}
  *
  * @param[out] v     Pointer to output vector.
  * @param[in]  seed  Byte array with seed of length MLDSA_CRHBYTES.
- * @param      nonce 16-bit nonce.
+ * @param      kappa Base counter; component i uses kappa + i.
  */
 MLD_INTERNAL_API
 void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
                                  const uint8_t seed[MLDSA_CRHBYTES],
-                                 uint16_t nonce)
+                                 uint16_t kappa)
 __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
   requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  requires(nonce <= (UINT16_MAX - MLDSA_L) / MLDSA_L)
+  requires(kappa <= UINT16_MAX - MLDSA_L)
   assigns(memory_slice(v, sizeof(mld_polyvecl)))
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))

@@ -7,7 +7,7 @@ void harness(void)
 {
   mld_yvec *y;
   uint8_t *rhoprime;
-  uint16_t nonce;
+  uint16_t kappa;
 
-  mld_yvec_init(y, rhoprime, nonce);
+  mld_yvec_init(y, rhoprime, kappa);
 }

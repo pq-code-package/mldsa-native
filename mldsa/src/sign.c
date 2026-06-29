@@ -490,13 +490,14 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/* Reference: The reference implementation does not explicitly check the
- * maximum nonce value, but instead loops indefinitely (even when the nonce
- * would overflow). Internally, sampling of y uses
- * (nonce*L), (nonce*L+1), ..., (nonce*L + L - 1).
- * Hence, there are no overflows if nonce < (UINT16_MAX - L)/L.
- * Explicitly checking for this explicitly allows us to prove type-safety. */
-#define MLD_NONCE_UB ((UINT16_MAX - MLDSA_L) / MLDSA_L)
+/* Sampling y from counter kappa uses nonces kappa, ..., kappa+L-1, which fit in
+ * uint16_t iff kappa <= UINT16_MAX - MLDSA_L. */
+#define MLD_MAX_KAPPA (UINT16_MAX - MLDSA_L)
+
+/* With kappa = attempt*MLDSA_L, the kappa bound becomes a bound on attempts.
+ * Bounding attempts (the reference loops indefinitely) gives predictable
+ * termination and provable type-safety. */
+#define MLD_MAX_SIGNING_ATTEMPTS (MLD_MAX_KAPPA / MLDSA_L)
 
 /**
  * Compute z = y + s1*c, check that z has coefficients smaller than
@@ -538,7 +539,7 @@ __contract__(
   MLD_IF_REDUCE_RAM(
     requires(memory_no_alias(s1hat->packed, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
     requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
-    requires(y->nonce <= MLD_NONCE_UB)
+    requires(y->kappa <= MLD_MAX_KAPPA)
   )
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   assigns(memory_slice(z, sizeof(mld_poly)))
@@ -594,7 +595,7 @@ __contract__(
  * in mldsa_native_config.h. Default is chosen so that failure probability
  * is < 2^{-256}, that is, signatures will practically always succeed. */
 #ifndef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
-#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS MLD_NONCE_UB
+#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS MLD_MAX_SIGNING_ATTEMPTS
 #endif
 
 #if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
@@ -606,7 +607,7 @@ __contract__(
 #error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 1
 #endif
 
-#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS > MLD_NONCE_UB
+#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS > MLD_MAX_SIGNING_ATTEMPTS
 #error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS exceeds the maximum allowed value.
 #endif
 
@@ -614,7 +615,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE uint16_t mld_get_max_signing_attempts(void)
 __contract__(
   ensures(return_value >= 1)
-  ensures(return_value <= MLD_NONCE_UB)
+  ensures(return_value <= MLD_MAX_SIGNING_ATTEMPTS)
 )
 {
   /* cassert(0) ensures CBMC uses the contract rather than inlining the body,
@@ -631,10 +632,9 @@ __contract__(
  * @[FIPS204, Algorithm 7, ML-DSA.Sign_internal] (lines 11-30) plus, on success,
  * the sigEncode step (line 33). The per-signature setup (Algorithm 7 lines 1-7:
  * skDecode, NTT of s1/s2/t0, ExpandA, and computation of mu and rhoprime) and
- * the loop itself (lines 8-10, 31-32, including the counter kappa) live in the
- * caller mld_sign_signature_internal; nonce is that caller's iteration counter,
- * from which the spec counter kappa = nonce*MLDSA_L is derived when sampling
- * y.}
+ * the loop itself (lines 8-10, 31-32) live in the caller
+ * mld_sign_signature_internal; kappa is this iteration's counter, used to
+ * sample y.}
  *
  * @reference{This code differs from the reference implementation in that it
  * factors out the core signature generation step into a distinct function
@@ -644,7 +644,7 @@ __contract__(
  * @param[in]  mu       Pointer to message or hash of exactly MLDSA_CRHBYTES
  *                      bytes.
  * @param[in]  rhoprime Pointer to randomness seed.
- * @param      nonce    Current nonce value.
+ * @param      kappa    Counter for this iteration (= attempt*MLDSA_L).
  * @param[in]  mat      Expanded matrix.
  * @param[in]  s1hat    Secret vector s1 in NTT domain.
  * @param[in]  s2hat    Secret vector s2 in NTT domain.
@@ -662,7 +662,7 @@ MLD_MUST_CHECK_RETURN_VALUE
 /* NOLINTNEXTLINE(readability-function-cognitive-complexity) */
 static int mld_attempt_signature_generation(
     uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *mu,
-    const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t nonce, mld_polymat *mat,
+    const uint8_t rhoprime[MLDSA_CRHBYTES], uint16_t kappa, mld_polymat *mat,
     const mld_sk_s1hat *s1hat, const mld_sk_s2hat *s2hat,
     const mld_sk_t0hat *t0hat, MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
 __contract__(
@@ -673,7 +673,7 @@ __contract__(
   requires(memory_no_alias(s1hat, sizeof(mld_sk_s1hat)))
   requires(memory_no_alias(s2hat, sizeof(mld_sk_s2hat)))
   requires(memory_no_alias(t0hat, sizeof(mld_sk_t0hat)))
-  requires(nonce <= MLD_NONCE_UB)
+  requires(kappa <= MLD_MAX_KAPPA)
   MLD_IF_NOT_REDUCE_RAM(
     requires(forall(k1, 0, MLDSA_K, forall(l1, 0, MLDSA_L,
                                            array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
@@ -723,10 +723,8 @@ __contract__(
   w1 = &w1tmp->w1;
   tmp = &w1tmp->tmp;
 
-  /* @[FIPS204, Algorithm 7, line 11] y <- ExpandMask(rhoprime, kappa), with
-   * spec counter kappa = nonce*MLDSA_L derived from nonce inside mld_yvec_init.
-   */
-  mld_yvec_init(y, rhoprime, nonce);
+  /* @[FIPS204, Algorithm 7, line 11] y <- ExpandMask(rhoprime, kappa). */
+  mld_yvec_init(y, rhoprime, kappa);
 
   /* @[FIPS204, Algorithm 7, line 12] w <- invNTT(A_hat o NTT(y)). This call
    * performs the whole line: it NTTs y, accumulates the pointwise product with
@@ -913,8 +911,8 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
 {
   int ret;
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
-  uint16_t nonce = 0;
   const uint16_t max_signing_attempts = mld_get_max_signing_attempts();
+  uint16_t attempt = 0;
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
@@ -961,29 +959,26 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
   /* @[FIPS204, Algorithm 7, line 5] A_hat <- ExpandA(rho). */
   mld_polyvec_matrix_expand(mat, rho);
 
-  /* @[FIPS204, Algorithm 7, lines 8-10 and 31-32] the rejection-sampling loop:
-   * the spec counter kappa starts at 0 and is incremented by MLDSA_L each
-   * iteration; here it is tracked by nonce (kappa = nonce*MLDSA_L), incremented
-   * by 1 per iteration. Each iteration's body (lines 11-30) plus, on success,
-   * the line-33 sigEncode are performed by mld_attempt_signature_generation. */
+  /* @[FIPS204, Algorithm 7, lines 8-10 and 31-32] the rejection-sampling loop,
+   * tracked by attempt (kappa = attempt*MLDSA_L). Each iteration's body (lines
+   * 11-30) plus, on success, the line-33 sigEncode are performed by
+   * mld_attempt_signature_generation. */
 
-  /* Reference: the reference implementation uses an unbounded loop. We instead
-   * iterate nonce over the statically bounded range [0, max_signing_attempts),
-   * which gives predictable termination and makes the increment of nonce
-   * provably type-safe. The loop is left early via goto cleanup once an attempt
-   * succeeds or fails fatally; if it instead runs to completion, every attempt
-   * was rejected and signing has exhausted its budget. With a FIPS-compliant
-   * value of MLD_CONFIG_MAX_SIGNING_ATTEMPTS, this should never happen. */
-  for (; nonce < max_signing_attempts; nonce++)
+  /* Reference: the reference loops unboundedly; we instead iterate over the
+   * bounded range [0, max_signing_attempts) for predictable termination.
+   * A success or fatal error exits via goto cleanup; running to completion
+   * means every attempt was rejected; with a FIPS compliant choice of
+   * MLD_CONFIG_MAX_SIGNING_ATTEMPTS, this should never happen. */
+  for (; attempt < max_signing_attempts; attempt++)
   __loop__(
     MLD_IF_NOT_REDUCE_RAM(
-      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
+      assigns(attempt, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES))
     )
     MLD_IF_REDUCE_RAM(
-      assigns(nonce, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
+      assigns(attempt, ret, object_whole(siglen), memory_slice(sig, MLDSA_CRYPTO_BYTES),
               memory_slice(mat, sizeof(mld_polymat)))
     )
-    invariant(nonce <= max_signing_attempts)
+    invariant(attempt <= max_signing_attempts)
 
     /* t0, s1, s2, and mat are initialized above and are NOT changed by this */
     /* loop. We can therefore re-assert their bounds here as part of the     */
@@ -995,10 +990,13 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       invariant(forall(k3, 0, MLDSA_L, array_abs_bound(s1hat->vec.vec[k3].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
       invariant(forall(k4, 0, MLDSA_K, array_abs_bound(s2hat->vec.vec[k4].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     )
-    decreases(max_signing_attempts - nonce)
+    decreases(max_signing_attempts - attempt)
   )
   {
-    ret = mld_attempt_signature_generation(sig, mu, rhoprime, nonce, mat, s1hat,
+    /* Safety: attempt < max_signing_attempts <= MLD_MAX_SIGNING_ATTEMPTS, so
+     * kappa <= MLD_MAX_KAPPA and the cast is safe. */
+    const uint16_t kappa = (uint16_t)(attempt * MLDSA_L);
+    ret = mld_attempt_signature_generation(sig, mu, rhoprime, kappa, mat, s1hat,
                                            s2hat, t0hat, context);
     if (ret == 0)
     {
@@ -1011,12 +1009,12 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES], size_t *siglen,
       goto cleanup;
     }
 
-    /* Otherwise, the signature was rejected; try the next nonce. */
+    /* Otherwise, the signature was rejected; try the next attempt. */
   }
 
-  /* The loop ran to completion: every attempt in [0, max_signing_attempts) was
-   * rejected, so signing has exhausted its budget. With a FIPS-compliant value
-   * of MLD_CONFIG_MAX_SIGNING_ATTEMPTS, this should never happen. */
+  /* Loop ran to completion: all attempts rejected, budget exhausted.
+   * This should never happen with a FIPS compliant choice of
+   * MLD_CONFIG_MAX_SIGNING_ATTEMPTS. */
   ret = MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED;
 
 cleanup:
@@ -1663,6 +1661,7 @@ cleanup:
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1
 #undef mld_get_max_signing_attempts
-#undef MLD_NONCE_UB
+#undef MLD_MAX_SIGNING_ATTEMPTS
+#undef MLD_MAX_KAPPA
 #undef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN
