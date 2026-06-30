@@ -1426,8 +1426,10 @@ static int test_signature_internal_rejects_short_external_mu(void)
                                     NULL, 0, rnd, sk, 1, NULL) == MLD_ERR_FAIL);
   CHECK(mld_sign_signature_internal(sig, &siglen, mu, sizeof(mu), NULL, 0, rnd,
                                     sk, 1, NULL) == 0);
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK(mld_sign_verify_internal(sig, siglen, short_mu, sizeof(short_mu), NULL,
                                  0, pk, 1, NULL) == MLD_ERR_FAIL);
+#endif
 
   ret = 0;
 
