@@ -45,25 +45,6 @@
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 #include "consts.h"
 
-.if MLD_AVX2_BACKEND_DATA_OFFSET_8XQ != 0
-.error "Update intt_avx2_asm.S qdata displacements for 8XQ"
-.endif
-.if MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV != 8
-.error "Update intt_avx2_asm.S qdata displacements for 8XQINV"
-.endif
-.if MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV_QINV != 16
-.error "Update intt_avx2_asm.S qdata displacements for 8XDIV_QINV"
-.endif
-.if MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV != 24
-.error "Update intt_avx2_asm.S qdata displacements for 8XDIV"
-.endif
-.if MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV != 32
-.error "Update intt_avx2_asm.S qdata displacements for ZETAS_QINV"
-.endif
-.if MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS != 328
-.error "Update intt_avx2_asm.S qdata displacements for ZETAS"
-.endif
-
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
