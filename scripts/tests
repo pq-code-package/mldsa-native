@@ -33,7 +33,10 @@ def dict2str(dict):
     return s
 
 
-SAFE_MAKE_FLAG_RE = re.compile(r"^[A-Za-z0-9_.,:+=/@% -]*$")
+# CI passes escaped quotes for configuration-file defines such as
+# -DMLD_CONFIG_FILE=\"../test/configs/custom_heap_alloc_config.h\".
+# Keep shell metacharacters such as ;, $, `, |, &, <, >, and newlines out.
+SAFE_MAKE_FLAG_RE = re.compile(r'^[A-Za-z0-9_.,:+=/@% "\\-]*$')
 SAFE_CROSS_PREFIX_RE = re.compile(r"^[A-Za-z0-9_./+-]*$")
 
 
