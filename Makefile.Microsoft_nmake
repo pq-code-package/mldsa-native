@@ -132,6 +132,21 @@ OPT = 0
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\acvp mkdir $(MLDSA87_BUILD_DIR)\test\acvp
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\acvp\ $<
 
+# compilation of wycheproof test for mldsa44
+{test\wycheproof}.c{$(MLDSA44_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test\wycheproof mkdir $(MLDSA44_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\wycheproof\ $<
+
+# compilation of wycheproof test for mldsa65
+{test\wycheproof}.c{$(MLDSA65_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test\wycheproof mkdir $(MLDSA65_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\wycheproof\ $<
+
+# compilation of wycheproof test for mldsa87
+{test\wycheproof}.c{$(MLDSA87_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\wycheproof mkdir $(MLDSA87_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\wycheproof\ $<
+
 # compile functional test for mldsa44
 test_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\test_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
     @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
@@ -207,7 +222,24 @@ test_alloc87: $(OBJ_FILES_87_ALLOC) $(MLDSA87_BUILD_DIR)\test\alloc\test_alloc.o
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_alloc87 $** /link
 
+# compile wycheproof test for mldsa44
+wycheproof_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\wycheproof_mldsa44 $** /link
+
+# compile wycheproof test for mldsa65
+wycheproof_mldsa65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\wycheproof_mldsa65 $** /link
+
+# compile wycheproof test for mldsa87
+wycheproof_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\wycheproof_mldsa87 $** /link
+
 acvp: acvp_mldsa44 acvp_mldsa65 acvp_mldsa87
+
+wycheproof: wycheproof_mldsa44 wycheproof_mldsa65 wycheproof_mldsa87
 
 gen_KAT: gen_KAT44 gen_KAT65 gen_KAT87
 
@@ -218,6 +250,9 @@ run_kat: gen_KAT
 
 run_acvp: acvp
     python test/acvp/acvp_client.py
+
+run_wycheproof: wycheproof
+    python test/wycheproof/wycheproof_client.py
 
 run_func: test_mldsa44 test_mldsa65 test_mldsa87
     $(MLDSA44_BUILD_DIR)\bin\test_mldsa44.exe
@@ -234,7 +269,7 @@ run_alloc: test_alloc44 test_alloc65 test_alloc87
     $(MLDSA65_BUILD_DIR)\bin\test_alloc65.exe
     $(MLDSA87_BUILD_DIR)\bin\test_alloc87.exe
 
-test: run_func run_rng_fail run_alloc run_acvp run_kat
+test: run_func run_rng_fail run_alloc run_acvp run_kat run_wycheproof
     @echo   Everything checks fine!
 
 quickcheck: test
