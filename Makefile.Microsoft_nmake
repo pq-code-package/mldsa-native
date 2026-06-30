@@ -127,6 +127,21 @@ gen_KAT87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\ra
     @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
     $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\gen_KAT87 $** /link
 
+# compile RNG fail test for mldsa44
+test_rng_fail44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\test_rng_fail44 $** /link
+
+# compile RNG fail test for mldsa65
+test_rng_fail65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\test_rng_fail65 $** /link
+
+# compile RNG fail test for mldsa87
+test_rng_fail87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_rng_fail87 $** /link
+
 acvp: acvp_mldsa44 acvp_mldsa65 acvp_mldsa87
 
 gen_KAT: gen_KAT44 gen_KAT65 gen_KAT87
@@ -144,7 +159,12 @@ run_func: test_mldsa44 test_mldsa65 test_mldsa87
     $(MLDSA65_BUILD_DIR)\bin\test_mldsa65.exe
     $(MLDSA87_BUILD_DIR)\bin\test_mldsa87.exe
 
-test: run_func run_acvp run_kat
+run_rng_fail: test_rng_fail44 test_rng_fail65 test_rng_fail87
+    $(MLDSA44_BUILD_DIR)\bin\test_rng_fail44.exe
+    $(MLDSA65_BUILD_DIR)\bin\test_rng_fail65.exe
+    $(MLDSA87_BUILD_DIR)\bin\test_rng_fail87.exe
+
+test: run_func run_rng_fail run_acvp run_kat
     @echo   Everything checks fine!
 
 quickcheck: test
