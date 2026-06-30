@@ -65,7 +65,8 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         custom_shell: ${{ inputs.custom_shell }}
         script: |
-          if [[ ! "$BENCH_CROSS_PREFIX" =~ ^[A-Za-z0-9_./+-]*$ ]]; then
+          safe_cross_prefix_re='^[A-Za-z0-9_./+-]*$'
+          if [[ ! "$BENCH_CROSS_PREFIX" =~ $safe_cross_prefix_re ]]; then
             printf 'cross_prefix contains unsupported characters\n' >&2
             exit 1
           fi
