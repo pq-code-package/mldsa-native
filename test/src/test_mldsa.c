@@ -4,7 +4,6 @@
  */
 
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "../notrandombytes/notrandombytes.h"
@@ -14,14 +13,14 @@
 
 /* Additional SUPERCOP-style macros for functions not in the standard set */
 #define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
+#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
+#define crypto_sign_verify_internal MLD_API_NAMESPACE(verify_internal)
 #define crypto_sign_signature_extmu MLD_API_NAMESPACE(signature_extmu)
 #define crypto_sign_verify_extmu MLD_API_NAMESPACE(verify_extmu)
 #define crypto_sign_signature_pre_hash_shake256 \
   MLD_API_NAMESPACE(signature_pre_hash_shake256)
 #define crypto_sign_verify_pre_hash_shake256 \
   MLD_API_NAMESPACE(verify_pre_hash_shake256)
-#define crypto_sign_prepare_domain_separation_prefix \
-  MLD_API_NAMESPACE(prepare_domain_separation_prefix)
 #define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
 
 #ifndef NTESTS
@@ -137,38 +136,45 @@ static int test_sign_unaligned(void)
   return test_sign_core(pk + 1, sk + 1, sm + 1, m + 1, m2 + 1, ctx + 1);
 }
 
-static int test_sign_oversized_message_rejected(void)
+static int test_invalid_inputs_rejected(void)
 {
   uint8_t pk[CRYPTO_PUBLICKEYBYTES];
   uint8_t sk[CRYPTO_SECRETKEYBYTES];
-  uint8_t sm[CRYPTO_BYTES];
-  uint8_t m[1] = {0};
-  uint8_t ctx[CTXLEN];
-  size_t smlen = CRYPTO_BYTES;
+  uint8_t sig[CRYPTO_BYTES];
+  uint8_t m[MLEN];
+  uint8_t mu[MLDSA_CRHBYTES];
+  uint8_t rnd[MLDSA_RNDBYTES];
+  size_t siglen = CRYPTO_BYTES;
   int rc;
 
   CHECK(crypto_sign_keypair(pk, sk) == 0);
-  CHECK(randombytes(ctx, sizeof(ctx)) == 0);
-  MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
+  CHECK(randombytes(m, sizeof(m)) == 0);
+  MLD_CT_TESTING_SECRET(m, sizeof(m));
+  CHECK(randombytes(mu, sizeof(mu)) == 0);
+  MLD_CT_TESTING_SECRET(mu, sizeof(mu));
+  CHECK(randombytes(rnd, sizeof(rnd)) == 0);
+  MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
+  CHECK(randombytes(sig, sizeof(sig)) == 0);
+  MLD_CT_TESTING_SECRET(sig, sizeof(sig));
 
-  rc = crypto_sign(sm, &smlen, m, SIZE_MAX, ctx, sizeof(ctx), sk);
-  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(rc));
-  MLD_CT_TESTING_DECLASSIFY(&smlen, sizeof(smlen));
-
+  rc = crypto_sign_signature(sig, &siglen, m, sizeof(m), NULL, 1, sk);
   CHECK(rc == MLD_ERR_FAIL);
-  CHECK(smlen == 0);
+  CHECK(siglen == 0);
 
-  return 0;
-}
+  siglen = CRYPTO_BYTES;
+  rc = crypto_sign_signature_internal(sig, &siglen, mu, MLDSA_CRHBYTES - 1,
+                                      NULL, 0, rnd, sk, 1);
+  CHECK(rc == MLD_ERR_FAIL);
+  CHECK(siglen == 0);
 
-static int test_prepare_prefix_null_context_rejected(void)
-{
-  uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES];
-
-  CHECK(crypto_sign_prepare_domain_separation_prefix(prefix, NULL, 0, NULL, 0,
-                                                     MLD_PREHASH_NONE) == 2);
-  CHECK(crypto_sign_prepare_domain_separation_prefix(prefix, NULL, 0, NULL, 1,
-                                                     MLD_PREHASH_NONE) == 0);
+  rc = crypto_sign_verify(sig, CRYPTO_BYTES, m, sizeof(m), NULL, 1, pk);
+  CHECK(rc == MLD_ERR_FAIL);
+  rc = crypto_sign_verify_internal(sig, CRYPTO_BYTES - 1, mu, sizeof(mu), NULL,
+                                   0, pk, 1);
+  CHECK(rc == MLD_ERR_FAIL);
+  rc = crypto_sign_verify_internal(sig, CRYPTO_BYTES, mu, MLDSA_CRHBYTES - 1,
+                                   NULL, 0, pk, 1);
+  CHECK(rc == MLD_ERR_FAIL);
 
   return 0;
 }
@@ -548,8 +554,7 @@ int main(void)
     !defined(MLD_CONFIG_NO_VERIFY_API)
     r |= test_sign();
     r |= test_sign_unaligned();
-    r |= test_sign_oversized_message_rejected();
-    r |= test_prepare_prefix_null_context_rejected();
+    r |= test_invalid_inputs_rejected();
     r |= test_wrong_pk();
     r |= test_wrong_sig();
     r |= test_wrong_ctx();

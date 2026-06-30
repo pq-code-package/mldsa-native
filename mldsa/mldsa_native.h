@@ -436,8 +436,7 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *                     MLDSA{44,65,87}_BYTES + mlen bytes); can be equal to m.
  * @param[out] smlen   Pointer to output length of signed message.
  * @param[in]  m       Pointer to message to be signed.
- * @param      mlen    Length of message. Must be <= SIZE_MAX -
- *                     MLDSA{44,65,87}_BYTES.
+ * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string. Must be <= 255.
  * @param[in]  sk      Bit-packed secret key.
