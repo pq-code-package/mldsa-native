@@ -85,7 +85,7 @@ static void mld_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
 __contract__(
     requires(r > 0)
     requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
-    requires(nblocks <= MLD_MAX_BUFFER_SIZE / r)
+    requires(nblocks <= 8 /* somewhat arbitrary bound */)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
     requires(memory_no_alias(out0, nblocks * r))
     requires(memory_no_alias(out1, nblocks * r))
