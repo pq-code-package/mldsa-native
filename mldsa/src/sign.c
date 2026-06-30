@@ -594,9 +594,7 @@ __contract__(
 /* User-facing bound on signing attempts. See MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  * in mldsa_native_config.h. Default is chosen so that failure probability
  * is < 2^{-256}, that is, signatures will practically always succeed. */
-#ifndef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
-#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS MLD_MAX_SIGNING_ATTEMPTS
-#endif
+#if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
 
 #if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
     MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 814
@@ -611,6 +609,8 @@ __contract__(
 #error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS exceeds the maximum allowed value.
 #endif
 
+#endif /* MLD_CONFIG_MAX_SIGNING_ATTEMPTS */
+
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE uint16_t mld_get_max_signing_attempts(void)
 __contract__(
@@ -621,7 +621,11 @@ __contract__(
   /* cassert(0) ensures CBMC uses the contract rather than inlining the body,
    * keeping proofs agnostic of the configured value. */
   cassert(0);
+#if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
   return MLD_CONFIG_MAX_SIGNING_ATTEMPTS;
+#else
+  return MLD_MAX_SIGNING_ATTEMPTS;
+#endif
 }
 
 /**
@@ -1661,7 +1665,6 @@ cleanup:
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1
 #undef mld_get_max_signing_attempts
-#undef MLD_MAX_SIGNING_ATTEMPTS
 #undef MLD_MAX_KAPPA
-#undef MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+#undef MLD_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN
