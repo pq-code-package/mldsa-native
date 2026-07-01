@@ -25,14 +25,16 @@
  */
 
 /*
- * Test configuration: Configuration for custom serial FIPS202 implementation
+ * Test configuration: Restartable signing driven by the
+ * SIGN_HOOK_{RESUME,ATTEMPT,FINISH} hooks
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
  *   - MLD_CONFIG_NAMESPACE_PREFIX
- *   - MLD_CONFIG_SERIAL_FIPS202_ONLY
- *   - MLD_CONFIG_FIPS202_CUSTOM_HEADER
- *   - MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
+ *   - MLD_CONFIG_NO_RANDOMIZED_API
+ *   - MLD_CONFIG_CONTEXT_PARAMETER
+ *   - MLD_CONFIG_CONTEXT_PARAMETER_TYPE
+ *   - MLD_CONFIG_SIGN_HOOK_RESUME
  */
 
 
@@ -87,7 +89,7 @@
  *
  * This can also be set using CFLAGS.
  */
-#define MLD_CONFIG_NAMESPACE_PREFIX mldsa
+#define MLD_CONFIG_NAMESPACE_PREFIX mld
 
 /**
  * MLD_CONFIG_MULTILEVEL_BUILD
@@ -184,7 +186,7 @@
  * as the current PCT implementation requires
  * signature().
  */
-/* #define MLD_CONFIG_NO_RANDOMIZED_API */
+#define MLD_CONFIG_NO_RANDOMIZED_API
 
 /**
  * MLD_CONFIG_CONSTANTS_ONLY
@@ -356,7 +358,7 @@
  * replacement for mldsa/src/fips202/fips202.h, and exposing
  * the same API (see FIPS202.md).
  */
-#define MLD_CONFIG_FIPS202_CUSTOM_HEADER "../custom_fips202/fips202.h"
+/* #define MLD_CONFIG_FIPS202_CUSTOM_HEADER "SOME_FILE.h" */
 
 /**
  * MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
@@ -371,7 +373,7 @@
  * replacement for mldsa/src/fips202/fips202x4.h, and exposing
  * the same API (see FIPS202.md).
  */
-#define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "../custom_fips202/fips202x4.h"
+/* #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /**
  * MLD_CONFIG_CUSTOM_ZEROIZE
@@ -696,7 +698,7 @@
  * performance when using software FIPS202 implementations.
  * Only enable this when you have to.
  */
-#define MLD_CONFIG_SERIAL_FIPS202_ONLY
+/* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER
@@ -725,7 +727,7 @@
  * MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH); each is documented with
  * its own option below.
  */
-/* #define MLD_CONFIG_CONTEXT_PARAMETER */
+#define MLD_CONFIG_CONTEXT_PARAMETER
 
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER_TYPE
@@ -738,7 +740,14 @@
  * This option must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is
  * defined; defining one without the other is a compile-time error.
  */
-/* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+/* The context type and the hook implementations live in
+ * test/src/test_sign_hook.c; here we only forward-declare them. */
+struct test_sign_hook_ctx; /* Forward declaration */
+#endif                     /* !__ASSEMBLER__ */
+#define MLD_CONFIG_CONTEXT_PARAMETER_TYPE struct test_sign_hook_ctx *
+
 
 /**
  * Signing hooks: MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH
@@ -789,27 +798,19 @@
  *
  * See test/src/test_sign_hook.c for a worked example using all three.
  */
-/* #define MLD_CONFIG_SIGN_HOOK_RESUME
-   #define MLD_CONFIG_SIGN_HOOK_ATTEMPT
-   #define MLD_CONFIG_SIGN_HOOK_FINISH
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/sys.h"
-   static MLD_INLINE uint16_t mld_sign_hook_resume(void)
-   {
-       ... return the attempt to resume from ...
-   }
-   static MLD_INLINE int mld_sign_hook_attempt(uint16_t attempt)
-   {
-       ... return non-zero to pause here; for resume, store attempt ...
-       return 0;
-   }
-   static MLD_INLINE void mld_sign_hook_finish(uint16_t attempt)
-   {
-       ... mark the operation complete (attempt = successful attempt) ...
-   }
-   #endif
-*/
+/* Enable all three signing hooks. Since MLD_CONFIG_CONTEXT_PARAMETER
+ * is set, the context is the last argument of each. The hooks are
+ * implemented in test/src/test_sign_hook.c. */
+#define MLD_CONFIG_SIGN_HOOK_RESUME
+#define MLD_CONFIG_SIGN_HOOK_ATTEMPT
+#define MLD_CONFIG_SIGN_HOOK_FINISH
+#if !defined(__ASSEMBLER__)
+struct test_sign_hook_ctx; /* Forward declaration */
+uint16_t mld_sign_hook_resume(struct test_sign_hook_ctx *context);
+int mld_sign_hook_attempt(uint16_t attempt, struct test_sign_hook_ctx *context);
+void mld_sign_hook_finish(uint16_t attempt, struct test_sign_hook_ctx *context);
+#endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLD_CONFIG_REDUCE_RAM

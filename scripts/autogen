@@ -3284,8 +3284,12 @@ def gen_header_guards():
 
 
 def gen_source_undefs(source_file):
-    # Get list of #define's clauses in this source file (ignore filename)
-    undef_list = list(map(lambda c: c[1], get_defines_from_file(source_file)))
+    # Get list of #define's clauses in this source file (ignore filename).
+    # Deduplicate while preserving order: a macro defined in multiple
+    # conditional branches (e.g. #if/#else) needs only a single #undef.
+    undef_list = list(
+        dict.fromkeys(map(lambda c: c[1], get_defines_from_file(source_file)))
+    )
     if not undef_list:
         return
 

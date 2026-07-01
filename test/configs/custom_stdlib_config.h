@@ -715,23 +715,115 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER
  *
- * Set this to add a context parameter that is provided to public
- * API functions and is then available in custom callbacks.
+ * Set this to add a caller-supplied context parameter to the public API
+ * functions, which is then forwarded unchanged to the custom callbacks
+ * (allocation, and signing hooks below).
  *
- * The type of the context parameter is configured via
- * MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
+ * When this option is set, every public API function gains a trailing
+ * parameter
+ *
+ *   MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+ *
+ * as its last argument; its type is configured via
+ * MLD_CONFIG_CONTEXT_PARAMETER_TYPE (see below). mldsa-native treats this
+ * value as opaque: it never dereferences it and only passes it on to the
+ * configurable hook macros. It is meant to carry per-caller state -- e.g. a
+ * pointer to a memory pool for the allocation hooks, or the resume state for
+ * the signing hooks -- into those hooks.
+ *
+ * When this option is unset (the default), no extra parameter is added and
+ * the hook macros never receive a context argument.
+ *
+ * The hooks that receive the context are the allocation hooks (see
+ * MLD_CONFIG_CUSTOM_ALLOC_FREE) and the signing hooks (see
+ * MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH); each is documented with
+ * its own option below.
  */
 /* #define MLD_CONFIG_CONTEXT_PARAMETER */
 
 /**
  * MLD_CONFIG_CONTEXT_PARAMETER_TYPE
  *
- * Set this to define the type for the context parameter used by
- * MLD_CONFIG_CONTEXT_PARAMETER.
+ * Set this to define the type of the context parameter added by
+ * MLD_CONFIG_CONTEXT_PARAMETER. It can be any C type usable as a function
+ * parameter, e.g. `void *` or a pointer to a caller-defined struct such as
+ * `struct my_ctx *`.
  *
- * This is only relevant if MLD_CONFIG_CONTEXT_PARAMETER is set.
+ * This option must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is
+ * defined; defining one without the other is a compile-time error.
  */
 /* #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE void* */
+
+/**
+ * Signing hooks: MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH
+ *
+ * Three optional, independent hooks into the ML-DSA signing rejection-sampling
+ * loop. Each is enabled by defining the matching option, in which case the
+ * integration must provide the corresponding function. If a hook needs
+ * per-operation state, enable MLD_CONFIG_CONTEXT_PARAMETER; the context is then
+ * appended as the last argument.
+ *
+ * @warning This feature is experimental. Its scope, configuration and
+ *          function signatures may change at any time, including after v1.
+ *
+ * Enabling any of the hooks requires MLD_CONFIG_NO_RANDOMIZED_API (restricting
+ * the public API to deterministic operations). This is because the restartable
+ * signing as enabled by the signing hooks only produces the uninterrupted
+ * signature when the randomness is fixed across calls. A logging-only use
+ * (attempt always returns 0; resume/finish merely observe) would be safe with
+ * the randomized API too, but for now the requirement is imposed uniformly on
+ * all three hooks.
+ *
+ * Note: Randomized signing is a shim wrapper around deterministic signing, and
+ * all helper functions you need to build it are exposed publicly. Thus, if you
+ * need a restartable, randomized signing operation, you can build your own by
+ * replicating the logic and adding the RNG seed to the restart context. In this
+ * case, please also consider letting the mldsa-native maintainers know of your
+ * need for randomized, restartable signing, so the feature can be appropriately
+ * prioritized.
+ *
+ * - MLD_CONFIG_SIGN_HOOK_ATTEMPT: int mld_sign_hook_attempt(attempt[, ctxt])
+ *   Called before each attempt. Returns 0 to proceed, or non-zero to pause:
+ *   signing then returns MLD_ERR_SIGNING_PAUSED with `attempt` as the resume
+ *   point (needs MLD_CONFIG_SIGN_HOOK_RESUME to resume; otherwise just aborts).
+ *   Always returning 0 makes it a logging/benchmarking hook.
+ *
+ * - MLD_CONFIG_SIGN_HOOK_RESUME: uint16_t mld_sign_hook_resume([ctxt])
+ *   Returns the attempt to resume from (0 for a fresh operation), i.e. the one
+ *   recorded when a previous call paused.
+ *
+ * - MLD_CONFIG_SIGN_HOOK_FINISH: void mld_sign_hook_finish(attempt[, ctxt])
+ *   Called on success with the succeeding attempt. Observe-only.
+ *
+ * When an option is unset, the hook is a no-op (resume to 0, attempt proceeds),
+ * i.e. ordinary one-shot signing.
+ *
+ * Independent of MLD_CONFIG_MAX_SIGNING_ATTEMPTS, which is a static upper bound
+ * on the number of signing attempts.
+ *
+ * See test/src/test_sign_hook.c for a worked example using all three.
+ */
+/* #define MLD_CONFIG_SIGN_HOOK_RESUME
+   #define MLD_CONFIG_SIGN_HOOK_ATTEMPT
+   #define MLD_CONFIG_SIGN_HOOK_FINISH
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/sys.h"
+   static MLD_INLINE uint16_t mld_sign_hook_resume(void)
+   {
+       ... return the attempt to resume from ...
+   }
+   static MLD_INLINE int mld_sign_hook_attempt(uint16_t attempt)
+   {
+       ... return non-zero to pause here; for resume, store attempt ...
+       return 0;
+   }
+   static MLD_INLINE void mld_sign_hook_finish(uint16_t attempt)
+   {
+       ... mark the operation complete (attempt = successful attempt) ...
+   }
+   #endif
+*/
 
 /**
  * MLD_CONFIG_REDUCE_RAM

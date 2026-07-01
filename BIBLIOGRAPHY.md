@@ -82,6 +82,7 @@ source code and documentation.
   - [examples/monolithic_build_native/mldsa_native/mldsa_native_config.h](examples/monolithic_build_native/mldsa_native/mldsa_native_config.h)
   - [examples/multilevel_build/mldsa_native/mldsa_native_config.h](examples/multilevel_build/mldsa_native/mldsa_native_config.h)
   - [examples/multilevel_build_native/mldsa_native/mldsa_native_config.h](examples/multilevel_build_native/mldsa_native/mldsa_native_config.h)
+  - [examples/restartable_sign/mldsa_native/mldsa_native_config.h](examples/restartable_sign/mldsa_native/mldsa_native_config.h)
   - [integration/liboqs/config_aarch64.h](integration/liboqs/config_aarch64.h)
   - [integration/liboqs/config_c.h](integration/liboqs/config_c.h)
   - [integration/liboqs/config_x86_64.h](integration/liboqs/config_x86_64.h)
@@ -103,6 +104,7 @@ source code and documentation.
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
 
 ### `FIPS202`
 
@@ -133,6 +135,7 @@ source code and documentation.
   - [examples/monolithic_build_native/mldsa_native/mldsa_native_config.h](examples/monolithic_build_native/mldsa_native/mldsa_native_config.h)
   - [examples/multilevel_build/mldsa_native/mldsa_native_config.h](examples/multilevel_build/mldsa_native/mldsa_native_config.h)
   - [examples/multilevel_build_native/mldsa_native/mldsa_native_config.h](examples/multilevel_build_native/mldsa_native/mldsa_native_config.h)
+  - [examples/restartable_sign/mldsa_native/mldsa_native_config.h](examples/restartable_sign/mldsa_native/mldsa_native_config.h)
   - [mldsa/mldsa_native.h](mldsa/mldsa_native.h)
   - [mldsa/mldsa_native_config.h](mldsa/mldsa_native_config.h)
   - [mldsa/src/ct.h](mldsa/src/ct.h)
@@ -166,6 +169,8 @@ source code and documentation.
   - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
+  - [test/src/test_sign_hook.c](test/src/test_sign_hook.c)
 
 ### `HYBRID`
 

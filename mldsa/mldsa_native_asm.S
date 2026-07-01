@@ -182,6 +182,7 @@
 #undef MLD_ERR_FAIL
 #undef MLD_ERR_OUT_OF_MEMORY
 #undef MLD_ERR_RNG_FAIL
+#undef MLD_ERR_SIGNING_PAUSED
 #undef MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED
 #undef MLD_H
 #undef MLD_MAX3_
@@ -236,6 +237,7 @@
 #undef MLD_ERR_FAIL
 #undef MLD_ERR_OUT_OF_MEMORY
 #undef MLD_ERR_RNG_FAIL
+#undef MLD_ERR_SIGNING_PAUSED
 #undef MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED
 #undef MLD_EXTERNAL_API
 #undef MLD_FIPS202X4_HEADER_FILE
@@ -317,6 +319,7 @@
 #undef MLDSA_SK_TR_OFFSET
 #undef MLDSA_TAU
 #undef MLDSA_TRBYTES
+#undef MLD_MAX_KAPPA
 #undef MLD_PARAMS_H
 /* mldsa/src/poly_kl.h */
 #undef MLD_POLYETA_UNPACK_LOWER_BOUND
@@ -459,6 +462,10 @@
 #undef MLD_CONTEXT_PARAMETERS_7
 #undef MLD_CONTEXT_PARAMETERS_8
 #undef MLD_CONTEXT_PARAMETERS_9
+#undef MLD_CONTEXT_UNUSED
+#undef mld_sign_attempt
+#undef mld_sign_finish
+#undef mld_sign_resume
 /* mldsa/src/ct.h */
 #undef MLD_CT_H
 #undef MLD_USE_ASM_VALUE_BARRIER
