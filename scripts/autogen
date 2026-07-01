@@ -2266,6 +2266,7 @@ def get_config_options():
         "MLD_FORCE_RISCV64",
         "MLD_FORCE_RISCV32",
         "MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER",
+        "MLD_SYS_AARCH64_FAST_SHA3",
         "MLDSA_DEBUG",  # TODO: Rename?
         "MLD_BREAK_PCT",  # Use in PCT breakage test
         "MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND",  # Internal testing escape hatch

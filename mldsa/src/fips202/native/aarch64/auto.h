@@ -25,13 +25,15 @@
 /*
  * Keccak-f1600
  *
- * - On Arm-based Apple CPUs, we pick a pure Neon implementation.
+ * - On Arm-based Apple CPUs, or CPUs with MLD_SYS_AARCH64_FAST_SHA3 set,
+ *   we pick a pure Neon implementation.
  * - Otherwise, unless MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER is set,
  *   we use lazy-rotation scalar assembly from @[HYBRID].
  * - Otherwise, if MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER is set, we
  *   fall back to the standard C implementation.
  */
-#if defined(__ARM_FEATURE_SHA3) && defined(__APPLE__)
+#if defined(__ARM_FEATURE_SHA3) && \
+    (defined(__APPLE__) || defined(MLD_SYS_AARCH64_FAST_SHA3))
 #include "x1_v84a.h"
 #elif !defined(MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER)
 #include "x1_scalar.h"
@@ -46,20 +48,21 @@
  * The optimal implementation is highly CPU-specific; see @[HYBRID].
  *
  * For now, if v8.4-A is not implemented, we fall back to Keccak-f1600.
- * If v8.4-A is implemented and we are on an Apple CPU, we use a plain
- * Neon-based implementation.
- * If v8.4-A is implemented and we are not on an Apple CPU, we use a
+ * If v8.4-A is implemented and we are on an Apple CPU (or a CPU with
+ * MLD_SYS_AARCH64_FAST_SHA3 set), we use a plain Neon-based implementation.
+ * If v8.4-A is implemented and we are on neither, we use a
  * scalar/Neon/Neon hybrid.
- * The reason for this distinction is that Apple CPUs appear to implement
- * the SHA3 instructions on all SIMD units, while Arm CPUs prior to Cortex-X4
- * don't, and ordinary Neon instructions are still needed.
+ * The reason for this distinction is that Apple CPUs (and other CPUs flagged
+ * via MLD_SYS_AARCH64_FAST_SHA3) appear to implement the SHA3 instructions on
+ * all SIMD units, while Arm CPUs prior to Cortex-X4 don't, and ordinary Neon
+ * instructions are still needed.
  */
 #if defined(__ARM_FEATURE_SHA3)
 /*
- * For Apple-M cores, we use a plain implementation leveraging SHA3
- * instructions only.
+ * For Apple-M cores (and other cores flagged via MLD_SYS_AARCH64_FAST_SHA3),
+ * we use a plain implementation leveraging SHA3 instructions only.
  */
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(MLD_SYS_AARCH64_FAST_SHA3)
 #include "x2_v84a.h"
 #else
 #include "x4_v8a_v84a_scalar.h"
