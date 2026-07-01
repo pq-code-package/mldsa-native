@@ -56,7 +56,7 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
 __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
   requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  requires(kappa <= UINT16_MAX - MLDSA_L)
+  requires(kappa <= MLD_MAX_KAPPA)
   assigns(memory_slice(v, sizeof(mld_polyvecl)))
   ensures(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))

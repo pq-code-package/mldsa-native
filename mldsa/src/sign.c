@@ -489,11 +489,8 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/* Sampling y from counter kappa uses nonces kappa, ..., kappa+L-1, which fit in
- * uint16_t iff kappa <= UINT16_MAX - MLDSA_L. */
-#define MLD_MAX_KAPPA (UINT16_MAX - MLDSA_L)
-
-/* With kappa = attempt*MLDSA_L, the kappa bound becomes a bound on attempts.
+/* MLD_MAX_KAPPA (see params.h) bounds the rejection-sampling counter kappa.
+ * With kappa = attempt*MLDSA_L, the kappa bound becomes a bound on attempts.
  * Bounding attempts (the reference loops indefinitely) gives predictable
  * termination and provable type-safety. */
 #define MLD_MAX_SIGNING_ATTEMPTS (MLD_MAX_KAPPA / MLDSA_L)

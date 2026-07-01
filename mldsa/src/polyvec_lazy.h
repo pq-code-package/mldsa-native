@@ -345,7 +345,7 @@ static MLD_INLINE void mld_yvec_init_eager(
 __contract__(
   requires(memory_no_alias(y, sizeof(mld_yvec_eager)))
   requires(memory_no_alias(rhoprime, MLDSA_CRHBYTES))
-  requires(kappa <= UINT16_MAX - MLDSA_L)
+  requires(kappa <= MLD_MAX_KAPPA)
   assigns(memory_slice(y, sizeof(mld_yvec_eager)))
   ensures(forall(k1, 0, MLDSA_L,
     array_bound(y->vec.vec[k1].coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1)))
@@ -390,13 +390,13 @@ __contract__(
   requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
   requires(i < MLDSA_L)
   requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
-  requires(y->kappa <= UINT16_MAX - MLDSA_L)
+  requires(y->kappa <= MLD_MAX_KAPPA)
   assigns(memory_slice(buf, sizeof(mld_poly)))
   ensures(array_bound(buf->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 )
 {
-  /* Safety: y->kappa <= UINT16_MAX - MLDSA_L and i < MLDSA_L, so y->kappa + i
-   * fits in uint16_t. See MLD_MAX_KAPPA comment in sign.c. */
+  /* Safety: y->kappa <= MLD_MAX_KAPPA and i < MLDSA_L, so y->kappa + i
+   * fits in uint16_t. See MLD_MAX_KAPPA comment in params.h. */
   mld_poly_uniform_gamma1(buf, y->rhoprime, (uint16_t)(y->kappa + i));
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API && (MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
@@ -592,7 +592,7 @@ __contract__(
   requires(memory_no_alias(y, sizeof(mld_yvec_lazy)))
   requires(memory_no_alias(scratch, sizeof(mld_polyvecl)))
   requires(memory_no_alias(y->rhoprime, MLDSA_CRHBYTES))
-  requires(y->kappa <= UINT16_MAX - MLDSA_L)
+  requires(y->kappa <= MLD_MAX_KAPPA)
   assigns(memory_slice(w, sizeof(mld_polyveck)))
   assigns(memory_slice(mat, sizeof(mld_polymat_lazy)))
   assigns(memory_slice(scratch, sizeof(mld_polyvecl)))

@@ -37,8 +37,8 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
 #endif
 
   /* The caller passes the base counter kappa; component i is sampled from
-   * kappa + i. Safety: kappa <= UINT16_MAX - MLDSA_L and i < MLDSA_L, so the
-   * casts below are safe. See MLD_MAX_KAPPA comment in sign.c. */
+   * kappa + i. Safety: kappa <= MLD_MAX_KAPPA and i < MLDSA_L, so the
+   * casts below are safe. See MLD_MAX_KAPPA comment in params.h. */
 #if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
   for (i = 0; i < MLDSA_L; i++)
   {

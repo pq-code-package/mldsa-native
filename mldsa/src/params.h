@@ -70,6 +70,12 @@
 #define MLDSA_POLYT0_PACKEDBYTES 416
 #define MLDSA_POLYVECH_PACKEDBYTES (MLDSA_OMEGA + MLDSA_K)
 
+/* Sampling y from counter kappa uses nonces kappa, ..., kappa+L-1, which fit in
+ * uint16_t iff kappa <= UINT16_MAX - MLDSA_L. With kappa = attempt*MLDSA_L this
+ * bounds the number of signing attempts by MLD_MAX_KAPPA / MLDSA_L; see
+ * MLD_MAX_SIGNING_ATTEMPTS in sign.c. */
+#define MLD_MAX_KAPPA (UINT16_MAX - MLDSA_L)
+
 /* Layout of the packed public key pk[MLDSA_CRYPTO_PUBLICKEYBYTES] = (rho, t1):
  *
  *   +-------------+--------------------------+
