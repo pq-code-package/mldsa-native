@@ -60,6 +60,15 @@
   (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 #endif /* !MLD_CONFIG_CONTEXT_PARAMETER */
 
+/* Consume a context parameter carried only for the integration's benefit,
+ * avoiding -Wunused-parameter; expands to nothing when no context is
+ * configured. */
+#if defined(MLD_CONFIG_CONTEXT_PARAMETER)
+#define MLD_CONTEXT_UNUSED(context) ((void)(context))
+#else
+#define MLD_CONTEXT_UNUSED(context) ((void)0)
+#endif
+
 #if defined(MLD_CONFIG_CONTEXT_PARAMETER_TYPE) != \
     defined(MLD_CONFIG_CONTEXT_PARAMETER)
 #error MLD_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is defined

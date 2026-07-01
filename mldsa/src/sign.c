@@ -138,9 +138,7 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Skip PCT */
   ((void)pk);
   ((void)sk);
-#if defined(MLD_CONFIG_CONTEXT_PARAMETER)
-  ((void)context);
-#endif
+  MLD_CONTEXT_UNUSED(context);
   return 0;
 }
 #endif /* !MLD_CONFIG_KEYGEN_PCT */

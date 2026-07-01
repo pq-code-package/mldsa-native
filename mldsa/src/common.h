@@ -226,6 +226,7 @@
 #define MLD_FREE(v, T, N, context)                     \
   do                                                   \
   {                                                    \
+    MLD_CONTEXT_UNUSED(context);                       \
     mld_zeroize(mld_alloc_##v, sizeof(mld_alloc_##v)); \
     (v) = NULL;                                        \
   } while (0)
