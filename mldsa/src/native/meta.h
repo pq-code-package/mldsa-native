@@ -16,6 +16,10 @@
 #include "aarch64/meta.h"
 #endif
 
+#if defined(MLD_SYS_PPC64LE) || defined(MLD_SYS_PPC64BE)
+#include "ppc64le/meta.h"
+#endif
+
 /* The x86_64 backend requires toolchain support for the SysV ABI */
 #if defined(MLD_SYS_X86_64_AVX2) && defined(MLD_SYSV_ABI_SUPPORTED)
 #include "x86_64/meta.h"

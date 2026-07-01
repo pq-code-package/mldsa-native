@@ -14,7 +14,8 @@ endif
 SOURCES += $(wildcard mldsa/src/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mldsa/src/native/aarch64/src/*.[csS]) \
-		$(wildcard mldsa/src/native/x86_64/src/*.[csS])
+		$(wildcard mldsa/src/native/x86_64/src/*.[csS]) \
+		$(wildcard mldsa/src/native/ppc64le/src/*.[csS])
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH \
 		-DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
