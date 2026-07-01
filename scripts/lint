@@ -109,6 +109,25 @@ gh_error_simple()
   fi
 }
 
+list-shell-scripts()
+{
+  git ls-files -z -- ":/" | xargs -0 shfmt -f
+}
+
+lint-shell-format()
+{
+  local file out="" result
+  while IFS= read -r file; do
+    [[ -z $file ]] && continue
+    if ! result=$(shfmt -s -l -i 2 -ci -fn "$file" 2>&1); then
+      out+="$result"$'\n'
+    elif [[ -n $result ]]; then
+      out+="$result"$'\n'
+    fi
+  done <<<"$SHELL_SCRIPTS"
+  printf "%s" "$out"
+}
+
 run-shellcheck()
 {
   if ! command -v shellcheck >/dev/null; then
@@ -119,21 +138,30 @@ run-shellcheck()
     return 0
   fi
 
-  checkerr "Lint shellcheck" "$(echo $SHELL_SCRIPTS | xargs shellcheck --severity=warning)"
+  local file out="" result
+  while IFS= read -r file; do
+    [[ -z $file ]] && continue
+    if ! result=$(shellcheck --severity=warning "$file" 2>&1); then
+      out+="$result"$'\n'
+    elif [[ -n $result ]]; then
+      out+="$result"$'\n'
+    fi
+  done <<<"$SHELL_SCRIPTS"
+  checkerr "Lint shellcheck" "$out"
 }
 
 # Formatting
 SUCCESS=true
 
 # Get list of shell scripts for linting
-SHELL_SCRIPTS=$(git grep -l '' :/ | xargs printf "'%s' " | xargs -L 1 shfmt -f)
+SHELL_SCRIPTS=$(list-shell-scripts)
 
 gh_group_start "Linting nix files with nixpkgs-fmt"
 checkerr "Lint nix" "$(nixpkgs-fmt --check "$ROOT")"
 gh_group_end
 
 gh_group_start "Linting shell scripts with shfmt"
-checkerr "Lint shell" "$(echo $SHELL_SCRIPTS | xargs -L 1 shfmt -s -l -i 2 -ci -fn)"
+checkerr "Lint shell" "$(lint-shell-format)"
 gh_group_end
 
 gh_group_start "Linting shell scripts with shellcheck"
@@ -185,12 +213,13 @@ gh_group_end
 gh_group_start "Linting c files with clang-format"
 lint-c-files()
 {
-  for file in $(git ls-files -- ":/*.c" ":/*.h"); do
+  local file out
+  while IFS= read -r -d '' file; do
     # Ignore symlinks
-    if [[ ! -L $file ]]; then
-      clang-format --Werror --dry-run "$file" 2>&1 | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' '
+    if [[ ! -L $file ]] && ! out=$(clang-format --Werror --dry-run "$file" 2>&1); then
+      printf "%s\n" "$out" | grep "error:" | cut -d ':' -f 1,2 | tr ':' ' ' || true
     fi
-  done
+  done < <(git ls-files -z -- ":/*.c" ":/*.h")
 }
 checkerr "Lint C" "$(lint-c-files)"
 gh_group_end
@@ -214,17 +243,23 @@ lint-clang-tidy()
   local nproc success=true
   nproc=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
 
-  # Run clang-tidy over a set of files. $1 is a label for diagnostics, $2 is a
-  # space-separated list of git pathspecs, and the rest are passed verbatim to
-  # clang-tidy's compiler invocation (after `--`). Note: not invoked via a pipe
-  # so that `success=false` propagates to the enclosing function.
+  # Run clang-tidy over a set of files. $1 is a label for diagnostics, followed
+  # by git pathspecs, `--`, and clang-tidy compiler invocation arguments. Note:
+  # not invoked via a pipe so that `success=false` propagates to the enclosing
+  # function.
   run-clang-tidy()
   {
-    local label="$1" pathspecs="$2" out
-    shift 2
-    if ! out=$(git ls-files -- $pathspecs |
-      xargs -P "$nproc" -I {} \
-        clang-tidy --quiet {} -- -I"$ROOT"/mldsa -std=c90 "$@" 2>&1); then
+    local label="$1" out
+    local pathspecs=()
+    shift
+    while [[ $# -gt 0 && $1 != "--" ]]; do
+      pathspecs+=("$1")
+      shift
+    done
+    shift
+    if ! out=$(git ls-files -z -- "${pathspecs[@]}" |
+      xargs -0 -P "$nproc" -I {} \
+        clang-tidy --quiet "{}" -- -I"$ROOT"/mldsa -std=c90 "$@" 2>&1); then
       echo "$out"
       gh_error_simple "clang-tidy error" "clang-tidy reported findings ($label)"
       success=false
@@ -233,9 +268,9 @@ lint-clang-tidy()
 
   for params in 44 65 87; do
     # Headers are passed with `-x c` so clang-tidy treats them as C, not C++.
-    run-clang-tidy "ML-DSA-$params .c" "${c_files[*]}" \
+    run-clang-tidy "ML-DSA-$params .c" "${c_files[@]}" -- \
       -DMLD_CONFIG_PARAMETER_SET="$params"
-    run-clang-tidy "ML-DSA-$params .h" "${h_files[*]}" \
+    run-clang-tidy "ML-DSA-$params .h" "${h_files[@]}" -- \
       -x c -DMLD_CONFIG_PARAMETER_SET="$params"
   done
 
@@ -255,13 +290,14 @@ gh_group_end
 
 check-eol-dry-run()
 {
-  for file in $(git ls-files -- ":/" ":/!:*.png"); do
+  local file l
+  while IFS= read -r -d '' file; do
     # Ignore symlinks
     if [[ ! -L $file && $(tail -c1 "$file" | wc -l) == 0 ]]; then
       l=$(wc -l <"$file")
       echo "$file $l"
     fi
-  done
+  done < <(git ls-files -z -- ":/" ":/!:*.png")
 }
 gh_group_start "Checking eol"
 checkerr "Check eol" "$(check-eol-dry-run)"
@@ -269,29 +305,61 @@ gh_group_end
 
 check-spdx()
 {
-  local success=true
-  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
+  local file success=true
+  local license_pathspecs=(
+    ":/"
+    ":/!:*.json"
+    ":/!:*.png"
+    ":/!:*LICENSE*"
+    ":/!:.git*"
+    ":/!:flake.lock"
+  )
+  local copyright_pathspecs=(
+    "*.[chsS]"
+    "*.py"
+    "*.mk"
+    "*.yml"
+    "**/Makefile*"
+    ":/!proofs/cbmc/*.py"
+    ":/!examples/bring_your_own_fips202/custom_fips202/tiny_sha3/*"
+    ":/!examples/custom_backend/mldsa_native/src/fips202/native/custom/src/*"
+  )
+  while IFS= read -r -d '' file; do
     # Ignore symlinks
-    if [[ ! -L $file && $(grep "SPDX-License-Identifier:" "$file" | wc -l) == 0 ]]; then
-      gh_error "$file" "${line:-1}" "Missing license header error" "$file is missing SPDX License header"
+    if [[ ! -L $file ]] && ! grep -q "SPDX-License-Identifier:" "$file"; then
+      gh_error \
+        "$file" \
+        "${line:-1}" \
+        "Missing license header error" \
+        "$file is missing SPDX License header"
       success=false
     fi
-  done
-  for file in $(git ls-files -- "*.[chsS]" "*.py" "*.mk" "*.yml" "**/Makefile*" ":/!proofs/cbmc/*.py" ":/!examples/bring_your_own_fips202/custom_fips202/tiny_sha3/*" ":/!examples/custom_backend/mldsa_native/src/fips202/native/custom/src/*"); do
+  done < <(git ls-files -z -- "${license_pathspecs[@]}")
+  while IFS= read -r -d '' file; do
     # Ignore symlinks
-    if [[ ! -L $file && $(grep "Copyright (c) The mldsa-native project authors" "$file" | wc -l) == 0 ]]; then
-      gh_error "$file" "${line:-1}" "Missing copyright header error" "$file is missing copyright header"
+    if [[ ! -L $file ]] && ! grep -q "Copyright (c) The mldsa-native project authors" "$file"; then
+      gh_error \
+        "$file" \
+        "${line:-1}" \
+        "Missing copyright header error" \
+        "$file is missing copyright header"
       success=false
     fi
-  done
+  done < <(git ls-files -z -- "${copyright_pathspecs[@]}")
   # For source files in dev/* and mldsa/*, we enforce `Apache-2.0 OR ISC OR MIT`
-  for file in $(git ls-files -- "*.[chsSi]" | grep "^dev/\|^mldsa/"); do
+  while IFS= read -r -d '' file; do
+    [[ $file == dev/* || $file == mldsa/* ]] || continue
     # Ignore symlinks
-    if [[ ! -L $file && $(grep "SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT" "$file" | wc -l) == 0 ]]; then
-      gh_error "$file" "${line:-1}" "Missing license header error" "$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"
+    if [[ ! -L $file ]] &&
+      ! grep -q "SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT" "$file"; then
+      gh_error \
+        "$file" \
+        "${line:-1}" \
+        "Missing license header error" \
+        "$file is not licensed under 'Apache-2.0 OR ISC OR MIT'"
       success=false
     fi
-  done
+  done < <(git ls-files -z -- "*.[chsSi]")
 
   if $success; then
     info "Check SPDX + Copyright"

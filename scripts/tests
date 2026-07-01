@@ -33,6 +33,25 @@ def dict2str(dict):
     return s
 
 
+# CI passes escaped quotes for configuration-file defines such as
+# -DMLD_CONFIG_FILE=\"../test/configs/custom_heap_alloc_config.h\".
+# Keep shell metacharacters such as ;, $, `, |, &, <, >, and newlines out.
+SAFE_MAKE_FLAG_RE = re.compile(r'^[A-Za-z0-9_.,:+=/@% "\\-]*$')
+SAFE_CROSS_PREFIX_RE = re.compile(r"^[A-Za-z0-9_./+-]*$")
+
+
+def validate_cli_inputs(parser, args):
+    checks = [
+        ("cflags", SAFE_MAKE_FLAG_RE),
+        ("ldflags", SAFE_MAKE_FLAG_RE),
+        ("cross_prefix", SAFE_CROSS_PREFIX_RE),
+    ]
+    for name, pattern in checks:
+        value = getattr(args, name, None)
+        if value is not None and not pattern.fullmatch(value):
+            parser.error(f"--{name.replace('_', '-')} contains unsupported characters")
+
+
 def github_log(msg):
     if os.environ.get("GITHUB_ENV") is None:
         return
@@ -1605,6 +1624,7 @@ def cli():
     )
 
     args = main_parser.parse_args()
+    validate_cli_inputs(main_parser, args)
 
     if not hasattr(args, "mac_taskpolicy"):
         args.mac_taskpolicy = None

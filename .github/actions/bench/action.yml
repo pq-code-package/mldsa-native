@@ -26,7 +26,7 @@ inputs:
     description: opt flag to set for tests script
     default: "true"
   bench_extra_args:
-    description: Further arguments to be appended to command line for `bench` script
+    description: Newline-delimited additional arguments for the `bench` script
     default: ""
   store_results:
     description: Whether to push results to GH pages
@@ -56,6 +56,8 @@ runs:
   using: composite
   steps:
     - uses: ./.github/actions/setup-shell
+      env:
+        BENCH_CROSS_PREFIX: ${{ inputs.cross_prefix }}
       with:
         nix-shell: ${{ inputs.nix-shell }}
         nix-cache: ${{ inputs.nix-cache }}
@@ -63,13 +65,18 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         custom_shell: ${{ inputs.custom_shell }}
         script: |
+          safe_cross_prefix_re='^[A-Za-z0-9_./+-]*$'
+          if [[ ! "$BENCH_CROSS_PREFIX" =~ $safe_cross_prefix_re ]]; then
+            printf 'cross_prefix contains unsupported characters\n' >&2
+            exit 1
+          fi
           ARCH=$(uname -m)
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
             Architecture: $ARCH
             - $(uname -a)
             - $(nix --version)
-            - $(${{ matrix.target.cross_prefix }}gcc --version | grep -m1 "")
+            - $("${BENCH_CROSS_PREFIX}gcc" --version | grep -m1 "")
             - $(bash --version | grep -m1 "")
 
             ## CPU Info
@@ -77,18 +84,60 @@ runs:
           EOF
     - name: Run benchmark
       shell: ${{ env.SHELL }}
+      env:
+        BENCH_ARCHFLAGS: ${{ inputs.archflags }}
+        BENCH_CFLAGS: ${{ inputs.cflags }}
+        BENCH_CROSS_PREFIX: ${{ inputs.cross_prefix }}
+        BENCH_EXTRA_ARGS: ${{ inputs.bench_extra_args }}
+        BENCH_LDFLAGS: ${{ inputs.ldflags }}
+        BENCH_OPT: ${{ inputs.opt }}
+        BENCH_PERF: ${{ inputs.perf }}
       run: |
-        ./scripts/tests bench -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
-              --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
-              --ldflags="${{ inputs.ldflags }}" \
-              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
-              -v --output=output.json ${{ inputs.bench_extra_args }}
+        validate_value() {
+          local name=$1
+          local value=$2
+          local pattern=$3
+          if [[ ! "$value" =~ $pattern ]]; then
+            printf '%s contains unsupported characters\n' "$name" >&2
+            exit 1
+          fi
+        }
 
-        ./scripts/tests bench --components -c ${{ inputs.perf }} --cross-prefix="${{ inputs.cross_prefix }}" \
-              --cflags="${{ inputs.cflags }} ${{ inputs.archflags }}" \
-              --ldflags="${{ inputs.ldflags }}" \
-              --opt=$([[ ${{ inputs.opt }} == "false" ]] && echo "no_opt" || echo "opt")  \
-              -v  ${{ inputs.bench_extra_args }}
+        validate_value perf "$BENCH_PERF" '^(NO|PMU|PERF|MAC)$'
+        validate_value cross_prefix "$BENCH_CROSS_PREFIX" '^[A-Za-z0-9_./+-]*$'
+        validate_value cflags "$BENCH_CFLAGS" '^[A-Za-z0-9_.,:+=/@% -]*$'
+        validate_value archflags "$BENCH_ARCHFLAGS" '^[A-Za-z0-9_.,:+=/@% -]*$'
+        validate_value ldflags "$BENCH_LDFLAGS" '^[A-Za-z0-9_.,:+=/@% -]*$'
+
+        if [[ "$BENCH_OPT" == "false" ]]; then
+          bench_opt=no_opt
+        elif [[ "$BENCH_OPT" == "true" ]]; then
+          bench_opt=opt
+        else
+          printf 'opt must be true or false\n' >&2
+          exit 1
+        fi
+
+        extra_args=()
+        if [[ -n "$BENCH_EXTRA_ARGS" ]]; then
+          while IFS= read -r arg; do
+            [[ -z "$arg" ]] && continue
+            extra_args+=("$arg")
+          done <<< "$BENCH_EXTRA_ARGS"
+        fi
+
+        common_args=(
+          ./scripts/tests bench
+          -c "$BENCH_PERF"
+          "--cross-prefix=$BENCH_CROSS_PREFIX"
+          "--cflags=$BENCH_CFLAGS $BENCH_ARCHFLAGS"
+          "--ldflags=$BENCH_LDFLAGS"
+          "--opt=$bench_opt"
+          -v
+        )
+
+        "${common_args[@]}" --output=output.json "${extra_args[@]}"
+        "${common_args[@]}" --components "${extra_args[@]}"
     - name: Check namespace
       shell: ${{ env.SHELL }}
       run: |
