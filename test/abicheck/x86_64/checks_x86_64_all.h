@@ -32,6 +32,8 @@ int check_poly_caddq_avx2_asm(void);
 int check_poly_chknorm_avx2_asm(void);
 int check_poly_decompose_32_avx2_asm(void);
 int check_poly_decompose_88_avx2_asm(void);
+int check_poly_use_hint_32_avx2_asm(void);
+int check_poly_use_hint_88_avx2_asm(void);
 int check_polyz_unpack_17_avx2_asm(void);
 int check_polyz_unpack_19_avx2_asm(void);
 #endif /* __AVX2__ */
@@ -52,6 +54,8 @@ static const abicheck_entry_t all_checks[] = {
     {"poly_chknorm_avx2_asm", check_poly_chknorm_avx2_asm},
     {"poly_decompose_32_avx2_asm", check_poly_decompose_32_avx2_asm},
     {"poly_decompose_88_avx2_asm", check_poly_decompose_88_avx2_asm},
+    {"poly_use_hint_32_avx2_asm", check_poly_use_hint_32_avx2_asm},
+    {"poly_use_hint_88_avx2_asm", check_poly_use_hint_88_avx2_asm},
     {"polyz_unpack_17_avx2_asm", check_polyz_unpack_17_avx2_asm},
     {"polyz_unpack_19_avx2_asm", check_polyz_unpack_19_avx2_asm},
 #endif           /* __AVX2__ */

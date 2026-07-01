@@ -59,6 +59,8 @@ OBJ = mldsa/ntt_avx2_asm.o \
       mldsa/poly_decompose_88_avx2_asm.o \
       mldsa/polyz_unpack_17_avx2_asm.o \
       mldsa/polyz_unpack_19_avx2_asm.o \
+      mldsa/poly_use_hint_32_avx2_asm.o \
+      mldsa/poly_use_hint_88_avx2_asm.o \
       mldsa/pointwise_avx2_asm.o \
       mldsa/pointwise_acc_l4_avx2_asm.o \
       mldsa/pointwise_acc_l5_avx2_asm.o \

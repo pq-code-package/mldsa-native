@@ -195,7 +195,7 @@ static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_use_hint_32_avx2(a, h);
+  mld_poly_use_hint_32_avx2_asm(a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
@@ -209,7 +209,7 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }
-  mld_poly_use_hint_88_avx2(a, h);
+  mld_poly_use_hint_88_avx2_asm(a, h);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \

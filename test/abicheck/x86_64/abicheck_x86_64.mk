@@ -30,6 +30,8 @@ ABICHECK_REQ_AVX2_FILES := \
   mldsa/src/native/x86_64/src/poly_chknorm_avx2_asm.S \
   mldsa/src/native/x86_64/src/poly_decompose_32_avx2_asm.S \
   mldsa/src/native/x86_64/src/poly_decompose_88_avx2_asm.S \
+  mldsa/src/native/x86_64/src/poly_use_hint_32_avx2_asm.S \
+  mldsa/src/native/x86_64/src/poly_use_hint_88_avx2_asm.S \
   mldsa/src/native/x86_64/src/polyz_unpack_17_avx2_asm.S \
   mldsa/src/native/x86_64/src/polyz_unpack_19_avx2_asm.S
 ABICHECK_REQ_AVX2_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_AVX2_FILES))

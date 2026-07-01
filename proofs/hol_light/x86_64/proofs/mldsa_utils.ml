@@ -277,3 +277,236 @@ let MAP_SUB_LIST = prove
   MATCH_MP_TAC num_INDUCTION THEN ASM_REWRITE_TAC[SUB_LIST_CLAUSES; MAP] THEN
   REPEAT STRIP_TAC THEN SPEC_TAC(`q:num`,`q:num`) THEN MATCH_MP_TAC num_INDUCTION THEN
   ASM_REWRITE_TAC[SUB_LIST_CLAUSES; MAP]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Shared 256-bit-block / 8-lane framework for the in-place poly routines     *)
+(* (poly_use_hint_32/88 etc.) that loop over 32 blocks of eight int32 lanes.   *)
+(* These are arch-independent of the per-coefficient model.                    *)
+(* ------------------------------------------------------------------------- *)
+
+(* Eight consecutive int32 coefficients packed into one 256-bit word. *)
+let pack8 = new_definition
+  `pack8 (f:num->int32) (b:num) : int256 =
+     word_join
+       (word_join (word_join (f (8*b+7)) (f (8*b+6)):int64)
+                  (word_join (f (8*b+5)) (f (8*b+4)):int64):int128)
+       (word_join (word_join (f (8*b+3)) (f (8*b+2)):int64)
+                  (word_join (f (8*b+1)) (f (8*b+0)):int64):int128)`;;
+
+(* Lane k (k<8) of a packed block is coefficient 8b+k. *)
+let PACK8_LANE = prove(
+  `!f b. !k. k < 8 ==> word_subword (pack8 f b) (32*k,32):int32 = f(8*b+k)`,
+  GEN_TAC THEN GEN_TAC THEN
+  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REWRITE_TAC[pack8] THEN REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST);;
+
+(* Lane k of a SIMD8 map is the scalar map applied to the corresponding lanes. *)
+let SIMD8_LANE = prove(
+  `!(g:int32->int32->int32) av hv. !k. k < 8 ==>
+      word_subword (simd8 g av hv) (32*k,32):int32 =
+      g (word_subword av (32*k,32)) (word_subword hv (32*k,32))`,
+  GEN_TAC THEN GEN_TAC THEN GEN_TAC THEN
+  REWRITE_TAC[simd8;simd4;simd2;DIMINDEX_32] THEN
+  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REPEAT CONJ_TAC THEN CONV_TAC(DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
+  CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN REFL_TAC);;
+
+(* Coefficient address 4*(8b+k) split into block base 32*b plus lane offset. *)
+let ADDR_SPLIT = prove(
+  `!p:int64 b k. word_add p (word(4*(8*b+k))) =
+                 word_add (word_add p (word(32*b))) (word(4*k))`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ARITH_RULE `4*(8*b+k) = 32*b+4*k`] THEN
+  CONV_TAC WORD_RULE);;
+
+(* A coefficient (bytes32) read is the matching lane of the block (bytes256) read. *)
+let BLOCK_SPLIT = prove(
+  `!p:int64 s:x86state b. !k. k < 8 ==>
+      read (memory :> bytes32 (word_add p (word(4*(8*b+k))))) s =
+      word_subword (read (memory :> bytes256 (word_add p (word(32*b)))) s) (32*k,32):int32`,
+  GEN_TAC THEN GEN_TAC THEN GEN_TAC THEN
+  CONV_TAC(RAND_CONV(ONCE_DEPTH_CONV(READ_MEMORY_MERGE_CONV 3))) THEN
+  GEN_REWRITE_TAC (BINDER_CONV o RAND_CONV o LAND_CONV o ONCE_DEPTH_CONV) [ADDR_SPLIT] THEN
+  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REWRITE_TAC[WORD_RULE `word_add q (word 0) = q`] THEN
+  REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST);;
+
+(* The block (bytes256) read assembles from its eight coefficient reads. *)
+let PACK8_MERGE = prove(
+  `!(x:num->int32) p:int64 s:x86state b.
+      b < 32 /\
+      (!i. i < 256 ==> read(memory :> bytes32(word_add p (word(4*i)))) s = x i)
+      ==> read (memory :> bytes256 (word_add p (word(32*b)))) s = pack8 x b`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN REWRITE_TAC[pack8] THEN
+  CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 3)) THEN
+  SUBGOAL_THEN
+   `!k. k < 8 ==> read (memory :> bytes32 (word_add (word_add p (word(32*b))) (word(4*k)))) (s:x86state) = x(8*b+k)`
+   (fun th ->
+      MP_TAC(SPEC `0` th) THEN MP_TAC(SPEC `1` th) THEN MP_TAC(SPEC `2` th) THEN MP_TAC(SPEC `3` th) THEN
+      MP_TAC(SPEC `4` th) THEN MP_TAC(SPEC `5` th) THEN MP_TAC(SPEC `6` th) THEN MP_TAC(SPEC `7` th)) THENL
+   [GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[GSYM ADDR_SPLIT] THEN
+    FIRST_X_ASSUM(fun th -> MP_TAC(SPEC `8*b+k` th)) THEN
+    ANTS_TAC THENL [UNDISCH_TAC `b:num<32` THEN UNDISCH_TAC `k:num<8` THEN ARITH_TAC; SIMP_TAC[]];
+    CONV_TAC NUM_REDUCE_CONV THEN
+    REWRITE_TAC[WORD_RULE `word_add q (word 0) = q`] THEN
+    REPEAT(DISCH_THEN SUBST1_TAC) THEN REFL_TAC]);;
+
+(* Two int256 words agree if all eight 32-bit lanes agree. *)
+let LANES8_EQ = prove
+ (`!x y:int256. (!k. k < 8 ==> word_subword x (32*k,32):int32 = word_subword y (32*k,32)) ==> x = y`,
+  REPEAT GEN_TAC THEN
+  DISCH_THEN(fun th -> MP_TAC(CONV_RULE(EXPAND_CASES_CONV THENC NUM_REDUCE_CONV) th)) THEN
+  CONV_TAC WORD_BLAST);;
+
+(* 32-byte blocks preserve 32-byte alignment of the base pointer. *)
+let ALIGNED_32I = prove
+ (`!i. aligned 32 (word(32*i):int64)`,
+  GEN_TAC THEN REWRITE_TAC[aligned; DIMINDEX_64; VAL_WORD; DIMINDEX_64] THEN
+  CONJ_TAC THENL
+   [REWRITE_TAC[DIVIDES_MOD] THEN CONV_TAC NUM_REDUCE_CONV;
+    MP_TAC(SPECL [`32`; `32 * i`; `2 EXP 64`] DIVIDES_MOD2) THEN
+    ANTS_TAC THENL
+     [REWRITE_TAC[DIVIDES_MOD] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
+    DISCH_THEN(SUBST1_TAC o SYM) THEN NUMBER_TAC]);;
+
+let ALIGNED_BLOCK = prove
+ (`!a:int64 i. aligned 32 a ==> aligned 32 (word_add a (word(32*i)))`,
+  REPEAT STRIP_TAC THEN MATCH_MP_TAC ALIGNED_WORD_ADD THEN
+  ASM_REWRITE_TAC[ALIGNED_32I]);;
+
+(* word_join of a zero high half is just zero-extension of the low half. *)
+let JOIN_ZERO_ZX = prove
+ (`!lo:(16)word. word_join (word 0:(16)word) lo :int32 = word_zx lo`,
+  GEN_TAC THEN CONV_TAC WORD_BLAST);;
+
+(* word_ile/word_igt against 0 are complementary on int32. *)
+let ILE_IGT = BITBLAST_RULE
+  `!a0:int32. word_ile a0 (word 0) <=> ~(word_igt a0 (word 0))`;;
+
+let WORD_NOT_0 = WORD_RULE `!x:N word. word_and x (word_not (word 0)) = x`;;
+
+(* Per-step state compaction during SIMD body simulation: abbreviate every large
+   int256 register value to a fresh atom so it propagates compactly (essential
+   for instructions like VPBLENDVB whose byte-mux otherwise duplicates the value). *)
+let ABBREV_BIG_TAC : tactic = fun (asl,w) ->
+  MAP_EVERY (fun (_,th) -> AUTO_ABBREV_TAC (rand(concl th)))
+    (filter (fun (_,th) -> let c=concl th in is_eq c &&
+       (try is_comb(lhs c) && fst(dest_const(fst(strip_comb(lhs c))))="read"
+            && type_of(lhs c)=`:int256` && not(is_var(rand c)) with _->false)
+       && String.length(string_of_term(rand c)) > 1500) asl) (asl,w);;
+
+(* ------------------------------------------------------------------------- *)
+(* Shared scalar UseHint lemmas (poly_use_hint_32/88).  Arch- and            *)
+(* parameter-independent: the per-coefficient Barrett rounding, lane         *)
+(* value/sign-extension facts and the +/-1 delta-encoding bridge.            *)
+(* ------------------------------------------------------------------------- *)
+
+(* Rounding division: ((q DIV n) + 1) DIV 2 = (q + n) DIV (2 * n). *)
+let ROUND_DIV = prove(`!q n. ~(n = 0) ==> (q DIV n + 1) DIV 2 = (q + n) DIV (2 * n)`,
+  REPEAT STRIP_TAC THEN
+  SUBGOAL_THEN `(q + n) DIV (2 * n) = (q + n) DIV n DIV 2` SUBST1_TAC THENL
+  [REWRITE_TAC[DIV_DIV] THEN AP_TERM_TAC THEN ARITH_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `(q + n) DIV n = q DIV n + 1` (fun th -> REWRITE_TAC[th]) THEN
+  ASM_SIMP_TAC[DIV_ADD; DIVIDES_REFL] THEN ASM_SIMP_TAC[DIV_REFL]);;
+
+(* The pre-shift t = (a + 127) >>u 7 has value (val a + 127) DIV 128 (no overflow
+   since val a < Q < 2^31). This is the f1' input to the Barrett step. *)
+let VAL_T = prove(`!x:int32. val x < 8380417
+   ==> val(word_ushr (word_add (word 127) x) 7 :int32) = (val x + 127) DIV 128`,
+  GEN_TAC THEN DISCH_TAC THEN
+  REWRITE_TAC[VAL_WORD_USHR] THEN
+  SUBGOAL_THEN `val(word_add (word 127:int32) x) = val x + 127` SUBST1_TAC THENL
+  [REWRITE_TAC[VAL_WORD_ADD; VAL_WORD; DIMINDEX_32] THEN CONV_TAC NUM_REDUCE_CONV THEN
+   SUBGOAL_THEN `(127 + val(x:int32)) MOD 4294967296 = 127 + val x`
+     (fun th -> REWRITE_TAC[th] THEN ARITH_TAC) THEN
+   MATCH_MP_TAC MOD_LT THEN MP_TAC(ISPEC `x:int32` VAL_BOUND) THEN
+   REWRITE_TAC[DIMINDEX_32] THEN ASM_ARITH_TAC;
+   REWRITE_TAC[ARITH_RULE `2 EXP 7 = 128`]]);;
+
+(* Bounded 16->32 sign-extension equals zero-extension on value: for a 16-bit
+   lane below 2^15 (top bit clear) word_sx agrees with the numeric value. Used to
+   evaluate the signed 16x16 multiply in the vpmulhrsw lane. *)
+let VAL_WORD_SX_SMALL = prove(`!u:16 word. val u < 32768
+   ==> val((word_sx u):int32) = val u`,
+  GEN_TAC THEN DISCH_TAC THEN
+  SUBGOAL_THEN `(word_sx (u:16 word)):int32 = word_zx u` SUBST1_TAC THENL
+  [REWRITE_TAC[WORD_SX_ZX_GEN; DIMINDEX_16] THEN
+   CONV_TAC(ONCE_DEPTH_CONV NUM_REDUCE_CONV) THEN
+   SUBGOAL_THEN `bit 15 (u:16 word) = F` SUBST1_TAC THENL
+   [REWRITE_TAC[BIT_VAL] THEN ASM_ARITH_TAC; ALL_TAC] THEN
+   REWRITE_TAC[BITVAL_CLAUSES;
+               WORD_REDUCE_CONV `word_shl (word_neg (word 0:int32)) 16`;
+               WORD_OR_0]; ALL_TAC] THEN
+  REWRITE_TAC[VAL_WORD_ZX_GEN; DIMINDEX_32] THEN CONV_TAC NUM_REDUCE_CONV THEN
+  SUBGOAL_THEN `val(u:16 word) MOD 4294967296 = val u` (fun th->REWRITE_TAC[th]) THEN
+  MATCH_MP_TAC MOD_LT THEN MP_TAC(ISPEC `u:16 word` VAL_BOUND) THEN
+  REWRITE_TAC[DIMINDEX_16] THEN ARITH_TAC);;
+
+(* delta encoding bridge (needs the hint bound val h <= 1):
+   the assembly computes delta*h as h - (andnot(dlt,h))<<1 with
+   dlt = (a0 >s 0); the model uses word_mul of the +1/-1 delta. *)
+let DELTA_EQ_BOUNDED = prove
+ (`!a0:int32 h:int32. val h <= 1 ==>
+     word_sub h (word_shl (word_and (word_not
+        (if word_igt a0 (word 0) then word 4294967295 else word 0)) h) 1) =
+     word_mul (word_or (word_neg (word (bitval (word_ile a0 (word 0))))) (word 1)) h`,
+  REPEAT GEN_TAC THEN DISCH_TAC THEN REWRITE_TAC[ILE_IGT] THEN
+  SUBGOAL_THEN `h:int32 = word 0 \/ h = word 1` STRIP_ASSUME_TAC THENL
+   [POP_ASSUM MP_TAC THEN SPEC_TAC(`h:int32`,`h:int32`) THEN
+    REWRITE_TAC[GSYM VAL_EQ_0; GSYM VAL_EQ_1] THEN ARITH_TAC;
+    ASM_REWRITE_TAC[] THEN COND_CASES_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC WORD_BLAST;
+    ASM_REWRITE_TAC[] THEN COND_CASES_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC WORD_BLAST]);;
+
+(* ------------------------------------------------------------------------- *)
+(* Barrett-quotient DIV/MOD tactics over the per-variant divisor 2*GAMMA2     *)
+(* (gg below): 523776 for poly_use_hint_32, 190464 for poly_use_hint_88.      *)
+(* Each proof aliases these at its concrete gg.                               *)
+(* ------------------------------------------------------------------------- *)
+
+(* Eliminate `r MOD gg` / `r DIV gg` from the assumptions and abstract them,
+   leaving an arithmetic goal solvable by ASM_ARITH_TAC. *)
+let LINEARIZE_DIV_MOD_BY_TAC gg =
+  let s = subst [mk_small_numeral gg, `gg:num`] in
+  REPEAT(FIRST_X_ASSUM(MP_TAC o check (fun th ->
+    free_in (s `r MOD gg`) (concl th) || free_in (s `r DIV gg`) (concl th)))) THEN
+  MP_TAC(SPECL [`r:num`; mk_small_numeral gg] (CONJUNCT1 DIVISION_SIMP)) THEN
+  SPEC_TAC(s `r MOD gg`, `m:num`) THEN
+  SPEC_TAC(s `r DIV gg`, `q:num`) THEN
+  REPEAT GEN_TAC THEN ASM_ARITH_TAC;;
+
+(* Replace `(r - r MOD gg) DIV gg` with `r DIV gg`. *)
+let DIV_MOD_TO_DIV_BY_TAC gg =
+  let s = subst [mk_small_numeral gg, `gg:num`] in
+  SUBGOAL_THEN (s `(r - r MOD gg) DIV gg = r DIV gg`) SUBST1_TAC THENL
+  [MP_TAC(SPECL [`r:num`; mk_small_numeral gg] (CONJUNCT1 DIVISION_SIMP)) THEN
+   DISCH_TAC THEN
+   SUBGOAL_THEN (s `r - r MOD gg = gg * r DIV gg`) SUBST1_TAC THENL
+   [ASM_ARITH_TAC; ALL_TAC] THEN
+   MP_TAC(SPECL [mk_small_numeral gg; s `r DIV gg`] DIV_MULT) THEN
+   CONV_TAC NUM_REDUCE_CONV; ALL_TAC];;
+
+(* Prove `r DIV gg = k` via DIV_SANDWICH + LE_MULT_RCANCEL. *)
+let DIV_EQ_K_BY_TAC gg k =
+  let s = subst [mk_small_numeral gg, `gg:num`] in
+  let k_num = mk_small_numeral k and km1 = mk_small_numeral (k-1)
+  and kp1 = mk_small_numeral (k+1)
+  and q = mk_var("q",`:num`) and le = `(<=):num->num->bool`
+  and lt = `(<):num->num->bool` and c = mk_small_numeral gg in
+  let mk_mul a b = mk_binop (rator(rator `0*0`)) a b in
+  MATCH_MP_TAC DIV_SANDWICH THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REPEAT(FIRST_X_ASSUM(MP_TAC o check (fun th ->
+    free_in (s `r MOD gg`) (concl th) || free_in (s `r DIV gg`) (concl th)))) THEN
+  MP_TAC(SPECL [`r:num`; c] (CONJUNCT1 DIVISION_SIMP)) THEN
+  SPEC_TAC(s `r MOD gg`, `m:num`) THEN
+  SPEC_TAC(s `r DIV gg`, q) THEN
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  ASM_CASES_TAC(mk_comb(mk_comb(le, q), km1)) THENL
+  [SUBGOAL_THEN(mk_comb(mk_comb(le, mk_mul q c), mk_mul km1 c)) ASSUME_TAC THENL
+   [ASM_SIMP_TAC[LE_MULT_RCANCEL]; ALL_TAC] THEN
+   CONV_TAC NUM_REDUCE_CONV THEN ASM_ARITH_TAC;
+   SUBGOAL_THEN(mk_comb(mk_comb(le, mk_mul k_num c), mk_mul q c)) ASSUME_TAC THENL
+   [ASM_SIMP_TAC[LE_MULT_RCANCEL] THEN DISJ1_TAC THEN ASM_ARITH_TAC; ALL_TAC] THEN
+   ASM_CASES_TAC(mk_comb(mk_comb(lt, k_num), q)) THENL
+   [SUBGOAL_THEN(mk_comb(mk_comb(le, mk_mul kp1 c), mk_mul q c)) ASSUME_TAC THENL
+    [ASM_SIMP_TAC[LE_MULT_RCANCEL] THEN DISJ1_TAC THEN ASM_ARITH_TAC; ALL_TAC] THEN
+    CONV_TAC NUM_REDUCE_CONV THEN ASM_ARITH_TAC;
+    CONV_TAC NUM_REDUCE_CONV THEN ASM_ARITH_TAC]];;
