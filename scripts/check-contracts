@@ -68,6 +68,10 @@ NAMESPACE_ALIASES = {
     "sign_verify_internal": "verify_internal",
     "sign_verify_pre_hash_internal": "verify_pre_hash_internal",
     "sign_verify_pre_hash_shake256": "verify_pre_hash_shake256",
+    # The signing-hook dummies are spelled via the mld_sign_{attempt,finish}
+    # call-site macros, which expand to mld_sign_hook_{attempt,finish}.
+    "sign_attempt": "sign_hook_attempt",
+    "sign_finish": "sign_hook_finish",
 }
 
 
