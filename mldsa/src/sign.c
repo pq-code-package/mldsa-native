@@ -487,11 +487,8 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/* MLD_MAX_KAPPA (see params.h) bounds the rejection-sampling counter kappa.
- * With kappa = attempt*MLDSA_L, the kappa bound becomes a bound on attempts.
- * Bounding attempts (the reference loops indefinitely) gives predictable
- * termination and provable type-safety. */
-#define MLD_MAX_SIGNING_ATTEMPTS (MLD_MAX_KAPPA / MLDSA_L)
+/* MLD_MAX_KAPPA (see params.h) bounds the rejection-sampling counter kappa;
+ * MLD_MAX_SIGNING_ATTEMPTS below turns that into a bound on attempts. */
 
 /**
  * Compute z = y + s1*c, check that z has coefficients smaller than
@@ -585,9 +582,11 @@ __contract__(
   return 0;
 }
 
-/* User-facing bound on signing attempts. See MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- * in mldsa_native_config.h. Default is chosen so that failure probability
- * is < 2^{-256}, that is, signatures will practically always succeed. */
+/* Effective bound on signing attempts: the configured bound
+ * MLD_CONFIG_MAX_SIGNING_ATTEMPTS (see mldsa_native_config.h) if set, otherwise
+ * the hard type-safety bound MLD_MAX_KAPPA / MLDSA_L (see MLD_MAX_KAPPA in
+ * params.h). The default is chosen so that the failure probability is
+ * < 2^{-256}, that is, signatures will practically always succeed. */
 #if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
 
 #if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
@@ -599,27 +598,26 @@ __contract__(
 #error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 1
 #endif
 
-#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS > MLD_MAX_SIGNING_ATTEMPTS
+#if MLD_CONFIG_MAX_SIGNING_ATTEMPTS > MLD_MAX_KAPPA / MLDSA_L
 #error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS exceeds the maximum allowed value.
 #endif
 
-#endif /* MLD_CONFIG_MAX_SIGNING_ATTEMPTS */
+#define MLD_MAX_SIGNING_ATTEMPTS MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+#else /* MLD_CONFIG_MAX_SIGNING_ATTEMPTS */
+#define MLD_MAX_SIGNING_ATTEMPTS (MLD_MAX_KAPPA / MLDSA_L)
+#endif /* !MLD_CONFIG_MAX_SIGNING_ATTEMPTS */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE uint16_t mld_get_max_signing_attempts(void)
 __contract__(
   ensures(return_value >= 1)
-  ensures(return_value <= MLD_MAX_SIGNING_ATTEMPTS)
+  ensures(return_value <= MLD_MAX_KAPPA / MLDSA_L)
 )
 {
   /* cassert(0) ensures CBMC uses the contract rather than inlining the body,
    * keeping proofs agnostic of the configured value. */
   cassert(0);
-#if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
-  return MLD_CONFIG_MAX_SIGNING_ATTEMPTS;
-#else
   return MLD_MAX_SIGNING_ATTEMPTS;
-#endif
 }
 
 /**
@@ -991,7 +989,7 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
     decreases(max_signing_attempts - attempt)
   )
   {
-    /* Safety: attempt < max_signing_attempts <= MLD_MAX_SIGNING_ATTEMPTS, so
+    /* Safety: attempt < max_signing_attempts <= MLD_MAX_KAPPA / MLDSA_L, so
      * kappa <= MLD_MAX_KAPPA and the cast is safe. */
     const uint16_t kappa = (uint16_t)(attempt * MLDSA_L);
     ret = mld_attempt_signature_generation(sig, mu, rhoprime, kappa, mat, s1hat,
