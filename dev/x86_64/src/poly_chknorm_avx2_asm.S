@@ -18,22 +18,12 @@
  */
 
 
-/*************************************************
- * Name:        mld_poly_chknorm_avx2_asm
- *
- * Description: Check infinity norm of polynomial against given bound.
- *              Returns 0 if norm is strictly smaller than B; otherwise
- *              returns 1.
- *
- * Arguments:   - const int32_t *a: pointer to input polynomial
- *              - int32_t B:  bound
- *
- * Returns:     - 1 if any |coefficient| >= B, 0 otherwise.
- **************************************************/
-
 /*yaml
   Name: poly_chknorm_avx2_asm
-  Description: x86_64 AVX2 infinity-norm bound check on polynomial coefficients
+  Description: x86_64 AVX2 infinity-norm bound check on polynomial coefficients.
+    Check the infinity norm of the polynomial against the given bound B.
+    Returns 0 if the norm is strictly smaller than B; otherwise returns 1
+    (i.e. returns 1 if any |coefficient| >= B, 0 otherwise).
   Signature: int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
   ABI:
     Architecture: x86_64

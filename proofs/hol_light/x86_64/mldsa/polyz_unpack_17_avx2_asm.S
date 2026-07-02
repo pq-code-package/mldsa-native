@@ -18,20 +18,11 @@
  */
 
 
-/*************************************************
- * Name:        mld_polyz_unpack_17_avx2_asm
- *
- * Description: Unpack polynomial z with 18-bit packed coefficients
- *              (GAMMA1 = 2^17). Maps packed [0, 2^18-1] to signed
- *              [-(2^17-1), 2^17] via GAMMA1 - x.
- *
- * Arguments:   - int32_t *r:       pointer to output polynomial (1024 bytes)
- *              - const uint8_t *a: pointer to packed input (576 bytes)
- **************************************************/
-
 /*yaml
   Name: polyz_unpack_17_avx2_asm
-  Description: x86_64 AVX2 unpacking of 17-bit packed coefficients
+  Description: x86_64 AVX2 unpacking of 17-bit packed coefficients.
+    Unpack polynomial z with 18-bit packed coefficients (GAMMA1 = 2^17),
+    mapping packed [0, 2^18-1] to signed [-(2^17-1), 2^17] via GAMMA1 - x.
   Signature: void mld_polyz_unpack_17_avx2_asm(int32_t *r, const uint8_t *a)
   ABI:
     Architecture: x86_64
