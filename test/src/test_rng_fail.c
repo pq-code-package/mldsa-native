@@ -205,6 +205,10 @@ static int test_verify_pre_hash_shake256_rng_failure(void)
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   int r = 0;

@@ -167,15 +167,16 @@
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isAarch64 [ config.packages.toolchain_x86_64 ];
           };
 
-          # arm-none-eabi-gcc + platform files from pqmx
-          devShells.cross-arm-embedded = util.mkShell {
+          # Zephyr build environment (board chosen at make time via EXTRA_MAKEFILE)
+          packages.zephyr = util.zephyr;
+          devShells.zephyr = util.mkShell {
             packages = builtins.attrValues
               {
-                inherit (util) pqmx;
-                inherit (config.packages) linters;
-                inherit (pkgs) gcc-arm-embedded qemu coreutils git;
-              };
+                inherit (util) zephyr;
+                inherit (pkgs) gcc-arm-embedded qemu cmake ninja dtc gperf coreutils git;
+              } ++ [ util.zephyrPythonEnv ];
           };
+
           devShells.cross-aarch64-embedded = util.mkShell {
             packages = builtins.attrValues
               {

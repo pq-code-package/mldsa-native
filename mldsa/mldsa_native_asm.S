@@ -684,8 +684,6 @@
 #undef MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
 #undef MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #undef mld_keccak_f1600_x4_native_impl
-#undef mld_keccak_f1600_x4_state_extract_bytes
-#undef mld_keccak_f1600_x4_state_xor_bytes
 /* mldsa/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLD_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
 #undef mld_keccak_f1600_x4_mve_asm

@@ -109,7 +109,17 @@ rec {
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
   slothy = pkgs.callPackage ./slothy { };
-  pqmx = pkgs.callPackage ./pqmx { };
+  zephyr = pkgs.callPackage ./zephyr { };
+  zephyrPythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    pyelftools
+    pyyaml
+    packaging
+    pykwalify
+    jsonschema
+    anytree
+    intelhex
+    colorama
+  ]);
 
   # Helper function to build individual cross toolchains
   _individual_toolchain = { name, cross_compilers }:

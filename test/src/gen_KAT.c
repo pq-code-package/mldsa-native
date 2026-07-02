@@ -15,6 +15,10 @@
 
 #if defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_CONFIG_NO_SIGN_API) || \
     defined(MLD_CONFIG_NO_VERIFY_API)
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   printf("SKIPPED (KAT requires full API)\n");
@@ -59,6 +63,10 @@ static void print_hex(const uint8_t *data, size_t size)
   printf("\n");
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   unsigned i;

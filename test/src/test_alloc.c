@@ -456,6 +456,10 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
     }                                                                        \
   } while (0)
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   int r = 0;

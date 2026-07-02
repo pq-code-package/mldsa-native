@@ -564,6 +564,10 @@ static int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
 int main(int argc, char *argv[])
 {
   acvp_mode mode;

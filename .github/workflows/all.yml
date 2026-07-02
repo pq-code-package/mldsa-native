@@ -100,6 +100,14 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
     secrets: inherit
+  zephyr:
+    name: Zephyr
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/zephyr.yml
+    secrets: inherit
   pavona_integration:
     name: Pavona
     permissions:

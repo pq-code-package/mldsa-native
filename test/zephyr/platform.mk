@@ -1,0 +1,96 @@
+# Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+# Zephyr test platform for QEMU-emulated Arm MPS boards.
+#
+# Each test binary is built as a Zephyr application by CMake (which owns the arm
+# toolchain, per-board arch flags and libc via the .#zephyr dev shell). The
+# generic rules don't link these; CUSTOM_BUILD (below, see test/mk/rules.mk)
+# drives the CMake build from the binary's TEST_SRCS, set by components.mk --
+# adding a test binary there needs no change here.
+
+PLATFORM_PATH := test/zephyr
+
+# BUILD_DIR is set by the top-level Makefile after this file is included;
+# define it here too so CUSTOM_BUILD below expands to the right path.
+BUILD_DIR ?= test/build
+
+# ZEPHYR_TARGET=<key> selects a target. Each key maps to a Zephyr board and the
+# QEMU machine emulating it; add a board with a row below.
+ZEPHYR_TARGET ?= mps3-an547
+
+ZEPHYR_BOARD_mps2-an385 := mps2/an385
+ZEPHYR_QEMU_mps2-an385  := mps2-an385                    # Cortex-M3
+ZEPHYR_BOARD_mps2-an386 := mps2/an386
+ZEPHYR_QEMU_mps2-an386  := mps2-an386                    # Cortex-M4
+ZEPHYR_BOARD_mps2-an500 := mps2/an500
+ZEPHYR_QEMU_mps2-an500  := mps2-an500                    # Cortex-M7
+ZEPHYR_BOARD_mps2-an521 := mps2/an521/cpu0
+ZEPHYR_QEMU_mps2-an521  := mps2-an521                    # Cortex-M33
+ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
+ZEPHYR_QEMU_mps3-an547  := mps3-an547                    # Cortex-M55
+
+ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
+
+ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547
+
+ZEPHYR_BOARD := $(ZEPHYR_BOARD_$(ZEPHYR_TARGET))
+export QEMU_MACHINE := $(strip $(ZEPHYR_QEMU_$(ZEPHYR_TARGET)))
+
+ifeq ($(ZEPHYR_BOARD),)
+$(error Unknown ZEPHYR_TARGET '$(ZEPHYR_TARGET)'. Supported: $(ZEPHYR_TARGETS))
+endif
+
+# CUSTOM_BUILD must be set before components.mk is included so it switches that
+# file to source prerequisites (it is: the top-level Makefile includes us first).
+OPT ?= 0
+
+# Native backends are an OPT=1 feature (an547 builds the Armv8.1-M MVE backend).
+ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
+
+ZEPHYR_APP := $(PLATFORM_PATH)/app
+ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
+
+# Per-binary CMake build dir, keyed on $(notdir $@) so binaries build in
+# parallel. Recipe-expanded, so $@ is the specific bin being built.
+ZEPHYR_OUT = $(ZEPHYR_BUILD_DIR)/$(notdir $@)
+
+# ML-DSA keeps its polynomial vectors on the stack; reduce the peak so the tests
+# fit comfortably within the Zephyr main-thread stack (see app/prj.conf).
+CFLAGS += -DMLD_CONFIG_REDUCE_RAM
+
+# Shrink the test iteration counts (the sources default them higher, sized for
+# native hardware): QEMU is far slower. On CFLAGS so they forward below.
+CFLAGS += -DNTESTS=3 \
+	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
+	-DNUM_RANDOM_TESTS=100
+
+# The binary's CFLAGS, forwarded to the CMake build (which applies them to the
+# mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
+# $(CFLAGS) includes the binary's target-specific additions (e.g.
+# -DMLD_STATIC_TESTABLE= for test_unit, -DMLD_CONFIG_FILE="..." for test_alloc).
+# Two rewrites:
+#   - -Imldsa -> absolute, as CMake builds from its own dir, not the repo root
+#     (and the alloc config path is relative to -Imldsa);
+#   - \" -> \\", so one level of quoting survives each of the recipe shell and
+#     CMake's separate_arguments and reaches the compiler intact.
+# Requires AUTO=0 (see .github/workflows/zephyr.yml): the host-arch flags AUTO=1
+# adds must not reach the Zephyr toolchain, which selects the target arch itself.
+ZEPHYR_TEST_CFLAGS = $(subst \",\\\",$(patsubst -Imldsa,-I$(abspath mldsa),$(CFLAGS)))
+
+CUSTOM_BUILD = \
+	echo "  ZEPHYR  $(ZEPHYR_TARGET): $(notdir $@)" && \
+	cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
+		-DBOARD=$(ZEPHYR_BOARD) \
+		-DZEPHYR_NATIVE_ROOT=$(CURDIR) \
+		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
+		-DZEPHYR_TEST_CFLAGS="$(ZEPHYR_TEST_CFLAGS)" \
+		-DZEPHYR_FIPS202_BACKEND=$(ZEPHYR_FIPS202_BACKEND) \
+		$(if $(ZEPHYR_FIPS202_BACKEND),-DCONFIG_FIPS202_MVE_BACKEND=y) \
+		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
+		>/dev/null && \
+	cmake --build $(ZEPHYR_OUT) >/dev/null && \
+	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
+
+EXEC_WRAPPER := $(abspath $(PLATFORM_PATH)/exec_wrapper.py)

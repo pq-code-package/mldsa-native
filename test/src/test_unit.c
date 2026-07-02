@@ -1402,6 +1402,10 @@ cleanup:
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(void);
+#endif
 int main(void)
 {
   /* WARNING: Test-only

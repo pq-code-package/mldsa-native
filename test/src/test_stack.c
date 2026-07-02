@@ -60,6 +60,10 @@ static void test_verify_only(void)
 #endif       /* MLD_CONFIG_NO_VERIFY_API */
 }
 
+/* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
+#if defined(main)
+int main(int argc, char *argv[]);
+#endif
 int main(int argc, char *argv[])
 {
   if (argc != 2)

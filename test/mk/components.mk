@@ -4,15 +4,22 @@
 
 FIPS202_SRCS = $(wildcard mldsa/src/fips202/*.c)
 ifeq ($(OPT),1)
-	FIPS202_SRCS += $(wildcard mldsa/src/fips202/native/aarch64/src/*.S) $(wildcard mldsa/src/fips202/native/aarch64/src/*.c) $(wildcard mldsa/src/fips202/native/x86_64/src/*.c) $(wildcard mldsa/src/fips202/native/x86_64/src/*.S) $(wildcard mldsa/src/fips202/native/armv81m/src/*.[csS])
+	FIPS202_SRCS += $(wildcard mldsa/src/fips202/native/aarch64/src/*.S) \
+		$(wildcard mldsa/src/fips202/native/aarch64/src/*.c) \
+		$(wildcard mldsa/src/fips202/native/x86_64/src/*.c) \
+		$(wildcard mldsa/src/fips202/native/x86_64/src/*.S) \
+		$(wildcard mldsa/src/fips202/native/armv81m/src/*.[csS])
 endif
-
 
 SOURCES += $(wildcard mldsa/src/*.c)
 ifeq ($(OPT),1)
-	SOURCES += $(wildcard mldsa/src/native/aarch64/src/*.[csS]) $(wildcard mldsa/src/native/x86_64/src/*.[csS])
-	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
+	SOURCES += $(wildcard mldsa/src/native/aarch64/src/*.[csS]) \
+		$(wildcard mldsa/src/native/x86_64/src/*.[csS])
+	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH \
+		-DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
+
+LIB_SRCS := $(SOURCES) $(FIPS202_SRCS)
 
 BASIC_TESTS = test_mldsa gen_KAT test_stack
 ACVP_TESTS = acvp_mldsa
@@ -27,30 +34,17 @@ MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
 MLDSA87_DIR = $(BUILD_DIR)/mldsa87
 
-MLDSA44_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR),$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA44_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44
-MLDSA65_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR),$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA65_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
-MLDSA87_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR),$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA87_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
+MLDSA44_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR),$(LIB_SRCS))
+MLDSA65_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR),$(LIB_SRCS))
+MLDSA87_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR),$(LIB_SRCS))
 
-# Unit test object files - same sources but with MLD_STATIC_TESTABLE=
-UNIT_CFLAGS = -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
+MLDSA44_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/unit,$(LIB_SRCS))
+MLDSA65_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/unit,$(LIB_SRCS))
+MLDSA87_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/unit,$(LIB_SRCS))
 
-MLDSA44_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA44_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 $(UNIT_CFLAGS)
-MLDSA65_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA65_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 $(UNIT_CFLAGS)
-MLDSA87_UNIT_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/unit,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA87_UNIT_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 $(UNIT_CFLAGS)
-
-# Alloc test object files - same sources but with custom alloc config
-MLDSA44_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA44_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-MLDSA65_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA65_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65 -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-MLDSA87_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/alloc,$(SOURCES) $(FIPS202_SRCS))
-$(MLDSA87_ALLOC_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+MLDSA44_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/alloc,$(LIB_SRCS))
+MLDSA65_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/alloc,$(LIB_SRCS))
+MLDSA87_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/alloc,$(LIB_SRCS))
 
 CFLAGS += -Imldsa
 
@@ -58,21 +52,34 @@ $(BUILD_DIR)/libmldsa44.a: $(MLDSA44_OBJS)
 $(BUILD_DIR)/libmldsa65.a: $(MLDSA65_OBJS)
 $(BUILD_DIR)/libmldsa87.a: $(MLDSA87_OBJS)
 
-# Unit libraries with exposed internal functions
 $(BUILD_DIR)/libmldsa44_unit.a: $(MLDSA44_UNIT_OBJS)
 $(BUILD_DIR)/libmldsa65_unit.a: $(MLDSA65_UNIT_OBJS)
 $(BUILD_DIR)/libmldsa87_unit.a: $(MLDSA87_UNIT_OBJS)
 
-# Alloc test libraries with custom alloc config
 $(BUILD_DIR)/libmldsa44_alloc.a: $(MLDSA44_ALLOC_OBJS)
 $(BUILD_DIR)/libmldsa65_alloc.a: $(MLDSA65_ALLOC_OBJS)
 $(BUILD_DIR)/libmldsa87_alloc.a: $(MLDSA87_ALLOC_OBJS)
 
 $(BUILD_DIR)/libmldsa.a: $(MLDSA44_OBJS) $(MLDSA65_OBJS) $(MLDSA87_OBJS)
 
+# Generic CFLAGS
+
+$(MLDSA44_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44
+$(MLDSA65_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
+$(MLDSA87_OBJS): CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
+
+# Lib objects also get the parameter set above; this covers the test entrypoints
+# (not in LIB_SRCS) and, for custom builds like Zephyr, every source.
+$(MLDSA44_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44
+$(MLDSA65_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
+$(MLDSA87_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
+
+# Per-test CFLAGS
+
 $(MLDSA44_DIR)/bin/bench_mldsa44: CFLAGS += -Itest/hal
 $(MLDSA65_DIR)/bin/bench_mldsa65: CFLAGS += -Itest/hal
 $(MLDSA87_DIR)/bin/bench_mldsa87: CFLAGS += -Itest/hal
+
 $(MLDSA44_DIR)/bin/bench_components_mldsa44: CFLAGS += -Itest/hal
 $(MLDSA65_DIR)/bin/bench_components_mldsa65: CFLAGS += -Itest/hal
 $(MLDSA87_DIR)/bin/bench_components_mldsa87: CFLAGS += -Itest/hal
@@ -81,52 +88,23 @@ $(MLDSA44_DIR)/bin/test_stack44: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA65_DIR)/bin/test_stack65: CFLAGS += -Imldsa -fstack-usage
 $(MLDSA87_DIR)/bin/test_stack87: CFLAGS += -Imldsa -fstack-usage
 
-$(MLDSA44_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLDSA65_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
-$(MLDSA87_DIR)/test/src/test_alloc.c.o: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA44_DIR)/bin/test_unit44: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
+$(MLDSA65_DIR)/bin/test_unit65: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
+$(MLDSA87_DIR)/bin/test_unit87: CFLAGS += -DMLD_STATIC_TESTABLE= -DMLD_UNIT_TEST -Wno-missing-prototypes
 
-$(MLDSA44_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
-$(MLDSA65_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
-$(MLDSA87_DIR)/test/src/test_unit.c.o: CFLAGS += $(UNIT_CFLAGS)
+$(MLDSA44_DIR)/bin/test_alloc44: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA65_DIR)/bin/test_alloc65: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
+$(MLDSA87_DIR)/bin/test_alloc87: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
-$(MLDSA44_DIR)/bin/test_unit44: CFLAGS += $(UNIT_CFLAGS)
-$(MLDSA65_DIR)/bin/test_unit65: CFLAGS += $(UNIT_CFLAGS)
-$(MLDSA87_DIR)/bin/test_unit87: CFLAGS += $(UNIT_CFLAGS)
-
-# Unit library object files compiled with MLD_STATIC_TESTABLE=
-$(MLDSA44_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLDSA65_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
-$(MLDSA87_DIR)/unit_%: CFLAGS += -DMLD_STATIC_TESTABLE= -Wno-missing-prototypes
-
-
-$(MLDSA44_DIR)/bin/bench_mldsa44: $(MLDSA44_DIR)/test/hal/hal.c.o
-$(MLDSA65_DIR)/bin/bench_mldsa65: $(MLDSA65_DIR)/test/hal/hal.c.o
-$(MLDSA87_DIR)/bin/bench_mldsa87: $(MLDSA87_DIR)/test/hal/hal.c.o
-$(MLDSA44_DIR)/bin/bench_components_mldsa44: $(MLDSA44_DIR)/test/hal/hal.c.o
-$(MLDSA65_DIR)/bin/bench_components_mldsa65: $(MLDSA65_DIR)/test/hal/hal.c.o
-$(MLDSA87_DIR)/bin/bench_components_mldsa87: $(MLDSA87_DIR)/test/hal/hal.c.o
-
-$(MLDSA44_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=44
-$(MLDSA65_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=65
-$(MLDSA87_DIR)/bin/%: CFLAGS += -DMLD_CONFIG_PARAMETER_SET=87
-
-# Link tests with respective library (except test_unit which includes sources directly)
 define ADD_SOURCE
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)
-$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/$(3)/$(2).c.o $(BUILD_DIR)/lib$(1).a
-endef
-
-
-# Special rule for test_unit - link against unit libraries with exposed internal functions
-define ADD_SOURCE_UNIT
-$(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_unit
-$(BUILD_DIR)/$(1)/bin/test_unit$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_unit.c.o $(BUILD_DIR)/lib$(1)_unit.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
-endef
-
-# Special rule for test_alloc - link against alloc libraries with custom alloc config
-define ADD_SOURCE_ALLOC
-$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)_alloc
-$(BUILD_DIR)/$(1)/bin/test_alloc$(subst mldsa,,$(1)): $(BUILD_DIR)/$(1)/test/src/test_alloc.c.o $(BUILD_DIR)/lib$(1)_alloc.a $(call MAKE_OBJS, $(BUILD_DIR)/$(1), $(wildcard test/notrandombytes/*.c))
+# Record this binary's test sources -- entrypoint test/$(3)/$(2).c plus extras
+# $(4) -- in the per-binary TEST_SRCS. A custom build (CUSTOM_BUILD, see
+# test/mk/rules.mk) consumes these directly; a normal build links lib$(1)$(5).a.
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): TEST_SRCS += test/$(3)/$(2).c $(4)
+ifndef CUSTOM_BUILD
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): LDLIBS += -L$(BUILD_DIR) -l$(1)$(5)
+$(BUILD_DIR)/$(1)/bin/$(2)$(subst mldsa,,$(1)): $(BUILD_DIR)/lib$(1)$(5).a
+endif
 endef
 
 $(foreach scheme,mldsa44 mldsa65 mldsa87, \
@@ -137,31 +115,45 @@ $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),wycheproof)) \
 	) \
 	$(foreach test,$(BENCH_TESTS), \
-		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench)) \
+		$(eval $(call ADD_SOURCE,$(scheme),$(test),bench,test/hal/hal.c)) \
 	) \
 	$(foreach test,$(BASIC_TESTS), \
 		$(eval $(call ADD_SOURCE,$(scheme),$(test),src)) \
 	) \
 	$(eval $(call ADD_SOURCE,$(scheme),test_rng_fail,src)) \
-	$(eval $(call ADD_SOURCE_UNIT,$(scheme))) \
-	$(eval $(call ADD_SOURCE_ALLOC,$(scheme))) \
+	$(eval $(call ADD_SOURCE,$(scheme),test_unit,src,,_unit)) \
+	$(eval $(call ADD_SOURCE,$(scheme),test_alloc,src,,_alloc)) \
 )
 
-# All tests get EXTRA_SOURCES
-$(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44): $(call MAKE_OBJS, $(MLDSA44_DIR), $(EXTRA_SOURCES))
-$(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65): $(call MAKE_OBJS, $(MLDSA65_DIR), $(EXTRA_SOURCES))
-$(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87): $(call MAKE_OBJS, $(MLDSA87_DIR), $(EXTRA_SOURCES))
+# The set of test binaries, per parameter set.
+BINS_44  := $(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44)
+BINS_65  := $(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65)
+BINS_87  := $(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87)
+ALL_BINS := $(BINS_44) $(BINS_65) $(BINS_87)
 
-# All tests except rng_fail get notrandombytes (rng_fail provides its own)
-$(filter-out %test_rng_fail44,$(ALL_TESTS:%=$(MLDSA44_DIR)/bin/%44)): $(call MAKE_OBJS, $(MLDSA44_DIR), $(wildcard test/notrandombytes/*.c))
-$(filter-out %test_rng_fail65,$(ALL_TESTS:%=$(MLDSA65_DIR)/bin/%65)): $(call MAKE_OBJS, $(MLDSA65_DIR), $(wildcard test/notrandombytes/*.c))
-$(filter-out %test_rng_fail87,$(ALL_TESTS:%=$(MLDSA87_DIR)/bin/%87)): $(call MAKE_OBJS, $(MLDSA87_DIR), $(wildcard test/notrandombytes/*.c))
+# All tests except rng_fail get notrandombytes (rng_fail provides its own).
+$(filter-out %test_rng_fail44 %test_rng_fail65 %test_rng_fail87,$(ALL_BINS)): \
+	TEST_SRCS += test/notrandombytes/notrandombytes.c
 
-# Apply EXTRA_CFLAGS to EXTRA_SOURCES object files
+# Turn each binary's TEST_SRCS into its prerequisites (via .SECONDEXPANSION, as
+# TEST_SRCS is a per-target variable). The scheme's object dir is derived from
+# the target ($@ = .../mldsaNNN/bin/foo, so $(@D) sans /bin = .../mldsaNNN).
+# Redundant in a normal build (the .a -> .o -> .c chain already implies it), but
+# a custom build links the sources directly and so needs them named explicitly.
+.SECONDEXPANSION:
+ifndef CUSTOM_BUILD
+$(ALL_BINS): $$(call MAKE_OBJS,$$(patsubst %/bin,%,$$(@D)),$$(TEST_SRCS))
+# EXTRA_SOURCES (platform-specific) is a normal-build feature: its per-file
+# CFLAGS only attach to object targets, which custom builds don't produce, so a
+# custom-build platform handles its own extra sources in its CUSTOM_BUILD recipe.
+$(ALL_BINS): TEST_SRCS += $(EXTRA_SOURCES)
 ifneq ($(EXTRA_SOURCES),)
 $(call MAKE_OBJS, $(MLDSA44_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLDSA65_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 $(call MAKE_OBJS, $(MLDSA87_DIR), $(EXTRA_SOURCES)): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
+endif
+else
+$(ALL_BINS): $$(TEST_SRCS) $(LIB_SRCS)
 endif
 
 # ABI checker
