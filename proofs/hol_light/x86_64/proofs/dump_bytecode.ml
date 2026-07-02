@@ -13,6 +13,10 @@ print_string "=== bytecode start: x86_64/mldsa/intt_avx2_asm.o ================\
 print_literal_from_elf "x86_64/mldsa/intt_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: x86_64/mldsa/rej_uniform_avx2_asm.o ================\n";;
+print_literal_from_elf "x86_64/mldsa/rej_uniform_avx2_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: x86_64/mldsa/nttunpack_avx2_asm.o ================\n";;
 print_literal_from_elf "x86_64/mldsa/nttunpack_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;

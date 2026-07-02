@@ -208,6 +208,8 @@ jobs:
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: intt_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
+          - name: rej_uniform_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_rej_uniform_table.ml"]
           - name: nttunpack_avx2_asm
             needs: ["mldsa_specs.ml", "subroutine_signatures.ml"]
           - name: pointwise_avx2_asm

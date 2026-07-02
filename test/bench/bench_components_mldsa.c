@@ -97,6 +97,15 @@ static int bench(void)
   /* polyz_unpack */
   BENCH("polyz_unpack", mld_polyz_unpack(&poly_out, (const uint8_t *)data0))
 
+  /* rej_uniform (via poly_uniform) */
+  {
+    uint8_t seed[MLDSA_SEEDBYTES + 2];
+    CHECK(mld_randombytes(seed, MLDSA_SEEDBYTES) == 0);
+    seed[MLDSA_SEEDBYTES] = 0;
+    seed[MLDSA_SEEDBYTES + 1] = 0;
+    BENCH("poly_uniform", mld_poly_uniform(&poly_out, seed))
+  }
+
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
 
   BENCH("poly_chknorm",

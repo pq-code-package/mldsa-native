@@ -174,6 +174,7 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 polyz_unpack (l=5,7): [polyz_unpack_19_avx2_asm.S](x86_64/mldsa/polyz_unpack_19_avx2_asm.S)
   * x86_64 poly_use_hint (l=5,7): [poly_use_hint_32_avx2_asm.S](x86_64/mldsa/poly_use_hint_32_avx2_asm.S)
   * x86_64 poly_use_hint (l=4): [poly_use_hint_88_avx2_asm.S](x86_64/mldsa/poly_use_hint_88_avx2_asm.S)
+  * x86_64 rejection uniform sampling: [rej_uniform_avx2_asm.S](x86_64/mldsa/rej_uniform_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
 
