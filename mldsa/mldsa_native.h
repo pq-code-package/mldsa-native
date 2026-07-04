@@ -30,8 +30,7 @@
  * in the configuration file and include this header multiple times, setting
  * MLD_CONFIG_PARAMETER_SET accordingly for each, and #undef'ing the MLD_H
  * guard to allow multiple inclusions.
- *
- ******************************************************************************/
+ */
 
 /******************************* Key sizes ************************************/
 
@@ -99,7 +98,7 @@
  * has probability < 2^-256. */
 #define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
 
-/****************************** Function API **********************************/
+/********************* Namespacing and Qualifiers *****************************/
 
 #define MLD_API_CONCAT_(x, y) x##y
 #define MLD_API_CONCAT(x, y) MLD_API_CONCAT_(x, y)
@@ -136,11 +135,12 @@
 #define MLD_API_QUALIFIER
 #endif
 
+/****************************** Function API **********************************/
+
 #if !defined(MLD_CONFIG_CONSTANTS_ONLY)
 
 #include <stddef.h>
 #include <stdint.h>
-
 
 #ifdef __cplusplus
 extern "C"
