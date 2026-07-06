@@ -62,12 +62,6 @@
 #define MLDSA65_CRHBYTES MLDSA_CRHBYTES
 #define MLDSA87_CRHBYTES MLDSA_CRHBYTES
 
-/* Size of TR output in bytes (level-independent) */
-#define MLDSA_TRBYTES 64
-#define MLDSA44_TRBYTES MLDSA_TRBYTES
-#define MLDSA65_TRBYTES MLDSA_TRBYTES
-#define MLDSA87_TRBYTES MLDSA_TRBYTES
-
 /* Size of randomness for signing in bytes (level-independent) */
 #define MLDSA_RNDBYTES 32
 #define MLDSA44_RNDBYTES MLDSA_RNDBYTES
