@@ -32,7 +32,6 @@ The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.
 - `MLD_CONFIG_MULTILEVEL_BUILD`: Enables multi-level mode
 - `MLD_CONFIG_NAMESPACE_PREFIX=mldsa`: Base prefix
 - `MLD_CONFIG_INTERNAL_API_QUALIFIER=static`: Makes internal functions static
-- `MLD_CONFIG_NO_SUPERCOP`: Disables the SUPERCOP API (crypto_sign*)
 
 The wrapper [mldsa_native_all.c](mldsa_native_all.c) includes `mldsa_native.c` three times:
 ```c
@@ -80,7 +79,6 @@ The header [mldsa_native_all.h](mldsa_native_all.h) exposes all APIs:
 
 - `MLD_CONFIG_MULTILEVEL_WITH_SHARED` must be set for exactly ONE level
 - `MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS` prevents cleanup of shared headers between inclusions
-- `MLD_CONFIG_NO_SUPERCOP` is required to avoid conflicting `CRYPTO_*` macro definitions
 
 ## Usage
 

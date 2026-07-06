@@ -23,7 +23,6 @@
 #define MLD_CONFIG_PARAMETER_SET 87
 #include <mldsa_native.h>
 #undef MLD_CONFIG_PARAMETER_SET
-#undef MLD_CONFIG_NO_SUPERCOP
 #undef MLD_H
 
 #endif /* !MLD_ALL_H */

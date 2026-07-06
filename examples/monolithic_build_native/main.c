@@ -20,6 +20,19 @@
 #include "expected_test_vectors.h"
 #include "test_only_rng/notrandombytes.h"
 
+/* Convenience abbreviations for the key and signature sizes.
+ *
+ * Ordinarily you know the parameter set you're working with, so you would
+ * just use the level-specific constants directly, e.g. MLDSA44_PUBLICKEYBYTES,
+ * MLDSA65_BYTES, or MLDSA87_SECRETKEYBYTES.
+ *
+ * These examples, however, are compiled for all three parameter sets (44, 65,
+ * 87), so we keep things generic by deriving the sizes from the configured
+ * MLD_CONFIG_PARAMETER_SET. */
+#define MLDSA_PK_BYTES MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)
+#define MLDSA_SK_BYTES MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)
+#define MLDSA_SIG_BYTES MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)
+
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
@@ -35,13 +48,13 @@
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int example_keygen(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
+  uint8_t sk[MLDSA_SK_BYTES];
 
   printf("Generating keypair... ");
-  CHECK(crypto_sign_keypair(pk, sk) == 0);
-  CHECK(memcmp(pk, test_vector_pk, CRYPTO_PUBLICKEYBYTES) == 0);
-  CHECK(memcmp(sk, test_vector_sk, CRYPTO_SECRETKEYBYTES) == 0);
+  CHECK(mldsa_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk, MLDSA_PK_BYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk, MLDSA_SK_BYTES) == 0);
   printf("DONE\n");
   return 0;
 }
@@ -56,14 +69,13 @@ static int example_keygen(void)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 static int example_sign(void)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   size_t siglen;
 
   printf("Signing message... ");
-  CHECK(crypto_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
-                              TEST_VECTOR_MSG_LEN,
-                              (const uint8_t *)TEST_VECTOR_CTX,
-                              TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
+  CHECK(mldsa_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                        TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                        TEST_VECTOR_CTX_LEN, test_vector_sk) == 0);
   CHECK(siglen == sizeof(test_vector_sig));
   CHECK(memcmp(sig, test_vector_sig, siglen) == 0);
   printf("DONE\n");
@@ -81,11 +93,10 @@ static int example_sign(void)
 static int example_verify(void)
 {
   printf("Verifying signature... ");
-  CHECK(crypto_sign_verify(test_vector_sig, sizeof(test_vector_sig),
-                           (const uint8_t *)TEST_VECTOR_MSG,
-                           TEST_VECTOR_MSG_LEN,
-                           (const uint8_t *)TEST_VECTOR_CTX,
-                           TEST_VECTOR_CTX_LEN, test_vector_pk) == 0);
+  CHECK(mldsa_verify(test_vector_sig, sizeof(test_vector_sig),
+                     (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                     (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                     test_vector_pk) == 0);
   printf("DONE\n");
   return 0;
 }

@@ -8,7 +8,7 @@ without requiring a `randombytes()` implementation.
 
 Use this approach when:
 - Your application manages its own entropy/randomness externally
-- You only need `crypto_sign_keypair_internal` and `crypto_sign_signature_internal` (deterministic variants)
+- You only need `mldsa_keypair_internal` and `mldsa_signature_internal` (deterministic variants)
 
 ## Components
 
@@ -20,7 +20,7 @@ No `randombytes()` implementation is required.
 ## Configuration
 
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
-- `MLD_CONFIG_NO_RANDOMIZED_API`: Disables `crypto_sign_keypair`, `crypto_sign_signature`, etc. 
+- `MLD_CONFIG_NO_RANDOMIZED_API`: Disables `mldsa_keypair`, `mldsa_signature`, etc. 
 - `MLD_CONFIG_PARAMETER_SET`: Security level (default 65)
 - `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix (set to `mldsa`)
 

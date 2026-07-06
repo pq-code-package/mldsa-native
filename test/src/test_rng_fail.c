@@ -12,6 +12,8 @@
 #include "../../mldsa/src/common.h"
 #include "expected_test_vectors.h"
 
+#include "test_namespace.h"
+
 /*
  * This test checks that we handle randombytes failures correctly by:
  * - Returning MLD_ERR_RNG_FAIL when randombytes fails
@@ -114,19 +116,18 @@ int randombytes(uint8_t *buf, size_t len)
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
+  uint8_t sk[MLDSA_SK_BYTES];
 
-  TEST_RNG_FAILURE("crypto_sign_keypair", crypto_sign_keypair(pk, sk));
+  TEST_RNG_FAILURE("keypair", mld_sign_keypair(pk, sk));
   return 0;
 }
 
 static int test_pk_from_sk_rng_failure(void)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
 
-  TEST_RNG_FAILURE("crypto_sign_pk_from_sk",
-                   MLD_API_NAMESPACE(pk_from_sk)(pk, test_vector_sk));
+  TEST_RNG_FAILURE("pk_from_sk", mld_sign_pk_from_sk(pk, test_vector_sk));
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -134,37 +135,36 @@ static int test_pk_from_sk_rng_failure(void)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_rng_failure(void)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   size_t siglen;
 
-  TEST_RNG_FAILURE("crypto_sign_signature",
-                   crypto_sign_signature(
-                       sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
-                       TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
-                       TEST_VECTOR_CTX_LEN, test_vector_sk));
+  TEST_RNG_FAILURE(
+      "signature",
+      mld_sign_signature(sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
+                         TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
+                         TEST_VECTOR_CTX_LEN, test_vector_sk));
   return 0;
 }
 
 static int test_signature_extmu_rng_failure(void)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   size_t siglen;
   uint8_t mu[64] = {0};
 
-  TEST_RNG_FAILURE(
-      "crypto_sign_signature_extmu",
-      MLD_API_NAMESPACE(signature_extmu)(sig, &siglen, mu, test_vector_sk));
+  TEST_RNG_FAILURE("signature_extmu",
+                   mld_sign_signature_extmu(sig, &siglen, mu, test_vector_sk));
   return 0;
 }
 
 static int test_signature_pre_hash_shake256_rng_failure(void)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t rnd[32] = {0};
   size_t siglen;
 
-  TEST_RNG_FAILURE("crypto_sign_signature_pre_hash_shake256",
-                   MLD_API_NAMESPACE(signature_pre_hash_shake256)(
+  TEST_RNG_FAILURE("signature_pre_hash_shake256",
+                   mld_sign_signature_pre_hash_shake256(
                        sig, &siglen, (const uint8_t *)TEST_VECTOR_MSG,
                        TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                        TEST_VECTOR_CTX_LEN, rnd, test_vector_sk));
@@ -176,28 +176,27 @@ static int test_signature_pre_hash_shake256_rng_failure(void)
 static int test_verify_rng_failure(void)
 {
   TEST_RNG_FAILURE(
-      "crypto_sign_verify",
-      crypto_sign_verify(test_vector_sig, CRYPTO_BYTES,
-                         (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-                         (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
-                         test_vector_pk));
+      "verify",
+      mld_sign_verify(test_vector_sig, MLDSA_SIG_BYTES,
+                      (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
+                      (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+                      test_vector_pk));
   return 0;
 }
 
 static int test_verify_extmu_rng_failure(void)
 {
-  TEST_RNG_FAILURE(
-      "crypto_sign_verify_extmu",
-      MLD_API_NAMESPACE(verify_extmu)(test_vector_sig_extmu, CRYPTO_BYTES,
-                                      test_vector_mu, test_vector_pk));
+  TEST_RNG_FAILURE("verify_extmu",
+                   mld_sign_verify_extmu(test_vector_sig_extmu, MLDSA_SIG_BYTES,
+                                         test_vector_mu, test_vector_pk));
   return 0;
 }
 
 static int test_verify_pre_hash_shake256_rng_failure(void)
 {
-  TEST_RNG_FAILURE("crypto_sign_verify_pre_hash_shake256",
-                   MLD_API_NAMESPACE(verify_pre_hash_shake256)(
-                       test_vector_sig_pre_hash_shake256, CRYPTO_BYTES,
+  TEST_RNG_FAILURE("verify_pre_hash_shake256",
+                   mld_sign_verify_pre_hash_shake256(
+                       test_vector_sig_pre_hash_shake256, MLDSA_SIG_BYTES,
                        (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
                        (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
                        test_vector_pk));

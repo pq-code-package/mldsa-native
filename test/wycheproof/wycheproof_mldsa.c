@@ -23,10 +23,7 @@
 
 #include "../../mldsa/mldsa_native.h"
 
-/* Additional SUPERCOP-style macros for functions not in the standard set */
-#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
-#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
-#define crypto_sign_pk_from_sk MLD_API_NAMESPACE(pk_from_sk)
+#include "../src/test_namespace.h"
 
 /* maximum message length used in the Wycheproof tests */
 #define MAX_MSG_LENGTH 8192
@@ -160,9 +157,9 @@ int main(int argc, char *argv[])
     unsigned char seed[MLDSA_SEEDBYTES];
     unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
     unsigned char context[MAX_CTX_LENGTH];
-    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    unsigned char sig[CRYPTO_BYTES];
+    unsigned char pk[MLDSA_PK_BYTES];
+    unsigned char sk[MLDSA_SK_BYTES];
+    unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char pre[MAX_CTX_LENGTH + 2];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
     size_t mlen, ctxlen, siglen;
@@ -209,12 +206,12 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(crypto_sign_keypair_internal(pk, sk, seed) == 0);
+    CHECK(mld_sign_keypair_internal(pk, sk, seed) == 0);
 
     if (externalMu)
     {
-      CHECK(crypto_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0,
-                                           rnd, sk, 1) == 0);
+      CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0,
+                                        rnd, sk, 1) == 0);
     }
     else
     {
@@ -222,8 +219,8 @@ int main(int argc, char *argv[])
       /* Safety: Truncation is safe due to the check above. */
       pre[1] = (uint8_t)ctxlen;
       memcpy(pre + 2, context, ctxlen);
-      CHECK(crypto_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                           ctxlen + 2, rnd, sk, 0) == 0);
+      CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
+                                        ctxlen + 2, rnd, sk, 0) == 0);
     }
     print_hex("signature", sig, siglen);
   }
@@ -235,8 +232,8 @@ int main(int argc, char *argv[])
     /* sigGenDeterministic message=HEX context=HEX sk=HEX */
     unsigned char message[MAX_MSG_LENGTH];
     unsigned char context[MAX_CTX_LENGTH];
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    unsigned char sig[CRYPTO_BYTES];
+    unsigned char sk[MLDSA_SK_BYTES];
+    unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char pre[MAX_CTX_LENGTH + 2];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
     size_t mlen, ctxlen, siglen;
@@ -273,16 +270,16 @@ int main(int argc, char *argv[])
     pre[1] = (uint8_t)ctxlen;
     memcpy(pre + 2, context, ctxlen);
 
-    CHECK(crypto_sign_signature_internal(sig, &siglen, message, mlen, pre,
-                                         ctxlen + 2, rnd, sk, 0) == 0);
+    CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, pre,
+                                      ctxlen + 2, rnd, sk, 0) == 0);
     print_hex("signature", sig, siglen);
   }
   else if (strcmp(argv[1], "sigGenInternalDeterministic") == 0)
   {
     /* sigGenInternalDeterministic message=HEX sk=HEX externalMu=0/1 */
     unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    unsigned char sig[CRYPTO_BYTES];
+    unsigned char sk[MLDSA_SK_BYTES];
+    unsigned char sig[MLDSA_SIG_BYTES];
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
     size_t mlen, siglen;
     int externalMu;
@@ -320,8 +317,8 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    CHECK(crypto_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0,
-                                         rnd, sk, externalMu) == 0);
+    CHECK(mld_sign_signature_internal(sig, &siglen, message, mlen, NULL, 0, rnd,
+                                      sk, externalMu) == 0);
     print_hex("signature", sig, siglen);
   }
   else
@@ -332,8 +329,8 @@ int main(int argc, char *argv[])
     /* sigVer message=HEX context=HEX signature=HEX pk=HEX */
     unsigned char message[MAX_MSG_LENGTH];
     unsigned char context[MAX_CTX_LENGTH];
-    unsigned char signature[CRYPTO_BYTES];
-    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+    unsigned char signature[MLDSA_SIG_BYTES];
+    unsigned char pk[MLDSA_PK_BYTES];
     size_t mlen, ctxlen;
 
     if (argc != 6)
@@ -369,8 +366,8 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    return crypto_sign_verify(signature, sizeof(signature), message, mlen,
-                              context, ctxlen, pk);
+    return mld_sign_verify(signature, sizeof(signature), message, mlen, context,
+                           ctxlen, pk);
   }
   else
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -378,8 +375,8 @@ int main(int argc, char *argv[])
       if (strcmp(argv[1], "pkFromSk") == 0)
   {
     /* pkFromSk sk=HEX */
-    unsigned char sk[CRYPTO_SECRETKEYBYTES];
-    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+    unsigned char sk[MLDSA_SK_BYTES];
+    unsigned char pk[MLDSA_PK_BYTES];
 
     if (argc != 3)
     {
@@ -392,7 +389,7 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    if (crypto_sign_pk_from_sk(pk, sk) != 0)
+    if (mld_sign_pk_from_sk(pk, sk) != 0)
     {
       return 1;
     }

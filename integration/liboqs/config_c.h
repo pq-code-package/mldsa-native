@@ -193,8 +193,8 @@ static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
  *              generated keypair before it can be exported.
  *
  *              Set this option if such a check should be implemented.
- *              In this case, crypto_sign_keypair_internal and
- *              crypto_sign_keypair will return a non-zero error code if the
+ *              In this case, keypair_internal and
+ *              keypair will return a non-zero error code if the
  *              PCT failed.
  *
  *              NOTE: This feature will drastically lower the performance of

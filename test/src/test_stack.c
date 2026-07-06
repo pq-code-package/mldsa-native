@@ -8,15 +8,17 @@
 
 #include "mldsa_native.h"
 
+#include "test_namespace.h"
+
 static void test_keygen_only(void)
 {
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-  unsigned char pk[CRYPTO_PUBLICKEYBYTES];
-  unsigned char sk[CRYPTO_SECRETKEYBYTES];
+  unsigned char pk[MLDSA_PK_BYTES];
+  unsigned char sk[MLDSA_SK_BYTES];
 
   /* Only call keypair - this is what we're measuring */
   /* Uses the notrandombytes implementation for deterministic randomness */
-  int ret = crypto_sign_keypair(pk, sk);
+  int ret = mld_sign_keypair(pk, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_KEYPAIR_API */
   printf("keygen test skipped (API disabled)\n");
@@ -26,16 +28,16 @@ static void test_keygen_only(void)
 static void test_sign_only(void)
 {
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-  unsigned char sk[CRYPTO_SECRETKEYBYTES] = {0};
-  unsigned char sig[CRYPTO_BYTES];
+  unsigned char sk[MLDSA_SK_BYTES] = {0};
+  unsigned char sig[MLDSA_SIG_BYTES];
   size_t siglen;
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
 
   /* Only call signature - this is what we're measuring */
   /* sk is zero-initialized (invalid key, but OK for stack measurement) */
-  int ret = crypto_sign_signature(sig, &siglen, msg, sizeof(msg) - 1, ctx,
-                                  sizeof(ctx) - 1, sk);
+  int ret = mld_sign_signature(sig, &siglen, msg, sizeof(msg) - 1, ctx,
+                               sizeof(ctx) - 1, sk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_SIGN_API */
   printf("sign test skipped (API disabled)\n");
@@ -45,15 +47,15 @@ static void test_sign_only(void)
 static void test_verify_only(void)
 {
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-  unsigned char pk[CRYPTO_PUBLICKEYBYTES] = {0};
-  unsigned char sig[CRYPTO_BYTES] = {0};
+  unsigned char pk[MLDSA_PK_BYTES] = {0};
+  unsigned char sig[MLDSA_SIG_BYTES] = {0};
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
 
   /* Only call verify - this is what we're measuring */
   /* pk and sig are zero-initialized (invalid, but OK for stack measurement) */
-  int ret = crypto_sign_verify(sig, CRYPTO_BYTES, msg, sizeof(msg) - 1, ctx,
-                               sizeof(ctx) - 1, pk);
+  int ret = mld_sign_verify(sig, MLDSA_SIG_BYTES, msg, sizeof(msg) - 1, ctx,
+                            sizeof(ctx) - 1, pk);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_VERIFY_API */
   printf("verify test skipped (API disabled)\n");

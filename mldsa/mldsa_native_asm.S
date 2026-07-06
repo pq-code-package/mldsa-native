@@ -139,9 +139,6 @@
  * Undefine macros from MLD_CONFIG_PARAMETER_SET-specific files
  */
 /* mldsa/mldsa_native.h */
-#undef CRYPTO_BYTES
-#undef CRYPTO_PUBLICKEYBYTES
-#undef CRYPTO_SECRETKEYBYTES
 #undef MLDSA44_BYTES
 #undef MLDSA44_CRHBYTES
 #undef MLDSA44_PUBLICKEYBYTES
@@ -218,9 +215,6 @@
 #undef MLD_TOTAL_ALLOC_87_PK_FROM_SK
 #undef MLD_TOTAL_ALLOC_87_SIGN
 #undef MLD_TOTAL_ALLOC_87_VERIFY
-#undef crypto_sign_keypair
-#undef crypto_sign_signature
-#undef crypto_sign_verify
 /* mldsa/src/common.h */
 #undef MLD_ADD_PARAM_SET
 #undef MLD_ALLOC

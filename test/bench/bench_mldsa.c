@@ -14,9 +14,7 @@
 #include "mldsa_native.h"
 #include "src/randombytes.h"
 
-/* Additional SUPERCOP-style macros for functions not in the standard set */
-#define crypto_sign_keypair_internal MLD_API_NAMESPACE(keypair_internal)
-#define crypto_sign_signature_internal MLD_API_NAMESPACE(signature_internal)
+#include "../src/test_namespace.h"
 
 #ifndef MLD_BENCHMARK_NWARMUP
 #define MLD_BENCHMARK_NWARMUP 3
@@ -91,13 +89,13 @@ static int bench(void)
   unsigned i;
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
+  uint8_t sk[MLDSA_SK_BYTES];
   unsigned char kg_rand[MLDSA_SEEDBYTES];
   uint64_t cycles_kg[MLD_BENCHMARK_NTESTS];
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API)
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
   unsigned char sig_rand[MLDSA_SEEDBYTES];
@@ -122,13 +120,13 @@ static int bench(void)
       /* Key-pair generation */
       for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
       {
-        ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
+        ret |= mld_sign_keypair_internal(pk, sk, kg_rand);
       }
 
       t0 = get_cyclecounter();
       for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
       {
-        ret |= crypto_sign_keypair_internal(pk, sk, kg_rand);
+        ret |= mld_sign_keypair_internal(pk, sk, kg_rand);
       }
       t1 = get_cyclecounter();
       cycles_kg[i] = t1 - t0;
@@ -152,14 +150,14 @@ static int bench(void)
 
       for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
       {
-        ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                              CTXLEN + 2, sig_rand, sk, 0);
+        ret |= mld_sign_signature_internal(sig, &siglen, m, MLEN, pre,
+                                           CTXLEN + 2, sig_rand, sk, 0);
       }
       t0 = get_cyclecounter();
       for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
       {
-        ret |= crypto_sign_signature_internal(sig, &siglen, m, MLEN, pre,
-                                              CTXLEN + 2, sig_rand, sk, 0);
+        ret |= mld_sign_signature_internal(sig, &siglen, m, MLEN, pre,
+                                           CTXLEN + 2, sig_rand, sk, 0);
       }
       t1 = get_cyclecounter();
       cycles_sign[i] = t1 - t0;
@@ -176,12 +174,12 @@ static int bench(void)
       /* Verification */
       for (j = 0; j < MLD_BENCHMARK_NWARMUP; j++)
       {
-        ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+        ret |= mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
       }
       t0 = get_cyclecounter();
       for (j = 0; j < MLD_BENCHMARK_NITERATIONS; j++)
       {
-        ret |= crypto_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
+        ret |= mld_sign_verify(sig, siglen, m, MLEN, ctx, CTXLEN, pk);
       }
       t1 = get_cyclecounter();
       cycles_verify[i] = t1 - t0;

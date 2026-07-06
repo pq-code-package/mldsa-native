@@ -191,7 +191,7 @@ To enable this mode, define `MLD_CONFIG_REDUCE_RAM` in [mldsa_native_config.h](m
 
 By default, mldsa-native uses the randomized "hedged" signing variant as specified in FIPS 204 Section 3.4. The hedged variant uses both fresh randomness at signing time and precomputed randomness from the private key. This helps mitigate fault injection attacks and side-channel attacks while protecting against potential flaws in the random number generator.
 
-If you need the deterministic variant of ML-DSA, you can call `crypto_sign_signature_internal`
+If you need the deterministic variant of ML-DSA, you can call `signature_internal`
 directly with an all-zero `rnd` argument.
 However, note that FIPS 204 warns that this should not be used on platforms where fault injection attacks and side-channel attacks are a concern, as the lack of fresh randomness makes fault attacks more difficult to mitigate.
 
@@ -206,8 +206,8 @@ External mu mode enables applications to compute the message digest (mu) externa
 Yes. mldsa-native supports HashML-DSA, the pre-hashing variant of ML-DSA defined in FIPS 204 Algorithms 4 and 5.
 
 mldsa-native provides two levels of API:
-- `crypto_sign_signature_pre_hash_internal` and `crypto_sign_verify_pre_hash_internal` - Low-level functions that accept a pre-hashed message digest. This function supports all 12 allowed hash functions.
-- `crypto_sign_signature_pre_hash_shake256` and `crypto_sign_verify_pre_hash_shake256` - High-level functions that perform SHAKE256 pre-hashing internally for convenience. Currently, only SHAKE256 is supported. If you require another hash function, use the `*_pre_hash_internal` functions or open an issue.
+- `signature_pre_hash_internal` and `verify_pre_hash_internal` - Low-level functions that accept a pre-hashed message digest. This function supports all 12 allowed hash functions.
+- `signature_pre_hash_shake256` and `verify_pre_hash_shake256` - High-level functions that perform SHAKE256 pre-hashing internally for convenience. Currently, only SHAKE256 is supported. If you require another hash function, use the `*_pre_hash_internal` functions or open an issue.
 
 ## Have a Question?
 

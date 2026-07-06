@@ -282,7 +282,7 @@ int MLD_API_NAMESPACE(signature_internal)(
 /**
  * Compute signature. This function implements the randomized variant of
  * ML-DSA. If you require the deterministic variant, use
- * crypto_sign_signature_internal directly.
+ * signature_internal directly.
  *
  * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign].}
  *
@@ -502,7 +502,7 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
  *
  * @warning This is an unstable API that may change in the future. If you need
- * a stable API use crypto_sign_signature_pre_hash_shake256.
+ * a stable API use signature_pre_hash_shake256.
  *
  * @param[out] sig     Output signature.
  * @param[out] siglen  Pointer to output length of signature.
@@ -554,7 +554,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
  *
  * @warning This is an unstable API that may change in the future. If you need
- * a stable API use crypto_sign_verify_pre_hash_shake256.
+ * a stable API use verify_pre_hash_shake256.
  *
  * @param[in] sig     Pointer to input signature.
  * @param     siglen  Length of signature.
@@ -752,33 +752,9 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 }
 #endif
 
-/****************************** SUPERCOP API *********************************/
-
-#if !defined(MLD_CONFIG_NO_SUPERCOP)
-/* Export API in SUPERCOP naming scheme CRYPTO_xxx / crypto_sign_xxx */
-#define CRYPTO_SECRETKEYBYTES MLDSA_SECRETKEYBYTES(MLD_CONFIG_PARAMETER_SET)
-#define CRYPTO_PUBLICKEYBYTES MLDSA_PUBLICKEYBYTES(MLD_CONFIG_PARAMETER_SET)
-#define CRYPTO_BYTES MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)
-
-#define crypto_sign_keypair MLD_API_NAMESPACE(keypair)
-#define crypto_sign_signature MLD_API_NAMESPACE(signature)
-#define crypto_sign_verify MLD_API_NAMESPACE(verify)
-
-#else /* !MLD_CONFIG_NO_SUPERCOP */
-
-/* If the SUPERCOP API is not needed, we can undefine the various helper macros
- * above. Otherwise, they are needed for lazy evaluation of crypto_sign_xxx. */
 #undef MLD_API_NAMESPACE_PREFIX
-#undef MLD_API_CONCAT
-#undef MLD_API_CONCAT_
-#undef MLD_API_CONCAT_UNDERSCORE
-#undef MLD_API_NAMESPACE
-#undef MLD_API_MUST_CHECK_RETURN_VALUE
-#undef MLD_API_QUALIFIER
 
-#endif /* MLD_CONFIG_NO_SUPERCOP */
 #endif /* !MLD_CONFIG_CONSTANTS_ONLY */
-
 
 /***************************** Memory Usage **********************************/
 

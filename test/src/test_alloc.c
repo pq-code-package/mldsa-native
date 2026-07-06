@@ -13,6 +13,7 @@
 #include "../../mldsa/src/common.h"
 #include "../notrandombytes/notrandombytes.h"
 #include "expected_test_vectors.h"
+#include "test_namespace.h"
 
 /*
  * Level-dependent allocation limit macros.
@@ -340,8 +341,8 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
-  uint8_t sk[CRYPTO_SECRETKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
+  uint8_t sk[MLDSA_SK_BYTES];
 
   TEST_ALLOC_FAILURE("mld_keypair", mld_keypair(pk, sk, ctx),
                      MLD_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
@@ -350,7 +351,7 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
 
 static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t pk[CRYPTO_PUBLICKEYBYTES];
+  uint8_t pk[MLDSA_PK_BYTES];
 
   TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, test_vector_sk, ctx),
                      MLD_TOTAL_ALLOC_PK_FROM_SK,
@@ -364,7 +365,7 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 static int test_sign_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   size_t siglen;
 
   TEST_ALLOC_FAILURE(
@@ -378,7 +379,7 @@ static int test_sign_alloc_failure(test_ctx_t *ctx)
 
 static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[64] = {0};
   size_t siglen;
 
@@ -390,7 +391,7 @@ static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 
 static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
-  uint8_t sig[CRYPTO_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t rnd[32] = {0};
   size_t siglen;
 
@@ -409,7 +410,7 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE(
       "mld_verify",
-      mld_verify(test_vector_sig, CRYPTO_BYTES,
+      mld_verify(test_vector_sig, MLDSA_SIG_BYTES,
                  (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
                  (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
                  test_vector_pk, ctx),
@@ -422,7 +423,7 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
 static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE("mld_verify_extmu",
-                     mld_verify_extmu(test_vector_sig_extmu, CRYPTO_BYTES,
+                     mld_verify_extmu(test_vector_sig_extmu, MLDSA_SIG_BYTES,
                                       test_vector_mu, test_vector_pk, ctx),
                      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
   return 0;
@@ -432,7 +433,7 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
   TEST_ALLOC_FAILURE("mld_verify_pre_hash_shake256",
                      mld_verify_pre_hash_shake256(
-                         test_vector_sig_pre_hash_shake256, CRYPTO_BYTES,
+                         test_vector_sig_pre_hash_shake256, MLDSA_SIG_BYTES,
                          (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
                          (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
                          test_vector_pk, ctx),

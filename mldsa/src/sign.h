@@ -38,7 +38,7 @@
 #endif
 
 #if MLDSA_CRYPTO_BYTES != MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET)
-#error Mismatch for CRYPTO_BYTES between sign.h and mldsa_native.h
+#error Mismatch for BYTES between sign.h and mldsa_native.h
 #endif
 
 #endif /* MLD_CHECK_APIS */

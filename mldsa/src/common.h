@@ -129,15 +129,15 @@
 #endif
 
 #if defined(MLD_CONFIG_NO_RANDOMIZED_API) && defined(MLD_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLD_CONFIG_NO_RANDOMIZED_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_signature()
+#error Bad configuration: MLD_CONFIG_NO_RANDOMIZED_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires signature()
 #endif
 
 #if defined(MLD_CONFIG_NO_SIGN_API) && defined(MLD_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLD_CONFIG_NO_SIGN_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_signature()
+#error Bad configuration: MLD_CONFIG_NO_SIGN_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires signature()
 #endif
 
 #if defined(MLD_CONFIG_NO_VERIFY_API) && defined(MLD_CONFIG_KEYGEN_PCT)
-#error Bad configuration: MLD_CONFIG_NO_VERIFY_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires crypto_sign_verify()
+#error Bad configuration: MLD_CONFIG_NO_VERIFY_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires verify()
 #endif
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)

@@ -127,8 +127,8 @@
  *
  * By default, mldsa-native includes support for generating key
  * pairs. If you don't need this, set MLD_CONFIG_NO_KEYPAIR_API
- * to exclude crypto_sign_keypair, crypto_sign_keypair_internal,
- * crypto_sign_pk_from_sk, and all internal APIs only needed by
+ * to exclude keypair, keypair_internal,
+ * pk_from_sk, and all internal APIs only needed by
  * those functions.
  */
 /* #define MLD_CONFIG_NO_KEYPAIR_API */
@@ -138,10 +138,10 @@
  *
  * By default, mldsa-native includes support for creating
  * signatures. If you don't need this, set MLD_CONFIG_NO_SIGN_API
- * to exclude crypto_sign_signature,
- * crypto_sign_signature_extmu, crypto_sign_signature_internal,
- * crypto_sign_signature_pre_hash_internal,
- * crypto_sign_signature_pre_hash_shake256, and all internal APIs
+ * to exclude signature,
+ * signature_extmu, signature_internal,
+ * signature_pre_hash_internal,
+ * signature_pre_hash_shake256, and all internal APIs
  * only needed by those functions.
  */
 /* #define MLD_CONFIG_NO_SIGN_API */
@@ -151,10 +151,10 @@
  *
  * By default, mldsa-native includes support for verifying
  * signatures. If you don't need this, set
- * MLD_CONFIG_NO_VERIFY_API to exclude crypto_sign_verify,
- * crypto_sign_verify_extmu, crypto_sign_verify_internal,
- * crypto_sign_verify_pre_hash_internal,
- * crypto_sign_verify_pre_hash_shake256, and all internal APIs
+ * MLD_CONFIG_NO_VERIFY_API to exclude verify,
+ * verify_extmu, verify_internal,
+ * verify_pre_hash_internal,
+ * verify_pre_hash_shake256, and all internal APIs
  * only needed by those functions.
  */
 /* #define MLD_CONFIG_NO_VERIFY_API */
@@ -163,8 +163,8 @@
  * MLD_CONFIG_CORE_API_ONLY
  *
  * Set this to remove all public APIs except
- * crypto_sign_keypair_internal, crypto_sign_signature_internal,
- * and crypto_sign_verify_internal.
+ * keypair_internal, signature_internal,
+ * and verify_internal.
  */
 /* #define MLD_CONFIG_CORE_API_ONLY */
 
@@ -172,30 +172,18 @@
  * MLD_CONFIG_NO_RANDOMIZED_API
  *
  * If this option is set, mldsa-native will be built without the
- * randomized API functions (crypto_sign_keypair,
- * crypto_sign_signature, and crypto_sign_signature_extmu).
+ * randomized API functions (keypair,
+ * signature, and signature_extmu).
  * This allows users to build mldsa-native without providing a
  * randombytes() implementation if they only need the
  * internal deterministic API
- * (crypto_sign_keypair_internal, crypto_sign_signature_internal).
+ * (keypair_internal, signature_internal).
  *
  * @note This option is incompatible with MLD_CONFIG_KEYGEN_PCT
  * as the current PCT implementation requires
- * crypto_sign_signature().
+ * signature().
  */
 /* #define MLD_CONFIG_NO_RANDOMIZED_API */
-
-/**
- * MLD_CONFIG_NO_SUPERCOP
- *
- * By default, mldsa_native.h exposes the mldsa-native API in the
- * SUPERCOP naming convention (crypto_sign_xxx). If you don't need
- * this, set MLD_CONFIG_NO_SUPERCOP.
- *
- * @note You must set this for a multi-level build as the SUPERCOP
- * naming does not disambiguate between the parameter sets.
- */
-/* #define MLD_CONFIG_NO_SUPERCOP */
 
 /**
  * MLD_CONFIG_CONSTANTS_ONLY
@@ -632,8 +620,8 @@
  * generated keypair before it can be exported.
  *
  * Set this option if such a check should be implemented.
- * In this case, crypto_sign_keypair_internal and
- * crypto_sign_keypair will return a non-zero error code if the
+ * In this case, keypair_internal and
+ * keypair will return a non-zero error code if the
  * PCT failed.
  *
  * @note This feature will drastically lower the performance of
@@ -641,7 +629,7 @@
  *
  * @note This option is incompatible with MLD_CONFIG_NO_SIGN_API
  * and MLD_CONFIG_NO_VERIFY_API as the current PCT implementation
- * requires crypto_sign_signature() and crypto_sign_verify().
+ * requires signature() and verify().
  */
 #define MLD_CONFIG_KEYGEN_PCT
 
