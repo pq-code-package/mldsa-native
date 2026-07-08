@@ -765,7 +765,11 @@ static inline void *mld_posix_memalign(size_t align, size_t sz)
  * e.g., PQCP_MLDSA_NATIVE_MLDSA44_
  */
 
-#if MLD_CONFIG_PARAMETER_SET == 44
+#if defined(MLD_CONFIG_MULTILEVEL_BUILD)
+/* In a multi-level build the parameter set is appended by the namespacing
+ * machinery, so the default prefix must not embed it. */
+#define MLD_DEFAULT_NAMESPACE_PREFIX PQCP_MLDSA_NATIVE_MLDSA
+#elif MLD_CONFIG_PARAMETER_SET == 44
 #define MLD_DEFAULT_NAMESPACE_PREFIX PQCP_MLDSA_NATIVE_MLDSA44
 #elif MLD_CONFIG_PARAMETER_SET == 65
 #define MLD_DEFAULT_NAMESPACE_PREFIX PQCP_MLDSA_NATIVE_MLDSA65
