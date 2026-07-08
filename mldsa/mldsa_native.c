@@ -667,6 +667,11 @@
 #undef MLD_NATIVE_FUNC_SUCCESS
 #undef MLD_NTT_BOUND
 #undef MLD_REDUCE32_RANGE_MAX
+/* mldsa/src/native/armv81m/mve_memory.h */
+#undef MLD_NATIVE_ARMV81M_MVE_MEMORY_H
+#undef mld_memcpy
+#undef mld_memset
+#undef mld_zeroize
 /* mldsa/src/native/meta.h */
 #undef MLD_NATIVE_META_H
 #if defined(MLD_SYS_AARCH64)

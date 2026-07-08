@@ -146,6 +146,28 @@ configs:
           }
           #endif
 
+  - path: test/configs/armv81m_mve_memory_config.h
+    description: "Test configuration with Armv8.1-M MVE custom zeroize, memcpy, and memset"
+    defines:
+      MLD_CONFIG_CUSTOM_ZEROIZE:
+        content: |
+          #define MLD_CONFIG_CUSTOM_ZEROIZE
+          #if !defined(__ASSEMBLER__)
+          #include "../mldsa/src/native/armv81m/mve_memory.h"
+          #endif
+      MLD_CONFIG_CUSTOM_MEMCPY:
+        content: |
+          #define MLD_CONFIG_CUSTOM_MEMCPY
+          #if !defined(__ASSEMBLER__)
+          #include "../mldsa/src/native/armv81m/mve_memory.h"
+          #endif
+      MLD_CONFIG_CUSTOM_MEMSET:
+        content: |
+          #define MLD_CONFIG_CUSTOM_MEMSET
+          #if !defined(__ASSEMBLER__)
+          #include "../mldsa/src/native/armv81m/mve_memory.h"
+          #endif
+
   - path: test/configs/break_pct_config.h
     description: "Test configuration for PCT breakage testing"
     defines:
