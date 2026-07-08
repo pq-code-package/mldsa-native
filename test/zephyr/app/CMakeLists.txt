@@ -21,7 +21,6 @@ list(TRANSFORM _test_srcs PREPEND ${R}/)
 target_sources(app PRIVATE
   ${R}/mldsa/mldsa_native.c
   ${_test_srcs}
-  ${CMAKE_CURRENT_SOURCE_DIR}/shim.c
 )
 
 target_include_directories(app PRIVATE
@@ -29,6 +28,31 @@ target_include_directories(app PRIVATE
   ${R}/test/notrandombytes
   ${R}/test/hal
 )
+
+# The Zephyr shim owns main() (see below). On QEMU targets shim.c stops the
+# emulator with the test's exit code; the NUCLEO-N657X0-Q hardware target needs
+# its own shim plus libc wrappers that route stdio over ITM/SWO.
+if(ZEPHYR_NUCLEO_N657X0_Q)
+  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c)
+  target_compile_definitions(app PRIVATE
+    printf=__wrap_printf
+    fprintf=__wrap_fprintf
+    puts=__wrap_puts
+    putchar=__wrap_putchar
+    fflush=__wrap_fflush
+    exit=__wrap_exit
+  )
+  target_link_options(app PRIVATE
+    -Wl,--wrap=printf
+    -Wl,--wrap=fprintf
+    -Wl,--wrap=puts
+    -Wl,--wrap=putchar
+    -Wl,--wrap=fflush
+    -Wl,--wrap=exit
+  )
+else()
+  target_sources(app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shim.c)
+endif()
 
 # The test binary's CFLAGS, forwarded from the build (test/zephyr/platform.mk
 # assembles and escapes them) and applied to the mldsa amalgamation and the test
@@ -47,6 +71,9 @@ endif()
 set_source_files_properties(${R}/test/hal/hal.c
   PROPERTIES COMPILE_OPTIONS "-Wno-error")
 
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c
+  PROPERTIES COMPILE_OPTIONS "-Wno-error")
+
 # Optional native FIPS202 backend (e.g. Armv8.1-M MVE on Cortex-M55). The
 # monolithic mldsa_native.c already includes the backend C sources; its
 # assembly counterpart comes from mldsa_native_asm.S.
@@ -57,9 +84,10 @@ if(ZEPHYR_FIPS202_BACKEND)
     "MLD_CONFIG_FIPS202_BACKEND_FILE=\"${ZEPHYR_FIPS202_BACKEND}\"")
 endif()
 
-# Each test brings its own int main(void); rename it so the Zephyr shim
-# (shim.c) owns main() and can stop QEMU with the test's exit code. Only the
-# test entrypoint in ZEPHYR_TEST_SRCS defines main(); the support sources
-# (notrandombytes, hal) don't, so applying the define to all is harmless.
+# Each test brings its own int main(void); rename it so the selected Zephyr
+# shim owns main() and can return the test's exit code through the target's
+# runner. Only the test entrypoint in ZEPHYR_TEST_SRCS defines main(); the
+# support sources (notrandombytes, hal) don't, so applying the define to all is
+# harmless.
 set_source_files_properties(${_test_srcs}
   PROPERTIES COMPILE_DEFINITIONS "main=mld_test_main")

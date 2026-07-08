@@ -38,6 +38,8 @@ jobs:
           bench_extra_args: ""
           nix_shell: bench
           only_no_opt: false
+          extra_makefile: ""
+          zephyr_target: ""
         - system: rpi5
           name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
           bench_pmu: PERF
@@ -48,6 +50,8 @@ jobs:
           nix_shell: bench
           only_no_opt: false
           cross_prefix: ""
+          extra_makefile: ""
+          zephyr_target: ""
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
           bench_pmu: PERF
@@ -57,6 +61,8 @@ jobs:
           bench_extra_args: -w exec-on-a55
           nix_shell: bench
           only_no_opt: false
+          extra_makefile: ""
+          zephyr_target: ""
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
           bench_pmu: PERF
@@ -67,6 +73,8 @@ jobs:
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
           only_no_opt: true
+          extra_makefile: ""
+          zephyr_target: ""
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
           bench_pmu: MAC
@@ -76,12 +84,29 @@ jobs:
           bench_extra_args: "-r"
           nix_shell: bench
           only_no_opt: false
+          extra_makefile: ""
+          zephyr_target: ""
+        - system: nucleo-n657x0
+          name: Arm Cortex-M55 (NUCLEO-N657X0-Q) benchmarks
+          bench_pmu: NO
+          archflags: ""
+          cflags: ""
+          ldflags: ""
+          bench_extra_args: ""
+          nix_shell: zephyr
+          only_no_opt: false
+          cross_prefix: ""
+          extra_makefile: test/zephyr/platform.mk
+          zephyr_target: nucleo-n657x0-q
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: ./.github/actions/bench
         if: ${{ !matrix.target.only_no_opt }}
+        env:
+          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
+          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
         with:
           name: ${{ matrix.target.name }} (opt)
           cflags: ${{ matrix.target.cflags }}
@@ -95,6 +120,9 @@ jobs:
           cross_prefix: ${{ matrix.target.cross_prefix }}
           opt: true
       - uses: ./.github/actions/bench
+        env:
+          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
+          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
         with:
           name: ${{ matrix.target.name }} (no-opt)
           cflags: ${{ matrix.target.cflags }}
