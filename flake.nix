@@ -169,9 +169,12 @@
 
           # Zephyr build environment (board chosen at make time via EXTRA_MAKEFILE)
           packages.zephyr = util.zephyr;
+          # OpenOCD with STM32N6 support, for the NUCLEO-N657X0-Q hardware target.
+          packages.openocd = util.openocd;
           devShells.zephyr = util.mkShell {
             packages = builtins.attrValues
               {
+                inherit (config.packages) openocd;
                 inherit (util) zephyr;
                 inherit (pkgs) gcc-arm-embedded qemu cmake ninja dtc gperf coreutils git;
               } ++ [ util.zephyrPythonEnv ];
