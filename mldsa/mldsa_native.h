@@ -62,7 +62,13 @@
 #define MLDSA65_CRHBYTES MLDSA_CRHBYTES
 #define MLDSA87_CRHBYTES MLDSA_CRHBYTES
 
-/* Size of TR output in bytes (level-independent) */
+/* Size of TR in bytes (level-independent)
+ *
+ * TR = SHAKE256(pk, 64) is the hash of the public key. Callers of the
+ * external-mu API (signature_extmu / verify_extmu) that compute the message
+ * representative mu = SHAKE256(TR || M', MLDSA_CRHBYTES) themselves -- e.g. to
+ * sign or verify a message that is too large or streamed to hold in memory --
+ * need this constant to size the TR buffer. */
 #define MLDSA_TRBYTES 64
 #define MLDSA44_TRBYTES MLDSA_TRBYTES
 #define MLDSA65_TRBYTES MLDSA_TRBYTES
