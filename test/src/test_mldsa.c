@@ -19,8 +19,6 @@
 #define MLEN 59
 #define CTXLEN 1
 
-#define MLDSA_TRBYTES 64
-
 #define CHECK(x)                                              \
   do                                                          \
   {                                                           \
