@@ -41,7 +41,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: 'f986aea60a9f3cb4055474aa212538bb0b14f1fe' # main (2026-05-27)
+          commit: '0.16.0' # release 0.16.0 (2026-07-09)
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           repository: 'open-quantum-safe/liboqs'
       - name: Apply patch
