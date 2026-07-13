@@ -50,7 +50,7 @@
 
 void enable_cyclecounter(void) {}
 void disable_cyclecounter(void) {}
-uint64_t get_cyclecounter(void) { return k_cycle_get_32(); }
+uint64_t get_cyclecounter(void) { return k_cycle_get_64(); }
 
 #elif defined(PMU_CYCLES)
 
@@ -125,8 +125,8 @@ uint64_t get_cyclecounter(void) { return DWT->CYCCNT; }
 #elif defined(ARMCM55)
 /* Cortex-M55: Use dedicated PMU */
 #include <ARMCM55.h>
+#include <pmu_armv8.h>
 #include <system_ARMCM55.h>
-#include "pmu_armv8.h"
 
 void enable_cyclecounter(void)
 {

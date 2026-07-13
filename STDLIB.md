@@ -24,4 +24,6 @@ Replaces all `memcpy` calls with a custom implementation. When enabled, you must
 ### MLD_CONFIG_CUSTOM_MEMSET
 Replaces all `memset` calls with a custom implementation. When enabled, you must define a `mld_memset` function with the same signature as the standard `memset`.
 
-See the configuration examples in `mldsa/src/config.h` and test configurations in `test/custom_*_config.h` for usage examples and implementation requirements.
+Armv8.1-M MVE targets can use `mldsa/src/native/armv81m/mve_memory.h` as an implementation of the existing `MLD_CONFIG_CUSTOM_ZEROIZE`, `MLD_CONFIG_CUSTOM_MEMCPY`, and `MLD_CONFIG_CUSTOM_MEMSET` hooks.
+
+See the configuration examples in `mldsa/mldsa_native_config.h` and test configurations in `test/configs/*_config.h` for usage examples and implementation requirements.

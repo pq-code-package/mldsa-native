@@ -1,0 +1,17 @@
+/*
+ * Copyright (c) The mldsa-native project authors
+ * Copyright (c) The mlkem-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/ {
+    mld_axisram: memory@34080000 {
+        compatible = "zephyr,memory-region", "mmio-sram";
+        reg = <0x34080000 0x00030000>;
+        zephyr,memory-region = "NUCLEO_AXISRAM";
+    };
+
+    chosen {
+        zephyr,sram = &mld_axisram;
+    };
+};

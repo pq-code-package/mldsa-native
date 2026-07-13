@@ -42,7 +42,10 @@
 
 static int cmp_uint64_t(const void *a, const void *b)
 {
-  return (int)((*((const uint64_t *)a)) - (*((const uint64_t *)b)));
+  const uint64_t va = *((const uint64_t *)a);
+  const uint64_t vb = *((const uint64_t *)b);
+
+  return (va > vb) - (va < vb);
 }
 
 static void print_avg(const char *txt, uint64_t cyc[MLD_BENCHMARK_NTESTS])
@@ -66,7 +69,7 @@ static void print_percentile_legend(void)
   printf("%21s", "percentile");
   for (i = 0; i < sizeof(percentiles) / sizeof(percentiles[0]); i++)
   {
-    printf("%9d", percentiles[i]);
+    printf("%12d", percentiles[i]);
   }
   printf("\n");
 }
@@ -78,8 +81,8 @@ static void print_percentiles(const char *txt,
   printf("%10s percentiles:", txt);
   for (i = 0; i < sizeof(percentiles) / sizeof(percentiles[0]); i++)
   {
-    printf("%9" PRIu64, (cyc)[MLD_BENCHMARK_NTESTS * percentiles[i] / 100] /
-                            MLD_BENCHMARK_NITERATIONS);
+    printf("%12" PRIu64, (cyc)[MLD_BENCHMARK_NTESTS * percentiles[i] / 100] /
+                             MLD_BENCHMARK_NITERATIONS);
   }
   printf("\n");
 }
