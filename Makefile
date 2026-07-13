@@ -2,14 +2,14 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: func kat acvp wycheproof stack unit alloc rng_fail \
-	func_44 kat_44 acvp_44 wycheproof_44 stack_44 unit_44 alloc_44 rng_fail_44 \
-	func_65 kat_65 acvp_65 wycheproof_65 stack_65 unit_65 alloc_65 rng_fail_65 \
-	func_87 kat_87 acvp_87 wycheproof_87 stack_87 unit_87 alloc_87 rng_fail_87 \
-	run_func run_kat run_acvp run_wycheproof run_stack run_unit run_alloc run_rng_fail \
-	run_func_44 run_kat_44 run_stack_44 run_unit_44 run_alloc_44 run_rng_fail_44 \
-	run_func_65 run_kat_65 run_stack_65 run_unit_65 run_alloc_65 run_rng_fail_65 \
-	run_func_87 run_kat_87 run_stack_87 run_unit_87 run_alloc_87 run_rng_fail_87 \
+.PHONY: func kat acvp wycheproof stack unit alloc sign_hook rng_fail \
+	func_44 kat_44 acvp_44 wycheproof_44 stack_44 unit_44 alloc_44 sign_hook_44 rng_fail_44 \
+	func_65 kat_65 acvp_65 wycheproof_65 stack_65 unit_65 alloc_65 sign_hook_65 rng_fail_65 \
+	func_87 kat_87 acvp_87 wycheproof_87 stack_87 unit_87 alloc_87 sign_hook_87 rng_fail_87 \
+	run_func run_kat run_acvp run_wycheproof run_stack run_unit run_alloc run_sign_hook run_rng_fail \
+	run_func_44 run_kat_44 run_stack_44 run_unit_44 run_alloc_44 run_sign_hook_44 run_rng_fail_44 \
+	run_func_65 run_kat_65 run_stack_65 run_unit_65 run_alloc_65 run_sign_hook_65 run_rng_fail_65 \
+	run_func_87 run_kat_87 run_stack_87 run_unit_87 run_alloc_87 run_sign_hook_87 run_rng_fail_87 \
 	bench_44 bench_65 bench_87 bench \
 	run_bench_44 run_bench_65 run_bench_87 run_bench \
 	bench_components_44 bench_components_65 bench_components_87 bench_components \
@@ -47,7 +47,7 @@ quickcheck: test
 build: func kat acvp wycheproof
 	$(Q)echo "  Everything builds fine!"
 
-test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_rng_fail run_abicheck
+test: run_kat run_func run_acvp run_wycheproof run_unit run_alloc run_sign_hook run_rng_fail run_abicheck
 	$(Q)echo "  Everything checks fine!"
 
 run_kat_44: kat_44
@@ -160,6 +160,25 @@ run_alloc_65: alloc_65
 run_alloc_87: alloc_87
 	$(W) $(MLDSA87_DIR)/bin/test_alloc87
 run_alloc: run_alloc_44 run_alloc_65 run_alloc_87
+
+sign_hook_44: $(MLDSA44_DIR)/bin/test_sign_hook44
+	$(Q)echo "  SIGN_HOOK   ML-DSA-44:   $^"
+sign_hook_65: $(MLDSA65_DIR)/bin/test_sign_hook65
+	$(Q)echo "  SIGN_HOOK   ML-DSA-65:   $^"
+sign_hook_87: $(MLDSA87_DIR)/bin/test_sign_hook87
+	$(Q)echo "  SIGN_HOOK   ML-DSA-87:  $^"
+sign_hook: sign_hook_44 sign_hook_65 sign_hook_87
+
+# SIGN_HOOK_SEED (e.g. "seed=<64 hex chars>") is forwarded to the test as an
+# optional PRNG seed; when unset it expands to nothing, so the test uses its
+# deterministic default seed.
+run_sign_hook_44: sign_hook_44
+	$(W) $(MLDSA44_DIR)/bin/test_sign_hook44 $(SIGN_HOOK_SEED)
+run_sign_hook_65: sign_hook_65
+	$(W) $(MLDSA65_DIR)/bin/test_sign_hook65 $(SIGN_HOOK_SEED)
+run_sign_hook_87: sign_hook_87
+	$(W) $(MLDSA87_DIR)/bin/test_sign_hook87 $(SIGN_HOOK_SEED)
+run_sign_hook: run_sign_hook_44 run_sign_hook_65 run_sign_hook_87
 
 rng_fail_44: $(MLDSA44_DIR)/bin/test_rng_fail44
 	$(Q)echo "  RNG_FAIL   ML-DSA-44:   $^"

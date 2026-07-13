@@ -217,6 +217,7 @@ class TEST_TYPES(Enum):
     RNG_FAIL = 22
     WYCHEPROOF = 23
     ABICHECK = 24
+    SIGN_HOOK = 25
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -298,6 +299,8 @@ class TEST_TYPES(Enum):
             return "Unit Test"
         if self == TEST_TYPES.ALLOC:
             return "Alloc Test"
+        if self == TEST_TYPES.SIGN_HOOK:
+            return "Sign Hook Test"
         if self == TEST_TYPES.RNG_FAIL:
             return "RNG Failure Test"
         if self == TEST_TYPES.ABICHECK:
@@ -375,6 +378,8 @@ class TEST_TYPES(Enum):
             return "unit"
         if self == TEST_TYPES.ALLOC:
             return "alloc"
+        if self == TEST_TYPES.SIGN_HOOK:
+            return "sign_hook"
         if self == TEST_TYPES.RNG_FAIL:
             return "rng_fail"
         if self == TEST_TYPES.ABICHECK:
@@ -691,6 +696,19 @@ class Tests:
 
         self.check_fail()
 
+    def sign_hook(self):
+        def _sign_hook(opt):
+            self._compile_schemes(TEST_TYPES.SIGN_HOOK, opt)
+            if self.args.run:
+                self._run_schemes(TEST_TYPES.SIGN_HOOK, opt)
+
+        if self.do_no_opt():
+            _sign_hook(False)
+        if self.do_opt():
+            _sign_hook(True)
+
+        self.check_fail()
+
     def rng_fail(self):
         def _rng_fail(opt):
             self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
@@ -866,6 +884,7 @@ class Tests:
         stack = self.args.stack
         unit = self.args.unit
         alloc = self.args.alloc
+        sign_hook = self.args.sign_hook
         rng_fail = self.args.rng_fail
         abicheck = self.args.abicheck
 
@@ -884,6 +903,8 @@ class Tests:
                 self._compile_schemes(TEST_TYPES.UNIT, opt)
             if alloc is True:
                 self._compile_schemes(TEST_TYPES.ALLOC, opt)
+            if sign_hook is True:
+                self._compile_schemes(TEST_TYPES.SIGN_HOOK, opt)
             if rng_fail is True:
                 self._compile_schemes(TEST_TYPES.RNG_FAIL, opt)
             if abicheck is True and opt:
@@ -915,6 +936,8 @@ class Tests:
                 self._run_schemes(TEST_TYPES.UNIT, opt)
             if alloc is True:
                 self._run_schemes(TEST_TYPES.ALLOC, opt)
+            if sign_hook is True:
+                self._run_schemes(TEST_TYPES.SIGN_HOOK, opt)
             if rng_fail is True:
                 self._run_schemes(TEST_TYPES.RNG_FAIL, opt)
             if abicheck is True and opt:
@@ -1331,6 +1354,21 @@ def cli():
         help="Do not run alloc tests",
     )
 
+    sign_hook_group = all_parser.add_mutually_exclusive_group()
+    sign_hook_group.add_argument(
+        "--sign-hook",
+        action="store_true",
+        dest="sign_hook",
+        help="Run sign hook tests",
+        default=True,
+    )
+    sign_hook_group.add_argument(
+        "--no-sign-hook",
+        action="store_false",
+        dest="sign_hook",
+        help="Do not run sign hook tests",
+    )
+
     rng_fail_group = all_parser.add_mutually_exclusive_group()
     rng_fail_group.add_argument(
         "--rng-fail",
@@ -1593,6 +1631,13 @@ def cli():
         parents=[common_parser],
     )
 
+    # sign_hook arguments
+    cmd_subparsers.add_parser(
+        "sign_hook",
+        help="Run the sign hook tests for all parameter sets",
+        parents=[common_parser],
+    )
+
     # rng_fail arguments
     cmd_subparsers.add_parser(
         "rng_fail",
@@ -1642,6 +1687,8 @@ def cli():
         Tests(args).size()
     elif args.cmd == "alloc":
         Tests(args).alloc()
+    elif args.cmd == "sign_hook":
+        Tests(args).sign_hook()
     elif args.cmd == "rng_fail":
         Tests(args).rng_fail()
     elif args.cmd == "abicheck":

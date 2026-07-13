@@ -29,6 +29,14 @@
  */
 
 void randombytes_reset(void);
+
+/**
+ * Reseed the (testing-only) PRNG. Folds up to the full 128-byte SURF seed from
+ * `s`, little-endian per 32-bit word (host-independent stream); leftover words
+ * keep their default. len == 0 leaves the default (pi-digit) seed.
+ */
+void randombytes_seed(const uint8_t *s, size_t len);
+
 int randombytes(uint8_t *buf, size_t n);
 
 #endif /* !NOTRANDOMBYTES_H */

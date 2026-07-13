@@ -27,8 +27,9 @@ WYCHEPROOF_TESTS = wycheproof_mldsa
 BENCH_TESTS = bench_mldsa bench_components_mldsa
 UNIT_TESTS = test_unit
 ALLOC_TESTS = test_alloc
+SIGN_HOOK_TESTS = test_sign_hook
 RNG_FAIL_TESTS = test_rng_fail
-ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(RNG_FAIL_TESTS)
+ALL_TESTS = $(BASIC_TESTS) $(ACVP_TESTS) $(WYCHEPROOF_TESTS) $(BENCH_TESTS) $(UNIT_TESTS) $(ALLOC_TESTS) $(SIGN_HOOK_TESTS) $(RNG_FAIL_TESTS)
 
 MLDSA44_DIR = $(BUILD_DIR)/mldsa44
 MLDSA65_DIR = $(BUILD_DIR)/mldsa65
@@ -46,6 +47,10 @@ MLDSA44_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/alloc,$(LIB_SRCS))
 MLDSA65_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/alloc,$(LIB_SRCS))
 MLDSA87_ALLOC_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/alloc,$(LIB_SRCS))
 
+MLDSA44_SIGN_HOOK_OBJS = $(call MAKE_OBJS,$(MLDSA44_DIR)/sign_hook,$(SOURCES) $(FIPS202_SRCS))
+MLDSA65_SIGN_HOOK_OBJS = $(call MAKE_OBJS,$(MLDSA65_DIR)/sign_hook,$(SOURCES) $(FIPS202_SRCS))
+MLDSA87_SIGN_HOOK_OBJS = $(call MAKE_OBJS,$(MLDSA87_DIR)/sign_hook,$(SOURCES) $(FIPS202_SRCS))
+
 CFLAGS += -Imldsa
 
 $(BUILD_DIR)/libmldsa44.a: $(MLDSA44_OBJS)
@@ -59,6 +64,11 @@ $(BUILD_DIR)/libmldsa87_unit.a: $(MLDSA87_UNIT_OBJS)
 $(BUILD_DIR)/libmldsa44_alloc.a: $(MLDSA44_ALLOC_OBJS)
 $(BUILD_DIR)/libmldsa65_alloc.a: $(MLDSA65_ALLOC_OBJS)
 $(BUILD_DIR)/libmldsa87_alloc.a: $(MLDSA87_ALLOC_OBJS)
+
+# Sign-hook test libraries with the sign-hook config
+$(BUILD_DIR)/libmldsa44_sign_hook.a: $(MLDSA44_SIGN_HOOK_OBJS)
+$(BUILD_DIR)/libmldsa65_sign_hook.a: $(MLDSA65_SIGN_HOOK_OBJS)
+$(BUILD_DIR)/libmldsa87_sign_hook.a: $(MLDSA87_SIGN_HOOK_OBJS)
 
 $(BUILD_DIR)/libmldsa.a: $(MLDSA44_OBJS) $(MLDSA65_OBJS) $(MLDSA87_OBJS)
 
@@ -96,6 +106,10 @@ $(MLDSA44_DIR)/bin/test_alloc44: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/t
 $(MLDSA65_DIR)/bin/test_alloc65: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 $(MLDSA87_DIR)/bin/test_alloc87: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_alloc_config.h\"
 
+$(MLDSA44_DIR)/bin/test_sign_hook44: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_sign_hook_config.h\"
+$(MLDSA65_DIR)/bin/test_sign_hook65: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_sign_hook_config.h\"
+$(MLDSA87_DIR)/bin/test_sign_hook87: CFLAGS += -DMLD_CONFIG_FILE=\"../test/configs/test_sign_hook_config.h\"
+
 define ADD_SOURCE
 # Record this binary's test sources -- entrypoint test/$(3)/$(2).c plus extras
 # $(4) -- in the per-binary TEST_SRCS. A custom build (CUSTOM_BUILD, see
@@ -123,6 +137,7 @@ $(foreach scheme,mldsa44 mldsa65 mldsa87, \
 	$(eval $(call ADD_SOURCE,$(scheme),test_rng_fail,src)) \
 	$(eval $(call ADD_SOURCE,$(scheme),test_unit,src,,_unit)) \
 	$(eval $(call ADD_SOURCE,$(scheme),test_alloc,src,,_alloc)) \
+	$(eval $(call ADD_SOURCE,$(scheme),test_sign_hook,src,,_sign_hook)) \
 )
 
 # The set of test binaries, per parameter set.

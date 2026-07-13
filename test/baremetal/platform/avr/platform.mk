@@ -25,7 +25,8 @@ CFLAGS += \
 	-DAVR_PLATFORM \
 	-fno-fat-lto-objects \
 	-DMLD_CONFIG_REDUCE_RAM \
-	-DNTESTS=1
+	-DNTESTS=1 \
+	-DMLD_SIGN_HOOK_DIST_ITERATIONS=1
 
 # Trap on UB; needs -fno-wrapv as avr-gcc defaults to -fwrapv.
 # On UB, abort() in avr_wrapper.c is called.

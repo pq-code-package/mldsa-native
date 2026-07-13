@@ -11,6 +11,7 @@
 
 #include "mldsa_native.h"
 
+#include "../src/decode_hex.h"
 #include "../src/test_namespace.h"
 
 #define USAGE "acvp_mldsa{lvl} [keyGen|sigGen|sigVer] {test specific arguments}"
@@ -97,78 +98,6 @@ typedef enum
   sigVerPreHashShake256
 } acvp_mode;
 
-/* Decode hex character [0-9A-Fa-f] into 0-15 */
-static unsigned char decode_hex_char(char hex)
-{
-  if (hex >= '0' && hex <= '9')
-  {
-    return (unsigned char)(hex - '0');
-  }
-  else if (hex >= 'A' && hex <= 'F')
-  {
-    return (unsigned char)(10 + (unsigned char)(hex - 'A'));
-  }
-  else if (hex >= 'a' && hex <= 'f')
-  {
-    return (unsigned char)(10 + (unsigned char)(hex - 'a'));
-  }
-  else
-  {
-    return 0xFF;
-  }
-}
-
-/* Decode the value of a `prefix=HEX` argument in place, overwriting the
- * hex encoding with the raw bytes. Returns a pointer to the decoded bytes
- * inside the argument string, or NULL on parse failure. */
-static unsigned char *decode_hex(const char *prefix, size_t out_len, char *hex)
-{
-  size_t i;
-  const char *arg = hex;
-  size_t hex_len = strlen(hex);
-  size_t prefix_len = strlen(prefix);
-  unsigned char *out;
-
-  /*
-   * Check that hex starts with `prefix=`
-   * Use memcmp, not strcmp
-   */
-  if (hex_len < prefix_len + 1 || memcmp(prefix, hex, prefix_len) != 0 ||
-      hex[prefix_len] != '=')
-  {
-    goto hex_usage;
-  }
-
-  hex += prefix_len + 1;
-  hex_len -= prefix_len + 1;
-
-  if (hex_len != 2 * out_len)
-  {
-    goto hex_usage;
-  }
-
-  out = (unsigned char *)hex;
-  for (i = 0; i < out_len; i++)
-  {
-    unsigned hex0 = decode_hex_char(hex[2 * i]);
-    unsigned hex1 = decode_hex_char(hex[2 * i + 1]);
-    if (hex0 == 0xFF || hex1 == 0xFF)
-    {
-      goto hex_usage;
-    }
-
-    out[i] = ((hex0 << 4) | hex1) & 0XFF;
-  }
-
-  return out;
-
-hex_usage:
-  fprintf(stderr,
-          "Argument %s invalid: Expected argument of the form '%s=HEX' with "
-          "HEX being a hex encoding of %u bytes\n",
-          arg, prefix, (unsigned)out_len);
-  return NULL;
-}
 
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)

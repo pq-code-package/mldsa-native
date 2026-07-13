@@ -7,8 +7,10 @@ PLATFORM_PATH:=test/baremetal/platform/aarch64-virt
 CROSS_PREFIX=aarch64-none-elf-
 CC=gcc
 
-# Reduce iterations -- bare-metal semihosting I/O is slow
-CFLAGS += -DNTESTS=3
+# Reduce iterations -- bare-metal semihosting I/O is slow. The sign-hook
+# distribution sample count defaults to 2000 (independent of NTESTS); override
+# it down too, as 2000 signings under emulation would be prohibitively slow.
+CFLAGS += -DNTESTS=3 -DMLD_SIGN_HOOK_DIST_ITERATIONS=3
 
 CFLAGS += \
 	-O3 \

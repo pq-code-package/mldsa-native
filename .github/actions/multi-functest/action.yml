@@ -63,6 +63,9 @@ inputs:
   alloc:
     description: Determine whether to run alloc tests or not
     default: "true"
+  sign_hook:
+    description: Determine whether to run sign hook tests or not
+    default: "true"
   rng_fail:
     description: Determine whether to run rng fail tests or not
     default: "true"
@@ -96,6 +99,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -122,6 +126,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -148,6 +153,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -174,6 +180,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -200,6 +207,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -226,6 +234,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
@@ -252,6 +261,7 @@ runs:
           check_namespace: ${{ inputs.check_namespace }}
           stack: ${{ inputs.stack }}
           alloc: ${{ inputs.alloc }}
+          sign_hook: ${{ inputs.sign_hook }}
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}

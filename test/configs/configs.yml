@@ -467,6 +467,42 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: test/configs/test_sign_hook_config.h
+    description: "Restartable signing driven by the SIGN_HOOK_{RESUME,ATTEMPT,FINISH} hooks"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mld
+      # Resuming is only sound with the randomized API disabled: the caller
+      # drives signing via the deterministic internal API with fixed `rnd`.
+      MLD_CONFIG_NO_RANDOMIZED_API: true
+      MLD_CONFIG_CONTEXT_PARAMETER: true
+      MLD_CONFIG_CONTEXT_PARAMETER_TYPE:
+        content: |
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          /* The context type and the hook implementations live in
+           * test/src/test_sign_hook.c; here we only forward-declare them. */
+          struct test_sign_hook_ctx; /* Forward declaration */
+          #endif /* !__ASSEMBLER__ */
+          #define MLD_CONFIG_CONTEXT_PARAMETER_TYPE struct test_sign_hook_ctx *
+      MLD_CONFIG_SIGN_HOOK_RESUME:
+        content: |
+          /* Enable all three signing hooks. Since MLD_CONFIG_CONTEXT_PARAMETER
+           * is set, the context is the last argument of each. The hooks are
+           * implemented in test/src/test_sign_hook.c. */
+          #define MLD_CONFIG_SIGN_HOOK_RESUME
+          #define MLD_CONFIG_SIGN_HOOK_ATTEMPT
+          #define MLD_CONFIG_SIGN_HOOK_FINISH
+          #if !defined(__ASSEMBLER__)
+          struct test_sign_hook_ctx; /* Forward declaration */
+          uint16_t mld_sign_hook_resume(struct test_sign_hook_ctx *context);
+          int mld_sign_hook_attempt(uint16_t attempt,
+                                    struct test_sign_hook_ctx *context);
+          void mld_sign_hook_finish(uint16_t attempt,
+                                    struct test_sign_hook_ctx *context);
+          #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: proofs/cbmc/mldsa_native_config_cbmc.h
     description: "mldsa-native configuration used for CBMC proofs"
     defines:

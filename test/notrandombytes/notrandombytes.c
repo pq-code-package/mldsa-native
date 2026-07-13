@@ -44,6 +44,25 @@ void randombytes_reset(void)
   outleft = 0;
 }
 
+void randombytes_seed(const uint8_t *s, size_t len)
+{
+  size_t i;
+  /* Fold the supplied bytes into the seed words, little-endian, so the same
+   * seed yields the same stream on any host. At most sizeof(seed) bytes are
+   * consumed; leftover seed words keep their default value. */
+  if (len > sizeof(seed))
+  {
+    len = sizeof(seed);
+  }
+  for (i = 0; i < len; ++i)
+  {
+    uint32_t byte = s[i];
+    seed[i / 4] = (seed[i / 4] & ~((uint32_t)0xFFu << (8 * (i % 4)))) |
+                  (byte << (8 * (i % 4)));
+  }
+  randombytes_reset();
+}
+
 #define ROTATE(x, b) (((x) << (b)) | ((x) >> (32 - (b))))
 #define MUSH(i, b) x = t[i] += (((x ^ seed[i]) + sum) ^ ROTATE(x, b));
 

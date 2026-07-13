@@ -63,6 +63,9 @@ inputs:
   alloc:
     description: Determine whether to run alloc tests or not
     default: "true"
+  sign_hook:
+    description: Determine whether to run sign hook tests or not
+    default: "true"
   rng_fail:
     description: Determine whether to run rng fail tests or not
     default: "true"
@@ -88,6 +91,7 @@ runs:
           echo EXAMPLES="${{ inputs.examples == 'true' && 'examples' || 'no-examples' }}" >> $GITHUB_ENV
           echo STACK="${{ inputs.stack == 'true' && 'stack' || 'no-stack' }}" >> $GITHUB_ENV
           echo ALLOC="${{ inputs.alloc == 'true' && 'alloc' || 'no-alloc' }}" >> $GITHUB_ENV
+          echo SIGN_HOOK="${{ inputs.sign_hook == 'true' && 'sign-hook' || 'no-sign-hook' }}" >> $GITHUB_ENV
           echo RNGFAIL="${{ inputs.rng_fail == 'true' && 'rng-fail' || 'no-rng-fail' }}" >> $GITHUB_ENV
       - name: Setup nix
         uses: ./.github/actions/setup-shell
@@ -119,13 +123,13 @@ runs:
             - $(python3 --version)
             - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
           EOF
-      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.RNGFAIL }})
+      - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.SIGN_HOOK }}, ${{ env.RNGFAIL }})
         shell: ${{ env.SHELL }}
         env:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
+          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.SIGN_HOOK }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()

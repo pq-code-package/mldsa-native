@@ -435,11 +435,47 @@ jobs:
           stack: false
           unit: true
           alloc: false
+          sign_hook: false # Requires custom config
           rng_fail: false
           check_namespace: false
           # Disable AArch64 SHA3 extension: valgrind cannot emulate it
           extra_env: "MK_COMPILER_SUPPORTS_SHA3=0"
           exec_wrapper: "valgrind --error-exitcode=1"
+  sign_hook_distribution:
+    name: "Sign-hook attempt distribution (${{ matrix.target.name }}, ML-DSA-${{ matrix.level }})"
+    strategy:
+      fail-fast: false
+      # One matrix entry per (architecture, parameter set): each level runs on
+      # its own runner so the three ~9-minute 5M-signature runs proceed in
+      # parallel rather than sequentially.
+      matrix:
+        external:
+         - ${{ github.repository_owner != 'pq-code-package' }}
+        target:
+          - runner: ubuntu-latest
+            name: x86_64
+          - runner: ubuntu-24.04-arm
+            name: aarch64
+        level: [44, 65, 87]
+        exclude:
+          - external: true
+    runs-on: ${{ matrix.target.runner }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      # Fresh random seed each run: the test draws fresh keys and signing
+      # randomness from it, so this samples the attempts-per-signature
+      # distribution anew every time. The seed is printed by the test, so a
+      # failure is reproducible by re-running with the same SIGN_HOOK_SEED.
+      - name: Generate random seed
+        run: echo "SIGN_HOOK_SEED=seed=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'ci'
+          # At 5,000,000 signatures, a deviation by more than +-0.5% (the 5
+          # per-mille tolerance) is expected with probability < 10^{-30}.
+          script: |
+            CFLAGS=\"-DMLD_SIGN_HOOK_DIST_ITERATIONS=5000000 -DMLD_SIGN_HOOK_RATIO_TOL_PERMILLE=5\" make run_sign_hook_${{ matrix.level }} OPT=1 AUTO=1 -j$(nproc)
   config_variations:
     name: "Config: ${{ matrix.test.name }} (${{ matrix.target.name }})"
     strategy:

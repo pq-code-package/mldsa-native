@@ -117,6 +117,36 @@ $(BUILD_DIR)/mldsa87/alloc/%.S.o: %.S $(CONFIG)
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
 
+$(BUILD_DIR)/mldsa44/sign_hook/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa44/sign_hook/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/sign_hook/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa65/sign_hook/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/sign_hook/%.c.o: %.c $(CONFIG)
+	$(Q)echo "  CC      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
+$(BUILD_DIR)/mldsa87/sign_hook/%.S.o: %.S $(CONFIG)
+	$(Q)echo "  AS      $@"
+	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+
 $(BUILD_DIR)/abicheck/bin/%: $(CONFIG)
 	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
