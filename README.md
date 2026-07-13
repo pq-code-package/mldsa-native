@@ -187,6 +187,10 @@ Yes. mldsa-native provides a compile-time option `MLD_CONFIG_REDUCE_RAM` that re
 
 To enable this mode, define `MLD_CONFIG_REDUCE_RAM` in [mldsa_native_config.h](mldsa/mldsa_native_config.h) or pass `-DMLD_CONFIG_REDUCE_RAM` as a compiler flag.
 
+### Can I bound or restart the signing loop for real-time systems?
+
+Yes. Signing hooks allow you to pause and restart ML-DSA signature operations, thereby bounding their runtime. See [examples/restartable_sign](examples/restartable_sign) for an example.
+
 ### Does mldsa-native use hedged or deterministic signing?
 
 By default, mldsa-native uses the randomized "hedged" signing variant as specified in FIPS 204 Section 3.4. The hedged variant uses both fresh randomness at signing time and precomputed randomness from the private key. This helps mitigate fault injection attacks and side-channel attacks while protecting against potential flaws in the random number generator.
