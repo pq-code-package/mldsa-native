@@ -103,6 +103,11 @@
  * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
  * has probability < 2^-256. */
 #define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
+/* Signing was paused before completing, at the request of a caller-provided
+ * MLD_CONFIG_SIGN_HOOK_ATTEMPT hook (see mldsa_native_config.h). The caller
+ * resumes by re-invoking signing with the same inputs; the attempt hook,
+ * together with MLD_CONFIG_SIGN_HOOK_RESUME, decides where to continue. */
+#define MLD_ERR_SIGNING_PAUSED (-5)
 
 /********************* Namespacing and Qualifiers *****************************/
 
@@ -277,6 +282,8 @@ int MLD_API_NAMESPACE(keypair)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_API_QUALIFIER
@@ -554,6 +561,8 @@ int MLD_API_NAMESPACE(verify_extmu)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_API_QUALIFIER
@@ -650,6 +659,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_API_QUALIFIER

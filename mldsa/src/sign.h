@@ -211,6 +211,8 @@ __contract__(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_MUST_CHECK_RETURN_VALUE
@@ -234,7 +236,8 @@ __contract__(
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
           return_value == MLD_ERR_OUT_OF_MEMORY ||
-          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED));
+          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
+          return_value == MLD_ERR_SIGNING_PAUSED));
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 /**
@@ -495,6 +498,8 @@ __contract__(  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_MUST_CHECK_RETURN_VALUE
@@ -513,7 +518,7 @@ __contract__(
   requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -598,6 +603,8 @@ __contract__(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_MUST_CHECK_RETURN_VALUE
@@ -616,7 +623,7 @@ __contract__(
   requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 

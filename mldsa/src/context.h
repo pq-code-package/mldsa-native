@@ -7,6 +7,11 @@
 
 /* This header is included by common.h once the configuration has been pulled
  * in; it is not meant to be included directly. */
+#if !defined(__ASSEMBLER__)
+
+#include <stdint.h>
+#include "cbmc.h"
+#include "sys.h"
 
 /*
  * If the integration wants to provide a context parameter for use in
@@ -73,5 +78,75 @@
     defined(MLD_CONFIG_CONTEXT_PARAMETER)
 #error MLD_CONFIG_CONTEXT_PARAMETER_TYPE must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is defined
 #endif
+
+/* The signing hooks tie into the rejection-sampling loop. A pausing attempt
+ * hook only reproduces the uninterrupted signature if the randomness is fixed
+ * across calls, and thus requires the deterministic API.
+ * For now we impose that requirement on all three hooks uniformly: enabling any
+ * of them requires MLD_CONFIG_NO_RANDOMIZED_API. This also rules out
+ * MLD_CONFIG_KEYGEN_PCT (whose PCT needs the randomized signature(), see
+ * common.h).
+ *
+ * A logging-only use (attempt always returns 0; resume/finish merely observe)
+ * would be safe with the randomized API too, but the restriction is applied
+ * uniformly for now. */
+#if (defined(MLD_CONFIG_SIGN_HOOK_RESUME) ||  \
+     defined(MLD_CONFIG_SIGN_HOOK_ATTEMPT) || \
+     defined(MLD_CONFIG_SIGN_HOOK_FINISH)) && \
+    !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+#error Signing hooks (MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH) require MLD_CONFIG_NO_RANDOMIZED_API
+#endif /* (MLD_CONFIG_SIGN_HOOK_RESUME || MLD_CONFIG_SIGN_HOOK_ATTEMPT || \
+          MLD_CONFIG_SIGN_HOOK_FINISH) && !MLD_CONFIG_NO_RANDOMIZED_API */
+
+/* Signing hooks (MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH; documented
+ * in mldsa_native_config.h). The following macros route the call sites to
+ * mld_sign_hook_*, appending or dropping the context argument; each unset hook
+ * uses the dummy below. */
+#define mld_sign_resume mld_sign_hook_resume MLD_CONTEXT_PARAMETERS_0
+#define mld_sign_attempt mld_sign_hook_attempt MLD_CONTEXT_PARAMETERS_1
+#define mld_sign_finish mld_sign_hook_finish MLD_CONTEXT_PARAMETERS_1
+
+/* We don't use mld_sign_resume here because MLD_CONTEXT_PARAMETERS_0 is
+ * unsuitable for function declarations: it misses `void` as the placeholder
+ * argument. */
+#if !defined(MLD_CONFIG_SIGN_HOOK_RESUME)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE uint16_t mld_sign_hook_resume(
+#if defined(MLD_CONFIG_CONTEXT_PARAMETER)
+    MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+#else
+    void
+#endif
+)
+__contract__(assigns() ensures(1))
+{
+  MLD_CONTEXT_UNUSED(context);
+  return 0;
+}
+#endif /* !MLD_CONFIG_SIGN_HOOK_RESUME */
+
+#if !defined(MLD_CONFIG_SIGN_HOOK_ATTEMPT)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_sign_attempt(
+    uint16_t attempt, MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
+__contract__(assigns() ensures(1))
+{
+  ((void)attempt);
+  MLD_CONTEXT_UNUSED(context);
+  return 0;
+}
+#endif /* !MLD_CONFIG_SIGN_HOOK_ATTEMPT */
+
+#if !defined(MLD_CONFIG_SIGN_HOOK_FINISH)
+static MLD_INLINE void mld_sign_finish(
+    uint16_t attempt, MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
+__contract__(assigns() ensures(1))
+{
+  ((void)attempt);
+  MLD_CONTEXT_UNUSED(context);
+}
+#endif /* !MLD_CONFIG_SIGN_HOOK_FINISH */
+
+#endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_CONTEXT_H */

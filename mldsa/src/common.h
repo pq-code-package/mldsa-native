@@ -271,15 +271,21 @@
  * signature. With a FIPS 204 Appendix C compliant bound (>= 814) this
  * has probability < 2^-256. */
 #define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
+/* Signing was paused before completing, at the request of a caller-provided
+ * MLD_CONFIG_SIGN_HOOK_ATTEMPT hook (see mldsa_native_config.h). The caller
+ * resumes by re-invoking signing with the same inputs; the attempt hook,
+ * together with MLD_CONFIG_SIGN_HOOK_RESUME, decides where to continue. */
+#define MLD_ERR_SIGNING_PAUSED (-5)
 
 /* Disjunction over the full set of MLD_ERR_XXX failure codes.
  *
  * Intended for use in top-level `ensures` clauses that admit every
  * possible error. Narrower contracts should enumerate only the
  * specific errors they can actually return. */
-#define MLD_ANY_ERROR(err)                                    \
-  ((err) == MLD_ERR_FAIL || (err) == MLD_ERR_OUT_OF_MEMORY || \
-   (err) == MLD_ERR_RNG_FAIL || (err) == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+#define MLD_ANY_ERROR(err)                                                  \
+  ((err) == MLD_ERR_FAIL || (err) == MLD_ERR_OUT_OF_MEMORY ||               \
+   (err) == MLD_ERR_RNG_FAIL || (err) == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || \
+   (err) == MLD_ERR_SIGNING_PAUSED)
 
 
 #endif /* !__ASSEMBLER__ */

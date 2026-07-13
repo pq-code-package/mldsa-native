@@ -130,7 +130,7 @@ cleanup:
 
   return ret;
 }
-#else /* MLD_CONFIG_KEYGEN_PCT */
+#else  /* MLD_CONFIG_KEYGEN_PCT */
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                          MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -585,8 +585,7 @@ __contract__(
 /* Effective bound on signing attempts: the configured bound
  * MLD_CONFIG_MAX_SIGNING_ATTEMPTS (see mldsa_native_config.h) if set, otherwise
  * the hard type-safety bound MLD_MAX_KAPPA / MLDSA_L (see MLD_MAX_KAPPA in
- * params.h). The default is chosen so that the failure probability is
- * < 2^{-256}, that is, signatures will practically always succeed. */
+ * params.h). */
 #if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
 
 #if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
@@ -907,8 +906,8 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
 {
   int ret;
   uint8_t *rho, *tr, *key, *mu, *rhoprime;
+  uint16_t attempt;
   const uint16_t max_signing_attempts = mld_get_max_signing_attempts();
-  uint16_t attempt = 0;
   MLD_ALLOC(seedbuf, uint8_t,
             2 * MLDSA_SEEDBYTES + MLDSA_TRBYTES + 2 * MLDSA_CRHBYTES, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
@@ -921,6 +920,15 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
+  }
+
+  /* If a resume hook is configured via MLD_CONFIG_SIGN_HOOK_RESUME, it provides
+   * the attempt to resume from after an earlier pause. Otherwise, we start at
+   * 0. Clamp to max_signing_attempts. */
+  attempt = mld_sign_resume(context);
+  if (attempt > max_signing_attempts)
+  {
+    attempt = max_signing_attempts;
   }
 
   rho = seedbuf;
@@ -992,6 +1000,16 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
     /* Safety: attempt < max_signing_attempts <= MLD_MAX_KAPPA / MLDSA_L, so
      * kappa <= MLD_MAX_KAPPA and the cast is safe. */
     const uint16_t kappa = (uint16_t)(attempt * MLDSA_L);
+
+    /* Query configurable signing hook whether signing should be paused.
+     * This is skipped by default and only used if the user sets the
+     * configuration option MLD_CONFIG_SIGN_HOOK_ATTEMPT. */
+    if (mld_sign_attempt(attempt, context) != 0)
+    {
+      ret = MLD_ERR_SIGNING_PAUSED;
+      goto cleanup;
+    }
+
     ret = mld_attempt_signature_generation(sig, mu, rhoprime, kappa, mat, s1hat,
                                            s2hat, t0hat, context);
 
@@ -1002,6 +1020,13 @@ int mld_sign_signature_internal(uint8_t sig[MLDSA_CRYPTO_BYTES],
      *    nonce.
      *  - any other value (e.g. MLD_ERR_OUT_OF_MEMORY): an unrecoverable error
      *    occurred, so we propagate it to the caller. */
+    if (ret == 0)
+    {
+      /* Signing succeeded: record the attempt that succeeded. No-op in the
+       * default build. */
+      mld_sign_finish(attempt, context);
+      goto cleanup;
+    }
     if (ret != MLD_ERR_FAIL)
     {
       goto cleanup;
@@ -1652,6 +1677,5 @@ cleanup:
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1
 #undef mld_get_max_signing_attempts
-#undef MLD_MAX_KAPPA
 #undef MLD_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN
