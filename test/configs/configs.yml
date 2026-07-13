@@ -417,6 +417,34 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/restartable_sign/mldsa_native/mldsa_native_config.h
+    description: "Restartable signing driven by the signing hooks, using global resume state"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      # Resuming is only sound with the randomized API disabled: the caller
+      # drives signing via the deterministic internal API with fixed `rnd`.
+      MLD_CONFIG_NO_RANDOMIZED_API: true
+      # This example keeps the resume state in a global variable, so the hooks
+      # need no context argument and MLD_CONFIG_CONTEXT_PARAMETER stays unset.
+      # For per-caller state instead, enable MLD_CONFIG_CONTEXT_PARAMETER and
+      # give the hooks a trailing context argument, as in test_sign_hook.
+      MLD_CONFIG_SIGN_HOOK_RESUME:
+        content: |
+          /* Enable all three signing hooks. The hooks take no context argument
+           * (MLD_CONFIG_CONTEXT_PARAMETER is unset); they are implemented on a
+           * global in examples/restartable_sign/main.c. */
+          #define MLD_CONFIG_SIGN_HOOK_RESUME
+          #define MLD_CONFIG_SIGN_HOOK_ATTEMPT
+          #define MLD_CONFIG_SIGN_HOOK_FINISH
+          #if !defined(__ASSEMBLER__)
+          #include <stdint.h>
+          uint16_t mld_sign_hook_resume(void);
+          int mld_sign_hook_attempt(uint16_t attempt);
+          void mld_sign_hook_finish(uint16_t attempt);
+          #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: test/configs/custom_heap_alloc_config.h
     description: "Test configuration with heap-based allocation"
     defines:

@@ -218,6 +218,7 @@ class TEST_TYPES(Enum):
     WYCHEPROOF = 23
     ABICHECK = 24
     SIGN_HOOK = 25
+    RESTARTABLE_SIGN = 26
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -240,6 +241,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.MULTILEVEL_BUILD_NATIVE,
             TEST_TYPES.BASIC_DETERMINISTIC,
             TEST_TYPES.BASIC_LOWRAM,
+            TEST_TYPES.RESTARTABLE_SIGN,
         ]
 
     @staticmethod
@@ -281,6 +283,8 @@ class TEST_TYPES(Enum):
             return "Example (mldsa-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.BASIC_LOWRAM:
             return "Example (mldsa-native with reduced RAM usage)"
+        if self == TEST_TYPES.RESTARTABLE_SIGN:
+            return "Example (restartable signing via signing hooks)"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "Example (monobuild)"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -319,6 +323,8 @@ class TEST_TYPES(Enum):
             return "examples/basic_deterministic"
         if self == TEST_TYPES.BASIC_LOWRAM:
             return "examples/basic_lowram"
+        if self == TEST_TYPES.RESTARTABLE_SIGN:
+            return "examples/restartable_sign"
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return "examples/monolithic_build"
         if self == TEST_TYPES.MONOLITHIC_BUILD_NATIVE:
@@ -359,6 +365,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return ""
         if self == TEST_TYPES.BASIC_LOWRAM:
+            return ""
+        if self == TEST_TYPES.RESTARTABLE_SIGN:
             return ""
         if self == TEST_TYPES.MONOLITHIC_BUILD:
             return ""
@@ -1313,6 +1321,7 @@ def cli():
             "basic",
             "basic_deterministic",
             "basic_lowram",
+            "restartable_sign",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",
@@ -1429,6 +1438,7 @@ def cli():
             "basic",
             "basic_deterministic",
             "basic_lowram",
+            "restartable_sign",
             "monolithic_build",
             "monolithic_build_native",
             "monolithic_build_multilevel",

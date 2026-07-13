@@ -16,6 +16,13 @@ See [basic_deterministic](basic_deterministic) for a basic example of how to bui
 
 See [basic_lowram](basic_lowram) for a basic example of how to build a single instance of mldsa-native with reduced RAM usage (`MLD_CONFIG_REDUCE_RAM`). This is useful for embedded systems with tight RAM constraints.
 
+## Restartable signing
+
+See [restartable_sign](restartable_sign) for a minimal example of restartable signing using the signing hooks
+(`MLD_CONFIG_SIGN_HOOK_RESUME` / `_ATTEMPT` / `_FINISH`). It pauses the rejection-sampling loop and resumes it on a
+later call -- bounding per-call runtime while reproducing the same signature as an uninterrupted run -- keeping the
+resume state in a global variable.
+
 ## Multi-level build (C only)
 
 See [multilevel_build](multilevel_build) for an example of how to build one instance of mldsa-native per security level,
