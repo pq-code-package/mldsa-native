@@ -64,55 +64,84 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
+#if defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
+static void keccakf1600_xor_bytes_ref(uint64_t *state,
+                                      const unsigned char *data,
+                                      unsigned offset, unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    state[lane] ^= (uint64_t)data[i] << shift;
+  }
+}
+
+static void keccakf1600_extract_bytes_ref(const uint64_t *state,
+                                          unsigned char *data, unsigned offset,
+                                          unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    data[i] = (unsigned char)(state[lane] >> shift);
+  }
+}
+
 #if defined(MLD_USE_NATIVE_FIPS202_X1)
-static void print_u64_array(const char *label, const uint64_t *array,
-                            size_t len)
+static void print_keccak_state_bytes(const char *label,
+                                     const unsigned char *state_bytes,
+                                     size_t len)
 {
   size_t i;
   fprintf(stderr, "%s:\n", label);
   for (i = 0; i < len; i++)
   {
-    if (i % 4 == 0)
+    if (i % sizeof(uint64_t) == 0)
     {
       fprintf(stderr, "  ");
     }
-    fprintf(stderr, "%016llx", (unsigned long long)array[i]);
-    if (i % 4 == 3)
+    fprintf(stderr, "%02x", state_bytes[i]);
+    if (i % sizeof(uint64_t) == sizeof(uint64_t) - 1)
     {
       fprintf(stderr, "\n");
     }
-    else
-    {
-      fprintf(stderr, " ");
-    }
   }
-  if (len % 4 != 0)
+  if (len % sizeof(uint64_t) != 0)
   {
     fprintf(stderr, "\n");
   }
 }
 
-static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
-                              unsigned len, const char *test_name)
+static int compare_keccak_state_bytes(const unsigned char *got,
+                                      const unsigned char *expected, size_t len,
+                                      const char *test_name)
 {
-  unsigned i;
+  size_t i;
   for (i = 0; i < len; i++)
   {
-    if (a[i] != b[i])
+    if (got[i] != expected[i])
     {
       fprintf(stderr, "FAIL: %s\n", test_name);
-      fprintf(
-          stderr,
-          "  First difference at index %u: got=0x%016llx, expected=0x%016llx\n",
-          i, (unsigned long long)a[i], (unsigned long long)b[i]);
-      print_u64_array("Got", a, len);
-      print_u64_array("Expected", b, len);
+      fprintf(stderr,
+              "  First difference at byte %lu: got=0x%02x, expected=0x%02x\n",
+              (unsigned long)i, (unsigned)got[i], (unsigned)expected[i]);
+      print_keccak_state_bytes("Got extracted state", got, len);
+      print_keccak_state_bytes("Expected extracted state", expected, len);
       return 0;
     }
   }
   return 1;
 }
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
+#endif /* MLD_USE_NATIVE_FIPS202_X1 || MLD_USE_NATIVE_FIPS202_X4 */
 
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
@@ -1020,6 +1049,9 @@ static int test_keccakf1600_permute(void)
 {
   int ret = 1;
   int i;
+  unsigned char input[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  unsigned char output[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  unsigned char output_ref[MLD_KECCAK_LANES * sizeof(uint64_t)];
   MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_ALLOC(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
 
@@ -1030,14 +1062,20 @@ static int test_keccakf1600_permute(void)
 
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes((uint8_t *)state, MLD_KECCAK_LANES * sizeof(uint64_t));
-    memcpy(state_ref, state, MLD_KECCAK_LANES * sizeof(uint64_t));
+    randombytes(input, sizeof(input));
+    memset(state, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+    memset(state_ref, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+
+    mld_keccakf1600_xor_bytes(state, input, 0, sizeof(input));
+    keccakf1600_xor_bytes_ref(state_ref, input, 0, sizeof(input));
 
     mld_keccakf1600_permute(state);
     mld_keccakf1600_permute_c(state_ref);
 
-    CHECK(compare_u64_arrays(state, state_ref, MLD_KECCAK_LANES,
-                             "keccakf1600_permute"));
+    mld_keccakf1600_extract_bytes(state, output, 0, sizeof(output));
+    keccakf1600_extract_bytes_ref(state_ref, output_ref, 0, sizeof(output_ref));
+    CHECK(compare_keccak_state_bytes(output, output_ref, sizeof(output),
+                                     "keccakf1600_permute"));
   }
 
   ret = 0;
@@ -1105,9 +1143,9 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
       memset(state_x1, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-      mld_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
+      keccakf1600_xor_bytes_ref(state_x1, input[j], xor_offset, xor_length);
       mld_keccakf1600_permute_c(state_x1);
-      mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
+      keccakf1600_extract_bytes_ref(state_x1, output_x1, ext_offset,
                                     ext_length);
 
       CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
@@ -1218,6 +1256,18 @@ static int test_backend_units(void)
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
+/* This test keeps the large ML-DSA-87 workspace static to avoid test harness
+ * stack pressure when the Zephyr FIPS202 backend is enabled. */
+#define TEST_STATIC_ALLOC(v, T, N)      \
+  static MLD_ALIGN T mld_static_##v[N]; \
+  T *v = mld_static_##v
+#define TEST_STATIC_FREE(v)                              \
+  do                                                     \
+  {                                                      \
+    mld_zeroize(mld_static_##v, sizeof(mld_static_##v)); \
+    (v) = NULL;                                          \
+  } while (0)
+
 static int test_polyvec_lazy_eager(void)
 {
   int ret = 1;
@@ -1225,45 +1275,30 @@ static int test_polyvec_lazy_eager(void)
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   unsigned int j;
 #endif
-  MLD_ALLOC(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_ALLOC(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_ALLOC(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES, NULL);
-  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, NULL);
-  MLD_ALLOC(rhoprime, uint8_t, MLDSA_CRHBYTES, NULL);
-  MLD_ALLOC(s1_eager, mld_sk_s1hat_eager, 1, NULL);
-  MLD_ALLOC(s1_lazy, mld_sk_s1hat_lazy, 1, NULL);
-  MLD_ALLOC(s2_eager, mld_sk_s2hat_eager, 1, NULL);
-  MLD_ALLOC(s2_lazy, mld_sk_s2hat_lazy, 1, NULL);
-  MLD_ALLOC(t0_eager, mld_sk_t0hat_eager, 1, NULL);
-  MLD_ALLOC(t0_lazy, mld_sk_t0hat_lazy, 1, NULL);
-  MLD_ALLOC(y_eager, mld_yvec_eager, 1, NULL);
-  MLD_ALLOC(y_lazy, mld_yvec_lazy, 1, NULL);
-  MLD_ALLOC(poly_eager, mld_poly, 1, NULL);
-  MLD_ALLOC(poly_lazy, mld_poly, 1, NULL);
-  MLD_ALLOC(mat_eager, mld_polymat_eager, 1, NULL);
-  MLD_ALLOC(mat_lazy, mld_polymat_lazy, 1, NULL);
+  TEST_STATIC_ALLOC(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES);
+  TEST_STATIC_ALLOC(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES);
+  TEST_STATIC_ALLOC(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES);
+  TEST_STATIC_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
+  TEST_STATIC_ALLOC(rhoprime, uint8_t, MLDSA_CRHBYTES);
+  TEST_STATIC_ALLOC(s1_eager, mld_sk_s1hat_eager, 1);
+  TEST_STATIC_ALLOC(s1_lazy, mld_sk_s1hat_lazy, 1);
+  TEST_STATIC_ALLOC(s2_eager, mld_sk_s2hat_eager, 1);
+  TEST_STATIC_ALLOC(s2_lazy, mld_sk_s2hat_lazy, 1);
+  TEST_STATIC_ALLOC(t0_eager, mld_sk_t0hat_eager, 1);
+  TEST_STATIC_ALLOC(t0_lazy, mld_sk_t0hat_lazy, 1);
+  TEST_STATIC_ALLOC(y_eager, mld_yvec_eager, 1);
+  TEST_STATIC_ALLOC(y_lazy, mld_yvec_lazy, 1);
+  TEST_STATIC_ALLOC(poly_eager, mld_poly, 1);
+  TEST_STATIC_ALLOC(poly_lazy, mld_poly, 1);
+  TEST_STATIC_ALLOC(mat_eager, mld_polymat_eager, 1);
+  TEST_STATIC_ALLOC(mat_lazy, mld_polymat_lazy, 1);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_ALLOC(v, mld_polyvecl, 1, NULL);
+  TEST_STATIC_ALLOC(v, mld_polyvecl, 1);
 #endif
-  MLD_ALLOC(scratch_eager, mld_polyvecl, 1, NULL);
-  MLD_ALLOC(scratch_lazy, mld_polyvecl, 1, NULL);
-  MLD_ALLOC(w_eager, mld_polyveck, 1, NULL);
-  MLD_ALLOC(w_lazy, mld_polyveck, 1, NULL);
-
-  if (packed_s1 == NULL || packed_s2 == NULL || packed_t0 == NULL ||
-      rho == NULL || rhoprime == NULL || s1_eager == NULL || s1_lazy == NULL ||
-      s2_eager == NULL || s2_lazy == NULL || t0_eager == NULL ||
-      t0_lazy == NULL || y_eager == NULL || y_lazy == NULL ||
-      poly_eager == NULL || poly_lazy == NULL || mat_eager == NULL ||
-      mat_lazy == NULL ||
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-      v == NULL ||
-#endif
-      scratch_eager == NULL || scratch_lazy == NULL || w_eager == NULL ||
-      w_lazy == NULL)
-  {
-    goto cleanup;
-  }
+  TEST_STATIC_ALLOC(scratch_eager, mld_polyvecl, 1);
+  TEST_STATIC_ALLOC(scratch_lazy, mld_polyvecl, 1);
+  TEST_STATIC_ALLOC(w_eager, mld_polyveck, 1);
+  TEST_STATIC_ALLOC(w_lazy, mld_polyveck, 1);
 
   for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
   {
@@ -1373,33 +1408,34 @@ static int test_polyvec_lazy_eager(void)
 
   ret = 0;
 
-cleanup:
-  MLD_FREE(w_lazy, mld_polyveck, 1, NULL);
-  MLD_FREE(w_eager, mld_polyveck, 1, NULL);
-  MLD_FREE(scratch_lazy, mld_polyvecl, 1, NULL);
-  MLD_FREE(scratch_eager, mld_polyvecl, 1, NULL);
+  TEST_STATIC_FREE(w_lazy);
+  TEST_STATIC_FREE(w_eager);
+  TEST_STATIC_FREE(scratch_lazy);
+  TEST_STATIC_FREE(scratch_eager);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_FREE(v, mld_polyvecl, 1, NULL);
+  TEST_STATIC_FREE(v);
 #endif
-  MLD_FREE(mat_lazy, mld_polymat_lazy, 1, NULL);
-  MLD_FREE(mat_eager, mld_polymat_eager, 1, NULL);
-  MLD_FREE(poly_lazy, mld_poly, 1, NULL);
-  MLD_FREE(poly_eager, mld_poly, 1, NULL);
-  MLD_FREE(y_lazy, mld_yvec_lazy, 1, NULL);
-  MLD_FREE(y_eager, mld_yvec_eager, 1, NULL);
-  MLD_FREE(t0_lazy, mld_sk_t0hat_lazy, 1, NULL);
-  MLD_FREE(t0_eager, mld_sk_t0hat_eager, 1, NULL);
-  MLD_FREE(s2_lazy, mld_sk_s2hat_lazy, 1, NULL);
-  MLD_FREE(s2_eager, mld_sk_s2hat_eager, 1, NULL);
-  MLD_FREE(s1_lazy, mld_sk_s1hat_lazy, 1, NULL);
-  MLD_FREE(s1_eager, mld_sk_s1hat_eager, 1, NULL);
-  MLD_FREE(rhoprime, uint8_t, MLDSA_CRHBYTES, NULL);
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES, NULL);
-  MLD_FREE(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES, NULL);
-  MLD_FREE(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_FREE(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES, NULL);
+  TEST_STATIC_FREE(mat_lazy);
+  TEST_STATIC_FREE(mat_eager);
+  TEST_STATIC_FREE(poly_lazy);
+  TEST_STATIC_FREE(poly_eager);
+  TEST_STATIC_FREE(y_lazy);
+  TEST_STATIC_FREE(y_eager);
+  TEST_STATIC_FREE(t0_lazy);
+  TEST_STATIC_FREE(t0_eager);
+  TEST_STATIC_FREE(s2_lazy);
+  TEST_STATIC_FREE(s2_eager);
+  TEST_STATIC_FREE(s1_lazy);
+  TEST_STATIC_FREE(s1_eager);
+  TEST_STATIC_FREE(rhoprime);
+  TEST_STATIC_FREE(rho);
+  TEST_STATIC_FREE(packed_t0);
+  TEST_STATIC_FREE(packed_s2);
+  TEST_STATIC_FREE(packed_s1);
   return ret;
 }
+#undef TEST_STATIC_FREE
+#undef TEST_STATIC_ALLOC
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
