@@ -8,9 +8,10 @@
  *
  * Usage:
  *   wycheproof_mldsa{lvl} sigGenSeedDeterministic seed=HEX message=HEX
- * context=HEX externalMu=0/1 wycheproof_mldsa{lvl} sigGenDeterministic
- * message=HEX context=HEX sk=HEX wycheproof_mldsa{lvl}
- * sigGenInternalDeterministic message=HEX sk=HEX externalMu=0/1
+ * context=HEX externalMu=0/1 [rnd=HEX] wycheproof_mldsa{lvl}
+ * sigGenDeterministic message=HEX context=HEX sk=HEX [rnd=HEX]
+ * wycheproof_mldsa{lvl} sigGenInternalDeterministic message=HEX sk=HEX
+ * externalMu=0/1 [rnd=HEX]
  *   wycheproof_mldsa{lvl} sigVer message=HEX context=HEX signature=HEX pk=HEX
  *   wycheproof_mldsa{lvl} pkFromSk sk=HEX
  */
@@ -165,7 +166,7 @@ int main(int argc, char *argv[])
     size_t mlen, ctxlen;
     int externalMu;
 
-    if (argc != 6)
+    if (argc != 6 && argc != 7)
     {
       goto usage;
     }
@@ -206,6 +207,12 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+    if (argc == 7 && decode_hex("rnd", rnd, sizeof(rnd), argv[6]) != 0)
+    {
+      printf("decode_error=1\n");
+      return 0;
+    }
+
     CHECK(mld_sign_keypair_internal(pk, sk, seed) == 0);
 
     if (externalMu)
@@ -229,7 +236,7 @@ int main(int argc, char *argv[])
 #if !defined(MLD_CONFIG_NO_SIGN_API)
       if (strcmp(argv[1], "sigGenDeterministic") == 0)
   {
-    /* sigGenDeterministic message=HEX context=HEX sk=HEX */
+    /* sigGenDeterministic message=HEX context=HEX sk=HEX [rnd=HEX] */
     unsigned char message[MAX_MSG_LENGTH];
     unsigned char context[MAX_CTX_LENGTH];
     unsigned char sk[MLDSA_SK_BYTES];
@@ -238,7 +245,7 @@ int main(int argc, char *argv[])
     unsigned char rnd[MLDSA_RNDBYTES] = {0};
     size_t mlen, ctxlen;
 
-    if (argc != 5)
+    if (argc != 5 && argc != 6)
     {
       goto usage;
     }
@@ -265,6 +272,12 @@ int main(int argc, char *argv[])
       return 0;
     }
 
+    if (argc == 6 && decode_hex("rnd", rnd, sizeof(rnd), argv[5]) != 0)
+    {
+      printf("decode_error=1\n");
+      return 0;
+    }
+
     pre[0] = 0;
     /* Safety: Truncation is safe due to the check above. */
     pre[1] = (uint8_t)ctxlen;
@@ -276,7 +289,8 @@ int main(int argc, char *argv[])
   }
   else if (strcmp(argv[1], "sigGenInternalDeterministic") == 0)
   {
-    /* sigGenInternalDeterministic message=HEX sk=HEX externalMu=0/1 */
+    /* sigGenInternalDeterministic message=HEX sk=HEX externalMu=0/1
+     * [rnd=HEX] */
     unsigned char message[MAX_MSG_LENGTH + MAX_CTX_LENGTH + 2];
     unsigned char sk[MLDSA_SK_BYTES];
     unsigned char sig[MLDSA_SIG_BYTES];
@@ -284,7 +298,7 @@ int main(int argc, char *argv[])
     size_t mlen;
     int externalMu;
 
-    if (argc != 5)
+    if (argc != 5 && argc != 6)
     {
       goto usage;
     }
@@ -312,6 +326,12 @@ int main(int argc, char *argv[])
       externalMu = 1;
     }
     else
+    {
+      printf("decode_error=1\n");
+      return 0;
+    }
+
+    if (argc == 6 && decode_hex("rnd", rnd, sizeof(rnd), argv[5]) != 0)
     {
       printf("decode_error=1\n");
       return 0;
@@ -406,11 +426,11 @@ usage:
   fprintf(stderr,
           "Usage:\n"
           "  wycheproof_mldsa{lvl} sigGenSeedDeterministic seed=HEX "
-          "message=HEX context=HEX externalMu=0/1\n"
+          "message=HEX context=HEX externalMu=0/1 [rnd=HEX]\n"
           "  wycheproof_mldsa{lvl} sigGenDeterministic message=HEX context=HEX "
-          "sk=HEX\n"
+          "sk=HEX [rnd=HEX]\n"
           "  wycheproof_mldsa{lvl} sigGenInternalDeterministic message=HEX "
-          "sk=HEX externalMu=0/1\n"
+          "sk=HEX externalMu=0/1 [rnd=HEX]\n"
           "  wycheproof_mldsa{lvl} sigVer message=HEX context=HEX "
           "signature=HEX pk=HEX\n"
           "  wycheproof_mldsa{lvl} pkFromSk sk=HEX\n");
