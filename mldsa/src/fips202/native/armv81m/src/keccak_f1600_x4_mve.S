@@ -72,7 +72,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/fips202/armv81m/src/keccak_f1600_x4_mve.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/armv81m_opt/src/keccak_f1600_x4_mve.S using scripts/simpasm. Do not modify it directly.
  */
 
 .thumb

@@ -61,7 +61,7 @@
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
- *   dev/fips202/armv81m/src/state_xor_bytes_x4_mve.S using scripts/simpasm. Do not modify it directly.
+ *   dev/fips202/armv81m_opt/src/state_xor_bytes_x4_mve.S using scripts/simpasm. Do not modify it directly.
  */
 
 .thumb
