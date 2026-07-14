@@ -8,11 +8,25 @@
 
 #include "../../../../common.h"
 
-/* Keccak round constants in bit-interleaved form */
+/* Keccak round constants in bit-interleaved form, plus x1 loop terminator */
 #define mld_keccakf1600_round_constants \
   MLD_NAMESPACE(keccakf1600_round_constants)
 MLD_INTERNAL_DATA_DECLARATION const uint32_t
-    mld_keccakf1600_round_constants[48];
+    mld_keccakf1600_round_constants[49];
+
+#define mld_keccak_f1600_x1_armv7m_asm MLD_NAMESPACE(keccak_f1600_x1_armv7m_asm)
+void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
+
+#define mld_keccak_f1600_x1_state_xor_bytes_asm \
+  MLD_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
+void mld_keccak_f1600_x1_state_xor_bytes_asm(void *state, const uint8_t *data,
+                                             unsigned offset, unsigned length);
+
+#define mld_keccak_f1600_x1_state_extract_bytes_asm \
+  MLD_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)
+void mld_keccak_f1600_x1_state_extract_bytes_asm(void *state, uint8_t *data,
+                                                 unsigned offset,
+                                                 unsigned length);
 
 #define mld_keccak_f1600_x4_mve_asm MLD_NAMESPACE(keccak_f1600_x4_mve_asm)
 void mld_keccak_f1600_x4_mve_asm(uint64_t state[100], uint64_t tmpstate[100],

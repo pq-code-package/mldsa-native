@@ -6,7 +6,8 @@
 
 #include "../../../../common.h"
 
-#if defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
+#if (defined(MLD_FIPS202_ARMV81M_NEED_X1) ||  \
+     defined(MLD_FIPS202_ARMV81M_NEED_X4)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include "fips202_native_armv81m.h"
@@ -16,9 +17,11 @@
  * Each 64-bit constant is split into two 32-bit words:
  * - low word contains even-indexed bits
  * - high word contains odd-indexed bits
+ * The x1 Adomnicai core uses the final 0xff word as a loop terminator; x4
+ * consumes only the first 48 words.
  */
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint32_t
-    mld_keccakf1600_round_constants[48] = {
+    mld_keccakf1600_round_constants[49] = {
         0x00000001, 0x00000000, /* RC0 */
         0x00000000, 0x00000089, /* RC1 */
         0x00000000, 0x8000008b, /* RC2 */
@@ -43,11 +46,13 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint32_t
         0x00000000, 0x80000088, /* RC21 */
         0x00000001, 0x00008000, /* RC22 */
         0x00000000, 0x80008082, /* RC23 */
+        0x000000FF,             /* x1 loop terminator */
 };
 
-#else /* MLD_FIPS202_ARMV81M_NEED_X4 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#else /* (MLD_FIPS202_ARMV81M_NEED_X1 || MLD_FIPS202_ARMV81M_NEED_X4) && \
+         !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLD_EMPTY_CU(fips202_armv81m_round_constants)
 
-#endif /* !(MLD_FIPS202_ARMV81M_NEED_X4 && !MLD_CONFIG_MULTILEVEL_NO_SHARED) \
-        */
+#endif /* !((MLD_FIPS202_ARMV81M_NEED_X1 || MLD_FIPS202_ARMV81M_NEED_X4) && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

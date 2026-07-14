@@ -13,8 +13,12 @@
 #define MLD_USE_NATIVE_FIPS202_X4
 #define MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #define MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
+#define MLD_USE_NATIVE_FIPS202_X1
+#define MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES
+#define MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES
 /* Guard for assembly file */
 #define MLD_FIPS202_ARMV81M_NEED_X4
+#define MLD_FIPS202_ARMV81M_NEED_X1
 
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
@@ -60,6 +64,47 @@ static MLD_INLINE int mld_keccakf1600_extract_bytes_x4_native(
   mld_keccak_f1600_x4_state_extract_bytes_asm(state, data0, data1, data2, data3,
                                               offset, length);
   return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+#define mld_keccak_f1600_x1_native_impl \
+  MLD_NAMESPACE(keccak_f1600_x1_native_impl)
+int mld_keccak_f1600_x1_native_impl(uint64_t *state);
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
+{
+  return mld_keccak_f1600_x1_native_impl(state);
+}
+
+#define mld_keccakf1600_xor_bytes_x1_native_impl \
+  MLD_NAMESPACE(keccakf1600_xor_bytes_x1_native_impl)
+int mld_keccakf1600_xor_bytes_x1_native_impl(uint64_t *state,
+                                             const uint8_t *data,
+                                             unsigned offset, unsigned length);
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_xor_bytes_x1_native(uint64_t *state,
+                                                          const uint8_t *data,
+                                                          unsigned offset,
+                                                          unsigned length)
+{
+  return mld_keccakf1600_xor_bytes_x1_native_impl(state, data, offset, length);
+}
+
+#define mld_keccakf1600_extract_bytes_x1_native_impl \
+  MLD_NAMESPACE(keccakf1600_extract_bytes_x1_native_impl)
+int mld_keccakf1600_extract_bytes_x1_native_impl(uint64_t *state, uint8_t *data,
+                                                 unsigned offset,
+                                                 unsigned length);
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_extract_bytes_x1_native(uint64_t *state,
+                                                              uint8_t *data,
+                                                              unsigned offset,
+                                                              unsigned length)
+{
+  return mld_keccakf1600_extract_bytes_x1_native_impl(state, data, offset,
+                                                      length);
 }
 
 #endif /* !__ASSEMBLER__ */
