@@ -2733,6 +2733,8 @@ def upstream_src_dir_for_dev_dir(dev_dir):
     if dev_dir.startswith("dev/fips202/"):
         # dev/fips202/<arch>/src -> mldsa/src/fips202/native/<arch>/src
         arch = dev_dir.split("/")[2]
+        if arch == "armv81m_opt":
+            arch = "armv81m"
         return f"mldsa/src/fips202/native/{arch}/src"
     if dev_dir.startswith("dev/aarch64_"):
         # dev/aarch64_opt/src and dev/aarch64_clean/src map to the same tree
@@ -3203,20 +3205,20 @@ def synchronize_backends(
         cflags="-Idev/fips202/x86_64 -Imldsa/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
     synchronize_backend(
-        "dev/fips202/armv81m/src",
+        "dev/fips202/armv81m_opt/src",
         "mldsa/src/fips202/native/armv81m/src",
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Idev/fips202/armv81m/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
+        cflags="-Idev/fips202/armv81m_opt/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
     )
     synchronize_backend(
-        "dev/fips202/armv81m",
+        "dev/fips202/armv81m_opt",
         "mldsa/src/fips202/native/armv81m",
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Idev/fips202/armv81m -Imldsa/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+        cflags="-Idev/fips202/armv81m_opt -Imldsa/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
     )
 
 
@@ -4437,7 +4439,7 @@ def gen_abicheck():
     # HOL-Light proofs (armv81m). Shape matches hol_light_asm_joblist
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
-        ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m/src", "", "armv81m"),
+        ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m_opt/src", "", "armv81m"),
     ]
     joblist = hol_light_asm_joblist() + joblist_abicheck_extra
 
