@@ -20,7 +20,7 @@
 
 typedef struct aarch64_register_state reg_state;
 
-void mld_poly_decompose_32_aarch64_asm(int32_t *a1, int32_t *a0);
+void mld_poly_decompose_32_aarch64_asm(int32_t a1[256], int32_t a0[256]);
 
 int check_poly_decompose_32_aarch64_asm(void)
 {

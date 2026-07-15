@@ -5,7 +5,7 @@
 /*yaml
   Name: poly_caddq_aarch64_asm
   Description: AArch64 conditional addition of q to each coefficient
-  Signature: void mld_poly_caddq_aarch64_asm(int32_t *a)
+  Signature: void mld_poly_caddq_aarch64_asm(int32_t a[256])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -13,7 +13,7 @@
       type: buffer
       size_bytes: 1024
       permissions: read/write
-      c_parameter: int32_t *a
+      c_parameter: int32_t a[256]
       description: Input/output polynomial (256 x int32_t)
 */
 

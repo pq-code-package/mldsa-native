@@ -21,7 +21,7 @@
 typedef struct aarch64_register_state reg_state;
 
 void mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm(
-    int32_t *r, const int32_t a[4][256], const int32_t b[4][256]);
+    int32_t r[256], const int32_t a[4][256], const int32_t b[4][256]);
 
 int check_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm(void)
 {

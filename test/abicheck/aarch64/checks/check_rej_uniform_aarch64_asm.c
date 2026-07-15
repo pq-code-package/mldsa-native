@@ -20,8 +20,8 @@
 
 typedef struct aarch64_register_state reg_state;
 
-uint64_t mld_rej_uniform_aarch64_asm(int32_t *r, const uint8_t *buf,
-                                     unsigned buflen, const uint8_t *table);
+uint64_t mld_rej_uniform_aarch64_asm(int32_t r[256], const uint8_t *buf,
+                                     unsigned buflen, const uint8_t table[256]);
 
 int check_rej_uniform_aarch64_asm(void)
 {

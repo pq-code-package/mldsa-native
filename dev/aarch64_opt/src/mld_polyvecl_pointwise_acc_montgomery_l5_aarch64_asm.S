@@ -5,7 +5,7 @@
 /*yaml
   Name: polyvecl_pointwise_acc_montgomery_l5_aarch64_asm
   Description: AArch64 pointwise multiply-accumulate of length-5 polynomial vectors
-  Signature: void mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm(int32_t *r, const int32_t a[5][256], const int32_t b[5][256])
+  Signature: void mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm(int32_t r[256], const int32_t a[5][256], const int32_t b[5][256])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -13,7 +13,7 @@
       type: buffer
       size_bytes: 1024
       permissions: write-only
-      c_parameter: int32_t *r
+      c_parameter: int32_t r[256]
       description: Output polynomial (256 x int32_t)
     x1:
       type: buffer

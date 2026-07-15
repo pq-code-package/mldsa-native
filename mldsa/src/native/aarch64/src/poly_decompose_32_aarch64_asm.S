@@ -5,7 +5,7 @@
 /*yaml
   Name: poly_decompose_32_aarch64_asm
   Description: AArch64 coefficient decomposition (alpha = (Q-1)/32)
-  Signature: void mld_poly_decompose_32_aarch64_asm(int32_t *a1, int32_t *a0)
+  Signature: void mld_poly_decompose_32_aarch64_asm(int32_t a1[256], int32_t a0[256])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -13,13 +13,13 @@
       type: buffer
       size_bytes: 1024
       permissions: write-only
-      c_parameter: int32_t *a1
+      c_parameter: int32_t a1[256]
       description: Output high-part polynomial (256 x int32_t)
     x1:
       type: buffer
       size_bytes: 1024
       permissions: read/write
-      c_parameter: int32_t *a0
+      c_parameter: int32_t a0[256]
       description: Input polynomial / output low-part (256 x int32_t)
 */
 

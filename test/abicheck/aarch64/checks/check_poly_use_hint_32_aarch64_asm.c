@@ -20,7 +20,7 @@
 
 typedef struct aarch64_register_state reg_state;
 
-void mld_poly_use_hint_32_aarch64_asm(int32_t *a, const int32_t *h);
+void mld_poly_use_hint_32_aarch64_asm(int32_t a[256], const int32_t h[256]);
 
 int check_poly_use_hint_32_aarch64_asm(void)
 {

@@ -20,8 +20,8 @@
 
 typedef struct aarch64_register_state reg_state;
 
-void mld_ntt_aarch64_asm(int32_t *r, const int32_t *zetas_l123456,
-                         const int32_t *zetas_l78);
+void mld_ntt_aarch64_asm(int32_t r[256], const int32_t zetas_l123456[144],
+                         const int32_t zetas_l78[384]);
 
 int check_ntt_aarch64_asm(void)
 {

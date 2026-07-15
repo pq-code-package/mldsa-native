@@ -20,7 +20,8 @@
 
 typedef struct aarch64_register_state reg_state;
 
-void mld_poly_pointwise_montgomery_aarch64_asm(int32_t *a, const int32_t *b);
+void mld_poly_pointwise_montgomery_aarch64_asm(int32_t a[256],
+                                               const int32_t b[256]);
 
 int check_poly_pointwise_montgomery_aarch64_asm(void)
 {

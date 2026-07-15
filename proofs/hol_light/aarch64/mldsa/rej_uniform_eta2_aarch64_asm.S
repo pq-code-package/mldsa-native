@@ -7,7 +7,7 @@
 /*yaml
   Name: rej_uniform_eta2_aarch64_asm
   Description: AArch64 rejection sampling of eta=2 secret coefficients
-  Signature: uint64_t mld_rej_uniform_eta2_aarch64_asm(int32_t *r, const uint8_t *buf, unsigned buflen, const uint8_t *table)
+  Signature: uint64_t mld_rej_uniform_eta2_aarch64_asm(int32_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[4096])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -15,7 +15,7 @@
       type: buffer
       size_bytes: 1024
       permissions: write-only
-      c_parameter: int32_t *r
+      c_parameter: int32_t r[256]
       description: Output buffer (256 x int32_t)
     x1:
       type: buffer
@@ -32,7 +32,7 @@
       type: buffer
       size_bytes: 4096
       permissions: read-only
-      c_parameter: const uint8_t *table
+      c_parameter: const uint8_t table[4096]
       description: Lookup table (4096 x uint8_t)
 */
 

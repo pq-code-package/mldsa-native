@@ -7,7 +7,7 @@
 /*yaml
   Name: polyz_unpack_17_aarch64_asm
   Description: AArch64 unpacking of 17-bit packed coefficients
-  Signature: void mld_polyz_unpack_17_aarch64_asm(int32_t *r, const uint8_t *buf, const uint8_t *indices)
+  Signature: void mld_polyz_unpack_17_aarch64_asm(int32_t r[256], const uint8_t buf[576], const uint8_t indices[64])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -15,19 +15,19 @@
       type: buffer
       size_bytes: 1024
       permissions: write-only
-      c_parameter: int32_t *r
+      c_parameter: int32_t r[256]
       description: Output polynomial (256 x int32_t)
     x1:
       type: buffer
       size_bytes: 576
       permissions: read-only
-      c_parameter: const uint8_t *buf
+      c_parameter: const uint8_t buf[576]
       description: Packed input bytes
     x2:
       type: buffer
       size_bytes: 64
       permissions: read-only
-      c_parameter: const uint8_t *indices
+      c_parameter: const uint8_t indices[64]
       description: Permutation index table (64 x uint8_t)
 */
 

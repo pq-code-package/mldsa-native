@@ -20,8 +20,8 @@
 
 typedef struct aarch64_register_state reg_state;
 
-void mld_polyz_unpack_17_aarch64_asm(int32_t *r, const uint8_t *buf,
-                                     const uint8_t *indices);
+void mld_polyz_unpack_17_aarch64_asm(int32_t r[256], const uint8_t buf[576],
+                                     const uint8_t indices[64]);
 
 int check_polyz_unpack_17_aarch64_asm(void)
 {

@@ -5,7 +5,7 @@
 /*yaml
   Name: poly_use_hint_88_aarch64_asm
   Description: AArch64 hint application (alpha = (Q-1)/88)
-  Signature: void mld_poly_use_hint_88_aarch64_asm(int32_t *a, const int32_t *h)
+  Signature: void mld_poly_use_hint_88_aarch64_asm(int32_t a[256], const int32_t h[256])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -13,13 +13,13 @@
       type: buffer
       size_bytes: 1024
       permissions: read/write
-      c_parameter: int32_t *a
+      c_parameter: int32_t a[256]
       description: Input/output polynomial (256 x int32_t)
     x1:
       type: buffer
       size_bytes: 1024
       permissions: read-only
-      c_parameter: const int32_t *h
+      c_parameter: const int32_t h[256]
       description: Hint polynomial (256 x int32_t)
 */
 
