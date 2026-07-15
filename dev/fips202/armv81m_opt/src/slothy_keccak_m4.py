@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-#
-# Copyright (c) 2022 Arm Limited
-# Copyright (c) 2022 Hanno Becker
-# Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: MIT
 
 import argparse
