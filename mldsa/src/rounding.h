@@ -201,6 +201,8 @@ MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE unsigned int mld_make_hint(int32_t a0, int32_t a1)
 __contract__(
   ensures(return_value >= 0 && return_value <= 1)
+  ensures(return_value == (a0 > MLDSA_GAMMA2 || a0 < -MLDSA_GAMMA2 ||
+                           (a0 == -MLDSA_GAMMA2 && a1 != 0)))
 )
 {
   if (a0 > MLDSA_GAMMA2 || a0 < -MLDSA_GAMMA2 ||
