@@ -101,6 +101,8 @@ def main():
     slothy.config.split_heuristic_factor = 22
     slothy.config.constraints.stalls_first_attempt = 16
 
+    slothy.config.timeout = 1000
+
     slothy.load_source_from_file(args.input)
     slothy.optimize(start="slothy_start", end="slothy_end")
     slothy.write_source_to_file(args.output)
