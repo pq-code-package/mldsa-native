@@ -95,6 +95,8 @@
 #include "src/native/x86_64/src/polyz_unpack_17_avx2_asm.S"
 #include "src/native/x86_64/src/polyz_unpack_19_avx2_asm.S"
 #include "src/native/x86_64/src/rej_uniform_avx2_asm.S"
+#include "src/native/x86_64/src/rej_uniform_eta2_avx2_asm.S"
+#include "src/native/x86_64/src/rej_uniform_eta4_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
@@ -795,8 +797,8 @@
 #undef mld_polyz_unpack_17_avx2_asm
 #undef mld_polyz_unpack_19_avx2_asm
 #undef mld_rej_uniform_avx2_asm
-#undef mld_rej_uniform_eta2_avx2
-#undef mld_rej_uniform_eta4_avx2
+#undef mld_rej_uniform_eta2_avx2_asm
+#undef mld_rej_uniform_eta4_avx2_asm
 #undef mld_rej_uniform_table
 /* mldsa/src/native/x86_64/src/consts.h */
 #undef MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV

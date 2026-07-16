@@ -66,7 +66,9 @@ OBJ = mldsa/ntt_avx2_asm.o \
       mldsa/pointwise_acc_l4_avx2_asm.o \
       mldsa/pointwise_acc_l5_avx2_asm.o \
       mldsa/pointwise_acc_l7_avx2_asm.o \
-      mldsa/keccak_f1600_x4_avx2_asm.o
+      mldsa/keccak_f1600_x4_avx2_asm.o \
+      mldsa/rej_uniform_eta4_avx2_asm.o \
+      mldsa/rej_uniform_eta2_avx2_asm.o
 
 # Build object files from assembly sources
 $(OBJ): %.o : %.S

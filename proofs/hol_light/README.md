@@ -19,7 +19,7 @@ Unless documented otherwise, for each assembly routine listed below, we prove th
 
 ### Known gap: rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
 
-The AArch64 kernels `rej_uniform_eta{2,4}` have secret-independent timing, but we do not yet prove it (see
+The AArch64 and AVX2 kernels `rej_uniform_eta{2,4}` have secret-independent timing, but we do not yet prove it (see
 [#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)): Their memory access pattern depends on which
 coefficients fall inside vs. outside the acceptance interval, but no other information about the secret coefficients is
 leaked. The indices of in bound vs. out of bounds coefficients are statistically independent of the secret key; see
@@ -175,6 +175,8 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 poly_use_hint (l=5,7): [poly_use_hint_32_avx2_asm.S](x86_64/mldsa/poly_use_hint_32_avx2_asm.S)
   * x86_64 poly_use_hint (l=4): [poly_use_hint_88_avx2_asm.S](x86_64/mldsa/poly_use_hint_88_avx2_asm.S)
   * x86_64 rejection uniform sampling: [rej_uniform_avx2_asm.S](x86_64/mldsa/rej_uniform_avx2_asm.S)
+  * x86_64 rejection sampling (eta=2): [rej_uniform_eta2_avx2_asm.S](x86_64/mldsa/rej_uniform_eta2_avx2_asm.S)
+  * x86_64 rejection sampling (eta=4): [rej_uniform_eta4_avx2_asm.S](x86_64/mldsa/rej_uniform_eta4_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
 

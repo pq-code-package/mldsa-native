@@ -2985,6 +2985,18 @@ def hol_light_asm_joblist():
             f"-Idev/fips202/x86_64/src -Imldsa/src/fips202/native/x86_64/src {x86_64_flags}",
             "x86_64",
         ),
+        (
+            "rej_uniform_eta4_avx2_asm.S",
+            "dev/x86_64/src",
+            f"-DMLD_ARITH_BACKEND_X86_64_DEFAULT -Imldsa/src/native/x86_64/src -Icommon {x86_64_flags}",
+            "x86_64",
+        ),
+        (
+            "rej_uniform_eta2_avx2_asm.S",
+            "dev/x86_64/src",
+            f"-DMLD_ARITH_BACKEND_X86_64_DEFAULT -Imldsa/src/native/x86_64/src -Icommon {x86_64_flags}",
+            "x86_64",
+        ),
     ]
 
     return joblist_aarch64 + joblist_x86_64

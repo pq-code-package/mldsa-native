@@ -28,22 +28,20 @@ same TCB, and therefore the same shared mitigations and residual risks.
 
 ## Additional risks specific to mldsa-native
 
-### Incomplete HOL Light proof coverage
+### Rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
 
-The AArch64 backend is fully covered, but the x86_64 backend is not yet complete.
-The full list of functions that are covered today is
-maintained in [proofs/hol_light/README.md](proofs/hol_light/README.md).
+Both the AArch64 and x86_64 backends are fully covered by HOL Light proofs; the full list of
+functions is maintained in [proofs/hol_light/README.md](proofs/hol_light/README.md).
 
-The remaining HOL Light proof work for the x86_64 backend is tracked in
-[#912](https://github.com/pq-code-package/mldsa-native/issues/912).
-
-For the routines without HOL Light specifications, functional correctness, memory safety,
-and constant-time properties are validated empirically through the full test suite (functional
-tests, KAT, ACVP, unit tests, and `valgrind`-based constant-time tests on AArch64 and x86_64),
-but they are not formally proved.
-
-We aim to close this gap and achieve full HOL Light coverage of the x86_64 backend
-prior to the first stable release of mldsa-native.
+The one exception to the three target properties is the rejection-sampling kernels for the
+secret vector, `rej_uniform_eta{2,4}`, on both backends: these are proven functionally correct
+and memory-safe, but their secret-independent timing is not yet formally proved (see
+[#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)). Their memory access
+pattern depends on which coefficients fall inside vs. outside the acceptance interval, but no
+other information about the secret coefficients is leaked, and the indices of in-bound vs.
+out-of-bound coefficients are statistically independent of the secret key; see Section 5.5 of
+@[Round3_Spec]. This property is validated empirically through the `valgrind`-based
+constant-time tests, but not formally proved.
 
 <!--- bibliography --->
 [^mlkem_native_soundness]: pq-code-package: mlkem-native SOUNDNESS document, [https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md](https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md)

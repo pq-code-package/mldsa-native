@@ -94,15 +94,37 @@ __contract__(
 );
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#define mld_rej_uniform_eta2_avx2 MLD_NAMESPACE(mld_rej_uniform_eta2_avx2)
-MLD_MUST_CHECK_RETURN_VALUE
-unsigned mld_rej_uniform_eta2_avx2(
-    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN]);
+#define mld_rej_uniform_eta2_avx2_asm MLD_NAMESPACE(rej_uniform_eta2_avx2_asm)
+/* This contract must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/rej_uniform_eta2_avx2_asm.ml */
+MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
+unsigned mld_rej_uniform_eta2_avx2_asm(
+    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN],
+    const uint8_t table[256][8])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN))
+  requires(table == mld_rej_uniform_table)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  ensures(array_abs_bound(r, 0, return_value, 3))
+);
 
-#define mld_rej_uniform_eta4_avx2 MLD_NAMESPACE(mld_rej_uniform_eta4_avx2)
-MLD_MUST_CHECK_RETURN_VALUE
-unsigned mld_rej_uniform_eta4_avx2(
-    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN]);
+#define mld_rej_uniform_eta4_avx2_asm MLD_NAMESPACE(rej_uniform_eta4_avx2_asm)
+/* This contract must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/x86_64/proofs/rej_uniform_eta4_avx2_asm.ml */
+MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
+unsigned mld_rej_uniform_eta4_avx2_asm(
+    int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN],
+    const uint8_t table[256][8])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(buf, MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN))
+  requires(table == mld_rej_uniform_table)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  ensures(array_abs_bound(r, 0, return_value, 5))
+);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)

@@ -108,6 +108,18 @@ static int bench(void)
 
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
 
+  /* poly_uniform_eta_4x — exercises rej_uniform_eta{2,4}_avx2_asm on x86 */
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  {
+    MLD_ALIGN mld_poly poly_eta0, poly_eta1, poly_eta2, poly_eta3;
+    BENCH(
+        "poly_uniform_eta_4x",
+        mld_poly_uniform_eta_4x(&poly_eta0, &poly_eta1, &poly_eta2, &poly_eta3,
+                                (const uint8_t *)data0, 0, 1, 2, 3))
+  }
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_NO_KEYPAIR_API */
+
   BENCH("poly_chknorm",
         chknorm_acc ^=
         mld_poly_chknorm((const mld_poly *)data0, MLDSA_GAMMA1 - MLDSA_BETA);)

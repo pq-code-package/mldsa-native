@@ -83,10 +83,8 @@
 #endif /* MLD_SYS_AARCH64 */
 #if defined(MLD_SYS_X86_64)
 #include "src/native/x86_64/src/consts.c"
-#include "src/native/x86_64/src/rej_uniform_eta2_avx2.c"
-#include "src/native/x86_64/src/rej_uniform_eta4_avx2.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
-#endif /* MLD_SYS_X86_64 */
+#endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -772,8 +770,8 @@
 #undef mld_polyz_unpack_17_avx2_asm
 #undef mld_polyz_unpack_19_avx2_asm
 #undef mld_rej_uniform_avx2_asm
-#undef mld_rej_uniform_eta2_avx2
-#undef mld_rej_uniform_eta4_avx2
+#undef mld_rej_uniform_eta2_avx2_asm
+#undef mld_rej_uniform_eta4_avx2_asm
 #undef mld_rej_uniform_table
 /* mldsa/src/native/x86_64/src/consts.h */
 #undef MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV

@@ -222,6 +222,10 @@ jobs:
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_avx2_asm
             needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
+          - name: rej_uniform_eta2_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_rej_uniform_table.ml", "subroutine_signatures.ml"]
+          - name: rej_uniform_eta4_avx2_asm
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_rej_uniform_table.ml", "subroutine_signatures.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-latest
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork
