@@ -1540,6 +1540,7 @@ static int mld_validate_hash_length(int hashalg, size_t len)
   }
 }
 
+MLD_EXTERNAL_API
 size_t mld_prepare_domain_separation_prefix(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg)

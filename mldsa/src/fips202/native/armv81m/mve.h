@@ -26,6 +26,7 @@
  */
 #define mld_keccak_f1600_x4_native_impl \
   MLD_NAMESPACE(keccak_f1600_x4_native_impl)
+MLD_INTERNAL_API
 int mld_keccak_f1600_x4_native_impl(uint64_t *state);
 
 MLD_MUST_CHECK_RETURN_VALUE
