@@ -6,6 +6,12 @@ permissions:
   contents: read
 on:
   workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: GitHub token used to register/deregister EC2 self-hosted runners
+        # Not required: on fork PRs this resolves empty and the fork-guarded EC2
+        # jobs are skipped; the guards, not this flag, are the security control.
+        required: false
   workflow_dispatch:
 
 jobs:
@@ -15,7 +21,6 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-      pull-requests: 'write'
     strategy:
       fail-fast: false
       matrix:
@@ -37,4 +42,5 @@ jobs:
       cbmc: true
       cbmc_mldsa_parameter_set: ${{ matrix.parameter_set }}
       cbmc_reduce_ram: ${{ matrix.reduce_ram }}
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}

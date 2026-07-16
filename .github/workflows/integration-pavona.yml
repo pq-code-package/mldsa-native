@@ -7,6 +7,12 @@ permissions:
   contents: read
 on:
   workflow_call:
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: GitHub token used to register/deregister the EC2 self-hosted runner
+        # Not required: on fork PRs this resolves empty and the fork-guarded EC2
+        # jobs are skipped; the guards, not this flag, are the security control.
+        required: false
   workflow_dispatch:
 
 env:
