@@ -391,14 +391,21 @@ cleanup:
   MLD_FREE(inbuf, uint8_t, MLDSA_SEEDBYTES + 2, context);
   MLD_FREE(seedbuf, uint8_t, 2 * MLDSA_SEEDBYTES + MLDSA_CRHBYTES, context);
 
-  if (ret != 0)
-  {
-    return ret;
-  }
-
   /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
   /* Do this after freeing all temporaries. */
-  return mld_check_pct(pk, sk, context);
+  if (ret == 0)
+  {
+    ret = mld_check_pct(pk, sk, context);
+  }
+
+  if (ret != 0)
+  {
+    /* Clear caller outputs on failure. */
+    mld_zeroize(pk, MLDSA_CRYPTO_PUBLICKEYBYTES);
+    mld_zeroize(sk, MLDSA_CRYPTO_SECRETKEYBYTES);
+  }
+
+  return ret;
 }
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
