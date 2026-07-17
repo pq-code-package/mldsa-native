@@ -23,6 +23,11 @@
  * Make sure the configuration file is in the include path
  * (this is "mldsa_native_config.h" by default, or MLD_CONFIG_FILE if defined).
  *
+ * # API conventions
+ *
+ * Conventions shared by all functions below (return values, pointer validity,
+ * output buffers on error) are documented in API-CONVENTIONS.md.
+ *
  * # Multi-level builds
  *
  * This header specifies a build of mldsa-native for a fixed security level.

@@ -158,6 +158,8 @@ For CI benchmark results and historical performance data, see the [benchmarking 
 
 If you want to use mldsa-native, import [mldsa](mldsa) into your project's source tree and build using your favourite build system. See [examples/basic](examples/basic) for a simple example. The build system provided in this repository is for development purposes only.
 
+See [API-CONVENTIONS.md](API-CONVENTIONS.md) for conventions that apply to all public functions, such as return values, pointer validity, and the state of output buffers on error.
+
 ### Can I bring my own FIPS-202?
 
 mldsa-native relies on and comes with an implementation of FIPS-202[^FIPS202]. If your library has its own FIPS-202 implementation, you
