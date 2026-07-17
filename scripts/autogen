@@ -2413,6 +2413,10 @@ def check_macro_typos():
         if is_autogen:
             return True
 
+        # 6. Release notes reference removed and renamed macros
+        if filename == "RELEASE.md":
+            return True
+
         if (
             is_autogen
             or filename == "mldsa/src/common.h"
