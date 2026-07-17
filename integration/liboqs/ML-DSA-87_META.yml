@@ -25,7 +25,7 @@ implementations:
   version: FIPS204
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_CONFIG_FILE="integration/liboqs/config_c.h"
-  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_C_keypair
+  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_C_keypair_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA87_C_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA87_C_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA87_C_signature_extmu_oqs
@@ -43,7 +43,7 @@ implementations:
   version: FIPS204
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_CONFIG_FILE="integration/liboqs/config_x86_64.h"
-  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_X86_64_keypair
+  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_X86_64_keypair_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA87_X86_64_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA87_X86_64_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA87_X86_64_signature_extmu_oqs
@@ -70,7 +70,7 @@ implementations:
   version: FIPS204
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=87 -DMLD_CONFIG_FILE="integration/liboqs/config_aarch64.h"
-  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_AARCH64_keypair
+  signature_keypair: PQCP_MLDSA_NATIVE_MLDSA87_AARCH64_keypair_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA87_AARCH64_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA87_AARCH64_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA87_AARCH64_signature_extmu_oqs
