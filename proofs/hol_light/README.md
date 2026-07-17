@@ -23,7 +23,7 @@ The AArch64 and AVX2 kernels `rej_uniform_eta{2,4}` have secret-independent timi
 [#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)): Their memory access pattern depends on which
 coefficients fall inside vs. outside the acceptance interval, but no other information about the secret coefficients is
 leaked. The indices of in bound vs. out of bounds coefficients are statistically independent of the secret key; see
-Section 5.5 of @[Round3_Spec].
+Section 5.5 of the Dilithium Round 3 specification[^Round3_Spec].
 
 ## Primer
 
@@ -182,3 +182,4 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
+[^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)

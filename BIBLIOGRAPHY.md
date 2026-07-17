@@ -367,7 +367,9 @@ source code and documentation.
   - Damien Stehlé
 * URL: https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
 * Referenced from:
+  - [SOUNDNESS.md](SOUNDNESS.md)
   - [mldsa/src/sign.c](mldsa/src/sign.c)
+  - [proofs/hol_light/README.md](proofs/hol_light/README.md)
 
 ### `SLOTHY_Paper`
 
