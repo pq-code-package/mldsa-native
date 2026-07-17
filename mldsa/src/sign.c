@@ -1050,7 +1050,7 @@ cleanup:
   if (ret != 0)
   {
     /* To be on the safe-side, we zeroize the signature buffer. */
-    mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
+    mld_zeroize(sig, MLDSA_CRYPTO_BYTES);
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1111,9 +1111,9 @@ cleanup:
      * the case of error.
      *
      * If we come from mld_sign_signature_internal, this is redundant, but the
-     * error case should not be the norm, and the added cost of the memset
+     * error case should not be the norm, and the added cost of the zeroization
      * insignificant. */
-    mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
+    mld_zeroize(sig, MLDSA_CRYPTO_BYTES);
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1370,9 +1370,9 @@ cleanup:
      * the case of error.
      *
      * If we come from mld_sign_signature_internal, this is redundant, but the
-     * error case should not be the norm, and the added cost of the memset
+     * error case should not be the norm, and the added cost of the zeroization
      * insignificant. */
-    mld_memset(sig, 0, MLDSA_CRYPTO_BYTES);
+    mld_zeroize(sig, MLDSA_CRYPTO_BYTES);
   }
 
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
