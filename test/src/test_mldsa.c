@@ -150,6 +150,48 @@ static int test_sign_pre_hash(void)
 
   return 0;
 }
+
+/* Empty message with a NULL pointer: m may be NULL when mlen == 0.
+ * Covers both the pure and SHAKE256 pre-hash paths, so the mlen == 0
+ * behaviour is exercised for prehash as well, across all backends in CI. */
+static int test_sign_empty_message(void)
+{
+  uint8_t pk[MLDSA_PK_BYTES];
+  uint8_t sk[MLDSA_SK_BYTES];
+  uint8_t sig[MLDSA_SIG_BYTES];
+  uint8_t ctx[CTXLEN];
+  uint8_t rnd[MLDSA_RNDBYTES];
+  int rc;
+
+  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK(randombytes(ctx, CTXLEN) == 0);
+  MLD_CT_TESTING_SECRET(ctx, CTXLEN);
+
+  /* Pure ML-DSA */
+  CHECK_SIGN_RC(mld_sign_signature(sig, NULL, 0, ctx, CTXLEN, sk));
+  rc = mld_sign_verify(sig, NULL, 0, ctx, CTXLEN, pk);
+  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
+  if (rc)
+  {
+    printf("ERROR: empty_message: pure verify\n");
+    return 1;
+  }
+
+  /* HashML-DSA (SHAKE256 pre-hash) */
+  CHECK(randombytes(rnd, MLDSA_RNDBYTES) == 0);
+  MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
+  CHECK_SIGN_RC(
+      mld_sign_signature_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, rnd, sk));
+  rc = mld_sign_verify_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, pk);
+  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
+  if (rc)
+  {
+    printf("ERROR: empty_message: pre-hash verify\n");
+    return 1;
+  }
+
+  return 0;
+}
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
           !MLD_CONFIG_NO_VERIFY_API */
 
@@ -444,6 +486,7 @@ int main(void)
     r |= test_wrong_ctx();
     r |= test_sign_extmu();
     r |= test_sign_pre_hash();
+    r |= test_sign_empty_message();
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
           !MLD_CONFIG_NO_VERIFY_API */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)

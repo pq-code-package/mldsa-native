@@ -319,7 +319,8 @@ int MLD_API_NAMESPACE(signature_internal)(
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
  *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
- * @param[in]  m       Pointer to message to be signed.
+ * @param[in]  m       Pointer to message to be signed. May be NULL if
+ *                     mlen == 0.
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string. Should be <= 255.
@@ -446,7 +447,7 @@ int MLD_API_NAMESPACE(verify_internal)(
  *
  * @param[in] sig     Pointer to input signature of
  *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
- * @param[in] m       Pointer to message.
+ * @param[in] m       Pointer to message. May be NULL if mlen == 0.
  * @param     mlen    Length of message.
  * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
@@ -647,7 +648,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
  *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
- * @param[in]  m       Pointer to message to be hashed and signed.
+ * @param[in]  m       Pointer to message to be hashed and signed. May be
+ *                     NULL if mlen == 0.
  * @param      mlen    Length of message.
  * @param[in]  ctx     Pointer to context string.
  * @param      ctxlen  Length of context string.
@@ -692,7 +694,8 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *
  * @param[in] sig     Pointer to input signature of
  *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
- * @param[in] m       Pointer to message to be hashed and verified.
+ * @param[in] m       Pointer to message to be hashed and verified. May be
+ *                    NULL if mlen == 0.
  * @param     mlen    Length of message.
  * @param[in] ctx     Pointer to context string.
  * @param     ctxlen  Length of context string.
