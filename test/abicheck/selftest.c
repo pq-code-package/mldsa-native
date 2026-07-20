@@ -109,7 +109,7 @@ extern void selftest_aarch64_corrupt_d13(void);
 extern void selftest_aarch64_corrupt_d14(void);
 extern void selftest_aarch64_corrupt_d15(void);
 
-static const selftest_entry_t aarch64_entries[] = {
+static const selftest_entry_t aarch64_gpr_entries[] = {
     {"noop", selftest_aarch64_noop, 0},
 #if !defined(__APPLE__)
     {"corrupt_x18", selftest_aarch64_corrupt_x18, 1},
@@ -125,6 +125,10 @@ static const selftest_entry_t aarch64_entries[] = {
     {"corrupt_x27", selftest_aarch64_corrupt_x27, 1},
     {"corrupt_x28", selftest_aarch64_corrupt_x28, 1},
     {"corrupt_x29", selftest_aarch64_corrupt_x29, 1},
+    {NULL, NULL, 0},
+};
+
+static const selftest_entry_t aarch64_neon_entries[] = {
     {"corrupt_d8", selftest_aarch64_corrupt_d8, 1},
     {"corrupt_d9", selftest_aarch64_corrupt_d9, 1},
     {"corrupt_d10", selftest_aarch64_corrupt_d10, 1},
@@ -209,18 +213,28 @@ int abicheck_selftest(void)
 
 #if defined(MLD_SYS_AARCH64)
   SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
-                    init_aarch64_register_state, asm_call_stub_aarch64,
-                    check_aarch64_aapcs_compliance, aarch64_entries,
+                    init_aarch64_register_state, call_stub_aarch64,
+                    check_aarch64_aapcs_compliance, aarch64_gpr_entries,
                     (void (*)(void)));
+
+  /* The NEON corrupters execute vector instructions, so running them on a
+   * host without NEON would fault instead of testing the ABI checker. */
+  if (mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
+  {
+    SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
+                      init_aarch64_register_state, call_stub_aarch64,
+                      check_aarch64_aapcs_compliance, aarch64_neon_entries,
+                      (void (*)(void)));
+  }
 #elif defined(MLD_SYS_X86_64) && defined(MLD_SYSV_ABI_SUPPORTED)
   SELFTEST_RUN_ARCH(
       "x86_64", struct x86_64_register_state, init_x86_64_register_state,
-      asm_call_stub_x86_64_sysv, check_x86_64_sysv_compliance, x86_64_entries,
+      call_stub_x86_64_sysv, check_x86_64_sysv_compliance, x86_64_entries,
       (MLD_SYSV_ABI
        void (*)(void)));
 #elif defined(MLD_SYS_ARMV81M_MVE)
   SELFTEST_RUN_ARCH("armv81m", struct armv81m_register_state,
-                    init_armv81m_register_state, asm_call_stub_armv81m,
+                    init_armv81m_register_state, call_stub_armv81m,
                     check_armv81m_aapcs32_compliance, armv81m_entries,
                     (void (*)(void)));
 #else  /* !MLD_SYS_AARCH64 && !(MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED) && \

@@ -266,6 +266,7 @@ typedef enum
   /* x86_64 */
   MLD_SYS_CAP_X86_64_AVX2,
   /* AArch64 */
+  MLD_SYS_CAP_AARCH64_NEON,
   MLD_SYS_CAP_AARCH64_SHA3,
   /* Armv8.1-M */
   MLD_SYS_CAP_ARMV81M_MVE

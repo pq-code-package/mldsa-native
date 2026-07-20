@@ -42,6 +42,14 @@ void asm_call_stub_x86_64_sysv(
                                MLD_SYSV_ABI
     void (*function_ptr)(void));
 
+static MLD_INLINE void call_stub_x86_64_sysv(
+    struct x86_64_register_state *input, struct x86_64_register_state *output,
+                               MLD_SYSV_ABI
+    void (*function_ptr)(void))
+{
+  asm_call_stub_x86_64_sysv(input, output, function_ptr);
+}
+
 #endif /* MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED */
 
 #endif /* !MLD_TEST_ABICHECK_ABICHECK_X86_64_H */

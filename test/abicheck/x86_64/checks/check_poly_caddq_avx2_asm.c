@@ -49,7 +49,7 @@ int check_poly_caddq_avx2_asm(void)
     input_state.rdi = (uint64_t)buf_rdi;
 
     /* Call function through ABI test stub */
-    asm_call_stub_x86_64_sysv(
+    call_stub_x86_64_sysv(
         &input_state, &output_state,
         (MLD_SYSV_ABI
          void (*)(void))mld_poly_caddq_avx2_asm);

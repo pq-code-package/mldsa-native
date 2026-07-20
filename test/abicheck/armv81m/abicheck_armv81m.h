@@ -37,6 +37,13 @@ extern void asm_call_stub_armv81m(struct armv81m_register_state *input,
                                   struct armv81m_register_state *output,
                                   void (*function_ptr)(void));
 
+static MLD_INLINE void call_stub_armv81m(struct armv81m_register_state *input,
+                                         struct armv81m_register_state *output,
+                                         void (*function_ptr)(void))
+{
+  asm_call_stub_armv81m(input, output, function_ptr);
+}
+
 #endif /* MLD_SYS_ARMV81M_MVE */
 
 #endif /* !MLD_TEST_ABICHECK_ABICHECK_ARMV81M_H */

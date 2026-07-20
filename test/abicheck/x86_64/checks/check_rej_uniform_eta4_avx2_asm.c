@@ -59,7 +59,7 @@ int check_rej_uniform_eta4_avx2_asm(void)
     input_state.rsi = (uint64_t)buf_rsi;
 
     /* Call function through ABI test stub */
-    asm_call_stub_x86_64_sysv(
+    call_stub_x86_64_sysv(
         &input_state, &output_state,
         (MLD_SYSV_ABI
          void (*)(void))mld_rej_uniform_eta4_avx2_asm);

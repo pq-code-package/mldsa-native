@@ -34,6 +34,14 @@ int check_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(void)
   MLD_ALIGN uint8_t
       buf_x2[7168]; /* Input polynomial vector b (7 x 256 x int32_t) */
 
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
+  {
+    fprintf(stderr,
+            "ABI check polyvecl_pointwise_acc_montgomery_l7_aarch64_asm: host "
+            "lacks AArch64 NEON, skipping\n");
+    return MLD_ABICHECK_SKIPPED;
+  }
+
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
     /* Initialize random register state */
@@ -49,7 +57,7 @@ int check_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(void)
     input_state.gpr[2] = (uint64_t)buf_x2;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(
+    call_stub_aarch64(
         &input_state, &output_state,
         (void (*)(void))mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm);
 

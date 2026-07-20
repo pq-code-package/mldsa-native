@@ -57,8 +57,8 @@ int check_keccak_f1600_x4_mve_asm(void)
     input_state.gpr[2] = (uint32_t)buf_r2;
 
     /* Call function through ABI test stub */
-    asm_call_stub_armv81m(&input_state, &output_state,
-                          (void (*)(void))mld_keccak_f1600_x4_mve_asm);
+    call_stub_armv81m(&input_state, &output_state,
+                      (void (*)(void))mld_keccak_f1600_x4_mve_asm);
 
     /* Check ABI compliance */
     violations = check_armv81m_aapcs32_compliance(&input_state, &output_state,

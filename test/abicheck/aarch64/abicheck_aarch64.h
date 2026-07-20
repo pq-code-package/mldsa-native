@@ -27,7 +27,15 @@ void init_aarch64_register_state(struct aarch64_register_state *state);
 
 extern void asm_call_stub_aarch64(struct aarch64_register_state *input,
                                   struct aarch64_register_state *output,
-                                  void (*function_ptr)(void));
+                                  void (*function_ptr)(void), int use_neon);
+
+static MLD_INLINE void call_stub_aarch64(struct aarch64_register_state *input,
+                                         struct aarch64_register_state *output,
+                                         void (*function_ptr)(void))
+{
+  int use_neon = mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON) != 0;
+  asm_call_stub_aarch64(input, output, function_ptr, use_neon);
+}
 
 #endif /* MLD_SYS_AARCH64 */
 

@@ -31,6 +31,14 @@ int check_keccak_f1600_x1_v84a_aarch64_asm(void)
   MLD_ALIGN uint8_t buf_x0[200]; /* Keccak state (25 x uint64_t) */
   MLD_ALIGN uint8_t buf_x1[192]; /* Round constants (24 x uint64_t) */
 
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
+  {
+    fprintf(stderr,
+            "ABI check keccak_f1600_x1_v84a_aarch64_asm: host lacks AArch64 "
+            "NEON, skipping\n");
+    return MLD_ABICHECK_SKIPPED;
+  }
+
   if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_SHA3))
   {
     fprintf(stderr,
@@ -52,8 +60,8 @@ int check_keccak_f1600_x1_v84a_aarch64_asm(void)
     input_state.gpr[1] = (uint64_t)buf_x1;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(&input_state, &output_state,
-                          (void (*)(void))mld_keccak_f1600_x1_v84a_aarch64_asm);
+    call_stub_aarch64(&input_state, &output_state,
+                      (void (*)(void))mld_keccak_f1600_x1_v84a_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state,

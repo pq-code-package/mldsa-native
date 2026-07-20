@@ -32,6 +32,14 @@ int check_rej_uniform_aarch64_asm(void)
   MLD_ALIGN uint8_t buf_x1[840];  /* Input buffer */
   MLD_ALIGN uint8_t buf_x3[256];  /* Lookup table (256 x uint8_t) */
 
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
+  {
+    fprintf(stderr,
+            "ABI check rej_uniform_aarch64_asm: host lacks AArch64 NEON, "
+            "skipping\n");
+    return MLD_ABICHECK_SKIPPED;
+  }
+
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
     /* Initialize random register state */
@@ -48,8 +56,8 @@ int check_rej_uniform_aarch64_asm(void)
     input_state.gpr[3] = (uint64_t)buf_x3;
 
     /* Call function through ABI test stub */
-    asm_call_stub_aarch64(&input_state, &output_state,
-                          (void (*)(void))mld_rej_uniform_aarch64_asm);
+    call_stub_aarch64(&input_state, &output_state,
+                      (void (*)(void))mld_rej_uniform_aarch64_asm);
 
     /* Check ABI compliance */
     violations = check_aarch64_aapcs_compliance(&input_state, &output_state,

@@ -2342,6 +2342,7 @@ def check_macro_typos_in_file(filename, macro_check):
 def get_syscaps():
     return [
         "MLD_SYS_CAP_X86_64_AVX2",
+        "MLD_SYS_CAP_AARCH64_NEON",
         "MLD_SYS_CAP_AARCH64_SHA3",
         "MLD_SYS_CAP_ARMV81M_MVE",
     ]
@@ -4254,6 +4255,14 @@ ABI_CAPS = {
         "cflags": ["-mavx2", "-mbmi2"],
         "aux_files": [],
     },
+    "NEON": {
+        "asm_subdir": "aarch64",
+        "guard": None,
+        "syscap": "MLD_SYS_CAP_AARCH64_NEON",
+        "description": "AArch64 NEON",
+        "cflags": [],
+        "aux_files": [],
+    },
     "SHA3": {
         "asm_subdir": "aarch64",
         "guard": "__ARM_FEATURE_SHA3",
@@ -4295,7 +4304,7 @@ ARCH_CALLINGS = {
         "gpr_int_type": "uint64_t",
         "fn_qualifier": "",
         "init_func": "init_aarch64_register_state",
-        "stub_func": "asm_call_stub_aarch64",
+        "stub_func": "call_stub_aarch64",
         "check_func": "check_aarch64_aapcs_compliance",
         # YAML register xN maps to gpr[N].
         "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
@@ -4312,7 +4321,7 @@ ARCH_CALLINGS = {
         # mldsa/src/native/x86_64/src/arith_native_x86_64.h.
         "fn_qualifier": "MLD_SYSV_ABI",
         "init_func": "init_x86_64_register_state",
-        "stub_func": "asm_call_stub_x86_64_sysv",
+        "stub_func": "call_stub_x86_64_sysv",
         "check_func": "check_x86_64_sysv_compliance",
         "reg_to_field": lambda reg: reg,
     },
@@ -4324,7 +4333,7 @@ ARCH_CALLINGS = {
         "gpr_int_type": "uint32_t",
         "fn_qualifier": "",
         "init_func": "init_armv81m_register_state",
-        "stub_func": "asm_call_stub_armv81m",
+        "stub_func": "call_stub_armv81m",
         "check_func": "check_armv81m_aapcs32_compliance",
         # AAPCS32 GPRs r0-r12 map directly to gpr[0..12].
         "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
@@ -4790,7 +4799,8 @@ def gen_abicheck():
                 f"ABICHECK_REQ_{cap}_OBJS := "
                 f"$(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_{cap}_FILES))"
             )
-            yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
+            if cflags:
+                yield f"$(ABICHECK_REQ_{cap}_OBJS): CFLAGS += {cflags}"
         yield ""
 
     for asm_subdir, caps in caps_by_subdir.items():

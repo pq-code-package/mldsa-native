@@ -10,7 +10,7 @@
 diff --git a/crypto/fipsmodule/ml_dsa/mldsa_native_config.h b/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
 --- a/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
 +++ b/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
-@@ -42,7 +42,7 @@
+@@ -42,10 +42,15 @@
  static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  {
  #if defined(MLD_SYS_X86_64)
@@ -19,6 +19,14 @@ diff --git a/crypto/fipsmodule/ml_dsa/mldsa_native_config.h b/crypto/fipsmodule/
    {
      return CRYPTO_is_AVX2_capable();
    }
++#elif defined(MLD_SYS_AARCH64)
++  if (cap == MLD_SYS_CAP_AARCH64_NEON)
++  {
++    return CRYPTO_is_NEON_capable();
++  }
+ #endif
+   return 0;
+ }
 diff --git a/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h b/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h
 --- a/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h
 +++ b/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h

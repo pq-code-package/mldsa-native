@@ -22,7 +22,8 @@
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 {
-  if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_SHA3))
+  if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON) ||
+      !mld_sys_check_capability(MLD_SYS_CAP_AARCH64_SHA3))
   {
     return MLD_NATIVE_FUNC_FALLBACK;
   }

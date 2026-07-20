@@ -45,13 +45,17 @@ int check_aarch64_aapcs_compliance(struct aarch64_register_state *before,
     }
   }
 
-  /* Check callee-saved NEON registers (d8-d15, lower 64 bits only) */
-  for (i = 8; i <= 15; i++)
+  /* The call stub leaves vector output untouched when NEON is unavailable. */
+  if (mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
   {
-    if (before->neon[i][0] != after->neon[i][0])
+    /* Check callee-saved NEON registers (d8-d15, lower 64 bits only). */
+    for (i = 8; i <= 15; i++)
     {
-      MLD_ABI_VIOLATION(quiet, "d%d modified\n", i);
-      violations++;
+      if (before->neon[i][0] != after->neon[i][0])
+      {
+        MLD_ABI_VIOLATION(quiet, "d%d modified\n", i);
+        violations++;
+      }
     }
   }
 
