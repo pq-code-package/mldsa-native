@@ -58,7 +58,11 @@ mldsa-native is used in
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
 
-All AArch64 and x86_64 assembly is proved functionally correct and memory-safe at the object-code level, using [HOL-Light](https://hol-light.github.io/) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) verification infrastructure; all routines except the rejection samplers are additionally proved to have secret-independent timing (constant-time). See [proofs/hol_light](proofs/hol_light) for details.
+All AArch64 and x86_64 assembly is proved functionally correct and memory-safe at the object-code level, using
+[HOL-Light](https://hol-light.github.io/) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) verification
+infrastructure. All routines except the rejection samplers are additionally proved to have secret-independent timing
+(those samplers _do_ have secret-independent timing, but this property is not yet backed
+by proof). See [proofs/hol_light](proofs/hol_light) for details.
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
