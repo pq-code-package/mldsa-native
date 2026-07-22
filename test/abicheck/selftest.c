@@ -100,6 +100,7 @@ extern void selftest_aarch64_corrupt_x27(void);
 extern void selftest_aarch64_corrupt_x28(void);
 extern void selftest_aarch64_corrupt_x29(void);
 /* SIMD: lower 64 bits of d8-d15 are callee-saved. */
+#if defined(MLD_SYS_AARCH64_NEON)
 extern void selftest_aarch64_corrupt_d8(void);
 extern void selftest_aarch64_corrupt_d9(void);
 extern void selftest_aarch64_corrupt_d10(void);
@@ -108,6 +109,7 @@ extern void selftest_aarch64_corrupt_d12(void);
 extern void selftest_aarch64_corrupt_d13(void);
 extern void selftest_aarch64_corrupt_d14(void);
 extern void selftest_aarch64_corrupt_d15(void);
+#endif /* MLD_SYS_AARCH64_NEON */
 
 static const selftest_entry_t aarch64_gpr_entries[] = {
     {"noop", selftest_aarch64_noop, 0},
@@ -128,6 +130,7 @@ static const selftest_entry_t aarch64_gpr_entries[] = {
     {NULL, NULL, 0},
 };
 
+#if defined(MLD_SYS_AARCH64_NEON)
 static const selftest_entry_t aarch64_neon_entries[] = {
     {"corrupt_d8", selftest_aarch64_corrupt_d8, 1},
     {"corrupt_d9", selftest_aarch64_corrupt_d9, 1},
@@ -139,6 +142,7 @@ static const selftest_entry_t aarch64_neon_entries[] = {
     {"corrupt_d15", selftest_aarch64_corrupt_d15, 1},
     {NULL, NULL, 0},
 };
+#endif /* MLD_SYS_AARCH64_NEON */
 
 #elif defined(MLD_SYS_X86_64) && defined(MLD_SYSV_ABI_SUPPORTED)
 
@@ -217,8 +221,9 @@ int abicheck_selftest(void)
                     check_aarch64_aapcs_compliance, aarch64_gpr_entries,
                     (void (*)(void)));
 
-  /* The NEON corrupters execute vector instructions, so running them on a
-   * host without NEON would fault instead of testing the ABI checker. */
+  /* The NEON corrupters only exist when vector instructions were compiled in,
+   * and must only run when the host supports them. */
+#if defined(MLD_SYS_AARCH64_NEON)
   if (mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON))
   {
     SELFTEST_RUN_ARCH("aarch64", struct aarch64_register_state,
@@ -226,6 +231,7 @@ int abicheck_selftest(void)
                       check_aarch64_aapcs_compliance, aarch64_neon_entries,
                       (void (*)(void)));
   }
+#endif /* MLD_SYS_AARCH64_NEON */
 #elif defined(MLD_SYS_X86_64) && defined(MLD_SYSV_ABI_SUPPORTED)
   SELFTEST_RUN_ARCH(
       "x86_64", struct x86_64_register_state, init_x86_64_register_state,

@@ -41,6 +41,7 @@ ABICHECK_REQ_NEON_FILES := \
   mldsa/src/native/aarch64/src/rej_uniform_eta2_aarch64_asm.S \
   mldsa/src/native/aarch64/src/rej_uniform_eta4_aarch64_asm.S
 ABICHECK_REQ_NEON_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_NEON_FILES))
+$(ABICHECK_REQ_NEON_OBJS): CFLAGS += -march=armv8-a+simd
 
 # SHA3: Armv8.4-A SHA3 (eor3, rax1, xar, bcax)
 ABICHECK_REQ_SHA3_FILES := \

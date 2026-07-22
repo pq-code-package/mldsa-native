@@ -12,7 +12,7 @@
  */
 #include "../sys.h"
 
-#ifdef MLD_SYS_AARCH64
+#ifdef MLD_SYS_AARCH64_NEON
 #include "aarch64/meta.h"
 #endif
 

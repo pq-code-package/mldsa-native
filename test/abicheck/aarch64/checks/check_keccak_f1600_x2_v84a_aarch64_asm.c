@@ -14,7 +14,8 @@
 #include "../abicheck_aarch64.h"
 #include "../checks_aarch64_all.h"
 
-#if defined(MLD_SYS_AARCH64) && defined(__ARM_FEATURE_SHA3)
+#if defined(MLD_SYS_AARCH64) && defined(MLD_SYS_AARCH64_NEON) && \
+    defined(__ARM_FEATURE_SHA3)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -80,4 +81,4 @@ int check_keccak_f1600_x2_v84a_aarch64_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_AARCH64 && __ARM_FEATURE_SHA3 */
+#endif /* MLD_SYS_AARCH64 && MLD_SYS_AARCH64_NEON && __ARM_FEATURE_SHA3 */

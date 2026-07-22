@@ -35,6 +35,13 @@ jobs:
            mode: native
            nix_shell: ci
          - runner: ubuntu-24.04-arm
+           name: 'aarch64, no Neon'
+           arch: aarch64
+           mode: native
+           nix_shell: ci
+           cflags: '-march=armv8-a+nosimd'
+           extra_args: '--no-auto'
+         - runner: ubuntu-24.04-arm
            name: 'x86_64, cross'
            arch: x86_64
            mode: cross-x86_64
@@ -112,6 +119,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          cflags: ${{ matrix.target.cflags || '' }}
           extra_args: ${{ matrix.target.extra_args || '' }}
           exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'no_opt'
@@ -122,8 +130,9 @@ jobs:
           nix-shell: ${{ matrix.target.nix_shell }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: native
-          cflags: "-DMLDSA_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          cflags: "${{ matrix.target.cflags || '' }} -DMLDSA_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          extra_args: ${{ matrix.target.extra_args || '' }}
           check_namespace: 'false'
       - name: build + test (cross, opt)
         uses: ./.github/actions/multi-functest
@@ -134,6 +143,7 @@ jobs:
           nix-cache: ${{ matrix.target.mode == 'native' && 'false' || 'true' }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           compile_mode: ${{ matrix.target.mode }}
+          cflags: ${{ matrix.target.cflags || '' }}
           extra_args: ${{ matrix.target.extra_args || '' }}
           exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
           opt: 'opt'
@@ -148,7 +158,7 @@ jobs:
           compile_mode: ${{ matrix.target.mode }}
           extra_args: ${{ matrix.target.extra_args || '' }}
           exec_wrapper: ${{ matrix.target.exec_wrapper || '' }}
-          cflags: "-DMLDSA_DEBUG"
+          cflags: "${{ matrix.target.cflags || '' }} -DMLDSA_DEBUG"
           opt: 'opt'
   backend_tests:
     name: AArch64 FIPS202 backends (${{ matrix.backend }})

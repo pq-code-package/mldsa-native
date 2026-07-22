@@ -39,6 +39,21 @@
 #define MLD_SYS_AARCH64
 #endif
 
+/* Check if the AArch64 compilation target supports NEON (Advanced SIMD).
+ *
+ * Some compilers also define __ARM_NEON__, but __ARM_NEON is the most reliable
+ * signal. Specifically, clang on Apple appears to keep __ARM_NEON__ set even if
+ * -march=armv8-a+nosimd is set.
+ *
+ * gcc 4.8 -- the first gcc version introducing Neon support -- sets neither
+ * __ARM_NEON nor __ARM_NEON__; in fact, there is no preprocessor signal that
+ * Neon is enabled. If you use gcc 4.8 and need Neon, you should set
+ * MLD_SYS_AARCH64_NEON manually. gcc 4.9 onwards do set __ARM_NEON.
+ */
+#if defined(MLD_SYS_AARCH64) && defined(__ARM_NEON)
+#define MLD_SYS_AARCH64_NEON
+#endif
+
 /* Check if we're running on an AArch64 big endian system. */
 #if defined(__AARCH64EB__)
 #define MLD_SYS_AARCH64_EB

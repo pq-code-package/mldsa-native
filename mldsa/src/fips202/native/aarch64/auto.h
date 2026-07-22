@@ -42,6 +42,9 @@
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
      !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_REDUCE_RAM)) && \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+/* Batched, SIMD-based Keccak-f1600 implementations. */
+#if defined(MLD_SYS_AARCH64_NEON)
+
 /*
  * Keccak-f1600x2/x4
  *
@@ -73,6 +76,8 @@
 #include "x4_v8a_scalar.h"
 
 #endif /* !__ARM_FEATURE_SHA3 */
+
+#endif /* MLD_SYS_AARCH64_NEON */
 
 #endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_REDUCE_RAM) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
