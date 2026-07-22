@@ -12,11 +12,11 @@
 # pkgs.slothy
 
 pkgs.slothy.overrideAttrs (old: rec {
-  version = "0.2.2";
+  version = "f60a8d7436d133e81c7bbd1c6a9729f50c06a6e6";
   src = pkgs.fetchFromGitHub {
     owner = "slothy-optimizer";
     repo = "slothy";
     rev = version;
-    sha256 = "sha256-pyES6ithBVAFSVdjsM61kp6eeEUxNsLs7jdekpX+YuA=";
+    sha256 = "sha256-+TgHdymZQIAMZrz0oB5MLelJ0pGChBZVUBpn4XXBTXM=";
   };
 })
