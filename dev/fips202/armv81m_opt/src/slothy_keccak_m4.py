@@ -9,6 +9,8 @@ import sys
 from slothy import Slothy
 import slothy.targets.arm_v7m.arch_v7m as Arch_Armv7M
 import slothy.targets.arm_v7m.cortex_m7 as Target_CortexM7
+import slothy.targets.arm_v81m.arch_v81m as Arch_Armv81M
+import slothy.targets.arm_v81m.cortex_m55r1 as Target_CortexM55r1
 
 
 ADOMNICAI_M4_OUTPUTS = [
@@ -71,15 +73,20 @@ ADOMNICAI_M4_OUTPUTS = [
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--target", choices=("m7", "m55"), default="m7")
     parser.add_argument("input")
     parser.add_argument("output")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    arch, target = {
+        "m7": (Arch_Armv7M, Target_CortexM7),
+        "m55": (Arch_Armv81M, Target_CortexM55r1),
+    }[args.target]
     slothy = Slothy(
-        Arch_Armv7M,
-        Target_CortexM7,
-        logger=logging.getLogger("slothy-keccak-m4"),
+        arch,
+        target,
+        logger=logging.getLogger(f"slothy-keccak-{args.target}"),
     )
 
     slothy.config.inputs_are_outputs = True

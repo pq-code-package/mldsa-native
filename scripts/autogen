@@ -3398,7 +3398,10 @@ def gen_slothy(funcs):
     targets = list(map(lambda s: s + ".S", funcs))
 
     for t in targets:
-        if t == "keccak_f1600_x1_armv7m_opt_m7.S":
+        if t in {
+            "keccak_f1600_x1_armv7m_opt_m7.S",
+            "keccak_f1600_x1_armv7m_opt_m55.S",
+        }:
             base = "dev/fips202/armv81m_opt/src"
         elif t.startswith("keccak"):
             base = "dev/fips202/aarch64/src"
@@ -4863,6 +4866,7 @@ def _main():
         "rej_uniform_eta2_aarch64_asm",
         "rej_uniform_eta4_aarch64_asm",
         "keccak_f1600_x1_armv7m_opt_m7",
+        "keccak_f1600_x1_armv7m_opt_m55",
     ]
 
     parser = argparse.ArgumentParser(
