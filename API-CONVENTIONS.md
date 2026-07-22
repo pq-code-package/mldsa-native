@@ -14,7 +14,7 @@ Return values must always be checked; the public API is annotated with `warn_unu
 
 ## Pointer arguments
 
-All pointer arguments are assumed to be valid and non-NULL, and every buffer is assumed to have the size implied by its parameter type. mldsa-native does not check pointers for NULL and does not validate buffer sizes; passing a NULL or otherwise invalid pointer, or an undersized buffer, is undefined behavior. Ensuring these preconditions is the caller's responsibility.
+All pointers to non-empty buffers are assumed to be valid and non-NULL, and every buffer is assumed to have the size implied by its parameter type or associated length parameter. mldsa-native does not conduct pointer validity checks such as NULL comparisons; passing a NULL or otherwise invalid pointer, or an undersized buffer, is undefined behavior. Ensuring these preconditions is the caller's responsibility.
 
 The exception is a pointer paired with a length: it may be NULL when that length is `0` — for example, the message `m` when `mlen == 0`, or `ctx` when `ctxlen == 0`. Such cases are called out in the per-function documentation.
 
