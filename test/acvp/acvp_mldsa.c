@@ -203,7 +203,8 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
+static MLD_NOINLINE void acvp_mldsa_keyGen_AFT(
+    const unsigned char seed[MLDSA_RNDBYTES])
 {
   unsigned char pk[MLDSA_PK_BYTES];
   unsigned char sk[MLDSA_SK_BYTES];
@@ -217,10 +218,50 @@ static void acvp_mldsa_keyGen_AFT(const unsigned char seed[MLDSA_RNDBYTES])
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
-                                  const unsigned char rnd[MLDSA_SEEDBYTES],
-                                  const unsigned char sk[MLDSA_SK_BYTES],
-                                  const unsigned char *context, size_t ctxlen)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+/* Private key expanded from a seed. Kept in .bss (not on main's stack) so that
+ * main's per-case argument handling stays small on RAM-tight targets. */
+static unsigned char acvp_expanded_sk[MLDSA_SK_BYTES];
+#endif
+
+/*
+ * Resolve the sigGen key argument. "sk=HEX" (keyFormat 'expanded') is decoded
+ * in place and a pointer into arg is returned; "seed=HEX" (keyFormat 'seed')
+ * is expanded via keyGen. Returns NULL on failure. MLD_NOINLINE keeps the
+ * keyGen scratch out of the caller's (main's) stack frame.
+ */
+static MLD_NOINLINE unsigned char *decode_sk(char *arg)
+{
+  size_t seed_len = strlen("seed=");
+  /* Prefix check via memcmp; strncmp is unavailable on baremetal builds. */
+  if (strlen(arg) >= seed_len && memcmp(arg, "seed=", seed_len) == 0)
+  {
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+    unsigned char pk[MLDSA_PK_BYTES];
+    unsigned char *seed = decode_hex("seed", MLDSA_SEEDBYTES, arg);
+    if (seed == NULL)
+    {
+      return NULL;
+    }
+    if (mld_sign_keypair_internal(pk, acvp_expanded_sk, seed) != 0)
+    {
+      fprintf(stderr, "Failed to expand seed into private key\n");
+      return NULL;
+    }
+    return acvp_expanded_sk;
+#else  /* !MLD_CONFIG_NO_KEYPAIR_API */
+    fprintf(stderr, "seed key format requires the keyGen API\n");
+    return NULL;
+#endif /* MLD_CONFIG_NO_KEYPAIR_API */
+  }
+  return decode_hex("sk", MLDSA_SK_BYTES, arg);
+}
+
+static MLD_NOINLINE void acvp_mldsa_sigGen_AFT(
+    const unsigned char *message, size_t mlen,
+    const unsigned char rnd[MLDSA_SEEDBYTES],
+    const unsigned char sk[MLDSA_SK_BYTES], const unsigned char *context,
+    size_t ctxlen)
 {
   unsigned char sig[MLDSA_SIG_BYTES];
   unsigned char pre[MAX_CTX_LENGTH + 2];
@@ -236,7 +277,7 @@ static void acvp_mldsa_sigGen_AFT(const unsigned char *message, size_t mlen,
   print_hex("signature", sig, sizeof(sig));
 }
 
-static void acvp_mldsa_sigGenInternal_AFT(
+static MLD_NOINLINE void acvp_mldsa_sigGenInternal_AFT(
     const unsigned char *message, size_t mlen,
     const unsigned char rnd[MLDSA_SEEDBYTES],
     const unsigned char sk[MLDSA_SK_BYTES], int externalMu)
@@ -249,7 +290,7 @@ static void acvp_mldsa_sigGenInternal_AFT(
 
 /* Deterministic signing functions - use all-zero rnd for deterministic mode */
 
-static void acvp_mldsa_sigGenDeterministic_AFT(
+static MLD_NOINLINE void acvp_mldsa_sigGenDeterministic_AFT(
     const unsigned char *message, size_t mlen,
     const unsigned char sk[MLDSA_SK_BYTES], const unsigned char *context,
     size_t ctxlen)
@@ -270,7 +311,7 @@ static void acvp_mldsa_sigGenDeterministic_AFT(
   print_hex("signature", sig, sizeof(sig));
 }
 
-static void acvp_mldsa_sigGenInternalDeterministic_AFT(
+static MLD_NOINLINE void acvp_mldsa_sigGenInternalDeterministic_AFT(
     const unsigned char *message, size_t mlen,
     const unsigned char sk[MLDSA_SK_BYTES], int externalMu)
 {
@@ -285,16 +326,16 @@ static void acvp_mldsa_sigGenInternalDeterministic_AFT(
 
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-static int acvp_mldsa_sigVer_AFT(const unsigned char *message, size_t mlen,
-                                 const unsigned char *context, size_t ctxlen,
-                                 const unsigned char signature[MLDSA_SIG_BYTES],
-                                 const unsigned char pk[MLDSA_PK_BYTES])
+static MLD_NOINLINE int acvp_mldsa_sigVer_AFT(
+    const unsigned char *message, size_t mlen, const unsigned char *context,
+    size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
+    const unsigned char pk[MLDSA_PK_BYTES])
 {
   return mld_sign_verify(signature, message, mlen, context, ctxlen, pk);
 }
 
 
-static int acvp_mldsa_sigVerInternal_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigVerInternal_AFT(
     const unsigned char *message, size_t mlen,
     const unsigned char signature[MLDSA_SIG_BYTES],
     const unsigned char pk[MLDSA_PK_BYTES], int externalMu)
@@ -368,12 +409,10 @@ static int str_to_hash_alg(const char *hashAlg)
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-static int acvp_mldsa_sigGenPreHash_AFT(const unsigned char *ph, size_t phlen,
-                                        const unsigned char *context,
-                                        size_t ctxlen,
-                                        const unsigned char rng[MLDSA_RNDBYTES],
-                                        const unsigned char sk[MLDSA_SK_BYTES],
-                                        const char *hashAlg)
+static MLD_NOINLINE int acvp_mldsa_sigGenPreHash_AFT(
+    const unsigned char *ph, size_t phlen, const unsigned char *context,
+    size_t ctxlen, const unsigned char rng[MLDSA_RNDBYTES],
+    const unsigned char sk[MLDSA_SK_BYTES], const char *hashAlg)
 {
   unsigned char signature[MLDSA_SIG_BYTES];
   if (mld_sign_signature_pre_hash_internal(signature, ph, phlen, context,
@@ -390,7 +429,7 @@ static int acvp_mldsa_sigGenPreHash_AFT(const unsigned char *ph, size_t phlen,
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-static int acvp_mldsa_sigVerPreHash_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigVerPreHash_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
     const unsigned char pk[MLDSA_PK_BYTES], const char *hashAlg)
@@ -401,7 +440,7 @@ static int acvp_mldsa_sigVerPreHash_AFT(
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-static int acvp_mldsa_sigGenPreHashShake256_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigGenPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char rnd[MLDSA_RNDBYTES],
     const unsigned char sk[MLDSA_SK_BYTES])
@@ -420,7 +459,7 @@ static int acvp_mldsa_sigGenPreHashShake256_AFT(
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
-static int acvp_mldsa_sigVerPreHashShake256_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigVerPreHashShake256_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
     const unsigned char pk[MLDSA_PK_BYTES])
@@ -432,7 +471,7 @@ static int acvp_mldsa_sigVerPreHashShake256_AFT(
 
 /* Deterministic prehash signing functions */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigGenPreHashDeterministic_AFT(
     const unsigned char *ph, size_t phlen, const unsigned char *context,
     size_t ctxlen, const unsigned char sk[MLDSA_SK_BYTES], const char *hashAlg)
 {
@@ -450,7 +489,7 @@ static int acvp_mldsa_sigGenPreHashDeterministic_AFT(
   return 0;
 }
 
-static int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
+static MLD_NOINLINE int acvp_mldsa_sigGenPreHashShake256Deterministic_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char sk[MLDSA_SK_BYTES])
 {
@@ -603,7 +642,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_usage;
       }
@@ -655,7 +694,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_internal_usage;
       }
@@ -704,7 +743,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_deterministic_usage;
       }
@@ -749,7 +788,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_internal_deterministic_usage;
       }
@@ -919,7 +958,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_prehash_usage;
       }
@@ -1051,7 +1090,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_prehash_shake256_usage;
       }
@@ -1104,7 +1143,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_prehash_deterministic_usage;
       }
@@ -1158,7 +1197,7 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Parse sk */
-      if (argc == 0 || (sk = decode_hex("sk", MLDSA_SK_BYTES, *argv)) == NULL)
+      if (argc == 0 || (sk = decode_sk(*argv)) == NULL)
       {
         goto siggen_prehash_shake256_deterministic_usage;
       }

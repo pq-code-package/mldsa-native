@@ -169,6 +169,22 @@
 #endif
 #endif /* !MLD_ALWAYS_INLINE */
 
+/*
+ * MLD_NOINLINE: Prevent inlining.
+ * - MSVC: __declspec(noinline)
+ * - GCC/Clang: __attribute__((noinline))
+ * - Other: empty
+ */
+#if !defined(MLD_NOINLINE)
+#if defined(_MSC_VER)
+#define MLD_NOINLINE __declspec(noinline)
+#elif defined(__GNUC__) || defined(__clang__)
+#define MLD_NOINLINE __attribute__((noinline))
+#else
+#define MLD_NOINLINE
+#endif
+#endif /* !MLD_NOINLINE */
+
 #ifndef MLD_STATIC_TESTABLE
 #define MLD_STATIC_TESTABLE static
 #endif

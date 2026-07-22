@@ -49,13 +49,23 @@ def download_file(url, dest, token):
             time.sleep(wait)
 
 
+def acvp_version_has_tr1(version):
+    """Whether `version` ships the FIPS204-tr1 sigGen vectors (v1.1.0.43+)."""
+    try:
+        parts = tuple(int(x) for x in version.lstrip("v").split("."))
+    except ValueError:
+        # Non-numeric ref (branch or commit); assume the vectors are present.
+        return True
+    return parts >= (1, 1, 0, 43)
+
+
 def download_acvp_files(version):
     """Download ACVP test files for the specified version if not present."""
     api_base = (
         "https://api.github.com/repos/usnistgov/ACVP-Server/contents/gen-val/json-files"
     )
 
-    # Files we need to download for ML-KEM
+    # Files we need to download for ML-DSA
     files_to_download = [
         "ML-DSA-keyGen-FIPS204/prompt.json",
         "ML-DSA-keyGen-FIPS204/expectedResults.json",
@@ -64,6 +74,13 @@ def download_acvp_files(version):
         "ML-DSA-sigVer-FIPS204/prompt.json",
         "ML-DSA-sigVer-FIPS204/expectedResults.json",
     ]
+
+    # The FIPS204-tr1 sigGen vectors add seed/expanded key-format groups.
+    if acvp_version_has_tr1(version):
+        files_to_download += [
+            "ML-DSA-sigGen-FIPS204-tr1/prompt.json",
+            "ML-DSA-sigGen-FIPS204-tr1/expectedResults.json",
+        ]
 
     # Create directory structure
     data_dir = Path(f"test/acvp/.acvp-data/{version}/files")
@@ -153,6 +170,17 @@ def loadDefaultAcvpData(version, supported_modes=None):
             f"{data_dir}/ML-DSA-sigVer-FIPS204/expectedResults.json",
         ),
     ]
+
+    # FIPS204-tr1 sigGen vectors (seed/expanded key formats) exist from v1.1.0.43.
+    if acvp_version_has_tr1(version):
+        acvp_jsons_for_version.append(
+            (
+                "sigGen",
+                f"{data_dir}/ML-DSA-sigGen-FIPS204-tr1/prompt.json",
+                f"{data_dir}/ML-DSA-sigGen-FIPS204-tr1/expectedResults.json",
+            )
+        )
+
     acvp_data = []
     for mode, prompt, expectedResults in acvp_jsons_for_version:
         if mode not in supported_modes:
@@ -270,6 +298,13 @@ def unsupported_hash(tg, tc):
     return f"hash algorithm {hashAlg} unavailable in this Python's hashlib"
 
 
+def seed_key_format(tg, tc):
+    # keyFormat 'seed' cases need keyGen to expand the key into the private key.
+    if tg.get("keyFormat") == "seed":
+        return "seed key format requires the keyGen API"
+    return None
+
+
 def filter_test_cases(acvp_data, should_drop):
     # Drop cases for which should_drop(tg, tc) returns a reason (None keeps).
     # Reasons come from the prompt but are applied to expected data too.
@@ -299,6 +334,13 @@ def run_sigGen_test(tg, tc):
 
     assert tg["testType"] == "AFT"
 
+    # keyFormat 'seed' passes a seed for the binary to expand into the private
+    # key; 'expanded' (or absent) passes the expanded sk directly.
+    if tg.get("keyFormat") == "seed":
+        sk_arg = f"seed={tc['seed']}"
+    else:
+        sk_arg = f"sk={tc['sk']}"
+
     is_deterministic = tg["deterministic"] is True
     if "preHash" in tg and tg["preHash"] == "preHash":
         assert len(tc["context"]) <= 2 * 255
@@ -315,7 +357,7 @@ def run_sigGen_test(tg, tc):
                 target,
                 f"message={tc['message']}",
                 f"context={tc['context']}",
-                f"sk={tc['sk']}",
+                sk_arg,
             ]
         else:
             ph = compute_hash(tc["message"], tc["hashAlg"])
@@ -327,7 +369,7 @@ def run_sigGen_test(tg, tc):
                 target,
                 f"ph={ph}",
                 f"context={tc['context']}",
-                f"sk={tc['sk']}",
+                sk_arg,
                 f"hashAlg={tc['hashAlg']}",
             ]
     elif tg["signatureInterface"] == "external":
@@ -340,7 +382,7 @@ def run_sigGen_test(tg, tc):
             acvp_bin,
             target,
             f"message={tc['message']}",
-            f"sk={tc['sk']}",
+            sk_arg,
             f"context={tc['context']}",
         ]
     else:  # signatureInterface=internal
@@ -359,7 +401,7 @@ def run_sigGen_test(tg, tc):
             acvp_bin,
             target,
             f"message={msg}",
-            f"sk={tc['sk']}",
+            sk_arg,
             f"externalMu={externalMu}",
         ]
 
@@ -555,6 +597,14 @@ def test(
         info("No test data to run (all modes disabled in this build)")
         return
 
+    # Seed key-format cases require keyGen to expand the key; drop them when the
+    # build does not provide it (unconditionally, unlike --skip-unsupported).
+    if supported_modes is not None and "keyGen" not in supported_modes:
+        seed_reasons = filter_test_cases(data, seed_key_format)
+        if seed_reasons:
+            summary = ", ".join(sorted(set(seed_reasons)))
+            info(f"Skipping {len(seed_reasons)} test case(s): {summary}")
+
     reasons = filter_test_cases(data, unsupported_hash)
     if reasons:
         summary = ", ".join(sorted(set(reasons)))
@@ -583,8 +633,8 @@ parser.add_argument(
 parser.add_argument(
     "--version",
     "-v",
-    default="v1.1.0.41",
-    help="ACVP test vector version (default: v1.1.0.41)",
+    default="v1.1.0.43",
+    help="ACVP test vector version (default: v1.1.0.43)",
 )
 parser.add_argument(
     "--no-keygen",
