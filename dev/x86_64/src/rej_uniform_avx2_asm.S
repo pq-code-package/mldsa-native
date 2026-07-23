@@ -135,11 +135,11 @@ MLD_ASM_FN_SYMBOL(rej_uniform_avx2_asm)
  * Main SIMD loop: process 24 input bytes into up to 8 coefficients
  * per iteration. Loops while ctr <= MLDSA_N - 8 and pos <= BUFLEN - 32.
  */
-rej_uniform_avx2_asm_loop:
+mld_rej_uniform_avx2_asm_loop:
         cmpl    $SIMD_CTR_BOUND, ctr
-        ja      rej_uniform_avx2_asm_scalar
+        ja      mld_rej_uniform_avx2_asm_scalar
         cmpl    $SIMD_POS_BOUND, pos
-        ja      rej_uniform_avx2_asm_scalar
+        ja      mld_rej_uniform_avx2_asm_scalar
 
         vmovdqu (in, pos_q), data              /* load 32 bytes from buf[pos] */
         addl    $24, pos                       /* advance pos */
@@ -159,17 +159,17 @@ rej_uniform_avx2_asm_loop:
         vmovdqu data, (out, ctr_q, 4)          /* store at r[ctr] */
         addl    cnt, ctr                       /* ctr += popcount(good) */
 
-        jmp     rej_uniform_avx2_asm_loop
+        jmp     mld_rej_uniform_avx2_asm_loop
 
 /*
  * Scalar fallback loop: process remaining bytes one coefficient at a time.
  * Loops while ctr < MLDSA_N and pos <= BUFLEN - 3.
  */
-rej_uniform_avx2_asm_scalar:
+mld_rej_uniform_avx2_asm_scalar:
         cmpl    $MLDSA_N, ctr
-        jae     rej_uniform_avx2_asm_done
+        jae     mld_rej_uniform_avx2_asm_done
         cmpl    $SCALAR_POS_BOUND, pos
-        ja      rej_uniform_avx2_asm_done
+        ja      mld_rej_uniform_avx2_asm_done
 
         movzwl  (in, pos_q), good              /* load 2 bytes at buf[pos] */
         movzbl  2(in, pos_q), cnt              /* load third byte */
@@ -179,13 +179,13 @@ rej_uniform_avx2_asm_scalar:
         addl    $3, pos                        /* advance pos */
 
         cmpl    $MLDSA_Q, good
-        jae     rej_uniform_avx2_asm_scalar    /* reject if >= Q */
+        jae     mld_rej_uniform_avx2_asm_scalar    /* reject if >= Q */
 
         movl    good, (out, ctr_q, 4)          /* store valid coefficient */
         addl    $1, ctr                        /* ctr++ */
-        jmp     rej_uniform_avx2_asm_scalar
+        jmp     mld_rej_uniform_avx2_asm_scalar
 
-rej_uniform_avx2_asm_done:
+mld_rej_uniform_avx2_asm_done:
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

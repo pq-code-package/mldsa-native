@@ -55,7 +55,7 @@ MLD_ASM_FN_SYMBOL(poly_use_hint_88_aarch64_asm)
         movi v24.4s, #0x2b
         mov x3, #0x10               // =16
 
-Lpoly_use_hint_88_loop:
+Lmld_poly_use_hint_88_loop:
         ldr q1, [x0, #0x10]
         ldr q2, [x0, #0x20]
         ldr q3, [x0, #0x30]
@@ -117,7 +117,7 @@ Lpoly_use_hint_88_loop:
         str q19, [x0, #0x30]
         str q16, [x0], #0x40
         subs x3, x3, #0x1
-        b.ne Lpoly_use_hint_88_loop
+        b.ne Lmld_poly_use_hint_88_loop
         ret
         .cfi_endproc
 

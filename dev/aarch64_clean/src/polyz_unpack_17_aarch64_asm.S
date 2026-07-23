@@ -94,7 +94,7 @@ MLD_ASM_FN_SYMBOL(polyz_unpack_17_aarch64_asm)
 
         mov count, #(64/4)
 
-polyz_unpack_17_loop:
+mld_polyz_unpack_17_loop:
         // Split the load to avoid overreading the buffer: a
         // 3-register ld1 would load 48 bytes, but only 36 are
         // consumed per iteration. The TBL indices for v2 are
@@ -119,7 +119,7 @@ polyz_unpack_17_loop:
         str q4, [output], #4*16
 
         subs count, count, #1
-        bne polyz_unpack_17_loop
+        bne mld_polyz_unpack_17_loop
 
         ret
 

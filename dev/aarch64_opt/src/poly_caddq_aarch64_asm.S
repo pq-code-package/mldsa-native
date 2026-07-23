@@ -47,7 +47,7 @@ MLD_ASM_FN_SYMBOL(poly_caddq_aarch64_asm)
         dup q_reg.4s, w9        // Load Q values
 
         mov count, #64/4
-poly_caddq_loop:
+mld_poly_caddq_loop:
         ldr q0, [a_ptr, #0*16]
         ldr q1, [a_ptr, #1*16]
         ldr q2, [a_ptr, #2*16]
@@ -64,7 +64,7 @@ poly_caddq_loop:
         str q0, [a_ptr], #4*16
 
         subs count, count, #1
-        bne poly_caddq_loop
+        bne mld_poly_caddq_loop
 
         ret
 

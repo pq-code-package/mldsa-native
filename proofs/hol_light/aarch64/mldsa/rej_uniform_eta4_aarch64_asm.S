@@ -73,21 +73,21 @@ mld_rej_uniform_eta4_aarch64_asm:
         mov x11, #0x0               // =0
         eor v16.16b, v16.16b, v16.16b
 
-Lrej_uniform_eta4_initial_zero:
+Lmld_rej_uniform_eta4_initial_zero:
         str q16, [x7], #0x40
         stur q16, [x7, #-0x30]
         stur q16, [x7, #-0x20]
         stur q16, [x7, #-0x10]
         add x11, x11, #0x20
         cmp x11, #0x100
-        b.lt Lrej_uniform_eta4_initial_zero
+        b.lt Lmld_rej_uniform_eta4_initial_zero
         mov x7, x8
         mov x9, #0x0                // =0
         mov x4, #0x100              // =256
 
-Lrej_uniform_eta4_loop8:
+Lmld_rej_uniform_eta4_loop8:
         cmp x9, x4
-        b.hs Lrej_uniform_eta4_memory_copy
+        b.hs Lmld_rej_uniform_eta4_memory_copy
         sub x2, x2, #0x8
         ld1 { v0.8b }, [x1], #8
         movi v26.8b, #0xf
@@ -122,15 +122,15 @@ Lrej_uniform_eta4_loop8:
         add x12, x12, x13
         add x9, x9, x12
         cmp x2, #0x8
-        b.hs Lrej_uniform_eta4_loop8
+        b.hs Lmld_rej_uniform_eta4_loop8
 
-Lrej_uniform_eta4_memory_copy:
+Lmld_rej_uniform_eta4_memory_copy:
         cmp x9, x4
         csel x9, x9, x4, lo
         mov x11, #0x0               // =0
         mov x7, x8
 
-Lrej_uniform_eta4_final_copy:
+Lmld_rej_uniform_eta4_final_copy:
         ldr q16, [x7], #0x20
         ldur q18, [x7, #-0x10]
         sub v16.8h, v7.8h, v16.8h
@@ -145,7 +145,7 @@ Lrej_uniform_eta4_final_copy:
         stur q19, [x0, #-0x10]
         add x11, x11, #0x10
         cmp x11, #0x100
-        b.lt Lrej_uniform_eta4_final_copy
+        b.lt Lmld_rej_uniform_eta4_final_copy
         mov x0, x9
         add sp, sp, #0x240
         .cfi_adjust_cfa_offset -0x240

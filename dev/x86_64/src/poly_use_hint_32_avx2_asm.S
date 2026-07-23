@@ -146,7 +146,7 @@ vpbroadcastd    %xmm4, %ymm4
 vpbroadcastd    %xmm3, %ymm3
 
 
-poly_use_hint_32_avx2_asm_loop:
+mld_poly_use_hint_32_avx2_asm_loop:
 vmovdqa (%rdi), %ymm0
 vmovdqa (%rsi), %ymm2
 
@@ -157,7 +157,7 @@ addq    $32, %rdi
 addq    $32, %rsi
 addq    $32, %rax
 cmpq    $1024, %rax
-jne poly_use_hint_32_avx2_asm_loop
+jne mld_poly_use_hint_32_avx2_asm_loop
 ret
 
 /* simpasm: footer-start */

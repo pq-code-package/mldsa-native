@@ -114,11 +114,11 @@ MLD_ASM_FN_SYMBOL(rej_uniform_eta4_avx2_asm)
  * ctr <= 248 entering a sub-iter, the store touches r[248..256] — exactly
  * fitting the 256-int output buffer.
  */
-rej_uniform_eta4_avx2_asm_loop:
+mld_rej_uniform_eta4_avx2_asm_loop:
         cmpl    $248, ctr                      // MLDSA_N - 8
-        ja      rej_uniform_eta4_avx2_asm_scalar
+        ja      mld_rej_uniform_eta4_avx2_asm_scalar
         cmpl    $256, pos                      // MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN - 16
-        ja      rej_uniform_eta4_avx2_asm_scalar
+        ja      mld_rej_uniform_eta4_avx2_asm_scalar
 
         // Load 16 bytes and extract 32 nibbles into f0
         vpmovzxbw (in, pos_q), f0              // load 16 bytes, zero-extend to 16 words
@@ -144,7 +144,7 @@ rej_uniform_eta4_avx2_asm_loop:
         addl    $4, pos                        // 4 input bytes consumed
 
         cmpl    $248, ctr                      // mid-iter exit if ctr > 248
-        ja      rej_uniform_eta4_avx2_asm_scalar
+        ja      mld_rej_uniform_eta4_avx2_asm_scalar
 
         // Sub-iter 2: shift g0 down by 8 bytes; process next 8 bits of mask
         vpsrldq $8, g0, g0
@@ -159,7 +159,7 @@ rej_uniform_eta4_avx2_asm_loop:
         addl    $4, pos
 
         cmpl    $248, ctr
-        ja      rej_uniform_eta4_avx2_asm_scalar
+        ja      mld_rej_uniform_eta4_avx2_asm_scalar
 
         // Sub-iter 3: extract high 128 bits of f0
         vextracti128 $1, f0, g0
@@ -174,7 +174,7 @@ rej_uniform_eta4_avx2_asm_loop:
         addl    $4, pos
 
         cmpl    $248, ctr
-        ja      rej_uniform_eta4_avx2_asm_scalar
+        ja      mld_rej_uniform_eta4_avx2_asm_scalar
 
         // Sub-iter 4: shift g0 down by 8 bytes; process final 8 bits of mask
         vpsrldq $8, g0, g0
@@ -187,17 +187,17 @@ rej_uniform_eta4_avx2_asm_loop:
         addl    cnt, ctr
         addl    $4, pos
 
-        jmp     rej_uniform_eta4_avx2_asm_loop
+        jmp     mld_rej_uniform_eta4_avx2_asm_loop
 
 /*
  * Scalar fallback loop: process remaining bytes one nibble at a time.
  * Each byte contains two 4-bit nibbles (low and high), each accepted iff < 9.
  */
-rej_uniform_eta4_avx2_asm_scalar:
+mld_rej_uniform_eta4_avx2_asm_scalar:
         cmpl    $256, ctr                      // MLDSA_N
-        jae     rej_uniform_eta4_avx2_asm_done
+        jae     mld_rej_uniform_eta4_avx2_asm_done
         cmpl    $272, pos                      // MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN
-        jae     rej_uniform_eta4_avx2_asm_done
+        jae     mld_rej_uniform_eta4_avx2_asm_done
 
         movzbl  (in, pos_q), val               // load 1 byte
         incl    pos
@@ -206,7 +206,7 @@ rej_uniform_eta4_avx2_asm_scalar:
         movl    val, tmp_d
         andl    $0x0F, tmp_d                   // extract low 4 bits
         cmpl    $9, tmp_d
-        jae     rej_uniform_eta4_avx2_asm_high_nibble
+        jae     mld_rej_uniform_eta4_avx2_asm_high_nibble
 
         movl    $4, cnt
         subl    tmp_d, cnt                     // 4 - nibble
@@ -214,23 +214,23 @@ rej_uniform_eta4_avx2_asm_scalar:
         incl    ctr
 
         cmpl    $256, ctr
-        jae     rej_uniform_eta4_avx2_asm_done
+        jae     mld_rej_uniform_eta4_avx2_asm_done
 
-rej_uniform_eta4_avx2_asm_high_nibble:
+mld_rej_uniform_eta4_avx2_asm_high_nibble:
         // Process high nibble
         shrl    $4, val
         andl    $0x0F, val
         cmpl    $9, val
-        jae     rej_uniform_eta4_avx2_asm_scalar
+        jae     mld_rej_uniform_eta4_avx2_asm_scalar
 
         movl    $4, tmp_d
         subl    val, tmp_d                     // 4 - nibble
         movl    tmp_d, (out, ctr_q, 4)
         incl    ctr
 
-        jmp     rej_uniform_eta4_avx2_asm_scalar
+        jmp     mld_rej_uniform_eta4_avx2_asm_scalar
 
-rej_uniform_eta4_avx2_asm_done:
+mld_rej_uniform_eta4_avx2_asm_done:
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
