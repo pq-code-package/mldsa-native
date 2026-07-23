@@ -101,7 +101,10 @@ def main():
     slothy.config.timeout = 1000
 
     slothy.load_source_from_file(args.input)
-    slothy.optimize(start="slothy_start", end="slothy_end")
+    slothy.optimize(
+        start="keccak_f1600_x1_armv7m_asm_slothy_start",
+        end="keccak_f1600_x1_armv7m_asm_slothy_end",
+    )
     slothy.write_source_to_file(args.output)
 
 
