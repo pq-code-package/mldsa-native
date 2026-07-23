@@ -2190,20 +2190,9 @@ def gen_monolithic_asm_file():
     def gen_armv81m_x1_clean_helpers():
         yield "#if defined(MLD_FIPS202_ARMV81M_NEED_X1) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
-        yield ".global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)"
-        yield ".type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm),%function"
-        yield ".global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)"
-        yield ".type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm),%function"
-        yield "#define KeccakF1600_StateXORBytes \\"
-        yield "  MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)"
-        yield "#define KeccakF1600_StateExtractBytes \\"
-        yield "  MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)"
-        yield "#define KeccakF1600_StatePermute_adomnicai_m4 \\"
-        yield "  MLD_ASM_NAMESPACE(keccak_f1600_x1_armv7m_clean_asm)"
+        yield "#define MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY"
         yield '#include "../dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S"'
-        yield "#undef KeccakF1600_StatePermute_adomnicai_m4"
-        yield "#undef KeccakF1600_StateExtractBytes"
-        yield "#undef KeccakF1600_StateXORBytes"
+        yield "#undef MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY"
         yield "#endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
 
     def gen():

@@ -920,7 +920,8 @@ keccak_f1600_x1_armv7m_asm_Initialize:
 @ void KeccakF1600_StateXORBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length)
 @
 .align 8
-MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm):
+.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
+MLD_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
     cbz     r3, keccak_f1600_x1_armv7m_asm_StateXORBytes_Exit1
     push    {r4 - r8, lr}                           @ then
     bic     r4, r2, #7                              @ offset &= ~7
@@ -1014,6 +1015,8 @@ keccak_f1600_x1_armv7m_asm_StateXORBytesInLane_Loop:
     strd    r6, r7, [r0], #8
     bx      lr
 
+MLD_ASM_FN_SIZE(keccak_f1600_x1_state_xor_bytes_asm)
+
 
 
 
@@ -1022,7 +1025,8 @@ keccak_f1600_x1_armv7m_asm_StateXORBytesInLane_Loop:
 @ void KeccakF1600_StateExtractBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length)
 @
 .align 8
-MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm):
+.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)
+MLD_ASM_FN_SYMBOL(keccak_f1600_x1_state_extract_bytes_asm)
     cbz     r3, keccak_f1600_x1_armv7m_asm_StateExtractBytes_Exit1 @ .if length != 0
     push    {r4 - r8, lr}                           @ then
     bic     r4, r2, #7                              @ offset &= ~7
@@ -1112,8 +1116,11 @@ keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane_Loop:
     add     sp, #8
     bx      lr
 
+MLD_ASM_FN_SIZE(keccak_f1600_x1_state_extract_bytes_asm)
 
 
+
+#if !defined(MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY)
 .align 8
 keccak_f1600_x1_armv7m_asm_StatePermute_RoundConstantsWithTerminator:
     @       0           1
@@ -1172,3 +1179,4 @@ keccak_f1600_x1_armv7m_asm_slothy_end:
     pop     { r4 - r12, pc }
 
 MLD_ASM_FN_SIZE(keccak_f1600_x1_armv7m_asm)
+#endif /* !MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY */

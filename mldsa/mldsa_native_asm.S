@@ -114,21 +114,9 @@
 #if defined(MLD_SYS_ARMV81M_MVE)
 #if defined(MLD_FIPS202_ARMV81M_NEED_X1) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
-.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
-    .type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm),
-    % function.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)
-            .type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm),
-    % function
-#define KeccakF1600_StateXORBytes \
-  MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
-#define KeccakF1600_StateExtractBytes \
-  MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm)
-#define KeccakF1600_StatePermute_adomnicai_m4 \
-  MLD_ASM_NAMESPACE(keccak_f1600_x1_armv7m_clean_asm)
+#define MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY
 #include "../dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S"
-#undef KeccakF1600_StatePermute_adomnicai_m4
-#undef KeccakF1600_StateExtractBytes
-#undef KeccakF1600_StateXORBytes
+#undef MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY
 #endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
