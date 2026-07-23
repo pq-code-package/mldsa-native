@@ -1,13 +1,7 @@
 /*
+ * Copyright (c) The mlkem-native project authors
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
- */
-
-/*
- * This file is derived from the public domain SLOTHY source
- * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m4.s.
- * That source is based on public domain XKCP code, with additional
- * optimizations by Alexandre Adomnicai.
  */
 
 /* References
@@ -29,8 +23,51 @@
  *   Bertoni, Daemen, Peeters, Van Assche, Van Keer
  *   https://github.com/XKCP/XKCP
  */
+
+/*
+ * This file is derived from the public domain SLOTHY source
+ * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m4.s.
+ * That source is based on public domain XKCP code, with additional
+ * optimizations by Alexandre Adomnicai.
+ */
+
+/*yaml
+  Name: keccak_f1600_x1_armv7m_asm
+  Description: Armv8.1-M baseline x1 Keccak-f[1600] permutation using the Adomnicai/XKCP bit-interleaved Armv7-M representation
+  Signature: void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49])
+  ABI:
+    Architecture: armv81m
+    CallingConvention: AAPCS32
+    Features: [MVE]
+    r0:
+      type: buffer
+      size_bytes: 200
+      permissions: read/write
+      c_parameter: uint32_t state[50]
+      description: Bit-interleaved x1 state as even/odd 32-bit halves for each Keccak lane
+    r1:
+      type: buffer
+      size_bytes: 196
+      permissions: read
+      c_parameter: const uint32_t rc[49]
+      description: Bit-interleaved round constants followed by the 0xff loop terminator
+  Stack:
+    bytes: 64
+    description: register preservation (40) + scalar scratch/intermediate state (24); no MVE/Q-register scratch
+*/
+
+/*
+ * This file is derived from the public domain implementation @[XKCP].
+ * Optimizations for Armv7-M are described in @[ADOMNICAI23].
+ * The clean round body is adapted from SLOTHY's MIT-licensed
+ * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m7.s.
+ * Further optimizations using SLOTHY are described in @[SLOTHYM7].
+ */
 @ WARNING: These functions work only on little endian CPU with@ ARMv7m architecture (ARM Cortex-M3, ...).
 
+#include "../../../../common.h"
+#if defined(MLD_FIPS202_ARMV81M_NEED_X1) &&  !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+/* simpasm: header-end */
 
     .thumb
     .syntax unified
@@ -630,7 +667,7 @@
     KeccakThetaRhoPiChi Aku0, Asa1, r14, 14, 22,  Asa1, Age1,  r8, 18,  2,  Age1, Ami1, r10,  5,  4,  Ami1, Abo1,  r2,  8, 28,  Abo1, Aku0,  r9, 28, 31,  1, Asu0
     KeccakThetaRhoPiChi Agi0, Aka1,  r2, 31,  7,  Amo1, Ase1,  r9, 27, 14,  Abu1, Agi0, r12, 19,  3,  Aka1, Amo1,  r8, 20,  5,  Ase1, Abu1, r11,  1, 20,  1, Aku0
     ldr     r9, [sp, #mDo1] // @slothy:reads=['spmDo1']
-    KeccakThetaRhoPiChiIota Aba0, r8,  0,      Ake1, r10,22, 23,  Asi0, r2, 22,  9,  Ago0, r9, 11, 13,  Amu1, r12, 7, 28,  16, 0, 1, Abu1, r1
+    KeccakThetaRhoPiChiIota Aba0, r8,  0,      Ake1, r10, 22, 23,  Asi0, r2, 22,  9,  Ago0, r9, 11, 13,  Amu1, r12, 7, 28,  16, 0, 1, Abu1, r1
     ldr.w   r2, [sp, #mDi0] // @slothy:reads=['spmDi0']
     KeccakThetaRhoPiChi Aso0, Ama1,  r9, 14,  0,  Agu1, Abe1, r14, 10, 10,  Ama1, Aki1,  r8,  1, 13,  Abe1, Aso0, r10, 22,  8,  Aki1, Agu1,  r2, 30,  1,  1, Aba0
     KeccakThetaRhoPiChi Ame0, Aga1, r11,  1, 10,  Abi1, Ame0,  r2,  3, 31,  Ako1, Abi1,  r9, 13,  0,  Asu1, Ako1, r12,  4, 18,  Aga1, Asu1,  r8,  9, 20,  1, Agu1
@@ -690,254 +727,6 @@
     str.w r1, [r0, #Aba1] // @slothy:writes=['r0Aba1']
 .endm
 
-@----------------------------------------------------------------------------
-@
-@ void keccak_f1600_x1_armv7m_asm_Initialize( void )
-@
-.align 8
-keccak_f1600_x1_armv7m_asm_Initialize:
-    bx      lr
-
-
-
-@----------------------------------------------------------------------------
-@
-@ void KeccakF1600_StateXORBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length)
-@
-.align 8
-MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm):
-    cbz     r3, keccak_f1600_x1_armv7m_asm_StateXORBytes_Exit1
-    push    {r4 - r8, lr}                           @ then
-    bic     r4, r2, #7                              @ offset &= ~7
-    adds    r0, r0, r4                              @ add whole lane offset to state pointer
-    ands    r2, r2, #7                              @ offset &= 7 (part not lane aligned)
-    beq     keccak_f1600_x1_armv7m_asm_StateXORBytes_CheckLanes    @ .if offset != 0
-    movs    r4, r3                                  @ then, do remaining bytes in first lane
-    rsb     r5, r2, #8                              @ max size in lane = 8 - offset
-    cmp     r4, r5
-    ble     keccak_f1600_x1_armv7m_asm_StateXORBytes_BytesAlign
-    movs    r4, r5
-keccak_f1600_x1_armv7m_asm_StateXORBytes_BytesAlign:
-    sub     r8, r3, r4                              @ size left
-    movs    r3, r4
-    bl      keccak_f1600_x1_armv7m_asm_StateXORBytesInLane
-    mov     r3, r8
-keccak_f1600_x1_armv7m_asm_StateXORBytes_CheckLanes:
-    lsrs    r2, r3, #3                              @ .if length >= 8
-    beq     keccak_f1600_x1_armv7m_asm_StateXORBytes_Bytes
-    mov     r8, r3
-    bl      keccak_f1600_x1_armv7m_asm_StateXORLanes
-    and     r3, r8, #7
-keccak_f1600_x1_armv7m_asm_StateXORBytes_Bytes:
-    cbz     r3, keccak_f1600_x1_armv7m_asm_StateXORBytes_Exit
-    movs    r2, #0
-    bl      keccak_f1600_x1_armv7m_asm_StateXORBytesInLane
-keccak_f1600_x1_armv7m_asm_StateXORBytes_Exit:
-    pop     {r4 - r8, pc}
-keccak_f1600_x1_armv7m_asm_StateXORBytes_Exit1:
-    bx      lr
-
-
-@----------------------------------------------------------------------------
-@
-@ keccak_f1600_x1_armv7m_asm_StateXORLanes
-@
-@ Input:
-@  r0 state pointer
-@  r1 data pointer
-@  r2 laneCount
-@
-@ Output:
-@  r0 state pointer next lane
-@  r1 data pointer next byte to input
-@
-@ Changed: r2-r7
-@
-.align 8
-keccak_f1600_x1_armv7m_asm_StateXORLanes:
-keccak_f1600_x1_armv7m_asm_StateXORLanes_LoopAligned:
-    ldr     r4, [r1], #4
-    ldr     r5, [r1], #4
-    ldrd    r6, r7, [r0]
-    toBitInterleaving   r4, r5, r6, r7, r3, 0
-    strd    r6, r7, [r0], #8
-    subs    r2, r2, #1
-    bne     keccak_f1600_x1_armv7m_asm_StateXORLanes_LoopAligned
-    bx      lr
-
-
-@----------------------------------------------------------------------------
-@
-@ keccak_f1600_x1_armv7m_asm_StateXORBytesInLane
-@
-@ Input:
-@  r0 state pointer
-@  r1 data pointer
-@  r2 offset in lane
-@  r3 length
-@
-@ Output:
-@  r0 state pointer next lane
-@  r1 data pointer next byte to input
-@
-@  Changed: r2-r7
-@
-.align 8
-keccak_f1600_x1_armv7m_asm_StateXORBytesInLane:
-    movs    r4, #0
-    movs    r5, #0
-    push    { r4 - r5 }
-    add     r2, r2, sp
-keccak_f1600_x1_armv7m_asm_StateXORBytesInLane_Loop:
-    ldrb    r5, [r1], #1
-    strb    r5, [r2], #1
-    subs    r3, r3, #1
-    bne     keccak_f1600_x1_armv7m_asm_StateXORBytesInLane_Loop
-    pop     { r4 - r5 }
-    ldrd    r6, r7, [r0]
-    toBitInterleaving   r4, r5, r6, r7, r3, 0
-    strd    r6, r7, [r0], #8
-    bx      lr
-
-
-
-
-@----------------------------------------------------------------------------
-@
-@ void KeccakF1600_StateExtractBytes(void *state, const unsigned char *data, unsigned int offset, unsigned int length)
-@
-.align 8
-MLD_ASM_NAMESPACE(keccak_f1600_x1_state_extract_bytes_asm):
-    cbz     r3, keccak_f1600_x1_armv7m_asm_StateExtractBytes_Exit1 @ .if length != 0
-    push    {r4 - r8, lr}                           @ then
-    bic     r4, r2, #7                              @ offset &= ~7
-    adds    r0, r0, r4                              @ add whole lane offset to state pointer
-    ands    r2, r2, #7                              @ offset &= 7 (part not lane aligned)
-    beq     keccak_f1600_x1_armv7m_asm_StateExtractBytes_CheckLanes    @ .if offset != 0
-    movs    r4, r3                                  @ then, do remaining bytes in first lane
-    rsb     r5, r2, #8                              @ max size in lane = 8 - offset
-    cmp     r4, r5
-    ble     keccak_f1600_x1_armv7m_asm_StateExtractBytes_BytesAlign
-    movs    r4, r5
-keccak_f1600_x1_armv7m_asm_StateExtractBytes_BytesAlign:
-    sub     r8, r3, r4                              @ size left
-    movs    r3, r4
-    bl      keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane
-    mov     r3, r8
-keccak_f1600_x1_armv7m_asm_StateExtractBytes_CheckLanes:
-    lsrs    r2, r3, #3                              @ .if length >= 8
-    beq     keccak_f1600_x1_armv7m_asm_StateExtractBytes_Bytes
-    mov     r8, r3
-    bl      keccak_f1600_x1_armv7m_asm_StateExtractLanes
-    and     r3, r8, #7
-keccak_f1600_x1_armv7m_asm_StateExtractBytes_Bytes:
-    cbz     r3, keccak_f1600_x1_armv7m_asm_StateExtractBytes_Exit
-    movs    r2, #0
-    bl      keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane
-keccak_f1600_x1_armv7m_asm_StateExtractBytes_Exit:
-    pop     {r4 - r8, pc}
-keccak_f1600_x1_armv7m_asm_StateExtractBytes_Exit1:
-    bx      lr
-
-
-@----------------------------------------------------------------------------
-@
-@ keccak_f1600_x1_armv7m_asm_StateExtractLanes
-@
-@ Input:
-@  r0 state pointer
-@  r1 data pointer
-@  r2 laneCount
-@
-@ Output:
-@  r0 state pointer next lane
-@  r1 data pointer next byte to input
-@
-@ Changed: r2-r5
-@
-.align 8
-keccak_f1600_x1_armv7m_asm_StateExtractLanes:
-keccak_f1600_x1_armv7m_asm_StateExtractLanes_LoopAligned:
-    ldrd    r4, r5, [r0], #8
-    fromBitInterleaving r4, r5, r3
-    str     r4, [r1], #4
-    subs    r2, r2, #1
-    str     r5, [r1], #4
-    bne     keccak_f1600_x1_armv7m_asm_StateExtractLanes_LoopAligned
-    bx      lr
-
-
-@----------------------------------------------------------------------------
-@
-@ keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane
-@
-@ Input:
-@  r0 state pointer
-@  r1 data pointer
-@  r2 offset in lane
-@  r3 length
-@
-@ Output:
-@  r0 state pointer next lane
-@  r1 data pointer next byte to input
-@
-@  Changed: r2-r6
-@
-.align 8
-keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane:
-    ldrd    r4, r5, [r0], #8
-    fromBitInterleaving r4, r5, r6
-    push    {r4, r5}
-    add     r2, sp, r2
-keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane_Loop:
-    ldrb    r4, [r2], #1
-    subs    r3, r3, #1
-    strb    r4, [r1], #1
-    bne     keccak_f1600_x1_armv7m_asm_StateExtractBytesInLane_Loop
-    add     sp, #8
-    bx      lr
-
-
-
-.align 8
-keccak_f1600_x1_armv7m_asm_StatePermute_RoundConstantsWithTerminator:
-    @       0           1
-        .long       0x00000001, 0x00000000
-        .long       0x00000000, 0x00000089
-        .long       0x00000000, 0x8000008b
-        .long       0x00000000, 0x80008080
-
-        .long       0x00000001, 0x0000008b
-        .long       0x00000001, 0x00008000
-        .long       0x00000001, 0x80008088
-        .long       0x00000001, 0x80000082
-
-        .long       0x00000000, 0x0000000b
-        .long       0x00000000, 0x0000000a
-        .long       0x00000001, 0x00008082
-        .long       0x00000000, 0x00008003
-
-        .long       0x00000001, 0x0000808b
-        .long       0x00000001, 0x8000000b
-        .long       0x00000001, 0x8000008a
-        .long       0x00000001, 0x80000081
-
-        .long       0x00000000, 0x80000081
-        .long       0x00000000, 0x80000008
-        .long       0x00000000, 0x00000083
-        .long       0x00000000, 0x80008003
-
-        .long       0x00000001, 0x80008088
-        .long       0x00000000, 0x80000088
-        .long       0x00000001, 0x00008000
-        .long       0x00000000, 0x80008082
-
-        .long       0x000000FF  @terminator
-
-@----------------------------------------------------------------------------
-@
-@ void KeccakF1600_StatePermute( void *state )
-@
 .align 8
 .global   MLD_ASM_NAMESPACE(keccak_f1600_x1_armv7m_asm)
 .type MLD_ASM_NAMESPACE(keccak_f1600_x1_armv7m_asm),%function
@@ -4008,3 +3797,6 @@ keccak_f1600_x1_armv7m_asm_StatePermute_RoundLoop:
     pop     { r4 - r12, pc }
 
 MLD_ASM_FN_SIZE(keccak_f1600_x1_armv7m_asm)
+
+/* simpasm: footer-start */
+#endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
