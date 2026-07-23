@@ -7,6 +7,8 @@ claimed-security: SUF-CMA
 length-public-key: 1312
 length-secret-key: 2560
 length-signature: 2420
+length-keypair-seed: 32
+derandomized_keypair: true
 length-mu: 64
 nistkat-sha256: 9a196e7fb32fbc93757dc2d8dc1924460eab66303c0c08aeb8b798fb8d8f8cf3
 testvectors-sha256: 5f0d135c0f7fd43f3fb9727265fcd6ec3651eb8c67c04ea5f3d8dfa1d99740d2
@@ -26,6 +28,7 @@ implementations:
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_CONFIG_FILE="integration/liboqs/config_c.h"
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA44_C_keypair_oqs
+  signature_keypair_derand: PQCP_MLDSA_NATIVE_MLDSA44_C_keypair_derand_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA44_C_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA44_C_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA44_C_signature_extmu_oqs
@@ -44,6 +47,7 @@ implementations:
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_CONFIG_FILE="integration/liboqs/config_x86_64.h"
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA44_X86_64_keypair_oqs
+  signature_keypair_derand: PQCP_MLDSA_NATIVE_MLDSA44_X86_64_keypair_derand_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA44_X86_64_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_extmu_oqs
@@ -71,6 +75,7 @@ implementations:
   folder_name: .
   compile_opts: -DMLD_CONFIG_PARAMETER_SET=44 -DMLD_CONFIG_FILE="integration/liboqs/config_aarch64.h"
   signature_keypair: PQCP_MLDSA_NATIVE_MLDSA44_AARCH64_keypair_oqs
+  signature_keypair_derand: PQCP_MLDSA_NATIVE_MLDSA44_AARCH64_keypair_derand_oqs
   signature_signature: PQCP_MLDSA_NATIVE_MLDSA44_AARCH64_signature_oqs
   signature_verify: PQCP_MLDSA_NATIVE_MLDSA44_AARCH64_verify_oqs
   signature_signature_extmu: PQCP_MLDSA_NATIVE_MLDSA44_AARCH64_signature_extmu_oqs
