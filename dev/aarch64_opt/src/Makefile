@@ -64,17 +64,17 @@ all: ntt_aarch64_asm.S \
 ntt_aarch64_asm.S: ../../aarch64_clean/src/ntt_aarch64_asm.S
 	# optimize first loop in one go and write to temp file
 	$(eval TMPFILE := $(shell mktemp))
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l ntt_layer123_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l mld_ntt_layer123_start $(SLOTHY_FLAGS) $(RESERVE_X_ONLY_FLAG)
 	# optimize second loop using split heuristic
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l ntt_layer45678_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=1.5 $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l mld_ntt_layer45678_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=1.5 $(RESERVE_X_ONLY_FLAG)
 
 # Copy remaining files without optimization for now
 intt_aarch64_asm.S: ../../aarch64_clean/src/intt_aarch64_asm.S
 	# optimize first loop in one go and write to temp file
 	$(eval TMPFILE := $(shell mktemp))
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l intt_layer5678_start $(SLOTHY_FLAGS) -c reserved_regs="[x0,x18--x30,sp]"
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $< -o $(TMPFILE) -l mld_intt_layer5678_start $(SLOTHY_FLAGS) -c reserved_regs="[x0,x18--x30,sp]"
 	# optimize second loop using split heuristic
-	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l intt_layer1234_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=2.5 $(RESERVE_X_ONLY_FLAG)
+	slothy-cli $(TARGET_ISA) $(TARGET_MICROARCH) $(TMPFILE) -o $@ -l mld_intt_layer1234_start $(SLOTHY_FLAGS_SPLIT) -c split_heuristic_factor=2.5 $(RESERVE_X_ONLY_FLAG)
 
 mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S: ../../aarch64_clean/src/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S
 	cp $< $@

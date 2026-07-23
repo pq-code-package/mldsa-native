@@ -154,7 +154,7 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
         vinserti128 $0x1, %xmm0, %ymm1, %ymm2
         movq $0x0, %r10
 
-LLkeccak_f1600_x4_avx2_asm:
+LLmld_keccak_f1600_x4_avx2_asm:
         vmovdqu 0xa0(%rsp), %ymm4
         vpxor 0x1c0(%rsp), %ymm9, %ymm0
         vmovdqu %ymm9, 0x200(%rsp)
@@ -378,7 +378,7 @@ LLkeccak_f1600_x4_avx2_asm:
         addq $0x8, %rsi
         addq $0x1, %r10
         cmpq $0x18, %r10
-        jne LLkeccak_f1600_x4_avx2_asm
+        jne LLmld_keccak_f1600_x4_avx2_asm
         vmovdqu (%rsp), %ymm4
         vmovdqu 0x40(%rsp), %ymm5
         vmovdqu 0x20(%rsp), %ymm0

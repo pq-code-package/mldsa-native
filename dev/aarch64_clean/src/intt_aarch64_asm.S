@@ -272,7 +272,7 @@ MLD_ASM_FN_SYMBOL(intt_aarch64_asm)
         mov count, #16
 
         .p2align 2
-intt_layer5678_start:
+mld_intt_layer5678_start:
 
         ldr q_data0, [inp, #(16*0)]
         ldr q_data1, [inp, #(16*1)]
@@ -331,7 +331,7 @@ intt_layer5678_start:
         str q_data3, [inp, #(-64 + 16*3)]
 
         subs count, count, #1
-        cbnz count, intt_layer5678_start
+        cbnz count, mld_intt_layer5678_start
 
         // ---------------------------------------------------------------------
 
@@ -351,7 +351,7 @@ intt_layer5678_start:
 
         .p2align 2
 
-intt_layer1234_start:
+mld_intt_layer1234_start:
 
         ldr q_data0,  [in, #0]
         ldr q_data1,  [in, #(1*(512/8))]
@@ -464,7 +464,7 @@ intt_layer1234_start:
         str q_data7, [in, #(-16 + 7*(512/8))]
 
         subs count, count, #1
-        cbnz count, intt_layer1234_start
+        cbnz count, mld_intt_layer1234_start
 
         pop_stack
         ret

@@ -159,14 +159,14 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     // in case not enough bytes have been sampled, zero the temporary buffer.
     mov initial_zero_count, #0
     eor val0.16b, val0.16b, val0.16b
-rej_uniform_initial_zero:
+mld_rej_uniform_initial_zero:
         str val0q, [output_tmp], #64
         str val0q, [output_tmp, #-48]
         str val0q, [output_tmp, #-32]
         str val0q, [output_tmp, #-16]
         add initial_zero_count, initial_zero_count, #16
         cmp initial_zero_count, #MLDSA_N
-        b.lt rej_uniform_initial_zero
+        b.lt mld_rej_uniform_initial_zero
 
     mov output_tmp, output_tmp_base
 
@@ -174,12 +174,12 @@ rej_uniform_initial_zero:
     mov len, #MLDSA_N
 
     cmp buflen, #48
-    b.lo rej_uniform_loop48_end
+    b.lo mld_rej_uniform_loop48_end
 
-rej_uniform_loop48:
+mld_rej_uniform_loop48:
         // Finish once we've generated sufficiently many coefficients
         cmp     count, len
-        b.hs    rej_uniform_memory_copy
+        b.hs    mld_rej_uniform_memory_copy
 
         // First, we unpack the byte stream into a stream of signed
         // coefficients, interpreting each consecutive 3 bytes as one
@@ -290,15 +290,15 @@ rej_uniform_loop48:
         add     count, count, ctr23
 
         cmp buflen, #48
-        b.hs rej_uniform_loop48
-rej_uniform_loop48_end:
+        b.hs mld_rej_uniform_loop48
+mld_rej_uniform_loop48_end:
 
     // Finish once we've generated sufficiently many coefficients
     cmp     count, len
-    b.hs    rej_uniform_memory_copy
+    b.hs    mld_rej_uniform_memory_copy
 
     cmp buflen, #24
-    b.lo rej_uniform_memory_copy
+    b.lo mld_rej_uniform_memory_copy
 
         sub     buflen, buflen, #24
         ld3     {buf0.8b, buf1.8b, buf2.8b}, [buf], #24
@@ -349,7 +349,7 @@ rej_uniform_loop48_end:
         add     count, count, ctr0
         add     count, count, ctr1
 
-rej_uniform_memory_copy:
+mld_rej_uniform_memory_copy:
     // min = min(count,len)
     cmp  count, len
     csel count, count, len, lo
@@ -359,7 +359,7 @@ rej_uniform_memory_copy:
     // allows us to stick to vectorized code.
     mov final_copy_count, #0
     mov output_tmp, output_tmp_base
-rej_uniform_final_copy:
+mld_rej_uniform_final_copy:
         ldr val0q, [output_tmp], #64
         ldr val1q, [output_tmp, #-48]
         ldr val2q, [output_tmp, #-32]
@@ -370,13 +370,13 @@ rej_uniform_final_copy:
         str val3q, [output, #-16]
         add final_copy_count, final_copy_count, #16
         cmp final_copy_count, #MLDSA_N
-        b.lt rej_uniform_final_copy
+        b.lt mld_rej_uniform_final_copy
 
     mov x0, count
-    b rej_uniform_return
+    b mld_rej_uniform_return
 
 
-rej_uniform_return:
+mld_rej_uniform_return:
     pop_stack
     ret
 

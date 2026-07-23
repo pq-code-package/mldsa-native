@@ -192,7 +192,7 @@ mld_intt_aarch64_asm:
         ldr q17, [x1], #0x60
         sub x4, x4, #0x2
 
-Lintt_layer5678_start:
+Lmld_intt_layer5678_start:
         ldr d4, [x2], #0x20
         mul v0.4s, v21.4s, v17.4s
         ldr q7, [x3, #0xa0]
@@ -266,7 +266,7 @@ Lintt_layer5678_start:
         mul v8.4s, v19.4s, v4.s[0]
         sqrdmulh v24.4s, v21.4s, v2.4s
         subs x4, x4, #0x1
-        cbnz x4, Lintt_layer5678_start
+        cbnz x4, Lmld_intt_layer5678_start
         sqrdmulh v19.4s, v3.4s, v2.4s
         trn2 v0.4s, v14.4s, v26.4s
         str q15, [x3], #0x40
@@ -436,7 +436,7 @@ Lintt_layer5678_start:
         mul v25.4s, v9.4s, v2.s[0]
         sub x4, x4, #0x1
 
-Lintt_layer1234_start:
+Lmld_intt_layer1234_start:
         sub v22.4s, v21.4s, v16.4s
         mls v25.4s, v12.4s, v31.s[0]
         add v12.4s, v21.4s, v16.4s
@@ -654,7 +654,7 @@ Lintt_layer1234_start:
         sqrdmulh v8.4s, v24.4s, v0.s[3]
         mul v25.4s, v22.4s, v2.s[0]
         subs x4, x4, #0x1
-        cbnz x4, Lintt_layer1234_start
+        cbnz x4, Lmld_intt_layer1234_start
         mul v22.4s, v24.4s, v0.s[2]
         sqrdmulh v9.4s, v23.4s, v30.4s
         mls v25.4s, v12.4s, v31.s[0]

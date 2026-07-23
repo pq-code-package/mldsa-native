@@ -124,7 +124,7 @@ MLD_ASM_FN_SYMBOL(poly_decompose_88_aarch64_asm)
         dup barrett_const.4s, w11
 
         mov count, #(64/4)
-poly_decompose_88_loop:
+mld_poly_decompose_88_loop:
         ldr q0, [a0_ptr, #0*16]
         ldr q1, [a0_ptr, #1*16]
         ldr q2, [a0_ptr, #2*16]
@@ -145,7 +145,7 @@ poly_decompose_88_loop:
         str q0, [a0_ptr], #4*16
 
         subs count, count, #1
-        bne poly_decompose_88_loop
+        bne mld_poly_decompose_88_loop
 
         ret
 

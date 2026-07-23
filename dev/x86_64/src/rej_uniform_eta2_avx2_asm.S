@@ -123,11 +123,11 @@ MLD_ASM_FN_SYMBOL(rej_uniform_eta2_avx2_asm)
  * 32 coefficients per iteration (4 groups of 8 nibbles each).
  * Loops while ctr <= MLDSA_N - 8 and pos <= BUFLEN - 16.
  */
-rej_uniform_eta2_avx2_asm_loop:
+mld_rej_uniform_eta2_avx2_asm_loop:
         cmpl    $248, ctr                      // MLDSA_N - 8
-        ja      rej_uniform_eta2_avx2_asm_scalar
+        ja      mld_rej_uniform_eta2_avx2_asm_scalar
         cmpl    $120, pos                      // MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN - 16
-        ja      rej_uniform_eta2_avx2_asm_scalar
+        ja      mld_rej_uniform_eta2_avx2_asm_scalar
 
         // Load 16 bytes and extract 32 nibbles into f0
         vpmovzxbw (in, pos_q), f0              // load 16 bytes, zero-extend to 16 words
@@ -163,7 +163,7 @@ rej_uniform_eta2_avx2_asm_loop:
         addl    $4, pos                        // consumed 4 input bytes
 
         cmpl    $248, ctr
-        ja      rej_uniform_eta2_avx2_asm_scalar
+        ja      mld_rej_uniform_eta2_avx2_asm_scalar
 
         // Process second group of 8 nibbles (low 128 bits, high 64 bits)
         vpsrldq $8, g0, g0                     // shift right to get next 8 nibbles
@@ -181,7 +181,7 @@ rej_uniform_eta2_avx2_asm_loop:
         addl    $4, pos
 
         cmpl    $248, ctr
-        ja      rej_uniform_eta2_avx2_asm_scalar
+        ja      mld_rej_uniform_eta2_avx2_asm_scalar
 
         // Process third group of 8 nibbles (high 128 bits, low 64 bits)
         vextracti128 $1, f0, g0                // extract high 128 bits
@@ -199,7 +199,7 @@ rej_uniform_eta2_avx2_asm_loop:
         addl    $4, pos
 
         cmpl    $248, ctr
-        ja      rej_uniform_eta2_avx2_asm_scalar
+        ja      mld_rej_uniform_eta2_avx2_asm_scalar
 
         // Process fourth group of 8 nibbles (high 128 bits, high 64 bits)
         vpsrldq $8, g0, g0
@@ -215,18 +215,18 @@ rej_uniform_eta2_avx2_asm_loop:
         addl    cnt, ctr
         addl    $4, pos
 
-        jmp     rej_uniform_eta2_avx2_asm_loop
+        jmp     mld_rej_uniform_eta2_avx2_asm_loop
 
 /*
  * Scalar fallback loop: process remaining bytes one nibble at a time.
  * Each byte contains two 4-bit nibbles (low and high).
  * Apply modulo-5 reduction: t = t - (205 * t >> 10) * 5
  */
-rej_uniform_eta2_avx2_asm_scalar:
+mld_rej_uniform_eta2_avx2_asm_scalar:
         cmpl    $256, ctr                      // MLDSA_N
-        jae     rej_uniform_eta2_avx2_asm_done
+        jae     mld_rej_uniform_eta2_avx2_asm_done
         cmpl    $136, pos                      // MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN
-        jae     rej_uniform_eta2_avx2_asm_done
+        jae     mld_rej_uniform_eta2_avx2_asm_done
 
         movzbl  (in, pos_q), val               // load 1 byte
         incl    pos
@@ -235,7 +235,7 @@ rej_uniform_eta2_avx2_asm_scalar:
         movl    val, tmp_d
         andl    $0x0F, tmp_d                   // extract low 4 bits
         cmpl    $15, tmp_d
-        jae     rej_uniform_eta2_avx2_asm_high_nibble
+        jae     mld_rej_uniform_eta2_avx2_asm_high_nibble
 
         // Apply modulo-5 reduction: t = t - (205 * t >> 10) * 5
         movl    tmp_d, val
@@ -250,15 +250,15 @@ rej_uniform_eta2_avx2_asm_scalar:
         incl    ctr
 
         cmpl    $256, ctr
-        jae     rej_uniform_eta2_avx2_asm_done
+        jae     mld_rej_uniform_eta2_avx2_asm_done
 
-rej_uniform_eta2_avx2_asm_high_nibble:
+mld_rej_uniform_eta2_avx2_asm_high_nibble:
         // Reload original byte for high nibble
         movzbl  -1(in, pos_q), val             // reload byte
         shrl    $4, val
         andl    $0x0F, val
         cmpl    $15, val
-        jae     rej_uniform_eta2_avx2_asm_scalar
+        jae     mld_rej_uniform_eta2_avx2_asm_scalar
 
         // Apply modulo-5 reduction
         movl    val, tmp_d
@@ -272,9 +272,9 @@ rej_uniform_eta2_avx2_asm_high_nibble:
         movl    tmp_d, (out, ctr_q, 4)
         incl    ctr
 
-        jmp     rej_uniform_eta2_avx2_asm_scalar
+        jmp     mld_rej_uniform_eta2_avx2_asm_scalar
 
-rej_uniform_eta2_avx2_asm_done:
+mld_rej_uniform_eta2_avx2_asm_done:
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

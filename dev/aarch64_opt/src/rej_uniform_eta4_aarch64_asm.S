@@ -160,24 +160,24 @@ MLD_ASM_FN_SYMBOL(rej_uniform_eta4_aarch64_asm)
     // on copy out
     mov initial_zero_count, #0
     eor val0.16b, val0.16b, val0.16b
-rej_uniform_eta4_initial_zero:
+mld_rej_uniform_eta4_initial_zero:
         str val0q, [output_tmp], #64
         str val0q, [output_tmp, #-48]
         str val0q, [output_tmp, #-32]
         str val0q, [output_tmp, #-16]
         add initial_zero_count, initial_zero_count, #32
         cmp initial_zero_count, #MLDSA_N
-        b.lt rej_uniform_eta4_initial_zero
+        b.lt mld_rej_uniform_eta4_initial_zero
 
     mov output_tmp, output_tmp_base
 
     mov count, #0
     mov len, #MLDSA_N
 
-rej_uniform_eta4_loop8:
+mld_rej_uniform_eta4_loop8:
         // Finish once we've generated sufficiently many coefficients
         cmp     count, len
-        b.hs    rej_uniform_eta4_memory_copy
+        b.hs    mld_rej_uniform_eta4_memory_copy
 
         // Load 8 bytes and extract nibbles to get 16 4-bit values
         sub     buflen, buflen, #8
@@ -255,9 +255,9 @@ rej_uniform_eta4_loop8:
         add     count, count, ctr01
 
         cmp buflen, #8
-        b.hs rej_uniform_eta4_loop8
+        b.hs mld_rej_uniform_eta4_loop8
 
-rej_uniform_eta4_memory_copy:
+mld_rej_uniform_eta4_memory_copy:
     // min = min(count,len)
     cmp  count, len
     csel count, count, len, lo
@@ -265,7 +265,7 @@ rej_uniform_eta4_memory_copy:
     // Always copy MLDSA_N coefficients from the stack to the destination
     mov final_copy_count, #0
     mov output_tmp, output_tmp_base
-rej_uniform_eta4_final_copy:
+mld_rej_uniform_eta4_final_copy:
         ldr val0q, [output_tmp], #32
         ldr val2q, [output_tmp, #-16]
 
@@ -286,7 +286,7 @@ rej_uniform_eta4_final_copy:
         str val3q, [output, #-16]
         add final_copy_count, final_copy_count, #16
         cmp final_copy_count, #MLDSA_N
-        b.lt rej_uniform_eta4_final_copy
+        b.lt mld_rej_uniform_eta4_final_copy
 
     mov x0, count
     pop_stack
