@@ -63,7 +63,7 @@
  * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m7.s.
  * Further optimizations using SLOTHY are described in @[SLOTHYM7].
  */
-@ WARNING: These functions work only on little endian CPU with@ ARMv7m architecture (ARM Cortex-M3, ...).
+/* WARNING: These functions work only on little-endian Armv7-M CPUs. */
 
 #include "../../../../common.h"
 #if defined(MLD_FIPS202_ARMV81M_NEED_X1) &&  !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
