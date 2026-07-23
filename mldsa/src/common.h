@@ -276,16 +276,19 @@
  * resumes by re-invoking signing with the same inputs; the attempt hook,
  * together with MLD_CONFIG_SIGN_HOOK_RESUME, decides where to continue. */
 #define MLD_ERR_SIGNING_PAUSED (-5)
-
-/* Disjunction over the full set of MLD_ERR_XXX failure codes.
- *
- * Intended for use in top-level `ensures` clauses that admit every
- * possible error. Narrower contracts should enumerate only the
- * specific errors they can actually return. */
-#define MLD_ANY_ERROR(err)                                                  \
-  ((err) == MLD_ERR_FAIL || (err) == MLD_ERR_OUT_OF_MEMORY ||               \
-   (err) == MLD_ERR_RNG_FAIL || (err) == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || \
-   (err) == MLD_ERR_SIGNING_PAUSED)
+/* Signature verification failed: the signature is not valid for the given
+ * message and public key. Returned by the verification API. */
+#define MLD_ERR_INVALID_SIGNATURE (-6)
+/* Secret key validation failed: the secret key is malformed or internally
+ * inconsistent. Returned by pk_from_sk. */
+#define MLD_ERR_INVALID_KEY (-7)
+/* The Pairwise Consistency Test failed. Only possible when
+ * MLD_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
+ * pair failed its sign/verify self-test. */
+#define MLD_ERR_PCT_FAIL (-8)
+/* An argument was invalid, e.g. an unsupported pre-hash algorithm or a context
+ * string longer than 255 bytes. */
+#define MLD_ERR_INVALID_ARG (-9)
 
 
 #endif /* !__ASSEMBLER__ */

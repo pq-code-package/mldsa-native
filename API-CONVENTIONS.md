@@ -8,7 +8,7 @@ This document describes conventions shared by all public functions declared in [
 
 Functions returning `int` return `0` on success and a negative error code on failure. Error codes are enumerated as `MLD_ERR_XXX` constants in `mldsa_native.h`.
 
-Errors have different origins, and not all are fatal. For example, signature verification routines use `MLD_ERR_FAIL` to signal an invalid signature, and signing hooks use `MLD_ERR_SIGNING_PAUSED` to signal a paused signing operation. Other errors, such as `MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED` or `MLD_ERR_RNG_FAIL`, should never be observed in normal operation and hint at a deeper failure in the system.
+Errors have different origins, and not all are fatal. For example, signature verification routines use `MLD_ERR_INVALID_SIGNATURE` to signal an invalid signature, and signing hooks use `MLD_ERR_SIGNING_PAUSED` to signal a paused signing operation. Other errors, such as `MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED` or `MLD_ERR_RNG_FAIL`, should never be observed in normal operation and hint at a deeper failure in the system.
 
 Return values must always be checked; the public API is annotated with `warn_unused_result` on compilers that support it.
 

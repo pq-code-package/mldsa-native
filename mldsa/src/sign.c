@@ -60,7 +60,10 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY ||
+          return_value == MLD_ERR_RNG_FAIL ||
+          return_value == MLD_ERR_SIGNING_PAUSED ||
+          return_value == MLD_ERR_PCT_FAIL)
 );
 
 #if defined(MLD_CONFIG_KEYGEN_PCT)
@@ -83,7 +86,9 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @return 0 if the signature was successfully verified, non-zero otherwise.
+ * @return 0 if the signature was successfully verified, MLD_ERR_PCT_FAIL if
+ * the consistency check failed, or another MLD_ERR_XXX code if signing failed
+ * for another reason (e.g. MLD_ERR_OUT_OF_MEMORY).
  */
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
@@ -119,14 +124,29 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   }
 #endif /* MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
-  /* Verify the signature using the (potentially corrupted) public key */
+  /* Verify the signature using the (potentially corrupted) public key. */
   ret = mld_sign_verify(signature, message, sizeof(message), NULL, 0, pk_test,
                         context);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(pk_test, uint8_t, MLDSA_CRYPTO_PUBLICKEYBYTES, context);
   MLD_FREE(signature, uint8_t, MLDSA_CRYPTO_BYTES, context);
+
+  /* A failed signing operation or an invalid signature hint at a faulty
+   * implementation and map to a dedicated error code for PCT failure. */
+  if (ret == MLD_ERR_INVALID_SIGNATURE ||
+      ret == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)
+  {
+    ret = MLD_ERR_PCT_FAIL;
+  }
+
+  /* Other error codes, e.g. platform failures like out of memory of
+   * randomness failure, are passed on unmodified. */
 
   return ret;
 }
@@ -1081,7 +1101,7 @@ int mld_sign_signature(uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m,
                                                  MLD_PREHASH_NONE);
   if (pre_len == 0)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1190,10 +1210,11 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   mld_polyvecl_unpack_z(z, sig + MLDSA_SIG_Z_OFFSET);
 
   /* mld_polyvecl_chknorm signals failure through a single non-zero error code
-   * that's not yet aligned with MLD_ERR_XXX. Map it to MLD_ERR_FAIL. */
+   * that's not yet aligned with MLD_ERR_XXX. A norm-check failure here means
+   * the signature is invalid, so map it to MLD_ERR_INVALID_SIGNATURE. */
   if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_SIGNATURE;
     goto cleanup;
   }
 
@@ -1247,10 +1268,11 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
     mld_poly_invntt_tomont(w1);
     mld_poly_caddq(w1);
 
-    /* tmp = h_i (decoded and validated from signature) */
-    ret = mld_sig_unpack_hints(tmp, sig, i);
-    if (ret != 0)
+    /* tmp = h_i (decoded and validated from signature). A non-zero return
+     * means the hint encoding is malformed, i.e. the signature is invalid. */
+    if (mld_sig_unpack_hints(tmp, sig, i) != 0)
     {
+      ret = MLD_ERR_INVALID_SIGNATURE;
       goto cleanup;
     }
 
@@ -1268,7 +1290,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   /* Declassify the result of the verification. */
   MLD_CT_TESTING_DECLASSIFY(&cmp, sizeof(cmp));
 
-  ret = cmp == 0 ? 0 : MLD_ERR_FAIL;
+  ret = cmp == 0 ? 0 : MLD_ERR_INVALID_SIGNATURE;
 
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
@@ -1300,7 +1322,7 @@ int mld_sign_verify(const uint8_t sig[MLDSA_CRYPTO_BYTES], const uint8_t *m,
                                                  MLD_PREHASH_NONE);
   if (pre_len == 0)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1342,7 +1364,7 @@ int mld_sign_signature_pre_hash_internal(
 
   if (hashalg == MLD_PREHASH_NONE)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1350,7 +1372,7 @@ int mld_sign_signature_pre_hash_internal(
                                                  hashalg);
   if (pre_len == 0)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1389,7 +1411,7 @@ int mld_sign_verify_pre_hash_internal(
 
   if (hashalg == MLD_PREHASH_NONE)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1397,7 +1419,7 @@ int mld_sign_verify_pre_hash_internal(
                                                  hashalg);
   if (pre_len == 0)
   {
-    ret = MLD_ERR_FAIL;
+    ret = MLD_ERR_INVALID_ARG;
     goto cleanup;
   }
 
@@ -1641,7 +1663,7 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
 
   /* Declassify the final result of the validity check. */
   MLD_CT_TESTING_DECLASSIFY(&check, sizeof(check));
-  ret = (check != 0) ? MLD_ERR_FAIL : 0;
+  ret = (check != 0) ? MLD_ERR_INVALID_KEY : 0;
 
 cleanup:
 

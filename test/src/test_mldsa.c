@@ -144,9 +144,11 @@ static int test_sign_pre_hash(void)
 
   /* MLD_PREHASH_NONE must be rejected by the internal prehash APIs. */
   CHECK(mld_sign_verify_pre_hash_internal(sig, m, MLEN, ctx, CTXLEN, pk,
-                                          MLD_PREHASH_NONE) == MLD_ERR_FAIL);
+                                          MLD_PREHASH_NONE) ==
+        MLD_ERR_INVALID_ARG);
   CHECK(mld_sign_signature_pre_hash_internal(sig, m, MLEN, ctx, CTXLEN, rnd, sk,
-                                             MLD_PREHASH_NONE) == MLD_ERR_FAIL);
+                                             MLD_PREHASH_NONE) ==
+        MLD_ERR_INVALID_ARG);
 
   return 0;
 }
@@ -227,7 +229,7 @@ static int test_pk_from_sk(void)
   /* Constant time: Declassify to check result */
   MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
 
-  if (rc != -1)
+  if (rc != MLD_ERR_INVALID_KEY)
   {
     printf("ERROR: pk_from_sk - should fail with corrupted t0 in secret key\n");
     return 1;
@@ -244,7 +246,7 @@ static int test_pk_from_sk(void)
   /* Constant time: Declassify to check result */
   MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
 
-  if (rc != -1)
+  if (rc != MLD_ERR_INVALID_KEY)
   {
     printf(
         "ERROR: pk_from_sk - should fail with corrupted tr in "

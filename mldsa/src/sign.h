@@ -105,13 +105,16 @@
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The PCT's signing step exhausted
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations. Only possible when
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
- * @retval MLD_ERR_FAIL                    Other kinds of failure, including
- *                                         PCT failure if
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
+ * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
+ *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                         This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         is incompatible with
+ *                                         MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                         cannot be enabled simultaneously.
+ * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
+ *                                         the PCT check failed.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -125,7 +128,10 @@ __contract__(
   requires(memory_no_alias(seed, MLDSA_SEEDBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY ||
+          return_value == MLD_ERR_RNG_FAIL ||
+          return_value == MLD_ERR_SIGNING_PAUSED ||
+          return_value == MLD_ERR_PCT_FAIL)
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
@@ -148,13 +154,16 @@ __contract__(
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The PCT's signing step exhausted
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations. Only possible when
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
- * @retval MLD_ERR_FAIL                    Other kinds of failure, including
- *                                         PCT failure if
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
+ * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
+ *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                         This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         is incompatible with
+ *                                         MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                         cannot be enabled simultaneously.
+ * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
+ *                                         the PCT check failed.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -166,7 +175,10 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(object_whole(pk))
   assigns(object_whole(sk))
-  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY ||
+          return_value == MLD_ERR_RNG_FAIL ||
+          return_value == MLD_ERR_SIGNING_PAUSED ||
+          return_value == MLD_ERR_PCT_FAIL)
 );
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -213,7 +225,6 @@ __contract__(
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -234,7 +245,7 @@ __contract__(
   requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
   requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL ||
+  ensures(return_value == 0 ||
           return_value == MLD_ERR_OUT_OF_MEMORY ||
           return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
           return_value == MLD_ERR_SIGNING_PAUSED));
@@ -269,7 +280,10 @@ __contract__(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
+ * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                         bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -285,7 +299,12 @@ __contract__(
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY ||
+          return_value == MLD_ERR_RNG_FAIL ||
+          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
+          return_value == MLD_ERR_SIGNING_PAUSED ||
+          return_value == MLD_ERR_INVALID_ARG)
+  ensures((return_value == MLD_ERR_INVALID_ARG) ==> (ctxlen > 255))
 );
 
 /**
@@ -317,7 +336,8 @@ __contract__(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -330,7 +350,10 @@ __contract__(
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || MLD_ANY_ERROR(return_value))
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY ||
+          return_value == MLD_ERR_RNG_FAIL ||
+          return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
+          return_value == MLD_ERR_SIGNING_PAUSED)
 );
 
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
@@ -360,10 +383,11 @@ __contract__(
  *                       MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -381,7 +405,7 @@ __contract__(
   requires((externalmu == 0) ==> ((prelen == 0) || memory_no_alias(pre, prelen)))
   requires((externalmu != 0) ==> (mlen == MLDSA_CRHBYTES))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
@@ -400,10 +424,12 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -418,7 +444,8 @@ __contract__(
   requires(memory_no_alias(m, mlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE || return_value == MLD_ERR_INVALID_ARG || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures((return_value == MLD_ERR_INVALID_ARG) ==> (ctxlen > 255))
 );
 
 /**
@@ -437,10 +464,11 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -451,7 +479,7 @@ int mld_sign_verify_extmu(const uint8_t sig[MLDSA_CRYPTO_BYTES],
 __contract__(  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(mu, MLDSA_CRHBYTES))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
@@ -500,7 +528,10 @@ __contract__(  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_INVALID_ARG             The pre-hash algorithm was
+ *                                         MLD_PREHASH_NONE or unsupported, or
+ *                                         the context string exceeded 255
+ *                                         bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -518,7 +549,7 @@ __contract__(
   requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED)
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED || return_value == MLD_ERR_INVALID_ARG)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -550,10 +581,14 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The pre-hash algorithm was
+ *                                   MLD_PREHASH_NONE or unsupported, or the
+ *                                   context string exceeded 255 bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -569,7 +604,7 @@ __contract__(
   requires(memory_no_alias(ph, phlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE || return_value == MLD_ERR_INVALID_ARG || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -605,7 +640,8 @@ __contract__(
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                         bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -623,7 +659,7 @@ __contract__(
   requires(memory_no_alias(rnd, MLDSA_RNDBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED)
+  ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED || return_value == MLD_ERR_INVALID_ARG)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -645,10 +681,12 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -664,7 +702,7 @@ __contract__(
   requires(memory_no_alias(m, mlen))
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE || return_value == MLD_ERR_INVALID_ARG || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -745,7 +783,7 @@ __contract__(
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
  *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Secret key validation failed.
+ * @retval MLD_ERR_INVALID_KEY   Secret key validation failed.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -756,7 +794,7 @@ __contract__(
   requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL || return_value == MLD_ERR_OUT_OF_MEMORY)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_KEY || return_value == MLD_ERR_OUT_OF_MEMORY)
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */

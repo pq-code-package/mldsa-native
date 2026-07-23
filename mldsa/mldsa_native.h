@@ -95,7 +95,8 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition */
+/* Generic failure condition; used when none of the more specific error
+ * conditions apply. */
 #define MLD_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
@@ -113,6 +114,19 @@
  * resumes by re-invoking signing with the same inputs; the attempt hook,
  * together with MLD_CONFIG_SIGN_HOOK_RESUME, decides where to continue. */
 #define MLD_ERR_SIGNING_PAUSED (-5)
+/* Signature verification failed: the signature is not valid for the given
+ * message and public key. Returned by the verification API. */
+#define MLD_ERR_INVALID_SIGNATURE (-6)
+/* Secret key validation failed: the secret key is malformed or internally
+ * inconsistent. Returned by pk_from_sk. */
+#define MLD_ERR_INVALID_KEY (-7)
+/* The Pairwise Consistency Test failed. Only possible when
+ * MLD_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
+ * pair failed its sign/verify self-test. */
+#define MLD_ERR_PCT_FAIL (-8)
+/* An argument was invalid, e.g. an unsupported pre-hash algorithm or a context
+ * string longer than 255 bytes. */
+#define MLD_ERR_INVALID_ARG (-9)
 
 /********************* Namespacing and Qualifiers *****************************/
 
@@ -187,13 +201,16 @@ extern "C"
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The PCT's signing step exhausted
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations. Only possible when
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
- * @retval MLD_ERR_FAIL                    Other kinds of failure, including
- *                                         PCT failure if
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
+ * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
+ *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                         This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         is incompatible with
+ *                                         MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                         cannot be enabled simultaneously.
+ * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
+ *                                         the PCT check failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -227,11 +244,15 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The PCT's signing step exhausted
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations. Only possible when
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
- * @retval MLD_ERR_FAIL                    MLD_CONFIG_KEYGEN_PCT is enabled and
+ * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
+ *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                         This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         is incompatible with
+ *                                         MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                         cannot be enabled simultaneously.
+ * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
  *                                         the PCT check failed.
  */
 MLD_API_QUALIFIER
@@ -289,7 +310,6 @@ int MLD_API_NAMESPACE(keypair)(
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -337,7 +357,10 @@ int MLD_API_NAMESPACE(signature_internal)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
+ * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                         bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -380,7 +403,8 @@ int MLD_API_NAMESPACE(signature)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                         paused signing; re-invoke to resume.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -421,10 +445,11 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *                       MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -456,10 +481,12 @@ int MLD_API_NAMESPACE(verify_internal)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -490,10 +517,11 @@ int MLD_API_NAMESPACE(verify)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -569,7 +597,10 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_INVALID_ARG             The pre-hash algorithm was
+ *                                         MLD_PREHASH_NONE or unsupported, or
+ *                                         the context string exceeded 255
+ *                                         bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -615,10 +646,14 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The pre-hash algorithm was
+ *                                   MLD_PREHASH_NONE or unsupported, or the
+ *                                   context string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -668,7 +703,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *                                         iterations.
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_FAIL                    Other kinds of failure.
+ * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                         bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -704,10 +740,12 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Signature verification failed.
+ * @retval 0                         Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                   used and an allocation via
+ *                                   MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -788,7 +826,7 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
  * @retval 0                    Success.
  * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
  *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_FAIL          Secret key validation failed.
+ * @retval MLD_ERR_INVALID_KEY   Secret key validation failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
