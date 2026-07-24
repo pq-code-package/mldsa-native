@@ -652,15 +652,22 @@
  * Undefine macros from native code (FIPS202, Armv8.1-M)
  */
 /* mldsa/src/fips202/native/armv81m/mve.h */
+#undef MLD_FIPS202_ARMV81M_NEED_X1
 #undef MLD_FIPS202_ARMV81M_NEED_X4
 #undef MLD_FIPS202_NATIVE_ARMV81M
 #undef MLD_FIPS202_NATIVE_ARMV81M_MVE_H
+#undef MLD_USE_NATIVE_FIPS202_X1
+#undef MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES
+#undef MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES
 #undef MLD_USE_NATIVE_FIPS202_X4
 #undef MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
 #undef MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #undef mld_keccak_f1600_x4_native_impl
 /* mldsa/src/fips202/native/armv81m/src/fips202_native_armv81m.h */
 #undef MLD_FIPS202_NATIVE_ARMV81M_SRC_FIPS202_NATIVE_ARMV81M_H
+#undef mld_keccak_f1600_x1_armv7m_asm
+#undef mld_keccak_f1600_x1_state_extract_bytes_asm
+#undef mld_keccak_f1600_x1_state_xor_bytes_asm
 #undef mld_keccak_f1600_x4_mve_asm
 #undef mld_keccak_f1600_x4_state_extract_bytes_asm
 #undef mld_keccak_f1600_x4_state_xor_bytes_asm

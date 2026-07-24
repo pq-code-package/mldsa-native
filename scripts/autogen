@@ -4445,6 +4445,7 @@ def gen_abicheck():
     # HOL-Light proofs (armv81m). Shape matches hol_light_asm_joblist
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
+        ("keccak_f1600_x1_armv7m.S", "dev/fips202/armv81m/src", "", "armv81m"),
         ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m/src", "", "armv81m"),
     ]
     joblist = hol_light_asm_joblist() + joblist_abicheck_extra
