@@ -20,17 +20,18 @@
 
 typedef struct armv81m_register_state reg_state;
 
-void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
+void mld_keccak_f1600_x1_state_extract_bytes_asm(void *state, uint8_t *data,
+                                                 unsigned offset,
+                                                 unsigned length);
 
-int check_keccak_f1600_x1_armv7m_asm(void)
+int check_keccak_f1600_x1_state_extract_bytes_asm(void)
 {
   int test_iter;
   reg_state input_state, output_state;
   int violations;
   MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 state as even/odd 32-bit
                                     halves for each Keccak lane */
-  MLD_ALIGN uint8_t buf_r1[196]; /* 24 bit-interleaved round constants followed
-                                    by the 0xff loop terminator */
+  MLD_ALIGN uint8_t buf_r1[196]; /* Output bytes reconstructed from the state */
 
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
@@ -43,10 +44,13 @@ int check_keccak_f1600_x1_armv7m_asm(void)
     /* Set up register state for function arguments */
     input_state.gpr[0] = (uint32_t)buf_r0;
     input_state.gpr[1] = (uint32_t)buf_r1;
+    input_state.gpr[2] = 3;
+    input_state.gpr[3] = 196;
 
     /* Call function through ABI test stub */
-    call_stub_armv81m(&input_state, &output_state,
-                      (void (*)(void))mld_keccak_f1600_x1_armv7m_asm);
+    call_stub_armv81m(
+        &input_state, &output_state,
+        (void (*)(void))mld_keccak_f1600_x1_state_extract_bytes_asm);
 
     /* Check ABI compliance */
     violations = check_armv81m_aapcs32_compliance(&input_state, &output_state,
@@ -54,8 +58,8 @@ int check_keccak_f1600_x1_armv7m_asm(void)
     if (violations > 0)
     {
       fprintf(stderr,
-              "ABI test FAILED for keccak_f1600_x1_armv7m_asm (iteration %d): "
-              "%d violations\n",
+              "ABI test FAILED for keccak_f1600_x1_state_extract_bytes_asm "
+              "(iteration %d): %d violations\n",
               test_iter + 1, violations);
       return MLD_ABICHECK_FAILED;
     }

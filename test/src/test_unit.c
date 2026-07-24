@@ -64,55 +64,84 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
+#if defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
+static void keccakf1600_xor_bytes_ref(uint64_t *state,
+                                      const unsigned char *data,
+                                      unsigned offset, unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    state[lane] ^= (uint64_t)data[i] << shift;
+  }
+}
+
+static void keccakf1600_extract_bytes_ref(const uint64_t *state,
+                                          unsigned char *data, unsigned offset,
+                                          unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    data[i] = (unsigned char)(state[lane] >> shift);
+  }
+}
+
 #if defined(MLD_USE_NATIVE_FIPS202_X1)
-static void print_u64_array(const char *label, const uint64_t *array,
-                            size_t len)
+static void print_keccak_state_bytes(const char *label,
+                                     const unsigned char *state_bytes,
+                                     size_t len)
 {
   size_t i;
   fprintf(stderr, "%s:\n", label);
   for (i = 0; i < len; i++)
   {
-    if (i % 4 == 0)
+    if (i % sizeof(uint64_t) == 0)
     {
       fprintf(stderr, "  ");
     }
-    fprintf(stderr, "%016llx", (unsigned long long)array[i]);
-    if (i % 4 == 3)
+    fprintf(stderr, "%02x", state_bytes[i]);
+    if (i % sizeof(uint64_t) == sizeof(uint64_t) - 1)
     {
       fprintf(stderr, "\n");
     }
-    else
-    {
-      fprintf(stderr, " ");
-    }
   }
-  if (len % 4 != 0)
+  if (len % sizeof(uint64_t) != 0)
   {
     fprintf(stderr, "\n");
   }
 }
 
-static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
-                              unsigned len, const char *test_name)
+static int compare_keccak_state_bytes(const unsigned char *got,
+                                      const unsigned char *expected, size_t len,
+                                      const char *test_name)
 {
-  unsigned i;
+  size_t i;
   for (i = 0; i < len; i++)
   {
-    if (a[i] != b[i])
+    if (got[i] != expected[i])
     {
       fprintf(stderr, "FAIL: %s\n", test_name);
-      fprintf(
-          stderr,
-          "  First difference at index %u: got=0x%016llx, expected=0x%016llx\n",
-          i, (unsigned long long)a[i], (unsigned long long)b[i]);
-      print_u64_array("Got", a, len);
-      print_u64_array("Expected", b, len);
+      fprintf(stderr,
+              "  First difference at byte %lu: got=0x%02x, expected=0x%02x\n",
+              (unsigned long)i, (unsigned)got[i], (unsigned)expected[i]);
+      print_keccak_state_bytes("Got extracted state", got, len);
+      print_keccak_state_bytes("Expected extracted state", expected, len);
       return 0;
     }
   }
   return 1;
 }
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
+#endif /* MLD_USE_NATIVE_FIPS202_X1 || MLD_USE_NATIVE_FIPS202_X4 */
 
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
     defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||                    \
@@ -1018,8 +1047,14 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X1
 static int test_keccakf1600_permute(void)
 {
+  static const unsigned offsets[] = {0, 0, 3, 3, 3, 7, 8, 8, 197, 200};
+  static const unsigned lengths[] = {0, 1, 1, 5, 13, 193, 8, 9, 3, 0};
   int ret = 1;
   int i;
+  unsigned char input[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  unsigned char xor_data[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  unsigned char output[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  unsigned char output_ref[MLD_KECCAK_LANES * sizeof(uint64_t)];
   MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_ALLOC(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
 
@@ -1028,16 +1063,49 @@ static int test_keccakf1600_permute(void)
     goto cleanup;
   }
 
+  /* Cover zero-length, partial-lane, full-lane, and end-boundary paths. */
+  randombytes(input, sizeof(input));
+  randombytes(xor_data, sizeof(xor_data));
+  for (i = 0; i < (int)(sizeof(offsets) / sizeof(offsets[0])); i++)
+  {
+    memset(state, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+    memset(state_ref, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+
+    mld_keccakf1600_xor_bytes(state, input, 0, sizeof(input));
+    keccakf1600_xor_bytes_ref(state_ref, input, 0, sizeof(input));
+    mld_keccakf1600_xor_bytes(state, xor_data, offsets[i], lengths[i]);
+    keccakf1600_xor_bytes_ref(state_ref, xor_data, offsets[i], lengths[i]);
+
+    mld_keccakf1600_extract_bytes(state, output, 0, sizeof(output));
+    keccakf1600_extract_bytes_ref(state_ref, output_ref, 0, sizeof(output_ref));
+    CHECK(compare_keccak_state_bytes(output, output_ref, sizeof(output),
+                                     "keccakf1600_xor_bytes"));
+
+    memset(output, 0xa5, sizeof(output));
+    memset(output_ref, 0xa5, sizeof(output_ref));
+    mld_keccakf1600_extract_bytes(state, output, offsets[i], lengths[i]);
+    keccakf1600_extract_bytes_ref(state_ref, output_ref, offsets[i],
+                                  lengths[i]);
+    CHECK(compare_keccak_state_bytes(output, output_ref, sizeof(output),
+                                     "keccakf1600_extract_bytes"));
+  }
+
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
-    randombytes((uint8_t *)state, MLD_KECCAK_LANES * sizeof(uint64_t));
-    memcpy(state_ref, state, MLD_KECCAK_LANES * sizeof(uint64_t));
+    randombytes(input, sizeof(input));
+    memset(state, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+    memset(state_ref, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
+
+    mld_keccakf1600_xor_bytes(state, input, 0, sizeof(input));
+    keccakf1600_xor_bytes_ref(state_ref, input, 0, sizeof(input));
 
     mld_keccakf1600_permute(state);
     mld_keccakf1600_permute_c(state_ref);
 
-    CHECK(compare_u64_arrays(state, state_ref, MLD_KECCAK_LANES,
-                             "keccakf1600_permute"));
+    mld_keccakf1600_extract_bytes(state, output, 0, sizeof(output));
+    keccakf1600_extract_bytes_ref(state_ref, output_ref, 0, sizeof(output_ref));
+    CHECK(compare_keccak_state_bytes(output, output_ref, sizeof(output),
+                                     "keccakf1600_permute"));
   }
 
   ret = 0;
@@ -1105,9 +1173,9 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
       memset(state_x1, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-      mld_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
+      keccakf1600_xor_bytes_ref(state_x1, input[j], xor_offset, xor_length);
       mld_keccakf1600_permute_c(state_x1);
-      mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
+      keccakf1600_extract_bytes_ref(state_x1, output_x1, ext_offset,
                                     ext_length);
 
       CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
