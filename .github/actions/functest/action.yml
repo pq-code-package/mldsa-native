@@ -69,6 +69,9 @@ inputs:
   rng_fail:
     description: Determine whether to run rng fail tests or not
     default: "true"
+  abicheck:
+    description: Determine whether to run ABI compliance tests or not
+    default: "true"
   extra_args:
     description: Additional arguments to pass to the tests script
     default: ""
@@ -93,6 +96,7 @@ runs:
           echo ALLOC="${{ inputs.alloc == 'true' && 'alloc' || 'no-alloc' }}" >> $GITHUB_ENV
           echo SIGN_HOOK="${{ inputs.sign_hook == 'true' && 'sign-hook' || 'no-sign-hook' }}" >> $GITHUB_ENV
           echo RNGFAIL="${{ inputs.rng_fail == 'true' && 'rng-fail' || 'no-rng-fail' }}" >> $GITHUB_ENV
+          echo ABICHECK="${{ inputs.abicheck == 'true' && 'abicheck' || 'no-abicheck' }}" >> $GITHUB_ENV
       - name: Setup nix
         uses: ./.github/actions/setup-shell
         with:
@@ -129,7 +133,7 @@ runs:
           GH_TOKEN: ${{ inputs.gh_token }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.SIGN_HOOK }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
+          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.SIGN_HOOK }} --${{ env.RNGFAIL }} --${{ env.ABICHECK }} -v ${{ inputs.extra_args }}
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
