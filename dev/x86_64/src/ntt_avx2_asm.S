@@ -43,9 +43,28 @@
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#include "consts.h"
+
 /* simpasm: header-end */
 
-#include "consts.h"
+.if MLD_AVX2_BACKEND_DATA_OFFSET_8XQ != 0
+.error "Update ntt_avx2_asm.S qdata displacements for 8XQ"
+.endif
+.if MLD_AVX2_BACKEND_DATA_OFFSET_8XQINV != 8
+.error "Update ntt_avx2_asm.S qdata displacements for 8XQINV"
+.endif
+.if MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV_QINV != 16
+.error "Update ntt_avx2_asm.S qdata displacements for 8XDIV_QINV"
+.endif
+.if MLD_AVX2_BACKEND_DATA_OFFSET_8XDIV != 24
+.error "Update ntt_avx2_asm.S qdata displacements for 8XDIV"
+.endif
+.if MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS_QINV != 32
+.error "Update ntt_avx2_asm.S qdata displacements for ZETAS_QINV"
+.endif
+.if MLD_AVX2_BACKEND_DATA_OFFSET_ZETAS != 328
+.error "Update ntt_avx2_asm.S qdata displacements for ZETAS"
+.endif
 
 .macro shuffle8 r0, r1, r2, r3
 vperm2i128 $0x20,%ymm\r1,%ymm\r0,%ymm\r2

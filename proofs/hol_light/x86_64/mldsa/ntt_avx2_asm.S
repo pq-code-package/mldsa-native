@@ -41,6 +41,7 @@
 */
 
 
+
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
  *   dev/x86_64/src/ntt_avx2_asm.S using scripts/simpasm. Do not modify it directly.

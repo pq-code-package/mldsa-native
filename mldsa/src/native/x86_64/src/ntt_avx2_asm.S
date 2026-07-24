@@ -43,6 +43,8 @@
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#include "consts.h"
+
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
