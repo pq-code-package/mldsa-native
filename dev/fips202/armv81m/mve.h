@@ -10,15 +10,51 @@
 #define MLD_FIPS202_NATIVE_ARMV81M
 
 /* Part of backend API */
+#define MLD_USE_NATIVE_FIPS202_X1
+#define MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES
+#define MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES
 #define MLD_USE_NATIVE_FIPS202_X4
 #define MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #define MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
 /* Guard for assembly file */
+#define MLD_FIPS202_ARMV81M_NEED_X1
 #define MLD_FIPS202_ARMV81M_NEED_X4
 
 #if !defined(__ASSEMBLER__)
 #include "../api.h"
 #include "src/fips202_native_armv81m.h"
+
+/*
+ * Native x1 permutation.
+ * The x1 xor/extract hooks keep the state bit-interleaved between operations.
+ */
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
+{
+  mld_keccak_f1600_x1_armv7m_asm((uint32_t *)state,
+                                 mld_keccakf1600_round_constants);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_xor_bytes_x1_native(uint64_t *state,
+                                                          const uint8_t *data,
+                                                          unsigned offset,
+                                                          unsigned length)
+{
+  mld_keccak_f1600_x1_state_xor_bytes_asm(state, data, offset, length);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_extract_bytes_x1_native(uint64_t *state,
+                                                              uint8_t *data,
+                                                              unsigned offset,
+                                                              unsigned length)
+{
+  mld_keccak_f1600_x1_state_extract_bytes_asm(state, data, offset, length);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
 
 /*
  * Native x4 permutation

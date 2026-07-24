@@ -109,6 +109,21 @@
   - Klein, Fabien
   url: https://eprint.iacr.org/2022/1303
 
+- id: ADOMNICAI23
+  name: "An update on Keccak performance on ARMv7-M"
+  author: Adomnicai, Alexandre
+  url: https://eprint.iacr.org/2023/773
+
+- id: XKCP
+  name: eXtended Keccak Code Package
+  author:
+  - Bertoni, Guido
+  - Daemen, Joan
+  - Peeters, Michaël
+  - Van Assche, Gilles
+  - Van Keer, Ronny
+  url: https://github.com/XKCP/XKCP
+
 - id: NeonNTT
   name: "Neon NTT: Faster Dilithium, Kyber, and Saber on Cortex-A72 and Apple M1"
   year: 2022
