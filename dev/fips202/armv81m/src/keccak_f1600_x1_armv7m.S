@@ -44,6 +44,11 @@
       permissions: read
       c_parameter: const uint32_t rc[49]
       description: 24 bit-interleaved round constants followed by the 0xff loop terminator
+      test_bytes:
+        192: 0xff
+        193: 0x00
+        194: 0x00
+        195: 0x00
   Stack:
     bytes: 64
     description: register preservation (40 bytes) and scalar scratch storage (24 bytes)

@@ -36,6 +36,20 @@ source code and documentation.
 * Referenced from:
   - [README.md](README.md)
 
+### `ADOMNICAI23`
+
+* An update on Keccak performance on ARMv7-M
+* Author(s):
+  - Alexandre Adomnicai
+* URL: https://eprint.iacr.org/2023/773
+* Referenced from:
+  - [dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [dev/fips202/armv81m/src/state_extract_bytes_x1_armv7m.S](dev/fips202/armv81m/src/state_extract_bytes_x1_armv7m.S)
+  - [dev/fips202/armv81m/src/state_xor_bytes_x1_armv7m.S](dev/fips202/armv81m/src/state_xor_bytes_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/state_extract_bytes_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/state_extract_bytes_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/state_xor_bytes_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/state_xor_bytes_x1_armv7m.S)
+
 ### `ArmARMv8M`
 
 * Armv8-M Architecture Reference Manual (DDI 0553)
@@ -403,6 +417,24 @@ source code and documentation.
 * Referenced from:
   - [test/abicheck/README.md](test/abicheck/README.md)
   - [test/abicheck/x86_64/abicheck_x86_64.c](test/abicheck/x86_64/abicheck_x86_64.c)
+
+### `XKCP`
+
+* eXtended Keccak Code Package
+* Author(s):
+  - Guido Bertoni
+  - Joan Daemen
+  - Michaël Peeters
+  - Gilles Van Assche
+  - Ronny Van Keer
+* URL: https://github.com/XKCP/XKCP
+* Referenced from:
+  - [dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [dev/fips202/armv81m/src/state_extract_bytes_x1_armv7m.S](dev/fips202/armv81m/src/state_extract_bytes_x1_armv7m.S)
+  - [dev/fips202/armv81m/src/state_xor_bytes_x1_armv7m.S](dev/fips202/armv81m/src/state_xor_bytes_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/state_extract_bytes_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/state_extract_bytes_x1_armv7m.S)
+  - [mldsa/src/fips202/native/armv81m/src/state_xor_bytes_x1_armv7m.S](mldsa/src/fips202/native/armv81m/src/state_xor_bytes_x1_armv7m.S)
 
 ### `libmceliece`
 
