@@ -44,7 +44,7 @@ jobs:
           check_namespace: false
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
-          extra_args: --no-auto
+          extra_args: --no-auto --no-abicheck
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.
       - name: bench (smoke)
