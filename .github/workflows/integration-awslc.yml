@@ -152,7 +152,7 @@ jobs:
         run: |
           cd "$AWSLC_DIR"
           if [ -f "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch" ]; then
-            git apply $"GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch"
+            git apply "$GITHUB_WORKSPACE/integration/aws-lc/pre_import.patch"
           fi
       - name: Run importer
         run: |

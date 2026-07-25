@@ -1847,7 +1847,15 @@ def get_all_files():
     r = subprocess.run(["git", "ls-files"], capture_output=True, text=True)
     assert r.returncode == 0
     files = r.stdout.split("\n")
-    files = filter(lambda s: s != "" and pathlib.Path(s).is_symlink() is False, files)
+    # Skip symlinks and patch files.
+    files = filter(
+        lambda s: (
+            s != ""
+            and pathlib.Path(s).is_symlink() is False
+            and not s.endswith(".patch")
+        ),
+        files,
+    )
     return files
 
 
@@ -2401,8 +2409,8 @@ def check_macro_typos():
             if rest.startswith("\\") or m in ["MLD_XXX", "MLD_SOURCE_XXX"]:
                 return True
 
-        # 5. AWS-LC post-import patch
-        if is_autogen or filename == "integration/aws-lc/post_import.patch":
+        # 5. autogen references macros in codegen templates/comments.
+        if is_autogen:
             return True
 
         if (
