@@ -258,7 +258,8 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition */
+/* Generic failure condition; used when none of the more specific error
+ * conditions apply. */
 #define MLD_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */

@@ -628,7 +628,7 @@ void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
  *
  * Set this option if such a check should be implemented.
  * In this case, keypair_internal and
- * keypair will return a non-zero error code if the
+ * keypair will return MLD_ERR_PCT_FAIL if the
  * PCT failed.
  *
  * @note This feature will drastically lower the performance of

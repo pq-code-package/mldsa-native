@@ -86,9 +86,13 @@ __contract__(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @return 0 if the signature was successfully verified, MLD_ERR_PCT_FAIL if
- * the consistency check failed, or another MLD_ERR_XXX code if signing failed
- * for another reason (e.g. MLD_ERR_OUT_OF_MEMORY).
+ * @retval 0                      Success.
+ * @retval MLD_ERR_OUT_OF_MEMORY  MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
+ *                                allocation via MLD_CUSTOM_ALLOC returned NULL.
+ * @retval MLD_ERR_RNG_FAIL       Random number generation failed.
+ * @retval MLD_ERR_SIGNING_PAUSED The PCT's signing step was paused by a
+ *                                MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ * @retval MLD_ERR_PCT_FAIL       The consistency check failed.
  */
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                          uint8_t const sk[MLDSA_CRYPTO_SECRETKEYBYTES],
@@ -145,7 +149,7 @@ cleanup:
     ret = MLD_ERR_PCT_FAIL;
   }
 
-  /* Other error codes, e.g. platform failures like out of memory of
+  /* Other error codes, e.g. platform failures like out of memory or
    * randomness failure, are passed on unmodified. */
 
   return ret;

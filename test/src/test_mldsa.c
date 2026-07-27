@@ -289,7 +289,7 @@ static int test_wrong_pk(void)
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
 
-  if (!rc)
+  if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_pk: verify\n");
     return 1;
@@ -326,7 +326,7 @@ static int test_wrong_sig(void)
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
 
-  if (!rc)
+  if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_sig: verify\n");
     return 1;
@@ -364,7 +364,7 @@ static int test_wrong_ctx(void)
   /* Constant time: Declassify outputs to check them. */
   MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
 
-  if (!rc)
+  if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_ctx: verify\n");
     return 1;

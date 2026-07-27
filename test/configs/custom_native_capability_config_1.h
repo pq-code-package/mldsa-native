@@ -626,7 +626,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
  *
  * Set this option if such a check should be implemented.
  * In this case, keypair_internal and
- * keypair will return a non-zero error code if the
+ * keypair will return MLD_ERR_PCT_FAIL if the
  * PCT failed.
  *
  * @note This feature will drastically lower the performance of
