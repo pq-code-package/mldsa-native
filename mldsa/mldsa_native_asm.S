@@ -119,7 +119,6 @@
 #undef MLD_FIPS202_ARMV81M_CLEAN_HELPERS_ONLY
 #endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S"
-#include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
 #include "src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S"
 #include "src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S"

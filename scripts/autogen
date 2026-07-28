@@ -1952,7 +1952,11 @@ def native_fips202_x86_64(c):
 
 
 def native_fips202_armv81m(c):
-    return native_fips202(c) and armv81m(c)
+    return (
+        native_fips202(c)
+        and armv81m(c)
+        and not c.endswith("/keccak_f1600_x1_armv7m_opt_m7.S")
+    )
 
 
 def native_fips202_core(c):

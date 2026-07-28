@@ -45,6 +45,7 @@ source code and documentation.
 * Referenced from:
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
 
 ### `ArmARMv8M`
@@ -393,6 +394,7 @@ source code and documentation.
 * Referenced from:
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
 
 ### `SLOTHY_Paper`
@@ -441,6 +443,7 @@ source code and documentation.
 * Referenced from:
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
   - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
 
 ### `libmceliece`
