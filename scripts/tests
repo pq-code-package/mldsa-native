@@ -560,6 +560,11 @@ class Tests:
         log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
 
         args = ["make", test_type.make_run_target(scheme)]
+        # run_abicheck is conditional on OPT in the Makefile. Keep its run
+        # invocation aligned with the build; otherwise a Zephyr platform's
+        # OPT=0 default turns this into an empty, successful target.
+        if test_type == TEST_TYPES.ABICHECK:
+            args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
         if test_type.is_benchmark() is False and test_type.is_example() is False:
             args += self.make_j()
         if test_type.make_dir() != "":

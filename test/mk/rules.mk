@@ -148,9 +148,8 @@ $(BUILD_DIR)/mldsa87/sign_hook/%.S.o: %.S $(CONFIG)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
 
 $(BUILD_DIR)/abicheck/bin/%: $(CONFIG)
-	$(Q)echo "  LD      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(LD) $(LDFLAGS) -o $@ $(filter %.o,$^) $(LDLIBS)
+	$(Q)$(LINK)
 
 $(BUILD_DIR)/abicheck/%.c.o: %.c $(CONFIG)
 	$(Q)echo "  CC      $@"
@@ -161,4 +160,3 @@ $(BUILD_DIR)/abicheck/%.S.o: %.S $(CONFIG)
 	$(Q)echo "  AS      $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
-

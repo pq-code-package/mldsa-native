@@ -13,15 +13,17 @@ project(mldsa_native_zephyr)
 #                        ZEPHYR_NATIVE_ROOT, space separated
 #   ZEPHYR_TEST_CFLAGS - the test binary's CFLAGS (see below); includes the
 #                        parameter set (-DMLD_CONFIG_PARAMETER_SET=...)
+#   ZEPHYR_ABICHECK    - build the standalone ABI checker sources without the
+#                        normal mldsa amalgamation
 set(R ${ZEPHYR_NATIVE_ROOT})
 
 separate_arguments(_test_srcs UNIX_COMMAND "${ZEPHYR_TEST_SRCS}")
 list(TRANSFORM _test_srcs PREPEND ${R}/)
 
-target_sources(app PRIVATE
-  ${R}/mldsa/mldsa_native.c
-  ${_test_srcs}
-)
+target_sources(app PRIVATE ${_test_srcs})
+if(NOT ZEPHYR_ABICHECK)
+  target_sources(app PRIVATE ${R}/mldsa/mldsa_native.c)
+endif()
 
 target_include_directories(app PRIVATE
   ${R}/mldsa
@@ -93,14 +95,14 @@ set_property(SOURCE ${R}/mldsa/mldsa_native.c ${_test_srcs} ${_zephyr_shim}
 # Optional native FIPS202 backend (e.g. Armv8.1-M MVE on Cortex-M55). The
 # monolithic mldsa_native.c already includes the backend C sources; its
 # assembly counterpart comes from mldsa_native_asm.S.
-if(ZEPHYR_FIPS202_BACKEND)
+if(ZEPHYR_FIPS202_BACKEND AND NOT ZEPHYR_ABICHECK)
   target_sources(app PRIVATE ${R}/mldsa/mldsa_native_asm.S)
   target_compile_definitions(app PRIVATE
     MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
     "MLD_CONFIG_FIPS202_BACKEND_FILE=\"${ZEPHYR_FIPS202_BACKEND}\"")
 endif()
 
-# Each test brings its own int main(void); rename it so the selected Zephyr
+# Each test brings its own main(); rename it so the selected Zephyr
 # shim owns main() and can return the test's exit code through the target's
 # runner. Only the test entrypoint in ZEPHYR_TEST_SRCS defines main(); the
 # support sources (notrandombytes, hal) don't, so applying the define to all is
