@@ -177,16 +177,10 @@ endif
 # ABI checker
 ABICHECK_DIR = $(BUILD_DIR)/abicheck
 
-# Map $(ARCH) to the abicheck per-arch subdir name. For most architectures
-# the subdir matches $(ARCH); one exception:
-#   - arm-none-eabi- targets: $(ARCH) = arm (a generic label for the
-#     bare-metal Cortex-M family). The abicheck subdir is the more specific
-#     armv81m.
-ifeq ($(ARCH),arm)
-ABICHECK_ARCH := armv81m
-else
-ABICHECK_ARCH := $(ARCH)
-endif
+# A platform can select the ABI independently of make's host/cross ARCH (for
+# example, Zephyr owns its target toolchain). Otherwise, use the architecture
+# inferred from the compiler prefix.
+ABICHECK_ARCH ?= $(ARCH)
 
 ABICHECK_SOURCES = test/abicheck/abicheck.c test/abicheck/selftest.c
 ABICHECK_SOURCES += $(wildcard test/abicheck/$(ABICHECK_ARCH)/abicheck_$(ABICHECK_ARCH).c)
@@ -268,4 +262,15 @@ ifneq ($(EXTRA_SOURCES),)
 $(ABICHECK_EXTRA_OBJS): CFLAGS += $(EXTRA_SOURCES_CFLAGS)
 endif
 
+ifndef CUSTOM_BUILD
 $(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_OBJS) $(ABICHECK_EXTRA_OBJS)
+else
+# Custom builds compile sources through their own build system. Pass the ABI
+# checker inputs and flags through the same interface as the other tests, and
+# mark this as a standalone checker so the platform does not add libmldsa.
+$(ABICHECK_DIR)/bin/abicheck: CUSTOM_BUILD_ABICHECK := 1
+$(ABICHECK_DIR)/bin/abicheck: TEST_SRCS += $(ABICHECK_ALL_SOURCES)
+$(ABICHECK_DIR)/bin/abicheck: CFLAGS += \
+	$(ABICHECK_ASM_CFLAGS) $(ABICHECK_FULL_API_CFLAGS)
+$(ABICHECK_DIR)/bin/abicheck: $(ABICHECK_ALL_SOURCES) $(CUSTOM_BUILD_DEPS)
+endif

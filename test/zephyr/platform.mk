@@ -36,6 +36,10 @@ ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
 ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve.h
 
+# Zephyr owns target selection, so do not infer its ABI from make's host ARCH.
+ZEPHYR_ABICHECK_ARCH_mps3-an547 := armv81m
+ABICHECK_ARCH := $(strip $(ZEPHYR_ABICHECK_ARCH_$(ZEPHYR_TARGET)))
+
 ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547 nucleo-n657x0-q
 
 ZEPHYR_BOARD := $(ZEPHYR_BOARD_$(ZEPHYR_TARGET))
@@ -120,6 +124,7 @@ ZEPHYR_TEST_CFLAGS = $(subst \",\\\",$(patsubst -Imldsa,-I$(abspath mldsa),$(CFL
 ZEPHYR_CMAKE_ENV := env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS
 
 CUSTOM_BUILD = \
+	$(if $(CUSTOM_BUILD_ABICHECK),$(if $(ABICHECK_ARCH),,$(error ABI checking is not supported for ZEPHYR_TARGET=$(ZEPHYR_TARGET)))) \
 	echo "  ZEPHYR  $(ZEPHYR_TARGET): $(notdir $@)" && \
 	$(ZEPHYR_CMAKE_ENV) cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
 		-DBOARD=$(ZEPHYR_BOARD) \
@@ -127,6 +132,7 @@ CUSTOM_BUILD = \
 		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
 		-DZEPHYR_TEST_CFLAGS="$(ZEPHYR_TEST_CFLAGS)" \
 		-DZEPHYR_FIPS202_BACKEND=$(ZEPHYR_FIPS202_BACKEND) \
+		-DZEPHYR_ABICHECK=$(if $(CUSTOM_BUILD_ABICHECK),ON,OFF) \
 		$(if $(ZEPHYR_FIPS202_BACKEND),-DCONFIG_FIPS202_MVE_BACKEND=y) \
 		$(ZEPHYR_TARGET_CMAKE_ARGS) \
 		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
