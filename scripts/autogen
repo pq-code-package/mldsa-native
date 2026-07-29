@@ -1952,11 +1952,7 @@ def native_fips202_x86_64(c):
 
 
 def native_fips202_armv81m(c):
-    return (
-        native_fips202(c)
-        and armv81m(c)
-        and not c.endswith("/keccak_f1600_x1_armv7m_opt_m7.S")
-    )
+    return native_fips202(c) and armv81m(c)
 
 
 def native_fips202_core(c):
@@ -2330,6 +2326,8 @@ def get_config_options():
 def check_macro_typos_in_file(filename, macro_check):
     """Checks for typos in MLD_XXX and MLDSA_XXX identifiers."""
     content = read_file(filename)
+    if content is None:
+        return
 
     # Separate check for wrongly ported MLK/MLKEM macros
     for m in _RE_MLKEM_MACRO_CHECK.finditer(content):
@@ -3097,10 +3095,21 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
     return basename
 
 
-def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
+def synchronize_backend(
+    in_dir,
+    out_dir,
+    delete=False,
+    no_simplify=False,
+    excluded_basenames=(),
+    **kwargs,
+):
     copied = []
 
-    files = get_files(os.path.join(in_dir, "*"))
+    files = [
+        f
+        for f in get_files(os.path.join(in_dir, "*"))
+        if os.path.basename(f) not in excluded_basenames
+    ]
     pool_results = run_parallel(
         files,
         partial(
@@ -3230,6 +3239,7 @@ def synchronize_backends(
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
+        excluded_basenames=("keccak_f1600_x1_armv7m_opt_m7.S",),
         cflags="-Idev/fips202/armv81m_opt/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
     )
     synchronize_backend(
@@ -3412,12 +3422,84 @@ def gen_slothy(funcs):
         else:
             base = "dev/aarch64_opt/src"
 
-        # Remove file(s) to be re-generated
-        if t.endswith(".S"):
-            subprocess.run(["rm", "-f", f"{base}/{t}"])
+        output = f"{base}/{t}"
 
-        p = subprocess.run(["make", t] + ["-C", base])
-        if p.returncode != 0:
+        # Preserve the physical output so a failed or interrupted generator
+        # invocation does not leave the tracked file missing.
+        try:
+            with open(output, "r") as f:
+                output_before = f.read()
+            # Ensure update_file retains the pre-generation content as the
+            # original value used by finalization bookkeeping.
+            read_file(output)
+        except FileNotFoundError:
+            output_before = None
+
+        # Earlier autogen steps update assembly in the in-memory file cache,
+        # while SLOTHY and make read from disk. Materialize those pending
+        # updates before invoking the external generator so it sees the same
+        # sources that the remainder of autogen will synchronize.
+        with _file_cache_lock:
+            cached_asm = [
+                (filename, data["content"])
+                for filename, data in _file_cache.items()
+                if filename != output
+                and filename.endswith((".S", ".s"))
+                and data["content"] is not None
+                and data["content"] != data["original"]
+            ]
+
+        materialized = []
+        for filename, content in cached_asm:
+            try:
+                with open(filename, "r") as f:
+                    content_before = f.read()
+            except FileNotFoundError:
+                content_before = None
+            if content_before == content:
+                continue
+            materialized.append((filename, content_before))
+            with open(filename, "w") as f:
+                f.write(content)
+
+        generated = False
+        try:
+            try:
+                os.remove(output)
+            except FileNotFoundError:
+                pass
+
+            p = subprocess.run(["make", t] + ["-C", base])
+            if p.returncode == 0:
+                # make replaced the physical output, so replace the stale
+                # cached content before later validation and synchronization.
+                with open(output, "r") as f:
+                    update_file(output, f.read())
+                generated = True
+        finally:
+            # Pending source edits belong to autogen's cache until finalize().
+            # Restore their prior physical contents after the external tool.
+            for filename, content_before in materialized:
+                if content_before is None:
+                    try:
+                        os.remove(filename)
+                    except FileNotFoundError:
+                        pass
+                else:
+                    with open(filename, "w") as f:
+                        f.write(content_before)
+
+            if not generated:
+                if output_before is None:
+                    try:
+                        os.remove(output)
+                    except FileNotFoundError:
+                        pass
+                else:
+                    with open(output, "w") as f:
+                        f.write(output_before)
+
+        if not generated:
             print(f"Failed to run SLOTHY on {t}!")
             exit(1)
 

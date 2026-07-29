@@ -107,6 +107,12 @@ def main():
 
     slothy.config.timeout = 1000
 
+    if args.target == "m55":
+        # Match the accepted paired-theta/no-hoist Cortex-M55 schedule policy.
+        slothy.config.split_heuristic_preprocess_naive_interleaving = False
+        slothy.config.split_heuristic_estimate_performance = False
+        slothy.config.retry_timeout = 1000
+
     slothy.load_source_from_file(args.input)
     slothy.optimize(
         start="keccak_f1600_x1_armv7m_asm_slothy_start",

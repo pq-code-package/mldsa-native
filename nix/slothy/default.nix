@@ -12,7 +12,7 @@
 # pkgs.slothy
 
 pkgs.slothy.overrideAttrs (old: rec {
-  version = "f60a8d7436d133e81c7bbd1c6a9729f50c06a6e6";
+  version = "e47c046447c3ecb506eb831484ea519426619c18";
   src = pkgs.fetchFromGitHub {
     owner = "slothy-optimizer";
     repo = "slothy";

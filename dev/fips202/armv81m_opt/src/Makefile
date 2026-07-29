@@ -11,7 +11,7 @@ all: keccak_f1600_x1_armv7m_opt_m7.S keccak_f1600_x1_armv7m_opt_m55.S
 keccak_f1600_x1_armv7m_opt_m7.S: ../../armv81m_clean/src/keccak_f1600_x1_armv7m.S $(SLOTHY_KECCAK_M4)
 	$(PYTHON) $(SLOTHY_KECCAK_M4) --target m7 $< $@
 
-keccak_f1600_x1_armv7m_opt_m55.S: ../../armv81m_clean/src/keccak_f1600_x1_armv7m.S $(SLOTHY_KECCAK_M4)
+keccak_f1600_x1_armv7m_opt_m55.S: naive/keccak_f1600_x1_armv7m_m55.S $(SLOTHY_KECCAK_M4)
 	$(PYTHON) $(SLOTHY_KECCAK_M4) --target m55 $< $@
 
 clean:
