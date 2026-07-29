@@ -61,6 +61,7 @@ ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKE
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
 ZEPHYR_ACTIVE_TARGET := $(BUILD_DIR)/zephyr/.active-target
+ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
 ZEPHYR_APP_INPUTS := \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
@@ -79,14 +80,15 @@ ZEPHYR_TARGET_CMAKE_ARGS := $(if $(ZEPHYR_IS_NUCLEO_N657X0_Q),\
 
 # Test binary output paths are shared across ZEPHYR_TARGET values, while the
 # CMake build directory is target-specific. Keep a lightweight marker containing
-# the last requested target, and only touch it when the target changes. Binaries
-# depending on this marker are then rebuilt after a target switch without
-# forcing a clean rebuild when the target is unchanged.
+# the last requested target/backend configuration, and only touch it when that
+# configuration changes. Binaries depending on this marker are then rebuilt
+# after a target or OPT/backend switch without forcing a clean rebuild when the
+# configuration is unchanged.
 .PHONY: zephyr_target_marker_force
 $(ZEPHYR_ACTIVE_TARGET): zephyr_target_marker_force
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)if [ ! -f $@ ] || [ "$$(cat $@)" != "$(ZEPHYR_TARGET)" ]; then \
-		echo "$(ZEPHYR_TARGET)" > $@; \
+	$(Q)if [ ! -f $@ ] || [ "$$(cat $@)" != "$(ZEPHYR_BUILD_KEY)" ]; then \
+		echo "$(ZEPHYR_BUILD_KEY)" > $@; \
 	fi
 
 # Per-binary CMake build dir, keyed on $(notdir $@) so binaries build in
@@ -99,9 +101,11 @@ CFLAGS += -DMLD_CONFIG_REDUCE_RAM
 
 # Shrink the test iteration counts (the sources default them higher, sized for
 # native hardware): QEMU is far slower. On CFLAGS so they forward below.
-CFLAGS += -DNTESTS=3 \
+NTESTS ?= 3
+NUM_RANDOM_TESTS ?= 100
+CFLAGS += -DNTESTS=$(NTESTS) \
 	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
-	-DNUM_RANDOM_TESTS=100
+	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
 
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
@@ -139,7 +143,8 @@ CUSTOM_BUILD = \
 # active-target marker. components.mk attaches CUSTOM_BUILD_DEPS to every test
 # binary (in its CUSTOM_BUILD branch), so a CMakeLists/shim/overlay edit or a
 # target switch forces a rebuild. Set here (before components.mk is included).
-CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS)
+CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS) \
+	$(if $(ZEPHYR_FIPS202_BACKEND),mldsa/mldsa_native_asm.S)
 
 ifeq ($(ZEPHYR_IS_NUCLEO_N657X0_Q),)
 EXEC_WRAPPER := $(abspath $(PLATFORM_PATH)/exec_wrapper.py)
