@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../mldsa/src/fips202/keccakf1600.h"
 #include "../../mldsa/src/poly.h"
 #include "../../mldsa/src/poly_kl.h"
 #include "../../mldsa/src/polyvec.h"
@@ -72,6 +73,7 @@ static int bench(void)
 {
   MLD_ALIGN int32_t data0[256];
   MLD_ALIGN int32_t data1[256];
+  MLD_ALIGN uint64_t keccak_state[MLD_KECCAK_LANES] = {0};
   MLD_ALIGN mld_poly poly_out;
   MLD_ALIGN mld_polyvecl polyvecl_a, polyvecl_b;
   MLD_ALIGN mld_polymat polymat;
@@ -79,6 +81,8 @@ static int bench(void)
   unsigned i, j;
   uint64_t t0, t1;
   uint32_t chknorm_acc = 0;
+
+  BENCH("keccak_f1600_x1", mld_keccakf1600_permute(keccak_state))
 
   /* ntt */
   BENCH("poly_ntt", mld_poly_ntt((mld_poly *)data0))
