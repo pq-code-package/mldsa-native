@@ -26,8 +26,8 @@ subsection \<open>C and AVX2 implementations\<close>
 
 text \<open>
   The C reference \<^file>\<open>../../../mldsa/src/rounding.h\<close> and AVX2 implementations
-  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_32_avx2_asm.S\<close> and
-  \<^file>\<open>../../../dev/x86_64/src/poly_decompose_88_avx2_asm.S\<close>
+  \<^file>\<open>../../../dev/x86_64/src/mldsa_poly_decompose_32_avx2_asm.S\<close> and
+  \<^file>\<open>../../../dev/x86_64/src/mldsa_poly_decompose_88_avx2_asm.S\<close>
   first compute \<^verbatim>\<open>ceil(f / 128)\<close>, then Barrett divide by \<^verbatim>\<open>B = 2*GAMMA2 / 128\<close>.
 \<close>
 
@@ -45,8 +45,8 @@ subsection \<open>AArch64 implementation\<close>
 
 text \<open>
   The AArch64 implementations
-  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_32_aarch64_asm.S\<close> and
-  \<^file>\<open>../../../dev/aarch64_clean/src/poly_decompose_88_aarch64_asm.S\<close>
+  \<^file>\<open>../../../dev/aarch64_clean/src/mldsa_poly_decompose_32_aarch64_asm.S\<close> and
+  \<^file>\<open>../../../dev/aarch64_clean/src/mldsa_poly_decompose_88_aarch64_asm.S\<close>
   Barrett divide directly by \<^verbatim>\<open>2*GAMMA2\<close> using \<^verbatim>\<open>sqdmulh\<close> and \<^verbatim>\<open>srshr\<close>.
 \<close>
 

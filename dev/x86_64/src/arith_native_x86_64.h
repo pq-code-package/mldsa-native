@@ -35,7 +35,7 @@ MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[256][8];
 MLD_SYSV_ABI
 void mld_ntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/ntt_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_ntt_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   /* check-magic: 8380417 == MLDSA_Q */
@@ -51,7 +51,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_invntt_avx2_asm(int32_t *r, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/intt_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_intt_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
@@ -66,7 +66,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_nttunpack_avx2_asm(int32_t *r)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/nttunpack_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_nttunpack_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, 8380417))
@@ -79,7 +79,7 @@ __contract__(
 
 #define mld_rej_uniform_avx2_asm MLD_NAMESPACE(rej_uniform_avx2_asm)
 /* This contract must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/rej_uniform_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_avx2_asm.ml */
 MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
 unsigned mld_rej_uniform_avx2_asm(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_BUFLEN],
@@ -96,7 +96,7 @@ __contract__(
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #define mld_rej_uniform_eta2_avx2_asm MLD_NAMESPACE(rej_uniform_eta2_avx2_asm)
 /* This contract must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/rej_uniform_eta2_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_eta2_avx2_asm.ml */
 MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
 unsigned mld_rej_uniform_eta2_avx2_asm(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA2_BUFLEN],
@@ -112,7 +112,7 @@ __contract__(
 
 #define mld_rej_uniform_eta4_avx2_asm MLD_NAMESPACE(rej_uniform_eta4_avx2_asm)
 /* This contract must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/rej_uniform_eta4_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_eta4_avx2_asm.ml */
 MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
 unsigned mld_rej_uniform_eta4_avx2_asm(
     int32_t *r, const uint8_t buf[MLD_AVX2_REJ_UNIFORM_ETA4_BUFLEN],
@@ -132,7 +132,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_poly_decompose_32_avx2_asm(int32_t *a1, int32_t *a0)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_decompose_32_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_decompose_32_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
@@ -149,7 +149,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_poly_decompose_88_avx2_asm(int32_t *a1, int32_t *a0)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_decompose_88_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_decompose_88_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a1, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a0, sizeof(int32_t) * MLDSA_N))
@@ -167,7 +167,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_poly_caddq_avx2_asm(int32_t *r)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_caddq_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_caddq_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
@@ -180,7 +180,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_poly_use_hint_32_avx2_asm(int32_t *a, const int32_t *h)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_use_hint_32_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_use_hint_32_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
@@ -195,7 +195,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_poly_use_hint_88_avx2_asm(int32_t *a, const int32_t *h)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_use_hint_88_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_use_hint_88_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
@@ -211,7 +211,7 @@ __contract__(
 MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
 int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/poly_chknorm_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_poly_chknorm_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
@@ -227,7 +227,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_polyz_unpack_17_avx2_asm(int32_t *r, const uint8_t *a)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/polyz_unpack_17_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_polyz_unpack_17_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, 576))
@@ -239,7 +239,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_polyz_unpack_19_avx2_asm(int32_t *r, const uint8_t *a)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/polyz_unpack_19_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_polyz_unpack_19_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, 640))
@@ -252,7 +252,7 @@ __contract__(
 MLD_SYSV_ABI
 void mld_pointwise_avx2_asm(int32_t *a, const int32_t *b, const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/pointwise_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
@@ -274,7 +274,7 @@ void mld_pointwise_acc_l4_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t b[4][MLDSA_N],
                                    const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/pointwise_acc_l4_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l4_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 4 * MLDSA_N))
@@ -294,7 +294,7 @@ void mld_pointwise_acc_l5_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t b[5][MLDSA_N],
                                    const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/pointwise_acc_l5_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l5_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 5 * MLDSA_N))
@@ -314,7 +314,7 @@ void mld_pointwise_acc_l7_avx2_asm(int32_t c[MLDSA_N],
                                    const int32_t b[7][MLDSA_N],
                                    const int32_t *qdata)
 /* This must be kept in sync with the HOL-Light specification
- * in proofs/hol_light/x86_64/proofs/pointwise_acc_l7_avx2_asm.ml */
+ * in proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l7_avx2_asm.ml */
 __contract__(
   requires(memory_no_alias(c, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(a, sizeof(int32_t) * 7 * MLDSA_N))

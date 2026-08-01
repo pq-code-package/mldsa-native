@@ -43,9 +43,9 @@ the human author owning architecture, abstractions, and editorial control.
 The kernels analysed here are the modular-arithmetic primitives used inside
 the AArch64 NTT and pointwise-multiplication assembly under
 [`mldsa/src/native/aarch64/src/`](../../../mldsa/src/native/aarch64/src/) —
-in particular `ntt_aarch64_asm.S`, `intt_aarch64_asm.S`,
-`pointwise_montgomery_aarch64_asm.S`, and the
-`mld_polyvecl_pointwise_acc_montgomery_l{4,5,7}_aarch64_asm.S` variants.
+in particular `mldsa_ntt_aarch64_asm.S`, `mldsa_intt_aarch64_asm.S`,
+`mldsa_pointwise_montgomery_aarch64_asm.S`, and the
+`mldsa_polyvecl_pointwise_acc_montgomery_l{4,5,7}_aarch64_asm.S` variants.
 
 The proofs are stated against an abstract word model assumed to match the
 Armv8-A semantics; agreement of the model with actual silicon is

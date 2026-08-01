@@ -66,8 +66,8 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light'
           script: |
-            make -C proofs/hol_light/aarch64 mldsa/poly_caddq_aarch64_asm.o
-            echo 'needs "aarch64/proofs/poly_caddq_aarch64_asm.ml";;' | hol.sh
+            make -C proofs/hol_light/aarch64 mldsa/mldsa_poly_caddq_aarch64_asm.o
+            echo 'needs "aarch64/proofs/mldsa_poly_caddq_aarch64_asm.ml";;' | hol.sh
   hol_light_proofs:
     needs: [ check_modified_files, hol_light_bytecode ]
     strategy:
@@ -75,29 +75,29 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: ntt_aarch64_asm
+          - name: mldsa_ntt_aarch64_asm
             needs: ["mldsa_specs.ml", "mldsa_zetas.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: intt_aarch64_asm
+          - name: mldsa_intt_aarch64_asm
             needs: ["mldsa_specs.ml", "mldsa_zetas.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: pointwise_montgomery_aarch64_asm
+          - name: mldsa_pointwise_montgomery_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
+          - name: mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm
+          - name: mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm
+          - name: mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_caddq_aarch64_asm
+          - name: mldsa_poly_caddq_aarch64_asm
             needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_chknorm_aarch64_asm
+          - name: mldsa_poly_chknorm_aarch64_asm
             needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_use_hint_32_aarch64_asm
+          - name: mldsa_poly_use_hint_32_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_use_hint_88_aarch64_asm
+          - name: mldsa_poly_use_hint_88_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
-          - name: rej_uniform_eta2_aarch64_asm
+          - name: mldsa_rej_uniform_eta2_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
-          - name: rej_uniform_eta4_aarch64_asm
+          - name: mldsa_rej_uniform_eta4_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
             needs: ["keccak_spec.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
@@ -109,15 +109,15 @@ jobs:
             needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
             needs: ["keccak_spec.ml", "keccak_utils.ml", "keccak_constants.ml", "subroutine_signatures.ml"]
-          - name: polyz_unpack_17_aarch64_asm
+          - name: mldsa_polyz_unpack_17_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_polyz_unpack_consts.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
-          - name: polyz_unpack_19_aarch64_asm
+          - name: mldsa_polyz_unpack_19_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_polyz_unpack_consts.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
-          - name: poly_decompose_32_aarch64_asm
+          - name: mldsa_poly_decompose_32_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
-          - name: poly_decompose_88_aarch64_asm
+          - name: mldsa_poly_decompose_88_aarch64_asm
             needs: ["aarch64_utils.ml", "mldsa_specs.ml", "subroutine_signatures.ml"]
-          - name: rej_uniform_aarch64_asm
+          - name: mldsa_rej_uniform_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_table.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-24.04-arm
@@ -188,8 +188,8 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             # TODO: Enable when we have a cheaper proof
-            # make -C proofs/hol_light/x86_64 mldsa/ntt_avx2_asm.o
-            # echo 'needs "x86_64/proofs/ntt_avx2_asm.ml";;' | hol.sh
+            # make -C proofs/hol_light/x86_64 mldsa/mldsa_ntt_avx2_asm.o
+            # echo 'needs "x86_64/proofs/mldsa_ntt_avx2_asm.ml";;' | hol.sh
             echo 'needs "x86/proofs/base.ml";; needs "common/mldsa_specs.ml";; #quit;;' | hol.sh
   hol_light_proofs_x86_64:
     needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
@@ -198,43 +198,43 @@ jobs:
       matrix:
         proof:
           # Dependencies on {name}.{S,ml} are implicit
-          - name: poly_caddq_avx2_asm
+          - name: mldsa_poly_caddq_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_chknorm_avx2_asm
+          - name: mldsa_poly_chknorm_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_decompose_32_avx2_asm
+          - name: mldsa_poly_decompose_32_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_decompose_88_avx2_asm
+          - name: mldsa_poly_decompose_88_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: polyz_unpack_17_avx2_asm
+          - name: mldsa_polyz_unpack_17_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: polyz_unpack_19_avx2_asm
+          - name: mldsa_polyz_unpack_19_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_use_hint_32_avx2_asm
+          - name: mldsa_poly_use_hint_32_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: poly_use_hint_88_avx2_asm
+          - name: mldsa_poly_use_hint_88_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
-          - name: ntt_avx2_asm
+          - name: mldsa_ntt_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
-          - name: intt_avx2_asm
+          - name: mldsa_intt_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
-          - name: rej_uniform_avx2_asm
+          - name: mldsa_rej_uniform_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_rej_uniform_table.ml"]
-          - name: nttunpack_avx2_asm
+          - name: mldsa_nttunpack_avx2_asm
             needs: ["mldsa_specs.ml", "subroutine_signatures.ml"]
-          - name: pointwise_avx2_asm
+          - name: mldsa_pointwise_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
-          - name: pointwise_acc_l4_avx2_asm
+          - name: mldsa_pointwise_acc_l4_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
-          - name: pointwise_acc_l5_avx2_asm
+          - name: mldsa_pointwise_acc_l5_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
-          - name: pointwise_acc_l7_avx2_asm
+          - name: mldsa_pointwise_acc_l7_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_avx2_asm
             needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
-          - name: rej_uniform_eta2_avx2_asm
+          - name: mldsa_rej_uniform_eta2_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_rej_uniform_table.ml", "subroutine_signatures.ml"]
-          - name: rej_uniform_eta4_avx2_asm
+          - name: mldsa_rej_uniform_eta4_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_rej_uniform_table.ml", "subroutine_signatures.ml"]
     name: x86_64 HOL Light proof for ${{ matrix.proof.name }}.S
     runs-on: ubuntu-latest

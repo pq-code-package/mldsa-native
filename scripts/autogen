@@ -2768,67 +2768,67 @@ def hol_light_asm_joblist():
     aarch64_flags = "-march=armv8.4-a+sha3"
     joblist_aarch64 = [
         (
-            "ntt_aarch64_asm.S",
+            "mldsa_ntt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "intt_aarch64_asm.S",
+            "mldsa_intt_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_caddq_aarch64_asm.S",
+            "mldsa_poly_caddq_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_chknorm_aarch64_asm.S",
+            "mldsa_poly_chknorm_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_decompose_32_aarch64_asm.S",
+            "mldsa_poly_decompose_32_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_decompose_88_aarch64_asm.S",
+            "mldsa_poly_decompose_88_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_use_hint_32_aarch64_asm.S",
+            "mldsa_poly_use_hint_32_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "poly_use_hint_88_aarch64_asm.S",
+            "mldsa_poly_use_hint_88_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S",
+            "mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S",
+            "mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S",
+            "mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
@@ -2864,37 +2864,37 @@ def hol_light_asm_joblist():
             "aarch64",
         ),
         (
-            "pointwise_montgomery_aarch64_asm.S",
+            "mldsa_pointwise_montgomery_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "polyz_unpack_17_aarch64_asm.S",
+            "mldsa_polyz_unpack_17_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "polyz_unpack_19_aarch64_asm.S",
+            "mldsa_polyz_unpack_19_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "rej_uniform_aarch64_asm.S",
+            "mldsa_rej_uniform_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "rej_uniform_eta2_aarch64_asm.S",
+            "mldsa_rej_uniform_eta2_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
         ),
         (
-            "rej_uniform_eta4_aarch64_asm.S",
+            "mldsa_rej_uniform_eta4_aarch64_asm.S",
             "dev/aarch64_opt/src",
             f"-Imldsa/src/native/aarch64/src {aarch64_flags}",
             "aarch64",
@@ -2904,97 +2904,97 @@ def hol_light_asm_joblist():
     x86_64_flags = "-mavx2 -mbmi2 -msse4 -fcf-protection=full"
     joblist_x86_64 = [
         (
-            "poly_caddq_avx2_asm.S",
+            "mldsa_poly_caddq_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_chknorm_avx2_asm.S",
+            "mldsa_poly_chknorm_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_use_hint_32_avx2_asm.S",
+            "mldsa_poly_use_hint_32_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_use_hint_88_avx2_asm.S",
+            "mldsa_poly_use_hint_88_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "ntt_avx2_asm.S",
+            "mldsa_ntt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "intt_avx2_asm.S",
+            "mldsa_intt_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "nttunpack_avx2_asm.S",
+            "mldsa_nttunpack_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "rej_uniform_avx2_asm.S",
+            "mldsa_rej_uniform_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "pointwise_avx2_asm.S",
+            "mldsa_pointwise_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompose_32_avx2_asm.S",
+            "mldsa_poly_decompose_32_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "poly_decompose_88_avx2_asm.S",
+            "mldsa_poly_decompose_88_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyz_unpack_17_avx2_asm.S",
+            "mldsa_polyz_unpack_17_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "polyz_unpack_19_avx2_asm.S",
+            "mldsa_polyz_unpack_19_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "pointwise_acc_l4_avx2_asm.S",
+            "mldsa_pointwise_acc_l4_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "pointwise_acc_l5_avx2_asm.S",
+            "mldsa_pointwise_acc_l5_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
         ),
         (
-            "pointwise_acc_l7_avx2_asm.S",
+            "mldsa_pointwise_acc_l7_avx2_asm.S",
             "dev/x86_64/src",
             f"-Imldsa/src/native/x86_64/src -Imldsa/src/common.h {x86_64_flags}",
             "x86_64",
@@ -3006,13 +3006,13 @@ def hol_light_asm_joblist():
             "x86_64",
         ),
         (
-            "rej_uniform_eta4_avx2_asm.S",
+            "mldsa_rej_uniform_eta4_avx2_asm.S",
             "dev/x86_64/src",
             f"-DMLD_ARITH_BACKEND_X86_64_DEFAULT -Imldsa/src/native/x86_64/src -Icommon {x86_64_flags}",
             "x86_64",
         ),
         (
-            "rej_uniform_eta2_avx2_asm.S",
+            "mldsa_rej_uniform_eta2_avx2_asm.S",
             "dev/x86_64/src",
             f"-DMLD_ARITH_BACKEND_X86_64_DEFAULT -Imldsa/src/native/x86_64/src -Icommon {x86_64_flags}",
             "x86_64",
@@ -3396,17 +3396,20 @@ def gen_slothy(funcs):
     if not isinstance(funcs, list):
         return
 
-    targets = list(map(lambda s: s + ".S", funcs))
-
-    for t in targets:
-        if t.startswith("keccak"):
+    for func in funcs:
+        if func.startswith("keccak"):
+            # FIPS202 assembly is already self-identifying via its `keccak_`
+            # name and carries no `mldsa_` prefix.
             base = "dev/fips202/aarch64/src"
+            t = func + ".S"
         else:
+            # Arithmetic assembly carries the `mldsa_` filename prefix, while
+            # the YAML `Name:` (and hence the exported symbol) stays unprefixed.
             base = "dev/aarch64_opt/src"
+            t = "mldsa_" + func + ".S"
 
         # Remove file(s) to be re-generated
-        if t.endswith(".S"):
-            subprocess.run(["rm", "-f", f"{base}/{t}"])
+        subprocess.run(["rm", "-f", f"{base}/{t}"])
 
         p = subprocess.run(["make", t] + ["-C", base])
         if p.returncode != 0:
@@ -4302,8 +4305,8 @@ ABI_CAPS = {
             # Shipped MVE helpers pulled in by the abicheck wildcard but
             # not registered as ABI-tested kernels - they still need MVE
             # CFLAGS to assemble.
-            "mldsa/src/fips202/native/armv81m/src/state_extract_bytes_x4_mve.S",
-            "mldsa/src/fips202/native/armv81m/src/state_xor_bytes_x4_mve.S",
+            "mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S",
+            "mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S",
         ],
     },
 }
@@ -4846,9 +4849,9 @@ def _main():
     slothy_choices = [
         "ntt_aarch64_asm",
         "intt_aarch64_asm",
-        "mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm",
-        "mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm",
-        "mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm",
+        "polyvecl_pointwise_acc_montgomery_l4_aarch64_asm",
+        "polyvecl_pointwise_acc_montgomery_l5_aarch64_asm",
+        "polyvecl_pointwise_acc_montgomery_l7_aarch64_asm",
         "pointwise_montgomery_aarch64_asm",
         "poly_caddq_aarch64_asm",
         "poly_chknorm_aarch64_asm",

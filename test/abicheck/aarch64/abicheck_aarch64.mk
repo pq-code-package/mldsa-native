@@ -23,23 +23,23 @@ ABICHECK_REQ_NEON_FILES := \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/intt_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/ntt_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/pointwise_montgomery_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_caddq_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_chknorm_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_decompose_32_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_decompose_88_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_use_hint_32_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/poly_use_hint_88_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/polyz_unpack_17_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/polyz_unpack_19_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/rej_uniform_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/rej_uniform_eta2_aarch64_asm.S \
-  mldsa/src/native/aarch64/src/rej_uniform_eta4_aarch64_asm.S
+  mldsa/src/native/aarch64/src/mldsa_intt_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_ntt_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_pointwise_montgomery_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_caddq_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_chknorm_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_decompose_32_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_decompose_88_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_use_hint_32_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_poly_use_hint_88_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_polyz_unpack_17_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_polyz_unpack_19_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_rej_uniform_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_rej_uniform_eta2_aarch64_asm.S \
+  mldsa/src/native/aarch64/src/mldsa_rej_uniform_eta4_aarch64_asm.S
 ABICHECK_REQ_NEON_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_NEON_FILES))
 $(ABICHECK_REQ_NEON_OBJS): CFLAGS += -march=armv8-a+simd
 
