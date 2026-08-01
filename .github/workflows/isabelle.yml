@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     container: makarius/isabelle:Isabelle2025-2
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build Compress session
         run: /home/isabelle/Isabelle/bin/isabelle build -D proofs/isabelle/compress
   neon_ntt:
@@ -25,7 +25,7 @@ jobs:
       image: makarius/isabelle:Isabelle2025-2_ARM_X11_Latex
       options: --user root
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install conformance build tools and missing TeX packages
         run: |
           apt-get update
@@ -55,7 +55,7 @@ jobs:
     name: Isabelle proofs (nix shell)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-shell
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
