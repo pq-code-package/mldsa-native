@@ -49,7 +49,8 @@
 
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
-    !defined(MLD_CONFIG_NO_VERIFY_API)
+    !defined(MLD_CONFIG_NO_VERIFY_API) &&                                      \
+    !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
                           uint8_t sk[MLDSA_SK_BYTES],
                           uint8_t sig[MLDSA_SIG_BYTES], uint8_t m[MLEN],
@@ -195,7 +196,7 @@ static int test_sign_empty_message(void)
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
-          !MLD_CONFIG_NO_VERIFY_API */
+          !MLD_CONFIG_NO_VERIFY_API && !MLD_CONFIG_NO_RANDOMIZED_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_pk_from_sk(void)
@@ -204,10 +205,14 @@ static int test_pk_from_sk(void)
   uint8_t pk_derived[MLDSA_PK_BYTES];
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t sk_corrupted[MLDSA_SK_BYTES];
+  uint8_t seed[MLDSA_SEEDBYTES];
   int rc;
 
-  /* Generate a keypair */
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  /* Generate a keypair. Drive the internal entry point so that this test
+   * also runs when the randomized API is disabled. */
+  CHECK(randombytes(seed, MLDSA_SEEDBYTES) == 0);
+  MLD_CT_TESTING_SECRET(seed, MLDSA_SEEDBYTES);
+  CHECK(mld_sign_keypair_internal(pk, sk, seed) == 0);
 
   /* Derive public key from secret key */
   CHECK(mld_sign_pk_from_sk(pk_derived, sk) == 0);
@@ -259,7 +264,8 @@ static int test_pk_from_sk(void)
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
-    !defined(MLD_CONFIG_NO_VERIFY_API)
+    !defined(MLD_CONFIG_NO_VERIFY_API) &&                                      \
+    !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_wrong_pk(void)
 {
   uint8_t pk[MLDSA_PK_BYTES];
@@ -372,7 +378,7 @@ static int test_wrong_ctx(void)
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
-          !MLD_CONFIG_NO_VERIFY_API */
+          !MLD_CONFIG_NO_VERIFY_API && !MLD_CONFIG_NO_RANDOMIZED_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int test_sign_expected_keypair(void)
@@ -381,8 +387,9 @@ static int test_sign_expected_keypair(void)
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t test_vector_sk_copy[MLDSA_SK_BYTES];
 
-  randombytes_reset();
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  /* test_vector_rnd is the seed the deterministic test RNG hands out, so the
+   * internal entry point must reproduce the same keypair. */
+  CHECK(mld_sign_keypair_internal(pk, sk, test_vector_rnd) == 0);
 
   /* Declassify sk's for comparison. This is for testing purposes only.
    * Don't declassify the test_vector_sk itself because we need it to stay
@@ -402,15 +409,14 @@ static int test_sign_expected_keypair(void)
 static int test_sign_expected_sign(void)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
+  uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* (0, ctxlen, ctx) */
 
-  /* WARNING: Test-only
-   * Normally, you would seed a PRNG _once_ with trustworthy entropy
-   * and not reseed it afterwards. Here, we reseed to make tests
-   * independent and reproducible. */
-  randombytes_reset();
-  CHECK_SIGN_RC(mld_sign_signature(
-      sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
-      (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN, test_vector_sk));
+  pre[0] = 0;
+  pre[1] = TEST_VECTOR_CTX_LEN;
+  memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
+  CHECK_SIGN_RC(mld_sign_signature_internal(
+      sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN, pre,
+      sizeof(pre), test_vector_rnd, test_vector_sk, 0));
   CHECK(memcmp(sig, test_vector_sig, MLDSA_SIG_BYTES) == 0);
 
   return 0;
@@ -480,7 +486,8 @@ int main(void)
   {
     r = 0;
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
-    !defined(MLD_CONFIG_NO_VERIFY_API)
+    !defined(MLD_CONFIG_NO_VERIFY_API) &&                                      \
+    !defined(MLD_CONFIG_NO_RANDOMIZED_API)
     r |= test_sign();
     r |= test_sign_unaligned();
     r |= test_wrong_pk();
@@ -490,7 +497,7 @@ int main(void)
     r |= test_sign_pre_hash();
     r |= test_sign_empty_message();
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_NO_SIGN_API && \
-          !MLD_CONFIG_NO_VERIFY_API */
+          !MLD_CONFIG_NO_VERIFY_API && !MLD_CONFIG_NO_RANDOMIZED_API */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
     r |= test_pk_from_sk();
 #endif

@@ -10,15 +10,23 @@
 
 #include "test_namespace.h"
 
+/*
+ * We measure the internal deterministic entry points rather than the
+ * randomized wrappers: they are available in every configuration, so the
+ * same measurements are taken under reduced-API builds such as
+ * MLD_CONFIG_NO_RANDOMIZED_API. The randomized wrappers merely add a seed
+ * buffer and a randombytes() call on top.
+ */
 static void test_keygen_only(void)
 {
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
   unsigned char pk[MLDSA_PK_BYTES];
   unsigned char sk[MLDSA_SK_BYTES];
+  unsigned char seed[MLDSA_SEEDBYTES] = {0};
 
-  /* Only call keypair - this is what we're measuring */
-  /* Uses the notrandombytes implementation for deterministic randomness */
-  int ret = mld_sign_keypair(pk, sk);
+  /* Only call keypair_internal - this is what we're measuring */
+  /* seed is zero-initialized; its value is irrelevant for stack measurement */
+  int ret = mld_sign_keypair_internal(pk, sk, seed);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_KEYPAIR_API */
   printf("keygen test skipped (API disabled)\n");
@@ -30,13 +38,21 @@ static void test_sign_only(void)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
   unsigned char sk[MLDSA_SK_BYTES] = {0};
   unsigned char sig[MLDSA_SIG_BYTES];
+  unsigned char rnd[MLDSA_RNDBYTES] = {0};
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
+  unsigned char pre[2 + sizeof(ctx) - 1];
+  int ret;
 
-  /* Only call signature - this is what we're measuring */
+  /* Prepare pre = (0, ctxlen, ctx) */
+  pre[0] = 0;
+  pre[1] = sizeof(ctx) - 1;
+  memcpy(pre + 2, ctx, sizeof(ctx) - 1);
+
+  /* Only call signature_internal - this is what we're measuring */
   /* sk is zero-initialized (invalid key, but OK for stack measurement) */
-  int ret =
-      mld_sign_signature(sig, msg, sizeof(msg) - 1, ctx, sizeof(ctx) - 1, sk);
+  ret = mld_sign_signature_internal(sig, msg, sizeof(msg) - 1, pre, sizeof(pre),
+                                    rnd, sk, 0);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_SIGN_API */
   printf("sign test skipped (API disabled)\n");

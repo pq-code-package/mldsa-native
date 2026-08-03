@@ -32,8 +32,16 @@ static int example_mldsa44_keygen(void)
   uint8_t pk[MLDSA44_PUBLICKEYBYTES];
   uint8_t sk[MLDSA44_SECRETKEYBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mldsa44_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_44, MLDSA44_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_44, MLDSA44_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  CHECK(mldsa44_keypair_internal(pk, sk, test_vector_rnd) == 0);
   CHECK(memcmp(pk, test_vector_pk_44, MLDSA44_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_44, MLDSA44_SECRETKEYBYTES) == 0);
   printf("DONE\n");
@@ -45,8 +53,16 @@ static int example_mldsa65_keygen(void)
   uint8_t pk[MLDSA65_PUBLICKEYBYTES];
   uint8_t sk[MLDSA65_SECRETKEYBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mldsa65_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_65, MLDSA65_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_65, MLDSA65_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  CHECK(mldsa65_keypair_internal(pk, sk, test_vector_rnd) == 0);
   CHECK(memcmp(pk, test_vector_pk_65, MLDSA65_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_65, MLDSA65_SECRETKEYBYTES) == 0);
   printf("DONE\n");
@@ -58,8 +74,16 @@ static int example_mldsa87_keygen(void)
   uint8_t pk[MLDSA87_PUBLICKEYBYTES];
   uint8_t sk[MLDSA87_SECRETKEYBYTES];
 
-  printf("  Generating keypair... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Generating keypair (randomized)... ");
   CHECK(mldsa87_keypair(pk, sk) == 0);
+  CHECK(memcmp(pk, test_vector_pk_87, MLDSA87_PUBLICKEYBYTES) == 0);
+  CHECK(memcmp(sk, test_vector_sk_87, MLDSA87_SECRETKEYBYTES) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Generating keypair (deterministic)... ");
+  CHECK(mldsa87_keypair_internal(pk, sk, test_vector_rnd) == 0);
   CHECK(memcmp(pk, test_vector_pk_87, MLDSA87_PUBLICKEYBYTES) == 0);
   CHECK(memcmp(sk, test_vector_sk_87, MLDSA87_SECRETKEYBYTES) == 0);
   printf("DONE\n");
@@ -89,11 +113,24 @@ static int example_mldsa87_keygen(void)
 static int example_mldsa44_sign(void)
 {
   uint8_t sig[MLDSA44_BYTES];
+  uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* (0, ctxlen, ctx) */
 
-  printf("  Signing message... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Signing message (randomized)... ");
   CHECK(mldsa44_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_44) == 0);
+  CHECK(memcmp(sig, test_vector_sig_44, sizeof(test_vector_sig_44)) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Signing message (deterministic)... ");
+  pre[0] = 0;
+  pre[1] = TEST_VECTOR_CTX_LEN;
+  memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
+  CHECK(mldsa44_signature_internal(sig, (const uint8_t *)TEST_VECTOR_MSG,
+                                   TEST_VECTOR_MSG_LEN, pre, sizeof(pre),
+                                   test_vector_rnd, test_vector_sk_44, 0) == 0);
   CHECK(memcmp(sig, test_vector_sig_44, sizeof(test_vector_sig_44)) == 0);
   printf("DONE\n");
   return 0;
@@ -102,11 +139,24 @@ static int example_mldsa44_sign(void)
 static int example_mldsa65_sign(void)
 {
   uint8_t sig[MLDSA65_BYTES];
+  uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* (0, ctxlen, ctx) */
 
-  printf("  Signing message... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Signing message (randomized)... ");
   CHECK(mldsa65_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_65) == 0);
+  CHECK(memcmp(sig, test_vector_sig_65, sizeof(test_vector_sig_65)) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Signing message (deterministic)... ");
+  pre[0] = 0;
+  pre[1] = TEST_VECTOR_CTX_LEN;
+  memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
+  CHECK(mldsa65_signature_internal(sig, (const uint8_t *)TEST_VECTOR_MSG,
+                                   TEST_VECTOR_MSG_LEN, pre, sizeof(pre),
+                                   test_vector_rnd, test_vector_sk_65, 0) == 0);
   CHECK(memcmp(sig, test_vector_sig_65, sizeof(test_vector_sig_65)) == 0);
   printf("DONE\n");
   return 0;
@@ -115,11 +165,24 @@ static int example_mldsa65_sign(void)
 static int example_mldsa87_sign(void)
 {
   uint8_t sig[MLDSA87_BYTES];
+  uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* (0, ctxlen, ctx) */
 
-  printf("  Signing message... ");
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
+  printf("  Signing message (randomized)... ");
   CHECK(mldsa87_signature(sig, (const uint8_t *)TEST_VECTOR_MSG,
                           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                           TEST_VECTOR_CTX_LEN, test_vector_sk_87) == 0);
+  CHECK(memcmp(sig, test_vector_sig_87, sizeof(test_vector_sig_87)) == 0);
+  printf("DONE\n");
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
+
+  printf("  Signing message (deterministic)... ");
+  pre[0] = 0;
+  pre[1] = TEST_VECTOR_CTX_LEN;
+  memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
+  CHECK(mldsa87_signature_internal(sig, (const uint8_t *)TEST_VECTOR_MSG,
+                                   TEST_VECTOR_MSG_LEN, pre, sizeof(pre),
+                                   test_vector_rnd, test_vector_sk_87, 0) == 0);
   CHECK(memcmp(sig, test_vector_sig_87, sizeof(test_vector_sig_87)) == 0);
   printf("DONE\n");
   return 0;

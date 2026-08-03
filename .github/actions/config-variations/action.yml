@@ -8,7 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, signing-bound-exhausted, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, signing-bound-exhausted, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify, no-randomized'
     required: false
     default: 'all'
   opt:
@@ -421,6 +421,23 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_KEYPAIR_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        stack: true
+        rng_fail: true
+        opt: ${{ inputs.opt }}
+        examples: true
+    - name: "No randomized API (deterministic only)"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'no-randomized') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        # Defined empty rather than bare so it does not clash with configs
+        # that define it themselves.
+        cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_RANDOMIZED_API= -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true

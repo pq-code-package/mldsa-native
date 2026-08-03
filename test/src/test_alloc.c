@@ -339,6 +339,7 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
 /* Keygen tests */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_keygen_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t pk[MLDSA_PK_BYTES];
@@ -348,6 +349,7 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 {
@@ -363,6 +365,7 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 /* Sign tests — use test_vector_sk directly */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_sign_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
@@ -384,6 +387,7 @@ static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
                      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
 {
@@ -476,16 +480,20 @@ int main(void)
 
   /* Keygen tests */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   r |= test_keygen_alloc_failure(&ctx);
-  r |= test_pk_from_sk_alloc_failure(&ctx);
 #endif
+  r |= test_pk_from_sk_alloc_failure(&ctx);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
   /* Sign tests */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   r |= test_sign_alloc_failure(&ctx);
   r |= test_signature_extmu_alloc_failure(&ctx);
-  r |= test_signature_pre_hash_shake256_alloc_failure(&ctx);
 #endif
+  r |= test_signature_pre_hash_shake256_alloc_failure(&ctx);
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
   /* Verify tests */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
@@ -499,20 +507,27 @@ int main(void)
     return 1;
   }
 
-  /* Check per-operation high watermarks match the declared limits */
+  /* Check per-operation high watermarks match the declared limits.
+   *
+   * The keypair and sign limits are attained by the randomized wrappers,
+   * which allocate a seed resp. rnd buffer on top of the internal entry
+   * points, so they are only tight when those wrappers are present. */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_keypair, MLD_TOTAL_ALLOC_KEYPAIR);
+#endif
   CHECK_ALLOC_MATCH(ctx.global_high_mark_pk_from_sk,
                     MLD_TOTAL_ALLOC_PK_FROM_SK);
-#endif
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#if !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_sign, MLD_TOTAL_ALLOC_SIGN);
 #endif
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark_verify, MLD_TOTAL_ALLOC_VERIFY);
 #endif
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_NO_SIGN_API) && \
-    !defined(MLD_CONFIG_NO_VERIFY_API)
+    !defined(MLD_CONFIG_NO_VERIFY_API) &&                                      \
+    !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   CHECK_ALLOC_MATCH(ctx.global_high_mark, MLD_TOTAL_ALLOC);
 #endif
 

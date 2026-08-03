@@ -510,9 +510,9 @@ jobs:
          - name: nblocks
            ids: nblocks-1 nblocks-4 nblocks-6
          - name: reduced-api
-           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify
+           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify no-randomized
          - name: reduced-api-reduce-ram
-           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify
+           ids: keygen-only sign-only verify-only keygen-sign keygen-verify sign-verify no-randomized
            extra_cflags: -DMLD_CONFIG_REDUCE_RAM
     runs-on: ${{ matrix.target.runner }}
     steps:

@@ -114,6 +114,7 @@ int randombytes(uint8_t *buf, size_t len)
   } while (0)
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_keygen_rng_failure(void)
 {
   uint8_t pk[MLDSA_PK_BYTES];
@@ -122,6 +123,7 @@ static int test_keygen_rng_failure(void)
   TEST_RNG_FAILURE("keypair", mld_sign_keypair(pk, sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 static int test_pk_from_sk_rng_failure(void)
 {
@@ -133,6 +135,7 @@ static int test_pk_from_sk_rng_failure(void)
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 static int test_sign_rng_failure(void)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
@@ -153,6 +156,7 @@ static int test_signature_extmu_rng_failure(void)
                    mld_sign_signature_extmu(sig, mu, test_vector_sk));
   return 0;
 }
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
 static int test_signature_pre_hash_shake256_rng_failure(void)
 {
@@ -208,16 +212,20 @@ int main(void)
 
   /* Keygen tests */
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   r |= test_keygen_rng_failure();
-  r |= test_pk_from_sk_rng_failure();
 #endif
+  r |= test_pk_from_sk_rng_failure();
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
   /* Sign tests */
 #if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   r |= test_sign_rng_failure();
   r |= test_signature_extmu_rng_failure();
-  r |= test_signature_pre_hash_shake256_rng_failure();
 #endif
+  r |= test_signature_pre_hash_shake256_rng_failure();
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
   /* Verify tests */
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
