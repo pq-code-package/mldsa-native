@@ -68,6 +68,10 @@ on:
       container:
         type: string
         default: ''
+    secrets:
+      AWS_GITHUB_TOKEN:
+        description: GitHub token used to register/deregister the EC2 self-hosted runner
+        required: true
 env:
   AWS_ROLE: arn:aws:iam::904233116199:role/mldsa-native-ci
   AWS_REGION: us-east-1

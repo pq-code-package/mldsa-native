@@ -49,41 +49,6 @@ jobs:
           fi
           echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
 
-  build_nix_cache:
-    needs: [ check_modified_files ]
-    if: ${{ needs.check_modified_files.outputs.run_needed == '1' && github.ref == 'refs/heads/main' }}
-    permissions:
-      actions: 'write'
-      contents: 'read'
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ ubuntu-24.04, ubuntu-24.04-arm, macos-latest ]
-    name: build nix cache (${{ matrix.runner }})
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - uses: ./.github/actions/setup-nix
-        with:
-          cache: true
-          verbose: true
-          save_cache: true
-          devShell: ci
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            # We only run cross-compilation checks for x86 on macos-latest,
-            # so restrict caching to the corresponding cross shell.
-            if [[ ${{ runner.os }} == 'macOS' ]]; then
-              nix develop .#cross-x86_64 --profile tmp-cross
-            else
-              nix develop .#cross --profile tmp-cross
-              # GH ubuntu-24.04 image tend to run outof space
-              if [[ ${{ matrix.runner }} == 'ubuntu-24.04' ]]; then
-                nix-collect-garbage
-              fi
-            fi
-            nix develop --profile tmp
-            nix-collect-garbage
   develop_environment:
     needs: [ check_modified_files ]
     if: ${{ needs.check_modified_files.outputs.run_needed == '1' }}
