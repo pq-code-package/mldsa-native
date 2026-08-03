@@ -497,7 +497,7 @@
  *
  * @warning This option is experimental. Its scope, configuration and
  *          function/macro signatures may change at any time. We expect a
- *          stable API for v2.
+ *          stable API in a future version.
  *
  * @note Even if this option is set, some allocations further down
  * the call stack will still be made from the stack. Those will
@@ -761,7 +761,7 @@ void custom_free(struct test_ctx_t *ctx, void *p, size_t sz, const char *file,
  * appended as the last argument.
  *
  * @warning This feature is experimental. Its scope, configuration and
- *          function signatures may change at any time, including after v1.
+ *          function signatures may change at any time, including after v2.
  *
  * Enabling any of the hooks requires MLD_CONFIG_NO_RANDOMIZED_API (restricting
  * the public API to deterministic operations). This is because the restartable
