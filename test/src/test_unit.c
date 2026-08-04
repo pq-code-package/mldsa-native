@@ -1218,6 +1218,18 @@ static int test_backend_units(void)
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
+/* This test keeps the large ML-DSA-87 workspace static to avoid test harness
+ * stack pressure when the Zephyr FIPS202 backend is enabled. */
+#define TEST_STATIC_ALLOC(v, T, N)      \
+  static MLD_ALIGN T mld_static_##v[N]; \
+  T *v = mld_static_##v
+#define TEST_STATIC_FREE(v)                              \
+  do                                                     \
+  {                                                      \
+    mld_zeroize(mld_static_##v, sizeof(mld_static_##v)); \
+    (v) = NULL;                                          \
+  } while (0)
+
 static int test_polyvec_lazy_eager(void)
 {
   int ret = 1;
@@ -1225,45 +1237,30 @@ static int test_polyvec_lazy_eager(void)
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   unsigned int j;
 #endif
-  MLD_ALLOC(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_ALLOC(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_ALLOC(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES, NULL);
-  MLD_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES, NULL);
-  MLD_ALLOC(rhoprime, uint8_t, MLDSA_CRHBYTES, NULL);
-  MLD_ALLOC(s1_eager, mld_sk_s1hat_eager, 1, NULL);
-  MLD_ALLOC(s1_lazy, mld_sk_s1hat_lazy, 1, NULL);
-  MLD_ALLOC(s2_eager, mld_sk_s2hat_eager, 1, NULL);
-  MLD_ALLOC(s2_lazy, mld_sk_s2hat_lazy, 1, NULL);
-  MLD_ALLOC(t0_eager, mld_sk_t0hat_eager, 1, NULL);
-  MLD_ALLOC(t0_lazy, mld_sk_t0hat_lazy, 1, NULL);
-  MLD_ALLOC(y_eager, mld_yvec_eager, 1, NULL);
-  MLD_ALLOC(y_lazy, mld_yvec_lazy, 1, NULL);
-  MLD_ALLOC(poly_eager, mld_poly, 1, NULL);
-  MLD_ALLOC(poly_lazy, mld_poly, 1, NULL);
-  MLD_ALLOC(mat_eager, mld_polymat_eager, 1, NULL);
-  MLD_ALLOC(mat_lazy, mld_polymat_lazy, 1, NULL);
+  TEST_STATIC_ALLOC(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES);
+  TEST_STATIC_ALLOC(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES);
+  TEST_STATIC_ALLOC(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES);
+  TEST_STATIC_ALLOC(rho, uint8_t, MLDSA_SEEDBYTES);
+  TEST_STATIC_ALLOC(rhoprime, uint8_t, MLDSA_CRHBYTES);
+  TEST_STATIC_ALLOC(s1_eager, mld_sk_s1hat_eager, 1);
+  TEST_STATIC_ALLOC(s1_lazy, mld_sk_s1hat_lazy, 1);
+  TEST_STATIC_ALLOC(s2_eager, mld_sk_s2hat_eager, 1);
+  TEST_STATIC_ALLOC(s2_lazy, mld_sk_s2hat_lazy, 1);
+  TEST_STATIC_ALLOC(t0_eager, mld_sk_t0hat_eager, 1);
+  TEST_STATIC_ALLOC(t0_lazy, mld_sk_t0hat_lazy, 1);
+  TEST_STATIC_ALLOC(y_eager, mld_yvec_eager, 1);
+  TEST_STATIC_ALLOC(y_lazy, mld_yvec_lazy, 1);
+  TEST_STATIC_ALLOC(poly_eager, mld_poly, 1);
+  TEST_STATIC_ALLOC(poly_lazy, mld_poly, 1);
+  TEST_STATIC_ALLOC(mat_eager, mld_polymat_eager, 1);
+  TEST_STATIC_ALLOC(mat_lazy, mld_polymat_lazy, 1);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_ALLOC(v, mld_polyvecl, 1, NULL);
+  TEST_STATIC_ALLOC(v, mld_polyvecl, 1);
 #endif
-  MLD_ALLOC(scratch_eager, mld_polyvecl, 1, NULL);
-  MLD_ALLOC(scratch_lazy, mld_polyvecl, 1, NULL);
-  MLD_ALLOC(w_eager, mld_polyveck, 1, NULL);
-  MLD_ALLOC(w_lazy, mld_polyveck, 1, NULL);
-
-  if (packed_s1 == NULL || packed_s2 == NULL || packed_t0 == NULL ||
-      rho == NULL || rhoprime == NULL || s1_eager == NULL || s1_lazy == NULL ||
-      s2_eager == NULL || s2_lazy == NULL || t0_eager == NULL ||
-      t0_lazy == NULL || y_eager == NULL || y_lazy == NULL ||
-      poly_eager == NULL || poly_lazy == NULL || mat_eager == NULL ||
-      mat_lazy == NULL ||
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-      v == NULL ||
-#endif
-      scratch_eager == NULL || scratch_lazy == NULL || w_eager == NULL ||
-      w_lazy == NULL)
-  {
-    goto cleanup;
-  }
+  TEST_STATIC_ALLOC(scratch_eager, mld_polyvecl, 1);
+  TEST_STATIC_ALLOC(scratch_lazy, mld_polyvecl, 1);
+  TEST_STATIC_ALLOC(w_eager, mld_polyveck, 1);
+  TEST_STATIC_ALLOC(w_lazy, mld_polyveck, 1);
 
   for (t = 0; t < NUM_RANDOM_TESTS_SLOW; t++)
   {
@@ -1373,33 +1370,34 @@ static int test_polyvec_lazy_eager(void)
 
   ret = 0;
 
-cleanup:
-  MLD_FREE(w_lazy, mld_polyveck, 1, NULL);
-  MLD_FREE(w_eager, mld_polyveck, 1, NULL);
-  MLD_FREE(scratch_lazy, mld_polyvecl, 1, NULL);
-  MLD_FREE(scratch_eager, mld_polyvecl, 1, NULL);
+  TEST_STATIC_FREE(w_lazy);
+  TEST_STATIC_FREE(w_eager);
+  TEST_STATIC_FREE(scratch_lazy);
+  TEST_STATIC_FREE(scratch_eager);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_FREE(v, mld_polyvecl, 1, NULL);
+  TEST_STATIC_FREE(v);
 #endif
-  MLD_FREE(mat_lazy, mld_polymat_lazy, 1, NULL);
-  MLD_FREE(mat_eager, mld_polymat_eager, 1, NULL);
-  MLD_FREE(poly_lazy, mld_poly, 1, NULL);
-  MLD_FREE(poly_eager, mld_poly, 1, NULL);
-  MLD_FREE(y_lazy, mld_yvec_lazy, 1, NULL);
-  MLD_FREE(y_eager, mld_yvec_eager, 1, NULL);
-  MLD_FREE(t0_lazy, mld_sk_t0hat_lazy, 1, NULL);
-  MLD_FREE(t0_eager, mld_sk_t0hat_eager, 1, NULL);
-  MLD_FREE(s2_lazy, mld_sk_s2hat_lazy, 1, NULL);
-  MLD_FREE(s2_eager, mld_sk_s2hat_eager, 1, NULL);
-  MLD_FREE(s1_lazy, mld_sk_s1hat_lazy, 1, NULL);
-  MLD_FREE(s1_eager, mld_sk_s1hat_eager, 1, NULL);
-  MLD_FREE(rhoprime, uint8_t, MLDSA_CRHBYTES, NULL);
-  MLD_FREE(rho, uint8_t, MLDSA_SEEDBYTES, NULL);
-  MLD_FREE(packed_t0, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES, NULL);
-  MLD_FREE(packed_s2, uint8_t, MLDSA_K *MLDSA_POLYETA_PACKEDBYTES, NULL);
-  MLD_FREE(packed_s1, uint8_t, MLDSA_L *MLDSA_POLYETA_PACKEDBYTES, NULL);
+  TEST_STATIC_FREE(mat_lazy);
+  TEST_STATIC_FREE(mat_eager);
+  TEST_STATIC_FREE(poly_lazy);
+  TEST_STATIC_FREE(poly_eager);
+  TEST_STATIC_FREE(y_lazy);
+  TEST_STATIC_FREE(y_eager);
+  TEST_STATIC_FREE(t0_lazy);
+  TEST_STATIC_FREE(t0_eager);
+  TEST_STATIC_FREE(s2_lazy);
+  TEST_STATIC_FREE(s2_eager);
+  TEST_STATIC_FREE(s1_lazy);
+  TEST_STATIC_FREE(s1_eager);
+  TEST_STATIC_FREE(rhoprime);
+  TEST_STATIC_FREE(rho);
+  TEST_STATIC_FREE(packed_t0);
+  TEST_STATIC_FREE(packed_s2);
+  TEST_STATIC_FREE(packed_s1);
   return ret;
 }
+#undef TEST_STATIC_FREE
+#undef TEST_STATIC_ALLOC
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
