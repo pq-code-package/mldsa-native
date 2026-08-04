@@ -16,6 +16,11 @@
  *   FIPS 204 Module-Lattice-Based Digital Signature Standard
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/pubs/fips/204/final
+ *
+ * - [FIPS204_UPDATES]
+ *   FIPS 204 Potential Updates (Errata)
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/files/pubs/fips/204/final/docs/fips-204-potential-updates.xlsx
  */
 
 /*
@@ -678,9 +683,9 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
  * This is useful in timing-sensitive environments that
  * require a deterministic worst-case bound on signing time.
  *
- * For FIPS 204 compliance, this value MUST be at least 814,
- * cf. @[FIPS204, Appendix C], which is chosen so that the
- * signing failure rate is < 2^{-256}.
+ * For FIPS 204 compliance, this value MUST be at least 821,
+ * cf. @[FIPS204, Appendix C] and @[FIPS204_UPDATES], which is
+ * chosen so that the signing failure rate is < 2^{-256}.
  *
  * Default: Largest possible value before internal counters
  * would overflow. This is larger than the FIPS204 bound.
@@ -688,7 +693,7 @@ static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
  * In particular, in the default configuration, the signing
  * failure rate is < 2^{-256}.
  */
-/* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 814 */
+/* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 821 */
 
 /**
  * MLD_CONFIG_SERIAL_FIPS202_ONLY

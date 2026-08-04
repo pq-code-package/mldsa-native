@@ -17,6 +17,11 @@
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/pubs/fips/204/final
  *
+ * - [FIPS204_UPDATES]
+ *   FIPS 204 Potential Updates (Errata)
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/files/pubs/fips/204/final/docs/fips-204-potential-updates.xlsx
+ *
  * - [Round3_Spec]
  *   CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation
  *   (Version 3.1)
@@ -620,8 +625,8 @@ __contract__(
 #if defined(MLD_CONFIG_MAX_SIGNING_ATTEMPTS)
 
 #if !defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND) && \
-    MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 814
-#error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 814 for FIPS 204 compliance @[FIPS204, Appendix C]
+    MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 821
+#error Bad configuration: MLD_CONFIG_MAX_SIGNING_ATTEMPTS must be >= 821 for FIPS 204 compliance @[FIPS204, Appendix C] @[FIPS204_UPDATES]
 #endif
 
 #if MLD_CONFIG_MAX_SIGNING_ATTEMPTS < 1

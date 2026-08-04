@@ -172,6 +172,46 @@ source code and documentation.
   - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
   - [test/src/test_sign_hook.c](test/src/test_sign_hook.c)
 
+### `FIPS204_UPDATES`
+
+* FIPS 204 Potential Updates (Errata)
+* Author(s):
+  - National Institute of Standards and Technology
+* URL: https://csrc.nist.gov/files/pubs/fips/204/final/docs/fips-204-potential-updates.xlsx
+* Referenced from:
+  - [examples/basic_deterministic/mldsa_native/mldsa_native_config.h](examples/basic_deterministic/mldsa_native/mldsa_native_config.h)
+  - [examples/basic_lowram/mldsa_native/mldsa_native_config.h](examples/basic_lowram/mldsa_native/mldsa_native_config.h)
+  - [examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202/mldsa_native/mldsa_native_config.h)
+  - [examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h](examples/bring_your_own_fips202_static/mldsa_native/mldsa_native_config.h)
+  - [examples/custom_backend/mldsa_native/mldsa_native_config.h](examples/custom_backend/mldsa_native/mldsa_native_config.h)
+  - [examples/monolithic_build/mldsa_native/mldsa_native_config.h](examples/monolithic_build/mldsa_native/mldsa_native_config.h)
+  - [examples/monolithic_build_multilevel/mldsa_native/mldsa_native_config.h](examples/monolithic_build_multilevel/mldsa_native/mldsa_native_config.h)
+  - [examples/monolithic_build_multilevel_native/mldsa_native/mldsa_native_config.h](examples/monolithic_build_multilevel_native/mldsa_native/mldsa_native_config.h)
+  - [examples/monolithic_build_native/mldsa_native/mldsa_native_config.h](examples/monolithic_build_native/mldsa_native/mldsa_native_config.h)
+  - [examples/multilevel_build/mldsa_native/mldsa_native_config.h](examples/multilevel_build/mldsa_native/mldsa_native_config.h)
+  - [examples/multilevel_build_native/mldsa_native/mldsa_native_config.h](examples/multilevel_build_native/mldsa_native/mldsa_native_config.h)
+  - [examples/restartable_sign/mldsa_native/mldsa_native_config.h](examples/restartable_sign/mldsa_native/mldsa_native_config.h)
+  - [mldsa/mldsa_native_config.h](mldsa/mldsa_native_config.h)
+  - [mldsa/src/sign.c](mldsa/src/sign.c)
+  - [proofs/cbmc/mldsa_native_config_cbmc.h](proofs/cbmc/mldsa_native_config_cbmc.h)
+  - [test/configs/break_pct_config.h](test/configs/break_pct_config.h)
+  - [test/configs/custom_heap_alloc_config.h](test/configs/custom_heap_alloc_config.h)
+  - [test/configs/custom_memcpy_config.h](test/configs/custom_memcpy_config.h)
+  - [test/configs/custom_memset_config.h](test/configs/custom_memset_config.h)
+  - [test/configs/custom_native_capability_config_0.h](test/configs/custom_native_capability_config_0.h)
+  - [test/configs/custom_native_capability_config_1.h](test/configs/custom_native_capability_config_1.h)
+  - [test/configs/custom_native_capability_config_CPUID_AVX2.h](test/configs/custom_native_capability_config_CPUID_AVX2.h)
+  - [test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h](test/configs/custom_native_capability_config_ID_AA64PFR1_EL1.h)
+  - [test/configs/custom_randombytes_config.h](test/configs/custom_randombytes_config.h)
+  - [test/configs/custom_stdlib_config.h](test/configs/custom_stdlib_config.h)
+  - [test/configs/custom_zeroize_config.h](test/configs/custom_zeroize_config.h)
+  - [test/configs/low_signing_bound_config.h](test/configs/low_signing_bound_config.h)
+  - [test/configs/no_asm_config.h](test/configs/no_asm_config.h)
+  - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
+  - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
+  - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
+  - [test/src/test_sign_hook.c](test/src/test_sign_hook.c)
+
 ### `HYBRID`
 
 * Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64

@@ -10,6 +10,11 @@
  *   FIPS 204 Module-Lattice-Based Digital Signature Standard
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/pubs/fips/204/final
+ *
+ * - [FIPS204_UPDATES]
+ *   FIPS 204 Potential Updates (Errata)
+ *   National Institute of Standards and Technology
+ *   https://csrc.nist.gov/files/pubs/fips/204/final/docs/fips-204-potential-updates.xlsx
  */
 
 #include <stddef.h>
@@ -56,11 +61,11 @@
  * to one key), which pins the mean to +-0.001; an independent BoringSSL
  * measurement agrees to within 0.15%.
  *
- * They exceed the expected repetitions of 4.25 / 5.10 / 3.85 tabulated in
- * @[FIPS204, Table 1], because that figure models only the first-stage
- * rejection (the ||z|| and ||r0|| low-bits checks) and omits the second-stage
- * @[FIPS204, Algorithm 7, line 28] checks (the ||ct0|| norm and the hint weight
- * <= omega). */
+ * They match the 4.36 / 5.14 / 3.91 that @[FIPS204_UPDATES] gives for
+ * @[FIPS204, Table 1]. They exceed the published 4.25 / 5.10 / 3.85, which
+ * model only the first-stage rejection (the ||z|| and ||r0|| low-bits checks)
+ * and omit the second-stage @[FIPS204, Algorithm 7, line 28] checks (the
+ * ||ct0|| norm and the hint weight <= omega). */
 #if MLD_CONFIG_PARAMETER_SET == 44
 #define MLD_SIGN_HOOK_EXPECTED_RATIO_X1000 4361
 #elif MLD_CONFIG_PARAMETER_SET == 65
