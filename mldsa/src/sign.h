@@ -104,7 +104,9 @@
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
+ * @retval MLD_ERR_RNG_FAIL                Random number generation failed
+ *                                         during the PCT. Only possible when
+ *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
  * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
  *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
  *                                         This should currently never happen:
@@ -509,8 +511,11 @@ __contract__(  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
  *
  * @param[out] sig     Output signature.
  * @param[in]  ph      Pointer to pre-hashed message.
- * @param      phlen   Length of pre-hashed message.
- * @param[in]  ctx     Pointer to context string.
+ * @param      phlen   Length of pre-hashed message. Must match the output
+ *                     length of hashalg (the digest size for SHA-2/SHA-3,
+ *                     32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                     MLD_PREHASH_SHAKE_256).
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key; assumed to be valid.
@@ -529,9 +534,10 @@ __contract__(  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_INVALID_ARG             The pre-hash algorithm was
- *                                         MLD_PREHASH_NONE or unsupported, or
- *                                         the context string exceeded 255
- *                                         bytes.
+ *                                         MLD_PREHASH_NONE or unsupported,
+ *                                         phlen did not match the output
+ *                                         length of hashalg, or the context
+ *                                         string exceeded 255 bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -572,8 +578,11 @@ __contract__(
  *
  * @param[in] sig     Pointer to input signature.
  * @param[in] ph      Pointer to pre-hashed message.
- * @param     phlen   Length of pre-hashed message.
- * @param[in] ctx     Pointer to context string.
+ * @param     phlen   Length of pre-hashed message. Must match the output
+ *                    length of hashalg (the digest size for SHA-2/SHA-3,
+ *                    32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                    MLD_PREHASH_SHAKE_256).
+ * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
  * @param     hashalg Hash algorithm constant (one of MLD_PREHASH_*).
@@ -587,8 +596,10 @@ __contract__(
  *                                   MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  * @retval MLD_ERR_INVALID_ARG       The pre-hash algorithm was
- *                                   MLD_PREHASH_NONE or unsupported, or the
- *                                   context string exceeded 255 bytes.
+ *                                   MLD_PREHASH_NONE or unsupported, phlen
+ *                                   did not match the output length of
+ *                                   hashalg, or the context string exceeded
+ *                                   255 bytes.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
@@ -623,7 +634,7 @@ __contract__(
  * @param[out] sig     Output signature.
  * @param[in]  m       Pointer to message to be hashed and signed.
  * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key; assumed to be valid.
@@ -674,7 +685,7 @@ __contract__(
  * @param[in] sig     Pointer to input signature.
  * @param[in] m       Pointer to message to be hashed and verified.
  * @param     mlen    Length of message.
- * @param[in] ctx     Pointer to context string.
+ * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
  * @param     context Application context. Only present when
@@ -737,13 +748,18 @@ __contract__(
  * @param[out] prefix  Output domain separation prefix buffer.
  * @param[in]  ph      Pointer to pre-hashed message (ignored for pure
  *                     ML-DSA).
- * @param      phlen   Length of pre-hashed message (ignored for pure ML-DSA).
- * @param[in]  ctx     Pointer to context string (may be NULL).
+ * @param      phlen   Length of pre-hashed message; must match the output
+ *                     length of hashalg (ignored for pure ML-DSA).
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param      hashalg Hash algorithm constant (MLD_PREHASH_NONE for pure
  *                     ML-DSA, or MLD_PREHASH_* for HashML-DSA).
  *
  * @return The total length of the formatted prefix, or 0 on error.
+ *         Errors are:
+ *         - The context string exceeded 255 bytes.
+ *         - For HashML-DSA: hashalg was unsupported, ph was NULL, or phlen
+ *           did not match the output length of hashalg.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API

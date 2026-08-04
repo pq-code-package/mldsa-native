@@ -95,13 +95,13 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition; used when none of the more specific error
- * conditions apply. */
+/* Generic failure condition, reserved for failures not covered by a more
+ * specific error code. */
 #define MLD_ERR_FAIL (-1)
 /* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
 #define MLD_ERR_OUT_OF_MEMORY (-2)
-/* An rng failure occured. Might be due to insufficient entropy or
+/* An RNG failure occurred. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLD_ERR_RNG_FAIL (-3)
 /* The signing rejection-sampling loop exceeded
@@ -200,7 +200,9 @@ extern "C"
  * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
  *                                         used and an allocation via
  *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
+ * @retval MLD_ERR_RNG_FAIL                Random number generation failed
+ *                                         during the PCT. Only possible when
+ *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
  * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
  *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
  *                                         This should currently never happen:
@@ -277,7 +279,7 @@ int MLD_API_NAMESPACE(keypair)(
  * @spec{Implements @[FIPS204, Algorithm 7, ML-DSA.Sign_internal].}
  *
  * @warning This function does not perform secret key validation.
- *          Callers importing serialized keys can use crypto_sign_pk_from_sk
+ *          Callers importing serialized keys can use pk_from_sk
  *          to validate them before signing.
  *
  * @param[out] sig        Pointer to buffer to hold the generated signature of
@@ -334,7 +336,7 @@ int MLD_API_NAMESPACE(signature_internal)(
  * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign].}
  *
  * @warning This function does not perform secret key validation.
- *          Callers importing serialized keys can use crypto_sign_pk_from_sk
+ *          Callers importing serialized keys can use pk_from_sk
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
@@ -384,7 +386,7 @@ int MLD_API_NAMESPACE(signature)(
  * @spec{Implements @[FIPS204, Algorithm 2, ML-DSA.Sign external mu variant].}
  *
  * @warning This function does not perform secret key validation.
- *          Callers importing serialized keys can use crypto_sign_pk_from_sk
+ *          Callers importing serialized keys can use pk_from_sk
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
@@ -572,14 +574,17 @@ int MLD_API_NAMESPACE(verify_extmu)(
  * a stable API use signature_pre_hash_shake256.
  *
  * @warning This function does not perform secret key validation.
- *          Callers importing serialized keys can use crypto_sign_pk_from_sk
+ *          Callers importing serialized keys can use pk_from_sk
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
  *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  ph      Pointer to pre-hashed message.
- * @param      phlen   Length of pre-hashed message.
- * @param[in]  ctx     Pointer to context string.
+ * @param      phlen   Length of pre-hashed message. Must match the output
+ *                     length of hashalg (the digest size for SHA-2/SHA-3,
+ *                     32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                     MLD_PREHASH_SHAKE_256).
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key; assumed to be valid.
@@ -598,9 +603,10 @@ int MLD_API_NAMESPACE(verify_extmu)(
  * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
  *                                         paused signing; re-invoke to resume.
  * @retval MLD_ERR_INVALID_ARG             The pre-hash algorithm was
- *                                         MLD_PREHASH_NONE or unsupported, or
- *                                         the context string exceeded 255
- *                                         bytes.
+ *                                         MLD_PREHASH_NONE or unsupported,
+ *                                         phlen did not match the output
+ *                                         length of hashalg, or the context
+ *                                         string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -637,8 +643,11 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  * @param[in] sig     Pointer to input signature of
  *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] ph      Pointer to pre-hashed message.
- * @param     phlen   Length of pre-hashed message.
- * @param[in] ctx     Pointer to context string.
+ * @param     phlen   Length of pre-hashed message. Must match the output
+ *                    length of hashalg (the digest size for SHA-2/SHA-3,
+ *                    32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                    MLD_PREHASH_SHAKE_256).
+ * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
  * @param     hashalg Hash algorithm constant (one of MLD_PREHASH_*).
@@ -652,8 +661,10 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *                                   MLD_CUSTOM_ALLOC returned NULL.
  * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  * @retval MLD_ERR_INVALID_ARG       The pre-hash algorithm was
- *                                   MLD_PREHASH_NONE or unsupported, or the
- *                                   context string exceeded 255 bytes.
+ *                                   MLD_PREHASH_NONE or unsupported, phlen
+ *                                   did not match the output length of
+ *                                   hashalg, or the context string exceeded
+ *                                   255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -678,7 +689,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  * the pre-hash.}
  *
  * @warning This function does not perform secret key validation.
- *          Callers importing serialized keys can use crypto_sign_pk_from_sk
+ *          Callers importing serialized keys can use pk_from_sk
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
@@ -686,7 +697,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  * @param[in]  m       Pointer to message to be hashed and signed. May be
  *                     NULL if mlen == 0.
  * @param      mlen    Length of message.
- * @param[in]  ctx     Pointer to context string.
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
  * @param[in]  sk      Bit-packed secret key; assumed to be valid.
@@ -733,7 +744,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  * @param[in] m       Pointer to message to be hashed and verified. May be
  *                    NULL if mlen == 0.
  * @param     mlen    Length of message.
- * @param[in] ctx     Pointer to context string.
+ * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
  * @param     context Application context. Only present when
@@ -790,13 +801,18 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  * @param[out] prefix  Output domain separation prefix buffer.
  * @param[in]  ph      Pointer to pre-hashed message (ignored for pure
  *                     ML-DSA).
- * @param      phlen   Length of pre-hashed message (ignored for pure ML-DSA).
- * @param[in]  ctx     Pointer to context string (may be NULL).
+ * @param      phlen   Length of pre-hashed message; must match the output
+ *                     length of hashalg (ignored for pure ML-DSA).
+ * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param      hashalg Hash algorithm constant (MLD_PREHASH_NONE for pure
  *                     ML-DSA, or MLD_PREHASH_* for HashML-DSA).
  *
  * @return The total length of the formatted prefix, or 0 on error.
+ *         Errors are:
+ *         - The context string exceeded 255 bytes.
+ *         - For HashML-DSA: hashalg was unsupported, ph was NULL, or phlen
+ *           did not match the output length of hashalg.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
