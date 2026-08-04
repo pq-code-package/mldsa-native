@@ -137,6 +137,7 @@ __contract__(
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 /**
  * Generate a public-private key pair.
  *
@@ -182,6 +183,7 @@ __contract__(
           return_value == MLD_ERR_SIGNING_PAUSED ||
           return_value == MLD_ERR_PCT_FAIL)
 );
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -253,6 +255,7 @@ __contract__(
           return_value == MLD_ERR_SIGNING_PAUSED));
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 /**
  * Compute signature. This function implements the randomized variant of
  * ML-DSA. If you require the deterministic variant, use
@@ -358,6 +361,7 @@ __contract__(
           return_value == MLD_ERR_SIGNING_PAUSED)
 );
 
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 

@@ -140,6 +140,10 @@
 #error Bad configuration: MLD_CONFIG_NO_VERIFY_API is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires verify()
 #endif
 
+#if defined(MLD_CONFIG_CORE_API_ONLY) && defined(MLD_CONFIG_KEYGEN_PCT)
+#error Bad configuration: MLD_CONFIG_CORE_API_ONLY is incompatible with MLD_CONFIG_KEYGEN_PCT as the current PCT implementation requires signature() and verify()
+#endif
+
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 #include MLD_CONFIG_ARITH_BACKEND_FILE
 /* Include to enforce consistency of API and implementation,

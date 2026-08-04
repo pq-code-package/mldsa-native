@@ -227,6 +227,7 @@ int MLD_API_NAMESPACE(keypair_internal)(
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 /**
  * Generate a public-private key pair.
  *
@@ -267,6 +268,7 @@ int MLD_API_NAMESPACE(keypair)(
     MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
 #endif
 );
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -328,6 +330,7 @@ int MLD_API_NAMESPACE(signature_internal)(
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
+#if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
 /**
  * Compute signature. This function implements the randomized variant of
  * ML-DSA. If you require the deterministic variant, use
@@ -420,6 +423,7 @@ int MLD_API_NAMESPACE(signature_extmu)(
 #endif
 );
 
+#endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
