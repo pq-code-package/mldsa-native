@@ -16,7 +16,7 @@ mldsa-native has minimal dependencies on the C standard library. This document l
 
 ## Custom Replacements
 
-Custom replacements can be provided for memory functions using the configuration options in `mldsa/src/config.h`:
+Custom replacements can be provided for memory functions using the configuration options in `mldsa/mldsa_native_config.h`:
 
 ### MLD_CONFIG_CUSTOM_MEMCPY
 Replaces all `memcpy` calls with a custom implementation. When enabled, you must define a `mld_memcpy` function with the same signature as the standard `memcpy`.
@@ -24,4 +24,4 @@ Replaces all `memcpy` calls with a custom implementation. When enabled, you must
 ### MLD_CONFIG_CUSTOM_MEMSET
 Replaces all `memset` calls with a custom implementation. When enabled, you must define a `mld_memset` function with the same signature as the standard `memset`.
 
-See the configuration examples in `mldsa/src/config.h` and test configurations in `test/custom_*_config.h` for usage examples and implementation requirements.
+See the configuration examples in `mldsa/mldsa_native_config.h` and test configurations in `test/configs/custom_*_config.h` for usage examples and implementation requirements.
