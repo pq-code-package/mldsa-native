@@ -4464,6 +4464,42 @@ def resolve_buffer_size(reg_info, abi_data):
     raise ValueError(f"Cannot resolve buffer size from {reg_info}")
 
 
+def resolve_buffer_test_bytes(reg_name, reg_info, size_bytes, dev_source):
+    """Validate and return deterministic byte overrides for a test buffer."""
+    test_bytes = reg_info.get("test_bytes")
+    if test_bytes is None:
+        return []
+    if not isinstance(test_bytes, dict):
+        raise ValueError(
+            f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' must be a mapping "
+            f"of byte offsets to byte values, got {type(test_bytes).__name__}"
+        )
+
+    result = []
+    for offset, value in test_bytes.items():
+        if isinstance(offset, bool) or not isinstance(offset, int):
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' offset "
+                f"{offset!r} must be an integer"
+            )
+        if offset < 0 or offset >= size_bytes:
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' offset "
+                f"{offset} is outside the {size_bytes}-byte buffer"
+            )
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 0 <= value <= 0xFF
+        ):
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes[{offset}]:' "
+                f"value {value!r} must be an integer in [0, 255]"
+            )
+        result.append((offset, value))
+    return sorted(result)
+
+
 def gen_abicheck():
     """Generate ABI checker tests"""
 
@@ -4590,7 +4626,12 @@ def gen_abicheck():
                         buffer_name = f"buf_{reg_name}"
                         description = reg_info.get("description", "")
                         yield f"  MLD_ALIGN uint8_t {buffer_name}[{size_bytes}]; /* {description} */"
-                        buffer_info.append((reg_name, buffer_name, size_bytes))
+                        test_bytes = resolve_buffer_test_bytes(
+                            reg_name, reg_info, size_bytes, dev_source
+                        )
+                        buffer_info.append(
+                            (reg_name, buffer_name, size_bytes, test_bytes)
+                        )
 
                 # Emit a runtime mld_sys_check_capability() skip (returning
                 # MLD_ABICHECK_SKIPPED) per Features cap that has a syscap; caps
@@ -4618,8 +4659,10 @@ def gen_abicheck():
                 yield f"    {config['init_func']}(&input_state);"
                 yield ""
 
-                for reg_name, buffer_name, size_bytes in buffer_info:
+                for reg_name, buffer_name, size_bytes, test_bytes in buffer_info:
                     yield f"    randombytes({buffer_name}, {size_bytes});"
+                    for offset, value in test_bytes:
+                        yield f"    {buffer_name}[{offset}] = 0x{value:02x};"
 
                 yield ""
                 yield "    /* Set up register state for function arguments */"
