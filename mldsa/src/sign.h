@@ -187,7 +187,7 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /**
- * Compute signature using internal randomness.
+ * Compute signature using a caller-supplied random seed and prefix.
  *
  * On error (non-zero return value), the signature buffer sig is zeroized.
  *
