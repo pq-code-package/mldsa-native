@@ -219,14 +219,17 @@
  * code will be included in the build, including code needed only
  * for other parameter sets.
  *
- * Example: TODO: add example
+ * Example: mld_polyw1_pack_88 is only needed for
+ * MLD_CONFIG_PARAMETER_SET == 44. Yet, if this option is set for a
+ * build with MLD_CONFIG_PARAMETER_SET == 65/87, it would be included.
  *
  * To build mldsa-native with support for all parameter sets,
  * build it three times -- once per parameter set -- and set the
  * option MLD_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
  * them, and MLD_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ * MLD_CONFIG_MULTILEVEL_BUILD should be set for all of them.
  *
- * See examples/multilevel_build_mldsa for an example.
+ * See examples/multilevel_build for an example.
  *
  * This can also be set using CFLAGS.
  */
@@ -245,8 +248,9 @@
  * build it three times -- once per parameter set -- and set the
  * option MLD_CONFIG_MULTILEVEL_WITH_SHARED for exactly one of
  * them, and MLD_CONFIG_MULTILEVEL_NO_SHARED for the others.
+ * MLD_CONFIG_MULTILEVEL_BUILD should be set for all of them.
  *
- * See examples/multilevel_build_mldsa for an example.
+ * See examples/multilevel_build for an example.
  *
  * This can also be set using CFLAGS.
  */
@@ -616,7 +620,7 @@ static inline void *mld_posix_memalign(size_t align, size_t sz)
  * function.
  *
  * If this option is set, MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 and
- * and MLD_CONFIG_USE_NATIVE_BACKEND_ARITH will be ignored, and no
+ * MLD_CONFIG_USE_NATIVE_BACKEND_ARITH will be ignored, and no
  * native backends will be used.
  */
 /* #define MLD_CONFIG_NO_ASM */
