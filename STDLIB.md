@@ -7,8 +7,8 @@ mldsa-native has minimal dependencies on the C standard library. This document l
 ## Dependencies
 
 ### Memory Functions
-- **memcpy**: Used extensively for copying data structures, keys, and intermediate values (40+ occurrences)
-- **memset**: Used for zeroing state structures and buffers (3 occurrences). **Note**: This is NOT used for security-critical zeroing - that is handled by `mld_zeroize` which has its own custom replacement mechanism
+- **memcpy**: Used extensively for copying data structures, keys, and intermediate values
+- **memset**: Used for zeroing state structures and buffers. **Note**: This is NOT used for security-critical zeroing - that is handled by `mld_zeroize` which has its own custom replacement mechanism
 
 ### Debug Functions (MLDSA_DEBUG builds only)
 - **fprintf**: Used in debug.c for error reporting to stderr

@@ -151,7 +151,7 @@ __contract__(ensures(return_value == b))
  * @return For uint32_t x, the unique y in int32_t so that x == y mod 2^32.
  *         Concretely:
  *         - x <  2^31: returns x
- *         - x >= 2^31: returns x - 2^31
+ *         - x >= 2^31: returns x - 2^32
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_ALWAYS_INLINE int32_t mld_cast_uint32_to_int32(uint32_t x)

@@ -4,5 +4,5 @@
 
 ## Reporting security bugs
 
-If you think you have found a security bug in mlkem-native, please report the vulnerability through
+If you think you have found a security bug in mldsa-native, please report the vulnerability through
 Github's [private vulnerability reporting](https://github.com/pq-code-package/mldsa-native/security).

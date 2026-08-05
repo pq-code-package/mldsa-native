@@ -8,7 +8,7 @@ This is the main source tree of mldsa-native.
 
 To build mldsa-native for a fixed parameter set (ML-DSA-44/65/87), build the compilation units in `src/*` separately, and link to an RNG and your application. See [examples/basic](../examples/basic) for a simple example.
 
-Alternatively, you can use the auto-generated helper files [mldsa_native.c](mldsa_native.c) and [mldsa_native_asm.S](mldsa_native_asm.S), which bundle all *.c and *.S files together. See [examples/monolithic_build](../examples/monolithic_build) and [examples/monolithic_build_native](../examples/monolithic_build_native) for examples with and without native code.
+Alternatively, you can use the auto-generated helper files [mldsa_native.c](mldsa_native.c) and [mldsa_native_asm.S](mldsa_native_asm.S), which bundle all *.c and *.S files together. See [examples/monolithic_build](../examples/monolithic_build) and [examples/monolithic_build_native](../examples/monolithic_build_native) for examples without and with native code.
 
 ## Configuration
 
