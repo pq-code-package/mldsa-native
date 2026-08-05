@@ -11,6 +11,8 @@
 #define MLDSA_NAMESPACE(sym) \
   MLD_TEST_CONCAT(MLD_TEST_CONCAT(MLD_CONFIG_NAMESPACE_PREFIX, _), sym)
 
+#define mld_prepare_domain_separation_prefix \
+  MLDSA_NAMESPACE(prepare_domain_separation_prefix)
 #define mld_sign_keypair MLDSA_NAMESPACE(keypair)
 #define mld_sign_keypair_internal MLDSA_NAMESPACE(keypair_internal)
 #define mld_sign_pk_from_sk MLDSA_NAMESPACE(pk_from_sk)

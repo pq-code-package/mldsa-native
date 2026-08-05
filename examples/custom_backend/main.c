@@ -75,7 +75,8 @@ static int example_keygen(void)
 static int example_sign(void)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
-  uint8_t pre[TEST_VECTOR_CTX_LEN + 2]; /* (0, ctxlen, ctx) */
+  uint8_t pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  size_t pre_len;
 
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
   printf("Signing message (randomized)... ");
@@ -88,12 +89,13 @@ static int example_sign(void)
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 
   printf("Signing message (deterministic)... ");
-  pre[0] = 0;
-  pre[1] = TEST_VECTOR_CTX_LEN;
-  memcpy(pre + 2, TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN);
+  pre_len = CUSTOM_TINY_SHA3_prepare_domain_separation_prefix(
+      pre, NULL, 0, (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
+      MLD_PREHASH_NONE);
+  CHECK(pre_len != 0);
   CHECK(CUSTOM_TINY_SHA3_signature_internal(
             sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN, pre,
-            sizeof(pre), test_vector_rnd, test_vector_sk, 0) == 0);
+            pre_len, test_vector_rnd, test_vector_sk, 0) == 0);
   CHECK(memcmp(sig, test_vector_sig, sizeof(test_vector_sig)) == 0);
   printf("DONE\n");
   return 0;

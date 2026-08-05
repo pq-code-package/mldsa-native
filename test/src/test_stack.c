@@ -41,17 +41,16 @@ static void test_sign_only(void)
   unsigned char rnd[MLDSA_RNDBYTES] = {0};
   const unsigned char msg[] = "test message for stack measurement";
   const unsigned char ctx[] = "test context";
-  unsigned char pre[2 + sizeof(ctx) - 1];
+  unsigned char pre[MLD_DOMAIN_SEPARATION_MAX_BYTES];
+  size_t pre_len;
   int ret;
 
-  /* Prepare pre = (0, ctxlen, ctx) */
-  pre[0] = 0;
-  pre[1] = sizeof(ctx) - 1;
-  memcpy(pre + 2, ctx, sizeof(ctx) - 1);
+  pre_len = mld_prepare_domain_separation_prefix(
+      pre, NULL, 0, ctx, sizeof(ctx) - 1, MLD_PREHASH_NONE);
 
   /* Only call signature_internal - this is what we're measuring */
   /* sk is zero-initialized (invalid key, but OK for stack measurement) */
-  ret = mld_sign_signature_internal(sig, msg, sizeof(msg) - 1, pre, sizeof(pre),
+  ret = mld_sign_signature_internal(sig, msg, sizeof(msg) - 1, pre, pre_len,
                                     rnd, sk, 0);
   (void)ret; /* Ignore return value - we only care about stack measurement */
 #else        /* !MLD_CONFIG_NO_SIGN_API */
