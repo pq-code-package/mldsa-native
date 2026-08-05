@@ -44,8 +44,8 @@ source code and documentation.
 * URL: https://eprint.iacr.org/2023/773
 * Referenced from:
   - [dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S)
-  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
-  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
 
 ### `ArmARMv8M`
 
@@ -392,8 +392,8 @@ source code and documentation.
 * URL: https://eprint.iacr.org/2025/366
 * Referenced from:
   - [dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S)
-  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
-  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
 
 ### `SLOTHY_Paper`
 
@@ -440,8 +440,8 @@ source code and documentation.
 * URL: https://github.com/XKCP/XKCP
 * Referenced from:
   - [dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S](dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S)
-  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m7.S)
-  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S)
+  - [dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S](dev/fips202/armv81m_opt/src/keccak_f1600_x1_armv7m_opt_m55.S)
+  - [mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S](mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S)
 
 ### `libmceliece`
 

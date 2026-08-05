@@ -3472,7 +3472,7 @@ def gen_slothy(funcs):
         return
 
     for func in funcs:
-        if func == "keccak_f1600_x1_armv7m_opt_m7":
+        if func == "keccak_f1600_x1_armv7m_opt_m55":
             base = "dev/fips202/armv81m_opt/src"
             t = func + ".S"
         elif func.startswith("keccak"):
@@ -4574,7 +4574,7 @@ def gen_abicheck():
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
         (
-            "keccak_f1600_x1_armv7m_opt_m7.S",
+            "keccak_f1600_x1_armv7m_opt_m55.S",
             "dev/fips202/armv81m_opt/src",
             "",
             "armv81m",
@@ -5003,7 +5003,7 @@ def _main():
         "rej_uniform_aarch64_asm",
         "rej_uniform_eta2_aarch64_asm",
         "rej_uniform_eta4_aarch64_asm",
-        "keccak_f1600_x1_armv7m_opt_m7",
+        "keccak_f1600_x1_armv7m_opt_m55",
     ]
 
     parser = argparse.ArgumentParser(
