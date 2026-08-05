@@ -165,6 +165,24 @@
 #define MLD_API_QUALIFIER
 #endif
 
+/* Hash algorithm constants for domain separation */
+#define MLD_PREHASH_NONE 0
+#define MLD_PREHASH_SHA2_224 1
+#define MLD_PREHASH_SHA2_256 2
+#define MLD_PREHASH_SHA2_384 3
+#define MLD_PREHASH_SHA2_512 4
+#define MLD_PREHASH_SHA2_512_224 5
+#define MLD_PREHASH_SHA2_512_256 6
+#define MLD_PREHASH_SHA3_224 7
+#define MLD_PREHASH_SHA3_256 8
+#define MLD_PREHASH_SHA3_384 9
+#define MLD_PREHASH_SHA3_512 10
+#define MLD_PREHASH_SHAKE_128 11
+#define MLD_PREHASH_SHAKE_256 12
+
+/* Maximum formatted domain separation message length */
+#define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
+
 /****************************** Function API **********************************/
 
 #if !defined(MLD_CONFIG_CONSTANTS_ONLY)
@@ -544,21 +562,6 @@ int MLD_API_NAMESPACE(verify_extmu)(
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-/* Hash algorithm constants for domain separation */
-#define MLD_PREHASH_NONE 0
-#define MLD_PREHASH_SHA2_224 1
-#define MLD_PREHASH_SHA2_256 2
-#define MLD_PREHASH_SHA2_384 3
-#define MLD_PREHASH_SHA2_512 4
-#define MLD_PREHASH_SHA2_512_224 5
-#define MLD_PREHASH_SHA2_512_256 6
-#define MLD_PREHASH_SHA3_224 7
-#define MLD_PREHASH_SHA3_256 8
-#define MLD_PREHASH_SHA3_384 9
-#define MLD_PREHASH_SHA3_512 10
-#define MLD_PREHASH_SHAKE_128 11
-#define MLD_PREHASH_SHAKE_256 12
-
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /**
@@ -775,9 +778,6 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
-
-/* Maximum formatted domain separation message length */
-#define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 /**
