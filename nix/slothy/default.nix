@@ -12,11 +12,12 @@
 # pkgs.slothy
 
 pkgs.slothy.overrideAttrs (old: rec {
-  version = "0.2.2";
+  # slothy-optimizer/slothy#464: Cortex-M55 shifted-source latency model.
+  version = "fed47d3f1e40b9c1f202f759f1d6c4100fe14f4d";
   src = pkgs.fetchFromGitHub {
     owner = "slothy-optimizer";
     repo = "slothy";
     rev = version;
-    sha256 = "sha256-pyES6ithBVAFSVdjsM61kp6eeEUxNsLs7jdekpX+YuA=";
+    sha256 = "sha256-x8bioD4mKxu5YxOpL4yuLV3tIJG6fCD+gsOvrJ/1P24=";
   };
 })

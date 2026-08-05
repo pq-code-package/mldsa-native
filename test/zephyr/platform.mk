@@ -33,8 +33,12 @@ ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
 ZEPHYR_QEMU_mps3-an547  := mps3-an547                    # Cortex-M55
 ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 
-ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
-ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve.h
+ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve_x1.h
+ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve_x1.h
+
+# Zephyr owns target selection, so do not infer its ABI from make's host ARCH.
+ZEPHYR_ABICHECK_ARCH_mps3-an547 := armv81m
+ABICHECK_ARCH := $(strip $(ZEPHYR_ABICHECK_ARCH_$(ZEPHYR_TARGET)))
 
 ZEPHYR_TARGETS := mps2-an385 mps2-an386 mps2-an500 mps2-an521 mps3-an547 nucleo-n657x0-q
 
@@ -55,12 +59,27 @@ endif
 # file to source prerequisites (it is: the top-level Makefile includes us first).
 OPT ?= 0
 
+# Shrink the test iteration counts (the sources default them higher, sized for
+# native hardware): QEMU is far slower. Keep these defaults ahead of the build
+# key so command-line overrides invalidate binaries built with different counts.
+NTESTS ?= 3
+NUM_RANDOM_TESTS ?= 100
+
+# Forward the QEMU execution deadline to exec_wrapper.py. Direct wrapper
+# invocations use the same default when the variable is absent.
+QEMU_TIMEOUT ?= 300
+export QEMU_TIMEOUT
+
 # Native backends are an OPT=1 feature (an547 builds the Armv8.1-M MVE backend).
 ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
 
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
 ZEPHYR_ACTIVE_TARGET := $(BUILD_DIR)/zephyr/.active-target
+ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NTESTS=$(NTESTS)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
 ZEPHYR_APP_INPUTS := \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
@@ -79,14 +98,15 @@ ZEPHYR_TARGET_CMAKE_ARGS := $(if $(ZEPHYR_IS_NUCLEO_N657X0_Q),\
 
 # Test binary output paths are shared across ZEPHYR_TARGET values, while the
 # CMake build directory is target-specific. Keep a lightweight marker containing
-# the last requested target, and only touch it when the target changes. Binaries
-# depending on this marker are then rebuilt after a target switch without
-# forcing a clean rebuild when the target is unchanged.
+# the last requested build configuration, and only touch it when that
+# configuration changes. Binaries depending on this marker are then rebuilt
+# after a target, backend, or test-count switch without forcing a clean rebuild
+# when the configuration is unchanged.
 .PHONY: zephyr_target_marker_force
 $(ZEPHYR_ACTIVE_TARGET): zephyr_target_marker_force
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)if [ ! -f $@ ] || [ "$$(cat $@)" != "$(ZEPHYR_TARGET)" ]; then \
-		echo "$(ZEPHYR_TARGET)" > $@; \
+	$(Q)if [ ! -f $@ ] || [ "$$(cat $@)" != "$(ZEPHYR_BUILD_KEY)" ]; then \
+		echo "$(ZEPHYR_BUILD_KEY)" > $@; \
 	fi
 
 # Per-binary CMake build dir, keyed on $(notdir $@) so binaries build in
@@ -97,11 +117,10 @@ ZEPHYR_OUT = $(ZEPHYR_BUILD_DIR)/$(notdir $@)
 # fit comfortably within the Zephyr main-thread stack (see app/prj.conf).
 CFLAGS += -DMLD_CONFIG_REDUCE_RAM
 
-# Shrink the test iteration counts (the sources default them higher, sized for
-# native hardware): QEMU is far slower. On CFLAGS so they forward below.
-CFLAGS += -DNTESTS=3 \
+# Put the configurable test counts on CFLAGS so they forward below.
+CFLAGS += -DNTESTS=$(NTESTS) \
 	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
-	-DNUM_RANDOM_TESTS=100
+	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
 
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
@@ -120,6 +139,7 @@ ZEPHYR_TEST_CFLAGS = $(subst \",\\\",$(patsubst -Imldsa,-I$(abspath mldsa),$(CFL
 ZEPHYR_CMAKE_ENV := env -u CFLAGS -u CXXFLAGS -u CPPFLAGS -u LDFLAGS
 
 CUSTOM_BUILD = \
+	$(if $(CUSTOM_BUILD_ABICHECK),$(if $(ABICHECK_ARCH),,$(error ABI checking is not supported for ZEPHYR_TARGET=$(ZEPHYR_TARGET)))) \
 	echo "  ZEPHYR  $(ZEPHYR_TARGET): $(notdir $@)" && \
 	$(ZEPHYR_CMAKE_ENV) cmake -GNinja -S $(ZEPHYR_APP) -B $(ZEPHYR_OUT) \
 		-DBOARD=$(ZEPHYR_BOARD) \
@@ -127,6 +147,7 @@ CUSTOM_BUILD = \
 		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
 		-DZEPHYR_TEST_CFLAGS="$(ZEPHYR_TEST_CFLAGS)" \
 		-DZEPHYR_FIPS202_BACKEND=$(ZEPHYR_FIPS202_BACKEND) \
+		-DZEPHYR_ABICHECK=$(if $(CUSTOM_BUILD_ABICHECK),ON,OFF) \
 		$(if $(ZEPHYR_FIPS202_BACKEND),-DCONFIG_FIPS202_MVE_BACKEND=y) \
 		$(ZEPHYR_TARGET_CMAKE_ARGS) \
 		-DUSER_CACHE_DIR=$(abspath $(ZEPHYR_OUT)/.cache) \
@@ -134,12 +155,20 @@ CUSTOM_BUILD = \
 	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
+# Track every production assembly source included by the native assembly
+# amalgamation so changing a source rebuilds a custom Zephyr application even
+# when the generated include list itself is unchanged.
+ZEPHYR_NATIVE_ASM_INPUTS := mldsa/mldsa_native_asm.S \
+	$(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
+
 # A custom build links the test sources directly rather than from objects, so
 # nothing otherwise makes the bins depend on the Zephyr app inputs or the
 # active-target marker. components.mk attaches CUSTOM_BUILD_DEPS to every test
-# binary (in its CUSTOM_BUILD branch), so a CMakeLists/shim/overlay edit or a
-# target switch forces a rebuild. Set here (before components.mk is included).
-CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS)
+# binary (in its CUSTOM_BUILD branch), so an application input, native assembly
+# input, target, backend, or test-count change forces a rebuild. Set here before
+# components.mk is included.
+CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS) \
+	$(if $(ZEPHYR_FIPS202_BACKEND),$(ZEPHYR_NATIVE_ASM_INPUTS))
 
 ifeq ($(ZEPHYR_IS_NUCLEO_N657X0_Q),)
 EXEC_WRAPPER := $(abspath $(PLATFORM_PATH)/exec_wrapper.py)

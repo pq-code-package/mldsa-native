@@ -40,7 +40,9 @@ from a `/*yaml ... */` block in its `dev/` assembly source. `scripts/autogen`
 turns that into the per-kernel `check_<name>.c`, the `checks_<arch>_all.h`
 registry, and the per-arch `abicheck_<arch>.mk` (CFLAGS per feature, e.g.
 `-mavx2`), all included via `abicheck.mk` from `test/mk/components.mk`. Edit the
-YAML, not the generated files.
+YAML, not the generated files. A buffer's optional `test_bytes` mapping
+overrides individual byte offsets after random initialization when the kernel
+requires a sentinel or other fixed test input.
 
 <!--- bibliography --->
 [^AAPCS32]: Arm Limited: Procedure Call Standard for the Arm Architecture (AAPCS32), [https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst)

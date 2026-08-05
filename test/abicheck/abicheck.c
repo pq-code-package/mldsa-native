@@ -22,11 +22,19 @@ static const abicheck_entry_t all_checks[] = {{NULL, NULL}};
 /* Return-code convention: see abicheck_common.h. SKIPPED means the kernel
  * built but the host lacks the runtime capability; the generated check
  * decides this via mld_sys_check_capability. */
-int main(void)
+/* Zephyr renames main to mld_test_main, making it an ordinary global function
+ * for which -Wmissing-prototypes requires a prior declaration. Its arguments
+ * match the Zephyr shim that invokes the renamed entry point. */
+int main(int argc, char **argv);
+
+int main(int argc, char **argv)
 {
   int failed_tests = 0;
   int selftest_failures;
   const abicheck_entry_t *entry;
+
+  (void)argc;
+  (void)argv;
 
   /* Meta-test the ABI checker before trusting kernel verdicts (see selftest.h).
    */

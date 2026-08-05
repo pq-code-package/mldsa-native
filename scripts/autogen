@@ -1963,6 +1963,10 @@ def native_fips202_armv81m(c):
     return native_fips202(c) and armv81m(c)
 
 
+def native_fips202_armv81m_x1(c):
+    return native_fips202_armv81m(c) and "keccak_f1600_x1_" in c
+
+
 def native_fips202_core(c):
     return (
         native_fips202(c)
@@ -2184,7 +2188,14 @@ def gen_monolithic_source_file():
             yield f'#include "{c}"'
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
-        for c in filter(native_fips202_armv81m, c_sources):
+        for c in filter(
+            lambda c: native_fips202_armv81m(c) and not native_fips202_armv81m_x1(c),
+            c_sources,
+        ):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_fips202_armv81m_x1, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2267,7 +2278,14 @@ def gen_monolithic_asm_file():
             yield f'#include "{c}"'
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
-        for c in filter(native_fips202_armv81m, asm_sources):
+        for c in filter(
+            lambda c: native_fips202_armv81m(c) and not native_fips202_armv81m_x1(c),
+            asm_sources,
+        ):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_fips202_armv81m_x1, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2760,6 +2778,8 @@ def upstream_src_dir_for_dev_dir(dev_dir):
     if dev_dir.startswith("dev/fips202/"):
         # dev/fips202/<arch>/src -> mldsa/src/fips202/native/<arch>/src
         arch = dev_dir.split("/")[2]
+        if arch in ("armv81m_clean", "armv81m_opt"):
+            arch = "armv81m"
         return f"mldsa/src/fips202/native/{arch}/src"
     if dev_dir.startswith("dev/aarch64_"):
         # dev/aarch64_opt/src and dev/aarch64_clean/src map to the same tree
@@ -3102,7 +3122,13 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
     return basename
 
 
-def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwargs):
+def synchronize_backend(
+    in_dir,
+    out_dir,
+    delete=False,
+    no_simplify=False,
+    **kwargs,
+):
     copied = []
 
     files = get_files(os.path.join(in_dir, "*"))
@@ -3119,18 +3145,59 @@ def synchronize_backend(in_dir, out_dir, delete=False, no_simplify=False, **kwar
     )
 
     copied = [r for r in pool_results if r is not None]
+    if delete is True:
+        # Check for files in the target directory that have not been copied.
+        for f in get_files(os.path.join(out_dir, "*")):
+            if os.path.basename(f) in copied:
+                continue
+            if not f.endswith(SYNCHRONIZED_EXTENSIONS):
+                continue
+            # Otherwise, remove it.
+            update_via_remove(f)
+
+    return copied
+
+
+def synchronize_merged_backends(
+    in_dirs,
+    out_dir,
+    delete=False,
+    no_simplify=False,
+    **kwargs,
+):
+    """Synchronize multiple development directories into one production tree.
+
+    The Armv8.1-M production directory combines the established x4 backend and
+    the separately maintained x1 backend. Derive the retained filename set from
+    both source directories so adding, renaming, or removing a source cannot
+    leave stale generated files or require a hard-coded keep list.
+    """
+    copied_by_basename = {}
+
+    for in_dir in in_dirs:
+        copied = synchronize_backend(
+            in_dir,
+            out_dir,
+            delete=False,
+            no_simplify=no_simplify,
+            **kwargs,
+        )
+        for basename in copied:
+            if basename in copied_by_basename:
+                raise ValueError(
+                    f"Duplicate synchronized filename {basename!r} in "
+                    f"{copied_by_basename[basename]!r} and {in_dir!r}"
+                )
+            copied_by_basename[basename] = in_dir
 
     if delete is False:
         return
 
-    # Check for files in the target directory that have not been copied
     for f in get_files(os.path.join(out_dir, "*")):
-        if os.path.basename(f) in copied:
-            continue
         if not f.endswith(SYNCHRONIZED_EXTENSIONS):
             continue
-        # Otherwise, remove it
-        update_via_remove(f)
+        if os.path.basename(f) not in copied_by_basename:
+            update_via_remove(f)
 
 
 def synchronize_backends(
@@ -3229,13 +3296,13 @@ def synchronize_backends(
         x86_64_syntax=x86_64_syntax,
         cflags="-Idev/fips202/x86_64 -Imldsa/src/fips202/native/x86_64 -mavx2 -mbmi2 -msse4 -fcf-protection=none",
     )
-    synchronize_backend(
-        "dev/fips202/armv81m/src",
+    synchronize_merged_backends(
+        ("dev/fips202/armv81m/src", "dev/fips202/armv81m_opt/src"),
         "mldsa/src/fips202/native/armv81m/src",
         delete=delete,
         force_cross=force_cross,
         no_simplify=no_simplify,
-        cflags="-Idev/fips202/armv81m/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
+        cflags="-Idev/fips202/armv81m/src -Idev/fips202/armv81m_opt/src -Imldsa/src/fips202/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
     )
     synchronize_backend(
         "dev/fips202/armv81m",
@@ -3405,7 +3472,10 @@ def gen_slothy(funcs):
         return
 
     for func in funcs:
-        if func.startswith("keccak"):
+        if func == "keccak_f1600_x1_armv7m_opt_m55":
+            base = "dev/fips202/armv81m_opt/src"
+            t = func + ".S"
+        elif func.startswith("keccak"):
             # FIPS202 assembly is already self-identifying via its `keccak_`
             # name and carries no `mldsa_` prefix.
             base = "dev/fips202/aarch64/src"
@@ -4460,6 +4530,42 @@ def resolve_buffer_size(reg_info, abi_data):
     raise ValueError(f"Cannot resolve buffer size from {reg_info}")
 
 
+def resolve_buffer_test_bytes(reg_name, reg_info, size_bytes, dev_source):
+    """Validate and return deterministic byte overrides for a test buffer."""
+    test_bytes = reg_info.get("test_bytes")
+    if test_bytes is None:
+        return []
+    if not isinstance(test_bytes, dict):
+        raise ValueError(
+            f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' must be a mapping "
+            f"of byte offsets to byte values, got {type(test_bytes).__name__}"
+        )
+
+    result = []
+    for offset, value in test_bytes.items():
+        if isinstance(offset, bool) or not isinstance(offset, int):
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' offset "
+                f"{offset!r} must be an integer"
+            )
+        if offset < 0 or offset >= size_bytes:
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes:' offset "
+                f"{offset} is outside the {size_bytes}-byte buffer"
+            )
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, int)
+            or not 0 <= value <= 0xFF
+        ):
+            raise ValueError(
+                f"{dev_source}: YAML 'ABI.{reg_name}.test_bytes[{offset}]:' "
+                f"value {value!r} must be an integer in [0, 255]"
+            )
+        result.append((offset, value))
+    return sorted(result)
+
+
 def gen_abicheck():
     """Generate ABI checker tests"""
 
@@ -4467,6 +4573,24 @@ def gen_abicheck():
     # HOL-Light proofs (armv81m). Shape matches hol_light_asm_joblist
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
+        (
+            "keccak_f1600_x1_armv7m_opt_m55.S",
+            "dev/fips202/armv81m_opt/src",
+            "",
+            "armv81m",
+        ),
+        (
+            "keccak_f1600_x1_state_extract_bytes_armv7m.S",
+            "dev/fips202/armv81m_opt/src",
+            "",
+            "armv81m",
+        ),
+        (
+            "keccak_f1600_x1_state_xor_bytes_armv7m.S",
+            "dev/fips202/armv81m_opt/src",
+            "",
+            "armv81m",
+        ),
         ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m/src", "", "armv81m"),
     ]
     joblist = hol_light_asm_joblist() + joblist_abicheck_extra
@@ -4586,7 +4710,12 @@ def gen_abicheck():
                         buffer_name = f"buf_{reg_name}"
                         description = reg_info.get("description", "")
                         yield f"  MLD_ALIGN uint8_t {buffer_name}[{size_bytes}]; /* {description} */"
-                        buffer_info.append((reg_name, buffer_name, size_bytes))
+                        test_bytes = resolve_buffer_test_bytes(
+                            reg_name, reg_info, size_bytes, dev_source
+                        )
+                        buffer_info.append(
+                            (reg_name, buffer_name, size_bytes, test_bytes)
+                        )
 
                 # Emit a runtime mld_sys_check_capability() skip (returning
                 # MLD_ABICHECK_SKIPPED) per Features cap that has a syscap; caps
@@ -4614,8 +4743,10 @@ def gen_abicheck():
                 yield f"    {config['init_func']}(&input_state);"
                 yield ""
 
-                for reg_name, buffer_name, size_bytes in buffer_info:
+                for reg_name, buffer_name, size_bytes, test_bytes in buffer_info:
                     yield f"    randombytes({buffer_name}, {size_bytes});"
+                    for offset, value in test_bytes:
+                        yield f"    {buffer_name}[{offset}] = 0x{value:02x};"
 
                 yield ""
                 yield "    /* Set up register state for function arguments */"
@@ -4872,6 +5003,7 @@ def _main():
         "rej_uniform_aarch64_asm",
         "rej_uniform_eta2_aarch64_asm",
         "rej_uniform_eta4_aarch64_asm",
+        "keccak_f1600_x1_armv7m_opt_m55",
     ]
 
     parser = argparse.ArgumentParser(
