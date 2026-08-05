@@ -17,6 +17,12 @@ Unless documented otherwise, for each assembly routine listed below, we prove th
 2. **Memory safety** — the routine accesses only those memory regions permitted by its specification (input/output buffers, stack frame).
 3. **Secret-independent timing** — the sequence of microarchitectural events (e.g. memory accesses, branch decisions) emitted by the routine is a function of public inputs only, and does not depend on secret data.
 
+### By design: rejection sampling for the public matrix (`rej_uniform`)
+
+`rej_uniform` expands the public matrix A from the public seed rho. Because it operates on public data only,
+secret-independent timing is not a requirement, and admitting variable-time execution enables a faster
+implementation. We therefore prove properties 1 and 2 for it, but deliberately not property 3.
+
 ### Known gap: rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
 
 The AArch64 and AVX2 kernels `rej_uniform_eta{2,4}` have secret-independent timing, but we do not yet prove it (see
@@ -127,7 +133,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## Routines covered
 
-All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for `rej_uniform_eta{2,4}` which are proven memory-safe only (see [Known gap](#known-gap-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
+All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the rejection samplers. `rej_uniform` is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct and memory-safe, with only their timing property outstanding (see [Known gap](#known-gap-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
 
 ### AArch64
 - ML-DSA Arithmetic:

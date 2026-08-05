@@ -28,14 +28,22 @@ same TCB, and therefore the same shared mitigations and residual risks.
 
 ## Additional risks specific to mldsa-native
 
-### Rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
+### Rejection sampling
 
 Both the AArch64 and x86_64 backends are fully covered by HOL Light proofs; the full list of
 functions is maintained in [proofs/hol_light/README.md](proofs/hol_light/README.md).
 
-The one exception to the three target properties is the rejection-sampling kernels for the
-secret vector, `rej_uniform_eta{2,4}`, on both backends: these are proven functionally correct
-and memory-safe, but their secret-independent timing is not yet formally proved (see
+The rejection samplers are the only routines that do not carry all three target properties, for
+two different reasons.
+
+The matrix sampler `rej_uniform` expands the public matrix A from the public seed rho. Since it
+operates on public data only, secret-independent timing is not a requirement, and admitting
+variable-time execution enables a faster implementation. It is proven functionally correct and
+memory-safe on both backends, and is deliberately not proven constant-time.
+
+The secret-vector samplers `rej_uniform_eta{2,4}` do operate on secret data. On both backends
+these are proven functionally correct and memory-safe, but their secret-independent timing is
+not yet formally proved (see
 [#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)). Their memory access
 pattern depends on which coefficients fall inside vs. outside the acceptance interval, but no
 other information about the secret coefficients is leaked, and the indices of in-bound vs.
