@@ -1,6 +1,27 @@
 /*
+ * Copyright (c) The mlkem-native project authors
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/* References
+ * ==========
+ *
+ * - [ADOMNICAI23]
+ *   An update on Keccak performance on ARMv7-M
+ *   Alexandre Adomnicai
+ *   https://eprint.iacr.org/2023/773
+ *
+ * - [SLOTHYM7]
+ *   Enabling Microarchitectural Agility: Taking ML-KEM and ML-DSA from
+ *   Cortex-M4 to M7 with SLOTHY
+ *   Abdulrahman, Kannwischer, Lim
+ *   https://eprint.iacr.org/2025/366
+ *
+ * - [XKCP]
+ *   eXtended Keccak Code Package
+ *   Bertoni, Daemen, Peeters, Van Assche, Van Keer
+ *   https://github.com/XKCP/XKCP
  */
 
 /*
@@ -29,27 +50,54 @@
  * its SLOTHY-derived portions are distributed under the MIT license.
  */
 
-/* References
- * ==========
- *
- * - [ADOMNICAI23]
- *   An update on Keccak performance on ARMv7-M
- *   Alexandre Adomnicai
- *   https://eprint.iacr.org/2023/773
- *
- * - [SLOTHYM7]
- *   Enabling Microarchitectural Agility: Taking ML-KEM and ML-DSA from
- *   Cortex-M4 to M7 with SLOTHY
- *   Abdulrahman, Kannwischer, Lim
- *   https://eprint.iacr.org/2025/366
- *
- * - [XKCP]
- *   eXtended Keccak Code Package
- *   Bertoni, Daemen, Peeters, Van Assche, Van Keer
- *   https://github.com/XKCP/XKCP
- */
-@ WARNING: This implementation requires a little-endian Armv7-M or Armv8-M Mainline CPU.
+/*yaml
+  Name: keccak_f1600_x1_armv7m_asm
+  Description: Armv8.1-M baseline x1 Keccak-f[1600] permutation using the Adomnicai/XKCP bit-interleaved Armv7-M representation
+  Signature: void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49])
+  ABI:
+    Architecture: armv81m
+    CallingConvention: AAPCS32
+    Features: []
+    r0:
+      type: buffer
+      size_bytes: 200
+      permissions: read/write
+      c_parameter: uint32_t state[50]
+      description: Bit-interleaved x1 state as even/odd 32-bit halves for each Keccak lane
+    r1:
+      type: buffer
+      size_bytes: 196
+      permissions: read
+      c_parameter: const uint32_t rc[49]
+      description: 24 bit-interleaved round constants followed by the 0xff loop terminator
+      test_bytes:
+        192: 0xff
+        193: 0x00
+        194: 0x00
+        195: 0x00
+  Stack:
+    bytes: 64
+    description: register preservation (40) + scalar scratch/intermediate state (24); no MVE/Q-register scratch
+*/
 
+/*
+ * AAPCS32 contract: preserves r4-r11 and sp; d8-d15 are not accessed.
+ * The caller-saved r0-r3, r12, and APSR condition flags may be clobbered.
+ * The 200-byte state buffer is modified; the round-constant buffer is read-only.
+ */
+
+/*
+ * This file is derived from the public domain implementation @[XKCP].
+ * Optimizations for Armv7-M are described in @[ADOMNICAI23].
+ * The clean round body is adapted from SLOTHY's MIT-licensed
+ * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m7.s.
+ * Further optimizations using SLOTHY are described in @[SLOTHYM7].
+ */
+/* WARNING: This implementation requires a little-endian Armv7-M or Armv8-M Mainline CPU. */
+
+#include "../../../../common.h"
+#if defined(MLD_FIPS202_ARMV81M_NEED_X1) &&  !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+/* simpasm: header-end */
 
     .thumb
     .syntax unified
@@ -982,3 +1030,6 @@ mld_keccak_f1600_x1_armv7m_asm_slothy_end:
     pop     { r4 - r12, pc }
 
 MLD_ASM_FN_SIZE(keccak_f1600_x1_armv7m_asm)
+
+/* simpasm: footer-start */
+#endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
