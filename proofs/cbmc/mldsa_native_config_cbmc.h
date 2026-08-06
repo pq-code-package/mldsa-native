@@ -38,6 +38,7 @@
  *   - MLD_CONFIG_NAMESPACE_PREFIX
  *   - MLD_CONFIG_KEYGEN_PCT
  *   - MLD_CONFIG_CUSTOM_ALLOC_FREE
+ *   - MLD_CONFIG_CUSTOM_ZEROIZE
  */
 
 
@@ -409,16 +410,24 @@
  *          consider additional measures instead of what this feature
  *          provides. In this case, you can set mld_zeroize to a no-op.
  */
-/* #define MLD_CONFIG_CUSTOM_ZEROIZE
-   #if !defined(__ASSEMBLER__)
-   #include <stdint.h>
-   #include "src/src.h"
-   static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
-   {
-       ... your implementation ...
-   }
-   #endif
-*/
+#define MLD_CONFIG_CUSTOM_ZEROIZE
+#if !defined(__ASSEMBLER__)
+#include <stddef.h>
+#include <stdint.h>
+#include "../../mldsa/src/cbmc.h"
+#include "../../mldsa/src/sys.h"
+static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
+__contract__(
+  requires(len <= UINT32_MAX)
+  requires(memory_no_alias(ptr, len))
+  assigns(memory_slice(ptr, len))
+  ensures(array_zeroized_u8((uint8_t *)ptr, len)))
+{
+  /* Fail if we forget to invoke mld_zeroize by contract. */
+  cassert(0);
+}
+#endif /* !__ASSEMBLER__ */
+
 
 /**
  * MLD_CONFIG_CUSTOM_RANDOMBYTES

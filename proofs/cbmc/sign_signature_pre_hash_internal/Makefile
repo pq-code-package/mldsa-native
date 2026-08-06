@@ -21,6 +21,7 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_signature_pre_hash_internal
 USE_FUNCTION_CONTRACTS=mld_signature_internal
+USE_FUNCTION_CONTRACTS+=mld_zeroize
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

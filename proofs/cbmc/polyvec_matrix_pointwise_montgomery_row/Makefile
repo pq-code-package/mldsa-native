@@ -25,6 +25,7 @@ USE_FUNCTION_CONTRACTS=mld_poly_pointwise_montgomery
 USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
 USE_FUNCTION_CONTRACTS+=mld_poly_add
 USE_FUNCTION_CONTRACTS+=mld_poly_reduce
+USE_FUNCTION_CONTRACTS+=mld_zeroize
 else
 USE_FUNCTION_CONTRACTS=mld_polyvecl_pointwise_acc_montgomery
 endif

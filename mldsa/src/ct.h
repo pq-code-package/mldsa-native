@@ -345,28 +345,29 @@ __contract__(
 #if !defined(MLD_CONFIG_CUSTOM_ZEROIZE)
 #if defined(MLD_SYS_WINDOWS)
 #include <windows.h>
+#elif !defined(MLD_HAVE_INLINE_ASM)
+#error No plausibly-secure implementation of mld_zeroize available. Please provide your own using MLD_CONFIG_CUSTOM_ZEROIZE.
+#endif
+
 static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
 __contract__(
+  requires(len <= UINT32_MAX)
   requires(memory_no_alias(ptr, len))
-  assigns(memory_slice(ptr, len))) { SecureZeroMemory(ptr, len); }
-#elif defined(MLD_HAVE_INLINE_ASM)
-#include <string.h>
-static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
-__contract__(
-  requires(memory_no_alias(ptr, len))
-  assigns(memory_slice(ptr, len)))
+  assigns(memory_slice(ptr, len))
+  ensures(array_zeroized_u8((uint8_t *)ptr, len)))
 {
-  memset(ptr, 0, len);
+#if defined(MLD_SYS_WINDOWS)
+  SecureZeroMemory(ptr, len);
+#else
+  mld_memset(ptr, 0, len);
   /* This follows OpenSSL and seems sufficient to prevent the compiler
    * from optimizing away the memset.
    *
    * If there was a reliable way to detect availability of memset_s(),
    * that would be preferred. */
   __asm__ __volatile__("" : : "r"(ptr) : "memory");
+#endif /* !MLD_SYS_WINDOWS */
 }
-#else /* !MLD_SYS_WINDOWS && MLD_HAVE_INLINE_ASM */
-#error No plausibly-secure implementation of mld_zeroize available. Please provide your own using MLD_CONFIG_CUSTOM_ZEROIZE.
-#endif /* !MLD_SYS_WINDOWS && !MLD_HAVE_INLINE_ASM */
 #endif /* !MLD_CONFIG_CUSTOM_ZEROIZE */
 
 #endif /* !MLD_CT_H */
