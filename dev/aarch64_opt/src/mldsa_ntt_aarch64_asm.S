@@ -69,8 +69,8 @@
         mls      \dst\().4s, t2.4s,      consts.s[0]
         // Bounds: |dst| < BARMUL_BOUND
 
-        // (See the end of dev/aarch64_clean/src/intt.S for the exact value of
-        // BARMUL_BOUND)
+        // (See the end of dev/aarch64_clean/src/mldsa_intt_aarch64_asm.S
+        // for the exact value of BARMUL_BOUND)
 .endm
 
 .macro mulmod dst, src, const, const_twisted
