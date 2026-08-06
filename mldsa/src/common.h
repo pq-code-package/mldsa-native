@@ -71,7 +71,7 @@
 #define MLD_NAMESPACE_KL(s) MLD_CONCAT(MLD_NAMESPACE_PREFIX_KL, s)
 
 /* On Apple platforms, we need to emit leading underscore
- * in front of assembly symbols. We thus introducee a separate
+ * in front of assembly symbols. We thus introduce a separate
  * namespace wrapper for ASM symbols. */
 #if !defined(__APPLE__)
 #define MLD_ASM_NAMESPACE(sym) MLD_NAMESPACE(sym)

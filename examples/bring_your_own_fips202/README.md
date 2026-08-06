@@ -26,7 +26,7 @@ The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.
 - `MLD_CONFIG_FIPS202_CUSTOM_HEADER`: Path to your custom `fips202.h`
 - `MLD_CONFIG_FIPS202X4_CUSTOM_HEADER`: Path to your custom `fips202x4.h`
 
-Your custom FIPS-202 implementation must impelement the API specified in [FIPS202.md](../../FIPS202.md).
+Your custom FIPS-202 implementation must implement the API specified in [FIPS202.md](../../FIPS202.md).
 
 ## Notes
 
