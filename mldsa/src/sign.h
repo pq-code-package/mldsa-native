@@ -134,6 +134,11 @@ __contract__(
           return_value == MLD_ERR_RNG_FAIL ||
           return_value == MLD_ERR_SIGNING_PAUSED ||
           return_value == MLD_ERR_PCT_FAIL)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
@@ -182,6 +187,11 @@ __contract__(
           return_value == MLD_ERR_RNG_FAIL ||
           return_value == MLD_ERR_SIGNING_PAUSED ||
           return_value == MLD_ERR_PCT_FAIL)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
@@ -252,7 +262,10 @@ __contract__(
   ensures(return_value == 0 ||
           return_value == MLD_ERR_OUT_OF_MEMORY ||
           return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
-          return_value == MLD_ERR_SIGNING_PAUSED));
+          return_value == MLD_ERR_SIGNING_PAUSED)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sig, MLDSA_CRYPTO_BYTES)));
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
 #if !defined(MLD_CONFIG_NO_RANDOMIZED_API)
@@ -310,6 +323,9 @@ __contract__(
           return_value == MLD_ERR_SIGNING_PAUSED ||
           return_value == MLD_ERR_INVALID_ARG)
   ensures((return_value == MLD_ERR_INVALID_ARG) ==> (ctxlen > 255))
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sig, MLDSA_CRYPTO_BYTES))
 );
 
 /**
@@ -359,6 +375,9 @@ __contract__(
           return_value == MLD_ERR_RNG_FAIL ||
           return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED ||
           return_value == MLD_ERR_SIGNING_PAUSED)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sig, MLDSA_CRYPTO_BYTES))
 );
 
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
@@ -560,6 +579,9 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED || return_value == MLD_ERR_INVALID_ARG)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sig, MLDSA_CRYPTO_BYTES))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -675,6 +697,9 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(sig, MLDSA_CRYPTO_BYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_OUT_OF_MEMORY || return_value == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED || return_value == MLD_ERR_SIGNING_PAUSED || return_value == MLD_ERR_INVALID_ARG)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(sig, MLDSA_CRYPTO_BYTES))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
@@ -815,6 +840,9 @@ __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   assigns(memory_slice(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
   ensures(return_value == 0 || return_value == MLD_ERR_INVALID_KEY || return_value == MLD_ERR_OUT_OF_MEMORY)
+  /* Output buffers on error, per API-CONVENTIONS.md */
+  ensures(return_value != 0 ==>
+          array_unchanged_or_zeroized_u8(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
