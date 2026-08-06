@@ -10,7 +10,7 @@
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #define mld_keccak_f1600_x1_armv7m_asm MLD_NAMESPACE(keccak_f1600_x1_armv7m_asm)
-void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
+void mld_keccak_f1600_x1_armv7m_asm(uint64_t state[25], const uint32_t rc[49]);
 
 #define mld_keccak_f1600_x1_state_xor_bytes_asm \
   MLD_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
@@ -58,8 +58,7 @@ static MLD_ALIGN const uint32_t mld_keccakf1600_round_constants_x1[49] = {
 int mld_keccak_f1600_x1_native_impl(uint64_t *state)
 {
   /* The x1 native xor/extract hooks keep state bit-interleaved in-place. */
-  mld_keccak_f1600_x1_armv7m_asm((uint32_t *)state,
-                                 mld_keccakf1600_round_constants_x1);
+  mld_keccak_f1600_x1_armv7m_asm(state, mld_keccakf1600_round_constants_x1);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 

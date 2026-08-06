@@ -20,15 +20,16 @@
 
 typedef struct armv81m_register_state reg_state;
 
-void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49]);
+void mld_keccak_f1600_x1_armv7m_asm(uint64_t state[25], const uint32_t rc[49]);
 
 int check_keccak_f1600_x1_armv7m_asm(void)
 {
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 state as even/odd 32-bit
-                                    halves for each Keccak lane */
+  MLD_ALIGN uint8_t
+      buf_r0[200]; /* 8-byte-aligned bit-interleaved x1 state containing
+                      even/odd 32-bit halves for each Keccak lane */
   MLD_ALIGN uint8_t buf_r1[196]; /* 24 bit-interleaved round constants followed
                                     by the 0xff loop terminator */
 

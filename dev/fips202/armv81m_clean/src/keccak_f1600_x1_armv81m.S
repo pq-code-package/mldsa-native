@@ -48,12 +48,16 @@
  * examples/naive/armv7m/keccak/keccakf1600_adomnicai_m4.s.
  * Its XKCP-derived portions are dedicated to the public domain under CC0-1.0;
  * its SLOTHY-derived portions are distributed under the MIT license.
+ *
+ * Theta parity is formed with paired theta parity loads: each LDRD fetches
+ * the even and odd 32-bit components of a lane, then the following EOR
+ * operations consume that pair immediately.
  */
 
 /*yaml
   Name: keccak_f1600_x1_armv7m_asm
-  Description: Armv8.1-M baseline x1 Keccak-f[1600] permutation using the Adomnicai/XKCP bit-interleaved Armv7-M representation
-  Signature: void mld_keccak_f1600_x1_armv7m_asm(uint32_t state[50], const uint32_t rc[49])
+  Description: Armv8.1-M x1 Keccak-f[1600] permutation using the Adomnicai/XKCP bit-interleaved Armv7-M representation
+  Signature: void mld_keccak_f1600_x1_armv7m_asm(uint64_t state[25], const uint32_t rc[49])
   ABI:
     Architecture: armv81m
     CallingConvention: AAPCS32
@@ -62,8 +66,8 @@
       type: buffer
       size_bytes: 200
       permissions: read/write
-      c_parameter: uint32_t state[50]
-      description: Bit-interleaved x1 state as even/odd 32-bit halves for each Keccak lane
+      c_parameter: uint64_t state[25]
+      description: 8-byte-aligned bit-interleaved x1 state containing even/odd 32-bit halves for each Keccak lane
     r1:
       type: buffer
       size_bytes: 196
@@ -83,7 +87,8 @@
 /*
  * AAPCS32 contract: preserves r4-r11 and sp; d8-d15 are not accessed.
  * The caller-saved r0-r3, r12, and APSR condition flags may be clobbered.
- * The 200-byte state buffer is modified; the round-constant buffer is read-only.
+ * The 200-byte state buffer must be 8-byte aligned and is modified; the
+ * round-constant buffer is read-only.
  */
 
 /*
@@ -347,6 +352,47 @@
 
 
 /******************************************************************************
+ * Load an adjacent bit-interleaved pair with optional swap.
+ *
+ * base must be the lower address of the adjacent pair, normally Xxx0.
+ *****************************************************************************/
+.macro ldrd_pair_select lo, hi, base, base_hi, swap
+.if \swap == 0
+    ldrd    \lo, \hi, [r0, #\base] // @slothy:reads=[r0\base,r0\base_hi]
+.else
+    ldrd    \hi, \lo, [r0, #\base] // @slothy:reads=[r0\base,r0\base_hi]
+.endif
+.endm
+
+
+/******************************************************************************
+ * Compute two xor5 parities together using LDRD.
+ *
+ * d0/d1 are independent parity accumulators. t0/t1/u0/u1 are explicit
+ * scratch registers. Each accumulator keeps the same rotation semantics as a
+ * standalone xor5 invocation.
+ *****************************************************************************/
+.macro xor5pair d0, d1, t0, t1, u0, u1, \
+                base1, base1_hi, swap1, base2, base2_hi, swap2, base3, base3_hi, swap3, base4, base4_hi, swap4, base5, base5_hi, swap5, \
+                r01, r02, r03, r04, r05, \
+                r11, r12, r13, r14, r15
+    ldrd_pair_select \d0, \d1, \base1, \base1_hi, \swap1
+    ldrd_pair_select \t0, \t1, \base2, \base2_hi, \swap2
+    eorror  \d0, \d0, \t0, \r01, \r02
+    eorror  \d1, \d1, \t1, \r11, \r12
+    ldrd_pair_select \t0, \t1, \base3, \base3_hi, \swap3
+    eorror  \d0, \d0, \t0, \r01, \r03
+    eorror  \d1, \d1, \t1, \r11, \r13
+    ldrd_pair_select \t0, \t1, \base4, \base4_hi, \swap4
+    eorror  \d0, \d0, \t0, \r01, \r04
+    eorror  \d1, \d1, \t1, \r11, \r14
+    ldrd_pair_select \t0, \t1, \base5, \base5_hi, \swap5
+    eorror  \d0, \d0, \t0, \r01, \r05
+    eorror  \d1, \d1, \t1, \r11, \r15
+.endm
+
+
+/******************************************************************************
  * Exclusive-OR where the 2nd operand is rotated by 1 bit to the left.
  *  - dst           destination register
  *  - src1-src2     source registers
@@ -596,26 +642,42 @@
  * classical representation (i.e. without transition and no delayed Rho step).
  *****************************************************************************/
 .macro    KeccakRound0
-    xor5      r3, Abu0, Agu0, Aku0, Amu0, Asu0, 0, 0, 0, 0, 0
-    xor5      r7, Abe1, Age1, Ake1, Ame1, Ase1, 0, 0, 0, 0, 0
-    xorrol    r6, r3, r7, 32
-    xor5str   r4, Abi1, Agi1, Aki1, Ami1, Asi1, 0, 0, 0, 0, 0, r6, sp, mDa0
-    eor.w     r6, r3, r4
-    xor5str   r3, Abo0, Ago0, Ako0, Amo0, Aso0, 0, 0, 0, 0, 0, r6, sp, mDo1
-    eor.w     r2, r7, r3
-    xor5      r7, Aba0, Aga0, Aka0, Ama0, Asa0, 0, 0, 0, 0, 0
-    xorrol   r10, r7, r4, 32
-    xor5      r4, Abo1, Ago1, Ako1, Amo1, Aso1, 0, 0, 0, 0, 0
-    eor      r14, r4, r7
-    xor5      r7, Abe0, Age0, Ake0, Ame0, Ase0, 0, 0, 0, 0, 0
+    xor5pair r3, r4, r1, r5, r11, r12, \
+             Abu0, Abu1, 0, Agu0, Agu1, 0, Aku0, Aku1, 0, Amu0, Amu1, 0, Asu0, Asu1, 0, \
+             0, 0, 0, 0, 0, \
+             0, 0, 0, 0, 0
+    xor5pair r7, r8, r1, r5, r11, r12, \
+             Abe0, Abe1, 0, Age0, Age1, 0, Ake0, Ake1, 0, Ame0, Ame1, 0, Ase0, Ase1, 0, \
+             0, 0, 0, 0, 0, \
+             0, 0, 0, 0, 0
+    xorrol    r6, r3, r8, 32
+    str       r6, [sp, #mDa0] // @slothy:writes=[spmDa0]
+    eor       r6, r4, r7
+    str       r6, [sp, #mDa1] // @slothy:writes=[spmDa1]
+    xor5pair r1, r5, r6, r10, r11, r12, \
+             Abi0, Abi1, 0, Agi0, Agi1, 0, Aki0, Aki1, 0, Ami0, Ami1, 0, Asi0, Asi1, 0, \
+             0, 0, 0, 0, 0, \
+             0, 0, 0, 0, 0
+    xorrol    r9, r1, r4, 32
+    str       r9, [sp, #mDo0] // @slothy:writes=[spmDo0]
+    eor       r6, r3, r5
+    str       r6, [sp, #mDo1] // @slothy:writes=[spmDo1]
+    xor5pair r3, r4, r6, r10, r11, r12, \
+             Abo0, Abo1, 0, Ago0, Ago1, 0, Ako0, Ako1, 0, Amo0, Amo1, 0, Aso0, Aso1, 0, \
+             0, 0, 0, 0, 0, \
+             0, 0, 0, 0, 0
+    eor       r2, r8, r3
     xorrol    r6, r7, r4, 32
-    xor5str   r4, Abu1, Agu1, Aku1, Amu1, Asu1, 0, 0, 0, 0, 0, r6, sp, mDi0
-    eor.w     r8, r4, r7
-    xor5str   r7, Abi0, Agi0, Aki0, Ami0, Asi0, 0, 0, 0, 0, 0, r8, sp, mDa1
-    xorrol    r9, r7, r4, 32
-    xor5str   r4, Aba1, Aga1, Aka1, Ama1, Asa1, 0, 0, 0, 0, 0, r9, sp, mDo0
-    eor      r11, r4, r7
-    xorrol   r12, r3, r4, 32
+    str       r6, [sp, #mDi0] // @slothy:writes=[spmDi0]
+    xor5pair r7, r6, r10, r11, r12, r14, \
+             Aba0, Aba1, 0, Aga0, Aga1, 0, Aka0, Aka1, 0, Ama0, Ama1, 0, Asa0, Asa1, 0, \
+             0, 0, 0, 0, 0, \
+             0, 0, 0, 0, 0
+    xorrol   r10, r7, r5, 32
+    eor      r11, r6, r1
+    xorrol   r12, r3, r6, 32
+    eor      r14, r4, r7
+    ldr       r8, [sp, #mDa1] // @slothy:reads=[spmDa1]
     KeccakThetaRhoPiChiSkipStore Abo0, Aka1,  r9, 14, 0, \
                         Agu0, Ame1, r12, 10, 0, \
                         Aka1, Asi1,  r8,  2, 0, \
@@ -648,7 +710,7 @@
                             Amo1,  r9, 11, 0, \
                             Asu0, r12,  7, 0, \
                             0, 0, 1, Aku0, r1
-    ldr.w       r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
+    ldr         r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
     KeccakThetaRhoPiChi Abo1, Aka0,  r9, 14, 0, \
                         Agu1, Ame0, r14, 10, 0, \
                         Aka0, Asi0,  r8,  1, 0, \
@@ -689,29 +751,46 @@
  * 2nd round of the 4 unrolled rounds routine due to in-place processing.
  *****************************************************************************/
 .macro    KeccakRound1
-    xor5str     r3, Asu0, Agu0, Amu0, Abu1, Aku1, 22, 10,  3, 18, 28, r14, r0, Aba1
-    xor5        r7, Age1, Ame0, Abe0, Ake1, Ase1, 10, 22,  4,  7, 20
-    ror         r3, #32-22
-    xorrol      r6, r3, r7, 32-10
-    xor5str     r4, Aki0, Asi0, Agi1, Ami0, Abi1,  7, 30,  9, 28,  1, r6, sp, mDa0
-    eor         r6, r3, r4, ror #32-7
-    xor5str     r3, Amo1, Abo0, Ako1, Aso0, Ago1,  0, 14,  1, 14, 31, r6, sp, mDo1
-    eor         r2, r3, r7, ror #32-10
-    xor5        r7, Aba0, Aka1, Asa0, Aga0, Ama1,  0,  2, 13,  5, 20
-    xorrol     r10, r7, r4, 32-7
-    xor5        r4, Amo0, Abo1, Ako0, Aso1, Ago0,  0, 14,  0, 13, 31
-    eor        r14, r4, r7
-    xor5        r7, Age0, Ame1, Abe1, Ake0, Ase0, 11, 23,  4,  8, 21
-    ror         r7, #32-11
+    str       r14, [r0, #Aba1] // @slothy:writes=[r0Aba1]
+    xor5pair r3, r4, r1, r5, r11, r12, \
+             Asu0, Asu1, 0, Agu0, Agu1, 0, Amu0, Amu1, 0, Abu0, Abu1, 1, Aku0, Aku1, 1, \
+             22, 10,  3, 18, 28, \
+             22, 10,  3, 18, 27
+    xor5pair r7, r8, r1, r5, r11, r12, \
+             Age0, Age1, 0, Ame0, Ame1, 1, Abe0, Abe1, 1, Ake0, Ake1, 0, Ase0, Ase1, 0, \
+             11, 23,  4,  8, 21, \
+             10, 22,  4,  7, 20
+    ror         r3, r3, #32-22
+    ror         r7, r7, #32-11
+    xorrol      r6, r3, r8, 32-10
+    str         r6, [sp, #mDa0] // @slothy:writes=[spmDa0]
+    eor        r10, r7, r4, ror #32-22
+    str        r10, [sp, #mDa1] // @slothy:writes=[spmDa1]
+    xor5pair r1, r5, r6, r10, r11, r12, \
+             Aki0, Aki1, 1, Asi0, Asi1, 1, Agi0, Agi1, 0, Ami0, Ami1, 1, Abi0, Abi1, 0, \
+              7, 31,  9, 28,  1, \
+              7, 30,  9, 28,  1
+    ror         r1, r1, #32-7
+    eor         r6, r3, r5, ror #32-7
+    str         r6, [sp, #mDo1] // @slothy:writes=[spmDo1]
+    xorrol      r9, r1, r4, 32-22
+    str         r9, [sp, #mDo0] // @slothy:writes=[spmDo0]
+    xor5pair r3, r4, r6, r10, r11, r12, \
+             Amo0, Amo1, 1, Abo0, Abo1, 0, Ako0, Ako1, 1, Aso0, Aso1, 0, Ago0, Ago1, 1, \
+              0, 14,  1, 14, 31, \
+              0, 14,  0, 13, 31
+    eor         r2, r3, r8, ror #32-10
     xorrol      r6, r7, r4, 32
-    xor5str     r4, Asu1, Agu1, Amu1, Abu0, Aku0, 22, 10,  3, 18, 27, r6, sp, mDi0
-    eor         r8, r7, r4, ror #32-22
-    xor5str     r7, Aki1, Asi1, Agi0, Ami1, Abi0,  7, 31,  9, 28,  1, r8, sp, mDa1
-    ror         r7, #32-7
-    xorrol      r9, r7, r4, 32-22
-    xor5str     r4, Aba1, Aka0, Asa1, Aga1, Ama0,  0,  1, 12,  5, 19, r9, sp, mDo0
-    eor        r11, r4, r7
-    xorrol     r12, r3, r4, 32
+    str         r6, [sp, #mDi0] // @slothy:writes=[spmDi0]
+    xor5pair r7, r6, r10, r11, r12, r14, \
+             Aba0, Aba1, 0, Aka0, Aka1, 1, Asa0, Asa1, 0, Aga0, Aga1, 0, Ama0, Ama1, 1, \
+              0,  2, 13,  5, 20, \
+              0,  1, 12,  5, 19
+    xorrol     r10, r7, r5, 32-7
+    eor        r11, r6, r1
+    xorrol     r12, r3, r6, 32
+    eor        r14, r4, r7
+    ldr         r8, [sp, #mDa1] // @slothy:reads=[spmDa1]
     KeccakThetaRhoPiChiSkipStore Amo1, Asa1,  r9, 14,  0, \
                         Agu0, Ake1, r12, 10, 10, \
                         Asa1, Abi1,  r8,  2, 12, \
@@ -744,7 +823,7 @@
                             Aso1,  r9, 11, 13, \
                             Aku1, r12,  7, 28, \
                             8, 0, 1, Amu0, r1
-    ldr.w         r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
+    ldr         r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
     KeccakThetaRhoPiChi Amo0, Asa0,  r9, 14,  0, \
                         Agu1, Ake0, r14, 10, 10, \
                         Asa0, Abi0,  r8,  1, 13, \
@@ -783,29 +862,46 @@
  * 3rd round of the 4 unrolled rounds routine due to in-place processing.
  *****************************************************************************/
 .macro    KeccakRound2
-    xor5str     r3, Aku1, Agu0, Abu1, Asu1, Amu1, 22, 10,  3, 18, 28, r14, r0, Aba1
-    xor5        r7, Ame0, Ake0, Age0, Abe0, Ase1, 10, 22,  4,  7, 20
-    ror         r3, #32-22
-    xorrol      r6, r3, r7, 32-10
-    xor5str     r4, Agi0, Abi0, Asi0, Ami1, Aki0,  7, 30,  9, 28,  1, r6, sp, mDa0
-    eor         r6, r3, r4, ror #32-7
-    xor5str     r3, Aso1, Amo1, Ako0, Ago1, Abo1,  0, 14,  1, 14, 31, r6, sp, mDo1
-    eor         r2, r3, r7, ror #32-10
-    xor5        r7, Aba0, Asa1, Ama1, Aka1, Aga1,  0,  2, 13,  5, 20
-    xorrol     r10, r7, r4, 32-7
-    xor5        r4, Aso0, Amo0, Ako1, Ago0, Abo0,  0, 14,  0, 13, 31
-    eor        r14, r4, r7
-    xor5        r7, Ame1, Ake1, Age1, Abe1, Ase0, 11, 23,  4,  8, 21
-    ror         r7, #32-11
+    str       r14, [r0, #Aba1] // @slothy:writes=[r0Aba1]
+    xor5pair r3, r4, r1, r5, r11, r12, \
+             Aku0, Aku1, 1, Agu0, Agu1, 0, Abu0, Abu1, 1, Asu0, Asu1, 1, Amu0, Amu1, 1, \
+             22, 10,  3, 18, 28, \
+             22, 10,  3, 18, 27
+    xor5pair r7, r8, r1, r5, r11, r12, \
+             Ame0, Ame1, 1, Ake0, Ake1, 1, Age0, Age1, 1, Abe0, Abe1, 1, Ase0, Ase1, 0, \
+             11, 23,  4,  8, 21, \
+             10, 22,  4,  7, 20
+    ror         r3, r3, #32-22
+    ror         r7, r7, #32-11
+    xorrol      r6, r3, r8, 32-10
+    str         r6, [sp, #mDa0] // @slothy:writes=[spmDa0]
+    eor        r10, r7, r4, ror #32-22
+    str        r10, [sp, #mDa1] // @slothy:writes=[spmDa1]
+    xor5pair r1, r5, r6, r10, r11, r12, \
+             Agi0, Agi1, 1, Abi0, Abi1, 1, Asi0, Asi1, 1, Ami0, Ami1, 0, Aki0, Aki1, 1, \
+              7, 31,  9, 28,  1, \
+              7, 30,  9, 28,  1
+    ror         r1, r1, #32-7
+    eor         r6, r3, r5, ror #32-7
+    str         r6, [sp, #mDo1] // @slothy:writes=[spmDo1]
+    xorrol      r9, r1, r4, 32-22
+    str         r9, [sp, #mDo0] // @slothy:writes=[spmDo0]
+    xor5pair r3, r4, r6, r10, r11, r12, \
+             Aso0, Aso1, 1, Amo0, Amo1, 1, Ako0, Ako1, 0, Ago0, Ago1, 1, Abo0, Abo1, 1, \
+              0, 14,  1, 14, 31, \
+              0, 14,  0, 13, 31
+    eor         r2, r3, r8, ror #32-10
     xorrol      r6, r7, r4, 32
-    xor5str     r4, Aku0, Agu1, Abu0, Asu0, Amu0, 22, 10,  3, 18, 27, r6, sp, mDi0
-    eor         r8, r7, r4, ror #32-22
-    xor5str     r7, Agi1, Abi1, Asi1, Ami0, Aki1,  7, 31,  9, 28,  1, r8, sp, mDa1
-    ror         r7, #32-7
-    xorrol      r9, r7, r4, 32-22
-    xor5str     r4, Aba1, Asa0, Ama0, Aka0, Aga0,  0,  1, 12,  5, 19, r9, sp, mDo0
-    eor        r11, r4, r7
-    xorrol     r12, r3, r4, 32
+    str         r6, [sp, #mDi0] // @slothy:writes=[spmDi0]
+    xor5pair r7, r6, r10, r11, r12, r14, \
+             Aba0, Aba1, 0, Asa0, Asa1, 1, Ama0, Ama1, 1, Aka0, Aka1, 1, Aga0, Aga1, 1, \
+              0,  2, 13,  5, 20, \
+              0,  1, 12,  5, 19
+    xorrol     r10, r7, r5, 32-7
+    eor        r11, r6, r1
+    xorrol     r12, r3, r6, 32
+    eor        r14, r4, r7
+    ldr         r8, [sp, #mDa1] // @slothy:reads=[spmDa1]
     KeccakThetaRhoPiChiSkipStore Aso1, Ama0,  r9, 14,  0, \
                         Agu0, Abe0, r12, 10, 10, \
                         Ama0, Aki0,  r8,  2, 12, \
@@ -838,7 +934,7 @@
                             Ago0, r9, 11, 13, \
                             Amu1, r12, 7, 28, \
                             16, 0, 1, Abu1, r1
-    ldr.w   r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
+    ldr     r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
     KeccakThetaRhoPiChi Aso0, Ama1,  r9, 14,  0, \
                         Agu1, Abe1, r14, 10, 10, \
                         Ama1, Aki1,  r8,  1, 13, \
@@ -881,54 +977,71 @@
  * compliant w/ the classical representation at the end of the routine.
  *****************************************************************************/
 .macro    KeccakRound3
-    xor5str     r3, Amu1, Agu0, Asu1, Aku0, Abu0, 22, 10,  3, 18, 28, r14, r0, Aba1
-    xor5        r7, Ake0, Abe1, Ame1, Age0, Ase1, 10, 22,  4,  7, 20
-    ror         r3, #32-22
-    xorrol      r6, r3, r7, 32-10
-    xor5str     r4, Asi1, Aki1, Abi0, Ami0, Agi0,  7, 30,  9, 28,  1, r6, sp, mDa0
-    eor         r6, r3, r4, ror #32-7
-    xor5str     r3, Ago0, Aso1, Ako1, Abo1, Amo0,  0, 14,  1, 14, 31, r6, sp, mDo1
-    eor         r2, r3, r7, ror #32-10
-    xor5        r7, Aba0, Ama0, Aga1, Asa1, Aka0,  0,  2, 13,  5, 20
-    xorrol     r10, r7, r4, 32-7
-    xor5        r4, Ago1, Aso0, Ako0, Abo0, Amo1,  0, 14,  0, 13, 31
-    eor        r14, r4, r7
-    xor5        r7, Ake1, Abe0, Ame0, Age1, Ase0, 11, 23,  4,  8, 21
-    ror         r7, #32-11
+    str       r14, [r0, #Aba1] // @slothy:writes=[r0Aba1]
+    xor5pair r3, r4, r1, r5, r11, r12, \
+             Amu0, Amu1, 1, Agu0, Agu1, 0, Asu0, Asu1, 1, Aku0, Aku1, 0, Abu0, Abu1, 0, \
+             22, 10,  3, 18, 28, \
+             22, 10,  3, 18, 27
+    xor5pair r7, r8, r1, r5, r11, r12, \
+             Ake0, Ake1, 1, Abe0, Abe1, 0, Ame0, Ame1, 0, Age0, Age1, 1, Ase0, Ase1, 0, \
+             11, 23,  4,  8, 21, \
+             10, 22,  4,  7, 20
+    ror         r3, r3, #32-22
+    ror         r7, r7, #32-11
+    xorrol      r6, r3, r8, 32-10
+    str         r6, [sp, #mDa0] // @slothy:writes=[spmDa0]
+    eor        r10, r7, r4, ror #32-22
+    str        r10, [sp, #mDa1] // @slothy:writes=[spmDa1]
+    xor5pair r1, r5, r6, r10, r11, r12, \
+             Asi0, Asi1, 0, Aki0, Aki1, 0, Abi0, Abi1, 1, Ami0, Ami1, 1, Agi0, Agi1, 1, \
+              7, 31,  9, 28,  1, \
+              7, 30,  9, 28,  1
+    ror         r1, r1, #32-7
+    eor         r6, r3, r5, ror #32-7
+    str         r6, [sp, #mDo1] // @slothy:writes=[spmDo1]
+    xorrol      r9, r1, r4, 32-22
+    str         r9, [sp, #mDo0] // @slothy:writes=[spmDo0]
+    xor5pair r3, r4, r6, r10, r11, r12, \
+             Ago0, Ago1, 0, Aso0, Aso1, 1, Ako0, Ako1, 1, Abo0, Abo1, 1, Amo0, Amo1, 0, \
+              0, 14,  1, 14, 31, \
+              0, 14,  0, 13, 31
+    eor         r2, r3, r8, ror #32-10
     xorrol      r6, r7, r4, 32
-    xor5str     r4, Amu0, Agu1, Asu0, Aku1, Abu1, 22, 10,  3, 18, 27, r6, sp, mDi0
-    eor         r8, r7, r4, ror #32-22
-    xor5str     r7, Asi0, Aki0, Abi1, Ami1, Agi1,  7, 31,  9, 28,  1, r8, sp, mDa1
-    ror         r7, #32-7
-    xorrol      r9, r7, r4, 32-22
-    xor5str     r4, Aba1, Ama1, Aga0, Asa0, Aka1,  0,  1, 12,  5, 19, r9, sp, mDo0
-    eor        r11, r4, r7
-    xorrol     r12, r3, r4, 32
+    str         r6, [sp, #mDi0] // @slothy:writes=[spmDi0]
+    xor5pair r7, r6, r10, r11, r12, r14, \
+             Aba0, Aba1, 0, Ama0, Ama1, 0, Aga0, Aga1, 1, Asa0, Asa1, 1, Aka0, Aka1, 0, \
+              0,  2, 13,  5, 20, \
+              0,  1, 12,  5, 19
+    xorrol     r10, r7, r5, 32-7
+    eor        r11, r6, r1
+    xorrol     r12, r3, r6, 32
+    eor        r14, r4, r7
+    ldr         r8, [sp, #mDa1] // @slothy:reads=[spmDa1]
     KeccakThetaRhoPiChiSkipStore     Ago0, Aga0,  r9, 14,  0, \
-                            Agu0, Age0, r12, 10, 10, \
-                            Aga0, Agi0,  r8,  2, 12, \
-                            Age0, Ago0, r11, 23,  7, \
-                            Agi0, Agu0,  r2, 31,  1, \
-                            0, Aga0
+                        Agu0, Age0, r12, 10, 10, \
+                        Aga0, Agi0,  r8,  2, 12, \
+                        Age0, Ago0, r11, 23,  7, \
+                        Agi0, Agu0,  r2, 31,  1, \
+                        0, Aga0
     KeccakThetaRhoPiChi     Ake1, Aka1, r10,  0, 11, \
-                            Aki1, Ake1,  r2,  3, 30, \
-                            Ako1, Aki1,  r9, 12,  1, \
-                            Aku1, Ako1, r14,  4, 18, \
-                            Aka1, Aku1,  r8,  9, 19, \
-                            0, Agu0
+                        Aki1, Ake1,  r2,  3, 30, \
+                        Ako1, Aki1,  r9, 12,  1, \
+                        Aku1, Ako1, r14,  4, 18, \
+                        Aka1, Aku1,  r8,  9, 19, \
+                        0, Agu0
     ldr     r8, [sp, #mDa0] // @slothy:reads=[spmDa0]
     KeccakThetaRhoPiChi     Amu0, Ama0, r14, 14, 22, \
-                            Ama0, Ame0,  r8, 18,  2, \
-                            Ame0, Ami0, r10,  5,  4, \
-                            Ami0, Amo0,  r2,  8, 28, \
-                            Amo0, Amu0,  r9, 28, 31, \
-                            0, Aku1
+                        Ama0, Ame0,  r8, 18,  2, \
+                        Ame0, Ami0, r10,  5,  4, \
+                        Ami0, Amo0,  r2,  8, 28, \
+                        Amo0, Amu0,  r9, 28, 31, \
+                        0, Aku1
     KeccakThetaRhoPiChi     Asi1, Asa1,  r2, 31,  7, \
-                            Aso1, Ase1,  r9, 27, 14, \
-                            Asu1, Asi1, r12, 19,  3, \
-                            Asa1, Aso1,  r8, 20,  5, \
-                            Ase1, Asu1, r11,  1, 20, \
-                            0, Amu0
+                        Aso1, Ase1,  r9, 27, 14, \
+                        Asu1, Asi1, r12, 19,  3, \
+                        Asa1, Aso1,  r8, 20,  5, \
+                        Ase1, Asu1, r11,  1, 20, \
+                        0, Amu0
     ldr     r9, [sp, #mDo1] // @slothy:reads=[spmDo1]
     KeccakThetaRhoPiChiIota Aba0,  r8,  0,     \
                             Abe0, r10, 22, 23, \
@@ -936,32 +1049,32 @@
                             Abo0,  r9, 11, 13, \
                             Abu0, r12,  7, 28, \
                             24, 0, 0, Asu1, r1
-    ldr.w   r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
+    ldr     r2, [sp, #mDi0] // @slothy:reads=[spmDi0]
     KeccakThetaRhoPiChi     Ago1, Aga1,  r9, 14,  0, \
-                            Agu1, Age1, r14, 10, 10, \
-                            Aga1, Agi1,  r8,  1, 13, \
-                            Age1, Ago1, r10, 22,  8, \
-                            Agi1, Agu1,  r2, 30,  1, \
-                            0, Aba0
+                        Agu1, Age1, r14, 10, 10, \
+                        Aga1, Agi1,  r8,  1, 13, \
+                        Age1, Ago1, r10, 22,  8, \
+                        Agi1, Agu1,  r2, 30,  1, \
+                        0, Aba0
     KeccakThetaRhoPiChi     Ake0, Aka0, r11,  1, 10, \
-                            Aki0, Ake0,  r2,  3, 31, \
-                            Ako0, Aki0,  r9, 13,  0, \
-                            Aku0, Ako0, r12,  4, 18, \
-                            Aka0, Aku0,  r8,  9, 20, \
-                            0, Agu1
+                        Aki0, Ake0,  r2,  3, 31, \
+                        Ako0, Aki0,  r9, 13,  0, \
+                        Aku0, Ako0, r12,  4, 18, \
+                        Aka0, Aku0,  r8,  9, 20, \
+                        0, Agu1
     ldr     r8, [sp, #mDa1] // @slothy:reads=[spmDa1]
     KeccakThetaRhoPiChi     Amu1, Ama1, r12, 13, 22, \
-                            Ama1, Ame1,  r8, 18,  1, \
-                            Ame1, Ami1, r11,  5,  4, \
-                            Ami1, Amo1,  r2,  7, 28, \
-                            Amo1, Amu1,  r9, 28, 31, \
-                            0, Aku0
+                        Ama1, Ame1,  r8, 18,  1, \
+                        Ame1, Ami1, r11,  5,  4, \
+                        Ami1, Amo1,  r2,  7, 28, \
+                        Amo1, Amu1,  r9, 28, 31, \
+                        0, Aku0
     KeccakThetaRhoPiChi     Asi0, Asa0,  r2, 31,  7, \
-                            Aso0, Ase0,  r9, 28, 14, \
-                            Asu0, Asi0, r14, 20,  3, \
-                            Asa0, Aso0,  r8, 21,  5, \
-                            Ase0, Asu0, r10,  1, 21, \
-                            0, Amu1
+                        Aso0, Ase0,  r9, 28, 14, \
+                        Asu0, Asi0, r14, 20,  3, \
+                        Asa0, Aso0,  r8, 21,  5, \
+                        Ase0, Asu0, r10,  1, 21, \
+                        0, Amu1
     ldr     r9, [sp, #mDo0] // @slothy:reads=[spmDo0]
     KeccakThetaRhoPiChiIota Aba1,  r8, 0,      \
                             Abe1, r11, 22, 22, \
@@ -969,7 +1082,7 @@
                             Abo1,  r9, 10, 14, \
                             Abu1, r14,  7, 27, \
                             28, 1, 0, Asu0, r1
-    str.w r1, [r0, #Aba1] // @slothy:writes=[r0Aba1]
+    str     r1, [r0, #Aba1] // @slothy:writes=[r0Aba1]
 .endm
 
 @----------------------------------------------------------------------------

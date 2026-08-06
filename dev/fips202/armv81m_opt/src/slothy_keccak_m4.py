@@ -89,7 +89,11 @@ def main():
     slothy.config.unsafe_address_offset_fixup = False
 
     slothy.config.split_heuristic = True
-    slothy.config.split_heuristic_preprocess_naive_interleaving = True
+    # Match the accepted Cortex-M55 schedule policy.
+    # Keep the checked-in selected schedule frozen: SLOTHY schedules are not
+    # expected to be byte-reproducible across solver runs.
+    slothy.config.split_heuristic_preprocess_naive_interleaving = False
+    slothy.config.split_heuristic_estimate_performance = False
     slothy.config.split_heuristic_repeat = 2
     slothy.config.split_heuristic_optimize_seam = 6
     slothy.config.split_heuristic_stepsize = 0.05
@@ -99,6 +103,7 @@ def main():
     slothy.config.constraints.stalls_first_attempt = 16
 
     slothy.config.timeout = 1000
+    slothy.config.retry_timeout = 1000
 
     slothy.load_source_from_file(args.input)
     slothy.optimize(
