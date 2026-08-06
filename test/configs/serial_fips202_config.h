@@ -69,7 +69,7 @@
  *
  * When you need to build mldsa-native in multiple configurations,
  * using varying MLD_CONFIG_FILE can be more convenient
- * then configuring everything through CFLAGS.
+ * than configuring everything through CFLAGS.
  *
  * To use, MLD_CONFIG_FILE _must_ be defined prior
  * to the inclusion of any mldsa-native headers. For example,
@@ -262,8 +262,8 @@
  * This is only relevant for single compilation unit (SCU)
  * builds of mldsa-native. In this case, it determines whether
  * directives defined in parameter-set-independent headers should
- * be #undef'ined or not at the of the SCU file. This is needed
- * in multilevel builds.
+ * be #undef'ined or not at the end of the SCU file. This is
+ * needed in multilevel builds.
  *
  * See examples/multilevel_build_native for an example.
  *
@@ -274,16 +274,16 @@
 /**
  * MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
  *
- * Determines whether an native arithmetic backend should be used.
+ * Determines whether a native arithmetic backend should be used.
  *
  * The arithmetic backend covers performance-critical functions
  * such as the number-theoretic transform (NTT).
  *
  * If this option is unset, the C backend will be used.
  *
- * If this option is set, the arithmetic backend to be use is
+ * If this option is set, the arithmetic backend to be used is
  * determined by MLD_CONFIG_ARITH_BACKEND_FILE: If the latter is
- * unset, the default backend for your the target architecture
+ * unset, the default backend for your target architecture
  * will be used. If set, it must be the name of a backend metadata
  * file.
  *
@@ -315,16 +315,16 @@
 /**
  * MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
  *
- * Determines whether an native FIPS202 backend should be used.
+ * Determines whether a native FIPS202 backend should be used.
  *
  * The FIPS202 backend covers 1x/2x/4x-fold Keccak-f1600, which is
  * the performance bottleneck of SHA3 and SHAKE.
  *
  * If this option is unset, the C backend will be used.
  *
- * If this option is set, the FIPS202 backend to be use is
+ * If this option is set, the FIPS202 backend to be used is
  * determined by MLD_CONFIG_FIPS202_BACKEND_FILE: If the latter is
- * unset, the default backend for your the target architecture
+ * unset, the default backend for your target architecture
  * will be used. If set, it must be the name of a backend metadata
  * file.
  *
@@ -422,8 +422,8 @@
  * MLD_CONFIG_CUSTOM_RANDOMBYTES
  *
  * mldsa-native does not provide a secure randombytes
- * implementation. Such an implementation has to provided by the
- * consumer.
+ * implementation. Such an implementation has to be provided by
+ * the consumer.
  *
  * If this option is not set, mldsa-native expects a function
  * int randombytes(uint8_t *out, size_t outlen).
@@ -450,9 +450,9 @@
  * mldsa-native backends may rely on specific hardware features.
  * Those backends will only be included in an mldsa-native build
  * if support for the respective features is enabled at
- * compile-time. However, when building for a heteroneous set
+ * compile-time. However, when building for a heterogeneous set
  * of CPUs to run the resulting binary/library on, feature
- * detection at _runtime_ is needed to decided whether a backend
+ * detection at _runtime_ is needed to decide whether a backend
  * can be used or not.
  *
  * Set this option and define `mld_sys_check_capability` if you
