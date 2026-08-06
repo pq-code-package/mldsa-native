@@ -601,7 +601,8 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
     decreases(MLDSA_N - i)
   )
   {
-    /* This loop teminates only probabilistically, hence no decreases clause. */
+    /* This loop terminates only probabilistically, hence no decreases
+     * clause. */
     do
     __loop__(
       assigns(j, object_whole(buf), state, pos)
@@ -618,10 +619,10 @@ void mld_poly_challenge(mld_poly *c, const uint8_t seed[MLDSA_CTILDEBYTES])
 
     c->coeffs[i] = c->coeffs[j];
 
-    /* Reference: Compute coefficent value here in two steps to */
-    /* mixinf unsigned and signed arithmetic with implicit      */
-    /* conversions, and so that CBMC can keep track of ranges   */
-    /* to complete type-safety proof here.                      */
+    /* Reference: Compute coefficient value here in two steps to */
+    /* avoid mixing unsigned and signed arithmetic with implicit */
+    /* conversions, and so that CBMC can keep track of ranges    */
+    /* to complete type-safety proof here.                       */
 
     /* The least-significant bit of signs tells us if we want -1 or +1 */
     offset = 2 * (signs & 1);
