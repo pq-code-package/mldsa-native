@@ -384,29 +384,36 @@
 /**
  * MLD_CONFIG_CUSTOM_ZEROIZE
  *
- * In compliance with @[FIPS204, Section 3.6.3], mldsa-native,
- * zeroizes intermediate stack buffers before returning from
- * function calls.
+ * In compliance with @[FIPS204, Section 3.6.3], mldsa-native zeroizes
+ * intermediate buffers before returning from function calls. By default,
+ * those buffers are allocated from the stack; if MLD_CONFIG_CUSTOM_ALLOC_FREE
+ * is set, they are (mostly -- few exceptions remain at present) allocated from
+ * the configured custom allocator.
  *
- * Set this option and define `mld_zeroize` if you want to
- * use a custom method to zeroize intermediate stack buffers.
- * The default implementation uses SecureZeroMemory on Windows
- * and a memset + compiler barrier otherwise. If neither of those
- * is available on the target platform, compilation will fail,
- * and you will need to use MLD_CONFIG_CUSTOM_ZEROIZE to provide
- * a custom implementation of `mld_zeroize()`.
+ * mldsa-native also zeroizes caller-owned output buffers as needed to uphold
+ * the API convention that outputs be either unmodified or zeroized upon
+ * failure.
  *
- * @warning The explicit stack zeroization conducted by mldsa-native reduces
- *          the likelihood of data leaking on the stack, but does not
- *          eliminate it. The C standard makes no guarantee about where a
- *          compiler allocates structures and whether/where it makes copies
- *          of them. Also, in addition to entire structures, there may also
- *          be potentially exploitable leakage of individual values on the
- *          stack.
+ * Set this option and define `mld_zeroize` if you want to use a custom
+ * method to zeroize intermediate and output buffers.
  *
- *          If you need bullet-proof zeroization of the stack, you need to
- *          consider additional measures instead of what this feature
- *          provides. In this case, you can set mld_zeroize to a no-op.
+ * The default implementation uses SecureZeroMemory on Windows and a
+ * memset + compiler barrier otherwise. If neither of those is available on
+ * the target platform, compilation will fail, and you will need to use
+ * MLD_CONFIG_CUSTOM_ZEROIZE to provide a custom implementation of
+ * `mld_zeroize()`.
+ *
+ * @warning
+ *   The zeroization conducted by mldsa-native reduces the likelihood of data
+ *   leaking on the stack or custom allocators, but it does not eliminate it.
+ *   For example, the C standard makes no guarantee about where a compiler
+ *   allocates local structures and whether/where it makes copies of them.
+ *   Also, in addition to entire structures, there may also be potentially
+ *   exploitable leakage of individual values on the stack. If you need
+ *   bullet-proof zeroization of the stack, you need to consider additional
+ *   measures instead of what this feature provides. In this case, you can
+ *   set mld_zeroize to a no-op. Note that in this case you are also responsible
+ *   for zeroizing output buffers upon failure.
  */
 /* #define MLD_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
