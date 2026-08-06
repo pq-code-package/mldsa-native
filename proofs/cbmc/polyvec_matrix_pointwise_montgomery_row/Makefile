@@ -45,7 +45,11 @@ FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_row
 EXPENSIVE = true
 
 # This function is large enough to need...
+ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
+CBMC_OBJECT_BITS = 12
+else
 CBMC_OBJECT_BITS = 11
+endif
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
