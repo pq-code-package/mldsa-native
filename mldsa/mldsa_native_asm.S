@@ -98,6 +98,9 @@
 #include "src/native/x86_64/src/mldsa_rej_uniform_eta2_avx2_asm.S"
 #include "src/native/x86_64/src/mldsa_rej_uniform_eta4_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+#include "src/native/armv81m/src/ntt_armv81m_asm.S"
+#endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
@@ -843,5 +846,17 @@
 #undef MLD_NATIVE_X86_64_SRC_CONSTS_H
 #undef mld_qdata
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+/*
+ * Undefine macros from native code (Arith, Armv8.1-M)
+ */
+/* mldsa/src/native/armv81m/meta.h */
+#undef MLD_ARITH_BACKEND_ARMV81M_PQMX
+#undef MLD_NATIVE_ARMV81M_META_H
+#undef MLD_USE_NATIVE_NTT
+/* mldsa/src/native/armv81m/src/arith_native_armv81m.h */
+#undef MLD_NATIVE_ARMV81M_SRC_ARITH_NATIVE_ARMV81M_H
+#undef mld_ntt_armv81m_asm
+#endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 #endif /* !MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */

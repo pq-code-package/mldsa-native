@@ -92,14 +92,26 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/shim_nucleo_n657x0_q.c
 set_property(SOURCE ${R}/mldsa/mldsa_native.c ${_test_srcs} ${_zephyr_shim}
   APPEND PROPERTY COMPILE_OPTIONS ${CONFIG_COMPILER_OPT})
 
-# Optional native FIPS202 backend (e.g. Armv8.1-M MVE on Cortex-M55). The
-# monolithic mldsa_native.c already includes the backend C sources; its
-# assembly counterpart comes from mldsa_native_asm.S.
+# Optional native backends (e.g. Armv8.1-M MVE on Cortex-M55). The monolithic
+# mldsa_native.c already includes backend C sources; its assembly counterpart
+# comes from mldsa_native_asm.S.
+set(_zephyr_use_native_asm FALSE)
 if(ZEPHYR_FIPS202_BACKEND AND NOT ZEPHYR_ABICHECK)
-  target_sources(app PRIVATE ${R}/mldsa/mldsa_native_asm.S)
+  set(_zephyr_use_native_asm TRUE)
   target_compile_definitions(app PRIVATE
     MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
     "MLD_CONFIG_FIPS202_BACKEND_FILE=\"${ZEPHYR_FIPS202_BACKEND}\"")
+endif()
+
+if(ZEPHYR_ARITH_BACKEND AND NOT ZEPHYR_ABICHECK)
+  set(_zephyr_use_native_asm TRUE)
+  target_compile_definitions(app PRIVATE
+    MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+    "MLD_CONFIG_ARITH_BACKEND_FILE=\"${ZEPHYR_ARITH_BACKEND}\"")
+endif()
+
+if(_zephyr_use_native_asm)
+  target_sources(app PRIVATE ${R}/mldsa/mldsa_native_asm.S)
 endif()
 
 # Each test brings its own main(); rename it so the selected Zephyr

@@ -16,6 +16,10 @@
 #include "aarch64/meta.h"
 #endif
 
+#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+#include "armv81m/meta.h"
+#endif
+
 /* The x86_64 backend requires toolchain support for the SysV ABI */
 #if defined(MLD_SYS_X86_64_AVX2) && defined(MLD_SYSV_ABI_SUPPORTED)
 #include "x86_64/meta.h"

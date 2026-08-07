@@ -33,8 +33,8 @@ Currently supported targets:
 | `mps3-an547`        | `mps3/corstone300/an547` | `mps3-an547`   | Cortex-M55 |
 | `nucleo-n657x0-q`   | `nucleo_n657x0_q`        | OpenOCD + GDB  | Cortex-M55 |
 
-The Armv8.1-M MVE FIPS202 backend is an `OPT=1` feature and is built for
-`mps3-an547` and `nucleo-n657x0-q`.
+The Armv8.1-M MVE FIPS202 and arithmetic/NTT backends are `OPT=1` features
+and are built for `mps3-an547` and `nucleo-n657x0-q`.
 
 ## How it works
 

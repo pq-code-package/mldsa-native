@@ -35,6 +35,8 @@ ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 
 ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve_x1.h
 ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve_x1.h
+ZEPHYR_ARITH_BACKEND_mps3-an547 := native/armv81m/meta.h
+ZEPHYR_ARITH_BACKEND_nucleo-n657x0-q := native/armv81m/meta.h
 
 # Zephyr owns target selection, so do not infer its ABI from make's host ARCH.
 ZEPHYR_ABICHECK_ARCH_mps3-an547 := armv81m
@@ -72,12 +74,14 @@ export QEMU_TIMEOUT
 
 # Native backends are an OPT=1 feature (an547 builds the Armv8.1-M MVE backend).
 ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
+ZEPHYR_ARITH_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_ARITH_BACKEND_$(ZEPHYR_TARGET))))
 
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
 ZEPHYR_ACTIVE_TARGET := $(BUILD_DIR)/zephyr/.active-target
 ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|ARITH=$(ZEPHYR_ARITH_BACKEND)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NTESTS=$(NTESTS)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
 ZEPHYR_APP_INPUTS := \
@@ -147,6 +151,7 @@ CUSTOM_BUILD = \
 		-DZEPHYR_TEST_SRCS="$(strip $(TEST_SRCS))" \
 		-DZEPHYR_TEST_CFLAGS="$(ZEPHYR_TEST_CFLAGS)" \
 		-DZEPHYR_FIPS202_BACKEND=$(ZEPHYR_FIPS202_BACKEND) \
+		-DZEPHYR_ARITH_BACKEND=$(ZEPHYR_ARITH_BACKEND) \
 		-DZEPHYR_ABICHECK=$(if $(CUSTOM_BUILD_ABICHECK),ON,OFF) \
 		$(if $(ZEPHYR_FIPS202_BACKEND),-DCONFIG_FIPS202_MVE_BACKEND=y) \
 		$(ZEPHYR_TARGET_CMAKE_ARGS) \
@@ -155,11 +160,20 @@ CUSTOM_BUILD = \
 	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
-# Track every production assembly source included by the native assembly
-# amalgamation so changing a source rebuilds a custom Zephyr application even
-# when the generated include list itself is unchanged.
-ZEPHYR_NATIVE_ASM_INPUTS := mldsa/mldsa_native_asm.S \
-	$(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
+# Track all production inputs to the selected Armv8.1-M native backends. In
+# particular, the pqmx NTT assembly includes its twiddle table directly, so
+# tracking only the amalgamation or the .S file could otherwise run stale code
+# after a table or backend-header change.
+ZEPHYR_ARMV81M_ARITH_INPUTS := \
+	mldsa/src/native/armv81m/meta.h \
+	$(wildcard mldsa/src/native/armv81m/src/*)
+ZEPHYR_ARMV81M_FIPS202_INPUTS := \
+	$(wildcard mldsa/src/fips202/native/armv81m/*.h) \
+	$(wildcard mldsa/src/fips202/native/armv81m/src/*)
+ZEPHYR_NATIVE_BACKEND_INPUTS := mldsa/mldsa_native.c \
+	mldsa/mldsa_native_asm.S \
+	$(ZEPHYR_ARMV81M_ARITH_INPUTS) \
+	$(ZEPHYR_ARMV81M_FIPS202_INPUTS)
 
 # A custom build links the test sources directly rather than from objects, so
 # nothing otherwise makes the bins depend on the Zephyr app inputs or the
@@ -168,7 +182,7 @@ ZEPHYR_NATIVE_ASM_INPUTS := mldsa/mldsa_native_asm.S \
 # input, target, backend, or test-count change forces a rebuild. Set here before
 # components.mk is included.
 CUSTOM_BUILD_DEPS := $(ZEPHYR_ACTIVE_TARGET) $(ZEPHYR_APP_INPUTS) \
-	$(if $(ZEPHYR_FIPS202_BACKEND),$(ZEPHYR_NATIVE_ASM_INPUTS))
+	$(if $(or $(ZEPHYR_FIPS202_BACKEND),$(ZEPHYR_ARITH_BACKEND)),$(ZEPHYR_NATIVE_BACKEND_INPUTS))
 
 ifeq ($(ZEPHYR_IS_NUCLEO_N657X0_Q),)
 EXEC_WRAPPER := $(abspath $(PLATFORM_PATH)/exec_wrapper.py)

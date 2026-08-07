@@ -14,7 +14,8 @@ endif
 SOURCES += $(wildcard mldsa/src/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mldsa/src/native/aarch64/src/*.[csS]) \
-		$(wildcard mldsa/src/native/x86_64/src/*.[csS])
+		$(wildcard mldsa/src/native/x86_64/src/*.[csS]) \
+		$(wildcard mldsa/src/native/armv81m/src/*.[csS])
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH \
 		-DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
@@ -198,7 +199,8 @@ else ifeq ($(ABICHECK_ARCH),x86_64)
 ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/x86_64/src/*.S) \
                         $(wildcard mldsa/src/fips202/native/x86_64/src/*.S)
 else ifeq ($(ABICHECK_ARCH),armv81m)
-ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
+ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/armv81m/src/*.S) \
+                        $(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
 else
 ABICHECK_ASM_SOURCES :=
 endif
@@ -232,6 +234,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLD_CONFIG_NAMESPACE_PREFIX=mld \
   -DMLD_ARITH_BACKEND_AARCH64 \
   -DMLD_ARITH_BACKEND_X86_64_DEFAULT \
+  -DMLD_ARITH_BACKEND_ARMV81M_PQMX \
   -DMLD_FIPS202_AARCH64_NEED_X1_SCALAR \
   -DMLD_FIPS202_AARCH64_NEED_X1_V84A \
   -DMLD_FIPS202_AARCH64_NEED_X2_V84A \

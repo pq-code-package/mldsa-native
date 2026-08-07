@@ -27,6 +27,7 @@ int check_keccak_f1600_x1_state_xor_bytes_scalar_asm(void);
 #if defined(__ARM_FEATURE_MVE)
 int check_keccak_f1600_x1_state_xor_bytes_asm(void);
 int check_keccak_f1600_x4_mve_asm(void);
+int check_ntt_armv81m_asm(void);
 #endif
 
 static const abicheck_entry_t all_checks[] = {
@@ -43,6 +44,7 @@ static const abicheck_entry_t all_checks[] = {
     {"keccak_f1600_x1_state_xor_bytes_asm",
      check_keccak_f1600_x1_state_xor_bytes_asm},
     {"keccak_f1600_x4_mve_asm", check_keccak_f1600_x4_mve_asm},
+    {"ntt_armv81m_asm", check_ntt_armv81m_asm},
 #endif
     {NULL, NULL} /* Sentinel */
 };
