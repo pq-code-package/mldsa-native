@@ -3519,8 +3519,8 @@ def gen_slothy(funcs):
         return
 
     for func in funcs:
-        if func == "ntt_armv81m_asm":
-            # Preserve pqmx's imported filename, which intentionally omits
+        if func in ("ntt_armv81m_asm", "intt_armv81m_asm"):
+            # Preserve pqmx's imported filenames, which intentionally omit
             # the normal arithmetic `mldsa_` prefix.
             base = "dev/armv81m_opt/src"
             t = func + ".S"
@@ -4643,6 +4643,12 @@ def gen_abicheck():
             "armv81m",
         ),
         (
+            "intt_armv81m_asm.S",
+            "dev/armv81m_opt/src",
+            "",
+            "armv81m",
+        ),
+        (
             "keccak_f1600_x1_armv7m_opt_m55.S",
             "dev/fips202/armv81m_opt/src",
             "",
@@ -5088,6 +5094,7 @@ def _main():
         "keccak_f1600_x1_state_xor_bytes_mve",
         "keccak_f1600_x1_state_extract_bytes_mve",
         "ntt_armv81m_asm",
+        "intt_armv81m_asm",
     ]
 
     parser = argparse.ArgumentParser(

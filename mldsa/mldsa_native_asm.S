@@ -99,6 +99,7 @@
 #include "src/native/x86_64/src/mldsa_rej_uniform_eta4_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
 #if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+#include "src/native/armv81m/src/intt_armv81m_asm.S"
 #include "src/native/armv81m/src/ntt_armv81m_asm.S"
 #endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
@@ -853,9 +854,12 @@
 /* mldsa/src/native/armv81m/meta.h */
 #undef MLD_ARITH_BACKEND_ARMV81M_PQMX
 #undef MLD_NATIVE_ARMV81M_META_H
+#undef MLD_USE_NATIVE_INTT
 #undef MLD_USE_NATIVE_NTT
+#undef MLD_USE_NATIVE_NTT_CUSTOM_ORDER
 /* mldsa/src/native/armv81m/src/arith_native_armv81m.h */
 #undef MLD_NATIVE_ARMV81M_SRC_ARITH_NATIVE_ARMV81M_H
+#undef mld_intt_armv81m_asm
 #undef mld_ntt_armv81m_asm
 #endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */

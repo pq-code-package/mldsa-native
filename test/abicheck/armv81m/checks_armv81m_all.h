@@ -18,6 +18,9 @@
 
 #if defined(MLD_SYS_ARMV81M_MVE)
 
+#if defined(__ARM_FEATURE_MVE)
+int check_intt_armv81m_asm(void);
+#endif
 int check_keccak_f1600_x1_armv7m_asm(void);
 int check_keccak_f1600_x1_state_extract_bytes_scalar_asm(void);
 #if defined(__ARM_FEATURE_MVE)
@@ -31,6 +34,9 @@ int check_ntt_armv81m_asm(void);
 #endif
 
 static const abicheck_entry_t all_checks[] = {
+#if defined(__ARM_FEATURE_MVE)
+    {"intt_armv81m_asm", check_intt_armv81m_asm},
+#endif
     {"keccak_f1600_x1_armv7m_asm", check_keccak_f1600_x1_armv7m_asm},
     {"keccak_f1600_x1_state_extract_bytes_scalar_asm",
      check_keccak_f1600_x1_state_extract_bytes_scalar_asm},

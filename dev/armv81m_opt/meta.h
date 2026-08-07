@@ -12,19 +12,22 @@
 
 /* Identifier for this backend so its assembly is only emitted when selected. */
 #define MLD_ARITH_BACKEND_ARMV81M_PQMX
+#define MLD_USE_NATIVE_NTT_CUSTOM_ORDER
 #define MLD_USE_NATIVE_NTT
+#define MLD_USE_NATIVE_INTT
 
 #if !defined(__ASSEMBLER__)
+#include <stddef.h>
+#include "../../reduce.h"
 #include "../api.h"
 #include "src/arith_native_armv81m.h"
 
 /*
- * pqmx's forward kernel leaves each 16-coefficient block in a 4-by-4
- * transposed layout. The transpose is self-inverse; undo it here so the
- * public native-NTT contract remains normal input to bit-reversed output
- * while the existing C inverse NTT remains in use.
+ * pqmx's forward kernel produces, and its inverse kernel consumes, a 4-by-4
+ * transposed layout in every 16-coefficient block. The transpose is
+ * self-inverse.
  */
-static MLD_INLINE void mld_armv81m_pqmx_restore_bitrev(int32_t data[MLDSA_N])
+static MLD_INLINE void mld_armv81m_pqmx_transpose_4x4(int32_t data[MLDSA_N])
 {
   unsigned int block;
 
@@ -47,6 +50,30 @@ static MLD_INLINE void mld_armv81m_pqmx_restore_bitrev(int32_t data[MLDSA_N])
   }
 }
 
+static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
+{
+  if (mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    mld_armv81m_pqmx_transpose_4x4(data);
+  }
+}
+
+/*
+ * The plain pqmx iNTT omits ML-DSA's final Montgomery-domain scale. Keep the
+ * existing scalar 41978 = R^2 / 256 (mod q) step separate in this issue.
+ */
+static MLD_INLINE void mld_armv81m_pqmx_intt_tomont_scale(int32_t data[MLDSA_N])
+{
+  /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
+  const int32_t f = 41978;
+  unsigned int i;
+
+  for (i = 0; i < MLDSA_N; i++)
+  {
+    data[i] = mld_montgomery_reduce((int64_t)data[i] * f);
+  }
+}
+
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
 {
@@ -56,7 +83,19 @@ static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
   }
 
   mld_ntt_armv81m_asm(data);
-  mld_armv81m_pqmx_restore_bitrev(data);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+{
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+
+  mld_intt_armv81m_asm(data);
+  mld_armv81m_pqmx_intt_tomont_scale(data);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */

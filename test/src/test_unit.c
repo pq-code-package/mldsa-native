@@ -294,6 +294,24 @@ static int compare_i32_arrays(const int32_t *a, const int32_t *b, unsigned len,
   }
   return 1;
 }
+
+static int check_i32_array_abs_bound(const int32_t *data, unsigned len,
+                                     int32_t bound, const char *test_name)
+{
+  unsigned i;
+
+  for (i = 0; i < len; i++)
+  {
+    if (data[i] <= -bound || data[i] >= bound)
+    {
+      fprintf(stderr, "FAIL: %s output bound\n", test_name);
+      fprintf(stderr, "  Coefficient %u is %d, expected absolute value < %d\n",
+              i, data[i], bound);
+      return 0;
+    }
+  }
+  return 1;
+}
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
           || MLD_USE_NATIVE_POLY_CADDQ || MLD_USE_NATIVE_POLY_USE_HINT_88 ||   \
@@ -399,6 +417,9 @@ static int test_invntt_tomont_core(const int32_t *input, const char *test_name)
   mld_poly_invntt_tomont(test_poly);
   mld_poly_invntt_tomont_c(ref_poly);
 
+  CHECK(check_i32_array_abs_bound(test_poly->coeffs, MLDSA_N, MLD_INTT_BOUND,
+                                  test_name));
+
   /* Normalize */
   mld_poly_reduce(ref_poly);
   mld_poly_reduce(test_poly);
@@ -436,6 +457,12 @@ static int test_native_invntt_tomont(void)
     CHECK(test_invntt_tomont_core(test_data, "invntt_tomont_single") == 0);
   }
 
+  for (i = 0; i < MLDSA_N; i++)
+  {
+    test_data[i] = (i & 1) == 0 ? MLDSA_Q - 1 : -MLDSA_Q + 1;
+  }
+  CHECK(test_invntt_tomont_core(test_data, "invntt_tomont_boundaries") == 0);
+
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     generate_i32_array_ranged(test_data, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
@@ -449,6 +476,169 @@ cleanup:
   return ret;
 }
 #endif /* MLD_USE_NATIVE_INTT */
+
+#if defined(MLD_USE_NATIVE_NTT) && defined(MLD_USE_NATIVE_INTT)
+static int test_ntt_intt_roundtrip_core(const int32_t *input,
+                                        const char *test_name)
+{
+  int ret = 1;
+  MLD_ALLOC(test_poly, mld_poly, 1, NULL);
+  MLD_ALLOC(ref_poly, mld_poly, 1, NULL);
+
+  if (test_poly == NULL || ref_poly == NULL)
+  {
+    goto cleanup;
+  }
+
+  memcpy(test_poly->coeffs, input, MLDSA_N * sizeof(int32_t));
+  memcpy(ref_poly->coeffs, input, MLDSA_N * sizeof(int32_t));
+
+  mld_poly_ntt(test_poly);
+  mld_poly_ntt_c(ref_poly);
+
+  /* The inverse NTT accepts coefficients with absolute value below q. */
+  mld_poly_reduce(test_poly);
+  mld_poly_reduce(ref_poly);
+
+  mld_poly_invntt_tomont(test_poly);
+  mld_poly_invntt_tomont_c(ref_poly);
+
+  mld_poly_reduce(ref_poly);
+  mld_poly_reduce(test_poly);
+  mld_poly_caddq_c(ref_poly);
+  mld_poly_caddq_c(test_poly);
+
+  CHECK(compare_i32_arrays(test_poly->coeffs, ref_poly->coeffs, MLDSA_N,
+                           test_name, input));
+  ret = 0;
+
+cleanup:
+  MLD_FREE(ref_poly, mld_poly, 1, NULL);
+  MLD_FREE(test_poly, mld_poly, 1, NULL);
+  return ret;
+}
+
+static int test_native_ntt_intt_roundtrip(void)
+{
+  int ret = 1;
+  int i;
+  MLD_ALLOC(test_data, int32_t, MLDSA_N, NULL);
+
+  if (test_data == NULL)
+  {
+    goto cleanup;
+  }
+
+  generate_i32_array_zeros(test_data, MLDSA_N);
+  CHECK(test_ntt_intt_roundtrip_core(test_data, "ntt_intt_zeros") == 0);
+
+  for (i = 0; i < MLDSA_N; i++)
+  {
+    test_data[i] = (i & 1) == 0 ? MLDSA_Q - 1 : -MLDSA_Q + 1;
+  }
+  CHECK(test_ntt_intt_roundtrip_core(test_data, "ntt_intt_boundaries") == 0);
+
+  for (i = 0; i < NUM_RANDOM_TESTS_SLOW; i++)
+  {
+    generate_i32_array_ranged(test_data, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
+    CHECK(test_ntt_intt_roundtrip_core(test_data, "ntt_intt_random") == 0);
+  }
+
+  ret = 0;
+
+cleanup:
+  MLD_FREE(test_data, int32_t, MLDSA_N, NULL);
+  return ret;
+}
+
+static int test_ntt_pointwise_intt_core(const int32_t *input_a,
+                                        const int32_t *input_b,
+                                        const char *test_name)
+{
+  int ret = 1;
+  MLD_ALLOC(test_a, mld_poly, 1, NULL);
+  MLD_ALLOC(test_b, mld_poly, 1, NULL);
+  MLD_ALLOC(ref_a, mld_poly, 1, NULL);
+  MLD_ALLOC(ref_b, mld_poly, 1, NULL);
+
+  if (test_a == NULL || test_b == NULL || ref_a == NULL || ref_b == NULL)
+  {
+    goto cleanup;
+  }
+
+  memcpy(test_a->coeffs, input_a, MLDSA_N * sizeof(int32_t));
+  memcpy(test_b->coeffs, input_b, MLDSA_N * sizeof(int32_t));
+  memcpy(ref_a->coeffs, input_a, MLDSA_N * sizeof(int32_t));
+  memcpy(ref_b->coeffs, input_b, MLDSA_N * sizeof(int32_t));
+
+  mld_poly_ntt(test_a);
+  mld_poly_ntt(test_b);
+  mld_poly_pointwise_montgomery(test_a, test_b);
+  mld_poly_invntt_tomont(test_a);
+
+  mld_poly_ntt_c(ref_a);
+  mld_poly_ntt_c(ref_b);
+  mld_poly_pointwise_montgomery_c(ref_a, ref_b);
+  mld_poly_invntt_tomont_c(ref_a);
+
+  mld_poly_reduce(ref_a);
+  mld_poly_reduce(test_a);
+  mld_poly_caddq_c(ref_a);
+  mld_poly_caddq_c(test_a);
+
+  CHECK(compare_i32_arrays(test_a->coeffs, ref_a->coeffs, MLDSA_N, test_name,
+                           input_a));
+  ret = 0;
+
+cleanup:
+  MLD_FREE(ref_b, mld_poly, 1, NULL);
+  MLD_FREE(ref_a, mld_poly, 1, NULL);
+  MLD_FREE(test_b, mld_poly, 1, NULL);
+  MLD_FREE(test_a, mld_poly, 1, NULL);
+  return ret;
+}
+
+static int test_native_ntt_pointwise_intt(void)
+{
+  int ret = 1;
+  int i;
+  MLD_ALLOC(input_a, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(input_b, int32_t, MLDSA_N, NULL);
+
+  if (input_a == NULL || input_b == NULL)
+  {
+    goto cleanup;
+  }
+
+  generate_i32_array_zeros(input_a, MLDSA_N);
+  generate_i32_array_zeros(input_b, MLDSA_N);
+  CHECK(test_ntt_pointwise_intt_core(input_a, input_b,
+                                     "ntt_pointwise_intt_zeros") == 0);
+
+  for (i = 0; i < MLDSA_N; i++)
+  {
+    input_a[i] = (i & 1) == 0 ? MLDSA_Q - 1 : -MLDSA_Q + 1;
+    input_b[i] = (i & 1) == 0 ? -MLDSA_Q + 1 : MLDSA_Q - 1;
+  }
+  CHECK(test_ntt_pointwise_intt_core(input_a, input_b,
+                                     "ntt_pointwise_intt_boundaries") == 0);
+
+  for (i = 0; i < NUM_RANDOM_TESTS_SLOW; i++)
+  {
+    generate_i32_array_ranged(input_a, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
+    generate_i32_array_ranged(input_b, MLDSA_N, -MLDSA_Q + 1, MLDSA_Q);
+    CHECK(test_ntt_pointwise_intt_core(input_a, input_b,
+                                       "ntt_pointwise_intt_random") == 0);
+  }
+
+  ret = 0;
+
+cleanup:
+  MLD_FREE(input_b, int32_t, MLDSA_N, NULL);
+  MLD_FREE(input_a, int32_t, MLDSA_N, NULL);
+  return ret;
+}
+#endif /* MLD_USE_NATIVE_NTT && MLD_USE_NATIVE_INTT */
 
 #if (defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||  \
      defined(MLD_USE_NATIVE_POLY_DECOMPOSE_88)) && \
@@ -1359,6 +1549,11 @@ static int test_backend_units(void)
 
 #ifdef MLD_USE_NATIVE_INTT
   CHECK(test_native_invntt_tomont() == 0);
+#endif
+
+#if defined(MLD_USE_NATIVE_NTT) && defined(MLD_USE_NATIVE_INTT)
+  CHECK(test_native_ntt_intt_roundtrip() == 0);
+  CHECK(test_native_ntt_pointwise_intt() == 0);
 #endif
 
 #if (defined(MLD_USE_NATIVE_POLY_DECOMPOSE_32) ||  \

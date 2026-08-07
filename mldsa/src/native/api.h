@@ -84,7 +84,8 @@
  * in place.
  *
  * The input polynomial is assumed to be in normal order. The output
- * polynomial is in bitreversed order.
+ * polynomial is in bitreversed order, or in a backend-specific custom order
+ * when MLD_USE_NATIVE_NTT_CUSTOM_ORDER is defined.
  *
  * @param[in,out] p Pointer to in/output polynomial.
  */
@@ -141,8 +142,9 @@ __contract__(
  * Computes inverse of negacyclic number-theoretic transform (NTT) of a
  * polynomial in place.
  *
- * The input polynomial is in bitreversed order. The output polynomial is
- * assumed to be in normal order.
+ * The input polynomial is in bitreversed order, or in a backend-specific
+ * custom order when MLD_USE_NATIVE_NTT_CUSTOM_ORDER is defined. The output
+ * polynomial is assumed to be in normal order.
  *
  * @param[in,out] p Pointer to in/output polynomial.
  */

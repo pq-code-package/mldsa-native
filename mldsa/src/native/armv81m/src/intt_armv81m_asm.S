@@ -1,0 +1,440 @@
+///
+/// Copyright (c) 2022 Arm Limited
+/// Copyright (c) 2022 Hanno Becker
+/// Copyright (c) 2023 Amin Abdulrahman, Matthias Kannwischer
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to deal
+/// in the Software without restriction, including without limitation the rights
+/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+/// copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+
+/*
+ * Selected SLOTHY schedule adapted for mldsa-native from pqmx.
+ * Clean input: intt_dilithium_12_34_56_78.s
+ * Selected output: intt_dilithium_12_34_56_78_opt_m55.s
+ * SLOTHY source revision: 504d1e8d
+ *
+ * The selected loop schedules are retained, but its two temporary whole-buffer
+ * Barrett-reduction passes are omitted: they are absent from the clean input
+ * and are not needed within the ML-DSA iNTT bounds.
+ *
+ * The clean input owns this artifact's metadata; see slothy_intt_armv81m.py.
+ */
+
+/*yaml
+  Name: intt_armv81m_asm
+  Description: pqmx Armv8.1-M MVE inverse ML-DSA NTT without final ToMont scale
+  Signature: void mld_intt_armv81m_asm(int32_t r[256])
+  CallerClobberedRegisters: [r0, r1, r2, r3, r12, lr, q0, q1, q2, q3]
+  ABI:
+    Architecture: armv81m
+    CallingConvention: AAPCS32
+    Features: [MVE]
+    r0:
+      type: buffer
+      size_bytes: 1024
+      alignment_bytes: 4
+      permissions: read/write
+      c_parameter: int32_t r[256]
+      description: 256-coefficient input/output polynomial; input is pqmx 4-by-4-transposed NTT order and output is normal coefficient order before the explicit ToMont scale
+  Stack:
+    bytes: 100
+    description: saves r4-r11, lr, and d8-d15; no dynamic allocation
+*/
+
+#include "../../../common.h"
+#if defined(MLD_ARITH_BACKEND_ARMV81M_PQMX) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && defined(__ARM_FEATURE_MVE)
+
+.section .rodata
+.p2align 2
+MLD_ASM_NAMESPACE(intt_armv81m_asm_roots):
+#include "intt_armv81m_asm_twiddles.inc"
+.text
+
+// Barrett multiplication
+.macro mld_intt_armv81m_asm_mulmod dst, src, const, const_twisted
+        vmul.s32       \dst,  \src, \const
+        vqrdmulh.s32   \src,  \src, \const_twisted
+        vmla.s32       \dst,  \src, modulus
+.endm
+
+.macro mld_intt_armv81m_asm_gs_butterfly a, b, root, root_twisted
+        vsub.u32       tmp, \a,  \b
+        vadd.u32       \a,  \a,  \b
+        mld_intt_armv81m_asm_mulmod         \b,  tmp, \root, \root_twisted
+.endm
+
+
+/*
+ * WARNING: This file is auto-derived from the mldsa-native source file
+ *   dev/armv81m_opt/src/intt_armv81m_asm.S using scripts/simpasm. Do not modify it directly.
+ */
+
+.thumb
+.syntax unified
+
+.text
+.balign 4
+.global MLD_ASM_NAMESPACE(intt_armv81m_asm)
+MLD_ASM_FN_SYMBOL(intt_armv81m_asm)
+
+        .cfi_startproc
+        push.w {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+        .cfi_adjust_cfa_offset 0x24
+        .cfi_rel_offset r4, 0x0
+        .cfi_rel_offset r5, 0x4
+        .cfi_rel_offset r6, 0x8
+        .cfi_rel_offset r7, 0xc
+        .cfi_rel_offset r8, 0x10
+        .cfi_rel_offset r9, 0x14
+        .cfi_rel_offset r10, 0x18
+        .cfi_rel_offset r11, 0x1c
+        .cfi_rel_offset lr, 0x20
+        vpush {d8, d9, d10, d11, d12, d13, d14, d15}
+        .cfi_adjust_cfa_offset 0x40
+        .cfi_rel_offset d8, 0x0
+        .cfi_rel_offset d9, 0x8
+        .cfi_rel_offset d10, 0x10
+        .cfi_rel_offset d11, 0x18
+        .cfi_rel_offset d12, 0x20
+        .cfi_rel_offset d13, 0x28
+        .cfi_rel_offset d14, 0x30
+        .cfi_rel_offset d15, 0x38
+        movw r12, #0x1fff
+        movt r12, #0xff80
+        ldr.w r11, [pc, #0x43c]       @ LPQCP_MLDSA_NATIVE_MLDSA44_intt_armv81m_asm_roots_addr
+        mov.w lr, #0x10
+        vldrw.u32 q0, [r0, #32]
+        vldrw.u32 q3, [r0, #48]
+        vldrw.u32 q2, [r11, #80]
+        sub.w lr, lr, #0x1
+
+Lmld_intt_armv81m_asm_layer78_loop:
+        vsub.i32 q7, q0, q3
+        vqrdmulh.s32 q1, q7, q2
+        vldrw.u32 q5, [r11, #64]
+        vmul.i32 q4, q7, q5
+        vldrw.u32 q6, [r0, #16]
+        vmla.i32 q4, q1, r12
+        vldrw.u32 q7, [r0]
+        vsub.i32 q1, q7, q6
+        vldrw.u32 q2, [r11, #32]
+        vmul.i32 q5, q1, q2
+        vldrw.u32 q2, [r11, #48]
+        vqrdmulh.s32 q2, q1, q2
+        vadd.i32 q3, q0, q3
+        vmla.i32 q5, q2, r12
+        vldrw.u32 q1, [r11], #96
+        vadd.i32 q2, q5, q4
+        vstrw.32 q2, [r0, #16]
+        vsub.i32 q2, q5, q4
+        vmul.i32 q5, q2, q1
+        vadd.i32 q7, q7, q6
+        vldrw.u32 q0, [r11, #-80]
+        vadd.i32 q4, q7, q3
+        vstrw.32 q4, [r0], #64
+        vqrdmulh.s32 q6, q2, q0
+        vsub.i32 q4, q7, q3
+        vldrw.u32 q2, [r11, #80]
+        vqrdmulh.s32 q7, q4, q0
+        vldrw.u32 q3, [r0, #48]
+        vmul.i32 q4, q4, q1
+        vldrw.u32 q0, [r0, #32]
+        vmla.i32 q5, q6, r12
+        vstrw.32 q5, [r0, #-16]
+        vmla.i32 q4, q7, r12
+        vstrw.32 q4, [r0, #-32]
+        le lr, Lmld_intt_armv81m_asm_layer78_loop @ imm = #-0x8c
+        vsub.i32 q5, q0, q3
+        vldrw.u32 q6, [r0, #16]
+        vqrdmulh.s32 q4, q5, q2
+        vadd.i32 q1, q0, q3
+        vldrw.u32 q2, [r0]
+        vadd.i32 q0, q2, q6
+        vldrw.u32 q3, [r11, #64]
+        vadd.i32 q7, q0, q1
+        vmul.i32 q3, q5, q3
+        vldrw.u32 q5, [r11, #48]
+        vmla.i32 q3, q4, r12
+        vsub.i32 q4, q2, q6
+        vqrdmulh.s32 q2, q4, q5
+        vldrw.u32 q5, [r11, #32]
+        vmul.i32 q5, q4, q5
+        vstrw.32 q7, [r0], #64
+        vmla.i32 q5, q2, r12
+        vsub.i32 q7, q0, q1
+        vldrw.u32 q1, [r11], #96
+        vmul.i32 q6, q7, q1
+        vldrw.u32 q2, [r11, #-80]
+        vqrdmulh.s32 q0, q7, q2
+        vsub.i32 q4, q5, q3
+        vmla.i32 q6, q0, r12
+        vadd.i32 q0, q5, q3
+        vqrdmulh.s32 q5, q4, q2
+        vstrw.32 q0, [r0, #-48]
+        vmul.i32 q4, q4, q1
+        vstrw.32 q6, [r0, #-32]
+        vmla.i32 q4, q5, r12
+        vstrw.32 q4, [r0, #-16]
+        sub.w r0, r0, #0x400
+        mov.w lr, #0x10
+        vld40.32 {q0, q1, q2, q3}, [r0]
+        vld41.32 {q0, q1, q2, q3}, [r0]
+        vld42.32 {q0, q1, q2, q3}, [r0]
+        ldrd r4, r6, [r11, #8]
+        vld43.32 {q0, q1, q2, q3}, [r0]
+        sub.w lr, lr, #0x1
+
+Lmld_intt_armv81m_asm_layer56_loop:
+        vsub.i32 q7, q0, q1
+        vqrdmulh.s32 q4, q7, r6
+        vadd.i32 q1, q0, q1
+        vmul.i32 q6, q7, r4
+        vsub.i32 q7, q2, q3
+        vmla.i32 q6, q4, r12
+        ldrd r5, r2, [r11], #24
+        vadd.i32 q0, q2, q3
+        ldrd r3, r4, [r11, #-8]
+        vadd.i32 q5, q1, q0
+        vstrw.32 q5, [r0], #64
+        vqrdmulh.s32 q4, q7, r4
+        vsub.i32 q5, q1, q0
+        vmul.i32 q7, q7, r3
+        vld40.32 {q0, q1, q2, q3}, [r0]
+        vmla.i32 q7, q4, r12
+        vld41.32 {q0, q1, q2, q3}, [r0]
+        vmul.i32 q4, q5, r5
+        ldrd r4, r6, [r11, #8]
+        vqrdmulh.s32 q5, q5, r2
+        vld42.32 {q0, q1, q2, q3}, [r0]
+        vmla.i32 q4, q5, r12
+        vadd.i32 q5, q6, q7
+        vstrw.32 q4, [r0, #-32]
+        vsub.i32 q6, q6, q7
+        vmul.i32 q7, q6, r5
+        vld43.32 {q0, q1, q2, q3}, [r0]
+        vqrdmulh.s32 q4, q6, r2
+        vstrw.32 q5, [r0, #-48]
+        vmla.i32 q7, q4, r12
+        vstrw.32 q7, [r0, #-16]
+        le lr, Lmld_intt_armv81m_asm_layer56_loop @ imm = #-0x80
+        vsub.i32 q4, q0, q1
+        vqrdmulh.s32 q7, q4, r6
+        vadd.i32 q6, q0, q1
+        vmul.i32 q5, q4, r4
+        ldrd r4, r2, [r11, #16]
+        vsub.i32 q0, q2, q3
+        vmul.i32 q4, q0, r4
+        vadd.i32 q1, q2, q3
+        vqrdmulh.s32 q0, q0, r2
+        ldrd r5, r2, [r11], #24
+        vmla.i32 q5, q7, r12
+        vadd.i32 q7, q6, q1
+        vmla.i32 q4, q0, r12
+        vsub.i32 q0, q6, q1
+        vqrdmulh.s32 q3, q0, r2
+        vadd.i32 q1, q5, q4
+        vmul.i32 q0, q0, r5
+        vstrw.32 q1, [r0, #16]
+        vmla.i32 q0, q3, r12
+        vsub.i32 q6, q5, q4
+        vqrdmulh.s32 q4, q6, r2
+        vstrw.32 q0, [r0, #32]
+        vmul.i32 q6, q6, r5
+        vstrw.32 q7, [r0], #64
+        vmla.i32 q6, q4, r12
+        vstrw.32 q6, [r0, #-16]
+        sub.w r0, r0, #0x400
+        mov.w r1, #0x4
+
+Lmld_intt_armv81m_asm_out_start:
+        ldrd r2, r3, [r11], #8
+        ldrd r4, r5, [r11], #8
+        ldrd r6, r7, [r11], #8
+        mov.w lr, #0x4
+        vldrw.u32 q2, [r0, #192]
+        vldrw.u32 q1, [r0, #128]
+        sub.w lr, lr, #0x1
+
+Lmld_intt_armv81m_asm_layer34_loop:
+        vsub.i32 q4, q1, q2
+        vqrdmulh.s32 q3, q4, r7
+        vldrw.u32 q0, [r0]
+        vmul.i32 q4, q4, r6
+        vldrw.u32 q7, [r0, #64]
+        vadd.i32 q6, q0, q7
+        vmla.i32 q4, q3, r12
+        vsub.i32 q3, q0, q7
+        vmul.i32 q5, q3, r4
+        vadd.i32 q7, q1, q2
+        vqrdmulh.s32 q2, q3, r5
+        vldrw.u32 q1, [r0, #144]
+        vmla.i32 q5, q2, r12
+        vldrw.u32 q2, [r0, #208]
+        vsub.i32 q3, q5, q4
+        vqrdmulh.s32 q0, q3, r3
+        vadd.i32 q4, q5, q4
+        vstrw.32 q4, [r0, #64]
+        vmul.i32 q4, q3, r2
+        vsub.i32 q5, q6, q7
+        vqrdmulh.s32 q3, q5, r3
+        vadd.i32 q7, q6, q7
+        vmul.i32 q5, q5, r2
+        vstrw.32 q7, [r0], #16
+        vmla.i32 q5, q3, r12
+        vstrw.32 q5, [r0, #112]
+        vmla.i32 q4, q0, r12
+        vstrw.32 q4, [r0, #176]
+        le lr, Lmld_intt_armv81m_asm_layer34_loop @ imm = #-0x74
+        vsub.i32 q4, q1, q2
+        vmul.i32 q5, q4, r6
+        vadd.i32 q0, q1, q2
+        vqrdmulh.s32 q4, q4, r7
+        vldrw.u32 q6, [r0, #64]
+        vmla.i32 q5, q4, r12
+        vldrw.u32 q7, [r0]
+        vsub.i32 q2, q7, q6
+        vqrdmulh.s32 q4, q2, r5
+        vadd.i32 q7, q7, q6
+        vmul.i32 q1, q2, r4
+        vsub.i32 q6, q7, q0
+        vmla.i32 q1, q4, r12
+        vadd.i32 q0, q7, q0
+        vmul.i32 q4, q6, r2
+        vstrw.32 q0, [r0], #16
+        vqrdmulh.s32 q0, q6, r3
+        vsub.i32 q6, q1, q5
+        vmla.i32 q4, q0, r12
+        vstrw.32 q4, [r0, #112]
+        vmul.i32 q4, q6, r2
+        vadd.i32 q0, q1, q5
+        vqrdmulh.s32 q6, q6, r3
+        vstrw.32 q0, [r0, #48]
+        vmla.i32 q4, q6, r12
+        vstrw.32 q4, [r0, #176]
+        add.w r0, r0, #0xc0
+        subs r1, #0x1
+        bne.w Lmld_intt_armv81m_asm_out_start @ imm = #-0x102
+        sub.w r0, r0, #0x400
+        add.w r1, r0, #0x200
+        ldrd r2, r3, [r11], #8
+        ldrd r4, r5, [r11], #8
+        ldrd r6, r7, [r11], #8
+        mov.w lr, #0x10
+        vldrw.u32 q1, [r0, #256]
+        vldrw.u32 q7, [r0]
+        sub.w lr, lr, #0x1
+        nop
+
+Lmld_intt_armv81m_asm_layer12_loop:
+        vsub.i32 q6, q7, q1
+        vqrdmulh.s32 q2, q6, r5
+        vadd.i32 q7, q7, q1
+        vldrw.u32 q0, [r1]
+        vmul.i32 q5, q6, r4
+        vldrw.u32 q1, [r1, #256]
+        vmla.i32 q5, q2, r12
+        vsub.i32 q6, q0, q1
+        vmul.i32 q4, q6, r6
+        vadd.i32 q1, q0, q1
+        vqrdmulh.s32 q6, q6, r7
+        vadd.i32 q3, q7, q1
+        vmla.i32 q4, q6, r12
+        vstrw.32 q3, [r0], #16
+        vsub.i32 q3, q5, q4
+        vmul.i32 q0, q3, r2
+        vadd.i32 q5, q5, q4
+        vqrdmulh.s32 q2, q3, r3
+        vstrw.32 q5, [r0, #240]
+        vmla.i32 q0, q2, r12
+        vstrw.32 q0, [r1, #256]
+        vsub.i32 q2, q7, q1
+        vqrdmulh.s32 q6, q2, r3
+        vldrw.u32 q7, [r0]
+        vmul.i32 q0, q2, r2
+        vldrw.u32 q1, [r0, #256]
+        vmla.i32 q0, q6, r12
+        vstrw.32 q0, [r1], #16
+        le lr, Lmld_intt_armv81m_asm_layer12_loop @ imm = #-0x74
+        vsub.i32 q4, q7, q1
+        vmul.i32 q5, q4, r4
+        vldrw.u32 q3, [r1]
+        vqrdmulh.s32 q4, q4, r5
+        vldrw.u32 q0, [r1, #256]
+        vmla.i32 q5, q4, r12
+        vsub.i32 q6, q3, q0
+        vmul.i32 q4, q6, r6
+        vadd.i32 q2, q3, q0
+        vqrdmulh.s32 q3, q6, r7
+        vadd.i32 q0, q7, q1
+        vmla.i32 q4, q3, r12
+        vsub.i32 q3, q0, q2
+        vmul.i32 q1, q3, r2
+        vsub.i32 q7, q5, q4
+        vqrdmulh.s32 q6, q3, r3
+        vadd.i32 q4, q5, q4
+        vmla.i32 q1, q6, r12
+        vstrw.32 q1, [r1], #16
+        vmul.i32 q5, q7, r2
+        vstrw.32 q4, [r0, #256]
+        vqrdmulh.s32 q1, q7, r3
+        vadd.i32 q0, q0, q2
+        vstrw.32 q0, [r0], #16
+        vmla.i32 q5, q1, r12
+        vstrw.32 q5, [r1, #240]
+        vpop {d8, d9, d10, d11, d12, d13, d14, d15}
+        .cfi_restore d8
+        .cfi_restore d9
+        .cfi_restore d10
+        .cfi_restore d11
+        .cfi_restore d12
+        .cfi_restore d13
+        .cfi_restore d14
+        .cfi_restore d15
+        .cfi_adjust_cfa_offset -0x40
+        pop.w {r4, r5, r6, r7, r8, r9, r10, r11, lr}
+        .cfi_restore r4
+        .cfi_restore r5
+        .cfi_restore r6
+        .cfi_restore r7
+        .cfi_restore r8
+        .cfi_restore r9
+        .cfi_restore r10
+        .cfi_restore r11
+        .cfi_restore lr
+        .cfi_adjust_cfa_offset -0x24
+        bx lr
+        .cfi_endproc
+        nop
+
+LPQCP_MLDSA_NATIVE_MLDSA44_intt_armv81m_asm_roots_addr:
+        .word 0x00000000
+
+MLD_ASM_FN_SIZE(intt_armv81m_asm)
+
+/* simpasm re-emits the preceding literal but not its source relocation.
+ * Keep this footer relocation adjacent to that literal in generated output. */
+.reloc . - 4, R_ARM_ABS32, MLD_ASM_NAMESPACE(intt_armv81m_asm_roots)
+
+#endif /* MLD_ARITH_BACKEND_ARMV81M_PQMX && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          __ARM_FEATURE_MVE */
+
+#if defined(__ELF__)
+.section .note.GNU-stack,"",%progbits
+#endif

@@ -23,6 +23,7 @@ ABICHECK_REQ_MVE_FILES := \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S \
+  mldsa/src/native/armv81m/src/intt_armv81m_asm.S \
   mldsa/src/native/armv81m/src/ntt_armv81m_asm.S \
   test/abicheck/armv81m/callstub_armv81m.S \
   test/abicheck/armv81m/selftest_armv81m.S
