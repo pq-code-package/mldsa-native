@@ -11,9 +11,9 @@
  */
 
 /*yaml
-  Name: keccak_f1600_x1_state_xor_bytes_asm
-  Description: XOR bytes into an x1 Keccak state while converting each touched lane to the bit-interleaved Armv7-M representation
-  Signature: void mld_keccak_f1600_x1_state_xor_bytes_asm(void *state, const uint8_t *data, unsigned offset, unsigned length)
+  Name: keccak_f1600_x1_state_xor_bytes_scalar_asm
+  Description: Scalar fallback for XORing bytes into the final x1 Keccak state lane pair
+  Signature: void mld_keccak_f1600_x1_state_xor_bytes_scalar_asm(void *state, const uint8_t *data, unsigned offset, unsigned length)
   ABI:
     Architecture: armv81m
     CallingConvention: AAPCS32
@@ -48,7 +48,8 @@
 /*
  * AAPCS32 contract: preserves r4-r11 and sp. The caller-saved r0-r3, r12,
  * APSR condition flags, and lr may be clobbered. No floating-point or MVE
- * registers are accessed.
+ * registers are accessed. This is the private fallback for the MVE helper's
+ * final eight-byte state lane.
  */
 
 #include "../../../../common.h"
@@ -114,14 +115,14 @@
 .endm
 
 .macro mld_keccak_x1_xor_lanes
-mld_keccak_f1600_x1_state_xor_bytes_lanes_loop:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_lanes_loop:
     ldr     r4, [r1], #4
     ldr     r5, [r1], #4
     ldrd    r6, r7, [r0]
     mld_keccak_x1_to_bit_interleaving r4, r5, r6, r7, r3, 0
     strd    r6, r7, [r0], #8
     subs    r2, r2, #1
-    bne     mld_keccak_f1600_x1_state_xor_bytes_lanes_loop
+    bne     mld_keccak_f1600_x1_state_xor_bytes_scalar_lanes_loop
 .endm
 
 .macro mld_keccak_x1_xor_bytes_in_lane label
@@ -130,11 +131,11 @@ mld_keccak_f1600_x1_state_xor_bytes_lanes_loop:
     sub     sp, #8
     strd    r4, r5, [sp]
     add     r2, r2, sp
-mld_keccak_f1600_x1_state_xor_bytes_in_lane_loop_\label:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_in_lane_loop_\label:
     ldrb    r5, [r1], #1
     strb    r5, [r2], #1
     subs    r3, r3, #1
-    bne     mld_keccak_f1600_x1_state_xor_bytes_in_lane_loop_\label
+    bne     mld_keccak_f1600_x1_state_xor_bytes_scalar_in_lane_loop_\label
     ldrd    r4, r5, [sp]
     add     sp, #8
     ldrd    r6, r7, [r0]
@@ -143,43 +144,43 @@ mld_keccak_f1600_x1_state_xor_bytes_in_lane_loop_\label:
 .endm
 
 .align 8
-.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm)
-.type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_asm), %function
-MLD_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_asm)
+.global MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_scalar_asm)
+.type MLD_ASM_NAMESPACE(keccak_f1600_x1_state_xor_bytes_scalar_asm), %function
+MLD_ASM_FN_SYMBOL(keccak_f1600_x1_state_xor_bytes_scalar_asm)
     cmp     r3, #0
-    beq.w   mld_keccak_f1600_x1_state_xor_bytes_exit
+    beq.w   mld_keccak_f1600_x1_state_xor_bytes_scalar_exit
     push    {r4-r8, lr}
     bic     r4, r2, #7
     adds    r0, r0, r4
     ands    r2, r2, #7
-    beq.w   mld_keccak_f1600_x1_state_xor_bytes_check_lanes
+    beq.w   mld_keccak_f1600_x1_state_xor_bytes_scalar_check_lanes
     movs    r4, r3
     rsb     r5, r2, #8
     cmp     r4, r5
-    ble     mld_keccak_f1600_x1_state_xor_bytes_align
+    ble     mld_keccak_f1600_x1_state_xor_bytes_scalar_align
     movs    r4, r5
-mld_keccak_f1600_x1_state_xor_bytes_align:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_align:
     sub     r8, r3, r4
     movs    r3, r4
     mld_keccak_x1_xor_bytes_in_lane first
     mov     r3, r8
-mld_keccak_f1600_x1_state_xor_bytes_check_lanes:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_check_lanes:
     lsrs    r2, r3, #3
-    beq.w   mld_keccak_f1600_x1_state_xor_bytes_tail
+    beq.w   mld_keccak_f1600_x1_state_xor_bytes_scalar_tail
     mov     r8, r3
     mld_keccak_x1_xor_lanes
     and     r3, r8, #7
-mld_keccak_f1600_x1_state_xor_bytes_tail:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_tail:
     cmp     r3, #0
-    beq.w   mld_keccak_f1600_x1_state_xor_bytes_restore
+    beq.w   mld_keccak_f1600_x1_state_xor_bytes_scalar_restore
     movs    r2, #0
     mld_keccak_x1_xor_bytes_in_lane tail
-mld_keccak_f1600_x1_state_xor_bytes_restore:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_restore:
     pop     {r4-r8, lr}
-mld_keccak_f1600_x1_state_xor_bytes_exit:
+mld_keccak_f1600_x1_state_xor_bytes_scalar_exit:
     bx      lr
 
-MLD_ASM_FN_SIZE(keccak_f1600_x1_state_xor_bytes_asm)
+MLD_ASM_FN_SIZE(keccak_f1600_x1_state_xor_bytes_scalar_asm)
 
 /* simpasm: footer-start */
 #endif /* MLD_FIPS202_ARMV81M_NEED_X1 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */

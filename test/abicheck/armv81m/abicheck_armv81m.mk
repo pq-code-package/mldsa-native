@@ -18,6 +18,8 @@ ABICHECK_REQ_MVE_FILES :=
 
 # MVE: Armv8.1-M MVE
 ABICHECK_REQ_MVE_FILES := \
+  mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_mve.S \
+  mldsa/src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_mve.S \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S \
   mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S \

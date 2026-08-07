@@ -19,19 +19,29 @@
 #if defined(MLD_SYS_ARMV81M_MVE)
 
 int check_keccak_f1600_x1_armv7m_asm(void);
-int check_keccak_f1600_x1_state_extract_bytes_asm(void);
-int check_keccak_f1600_x1_state_xor_bytes_asm(void);
+int check_keccak_f1600_x1_state_extract_bytes_scalar_asm(void);
 #if defined(__ARM_FEATURE_MVE)
+int check_keccak_f1600_x1_state_extract_bytes_asm(void);
+#endif
+int check_keccak_f1600_x1_state_xor_bytes_scalar_asm(void);
+#if defined(__ARM_FEATURE_MVE)
+int check_keccak_f1600_x1_state_xor_bytes_asm(void);
 int check_keccak_f1600_x4_mve_asm(void);
 #endif
 
 static const abicheck_entry_t all_checks[] = {
     {"keccak_f1600_x1_armv7m_asm", check_keccak_f1600_x1_armv7m_asm},
+    {"keccak_f1600_x1_state_extract_bytes_scalar_asm",
+     check_keccak_f1600_x1_state_extract_bytes_scalar_asm},
+#if defined(__ARM_FEATURE_MVE)
     {"keccak_f1600_x1_state_extract_bytes_asm",
      check_keccak_f1600_x1_state_extract_bytes_asm},
+#endif
+    {"keccak_f1600_x1_state_xor_bytes_scalar_asm",
+     check_keccak_f1600_x1_state_xor_bytes_scalar_asm},
+#if defined(__ARM_FEATURE_MVE)
     {"keccak_f1600_x1_state_xor_bytes_asm",
      check_keccak_f1600_x1_state_xor_bytes_asm},
-#if defined(__ARM_FEATURE_MVE)
     {"keccak_f1600_x4_mve_asm", check_keccak_f1600_x4_mve_asm},
 #endif
     {NULL, NULL} /* Sentinel */

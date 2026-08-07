@@ -1049,43 +1049,68 @@ struct keccak_x1_boundary_case
   unsigned length;
 };
 
+enum
+{
+  KECCAK_X1_STATE_BYTES = MLD_KECCAK_LANES * sizeof(uint64_t),
+  KECCAK_X1_GUARD_BYTES = 16,
+  KECCAK_X1_ALIGNMENT_SLACK = 15,
+  KECCAK_X1_STATE_GUARD = 0x3c,
+  KECCAK_X1_OUTPUT_GUARD = 0xa5,
+};
+
+struct MLD_ALIGN keccak_x1_guarded_state
+{
+  unsigned char prefix[KECCAK_X1_GUARD_BYTES];
+  uint64_t state[MLD_KECCAK_LANES];
+  unsigned char suffix[KECCAK_X1_GUARD_BYTES];
+};
+
 static const struct keccak_x1_boundary_case keccak_x1_boundary_cases[] = {
-    {0, 0},
-    {0, 1},
-    {0, 7},
-    {0, 8},
-    {0, 9},
-    {1, 1},
-    {1, 6},
-    {1, 7},
-    {1, 8},
-    {7, 1},
-    {7, 2},
-    {7, 8},
-    {8, 1},
-    {8, 8},
-    {9, 15},
-    {191, 9},
-    {193, 7},
-    {199, 1},
-    {0, MLD_KECCAK_LANES * sizeof(uint64_t)}};
+    {0, 0},    {0, 1},   {0, 7},   {0, 8},
+    {0, 9},    {0, 16},  {0, 17},  {1, 1},
+    {1, 6},    {1, 7},   {1, 8},   {1, 32},
+    {7, 1},    {7, 2},   {7, 8},   {7, 32},
+    {8, 1},    {8, 8},   {9, 15},  {176, 16},
+    {177, 15}, {184, 8}, {191, 1}, {191, 9},
+    {192, 0},  {192, 1}, {192, 8}, {193, 7},
+    {199, 1},  {200, 0}, {0, 192}, {0, KECCAK_X1_STATE_BYTES}};
+
+static int keccak_x1_state_guards_intact(
+    const struct keccak_x1_guarded_state *guarded_state)
+{
+  size_t i;
+
+  for (i = 0; i < KECCAK_X1_GUARD_BYTES; i++)
+  {
+    if (guarded_state->prefix[i] != KECCAK_X1_STATE_GUARD ||
+        guarded_state->suffix[i] != KECCAK_X1_STATE_GUARD)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
 
 static int test_keccakf1600_x1_byte_boundaries(void)
 {
-  int ret = 1;
   size_t i;
-  unsigned char input[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  unsigned char output[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  unsigned char output_ref[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES, NULL);
-  MLD_ALLOC(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
+  unsigned input_alignment;
+  unsigned output_alignment;
+  MLD_ALIGN unsigned char
+      input_storage[KECCAK_X1_GUARD_BYTES + KECCAK_X1_STATE_BYTES +
+                    KECCAK_X1_ALIGNMENT_SLACK + KECCAK_X1_GUARD_BYTES];
+  unsigned char input_before[sizeof(input_storage)];
+  MLD_ALIGN unsigned char
+      output_storage[KECCAK_X1_GUARD_BYTES + KECCAK_X1_STATE_BYTES +
+                     KECCAK_X1_ALIGNMENT_SLACK + KECCAK_X1_GUARD_BYTES];
+  MLD_ALIGN unsigned char output_ref_storage[sizeof(output_storage)];
+  unsigned char *input;
+  unsigned char *output;
+  unsigned char *output_ref;
+  struct keccak_x1_guarded_state state_guarded;
+  struct keccak_x1_guarded_state state_ref_guarded;
+  struct keccak_x1_guarded_state state_before_extract;
 
-  if (state == NULL || state_ref == NULL)
-  {
-    goto cleanup;
-  }
-
-  randombytes(input, sizeof(input));
   for (i = 0; i < sizeof(keccak_x1_boundary_cases) /
                       sizeof(keccak_x1_boundary_cases[0]);
        i++)
@@ -1093,44 +1118,115 @@ static int test_keccakf1600_x1_byte_boundaries(void)
     unsigned offset = keccak_x1_boundary_cases[i].offset;
     unsigned length = keccak_x1_boundary_cases[i].length;
 
-    memset(state, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-    memset(state_ref, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-    mld_keccakf1600_xor_bytes(state, input, offset, length);
-    keccakf1600_xor_bytes_ref(state_ref, input, offset, length);
+    /* The public API permits arbitrary byte alignment for data. The aligned
+     * storage bases and 16-byte prefix make these exact 1..15 modulo-16
+     * alignments while retaining red zones at each end. */
+    input_alignment = 1 + (unsigned)(i % KECCAK_X1_ALIGNMENT_SLACK);
+    output_alignment = 1 + (unsigned)((i * 7) % KECCAK_X1_ALIGNMENT_SLACK);
+    input = input_storage + KECCAK_X1_GUARD_BYTES + input_alignment;
+    output = output_storage + KECCAK_X1_GUARD_BYTES + output_alignment;
+    output_ref = output_ref_storage + KECCAK_X1_GUARD_BYTES + output_alignment;
+
+    memset(input_storage, KECCAK_X1_STATE_GUARD, sizeof(input_storage));
+    randombytes(input, KECCAK_X1_STATE_BYTES);
+    memcpy(input_before, input_storage, sizeof(input_storage));
+    memset(output_storage, KECCAK_X1_OUTPUT_GUARD, sizeof(output_storage));
+    memset(output_ref_storage, KECCAK_X1_OUTPUT_GUARD,
+           sizeof(output_ref_storage));
+    memset(&state_guarded, KECCAK_X1_STATE_GUARD, sizeof(state_guarded));
+    memset(&state_ref_guarded, KECCAK_X1_STATE_GUARD,
+           sizeof(state_ref_guarded));
+    memset(state_guarded.state, 0, KECCAK_X1_STATE_BYTES);
+    memset(state_ref_guarded.state, 0, KECCAK_X1_STATE_BYTES);
+
+    mld_keccakf1600_xor_bytes(state_guarded.state, input, offset, length);
+    keccakf1600_xor_bytes_ref(state_ref_guarded.state, input, offset, length);
+    if (memcmp(input_storage, input_before, sizeof(input_storage)) != 0)
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_xor_bytes modified its input buffer\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
+    }
+    if (!keccak_x1_state_guards_intact(&state_guarded))
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_xor_bytes wrote outside its state\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
+    }
+    memcpy(&state_before_extract, &state_guarded, sizeof(state_guarded));
 
     /* Extracting the complete logical state verifies both the updated range
      * and that xor_bytes left every byte outside it unchanged. */
-    mld_keccakf1600_extract_bytes(state, output, 0, sizeof(output));
-    keccakf1600_extract_bytes_ref(state_ref, output_ref, 0, sizeof(output_ref));
-    if (!compare_keccak_state_bytes(output, output_ref, sizeof(output),
+    mld_keccakf1600_extract_bytes(state_guarded.state, output, 0,
+                                  KECCAK_X1_STATE_BYTES);
+    keccakf1600_extract_bytes_ref(state_ref_guarded.state, output_ref, 0,
+                                  KECCAK_X1_STATE_BYTES);
+    if (!compare_keccak_state_bytes(output_storage, output_ref_storage,
+                                    sizeof(output_storage),
                                     "keccakf1600_x1_xor_bytes boundaries"))
     {
       fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
               length);
-      goto cleanup;
+      return 1;
+    }
+    if (!keccak_x1_state_guards_intact(&state_guarded))
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_extract_bytes wrote outside its state\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
+    }
+    if (memcmp(&state_guarded, &state_before_extract, sizeof(state_guarded)) !=
+        0)
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_extract_bytes modified its state\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
     }
 
-    /* Canary-fill the whole destination and compare it with the reference so
-     * zero-length and partial extractions also detect out-of-range writes. */
-    memset(output, 0xa5, sizeof(output));
-    memset(output_ref, 0xa5, sizeof(output_ref));
-    mld_keccakf1600_extract_bytes(state, output, offset, length);
-    keccakf1600_extract_bytes_ref(state_ref, output_ref, offset, length);
-    if (!compare_keccak_state_bytes(output, output_ref, sizeof(output),
+    /* Compare complete guarded buffers so zero-length and partial calls also
+     * detect any write beyond the requested range. */
+    memset(output_storage, KECCAK_X1_OUTPUT_GUARD, sizeof(output_storage));
+    memset(output_ref_storage, KECCAK_X1_OUTPUT_GUARD,
+           sizeof(output_ref_storage));
+    mld_keccakf1600_extract_bytes(state_guarded.state, output, offset, length);
+    keccakf1600_extract_bytes_ref(state_ref_guarded.state, output_ref, offset,
+                                  length);
+    if (!compare_keccak_state_bytes(output_storage, output_ref_storage,
+                                    sizeof(output_storage),
                                     "keccakf1600_x1_extract_bytes boundaries"))
     {
       fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
               length);
-      goto cleanup;
+      return 1;
+    }
+    if (!keccak_x1_state_guards_intact(&state_guarded))
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_extract_bytes wrote outside its state\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
+    }
+    if (memcmp(&state_guarded, &state_before_extract, sizeof(state_guarded)) !=
+        0)
+    {
+      fprintf(stderr,
+              "FAIL: keccakf1600_x1_extract_bytes modified its state\n");
+      fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
+              length);
+      return 1;
     }
   }
 
-  ret = 0;
-
-cleanup:
-  MLD_FREE(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
-  MLD_FREE(state, uint64_t, MLD_KECCAK_LANES, NULL);
-  return ret;
+  return 0;
 }
 
 static int test_keccakf1600_permute(void)

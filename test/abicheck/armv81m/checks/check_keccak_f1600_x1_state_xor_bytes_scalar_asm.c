@@ -14,32 +14,24 @@
 #include "../abicheck_armv81m.h"
 #include "../checks_armv81m_all.h"
 
-#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+#if defined(MLD_SYS_ARMV81M_MVE)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
 typedef struct armv81m_register_state reg_state;
 
-void mld_keccak_f1600_x1_state_extract_bytes_asm(void *state, uint8_t *data,
-                                                 unsigned offset,
-                                                 unsigned length);
+void mld_keccak_f1600_x1_state_xor_bytes_scalar_asm(void *state,
+                                                    const uint8_t *data,
+                                                    unsigned offset,
+                                                    unsigned length);
 
-int check_keccak_f1600_x1_state_extract_bytes_asm(void)
+int check_keccak_f1600_x1_state_xor_bytes_scalar_asm(void)
 {
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state, naturally
-                                    aligned for 32-bit MVE state accesses */
-  MLD_ALIGN uint8_t buf_r1[9];   /* Arbitrarily byte-aligned output bytes */
-
-  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
-  {
-    fprintf(stderr,
-            "ABI check keccak_f1600_x1_state_extract_bytes_asm: host lacks "
-            "Armv8.1-M MVE, skipping\n");
-    return MLD_ABICHECK_SKIPPED;
-  }
+  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state */
+  MLD_ALIGN uint8_t buf_r1[9];   /* Bytes to XOR into the state */
 
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
@@ -58,7 +50,7 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
     /* Call function through ABI test stub */
     call_stub_armv81m(
         &input_state, &output_state,
-        (void (*)(void))mld_keccak_f1600_x1_state_extract_bytes_asm);
+        (void (*)(void))mld_keccak_f1600_x1_state_xor_bytes_scalar_asm);
 
     /* Check ABI compliance */
     violations = check_armv81m_aapcs32_compliance(&input_state, &output_state,
@@ -66,7 +58,7 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
     if (violations > 0)
     {
       fprintf(stderr,
-              "ABI test FAILED for keccak_f1600_x1_state_extract_bytes_asm "
+              "ABI test FAILED for keccak_f1600_x1_state_xor_bytes_scalar_asm "
               "(iteration %d): %d violations\n",
               test_iter + 1, violations);
       return MLD_ABICHECK_FAILED;
@@ -76,4 +68,4 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */
+#endif /* MLD_SYS_ARMV81M_MVE */

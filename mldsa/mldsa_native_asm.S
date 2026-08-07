@@ -119,8 +119,10 @@
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m55.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_armv7m.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_armv7m.S"
-#endif
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_mve.S"
+#endif /* MLD_SYS_ARMV81M_MVE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
 

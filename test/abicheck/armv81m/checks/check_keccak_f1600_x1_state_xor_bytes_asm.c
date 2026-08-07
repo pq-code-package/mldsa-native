@@ -14,7 +14,7 @@
 #include "../abicheck_armv81m.h"
 #include "../checks_armv81m_all.h"
 
-#if defined(MLD_SYS_ARMV81M_MVE)
+#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -28,8 +28,18 @@ int check_keccak_f1600_x1_state_xor_bytes_asm(void)
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state */
-  MLD_ALIGN uint8_t buf_r1[9];   /* Bytes to XOR into the state */
+  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state, naturally
+                                    aligned for 32-bit MVE state accesses */
+  MLD_ALIGN uint8_t buf_r1[9];   /* Arbitrarily byte-aligned input bytes to XOR
+                                    into the state */
+
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    fprintf(stderr,
+            "ABI check keccak_f1600_x1_state_xor_bytes_asm: host lacks "
+            "Armv8.1-M MVE, skipping\n");
+    return MLD_ABICHECK_SKIPPED;
+  }
 
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
@@ -65,4 +75,4 @@ int check_keccak_f1600_x1_state_xor_bytes_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_ARMV81M_MVE */
+#endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */
