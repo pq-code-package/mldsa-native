@@ -24,21 +24,17 @@
 ///
 
 /*
- * Selected SLOTHY schedule adapted for mldsa-native from pqmx.
- * Clean input: intt_dilithium_12_34_56_78.s
- * Selected output: intt_dilithium_12_34_56_78_opt_m55.s
+ * pqmx inverse NTT with fused ToMont scale adapted for mldsa-native.
+ * Source: examples/naive/armv8m/dilithium/intt_dilithium_12_34_56_78.s
  * SLOTHY source revision: 504d1e8d
  *
- * The selected loop schedules are retained, but its two temporary whole-buffer
- * Barrett-reduction passes are omitted: they are absent from the clean input
- * and are not needed within the ML-DSA iNTT bounds.
- *
- * The clean input owns this artifact's metadata; see slothy_intt_armv81m.py.
+ * The kernel consumes pqmx's 4-by-4-transposed NTT order and fuses ML-DSA's
+ * final ToMont scale into its layer-1/2 stores.
  */
 
 /*yaml
   Name: intt_armv81m_asm
-  Description: pqmx Armv8.1-M MVE inverse ML-DSA NTT without final ToMont scale
+  Description: pqmx Armv8.1-M MVE inverse ML-DSA NTT with fused final ToMont scale
   Signature: void mld_intt_armv81m_asm(int32_t r[256])
   CallerClobberedRegisters: [r0, r1, r2, r3, r12, lr, q0, q1, q2, q3]
   ABI:
@@ -51,18 +47,17 @@
       alignment_bytes: 4
       permissions: read/write
       c_parameter: int32_t r[256]
-      description: 256-coefficient input/output polynomial; input is pqmx 4-by-4-transposed NTT order and output is normal coefficient order before the explicit ToMont scale
+      description: 256-coefficient input/output polynomial; input is pqmx 4-by-4-transposed NTT order and output is normal coefficient order with the final ToMont scale fused
   Stack:
     bytes: 100
     description: saves r4-r11, lr, and d8-d15; no dynamic allocation
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_ARMV81M_PQMX) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && defined(__ARM_FEATURE_MVE)
+#if defined(MLD_ARITH_BACKEND_ARMV81M_PQMX) &&  !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && defined(__ARM_FEATURE_MVE)
 
 .section .rodata
-.p2align 2
+.p2align 3
 MLD_ASM_NAMESPACE(intt_armv81m_asm_roots):
 #include "intt_armv81m_asm_twiddles.inc"
 .text
@@ -78,6 +73,14 @@ MLD_ASM_NAMESPACE(intt_armv81m_asm_roots):
         vsub.u32       tmp, \a,  \b
         vadd.u32       \a,  \a,  \b
         mld_intt_armv81m_asm_mulmod         \b,  tmp, \root, \root_twisted
+.endm
+
+.macro mld_intt_armv81m_asm_tomont_scale data, scratch
+        vmul.u32       \scratch, \data, scale_qinv
+        vqdmulh.s32    \data,    \data, scale_factor
+        vmul.u32       \scratch, \scratch, scale_factor
+        vqdmulh.s32    \scratch, \scratch, scale_modulus
+        vhsub.s32      \data,    \data, \scratch
 .endm
 
 
@@ -118,148 +121,148 @@ MLD_ASM_FN_SYMBOL(intt_armv81m_asm)
         .cfi_rel_offset d15, 0x38
         movw r12, #0x1fff
         movt r12, #0xff80
-        ldr.w r11, [pc, #0x43c]       @ LPQCP_MLDSA_NATIVE_MLDSA44_intt_armv81m_asm_roots_addr
+        ldr.w r11, [pc, #0x4f0]       @ LPQCP_MLDSA_NATIVE_MLDSA44_intt_armv81m_asm_roots_addr
         mov.w lr, #0x10
-        vldrw.u32 q0, [r0, #32]
-        vldrw.u32 q3, [r0, #48]
-        vldrw.u32 q2, [r11, #80]
+        vldrw.u32 q0, [r11, #80]
+        vldrw.u32 q6, [r0, #48]
+        vldrw.u32 q1, [r0, #32]
         sub.w lr, lr, #0x1
 
 Lmld_intt_armv81m_asm_layer78_loop:
-        vsub.i32 q7, q0, q3
-        vqrdmulh.s32 q1, q7, q2
-        vldrw.u32 q5, [r11, #64]
-        vmul.i32 q4, q7, q5
-        vldrw.u32 q6, [r0, #16]
-        vmla.i32 q4, q1, r12
+        vsub.i32 q4, q1, q6
+        vqrdmulh.s32 q5, q4, q0
+        vldrw.u32 q0, [r11, #64]
+        vmul.i32 q2, q4, q0
         vldrw.u32 q7, [r0]
-        vsub.i32 q1, q7, q6
-        vldrw.u32 q2, [r11, #32]
-        vmul.i32 q5, q1, q2
-        vldrw.u32 q2, [r11, #48]
-        vqrdmulh.s32 q2, q1, q2
-        vadd.i32 q3, q0, q3
-        vmla.i32 q5, q2, r12
-        vldrw.u32 q1, [r11], #96
-        vadd.i32 q2, q5, q4
-        vstrw.32 q2, [r0, #16]
-        vsub.i32 q2, q5, q4
-        vmul.i32 q5, q2, q1
-        vadd.i32 q7, q7, q6
-        vldrw.u32 q0, [r11, #-80]
-        vadd.i32 q4, q7, q3
-        vstrw.32 q4, [r0], #64
-        vqrdmulh.s32 q6, q2, q0
-        vsub.i32 q4, q7, q3
-        vldrw.u32 q2, [r11, #80]
-        vqrdmulh.s32 q7, q4, q0
-        vldrw.u32 q3, [r0, #48]
-        vmul.i32 q4, q4, q1
-        vldrw.u32 q0, [r0, #32]
-        vmla.i32 q5, q6, r12
-        vstrw.32 q5, [r0, #-16]
-        vmla.i32 q4, q7, r12
-        vstrw.32 q4, [r0, #-32]
+        vmla.i32 q2, q5, r12
+        vldrw.u32 q5, [r0, #16]
+        vsub.i32 q3, q7, q5
+        vldrw.u32 q0, [r11, #48]
+        vqrdmulh.s32 q0, q3, q0
+        vldrw.u32 q4, [r11, #32]
+        vmul.i32 q3, q3, q4
+        vadd.i32 q4, q7, q5
+        vmla.i32 q3, q0, r12
+        vldrw.u32 q0, [r11], #96
+        vadd.i32 q5, q3, q2
+        vstrw.32 q5, [r0, #16]
+        vsub.i32 q7, q3, q2
+        vmul.i32 q5, q7, q0
+        vadd.i32 q2, q1, q6
+        vldrw.u32 q6, [r11, #-80]
+        vqrdmulh.s32 q7, q7, q6
+        vldrw.u32 q1, [r0, #96]
+        vmla.i32 q5, q7, r12
+        vstrw.32 q5, [r0, #48]
+        vsub.i32 q3, q4, q2
+        vqrdmulh.s32 q7, q3, q6
+        vldrw.u32 q6, [r0, #112]
+        vmul.i32 q3, q3, q0
+        vldrw.u32 q0, [r11, #80]
+        vadd.i32 q2, q4, q2
+        vstrw.32 q2, [r0], #64
+        vmla.i32 q3, q7, r12
+        vstrw.32 q3, [r0, #-32]
         le lr, Lmld_intt_armv81m_asm_layer78_loop @ imm = #-0x8c
-        vsub.i32 q5, q0, q3
-        vldrw.u32 q6, [r0, #16]
-        vqrdmulh.s32 q4, q5, q2
-        vadd.i32 q1, q0, q3
+        vldrw.u32 q4, [r11, #32]
+        vsub.i32 q5, q1, q6
+        vqrdmulh.s32 q3, q5, q0
+        vldrw.u32 q0, [r11, #64]
+        vmul.i32 q0, q5, q0
         vldrw.u32 q2, [r0]
-        vadd.i32 q0, q2, q6
-        vldrw.u32 q3, [r11, #64]
-        vadd.i32 q7, q0, q1
-        vmul.i32 q3, q5, q3
-        vldrw.u32 q5, [r11, #48]
+        vmla.i32 q0, q3, r12
+        vldrw.u32 q7, [r0, #16]
+        vsub.i32 q5, q2, q7
+        vmul.i32 q3, q5, q4
+        vldrw.u32 q4, [r11, #48]
+        vqrdmulh.s32 q4, q5, q4
+        vadd.i32 q2, q2, q7
         vmla.i32 q3, q4, r12
-        vsub.i32 q4, q2, q6
-        vqrdmulh.s32 q2, q4, q5
-        vldrw.u32 q5, [r11, #32]
-        vmul.i32 q5, q4, q5
-        vstrw.32 q7, [r0], #64
-        vmla.i32 q5, q2, r12
-        vsub.i32 q7, q0, q1
-        vldrw.u32 q1, [r11], #96
-        vmul.i32 q6, q7, q1
-        vldrw.u32 q2, [r11, #-80]
-        vqrdmulh.s32 q0, q7, q2
-        vsub.i32 q4, q5, q3
+        vldrw.u32 q5, [r11], #96
+        vadd.i32 q4, q3, q0
+        vstrw.32 q4, [r0, #16]
+        vsub.i32 q4, q3, q0
+        vmul.i32 q3, q4, q5
+        vldrw.u32 q0, [r11, #-80]
+        vqrdmulh.s32 q4, q4, q0
+        vadd.i32 q7, q1, q6
+        vmla.i32 q3, q4, r12
+        vsub.i32 q4, q2, q7
+        vqrdmulh.s32 q0, q4, q0
+        vstrw.32 q3, [r0, #48]
+        vmul.i32 q6, q4, q5
+        vadd.i32 q4, q2, q7
+        vstrw.32 q4, [r0], #64
         vmla.i32 q6, q0, r12
-        vadd.i32 q0, q5, q3
-        vqrdmulh.s32 q5, q4, q2
-        vstrw.32 q0, [r0, #-48]
-        vmul.i32 q4, q4, q1
         vstrw.32 q6, [r0, #-32]
-        vmla.i32 q4, q5, r12
-        vstrw.32 q4, [r0, #-16]
         sub.w r0, r0, #0x400
         mov.w lr, #0x10
         vld40.32 {q0, q1, q2, q3}, [r0]
         vld41.32 {q0, q1, q2, q3}, [r0]
         vld42.32 {q0, q1, q2, q3}, [r0]
-        ldrd r4, r6, [r11, #8]
+        ldrd r7, r1, [r11, #8]
         vld43.32 {q0, q1, q2, q3}, [r0]
         sub.w lr, lr, #0x1
 
 Lmld_intt_armv81m_asm_layer56_loop:
-        vsub.i32 q7, q0, q1
-        vqrdmulh.s32 q4, q7, r6
-        vadd.i32 q1, q0, q1
-        vmul.i32 q6, q7, r4
-        vsub.i32 q7, q2, q3
-        vmla.i32 q6, q4, r12
-        ldrd r5, r2, [r11], #24
-        vadd.i32 q0, q2, q3
-        ldrd r3, r4, [r11, #-8]
-        vadd.i32 q5, q1, q0
-        vstrw.32 q5, [r0], #64
-        vqrdmulh.s32 q4, q7, r4
-        vsub.i32 q5, q1, q0
-        vmul.i32 q7, q7, r3
-        vld40.32 {q0, q1, q2, q3}, [r0]
-        vmla.i32 q7, q4, r12
-        vld41.32 {q0, q1, q2, q3}, [r0]
-        vmul.i32 q4, q5, r5
-        ldrd r4, r6, [r11, #8]
-        vqrdmulh.s32 q5, q5, r2
-        vld42.32 {q0, q1, q2, q3}, [r0]
-        vmla.i32 q4, q5, r12
-        vadd.i32 q5, q6, q7
-        vstrw.32 q4, [r0, #-32]
-        vsub.i32 q6, q6, q7
-        vmul.i32 q7, q6, r5
-        vld43.32 {q0, q1, q2, q3}, [r0]
-        vqrdmulh.s32 q4, q6, r2
-        vstrw.32 q5, [r0, #-48]
-        vmla.i32 q7, q4, r12
-        vstrw.32 q7, [r0, #-16]
-        le lr, Lmld_intt_armv81m_asm_layer56_loop @ imm = #-0x80
-        vsub.i32 q4, q0, q1
-        vqrdmulh.s32 q7, q4, r6
-        vadd.i32 q6, q0, q1
-        vmul.i32 q5, q4, r4
-        ldrd r4, r2, [r11, #16]
-        vsub.i32 q0, q2, q3
-        vmul.i32 q4, q0, r4
+        vsub.i32 q6, q0, q1
+        vmul.i32 q4, q6, r7
+        ldrd r10, r9, [r11, #16]
+        vadd.i32 q0, q0, q1
+        vqrdmulh.s32 q6, q6, r1
         vadd.i32 q1, q2, q3
-        vqrdmulh.s32 q0, q0, r2
-        ldrd r5, r2, [r11], #24
+        ldrd r5, r8, [r11], #24
+        vmla.i32 q4, q6, r12
+        vsub.i32 q7, q0, q1
+        vmul.i32 q5, q7, r5
+        vadd.i32 q1, q0, q1
+        vqrdmulh.s32 q7, q7, r8
+        vstrw.32 q1, [r0], #64
         vmla.i32 q5, q7, r12
-        vadd.i32 q7, q6, q1
-        vmla.i32 q4, q0, r12
-        vsub.i32 q0, q6, q1
-        vqrdmulh.s32 q3, q0, r2
-        vadd.i32 q1, q5, q4
-        vmul.i32 q0, q0, r5
-        vstrw.32 q1, [r0, #16]
-        vmla.i32 q0, q3, r12
-        vsub.i32 q6, q5, q4
-        vqrdmulh.s32 q4, q6, r2
-        vstrw.32 q0, [r0, #32]
-        vmul.i32 q6, q6, r5
-        vstrw.32 q7, [r0], #64
-        vmla.i32 q6, q4, r12
+        vstrw.32 q5, [r0, #-32]
+        vsub.i32 q6, q2, q3
+        vqrdmulh.s32 q5, q6, r9
+        vld40.32 {q0, q1, q2, q3}, [r0]
+        vmul.i32 q6, q6, r10
+        vld41.32 {q0, q1, q2, q3}, [r0]
+        vmla.i32 q6, q5, r12
+        vld42.32 {q0, q1, q2, q3}, [r0]
+        vadd.i32 q5, q4, q6
+        vstrw.32 q5, [r0, #-48]
+        vsub.i32 q4, q4, q6
+        vmul.i32 q6, q4, r5
+        vld43.32 {q0, q1, q2, q3}, [r0]
+        vqrdmulh.s32 q5, q4, r8
+        ldrd r7, r1, [r11, #8]
+        vmla.i32 q6, q5, r12
         vstrw.32 q6, [r0, #-16]
+        le lr, Lmld_intt_armv81m_asm_layer56_loop @ imm = #-0x80
+        vsub.i32 q6, q0, q1
+        vmul.i32 q5, q6, r7
+        ldrd r5, r8, [r11, #16]
+        vqrdmulh.s32 q7, q6, r1
+        vsub.i32 q4, q2, q3
+        vmul.i32 q6, q4, r5
+        vadd.i32 q3, q2, q3
+        vqrdmulh.s32 q4, q4, r8
+        vadd.i32 q2, q0, q1
+        vmla.i32 q6, q4, r12
+        vsub.i32 q1, q2, q3
+        vmla.i32 q5, q7, r12
+        ldrd r1, r7, [r11], #24
+        vsub.i32 q0, q5, q6
+        vqrdmulh.s32 q4, q0, r7
+        vadd.i32 q6, q5, q6
+        vmul.i32 q0, q0, r1
+        vstrw.32 q6, [r0, #16]
+        vmla.i32 q0, q4, r12
+        vstrw.32 q0, [r0, #48]
+        vqrdmulh.s32 q4, q1, r7
+        vadd.i32 q0, q2, q3
+        vmul.i32 q6, q1, r1
+        vstrw.32 q0, [r0], #64
+        vmla.i32 q6, q4, r12
+        vstrw.32 q6, [r0, #-32]
         sub.w r0, r0, #0x400
         mov.w r1, #0x4
 
@@ -268,66 +271,66 @@ Lmld_intt_armv81m_asm_out_start:
         ldrd r4, r5, [r11], #8
         ldrd r6, r7, [r11], #8
         mov.w lr, #0x4
-        vldrw.u32 q2, [r0, #192]
-        vldrw.u32 q1, [r0, #128]
+        vldrw.u32 q7, [r0, #128]
+        vldrw.u32 q0, [r0, #192]
         sub.w lr, lr, #0x1
 
 Lmld_intt_armv81m_asm_layer34_loop:
-        vsub.i32 q4, q1, q2
-        vqrdmulh.s32 q3, q4, r7
-        vldrw.u32 q0, [r0]
-        vmul.i32 q4, q4, r6
-        vldrw.u32 q7, [r0, #64]
-        vadd.i32 q6, q0, q7
-        vmla.i32 q4, q3, r12
-        vsub.i32 q3, q0, q7
-        vmul.i32 q5, q3, r4
-        vadd.i32 q7, q1, q2
-        vqrdmulh.s32 q2, q3, r5
-        vldrw.u32 q1, [r0, #144]
-        vmla.i32 q5, q2, r12
-        vldrw.u32 q2, [r0, #208]
-        vsub.i32 q3, q5, q4
-        vqrdmulh.s32 q0, q3, r3
-        vadd.i32 q4, q5, q4
-        vstrw.32 q4, [r0, #64]
-        vmul.i32 q4, q3, r2
-        vsub.i32 q5, q6, q7
-        vqrdmulh.s32 q3, q5, r3
-        vadd.i32 q7, q6, q7
-        vmul.i32 q5, q5, r2
-        vstrw.32 q7, [r0], #16
-        vmla.i32 q5, q3, r12
-        vstrw.32 q5, [r0, #112]
-        vmla.i32 q4, q0, r12
-        vstrw.32 q4, [r0, #176]
-        le lr, Lmld_intt_armv81m_asm_layer34_loop @ imm = #-0x74
-        vsub.i32 q4, q1, q2
-        vmul.i32 q5, q4, r6
-        vadd.i32 q0, q1, q2
-        vqrdmulh.s32 q4, q4, r7
-        vldrw.u32 q6, [r0, #64]
-        vmla.i32 q5, q4, r12
-        vldrw.u32 q7, [r0]
-        vsub.i32 q2, q7, q6
-        vqrdmulh.s32 q4, q2, r5
-        vadd.i32 q7, q7, q6
-        vmul.i32 q1, q2, r4
         vsub.i32 q6, q7, q0
+        vmul.i32 q2, q6, r6
+        vldrw.u32 q3, [r0, #64]
+        vqrdmulh.s32 q4, q6, r7
+        vldrw.u32 q5, [r0]
+        vadd.i32 q7, q7, q0
+        vmla.i32 q2, q4, r12
+        vsub.i32 q6, q5, q3
+        vmul.i32 q1, q6, r4
+        vadd.i32 q0, q5, q3
+        vqrdmulh.s32 q4, q6, r5
+        vsub.i32 q6, q0, q7
         vmla.i32 q1, q4, r12
-        vadd.i32 q0, q7, q0
-        vmul.i32 q4, q6, r2
+        vadd.i32 q0, q0, q7
         vstrw.32 q0, [r0], #16
         vqrdmulh.s32 q0, q6, r3
-        vsub.i32 q6, q1, q5
-        vmla.i32 q4, q0, r12
-        vstrw.32 q4, [r0, #112]
-        vmul.i32 q4, q6, r2
-        vadd.i32 q0, q1, q5
-        vqrdmulh.s32 q6, q6, r3
-        vstrw.32 q0, [r0, #48]
-        vmla.i32 q4, q6, r12
-        vstrw.32 q4, [r0, #176]
+        vadd.i32 q4, q1, q2
+        vmul.i32 q3, q6, r2
+        vstrw.32 q4, [r0, #48]
+        vmla.i32 q3, q0, r12
+        vstrw.32 q3, [r0, #112]
+        vsub.i32 q4, q1, q2
+        vmul.i32 q5, q4, r2
+        vldrw.u32 q0, [r0, #192]
+        vqrdmulh.s32 q4, q4, r3
+        vldrw.u32 q7, [r0, #128]
+        vmla.i32 q5, q4, r12
+        vstrw.32 q5, [r0, #176]
+        le lr, Lmld_intt_armv81m_asm_layer34_loop @ imm = #-0x74
+        vsub.i32 q1, q7, q0
+        vqrdmulh.s32 q6, q1, r7
+        vldrw.u32 q4, [r0]
+        vmul.i32 q2, q1, r6
+        vldrw.u32 q5, [r0, #64]
+        vsub.i32 q3, q4, q5
+        vqrdmulh.s32 q1, q3, r5
+        vadd.i32 q7, q7, q0
+        vmul.i32 q3, q3, r4
+        vadd.i32 q5, q4, q5
+        vmla.i32 q3, q1, r12
+        vsub.i32 q4, q5, q7
+        vqrdmulh.s32 q1, q4, r3
+        vadd.i32 q5, q5, q7
+        vmla.i32 q2, q6, r12
+        vstrw.32 q5, [r0], #16
+        vmul.i32 q5, q4, r2
+        vadd.i32 q6, q3, q2
+        vmla.i32 q5, q1, r12
+        vsub.i32 q1, q3, q2
+        vmul.i32 q0, q1, r2
+        vstrw.32 q6, [r0, #48]
+        vqrdmulh.s32 q6, q1, r3
+        vstrw.32 q5, [r0, #112]
+        vmla.i32 q0, q6, r12
+        vstrw.32 q0, [r0, #176]
         add.w r0, r0, #0xc0
         subs r1, #0x1
         bne.w Lmld_intt_armv81m_asm_out_start @ imm = #-0x102
@@ -336,68 +339,113 @@ Lmld_intt_armv81m_asm_layer34_loop:
         ldrd r2, r3, [r11], #8
         ldrd r4, r5, [r11], #8
         ldrd r6, r7, [r11], #8
+        movw r8, #0xa3fa
+        movt r8, #0x0
+        movw r9, #0x2001
+        movt r9, #0x380
+        rsb.w r10, r12, #0x0
         mov.w lr, #0x10
-        vldrw.u32 q1, [r0, #256]
+        vldrw.u32 q6, [r1, #256]
+        vldrw.u32 q3, [r1]
+        vsub.i32 q0, q3, q6
+        vmul.i32 q5, q0, r6
         vldrw.u32 q7, [r0]
+        vqrdmulh.s32 q4, q0, r7
+        vldrw.u32 q0, [r0, #256]
         sub.w lr, lr, #0x1
         nop
 
 Lmld_intt_armv81m_asm_layer12_loop:
-        vsub.i32 q6, q7, q1
-        vqrdmulh.s32 q2, q6, r5
-        vadd.i32 q7, q7, q1
-        vldrw.u32 q0, [r1]
-        vmul.i32 q5, q6, r4
-        vldrw.u32 q1, [r1, #256]
-        vmla.i32 q5, q2, r12
-        vsub.i32 q6, q0, q1
-        vmul.i32 q4, q6, r6
-        vadd.i32 q1, q0, q1
-        vqrdmulh.s32 q6, q6, r7
-        vadd.i32 q3, q7, q1
-        vmla.i32 q4, q6, r12
-        vstrw.32 q3, [r0], #16
-        vsub.i32 q3, q5, q4
-        vmul.i32 q0, q3, r2
-        vadd.i32 q5, q5, q4
-        vqrdmulh.s32 q2, q3, r3
-        vstrw.32 q5, [r0, #240]
-        vmla.i32 q0, q2, r12
-        vstrw.32 q0, [r1, #256]
-        vsub.i32 q2, q7, q1
-        vqrdmulh.s32 q6, q2, r3
-        vldrw.u32 q7, [r0]
-        vmul.i32 q0, q2, r2
-        vldrw.u32 q1, [r0, #256]
-        vmla.i32 q0, q6, r12
-        vstrw.32 q0, [r1], #16
-        le lr, Lmld_intt_armv81m_asm_layer12_loop @ imm = #-0x74
-        vsub.i32 q4, q7, q1
-        vmul.i32 q5, q4, r4
-        vldrw.u32 q3, [r1]
-        vqrdmulh.s32 q4, q4, r5
-        vldrw.u32 q0, [r1, #256]
         vmla.i32 q5, q4, r12
-        vsub.i32 q6, q3, q0
-        vmul.i32 q4, q6, r6
-        vadd.i32 q2, q3, q0
-        vqrdmulh.s32 q3, q6, r7
-        vadd.i32 q0, q7, q1
-        vmla.i32 q4, q3, r12
-        vsub.i32 q3, q0, q2
-        vmul.i32 q1, q3, r2
-        vsub.i32 q7, q5, q4
-        vqrdmulh.s32 q6, q3, r3
-        vadd.i32 q4, q5, q4
-        vmla.i32 q1, q6, r12
-        vstrw.32 q1, [r1], #16
-        vmul.i32 q5, q7, r2
-        vstrw.32 q4, [r0, #256]
-        vqrdmulh.s32 q1, q7, r3
-        vadd.i32 q0, q0, q2
-        vstrw.32 q0, [r0], #16
-        vmla.i32 q5, q1, r12
-        vstrw.32 q5, [r1, #240]
+        vsub.i32 q1, q7, q0
+        vqrdmulh.s32 q2, q1, r5
+        vadd.i32 q4, q7, q0
+        vmul.i32 q1, q1, r4
+        vadd.i32 q3, q3, q6
+        vmla.i32 q1, q2, r12
+        vsub.i32 q7, q4, q3
+        vmul.i32 q2, q7, r2
+        vadd.i32 q0, q1, q5
+        vmul.i32 q6, q0, r9
+        vmul.i32 q6, q6, r8
+        vadd.i32 q3, q4, q3
+        vmul.i32 q4, q3, r9
+        vmul.i32 q4, q4, r8
+        vqdmulh.s32 q4, q4, r10
+        vqrdmulh.s32 q7, q7, r3
+        vmla.i32 q2, q7, r12
+        vqdmulh.s32 q7, q2, r8
+        vmul.i32 q2, q2, r9
+        vmul.i32 q2, q2, r8
+        vsub.i32 q1, q1, q5
+        vqdmulh.s32 q5, q3, r8
+        vldrw.u32 q3, [r1, #16]
+        vqdmulh.s32 q2, q2, r10
+        vhsub.s32 q4, q5, q4
+        vqdmulh.s32 q5, q6, r10
+        vldrw.u32 q6, [r1, #272]
+        vqdmulh.s32 q0, q0, r8
+        vstrw.32 q4, [r0], #16
+        vqrdmulh.s32 q4, q1, r3
+        vhsub.s32 q0, q0, q5
+        vmul.i32 q5, q1, r2
+        vstrw.32 q0, [r0, #240]
+        vmla.i32 q5, q4, r12
+        vhsub.s32 q2, q7, q2
+        vqdmulh.s32 q1, q5, r8
+        vstrw.32 q2, [r1], #16
+        vmul.i32 q4, q5, r9
+        vsub.i32 q2, q3, q6
+        vmul.i32 q0, q4, r8
+        vldrw.u32 q7, [r0]
+        vqdmulh.s32 q4, q0, r10
+        vldrw.u32 q0, [r0, #256]
+        vmul.i32 q5, q2, r6
+        vhsub.s32 q1, q1, q4
+        vqrdmulh.s32 q4, q2, r7
+        vstrw.32 q1, [r1, #240]
+        le lr, Lmld_intt_armv81m_asm_layer12_loop @ imm = #-0xc4
+        vmla.i32 q5, q4, r12
+        vsub.i32 q1, q7, q0
+        vmul.i32 q4, q1, r4
+        vadd.i32 q2, q3, q6
+        vqrdmulh.s32 q6, q1, r5
+        vadd.i32 q1, q7, q0
+        vmla.i32 q4, q6, r12
+        vadd.i32 q3, q1, q2
+        vmul.i32 q6, q3, r9
+        vsub.i32 q2, q1, q2
+        vmul.i32 q7, q2, r2
+        vadd.i32 q0, q4, q5
+        vmul.i32 q1, q0, r9
+        vmul.i32 q1, q1, r8
+        vmul.i32 q6, q6, r8
+        vqdmulh.s32 q6, q6, r10
+        vqrdmulh.s32 q2, q2, r3
+        vmla.i32 q7, q2, r12
+        vqdmulh.s32 q2, q7, r8
+        vmul.i32 q7, q7, r9
+        vmul.i32 q7, q7, r8
+        vqdmulh.s32 q3, q3, r8
+        vqdmulh.s32 q7, q7, r10
+        vqdmulh.s32 q1, q1, r10
+        vsub.i32 q4, q4, q5
+        vqdmulh.s32 q5, q0, r8
+        vmul.i32 q0, q4, r2
+        vqrdmulh.s32 q4, q4, r3
+        vhsub.s32 q3, q3, q6
+        vmla.i32 q0, q4, r12
+        vstrw.32 q3, [r0], #16
+        vmul.i32 q4, q0, r9
+        vhsub.s32 q6, q5, q1
+        vmul.i32 q4, q4, r8
+        vstrw.32 q6, [r0, #240]
+        vqdmulh.s32 q0, q0, r8
+        vhsub.s32 q6, q2, q7
+        vqdmulh.s32 q4, q4, r10
+        vstrw.32 q6, [r1], #16
+        vhsub.s32 q4, q0, q4
+        vstrw.32 q4, [r1, #240]
         vpop {d8, d9, d10, d11, d12, d13, d14, d15}
         .cfi_restore d8
         .cfi_restore d9

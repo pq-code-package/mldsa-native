@@ -17,8 +17,6 @@
 #define MLD_USE_NATIVE_INTT
 
 #if !defined(__ASSEMBLER__)
-#include <stddef.h>
-#include "../../reduce.h"
 #include "../api.h"
 #include "src/arith_native_armv81m.h"
 
@@ -58,22 +56,6 @@ static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
   }
 }
 
-/*
- * The plain pqmx iNTT omits ML-DSA's final Montgomery-domain scale. Keep the
- * existing scalar 41978 = R^2 / 256 (mod q) step separate in this issue.
- */
-static MLD_INLINE void mld_armv81m_pqmx_intt_tomont_scale(int32_t data[MLDSA_N])
-{
-  /* check-magic: 41978 == pow(2,64-8,MLDSA_Q) */
-  const int32_t f = 41978;
-  unsigned int i;
-
-  for (i = 0; i < MLDSA_N; i++)
-  {
-    data[i] = mld_montgomery_reduce((int64_t)data[i] * f);
-  }
-}
-
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
 {
@@ -95,7 +77,6 @@ static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
   }
 
   mld_intt_armv81m_asm(data);
-  mld_armv81m_pqmx_intt_tomont_scale(data);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */

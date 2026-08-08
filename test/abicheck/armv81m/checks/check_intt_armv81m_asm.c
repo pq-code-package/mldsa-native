@@ -30,7 +30,7 @@ int check_intt_armv81m_asm(void)
   MLD_ALIGN uint8_t
       buf_r0[1024]; /* 256-coefficient input/output polynomial; input is pqmx
                        4-by-4-transposed NTT order and output is normal
-                       coefficient order before the explicit ToMont scale */
+                       coefficient order with the final ToMont scale fused */
 
   if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
   {

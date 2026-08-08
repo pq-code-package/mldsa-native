@@ -22,8 +22,8 @@
 
 /**
  * Sample a single matrix entry A[k][l] of ExpandA(rho) by rejection sampling
- * from SHAKE128(rho|l|k), and apply the custom-order permutation when a
- * native NTT backend is in use.
+ * from SHAKE128(rho|l|k), and apply the custom-order permutation when the
+ * selected native NTT backend uses one.
  *
  * The caller is expected to have copied rho into the first MLDSA_SEEDBYTES
  * of seed_ext. This function writes the domain-separation bytes

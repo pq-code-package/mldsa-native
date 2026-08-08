@@ -16,24 +16,20 @@ which carries the temporary Cortex-M55 shifted-source latency-model update
 from [slothy#464](https://github.com/slothy-optimizer/slothy/pull/464).
 
 The inverse NTT's clean input is
-`../armv81m_clean/src/intt_armv81m_asm.S`; its selected output is based on
-the unscaled pqmx M55 schedule at SLOTHY revision
+`../armv81m_clean/src/intt_armv81m_asm.S`; it is based on the pqmx M55 source
+at SLOTHY revision
 [`504d1e8d`](https://github.com/slothy-optimizer/slothy/commit/504d1e8d).
-The two temporary whole-buffer Barrett-reduction passes in that imported
-artifact are omitted: they are not part of the clean input or the loop
-schedule and are unnecessary within the ML-DSA iNTT bounds. The kernel
-intentionally leaves the final ML-DSA ToMont scale to the existing scalar
-`41978` post-scale in the backend wrapper.
+Its two temporary whole-buffer Barrett-reduction passes are omitted, as they
+are not needed within the ML-DSA iNTT bounds. The iNTT consumes the same
+per-16-coefficient 4-by-4-transposed NTT order produced by the native forward
+kernel, and its final layer fuses the ToMont scale.
 
-The kernels use a 4-by-4-transposed arrangement in every 16-coefficient
-block. With both kernels selected, the backend retains that custom NTT-domain
-order: the forward NTT produces it, the matrix-expansion helper converts C
-bit-reversed data to it, and the inverse NTT consumes it before returning
-normal coefficient order.
+The iNTT generator uses the Arm_v81M / Arm_Cortex_M55r1 model with
+input/output aliasing and software pipelining. It schedules the layer-7/8,
+layer-5/6, layer-3/4, and layer-1/2 loops in that order, with 1000-second
+initial and retry timeouts.
 
-Regenerate a candidate schedule with the Arm_v81M / Arm_Cortex_M55r1 model,
-the recorded loop-by-loop configuration, and 1000-second initial/retry
-timeouts:
+Regenerate a candidate schedule with:
 
 ```sh
 scripts/autogen --slothy ntt_armv81m_asm

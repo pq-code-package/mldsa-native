@@ -25,9 +25,9 @@ __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
-  /* The assembly returns the unscaled inverse transform. The wrapper applies
-   * the established 41978 ToMont scale before returning to the frontend. */
-  ensures(array_abs_bound(r, 0, MLDSA_N, MLDSA_N * MLDSA_Q))
+  /* The assembly consumes pqmx's 4-by-4-transposed NTT order and returns
+   * normal order with the final ToMont scale required by poly_invntt_tomont(). */
+  ensures(array_abs_bound(r, 0, MLDSA_N, MLD_INTT_BOUND))
 );
 
 #endif /* !MLD_NATIVE_ARMV81M_SRC_ARITH_NATIVE_ARMV81M_H */

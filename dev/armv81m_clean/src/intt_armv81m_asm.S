@@ -24,16 +24,17 @@
 ///
 
 /*
- * Plain pqmx inverse NTT adapted for mldsa-native.
+ * pqmx inverse NTT with fused ToMont scale adapted for mldsa-native.
  * Source: examples/naive/armv8m/dilithium/intt_dilithium_12_34_56_78.s
  * SLOTHY source revision: 504d1e8d
  *
- * This kernel intentionally leaves the ML-DSA ToMont scale to the C wrapper.
+ * The kernel consumes pqmx's 4-by-4-transposed NTT order and fuses ML-DSA's
+ * final ToMont scale into its layer-1/2 stores.
  */
 
 /*yaml
   Name: intt_armv81m_asm
-  Description: pqmx Armv8.1-M MVE inverse ML-DSA NTT without final ToMont scale
+  Description: pqmx Armv8.1-M MVE inverse ML-DSA NTT with fused final ToMont scale
   Signature: void mld_intt_armv81m_asm(int32_t r[256])
   CallerClobberedRegisters: [r0, r1, r2, r3, r12, lr, q0, q1, q2, q3]
   ABI:
@@ -46,7 +47,7 @@
       alignment_bytes: 4
       permissions: read/write
       c_parameter: int32_t r[256]
-      description: 256-coefficient input/output polynomial; input is pqmx 4-by-4-transposed NTT order and output is normal coefficient order before the explicit ToMont scale
+      description: 256-coefficient input/output polynomial; input is pqmx 4-by-4-transposed NTT order and output is normal coefficient order with the final ToMont scale fused
   Stack:
     bytes: 100
     description: saves r4-r11, lr, and d8-d15; no dynamic allocation
@@ -57,7 +58,7 @@
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && defined(__ARM_FEATURE_MVE)
 
 .section .rodata
-.p2align 2
+.p2align 3
 MLD_ASM_NAMESPACE(intt_armv81m_asm_roots):
 #include "intt_armv81m_asm_twiddles.inc"
 .text
@@ -73,6 +74,14 @@ MLD_ASM_NAMESPACE(intt_armv81m_asm_roots):
         vsub.u32       tmp, \a,  \b
         vadd.u32       \a,  \a,  \b
         mld_intt_armv81m_asm_mulmod         \b,  tmp, \root, \root_twisted
+.endm
+
+.macro mld_intt_armv81m_asm_tomont_scale data, scratch
+        vmul.u32       \scratch, \data, scale_qinv
+        vqdmulh.s32    \data,    \data, scale_factor
+        vmul.u32       \scratch, \scratch, scale_factor
+        vqdmulh.s32    \scratch, \scratch, scale_modulus
+        vhsub.s32      \data,    \data, \scratch
 .endm
 
 /* simpasm: header-end */
@@ -108,6 +117,13 @@ MLD_ASM_FN_SYMBOL(intt_armv81m_asm)
 
 
         tmp .req q4
+
+        scale_factor  .req r8
+        scale_qinv    .req r9
+        scale_modulus .req r10
+
+        .equ mld_intt_armv81m_asm_scale_factor_const, 41978
+        .equ mld_intt_armv81m_asm_scale_qinv_const, 58728449
 
         // Layers 7,8
 
@@ -229,6 +245,12 @@ mld_intt_armv81m_asm_layer34_loop:
         ldrd root1, root1_twisted, [root_ptr], #+8
         ldrd root2, root2_twisted, [root_ptr], #+8
 
+        movw scale_factor, #:lower16:mld_intt_armv81m_asm_scale_factor_const
+        movt scale_factor, #:upper16:mld_intt_armv81m_asm_scale_factor_const
+        movw scale_qinv, #:lower16:mld_intt_armv81m_asm_scale_qinv_const
+        movt scale_qinv, #:upper16:mld_intt_armv81m_asm_scale_qinv_const
+        rsb scale_modulus, modulus, #0
+
         mov lr, #16
 mld_intt_armv81m_asm_layer12_loop:
 
@@ -241,6 +263,11 @@ mld_intt_armv81m_asm_layer12_loop:
         mld_intt_armv81m_asm_gs_butterfly data2, data3, root2, root2_twisted
         mld_intt_armv81m_asm_gs_butterfly data0, data2, root0, root0_twisted
         mld_intt_armv81m_asm_gs_butterfly data1, data3, root0, root0_twisted
+
+        mld_intt_armv81m_asm_tomont_scale data0, tmp
+        mld_intt_armv81m_asm_tomont_scale data1, tmp
+        mld_intt_armv81m_asm_tomont_scale data2, tmp
+        mld_intt_armv81m_asm_tomont_scale data3, tmp
 
         vstrw.u32 data0, [in_low], #16
         vstrw.u32 data1, [in_low, #(4*64 - 16)]
@@ -271,6 +298,9 @@ mld_intt_armv81m_asm_layer12_loop:
         .unreq data2
         .unreq data3
         .unreq tmp
+        .unreq scale_factor
+        .unreq scale_qinv
+        .unreq scale_modulus
 
 .p2align 2
 MLD_ASM_NAMESPACE(intt_armv81m_asm_roots_addr):
