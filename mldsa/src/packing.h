@@ -247,8 +247,8 @@ __contract__(
  *   - on i == MLDSA_K - 1, the trailing index slots are zero.
  *
  * Callers must invoke this for every i in [0, 1, .., MLDSA_K - 1]; if any
- * call returns MLD_ERR_FAIL the encoding is malformed and the signature must
- * be rejected.
+ * call returns MLD_ERR_INVALID_SIGNATURE the encoding is malformed and the
+ * signature must be rejected.
  *
  * @spec{Implements @[FIPS204, Algorithm 21, HintBitUnpack] (one row; part of
  * @[FIPS204, Algorithm 27, sigDecode]).}
@@ -257,8 +257,8 @@ __contract__(
  * @param[in]  sig Signature buffer.
  * @param      i   Row index, must be < MLDSA_K.
  *
- * @retval 0            Hints were decoded successfully.
- * @retval MLD_ERR_FAIL Hints are malformed.
+ * @retval 0                         Hints were decoded successfully.
+ * @retval MLD_ERR_INVALID_SIGNATURE Hints are malformed.
  */
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
@@ -269,7 +269,7 @@ __contract__(
   requires(memory_no_alias(h, sizeof(mld_poly)))
   requires(i < MLDSA_K)
   assigns(memory_slice(h, sizeof(mld_poly)))
-  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+  ensures(return_value == 0 || return_value == MLD_ERR_INVALID_SIGNATURE)
   ensures(return_value == 0 ==> array_bound(h->coeffs, 0, MLDSA_N, 0, 2))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */

@@ -156,7 +156,7 @@ int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
 
   if (new_hint_count < old_hint_count || new_hint_count > MLDSA_OMEGA)
   {
-    return MLD_ERR_FAIL;
+    return MLD_ERR_INVALID_SIGNATURE;
   }
 
   mld_memset(h, 0, sizeof(mld_poly));
@@ -174,7 +174,7 @@ int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
   {
     if (j > old_hint_count && packed_hints[j] <= packed_hints[j - 1])
     {
-      return MLD_ERR_FAIL;
+      return MLD_ERR_INVALID_SIGNATURE;
     }
     /* Safety: packed_hints[j] is uint8_t (<= 255) and MLDSA_N == 256. */
     h->coeffs[packed_hints[j]] = 1;
@@ -191,7 +191,7 @@ int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
     {
       if (packed_hints[j] != 0)
       {
-        return MLD_ERR_FAIL;
+        return MLD_ERR_INVALID_SIGNATURE;
       }
     }
   }

@@ -1225,9 +1225,10 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   mld_memcpy(c, sig, MLDSA_CTILDEBYTES);
   mld_polyvecl_unpack_z(z, sig + MLDSA_SIG_Z_OFFSET);
 
-  /* mld_polyvecl_chknorm signals failure through a single non-zero error code
-   * that's not yet aligned with MLD_ERR_XXX. A norm-check failure here means
-   * the signature is invalid, so map it to MLD_ERR_INVALID_SIGNATURE. */
+  /* mld_polyvecl_chknorm signals failure as a constant-time mask, rather than
+   * aligned with MLD_ERR_XXX, since this is also used for secret key
+   * validation. A norm-check failure here means the signature is invalid, so
+   * map it to MLD_ERR_INVALID_SIGNATURE. */
   if (mld_polyvecl_chknorm(z, MLDSA_GAMMA1 - MLDSA_BETA))
   {
     ret = MLD_ERR_INVALID_SIGNATURE;
@@ -1286,9 +1287,9 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
 
     /* tmp = h_i (decoded and validated from signature). A non-zero return
      * means the hint encoding is malformed, i.e. the signature is invalid. */
-    if (mld_sig_unpack_hints(tmp, sig, i) != 0)
+    ret = mld_sig_unpack_hints(tmp, sig, i);
+    if (ret != 0)
     {
-      ret = MLD_ERR_INVALID_SIGNATURE;
       goto cleanup;
     }
 
