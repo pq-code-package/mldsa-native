@@ -531,12 +531,12 @@
 #undef mld_xof256_x4_squeezeblocks
 /* mldsa/src/sys.h */
 #undef MLD_ALIGN
+#undef MLD_ALIGN_BYTES
 #undef MLD_ALIGN_UP
 #undef MLD_ALWAYS_INLINE
 #undef MLD_CET_ENDBR
 #undef MLD_CT_TESTING_DECLASSIFY
 #undef MLD_CT_TESTING_SECRET
-#undef MLD_DEFAULT_ALIGN
 #undef MLD_HAVE_INLINE_ASM
 #undef MLD_INLINE
 #undef MLD_MUST_CHECK_RETURN_VALUE

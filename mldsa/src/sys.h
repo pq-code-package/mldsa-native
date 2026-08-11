@@ -208,13 +208,40 @@
 #define MLD_RESTRICT restrict
 #endif /* restrict */
 
-#define MLD_DEFAULT_ALIGN 32
+/*
+ * MLD_ALIGN_BYTES: Alignment, in bytes, that MLD_ALIGN guarantees.
+ * Set through MLD_CONFIG_ALIGN. If no alignment declarator is known for the
+ * compiler, this is 1, so that backends relying on alignment refuse to build.
+ */
+#if defined(MLD_CONFIG_ALIGN_ATTRIBUTE) || defined(__GNUC__) || \
+    defined(_MSC_VER)
+#if defined(MLD_CONFIG_ALIGN)
+#define MLD_ALIGN_BYTES MLD_CONFIG_ALIGN
+#else
+#define MLD_ALIGN_BYTES 32
+#endif
+#elif defined(MLD_CONFIG_ALIGN)
+#error Bad configuration: MLD_CONFIG_ALIGN requires MLD_CONFIG_ALIGN_ATTRIBUTE, as no alignment declarator is known for this compiler
+#else
+#define MLD_ALIGN_BYTES 1
+#endif
+
 #define MLD_ALIGN_UP(N) \
-  ((((N) + (MLD_DEFAULT_ALIGN - 1)) / MLD_DEFAULT_ALIGN) * MLD_DEFAULT_ALIGN)
-#if defined(__GNUC__)
-#define MLD_ALIGN __attribute__((aligned(MLD_DEFAULT_ALIGN)))
+  ((((N) + (MLD_ALIGN_BYTES - 1)) / MLD_ALIGN_BYTES) * MLD_ALIGN_BYTES)
+
+/*
+ * MLD_ALIGN: Declarator prefix aligning to MLD_ALIGN_BYTES bytes.
+ * - MLD_CONFIG_ALIGN_ATTRIBUTE, if set
+ * - GCC/Clang: __attribute__((aligned(N)))
+ * - MSVC: __declspec(align(N))
+ * - Other: empty
+ */
+#if defined(MLD_CONFIG_ALIGN_ATTRIBUTE)
+#define MLD_ALIGN MLD_CONFIG_ALIGN_ATTRIBUTE
+#elif defined(__GNUC__)
+#define MLD_ALIGN __attribute__((aligned(MLD_ALIGN_BYTES)))
 #elif defined(_MSC_VER)
-#define MLD_ALIGN __declspec(align(MLD_DEFAULT_ALIGN))
+#define MLD_ALIGN __declspec(align(MLD_ALIGN_BYTES))
 #else
 #define MLD_ALIGN /* No known support for alignment constraints */
 #endif
