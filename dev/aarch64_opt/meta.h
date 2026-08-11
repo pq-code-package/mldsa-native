@@ -7,6 +7,12 @@
 #ifndef MLD_NATIVE_AARCH64_META_H
 #define MLD_NATIVE_AARCH64_META_H
 
+/* This backend loads and stores polynomials through Q registers, which fault
+ * on operands that are not 16-byte aligned if alignment checking is on. */
+#if MLD_ALIGN_BYTES < 16
+#error Bad configuration: The AArch64 backend needs 16-byte aligned buffers for its Q-register loads and stores. Set MLD_CONFIG_ALIGN to at least 16, and MLD_CONFIG_ALIGN_ATTRIBUTE if no alignment declarator is known for your compiler.
+#endif
+
 /* Set of primitives that this backend replaces */
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT

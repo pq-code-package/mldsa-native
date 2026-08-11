@@ -146,6 +146,13 @@ configs:
           }
           #endif
 
+  - path: test/configs/custom_align_config.h
+    description: "Test configuration with a non-default alignment"
+    defines:
+      MLD_CONFIG_ALIGN:
+        content: |
+          #define MLD_CONFIG_ALIGN 64
+
   - path: test/configs/break_pct_config.h
     description: "Test configuration for PCT breakage testing"
     defines:
@@ -494,7 +501,7 @@ configs:
           #if defined(_WIN32)
           #include <malloc.h>
           #define MLD_CUSTOM_ALLOC(v, T, N) \
-            T *v = (T *)_aligned_malloc(sizeof(T) * (N), MLD_DEFAULT_ALIGN)
+            T *v = (T *)_aligned_malloc(sizeof(T) * (N), MLD_ALIGN_BYTES)
           #define MLD_CUSTOM_FREE(v, T, N) _aligned_free(v)
           #else
           #include <stdlib.h>
@@ -506,7 +513,7 @@ configs:
             return ptr;
           }
           #define MLD_CUSTOM_ALLOC(v, T, N) \
-            T *v = (T *)mld_posix_memalign(MLD_DEFAULT_ALIGN, sizeof(T) * (N))
+            T *v = (T *)mld_posix_memalign(MLD_ALIGN_BYTES, sizeof(T) * (N))
           #define MLD_CUSTOM_FREE(v, T, N) free(v)
           #endif /* _WIN32 */
           #endif /* !__ASSEMBLER__ */

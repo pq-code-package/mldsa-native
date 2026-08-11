@@ -11,7 +11,7 @@
 /* Alignment used for every allocation. 32 bytes is the strictest requirement
  * of any type mldsa-native allocates -- the AVX2 backend needs it for its
  * aligned loads, other backends need less -- and we are conservative and apply
- * it throughout. mldsa-native's own MLD_DEFAULT_ALIGN carries the same value,
+ * it throughout. mldsa-native's own MLD_ALIGN_BYTES carries the same value,
  * but is internal to the library, so we restate it here. */
 #define EXAMPLE_ALLOC_ALIGN 32
 
