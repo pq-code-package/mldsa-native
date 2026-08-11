@@ -502,7 +502,7 @@ jobs:
          - name: reduce-ram
            ids: reduce-ram reduce-ram-pct
          - name: custom-hooks
-           ids: custom-alloc-heap custom-zeroize custom-randombytes custom-memcpy custom-memset custom-stdlib
+           ids: custom-alloc-heap custom-zeroize custom-randombytes custom-memcpy custom-memset custom-stdlib custom-align
          - name: native-cap
            ids: native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1 native-cap-CPUID_AVX2
          - name: asm-fips202

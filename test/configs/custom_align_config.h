@@ -30,12 +30,11 @@
  */
 
 /*
- * Test configuration: Test configuration with custom stdlib functions
+ * Test configuration: Test configuration with a non-default alignment
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
- *   - MLD_CONFIG_CUSTOM_MEMCPY
- *   - MLD_CONFIG_CUSTOM_MEMSET
+ *   - MLD_CONFIG_ALIGN
  */
 
 
@@ -402,7 +401,8 @@
  *          function/macro signatures may change at any time. We expect a
  *          stable API in a future version.
  */
-/* #define MLD_CONFIG_ALIGN 32 */
+#define MLD_CONFIG_ALIGN 64
+
 
 /**
  * MLD_CONFIG_ALIGN_ATTRIBUTE [EXPERIMENTAL]
@@ -579,24 +579,16 @@
  * behavior as the standard memcpy function:
  * void *mld_memcpy(void *dest, const void *src, size_t n)
  */
-#define MLD_CONFIG_CUSTOM_MEMCPY
-#if !defined(__ASSEMBLER__)
-#include <stddef.h>
-#include <stdint.h>
-#include "../mldsa/src/sys.h"
-static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
-{
-  /* Simple byte-by-byte copy implementation for testing */
-  unsigned char *d = (unsigned char *)dest;
-  const unsigned char *s = (const unsigned char *)src;
-  for (size_t i = 0; i < n; i++)
-  {
-    d[i] = s[i];
-  }
-  return dest;
-}
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLD_CONFIG_CUSTOM_MEMCPY
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/src.h"
+   static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
 
 /**
  * MLD_CONFIG_CUSTOM_MEMSET
@@ -609,23 +601,16 @@ static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
  * behavior as the standard memset function:
  * void *mld_memset(void *s, int c, size_t n)
  */
-#define MLD_CONFIG_CUSTOM_MEMSET
-#if !defined(__ASSEMBLER__)
-#include <stddef.h>
-#include <stdint.h>
-#include "../mldsa/src/sys.h"
-static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
-{
-  /* Simple byte-by-byte set implementation for testing */
-  unsigned char *ptr = (unsigned char *)s;
-  for (size_t i = 0; i < n; i++)
-  {
-    ptr[i] = (unsigned char)c;
-  }
-  return s;
-}
-#endif /* !__ASSEMBLER__ */
-
+/* #define MLD_CONFIG_CUSTOM_MEMSET
+   #if !defined(__ASSEMBLER__)
+   #include <stdint.h>
+   #include "src/src.h"
+   static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
+   {
+       ... your implementation ...
+   }
+   #endif
+*/
 
 /**
  * MLD_CONFIG_INTERNAL_API_QUALIFIER

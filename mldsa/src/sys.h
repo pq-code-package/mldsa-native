@@ -205,10 +205,29 @@
 #define MLD_RESTRICT restrict
 #endif /* restrict */
 
+/*
+ * MLD_DEFAULT_ALIGN: Alignment, in bytes, of large buffers and structures.
+ * Set through MLD_CONFIG_ALIGN.
+ */
+#if defined(MLD_CONFIG_ALIGN)
+#define MLD_DEFAULT_ALIGN MLD_CONFIG_ALIGN
+#else
 #define MLD_DEFAULT_ALIGN 32
+#endif
+
 #define MLD_ALIGN_UP(N) \
   ((((N) + (MLD_DEFAULT_ALIGN - 1)) / MLD_DEFAULT_ALIGN) * MLD_DEFAULT_ALIGN)
-#if defined(__GNUC__)
+
+/*
+ * MLD_ALIGN: Declarator prefix aligning to MLD_DEFAULT_ALIGN bytes.
+ * - MLD_CONFIG_ALIGN_ATTRIBUTE, if set
+ * - GCC/Clang: __attribute__((aligned(N)))
+ * - MSVC: __declspec(align(N))
+ * - Other: empty
+ */
+#if defined(MLD_CONFIG_ALIGN_ATTRIBUTE)
+#define MLD_ALIGN MLD_CONFIG_ALIGN_ATTRIBUTE
+#elif defined(__GNUC__)
 #define MLD_ALIGN __attribute__((aligned(MLD_DEFAULT_ALIGN)))
 #elif defined(_MSC_VER)
 #define MLD_ALIGN __declspec(align(MLD_DEFAULT_ALIGN))
