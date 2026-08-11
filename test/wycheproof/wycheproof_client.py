@@ -44,6 +44,35 @@ ALGORITHM_TO_LEVEL = {
     "ML-DSA-87": 87,
 }
 
+# Fields each test-case handler knows how to interpret. If Wycheproof adds a
+# new field to a schema, an unrecognized key here means it may carry
+# information we are silently failing to check; fail loudly instead.
+KNOWN_FIELDS = {
+    "sign_seed": {
+        "tcId",
+        "comment",
+        "flags",
+        "result",
+        "msg",
+        "mu",
+        "ctx",
+        "rnd",
+        "sig",
+    },
+    "sign_noseed": {
+        "tcId",
+        "comment",
+        "flags",
+        "result",
+        "msg",
+        "mu",
+        "ctx",
+        "rnd",
+        "sig",
+    },
+    "verify": {"tcId", "comment", "flags", "result", "msg", "ctx", "sig"},
+}
+
 
 def err(msg, **kwargs):
     print(msg, file=sys.stderr, **kwargs)
@@ -86,6 +115,15 @@ def download_file(url, dest, token):
                 wait = min(int(e.headers.get("Retry-After") or wait), 60)
             print(f"Download failed ({e}); retrying in {wait}s", file=sys.stderr)
             time.sleep(wait)
+
+
+def check_known_fields(kind, tc):
+    unknown = set(tc.keys()) - KNOWN_FIELDS[kind]
+    require(
+        not unknown,
+        f"Unrecognized field(s) {sorted(unknown)} in {kind} tcId={tc['tcId']}; "
+        "Wycheproof schema may have grown a new field this client doesn't check",
+    )
 
 
 def get_wycheproof_data_dir(data_dir):
@@ -216,6 +254,7 @@ def run_sign_seed_test(data_file):
     for tg in data["testGroups"]:
         seed_hex = tg["privateSeed"]
         for tc in tg["tests"]:
+            check_known_fields("sign_seed", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             if "Internal" in tc.get("flags", []):
                 out = run_binary(
@@ -262,6 +301,7 @@ def run_sign_noseed_test(data_file):
     for tg in data["testGroups"]:
         sk_hex = tg["privateKey"]
         for tc in tg["tests"]:
+            check_known_fields("sign_noseed", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             if "Internal" in tc.get("flags", []):
                 out = run_binary(
@@ -306,6 +346,7 @@ def run_verify_test(data_file):
     for tg in data["testGroups"]:
         pk_hex = tg["publicKey"]
         for tc in tg["tests"]:
+            check_known_fields("verify", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary(
                 [
@@ -365,6 +406,7 @@ def run_pk_from_sk_noseed_test(data_file):
     for tg in data["testGroups"]:
         sk_hex = tg["privateKey"]
         for tc in tg["tests"]:
+            check_known_fields("sign_noseed", tc)
             info(f"  tcId={tc['tcId']} ... ", end="")
             out = run_binary([binary, "pkFromSk", f"sk={sk_hex}"])
             check_pk_from_sk_result(tc, tg, out)
