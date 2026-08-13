@@ -12,8 +12,9 @@
 (* ========================================================================= *)
 
 needs "s2n_bignum/arm/proofs/base.ml";;
-needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
-needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_eta_table.ml";;
+needs "./aarch64_utils.ml";;
+needs "./mldsa_rej_uniform_eta_acceptance.ml";;
+needs "./mldsa_rej_uniform_eta_table.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.o";;
  ****)
@@ -154,6 +155,25 @@ let LENGTH_SIMPLIFY_CONV =
 let REJ_NIBBLES_ETA4 = define
   `REJ_NIBBLES_ETA4 (l:byte list) =
    FILTER (\x:int16. val x < 9) (NIBBLES_OF_BYTES l)`;;
+
+let MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_BITMAP_EQ = prove
+ (`!l:byte list.
+     MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_BITMAP l =
+     MAP (\x:int16. val x < 9) (NIBBLES_OF_BYTES l)`,
+  REWRITE_TAC[MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_BITMAP] THEN
+  LIST_INDUCT_TAC THEN
+  ASM_REWRITE_TAC[MLDSA_REJ_ACCEPTANCE_BITMAP;
+                  NIBBLES_OF_BYTES; NIBBLE_PAIR; MAP; APPEND;
+                  VAL_WORD_NIBBLE_LT]);;
+
+let MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_COUNT_EQ = prove
+ (`!l:byte list.
+     LENGTH(REJ_NIBBLES_ETA4 l) = MLDSA_REJ_ACCEPTANCE_COUNT 9 l`,
+  GEN_TAC THEN
+  REWRITE_TAC[REJ_NIBBLES_ETA4; MLDSA_REJ_ACCEPTANCE_COUNT] THEN
+  GEN_REWRITE_TAC LAND_CONV [FILTER_PREDICATE_MAP_LENGTH] THEN
+  REWRITE_TAC[GSYM MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_BITMAP_EQ;
+              MLDSA_REJ_UNIFORM_ETA4_ACCEPTANCE_BITMAP]);;
 
 let REJ_SAMPLE_ETA4_BYTES = define
   `REJ_SAMPLE_ETA4_BYTES (l:byte list) =
@@ -1901,7 +1921,7 @@ let MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_CORRECT = prove
 (* ========================================================================= *)
 
 needs "s2n_bignum/arm/proofs/consttime.ml";;
-needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
+needs "./subroutine_signatures.ml";;
 
 (* Helper: discharge the memsafe postcondition
      exists e2. read events s = APPEND e2 e /\ memaccess_inbounds e2 R W

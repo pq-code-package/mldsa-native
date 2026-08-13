@@ -12,8 +12,9 @@
 (* same 256-entry lookup table as eta=4 (indexed by 8-bit masks, 16 bytes).  *)
 (* ========================================================================= *)
 needs "s2n_bignum/arm/proofs/base.ml";;
-needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
-needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_eta_table.ml";;
+needs "./aarch64_utils.ml";;
+needs "./mldsa_rej_uniform_eta_acceptance.ml";;
+needs "./mldsa_rej_uniform_eta_table.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_eta2_aarch64_asm.o";;
  ****)
@@ -161,6 +162,25 @@ let LENGTH_SIMPLIFY_CONV =
 let REJ_NIBBLES_ETA2 = define
   `REJ_NIBBLES_ETA2 (l:byte list) =
    FILTER (\x:int16. val x < 15) (NIBBLES_OF_BYTES l)`;;
+
+let MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_BITMAP_EQ = prove
+ (`!l:byte list.
+     MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_BITMAP l =
+     MAP (\x:int16. val x < 15) (NIBBLES_OF_BYTES l)`,
+  LIST_INDUCT_TAC THEN
+  ASM_REWRITE_TAC[MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_BITMAP;
+                  MLDSA_REJ_ACCEPTANCE_BITMAP;
+                  NIBBLES_OF_BYTES; NIBBLE_PAIR; MAP; APPEND;
+                  VAL_WORD_NIBBLE_LT]);;
+
+let MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_COUNT_EQ = prove
+ (`!l:byte list.
+     LENGTH(REJ_NIBBLES_ETA2 l) = MLDSA_REJ_ACCEPTANCE_COUNT 15 l`,
+  GEN_TAC THEN
+  REWRITE_TAC[REJ_NIBBLES_ETA2; MLDSA_REJ_ACCEPTANCE_COUNT] THEN
+  GEN_REWRITE_TAC LAND_CONV [FILTER_PREDICATE_MAP_LENGTH] THEN
+  REWRITE_TAC[GSYM MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_BITMAP_EQ;
+              MLDSA_REJ_UNIFORM_ETA2_ACCEPTANCE_BITMAP]);;
 
 let REJ_SAMPLE_ETA2_BYTES = define
   `REJ_SAMPLE_ETA2_BYTES (l:byte list) =
