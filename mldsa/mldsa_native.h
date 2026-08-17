@@ -95,36 +95,36 @@
 
 /****************************** Error codes ***********************************/
 
-/* Generic failure condition, reserved for failures not covered by a more
+/** Generic failure condition, reserved for failures not covered by a more
  * specific error code. */
 #define MLD_ERR_FAIL (-1)
-/* An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
+/** An allocation failed. This can only happen if MLD_CONFIG_CUSTOM_ALLOC_FREE
  * is defined and the provided MLD_CUSTOM_ALLOC can fail. */
 #define MLD_ERR_OUT_OF_MEMORY (-2)
-/* An RNG failure occurred. Might be due to insufficient entropy or
+/** An RNG failure occurred. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLD_ERR_RNG_FAIL (-3)
-/* The signing rejection-sampling loop exceeded
+/** The signing rejection-sampling loop exceeded
  * MLD_CONFIG_MAX_SIGNING_ATTEMPTS iterations without producing a valid
  * signature. With a FIPS 204 Appendix C compliant bound (>= 821) this
  * has probability < 2^-256. */
 #define MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (-4)
-/* Signing was paused before completing, at the request of a caller-provided
+/** Signing was paused before completing, at the request of a caller-provided
  * MLD_CONFIG_SIGN_HOOK_ATTEMPT hook (see mldsa_native_config.h). The caller
  * resumes by re-invoking signing with the same inputs; the attempt hook,
  * together with MLD_CONFIG_SIGN_HOOK_RESUME, decides where to continue. */
 #define MLD_ERR_SIGNING_PAUSED (-5)
-/* Signature verification failed: the signature is not valid for the given
+/** Signature verification failed: the signature is not valid for the given
  * message and public key. Returned by the verification API. */
 #define MLD_ERR_INVALID_SIGNATURE (-6)
-/* Secret key validation failed: the secret key is malformed or internally
+/** Secret key validation failed: the secret key is malformed or internally
  * inconsistent. Returned by pk_from_sk. */
 #define MLD_ERR_INVALID_KEY (-7)
-/* The Pairwise Consistency Test failed. Only possible when
+/** The Pairwise Consistency Test failed. Only possible when
  * MLD_CONFIG_KEYGEN_PCT is enabled; signals that the freshly generated key
  * pair failed its sign/verify self-test. */
 #define MLD_ERR_PCT_FAIL (-8)
-/* An argument was invalid, e.g. an unsupported pre-hash algorithm or a context
+/** An argument was invalid, e.g. an unsupported pre-hash algorithm or a context
  * string longer than 255 bytes. */
 #define MLD_ERR_INVALID_ARG (-9)
 
@@ -214,23 +214,23 @@ extern "C"
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed
- *                                         during the PCT. Only possible when
- *                                         MLD_CONFIG_KEYGEN_PCT is enabled.
- * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
- *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
- *                                         This should currently never happen:
- *                                         signing hooks require
- *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
- *                                         is incompatible with
- *                                         MLD_CONFIG_KEYGEN_PCT, so the two
- *                                         cannot be enabled simultaneously.
- * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
- *                                         the PCT check failed.
+ * @retval 0                       Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY  MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                 used and an allocation via
+ *                                 MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_RNG_FAIL       Random number generation failed
+ *                                 during the PCT. Only possible when
+ *                                 MLD_CONFIG_KEYGEN_PCT is enabled.
+ * @retval #MLD_ERR_SIGNING_PAUSED The PCT's signing step was paused by
+ *                                 a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                 This should currently never happen:
+ *                                 signing hooks require
+ *                                 MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                 is incompatible with
+ *                                 MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                 cannot be enabled simultaneously.
+ * @retval #MLD_ERR_PCT_FAIL       MLD_CONFIG_KEYGEN_PCT is enabled and
+ *                                 the PCT check failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -260,21 +260,21 @@ int MLD_API_NAMESPACE(keypair_internal)(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGNING_PAUSED          The PCT's signing step was paused by
- *                                         a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
- *                                         This should currently never happen:
- *                                         signing hooks require
- *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
- *                                         is incompatible with
- *                                         MLD_CONFIG_KEYGEN_PCT, so the two
- *                                         cannot be enabled simultaneously.
- * @retval MLD_ERR_PCT_FAIL                MLD_CONFIG_KEYGEN_PCT is enabled and
- *                                         the PCT check failed.
+ * @retval 0                       Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY  MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                 used and an allocation via
+ *                                 MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_RNG_FAIL       Random number generation failed.
+ * @retval #MLD_ERR_SIGNING_PAUSED The PCT's signing step was paused by
+ *                                 a MLD_CONFIG_SIGN_HOOK_ATTEMPT hook.
+ *                                 This should currently never happen:
+ *                                 signing hooks require
+ *                                 MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                 is incompatible with
+ *                                 MLD_CONFIG_KEYGEN_PCT, so the two
+ *                                 cannot be enabled simultaneously.
+ * @retval #MLD_ERR_PCT_FAIL       MLD_CONFIG_KEYGEN_PCT is enabled and
+ *                                 the PCT check failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -303,11 +303,11 @@ int MLD_API_NAMESPACE(keypair)(
  *          to validate them before signing.
  *
  * @param[out] sig        Pointer to buffer to hold the generated signature of
- *                        MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                        #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  m          Pointer to message to be signed (when
  *                        externalmu == 0), or to a precomputed
  *                        message representative mu (when externalmu != 0).
- * @param      mlen       Length of m. Must equal MLDSA_CRHBYTES when
+ * @param      mlen       Length of m. Must equal #MLDSA_CRHBYTES when
  *                        externalmu != 0.
  * @param[in]  pre        Pointer to prefix string. Ignored when
  *                        externalmu != 0.
@@ -318,20 +318,20 @@ int MLD_API_NAMESPACE(keypair)(
  * @param      externalmu 0: m/mlen is the raw message; mu = H(tr, pre, m) is
  *                        computed internally.
  *                        non-zero: m points to a precomputed mu of
- *                        MLDSA_CRHBYTES bytes; pre/prelen unused.
+ *                        #MLDSA_CRHBYTES bytes; pre/prelen unused.
  * @param      context    Application context. Only present when
  *                        MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                        MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
+ * @retval 0                                Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                          used and an allocation via
+ *                                          MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
+ *                                          MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *                                          iterations.
+ * @retval #MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                          paused signing; re-invoke to resume.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -361,7 +361,7 @@ int MLD_API_NAMESPACE(signature_internal)(
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
- *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                     #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  m       Pointer to message to be signed. May be NULL if
  *                     mlen == 0.
  * @param      mlen    Length of message.
@@ -372,18 +372,18 @@ int MLD_API_NAMESPACE(signature_internal)(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
- *                                         bytes.
+ * @retval 0                                Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                          used and an allocation via
+ *                                          MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_RNG_FAIL                Random number generation failed.
+ * @retval #MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
+ *                                          MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *                                          iterations.
+ * @retval #MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                          paused signing; re-invoke to resume.
+ * @retval #MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                          bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -411,23 +411,23 @@ int MLD_API_NAMESPACE(signature)(
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
- *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                     #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  mu      Precomputed message representative.
  * @param[in]  sk      Bit-packed secret key; assumed to be valid.
  * @param      context Application context. Only present when
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_RNG_FAIL                Random number generation failed.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
+ * @retval 0                                Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                          used and an allocation via
+ *                                          MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_RNG_FAIL                Random number generation failed.
+ * @retval #MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
+ *                                          MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *                                          iterations.
+ * @retval #MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                          paused signing; re-invoke to resume.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -452,11 +452,11 @@ int MLD_API_NAMESPACE(signature_extmu)(
  * @spec{Implements @[FIPS204, Algorithm 8, ML-DSA.Verify_internal].}
  *
  * @param[in] sig        Pointer to input signature of
- *                       MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                       #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] m          Pointer to message (when externalmu == 0), or to a
  *                       precomputed message representative mu (when
  *                       externalmu != 0).
- * @param     mlen       Length of m. Must equal MLDSA_CRHBYTES when
+ * @param     mlen       Length of m. Must equal #MLDSA_CRHBYTES when
  *                       externalmu != 0.
  * @param[in] pre        Pointer to prefix string. Ignored when externalmu != 0.
  * @param     prelen     Length of prefix string. Ignored when externalmu != 0.
@@ -464,16 +464,16 @@ int MLD_API_NAMESPACE(signature_extmu)(
  * @param     externalmu 0: m/mlen is the raw message; mu = H(H(pk), pre, m) is
  *                       computed internally.
  *                       non-zero: m points to a precomputed mu of
- *                       MLDSA_CRHBYTES bytes; pre/prelen unused.
+ *                       #MLDSA_CRHBYTES bytes; pre/prelen unused.
  * @param     context    Application context. Only present when
  *                       MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                       MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                         Success.
- * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                   used and an allocation via
- *                                   MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval 0                          Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                    used and an allocation via
+ *                                    MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -495,7 +495,7 @@ int MLD_API_NAMESPACE(verify_internal)(
  * @spec{Implements @[FIPS204, Algorithm 3, ML-DSA.Verify].}
  *
  * @param[in] sig     Pointer to input signature of
- *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                    #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] m       Pointer to message. May be NULL if mlen == 0.
  * @param     mlen    Length of message.
  * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
@@ -505,12 +505,12 @@ int MLD_API_NAMESPACE(verify_internal)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                         Success.
- * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                   used and an allocation via
- *                                   MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
- * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
+ * @retval 0                          Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                    used and an allocation via
+ *                                    MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval #MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -534,18 +534,18 @@ int MLD_API_NAMESPACE(verify)(
  * @spec{Implements @[FIPS204, Algorithm 3, ML-DSA.Verify external mu variant].}
  *
  * @param[in] sig     Pointer to input signature of
- *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                    #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] mu      Precomputed message representative.
  * @param[in] pk      Bit-packed public key.
  * @param     context Application context. Only present when
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                         Success.
- * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                   used and an allocation via
- *                                   MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval 0                          Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                    used and an allocation via
+ *                                    MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_SIGNATURE Signature verification failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -575,7 +575,7 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
  *
- * MLD_PREHASH_NONE is rejected by this API.
+ * #MLD_PREHASH_NONE is rejected by this API.
  *
  * @warning This is an unstable API that may change in the future. If you need
  * a stable API use signature_pre_hash_shake256.
@@ -585,12 +585,12 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
- *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                     #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  ph      Pointer to pre-hashed message.
  * @param      phlen   Length of pre-hashed message. Must match the output
  *                     length of hashalg (the digest size for SHA-2/SHA-3,
- *                     32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
- *                     MLD_PREHASH_SHAKE_256).
+ *                     32 bytes for #MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                     #MLD_PREHASH_SHAKE_256).
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
  * @param[in]  rnd     Random seed.
@@ -600,20 +600,20 @@ int MLD_API_NAMESPACE(verify_extmu)(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_INVALID_ARG             The pre-hash algorithm was
- *                                         MLD_PREHASH_NONE or unsupported,
- *                                         phlen did not match the output
- *                                         length of hashalg, or the context
- *                                         string exceeded 255 bytes.
+ * @retval 0                                Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                          used and an allocation via
+ *                                          MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
+ *                                          MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *                                          iterations.
+ * @retval #MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                          paused signing; re-invoke to resume.
+ * @retval #MLD_ERR_INVALID_ARG             The pre-hash algorithm was
+ *                                          #MLD_PREHASH_NONE or unsupported,
+ *                                          phlen did not match the output
+ *                                          length of hashalg, or the context
+ *                                          string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -642,18 +642,18 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *   MLD_PREHASH_SHA3_224, MLD_PREHASH_SHA3_256, MLD_PREHASH_SHA3_384,
  *   MLD_PREHASH_SHA3_512, MLD_PREHASH_SHAKE_128, MLD_PREHASH_SHAKE_256.
  *
- * MLD_PREHASH_NONE is rejected by this API.
+ * #MLD_PREHASH_NONE is rejected by this API.
  *
  * @warning This is an unstable API that may change in the future. If you need
  * a stable API use verify_pre_hash_shake256.
  *
  * @param[in] sig     Pointer to input signature of
- *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                    #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] ph      Pointer to pre-hashed message.
  * @param     phlen   Length of pre-hashed message. Must match the output
  *                    length of hashalg (the digest size for SHA-2/SHA-3,
- *                    32 bytes for MLD_PREHASH_SHAKE_128, 64 bytes for
- *                    MLD_PREHASH_SHAKE_256).
+ *                    32 bytes for #MLD_PREHASH_SHAKE_128, 64 bytes for
+ *                    #MLD_PREHASH_SHAKE_256).
  * @param[in] ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param     ctxlen  Length of context string.
  * @param[in] pk      Bit-packed public key.
@@ -662,16 +662,16 @@ int MLD_API_NAMESPACE(signature_pre_hash_internal)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                         Success.
- * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                   used and an allocation via
- *                                   MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
- * @retval MLD_ERR_INVALID_ARG       The pre-hash algorithm was
- *                                   MLD_PREHASH_NONE or unsupported, phlen
- *                                   did not match the output length of
- *                                   hashalg, or the context string exceeded
- *                                   255 bytes.
+ * @retval 0                          Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                    used and an allocation via
+ *                                    MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval #MLD_ERR_INVALID_ARG       The pre-hash algorithm was
+ *                                    #MLD_PREHASH_NONE or unsupported, phlen
+ *                                    did not match the output length of
+ *                                    hashalg, or the context string exceeded
+ *                                    255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -700,7 +700,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *          to validate them before signing.
  *
  * @param[out] sig     Pointer to buffer to hold the generated signature of
- *                     MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                     #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in]  m       Pointer to message to be hashed and signed. May be
  *                     NULL if mlen == 0.
  * @param      mlen    Length of message.
@@ -712,17 +712,17 @@ int MLD_API_NAMESPACE(verify_pre_hash_internal)(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                               Success.
- * @retval MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                         used and an allocation via
- *                                         MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
- *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
- *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
- * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
- *                                         bytes.
+ * @retval 0                                Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY           MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                          used and an allocation via
+ *                                          MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
+ *                                          MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *                                          iterations.
+ * @retval #MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
+ *                                          paused signing; re-invoke to resume.
+ * @retval #MLD_ERR_INVALID_ARG             The context string exceeded 255
+ *                                          bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -747,7 +747,7 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  * the pre-hash.}
  *
  * @param[in] sig     Pointer to input signature of
- *                    MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
+ *                    #MLDSA_BYTES(MLD_CONFIG_PARAMETER_SET) bytes.
  * @param[in] m       Pointer to message to be hashed and verified. May be
  *                    NULL if mlen == 0.
  * @param     mlen    Length of message.
@@ -758,12 +758,12 @@ int MLD_API_NAMESPACE(signature_pre_hash_shake256)(
  *                    MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                    MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                         Success.
- * @retval MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
- *                                   used and an allocation via
- *                                   MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_SIGNATURE Signature verification failed.
- * @retval MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
+ * @retval 0                          Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY     MLD_CONFIG_CUSTOM_ALLOC_FREE was
+ *                                    used and an allocation via
+ *                                    MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_SIGNATURE Signature verification failed.
+ * @retval #MLD_ERR_INVALID_ARG       The context string exceeded 255 bytes.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
@@ -783,17 +783,17 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
 /**
  * Prepare domain separation prefix for ML-DSA signing.
  *
- * For pure ML-DSA (hashalg == MLD_PREHASH_NONE):
+ * For pure ML-DSA (hashalg == #MLD_PREHASH_NONE):
  *   Format: 0x00 || ctxlen (1 byte) || ctx.
  *
- * For HashML-DSA (hashalg != MLD_PREHASH_NONE):
+ * For HashML-DSA (hashalg != #MLD_PREHASH_NONE):
  *   Format: 0x01 || ctxlen (1 byte) || ctx || oid (11 bytes) || ph.
  *
  * This function is useful for building incremental signing APIs.
  *
- * @spec{For HashML-DSA (hashalg != MLD_PREHASH_NONE), implements
+ * @spec{For HashML-DSA (hashalg != #MLD_PREHASH_NONE), implements
  * @[FIPS204, Algorithm 4, line 23]. For Pure ML-DSA
- * (hashalg == MLD_PREHASH_NONE), implements
+ * (hashalg == #MLD_PREHASH_NONE), implements
  * ```
  *    M' <- BytesToBits(IntegerToBytes(0, 1)
  *           || IntegerToBytes(|ctx|, 1)
@@ -809,7 +809,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  *                     length of hashalg (ignored for pure ML-DSA).
  * @param[in]  ctx     Pointer to context string. May be NULL if ctxlen == 0.
  * @param      ctxlen  Length of context string.
- * @param      hashalg Hash algorithm constant (MLD_PREHASH_NONE for pure
+ * @param      hashalg Hash algorithm constant (#MLD_PREHASH_NONE for pure
  *                     ML-DSA, or MLD_PREHASH_* for HashML-DSA).
  *
  * @return The total length of the formatted prefix, or 0 on error.
@@ -843,10 +843,10 @@ size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
  *                     MLD_CONFIG_CONTEXT_PARAMETER is defined; type set by
  *                     MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
- * @retval 0                    Success.
- * @retval MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
- *                               allocation via MLD_CUSTOM_ALLOC returned NULL.
- * @retval MLD_ERR_INVALID_KEY   Secret key validation failed.
+ * @retval 0                      Success.
+ * @retval #MLD_ERR_OUT_OF_MEMORY MLD_CONFIG_CUSTOM_ALLOC_FREE was used and an
+ *                                allocation via MLD_CUSTOM_ALLOC returned NULL.
+ * @retval #MLD_ERR_INVALID_KEY   Secret key validation failed.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
