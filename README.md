@@ -165,6 +165,8 @@ If you want to use mldsa-native, import [mldsa](mldsa) into your project's sourc
 
 See [API-CONVENTIONS.md](API-CONVENTIONS.md) for conventions that apply to all public functions, such as return values, pointer validity, and the state of output buffers on error.
 
+The public API and the build-time configuration options are documented in the sources; for the rendered version, see the [API documentation](https://pq-code-package.github.io/mldsa-native/doxygen/).
+
 ### Can I bring my own FIPS-202?
 
 mldsa-native relies on and comes with an implementation of FIPS-202[^FIPS202]. If your library has its own FIPS-202 implementation, you

@@ -359,27 +359,27 @@ check-doxygen()
 {
   if ! command -v doxygen >/dev/null; then
     gh_error_simple "doxygen missing" "doxygen is not installed"
-    error "Lint Doxygen comments"
+    error "Render Doxygen documentation"
     SUCCESS=false
-    gh_summary_failure "Lint Doxygen comments"
+    gh_summary_failure "Render Doxygen documentation"
     return 0
   fi
 
   local out
-  if out=$(cd "$ROOT" && doxygen scripts/Doxyfile.lint 2>&1) && [[ -z $out ]]; then
-    info "Lint Doxygen comments"
-    gh_summary_success "Lint Doxygen comments"
+  if out=$(cd "$ROOT" && doxygen scripts/Doxyfile 2>&1) && [[ -z $out ]]; then
+    info "Render Doxygen documentation"
+    gh_summary_success "Render Doxygen documentation"
   else
     echo "$out"
-    gh_error_simple "Doxygen lint error" "$out"
-    error "Lint Doxygen comments"
+    gh_error_simple "Doxygen error" "$out"
+    error "Render Doxygen documentation"
     SUCCESS=false
-    gh_summary_failure "Lint Doxygen comments"
+    gh_summary_failure "Render Doxygen documentation"
   fi
-  rm -rf "$ROOT"/.doxylint-xml
+  rm -rf "$ROOT"/.doxygen-html
 }
 
-gh_group_start "Linting Doxygen comments"
+gh_group_start "Rendering Doxygen documentation"
 check-doxygen
 gh_group_end
 

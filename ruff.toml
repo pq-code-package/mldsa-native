@@ -10,6 +10,7 @@ extend-include = [
     "scripts/check-contracts",
     "scripts/check-magic",
     "scripts/check-namespace",
+    "scripts/doxygen-config-filter",
     "scripts/simpasm",
     "scripts/stack",
     "scripts/tests",

@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+#
+# Doxygen input filter for mldsa/mldsa_native_config.h
+#
+# Configuration options that are off by default are written as commented-out
+# #define directives. Doxygen only binds a documentation block to a macro it
+# can see, so without this filter the block of a disabled option is attached
+# to whichever option happens to be enabled next. Uncomment the directives so
+# that every option is documented in its own right; any example code following
+# the directive stays commented out.
+#
+# The options are undefined again at the end of the file: Doxygen documents
+# them either way, and headers including the configuration file keep
+# documenting the default configuration rather than one with every option
+# enabled.
+#
+
+import re
+import sys
+
+_RE_DEFINE = re.compile(r"^/\* (#define (MLD_CONFIG_\w+).*?)( \*/)?$")
+
+
+def unhide_config_options(lines):
+    options = []
+    for line in lines:
+        m = _RE_DEFINE.match(line)
+        if m is None:
+            yield line
+            continue
+        options.append(m.group(2))
+        yield m.group(1)
+        # Reopen the comment if the directive started a multi-line block.
+        if m.group(3) is None:
+            yield "/*"
+    for option in options:
+        yield "#undef " + option
+
+
+def main():
+    with open(sys.argv[1], encoding="utf-8") as f:
+        lines = f.read().splitlines()
+    print("\n".join(unhide_config_options(lines)))
+
+
+if __name__ == "__main__":
+    main()
