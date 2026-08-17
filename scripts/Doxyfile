@@ -34,6 +34,12 @@ QUIET                  = YES
 ALIASES                = "spec{1}=@par Specification^^\1" \
                          "reference{1}=@par Reference^^\1"
 
+# Configuration options that are off by default are commented out; uncomment
+# them so that each option is documented in its own right. The source browser
+# is exempt and keeps showing the file as it is.
+FILTER_PATTERNS        = *mldsa_native_config.h=scripts/doxygen-config-filter
+FILTER_SOURCE_FILES    = NO
+
 # Suppress false positives from project macros. The qualifiers and the
 # namespace prefix are dropped from the rendered signatures, and the type of
 # the context parameter is left as the configuration option that sets it.
@@ -44,6 +50,7 @@ PREDEFINED             = MLD_ALIGN= \
                          MLD_API_QUALIFIER= \
                          MLD_API_MUST_CHECK_RETURN_VALUE= \
                          MLD_API_NAMESPACE(sym)=sym \
+                         MLD_BUILD_INTERNAL \
                          MLD_CONFIG_CONTEXT_PARAMETER
 
 WARN_IF_DOC_ERROR      = YES
