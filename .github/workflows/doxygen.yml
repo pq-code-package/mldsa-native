@@ -1,0 +1,58 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Doxygen
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish documentation
+    if: ${{ github.repository_owner == 'pq-code-package' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Render documentation
+        uses: ./.github/actions/setup-shell
+        with:
+          nix-shell: ci
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            doxygen scripts/Doxyfile
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: gh-pages
+          path: .gh-pages
+      - name: Publish to GitHub Pages
+        working-directory: .gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The benchmark results are published to the same branch, so start
+          # over on top of its tip should a push race with them.
+          for _ in 1 2 3; do
+            git fetch --depth 1 origin gh-pages
+            git reset --quiet --hard FETCH_HEAD
+            rm -rf doxygen
+            cp -r ../.doxygen-html doxygen
+            git add -A doxygen
+            if git diff --quiet --cached; then
+              echo "Documentation is up to date"
+              exit 0
+            fi
+            git commit --quiet -m "Update Doxygen documentation for ${GITHUB_SHA}"
+            if git push; then
+              exit 0
+            fi
+          done
+          exit 1
