@@ -1,0 +1,52 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Doxygen config for mldsa-native. Run doxygen from the repository root.
+
+PROJECT_NAME           = "mldsa-native"
+PROJECT_BRIEF          = "Secure, fast and portable C90 implementation of ML-DSA"
+
+INPUT                  = mldsa scripts/doxygen-mainpage.md
+USE_MDFILE_AS_MAINPAGE = scripts/doxygen-mainpage.md
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.c
+OPTIMIZE_OUTPUT_FOR_C  = YES
+JAVADOC_AUTOBRIEF      = YES
+
+# Document all files and their global entities. The sources have no file-level
+# documentation blocks, which Doxygen would otherwise require before it picks
+# up any of the macros and functions they define.
+EXTRACT_ALL            = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = .doxygen-html
+GENERATE_TREEVIEW      = YES
+HTML_COLORSTYLE        = TOGGLE
+# Document members in declaration order
+SORT_MEMBER_DOCS       = NO
+# Skip the annotated source listings; they dominate the size of the published
+# site, and the sources are on GitHub.
+VERBATIM_HEADERS       = NO
+GENERATE_LATEX         = NO
+
+QUIET                  = YES
+
+ALIASES                = "spec{1}=@par Specification^^\1" \
+                         "reference{1}=@par Reference^^\1"
+
+# Suppress false positives from project macros. The qualifiers and the
+# namespace prefix are dropped from the rendered signatures, and the type of
+# the context parameter is left as the configuration option that sets it.
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = MLD_ALIGN= \
+                         __contract__(x)= \
+                         MLD_API_QUALIFIER= \
+                         MLD_API_MUST_CHECK_RETURN_VALUE= \
+                         MLD_API_NAMESPACE(sym)=sym \
+                         MLD_CONFIG_CONTEXT_PARAMETER
+
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+STRICT_PROTO_MATCHING  = YES
+WARN_AS_ERROR          = FAIL_ON_WARNINGS

@@ -6,3 +6,5 @@ test/build
 test/acvp/.acvp-data/
 # Downloaded Wycheproof test data
 test/wycheproof/.wycheproof-data/
+# Rendered Doxygen documentation
+.doxygen-html/
