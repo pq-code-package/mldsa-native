@@ -1,0 +1,898 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/crypto/fipsmodule/ml_dsa/importer.sh b/crypto/fipsmodule/ml_dsa/importer.sh
+index 9a4f725..86c245d 100755
+--- a/crypto/fipsmodule/ml_dsa/importer.sh
++++ b/crypto/fipsmodule/ml_dsa/importer.sh
+@@ -31,7 +31,7 @@
+ # Dependencies:
+ # - unifdef
+ 
+-GITHUB_SERVER_URL=https://github.com/
++GITHUB_SERVER_URL=${GITHUB_SERVER_URL:=https://github.com/}
+ GITHUB_REPOSITORY=${GITHUB_REPOSITORY:=pq-code-package/mldsa-native.git}
+ GITHUB_SHA=${GITHUB_SHA:=main}
+ 
+@@ -78,27 +78,22 @@ mkdir $SRC
+ find $TMP/mldsa/src -maxdepth 1 -type f -exec cp {} $SRC \;
+ 
+ # Copy x86_64 backend
+-# We import all assembly (.S) files and shared headers/constants from the
+-# upstream x86_64 backend. The AVX2 C-intrinsic .c files (rej_uniform,
+-# decompose, use_hint, chknorm, polyz_unpack) are excluded — their includes
+-# are stripped from the BCM below.
+-#
+-# The upstream meta.h advertises both assembly and C-intrinsic operations.
+-# Rather than modify it, we keep a hand-maintained replacement in
+-# ../mldsa_x86_64_meta.h (referenced via MLD_CONFIG_ARITH_BACKEND_FILE) that
+-# declares only the assembly-backed subset. Upstream meta.h is not copied.
++# The x86_64 backend is fully assembly-backed: every native operation is
++# implemented by a proven .S kernel (proofs live in the upstream mldsa-native
++# repo). We import the upstream meta.h verbatim along with all assembly (.S)
++# files and shared headers/constants, so no hand-maintained meta.h shadow is
++# needed.
+ mkdir -p $SRC/native/x86_64/src
+ cp $TMP/mldsa/src/native/api.h $SRC/native
+-cp $TMP/mldsa/src/native/x86_64/src/arith_native_x86_64.h $SRC/native/x86_64/src
+-cp $TMP/mldsa/src/native/x86_64/src/consts.h $SRC/native/x86_64/src
+-cp $TMP/mldsa/src/native/x86_64/src/consts.c $SRC/native/x86_64/src
+-# NOTE: all imported .S files must have verified proofs in s2n-bignum.
++cp $TMP/mldsa/src/native/x86_64/meta.h $SRC/native/x86_64
++cp $TMP/mldsa/src/native/x86_64/src/*.h $SRC/native/x86_64/src
++cp $TMP/mldsa/src/native/x86_64/src/*.c $SRC/native/x86_64/src
+ cp $TMP/mldsa/src/native/x86_64/src/*.S $SRC/native/x86_64/src
+ 
+ # Copy aarch64 backend
+-# Unlike x86_64, the aarch64 backend is 100% assembly — no C-intrinsic .c
+-# files. The upstream meta.h is suitable as-is, so we copy it verbatim.
+-# All assembly (.S) files have verified proofs in s2n-bignum.
++# Like x86_64, the aarch64 backend is fully assembly-backed (proofs live in the
++# upstream mldsa-native repo). The upstream meta.h is suitable as-is, so we copy
++# it verbatim.
+ mkdir -p $SRC/native/aarch64/src
+ cp $TMP/mldsa/src/native/aarch64/*.h $SRC/native/aarch64
+ cp $TMP/mldsa/src/native/aarch64/src/* $SRC/native/aarch64/src
+@@ -141,12 +136,6 @@ cp $TMP/mldsa/mldsa_native.h $SRC
+ echo "Fixup include paths"
+ sed "${SED_I[@]}" 's/#include "src\/\([^"]*\)"/#include "\1"/' $SRC/mldsa_native_bcm.c
+ 
+-# Drop #include directives for the C-intrinsic .c files we did not import.
+-# Only consts.c (shared with the assembly backend) is kept.
+-echo "Strip C-intrinsic includes from mldsa_native_bcm.c"
+-BCM=$SRC/mldsa_native_bcm.c
+-sed "${SED_I[@]}" '/^#include "native\/x86_64\/src\/[^"]*\.c"/{/consts\.c/!d;}' "$BCM"
+-
+ # ================================================================
+ # Fixup assembly backends to use s2n-bignum macros
+ # ================================================================
+@@ -188,16 +177,6 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+     sed "${SED_I[@]}" "s/MLD_ASM_FN_SYMBOL($func_name)/S2N_BN_SYMBOL(mldsa_$func_name):/" "$file"
+     sed "${SED_I[@]}" "s/MLD_ASM_FN_SIZE($func_name)/S2N_BN_SIZE_DIRECTIVE(mldsa_$func_name)/" "$file"
+   fi
+-
+-  # Prefix local labels with `Lmldsa_` to avoid collisions with other
+-  # backends linked into the same FIPS BCM module (e.g. mlkem-native's
+-  # ntt.S also defines `Lntt_layer123_start`). The delocator rejects
+-  # duplicate symbol names across the unified BCM input.
+-  # Build the rename list from the local label definitions (`^Lfoo:`) in
+-  # this file, then s/Lfoo/Lmldsa_foo/g across all occurrences.
+-  for label in $(grep -oE '^L[a-z][a-zA-Z0-9_]*:' "$file" | sed 's/:$//' | sort -u); do
+-    sed "${SED_I[@]}" "s/\b${label}\b/Lmldsa_${label#L}/g" "$file"
+-  done
+ done
+ 
+ echo "Remove temporary artifacts ..."
+diff --git a/crypto/fipsmodule/ml_dsa/ml_dsa.c b/crypto/fipsmodule/ml_dsa/ml_dsa.c
+index f6b8342..9cb01a7 100644
+--- a/crypto/fipsmodule/ml_dsa/ml_dsa.c
++++ b/crypto/fipsmodule/ml_dsa/ml_dsa.c
+@@ -92,8 +92,9 @@ int ml_dsa_44_sign(const uint8_t *private_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa44_signature(sig, sig_len, message, message_len,
++  int ret = mldsa44_signature(sig, message, message_len,
+                                ctx_string, ctx_string_len, private_key);
++  *sig_len = (ret == 0) ? MLDSA44_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -113,7 +114,8 @@ int ml_dsa_extmu_44_sign(const uint8_t *private_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa44_signature_extmu(sig, sig_len, mu, private_key);
++  int ret = mldsa44_signature_extmu(sig, mu, private_key);
++  *sig_len = (ret == 0) ? MLDSA44_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -144,8 +146,9 @@ int ml_dsa_44_sign_internal_no_self_test(const uint8_t *private_key  /* IN */,
+                                          const uint8_t *pre          /* IN */,
+                                          size_t pre_len              /* IN */,
+                                          const uint8_t *rnd          /* IN */) {
+-  int ret = mldsa44_signature_internal(sig, sig_len, message, message_len,
++  int ret = mldsa44_signature_internal(sig, message, message_len,
+                                         pre, pre_len, rnd, private_key, 0);
++  *sig_len = (ret == 0) ? MLDSA44_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -158,8 +161,9 @@ int ml_dsa_extmu_44_sign_internal(const uint8_t *private_key  /* IN */,
+                                   size_t pre_len              /* IN */,
+                                   const uint8_t *rnd          /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa44_signature_internal(sig, sig_len, mu, mu_len,
++  int ret = mldsa44_signature_internal(sig, mu, mu_len,
+                                         pre, pre_len, rnd, private_key, 1);
++  *sig_len = (ret == 0) ? MLDSA44_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -173,8 +177,11 @@ int ml_dsa_44_verify(const uint8_t *public_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa44_verify(sig, sig_len, message, message_len,
+-                            ctx_string, ctx_string_len, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA44_SIGNATURE_BYTES) {
++    ret = mldsa44_verify(sig, message, message_len,
++                          ctx_string, ctx_string_len, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -194,7 +201,10 @@ int ml_dsa_extmu_44_verify(const uint8_t *public_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa44_verify_extmu(sig, sig_len, mu, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA44_SIGNATURE_BYTES) {
++    ret = mldsa44_verify_extmu(sig, mu, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -223,8 +233,11 @@ int ml_dsa_44_verify_internal_no_self_test(const uint8_t *public_key /* IN */,
+                                            size_t message_len        /* IN */,
+                                            const uint8_t *pre        /* IN */,
+                                            size_t pre_len            /* IN */) {
+-  int ret = mldsa44_verify_internal(sig, sig_len, message, message_len,
+-                                     pre, pre_len, public_key, 0);
++  int ret = -1;
++  if (sig_len == MLDSA44_SIGNATURE_BYTES) {
++    ret = mldsa44_verify_internal(sig, message, message_len,
++                                   pre, pre_len, public_key, 0);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -236,8 +249,11 @@ int ml_dsa_extmu_44_verify_internal(const uint8_t *public_key /* IN */,
+                                     const uint8_t *pre        /* IN */,
+                                     size_t pre_len            /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa44_verify_internal(sig, sig_len, mu, mu_len,
+-                                     pre, pre_len, public_key, 1);
++  int ret = -1;
++  if (sig_len == MLDSA44_SIGNATURE_BYTES) {
++    ret = mldsa44_verify_internal(sig, mu, mu_len,
++                                   pre, pre_len, public_key, 1);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -296,8 +312,9 @@ int ml_dsa_65_sign(const uint8_t *private_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa65_signature(sig, sig_len, message, message_len,
++  int ret = mldsa65_signature(sig, message, message_len,
+                                ctx_string, ctx_string_len, private_key);
++  *sig_len = (ret == 0) ? MLDSA65_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -317,7 +334,8 @@ int ml_dsa_extmu_65_sign(const uint8_t *private_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa65_signature_extmu(sig, sig_len, mu, private_key);
++  int ret = mldsa65_signature_extmu(sig, mu, private_key);
++  *sig_len = (ret == 0) ? MLDSA65_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -336,8 +354,9 @@ int ml_dsa_65_sign_internal(const uint8_t *private_key  /* IN */,
+                             size_t pre_len              /* IN */,
+                             const uint8_t *rnd          /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa65_signature_internal(sig, sig_len, message, message_len,
++  int ret = mldsa65_signature_internal(sig, message, message_len,
+                                         pre, pre_len, rnd, private_key, 0);
++  *sig_len = (ret == 0) ? MLDSA65_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -350,8 +369,9 @@ int ml_dsa_extmu_65_sign_internal(const uint8_t *private_key  /* IN */,
+                                   size_t pre_len              /* IN */,
+                                   const uint8_t *rnd          /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa65_signature_internal(sig, sig_len, mu, mu_len,
++  int ret = mldsa65_signature_internal(sig, mu, mu_len,
+                                         pre, pre_len, rnd, private_key, 1);
++  *sig_len = (ret == 0) ? MLDSA65_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -365,8 +385,11 @@ int ml_dsa_65_verify(const uint8_t *public_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa65_verify(sig, sig_len, message, message_len,
+-                            ctx_string, ctx_string_len, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA65_SIGNATURE_BYTES) {
++    ret = mldsa65_verify(sig, message, message_len,
++                          ctx_string, ctx_string_len, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -386,7 +409,10 @@ int ml_dsa_extmu_65_verify(const uint8_t *public_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa65_verify_extmu(sig, sig_len, mu, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA65_SIGNATURE_BYTES) {
++    ret = mldsa65_verify_extmu(sig, mu, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -404,8 +430,11 @@ int ml_dsa_65_verify_internal(const uint8_t *public_key /* IN */,
+                               const uint8_t *pre        /* IN */,
+                               size_t pre_len            /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa65_verify_internal(sig, sig_len, message, message_len,
+-                                     pre, pre_len, public_key, 0);
++  int ret = -1;
++  if (sig_len == MLDSA65_SIGNATURE_BYTES) {
++    ret = mldsa65_verify_internal(sig, message, message_len,
++                                   pre, pre_len, public_key, 0);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -417,8 +446,11 @@ int ml_dsa_extmu_65_verify_internal(const uint8_t *public_key /* IN */,
+                                     const uint8_t *pre        /* IN */,
+                                     size_t pre_len            /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa65_verify_internal(sig, sig_len, mu, mu_len,
+-                                     pre, pre_len, public_key, 1);
++  int ret = -1;
++  if (sig_len == MLDSA65_SIGNATURE_BYTES) {
++    ret = mldsa65_verify_internal(sig, mu, mu_len,
++                                   pre, pre_len, public_key, 1);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -476,8 +508,9 @@ int ml_dsa_87_sign(const uint8_t *private_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa87_signature(sig, sig_len, message, message_len,
++  int ret = mldsa87_signature(sig, message, message_len,
+                                ctx_string, ctx_string_len, private_key);
++  *sig_len = (ret == 0) ? MLDSA87_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -497,7 +530,8 @@ int ml_dsa_extmu_87_sign(const uint8_t *private_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa87_signature_extmu(sig, sig_len, mu, private_key);
++  int ret = mldsa87_signature_extmu(sig, mu, private_key);
++  *sig_len = (ret == 0) ? MLDSA87_SIGNATURE_BYTES : 0;
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -516,8 +550,9 @@ int ml_dsa_87_sign_internal(const uint8_t *private_key  /* IN */,
+                             size_t pre_len              /* IN */,
+                             const uint8_t *rnd          /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa87_signature_internal(sig, sig_len, message, message_len,
++  int ret = mldsa87_signature_internal(sig, message, message_len,
+                                         pre, pre_len, rnd, private_key, 0);
++  *sig_len = (ret == 0) ? MLDSA87_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -530,8 +565,9 @@ int ml_dsa_extmu_87_sign_internal(const uint8_t *private_key  /* IN */,
+                                   size_t pre_len              /* IN */,
+                                   const uint8_t *rnd          /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa87_signature_internal(sig, sig_len, mu, mu_len,
++  int ret = mldsa87_signature_internal(sig, mu, mu_len,
+                                         pre, pre_len, rnd, private_key, 1);
++  *sig_len = (ret == 0) ? MLDSA87_SIGNATURE_BYTES : 0;
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -545,8 +581,11 @@ int ml_dsa_87_verify(const uint8_t *public_key /* IN */,
+   FIPS_service_indicator_lock_state();
+   boringssl_ensure_ml_dsa_self_test();
+ 
+-  int ret = mldsa87_verify(sig, sig_len, message, message_len,
+-                            ctx_string, ctx_string_len, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA87_SIGNATURE_BYTES) {
++    ret = mldsa87_verify(sig, message, message_len,
++                          ctx_string, ctx_string_len, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -566,7 +605,10 @@ int ml_dsa_extmu_87_verify(const uint8_t *public_key /* IN */,
+ 
+   // mu_len is ignored - extmu always uses MLDSA_CRHBYTES (64 bytes)
+   (void)mu_len;
+-  int ret = mldsa87_verify_extmu(sig, sig_len, mu, public_key);
++  int ret = -1;
++  if (sig_len == MLDSA87_SIGNATURE_BYTES) {
++    ret = mldsa87_verify_extmu(sig, mu, public_key);
++  }
+ 
+   FIPS_service_indicator_unlock_state();
+   if (ret == 0) {
+@@ -584,8 +626,11 @@ int ml_dsa_87_verify_internal(const uint8_t *public_key /* IN */,
+                               const uint8_t *pre        /* IN */,
+                               size_t pre_len            /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa87_verify_internal(sig, sig_len, message, message_len,
+-                                     pre, pre_len, public_key, 0);
++  int ret = -1;
++  if (sig_len == MLDSA87_SIGNATURE_BYTES) {
++    ret = mldsa87_verify_internal(sig, message, message_len,
++                                   pre, pre_len, public_key, 0);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+ 
+@@ -597,7 +642,10 @@ int ml_dsa_extmu_87_verify_internal(const uint8_t *public_key /* IN */,
+                                     const uint8_t *pre        /* IN */,
+                                     size_t pre_len            /* IN */) {
+   boringssl_ensure_ml_dsa_self_test();
+-  int ret = mldsa87_verify_internal(sig, sig_len, mu, mu_len,
+-                                     pre, pre_len, public_key, 1);
++  int ret = -1;
++  if (sig_len == MLDSA87_SIGNATURE_BYTES) {
++    ret = mldsa87_verify_internal(sig, mu, mu_len,
++                                   pre, pre_len, public_key, 1);
++  }
+   return (ret == 0) ? 1 : 0;
+ }
+diff --git a/crypto/fipsmodule/ml_dsa/mldsa_aarch64_meta.h b/crypto/fipsmodule/ml_dsa/mldsa_aarch64_meta.h
+deleted file mode 100644
+index 4594b0b..0000000
+--- a/crypto/fipsmodule/ml_dsa/mldsa_aarch64_meta.h
++++ /dev/null
+@@ -1,324 +0,0 @@
+-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+-// SPDX-License-Identifier: Apache-2.0 OR ISC
+-
+-// AWS-LC-owned replacement for the vendored mldsa/native/aarch64/meta.h.
+-//
+-// The vendored header calls the NEON assembly unconditionally. This copy is
+-// identical except that every native entry point is guarded by a runtime NEON
+-// check (mld_sys_check_capability(MLD_SYS_CAP_NEON)); when NEON is absent it
+-// returns MLD_NATIVE_FUNC_FALLBACK and the frontend uses its C reference path
+-// (e.g. under OPENSSL_armcap=0). Kept outside the vendored `mldsa/` tree, which
+-// importer.sh clobbers on re-import, and selected via mldsa_native_backend.h.
+-// Keep the toggles/identifier/asm signatures in sync with the vendored header.
+-
+-// Reuse the vendored include-guard name on purpose: mldsa_native_bcm.c
+-// #undef's it between per-level rounds to re-emit the per-level native
+-// functions. A different guard name would break that re-emission.
+-#ifndef MLD_NATIVE_AARCH64_META_H
+-#define MLD_NATIVE_AARCH64_META_H
+-
+-/* Set of primitives that this backend replaces */
+-#define MLD_USE_NATIVE_NTT
+-#define MLD_USE_NATIVE_INTT
+-#define MLD_USE_NATIVE_REJ_UNIFORM
+-#define MLD_USE_NATIVE_REJ_UNIFORM_ETA2
+-#define MLD_USE_NATIVE_REJ_UNIFORM_ETA4
+-#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+-#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
+-#define MLD_USE_NATIVE_POLY_CADDQ
+-#define MLD_USE_NATIVE_POLY_USE_HINT_32
+-#define MLD_USE_NATIVE_POLY_USE_HINT_88
+-#define MLD_USE_NATIVE_POLY_CHKNORM
+-#define MLD_USE_NATIVE_POLYZ_UNPACK_17
+-#define MLD_USE_NATIVE_POLYZ_UNPACK_19
+-#define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+-
+-/* Identifier for this backend so that source and assembly files
+- * in the build can be appropriately guarded. */
+-#define MLD_ARITH_BACKEND_AARCH64
+-
+-
+-#if !defined(__ASSEMBLER__)
+-#include "mldsa/native/api.h"
+-#include "mldsa/native/aarch64/src/arith_native_aarch64.h"
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_ntt_aarch64_asm(data, mld_aarch64_ntt_zetas_layer123456,
+-                      mld_aarch64_ntt_zetas_layer78);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_intt_aarch64_asm(data, mld_aarch64_intt_zetas_layer78,
+-                       mld_aarch64_intt_zetas_layer123456);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+-                                             const uint8_t *buf,
+-                                             unsigned buflen)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON) || len != MLDSA_N ||
+-      buflen % 24 != 0)
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-
+-  /* Safety: outlen is at most MLDSA_N, hence, this cast is safe. */
+-  return (int)mld_rej_uniform_aarch64_asm(r, buf, buflen,
+-                                          mld_rej_uniform_table);
+-}
+-
+-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
+-                                                  const uint8_t *buf,
+-                                                  unsigned buflen)
+-{
+-  uint64_t outlen;
+-  /* AArch64 implementation assumes specific buffer lengths */
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON) || len != MLDSA_N ||
+-      buflen != MLD_AARCH64_REJ_UNIFORM_ETA2_BUFLEN)
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  /* Constant time: Inputs and outputs to this function are secret.
+-   * It is safe to leak which coefficients are accepted/rejected.
+-   * The assembly implementation must not leak any other information about the
+-   * accepted coefficients. Constant-time testing cannot cover this, and we
+-   * hence have to manually verify the assembly.
+-   * We declassify prior the input data and mark the outputs as secret.
+-   */
+-  MLD_CT_TESTING_DECLASSIFY(buf, buflen);
+-  outlen = mld_rej_uniform_eta2_aarch64_asm(r, buf, buflen,
+-                                            mld_rej_uniform_eta_table);
+-  MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
+-  /* Safety: outlen is at most MLDSA_N and, hence, this cast is safe. */
+-  return (int)outlen;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2 */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
+-                                                  const uint8_t *buf,
+-                                                  unsigned buflen)
+-{
+-  uint64_t outlen;
+-  /* AArch64 implementation assumes specific buffer lengths */
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON) || len != MLDSA_N ||
+-      buflen != MLD_AARCH64_REJ_UNIFORM_ETA4_BUFLEN)
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  /* Constant time: Inputs and outputs to this function are secret.
+-   * It is safe to leak which coefficients are accepted/rejected.
+-   * The assembly implementation must not leak any other information about the
+-   * accepted coefficients. Constant-time testing cannot cover this, and we
+-   * hence have to manually verify the assembly.
+-   * We declassify prior the input data and mark the outputs as secret.
+-   */
+-  MLD_CT_TESTING_DECLASSIFY(buf, buflen);
+-  outlen = mld_rej_uniform_eta4_aarch64_asm(r, buf, buflen,
+-                                            mld_rej_uniform_eta_table);
+-  MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
+-  /* Safety: outlen is at most MLDSA_N and, hence, this cast is safe. */
+-  return (int)outlen;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
+-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+-
+-#if !defined(MLD_CONFIG_NO_SIGN_API)
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_decompose_32_aarch64_asm(a1, a0);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+-          || MLD_CONFIG_PARAMETER_SET == 87 */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_decompose_88_aarch64_asm(a1, a0);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+-        */
+-#endif /* !MLD_CONFIG_NO_SIGN_API */
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_caddq_aarch64_asm(a);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_use_hint_32_aarch64_asm(a, h);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+-          || MLD_CONFIG_PARAMETER_SET == 87 */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_use_hint_88_aarch64_asm(a, h);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+-        */
+-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  return mld_poly_chknorm_aarch64_asm(a, B);
+-}
+-
+-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *buf)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_polyz_unpack_17_aarch64_asm(r, buf, mld_polyz_unpack_17_indices);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+-        */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+-    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_polyz_unpack_19_aarch64_asm(r, buf, mld_polyz_unpack_19_indices);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+-          || MLD_CONFIG_PARAMETER_SET == 87 */
+-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+-
+-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+-    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_pointwise_montgomery_native(
+-    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_pointwise_montgomery_aarch64_asm(a, b);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+-          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
+-    int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
+-    const int32_t v[4][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm(w, u, v);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4 */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 5
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
+-    int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
+-    const int32_t v[5][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm(w, u, v);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5 */
+-
+-#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
+-    int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
+-    const int32_t v[7][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_NEON))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm(w, u, v);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */
+-
+-#endif /* !__ASSEMBLER__ */
+-#endif /* !MLD_NATIVE_AARCH64_META_H */
+diff --git a/crypto/fipsmodule/ml_dsa/mldsa_native_backend.h b/crypto/fipsmodule/ml_dsa/mldsa_native_backend.h
+index 06cd3bd..8136c4d 100644
+--- a/crypto/fipsmodule/ml_dsa/mldsa_native_backend.h
++++ b/crypto/fipsmodule/ml_dsa/mldsa_native_backend.h
+@@ -10,11 +10,9 @@
+     (defined(OPENSSL_LINUX) || defined(OPENSSL_APPLE))
+ 
+ #if defined(OPENSSL_AARCH64)
+-// AWS-LC-owned replacement for mldsa/native/aarch64/meta.h that adds a runtime
+-// NEON capability gate; falls back to the C reference impl when NEON is absent.
+-#include "mldsa_aarch64_meta.h"
++#include "mldsa/native/aarch64/meta.h"
+ #elif defined(OPENSSL_X86_64) && !defined(MY_ASSEMBLER_IS_TOO_OLD_FOR_AVX)
+-#include "mldsa_x86_64_meta.h"
++#include "mldsa/native/x86_64/meta.h"
+ #endif
+ 
+ #endif
+diff --git a/crypto/fipsmodule/ml_dsa/mldsa_native_config.h b/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
+index a5f540f..2adff76 100644
+--- a/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
++++ b/crypto/fipsmodule/ml_dsa/mldsa_native_config.h
+@@ -36,25 +36,19 @@
+ #endif
+ 
+ // Map the CPU capability function to the ones used by AWS-LC.
+-// MLD_SYS_CAP_NEON is defined here (not in the vendored mldsa/sys.h enum)
+-// with a value that does not collide with AVX2 == 0 / SHA3 == 1.
+-#if !defined(__ASSEMBLER__)
+-#define MLD_SYS_CAP_NEON 2
+-#endif
+ #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+ #if !defined(__ASSEMBLER__)
+ #include <stdint.h>
+ #include "mldsa/sys.h"
+-static MLD_INLINE int mld_sys_check_capability(int cap)
++static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
+ {
+ #if defined(MLD_SYS_X86_64)
+-  if (cap == MLD_SYS_CAP_AVX2)
++  if (cap == MLD_SYS_CAP_X86_64_AVX2)
+   {
+     return CRYPTO_is_AVX2_capable();
+   }
+-#endif
+-#if defined(MLD_SYS_AARCH64)
+-  if (cap == MLD_SYS_CAP_NEON)
++#elif defined(MLD_SYS_AARCH64)
++  if (cap == MLD_SYS_CAP_AARCH64_NEON)
+   {
+     return CRYPTO_is_NEON_capable();
+   }
+diff --git a/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h b/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h
+deleted file mode 100644
+index 3b905ff..0000000
+--- a/crypto/fipsmodule/ml_dsa/mldsa_x86_64_meta.h
++++ /dev/null
+@@ -1,132 +0,0 @@
+-// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+-// SPDX-License-Identifier: Apache-2.0 OR ISC
+-
+-/*
+- * Custom x86_64 backend header for the mldsa-native import.
+- *
+- * mldsa-native's upstream meta.h declares native implementations for both
+- * assembly-backed operations (NTT, INTT, pointwise multiplication, caddq) and
+- * AVX2 C-intrinsic operations (rej_uniform, decompose, use_hint, chknorm,
+- * polyz_unpack). AWS-LC only imports the assembly-backed operations, so we
+- * replace the upstream meta.h with this trimmed-down version that declares
+- * only the subset we actually provide.
+- *
+- * Kept outside the imported `mldsa/` tree so that `importer.sh` does not
+- * need to modify upstream sources.
+- */
+-
+-#ifndef MLD_NATIVE_X86_64_META_H
+-#define MLD_NATIVE_X86_64_META_H
+-
+-/* Identifier for this backend so that source and assembly files
+- * in the build can be appropriately guarded. */
+-#define MLD_ARITH_BACKEND_X86_64_DEFAULT
+-
+-#define MLD_USE_NATIVE_NTT_CUSTOM_ORDER
+-#define MLD_USE_NATIVE_NTT
+-#define MLD_USE_NATIVE_INTT
+-#define MLD_USE_NATIVE_POLY_CADDQ
+-#define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
+-#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+-
+-#if !defined(__ASSEMBLER__)
+-#include "mldsa/native/api.h"
+-#include "mldsa/native/x86_64/src/arith_native_x86_64.h"
+-
+-static MLD_INLINE void mld_poly_permute_bitrev_to_custom(int32_t data[MLDSA_N])
+-{
+-  if (mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    mld_nttunpack_avx2_asm(data);
+-  }
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_ntt_avx2_asm(data, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_invntt_avx2_asm(data, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_poly_caddq_avx2_asm(a);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_poly_pointwise_montgomery_native(
+-    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_pointwise_avx2_asm(a, b, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
+-    int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
+-    const int32_t v[4][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_pointwise_acc_l4_avx2_asm(w, u, v, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
+-    int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
+-    const int32_t v[5][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_pointwise_acc_l5_avx2_asm(w, u, v, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-MLD_MUST_CHECK_RETURN_VALUE
+-static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
+-    int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
+-    const int32_t v[7][MLDSA_N])
+-{
+-  if (!mld_sys_check_capability(MLD_SYS_CAP_AVX2))
+-  {
+-    return MLD_NATIVE_FUNC_FALLBACK;
+-  }
+-  mld_pointwise_acc_l7_avx2_asm(w, u, v, mld_qdata);
+-  return MLD_NATIVE_FUNC_SUCCESS;
+-}
+-
+-#endif /* !__ASSEMBLER__ */
+-
+-#endif /* !MLD_NATIVE_X86_64_META_H */

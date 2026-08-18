@@ -1,0 +1,142 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: CI
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    types: [ "opened", "synchronize" ]
+  merge_group:
+
+jobs:
+  base:
+    name: Base
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/base.yml
+    secrets: inherit
+  lint-markdown:
+    name: Lint Markdown
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/lint_markdown.yml
+  nix:
+    name: Nix
+    permissions:
+      actions: 'write'
+      contents: 'read'
+      id-token: 'write'
+    uses: ./.github/workflows/nix.yml
+    secrets: inherit
+  riscv:
+    name: RISC-V
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/riscv.yml
+  ci:
+    name: Extended
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base, nix ]
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+  cbmc:
+    name: CBMC
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      pull-requests: 'write'
+    needs: [ base, nix ]
+    uses: ./.github/workflows/cbmc.yml
+    secrets: inherit
+  oqs_integration:
+    name: libOQS
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-liboqs.yml
+    secrets: inherit
+  awslc_integration:
+    name: AWS-LC
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-awslc.yml
+    with:
+      commit: v5.4.0
+    secrets: inherit
+  ct-test:
+    name: Constant-time
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base, nix ]
+    uses: ./.github/workflows/ct-tests.yml
+    secrets: inherit
+  slothy:
+    name: SLOTHY
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base, nix ]
+    uses: ./.github/workflows/slothy.yml
+    secrets: inherit
+  baremetal:
+    name: Baremetal
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/baremetal.yml
+    secrets: inherit
+  zephyr:
+    name: Zephyr
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/zephyr.yml
+    secrets: inherit
+  pavona_integration:
+    name: Pavona
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/integration-pavona.yml
+    secrets: inherit
+  isabelle:
+    name: Isabelle
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [ base ]
+    uses: ./.github/workflows/isabelle.yml
+    secrets: inherit
+  hol-light:
+    name: HOL-Light
+    permissions:
+      contents: 'read'
+    uses: ./.github/workflows/hol_light.yml
+    secrets: inherit
+  # Single required status check for branch protection and the merge queue; jobs added to this workflow must also be added to the needs list below to gate merges.
+  # riscv excluded as the RISE runners tend to be flaky.
+  ci-summary:
+    name: CI Summary
+    if: always()
+    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, isabelle, hol-light ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

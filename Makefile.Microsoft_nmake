@@ -1,0 +1,278 @@
+# Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+CFLAGS = /nologo /O2 /Imldsa /Imldsa/src /Imldsa/src/fips202 /Imldsa/src/fips202/native /Imldsa/src/native
+
+ALLOC_CFLAGS = \
+    $(CFLAGS) \
+    /D MLD_CONFIG_FILE="\"../test/configs/test_alloc_config.h\""
+
+OBJ_FILES = .\mldsa\*.obj \
+            .\mldsa\fips202\*.obj
+
+BUILD_DIR = test\build
+MLDSA44_BUILD_DIR = $(BUILD_DIR)\mldsa44
+MLDSA65_BUILD_DIR = $(BUILD_DIR)\mldsa65
+MLDSA87_BUILD_DIR = $(BUILD_DIR)\mldsa87
+
+OBJ_FILES_44 = $(MLDSA44_BUILD_DIR)\mldsa\*.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\*.obj
+OBJ_FILES_65 = $(MLDSA65_BUILD_DIR)\mldsa\*.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\*.obj
+OBJ_FILES_87 = $(MLDSA87_BUILD_DIR)\mldsa\*.obj \
+                 $(MLDSA87_BUILD_DIR)\mldsa\fips202\*.obj
+
+OBJ_FILES_44_ALLOC = $(MLDSA44_BUILD_DIR)\alloc\mldsa\*.obj \
+                     $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\*.obj
+OBJ_FILES_65_ALLOC = $(MLDSA65_BUILD_DIR)\alloc\mldsa\*.obj \
+                     $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\*.obj
+OBJ_FILES_87_ALLOC = $(MLDSA87_BUILD_DIR)\alloc\mldsa\*.obj \
+                     $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\*.obj
+
+# NOTE: We currently only build code for non-opt code, as we haven't yet made the assembly compatible on Windows
+!IFNDEF OPT
+OPT = 0
+!ENDIF
+
+{test/notrandombytes}.c{$(BUILD_DIR)\randombytes}.obj::
+	@if NOT EXIST $(BUILD_DIR)\randombytes mkdir $(BUILD_DIR)\randombytes
+    $(CC) $(CFLAGS) /c /Fo$(BUILD_DIR)\randombytes\ $<
+
+# compilation for mldsa44
+{mldsa\src}.c{$(MLDSA44_BUILD_DIR)\mldsa}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa mkdir $(MLDSA44_BUILD_DIR)\mldsa
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA44_BUILD_DIR)\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\fips202 mkdir $(MLDSA44_BUILD_DIR)\mldsa\fips202
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA44_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test mkdir $(MLDSA44_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\ $<
+
+# compilation for mldsa65
+{mldsa\src}.c{$(MLDSA65_BUILD_DIR)\mldsa}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa mkdir $(MLDSA65_BUILD_DIR)\mldsa
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA65_BUILD_DIR)\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\fips202 mkdir $(MLDSA65_BUILD_DIR)\mldsa\fips202
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA65_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test mkdir $(MLDSA65_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\ $<
+
+# compilation for mldsa87
+{mldsa\src}.c{$(MLDSA87_BUILD_DIR)\mldsa}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa mkdir $(MLDSA87_BUILD_DIR)\mldsa
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA87_BUILD_DIR)\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\fips202 mkdir $(MLDSA87_BUILD_DIR)\mldsa\fips202
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA87_BUILD_DIR)\test}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test mkdir $(MLDSA87_BUILD_DIR)\test
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\ $<
+
+# compilation for mldsa44 alloc test
+{mldsa\src}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA44_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test\alloc mkdir $(MLDSA44_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\alloc\ $<
+
+# compilation for mldsa65 alloc test
+{mldsa\src}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA65_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test\alloc mkdir $(MLDSA65_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\alloc\ $<
+
+# compilation for mldsa87 alloc test
+{mldsa\src}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\ $<
+
+{mldsa\src\fips202}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\ $<
+
+{test\src}.c{$(MLDSA87_BUILD_DIR)\test\alloc}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\alloc mkdir $(MLDSA87_BUILD_DIR)\test\alloc
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\alloc\ $<
+
+# compilation of acvp test for mldsa44
+{test\acvp}.c{$(MLDSA44_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test\acvp mkdir $(MLDSA44_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\acvp\ $<
+
+# compilation of acvp test for mldsa65
+{test\acvp}.c{$(MLDSA65_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test\acvp mkdir $(MLDSA65_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\acvp\ $<
+
+# compilation of acvp test for mldsa87
+{test\acvp}.c{$(MLDSA87_BUILD_DIR)\test\acvp}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\acvp mkdir $(MLDSA87_BUILD_DIR)\test\acvp
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\acvp\ $<
+
+# compilation of wycheproof test for mldsa44
+{test\wycheproof}.c{$(MLDSA44_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\test\wycheproof mkdir $(MLDSA44_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\test\wycheproof\ $<
+
+# compilation of wycheproof test for mldsa65
+{test\wycheproof}.c{$(MLDSA65_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\test\wycheproof mkdir $(MLDSA65_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\test\wycheproof\ $<
+
+# compilation of wycheproof test for mldsa87
+{test\wycheproof}.c{$(MLDSA87_BUILD_DIR)\test\wycheproof}.obj::
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\test\wycheproof mkdir $(MLDSA87_BUILD_DIR)\test\wycheproof
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\test\wycheproof\ $<
+
+# compile functional test for mldsa44
+test_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\test_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\test_mldsa44 $** /link
+
+# compile functional test for mldsa65
+test_mldsa65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\test_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\test_mldsa65 $** /link
+
+# compile functional test for mldsa87
+test_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\test_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_mldsa87 $** /link
+
+# compile acvp test for mldsa44
+acvp_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\acvp_mldsa44 $** /link
+
+# compile acvp test for mldsa65
+acvp_mldsa65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\acvp_mldsa65 $** /link
+
+# compile acvp test for mldsa87
+acvp_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\acvp\acvp_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\acvp_mldsa87 $** /link
+
+# compile KAT generator for mldsa44
+gen_KAT44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\gen_KAT44 $** /link
+
+# compile KAT generator for mldsa65
+gen_KAT65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\gen_KAT65 $** /link
+
+# compile KAT generator for mldsa87
+gen_KAT87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\gen_KAT.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\gen_KAT87 $** /link
+
+# compile RNG fail test for mldsa44
+test_rng_fail44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\test_rng_fail44 $** /link
+
+# compile RNG fail test for mldsa65
+test_rng_fail65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\test_rng_fail65 $** /link
+
+# compile RNG fail test for mldsa87
+test_rng_fail87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\test_rng_fail.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_rng_fail87 $** /link
+
+# compile alloc test for mldsa44
+test_alloc44: $(OBJ_FILES_44_ALLOC) $(MLDSA44_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\test_alloc44 $** /link
+
+# compile alloc test for mldsa65
+test_alloc65: $(OBJ_FILES_65_ALLOC) $(MLDSA65_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\test_alloc65 $** /link
+
+# compile alloc test for mldsa87
+test_alloc87: $(OBJ_FILES_87_ALLOC) $(MLDSA87_BUILD_DIR)\test\alloc\test_alloc.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\test_alloc87 $** /link
+
+# compile wycheproof test for mldsa44
+wycheproof_mldsa44: $(OBJ_FILES_44) $(MLDSA44_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\bin mkdir $(MLDSA44_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /Fe$(MLDSA44_BUILD_DIR)\bin\wycheproof_mldsa44 $** /link
+
+# compile wycheproof test for mldsa65
+wycheproof_mldsa65: $(OBJ_FILES_65) $(MLDSA65_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\bin mkdir $(MLDSA65_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /Fe$(MLDSA65_BUILD_DIR)\bin\wycheproof_mldsa65 $** /link
+
+# compile wycheproof test for mldsa87
+wycheproof_mldsa87: $(OBJ_FILES_87) $(MLDSA87_BUILD_DIR)\test\wycheproof\wycheproof_mldsa.obj $(BUILD_DIR)\randombytes\notrandombytes.obj
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\bin mkdir $(MLDSA87_BUILD_DIR)\bin
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /Fe$(MLDSA87_BUILD_DIR)\bin\wycheproof_mldsa87 $** /link
+
+acvp: acvp_mldsa44 acvp_mldsa65 acvp_mldsa87
+
+wycheproof: wycheproof_mldsa44 wycheproof_mldsa65 wycheproof_mldsa87
+
+gen_KAT: gen_KAT44 gen_KAT65 gen_KAT87
+
+run_kat: gen_KAT
+    $(MLDSA44_BUILD_DIR)\bin\gen_KAT44.exe | python META.py --scheme 44
+    $(MLDSA65_BUILD_DIR)\bin\gen_KAT65.exe | python META.py --scheme 65
+    $(MLDSA87_BUILD_DIR)\bin\gen_KAT87.exe | python META.py --scheme 87
+
+run_acvp: acvp
+    python test/acvp/acvp_client.py
+
+run_wycheproof: wycheproof
+    python test/wycheproof/wycheproof_client.py
+
+run_func: test_mldsa44 test_mldsa65 test_mldsa87
+    $(MLDSA44_BUILD_DIR)\bin\test_mldsa44.exe
+    $(MLDSA65_BUILD_DIR)\bin\test_mldsa65.exe
+    $(MLDSA87_BUILD_DIR)\bin\test_mldsa87.exe
+
+run_rng_fail: test_rng_fail44 test_rng_fail65 test_rng_fail87
+    $(MLDSA44_BUILD_DIR)\bin\test_rng_fail44.exe
+    $(MLDSA65_BUILD_DIR)\bin\test_rng_fail65.exe
+    $(MLDSA87_BUILD_DIR)\bin\test_rng_fail87.exe
+
+run_alloc: test_alloc44 test_alloc65 test_alloc87
+    $(MLDSA44_BUILD_DIR)\bin\test_alloc44.exe
+    $(MLDSA65_BUILD_DIR)\bin\test_alloc65.exe
+    $(MLDSA87_BUILD_DIR)\bin\test_alloc87.exe
+
+test: run_func run_rng_fail run_alloc run_acvp run_kat run_wycheproof
+    @echo   Everything checks fine!
+
+quickcheck: test
+
+clean:
+    -DEL $(BUILD_DIR)

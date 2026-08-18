@@ -1,0 +1,13 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+diff --git a/third_party/mldsa_native/BUILD.mldsa_native.bazel b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+--- a/third_party/mldsa_native/BUILD.mldsa_native.bazel
++++ b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+@@ -12,6 +12,7 @@ cc_library(
+         "mldsa/mldsa_native.h",
+         "mldsa/src/cbmc.h",
+         "mldsa/src/common.h",
++        "mldsa/src/context.h",
+         "mldsa/src/randombytes.h",
+         "mldsa/src/debug.h",
+         "mldsa/src/debug.c",

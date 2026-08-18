@@ -1,0 +1,234 @@
+[//]: # (SPDX-License-Identifier: CC-BY-4.0)
+
+# HOL Light proofs
+
+This directory contains HOL Light proofs for the AArch64 and x86_64 assembly routines
+used in mldsa-native. The proofs are written in the [HOL Light](https://hol-light.github.io/) theorem
+prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+
+Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
+contains the byte code being verified, as well as the specification that is being proved.
+
+## What is proven
+
+Unless documented otherwise, for each assembly routine listed below, we prove three properties:
+
+1. **Functional correctness** — the routine computes the specified mathematical function (e.g., that `mldsa_ntt` computes the ML-DSA forward NTT modulo `q = 8380417`).
+2. **Memory safety** — the routine accesses only those memory regions permitted by its specification (input/output buffers, stack frame).
+3. **Secret-independent timing** — the sequence of microarchitectural events (e.g. memory accesses, branch decisions) emitted by the routine is a function of public inputs only, and does not depend on secret data.
+
+### By design: rejection sampling for the public matrix (`rej_uniform`)
+
+`rej_uniform` expands the public matrix A from the public seed rho. Because it operates on public data only,
+secret-independent timing is not a requirement, and admitting variable-time execution enables a faster
+implementation. We therefore prove properties 1 and 2 for it, but deliberately not property 3.
+
+### Constant-time rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
+
+The `rej_uniform_eta{2,4}` kernels (on both AArch64 and x86_64) sample the secret vectors `s1`/`s2` by
+rejection, so their
+control flow and memory-access pattern legitimately depend on *which* candidate coefficients are accepted
+vs. rejected. They are therefore **not** data-oblivious, and the standard one-line safety tactic (which
+asserts full obliviousness) does not apply.
+
+Instead we prove **constant-time up to the reject pattern**: the microarchitectural event trace is a
+function of the public pointers and the *reject bitmap* — one accept/reject bit per candidate nibble — and
+of nothing else about the input. In particular it does not depend on the accepted coefficient *values* (the
+secret). The reject bitmap is itself public: whether a coefficient falls in the acceptance interval is a
+statistically-independent function of the public XOF output (Section 5.5 of @[Round3_Spec]).
+
+Concretely, the constant-time safety theorems for `rej_uniform_eta2` and `rej_uniform_eta4` state
+that some event-generating function `f_events`, depending only on public data, reproduces the
+entire trace (shown here for eta2; the eta4 statement is identical with `REJ_MASK_ETA4` and `val x < 9`):
+
+```ocaml
+`?f_events.
+   !res buf buflen table (inlist:byte list) pc e stackpointer returnaddress.
+     (* same alignment / non-overlap preconditions as _MEMSAFE *)
+     ...
+     ==> ensures arm
+          (\s. (* same precondition as _MEMSAFE: code at pc, C arguments
+                  [res;buf;buflen;table], input bytes at buf, table at table,
+                  event log = e *)
+               ... /\ read events s = e)
+          (\s. read PC s = returnaddress /\
+               ?e2. read events s = APPEND e2 e /\
+                    (* the events of this call are EXACTLY f_events applied to the
+                       public arguments and the reject bitmap -- and not the
+                       accepted coefficient values *)
+                    e2 = f_events res buf buflen table pc stackpointer
+                                  returnaddress (REJ_MASK_ETA2 inlist) /\
+                    memaccess_inbounds e2 (read set) (write set))
+          (* same footprint as _MEMSAFE *)`
+```
+
+where `REJ_MASK_ETA2 l = MAP (\x. val x < 15) (NIBBLES_OF_BYTES l)` is the public reject bitmap — one
+accept/reject bit per nibble, accepted values discarded. (Contrast `REJ_NIBBLES_ETA2`, which *keeps* the
+accepted values and is secret.) Because the whole trace factors through this bitmap, two inputs with the
+same accept/reject pattern are indistinguishable to a timing/cache adversary regardless of their
+coefficient values.
+
+The x86_64 AVX2 kernels prove the identical property (with `ensures x86`). Because the x86_64
+`rej_uniform_eta{2,4}` assembly processes a fixed-length input buffer (136 bytes for eta2, 272 for eta4)
+rather than taking a runtime `buflen` argument, its `f_events` and preconditions specialise `buflen` to
+that constant; the reject-bitmap factoring is otherwise identical.
+
+
+## Primer
+
+Proofs are 'post-hoc' in the sense that HOL-Light/s2n-bignum operate on the final object code. In particular, the means by which the code was generated need not be trusted.
+
+Specifications are essentially [Hoare triples](https://en.wikipedia.org/wiki/Hoare_logic), with the noteworthy difference that the program is implicit as the content of memory at the PC; which is asserted to
+be the code under verification as part of the precondition. For example, the following is the specification of the `mldsa_ntt` function:
+
+```ocaml
+ (* For all (abbreviated by `!` in HOL):
+    - a: Polynomial coefficients pointer
+    - zetas: NTT constants pointer
+    - x: Original polynomial coefficients
+    - pc: Current value of Program Counter (PC)
+    - stackpointer: Stack pointer
+    - returnaddress: Return address on the stack *)
+`!a zetas x pc stackpointer returnaddress.
+    (* Alignment and non-overlapping requirements *)
+    aligned 32 a /\
+    aligned 32 zetas /\
+    nonoverlapping (word pc,LENGTH mldsa_ntt_mc) (a, 1024) /\
+    nonoverlapping (word pc,LENGTH mldsa_ntt_mc) (zetas, 2496) /\
+    nonoverlapping (a, 1024) (zetas, 2496) /\
+    nonoverlapping (stackpointer,8) (a, 1024) /\
+    nonoverlapping (stackpointer,8) (zetas, 2496)
+    ==> ensures x86
+      (* Precondition *)
+      (\s. (* The memory at the current PC is the byte-code of mldsa_ntt() *)
+        bytes_loaded s (word pc) mldsa_ntt_mc /\
+        read RIP s = word pc /\
+        read RSP s = stackpointer /\
+        (* The return address is on the stack *)
+        read (memory :> bytes64 stackpointer) s = returnaddress /\
+        (* Arguments are passed via C calling convention *)
+        C_ARGUMENTS [a; zetas] s /\
+        (* NTT constants are properly loaded *)
+        wordlist_from_memory(zetas,624) s = MAP (iword: int -> 32 word) mldsa_complete_qdata /\
+        (* Input bounds checking *)
+        (!i. i < 256 ==> abs(ival(x i)) <= &8380416) /\
+        (* Give a name to the memory contents at the source pointer *)
+        !i. i < 256
+            ==> read(memory :> bytes32(word_add a (word(4 * i)))) s = x i)
+      (* Postcondition: Eventually we reach a state where ... *)
+      (\s.
+        (* The PC is the return address *)
+        read RIP s = returnaddress /\
+        (* Stack pointer is adjusted *)
+        read RSP s = word_add stackpointer (word 8) /\
+        (* The integers represented by the final memory contents
+         * are congruent to the ML-DSA forward NTT transformation
+         * of the original coefficients, modulo 8380417, with proper bounds *)
+        !i. i < 256
+            ==> let zi = read(memory :> bytes32(word_add a (word(4 * i)))) s in
+                (ival zi == mldsa_forward_ntt (ival o x) i) (mod &8380417) /\
+                abs(ival zi) <= &42035261)
+      (* Footprint: The program may modify (only) the ABI permitted registers
+       * and flags, stack pointer, and the memory contents at the source pointer. *)
+      (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+       MAYCHANGE [memory :> bytes(a,1024)])`
+```
+
+## Reproducing the proofs
+
+To reproduce the proofs, enter the nix shell via
+
+```bash
+nix develop .#hol_light --experimental-features 'nix-command flakes'
+```
+
+from mldsa-native's base directory. Then
+
+```bash
+make -C proofs/hol_light/aarch64
+```
+or
+
+```bash
+make -C proofs/hol_light/x86_64
+```
+
+will build and run the proofs. Note that this may take hours even on powerful machines.
+
+For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
+
+## Interactive proof development
+
+For interactive proof development, start the HOL Light server:
+
+```bash
+hol-server [port]  # default port is 2012
+```
+
+Then use the [HOL Light extension for VS Code](https://marketplace.visualstudio.com/items?itemName=monadius.hol-light-simple)
+to connect and send commands interactively.
+
+Alternatively, send commands using netcat:
+
+```bash
+echo '1+1;;' | nc -w 5 127.0.0.1 2012
+```
+
+## Routines covered
+
+All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the rejection samplers. `rej_uniform` is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct and memory-safe, and secret-independent in timing up to the reject pattern (see [Constant-time rejection sampling](#constant-time-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
+
+### AArch64
+- ML-DSA Arithmetic:
+  * AArch64 forward NTT: [mldsa_ntt_aarch64_asm.S](aarch64/mldsa/mldsa_ntt_aarch64_asm.S)
+  * AArch64 inverse NTT: [mldsa_intt_aarch64_asm.S](aarch64/mldsa/mldsa_intt_aarch64_asm.S)
+  * AArch64 poly_caddq: [mldsa_poly_caddq_aarch64_asm.S](aarch64/mldsa/mldsa_poly_caddq_aarch64_asm.S)
+  * AArch64 poly_chknorm: [mldsa_poly_chknorm_aarch64_asm.S](aarch64/mldsa/mldsa_poly_chknorm_aarch64_asm.S)
+  * AArch64 poly_use_hint (l=5,7): [mldsa_poly_use_hint_32_aarch64_asm.S](aarch64/mldsa/mldsa_poly_use_hint_32_aarch64_asm.S)
+  * AArch64 poly_use_hint (l=4): [mldsa_poly_use_hint_88_aarch64_asm.S](aarch64/mldsa/mldsa_poly_use_hint_88_aarch64_asm.S)
+  * AArch64 poly_decompose (l=5,7): [mldsa_poly_decompose_32_aarch64_asm.S](aarch64/mldsa/mldsa_poly_decompose_32_aarch64_asm.S)
+  * AArch64 poly_decompose (l=4): [mldsa_poly_decompose_88_aarch64_asm.S](aarch64/mldsa/mldsa_poly_decompose_88_aarch64_asm.S)
+  * AArch64 polyz_unpack (l=4): [mldsa_polyz_unpack_17_aarch64_asm.S](aarch64/mldsa/mldsa_polyz_unpack_17_aarch64_asm.S)
+  * AArch64 polyz_unpack (l=5,7): [mldsa_polyz_unpack_19_aarch64_asm.S](aarch64/mldsa/mldsa_polyz_unpack_19_aarch64_asm.S)
+  * AArch64 pointwise multiplication: [mldsa_pointwise_montgomery_aarch64_asm.S](aarch64/mldsa/mldsa_pointwise_montgomery_aarch64_asm.S)
+  * AArch64 pointwise multiplication-accumulation (l=4): [mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S](aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S)
+  * AArch64 pointwise multiplication-accumulation (l=5): [mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S](aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S)
+  * AArch64 pointwise multiplication-accumulation (l=7): [mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S](aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S)
+  * AArch64 rejection sampling: [mldsa_rej_uniform_aarch64_asm.S](aarch64/mldsa/mldsa_rej_uniform_aarch64_asm.S)
+  * AArch64 rejection sampling (eta=2): [mldsa_rej_uniform_eta2_aarch64_asm.S](aarch64/mldsa/mldsa_rej_uniform_eta2_aarch64_asm.S)
+  * AArch64 rejection sampling (eta=4): [mldsa_rej_uniform_eta4_aarch64_asm.S](aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.S)
+- FIPS202:
+  * Keccak-F1600 using lazy rotations[^HYBRID]: [keccak_f1600_x1_scalar_aarch64_asm.S](aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.S)
+  * Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x1_v84a_aarch64_asm.S](aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S)
+  * 2-fold Keccak-F1600 using v8.4-A SHA3 instructions: [keccak_f1600_x2_v84a_aarch64_asm.S](aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S)
+  * 'Hybrid' 4-fold Keccak-F1600 using scalar and v8-A Neon instructions: [keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S](aarch64/mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S)
+  * 'Triple hybrid' 4-fold Keccak-F1600 using scalar, v8-A Neon and v8.4-A+SHA3 Neon instructions: [keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S](aarch64/mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S)
+
+
+
+### x86_64
+- ML-DSA Arithmetic:
+  * x86_64 forward NTT: [mldsa_ntt_avx2_asm.S](x86_64/mldsa/mldsa_ntt_avx2_asm.S)
+  * x86_64 inverse NTT: [mldsa_intt_avx2_asm.S](x86_64/mldsa/mldsa_intt_avx2_asm.S)
+  * x86_64 poly_caddq: [mldsa_poly_caddq_avx2_asm.S](x86_64/mldsa/mldsa_poly_caddq_avx2_asm.S)
+  * x86_64 NTT unpack: [mldsa_nttunpack_avx2_asm.S](x86_64/mldsa/mldsa_nttunpack_avx2_asm.S)
+  * x86_64 pointwise multiplication: [mldsa_pointwise_avx2_asm.S](x86_64/mldsa/mldsa_pointwise_avx2_asm.S)
+  * x86_64 pointwise multiplication-accumulation (l=4): [mldsa_pointwise_acc_l4_avx2_asm.S](x86_64/mldsa/mldsa_pointwise_acc_l4_avx2_asm.S)
+  * x86_64 pointwise multiplication-accumulation (l=5): [mldsa_pointwise_acc_l5_avx2_asm.S](x86_64/mldsa/mldsa_pointwise_acc_l5_avx2_asm.S)
+  * x86_64 pointwise multiplication-accumulation (l=7): [mldsa_pointwise_acc_l7_avx2_asm.S](x86_64/mldsa/mldsa_pointwise_acc_l7_avx2_asm.S)
+  * x86_64 poly_chknorm: [mldsa_poly_chknorm_avx2_asm.S](x86_64/mldsa/mldsa_poly_chknorm_avx2_asm.S)
+  * x86_64 poly_decompose (l=5,7): [mldsa_poly_decompose_32_avx2_asm.S](x86_64/mldsa/mldsa_poly_decompose_32_avx2_asm.S)
+  * x86_64 poly_decompose (l=4): [mldsa_poly_decompose_88_avx2_asm.S](x86_64/mldsa/mldsa_poly_decompose_88_avx2_asm.S)
+  * x86_64 polyz_unpack (l=4): [mldsa_polyz_unpack_17_avx2_asm.S](x86_64/mldsa/mldsa_polyz_unpack_17_avx2_asm.S)
+  * x86_64 polyz_unpack (l=5,7): [mldsa_polyz_unpack_19_avx2_asm.S](x86_64/mldsa/mldsa_polyz_unpack_19_avx2_asm.S)
+  * x86_64 poly_use_hint (l=5,7): [mldsa_poly_use_hint_32_avx2_asm.S](x86_64/mldsa/mldsa_poly_use_hint_32_avx2_asm.S)
+  * x86_64 poly_use_hint (l=4): [mldsa_poly_use_hint_88_avx2_asm.S](x86_64/mldsa/mldsa_poly_use_hint_88_avx2_asm.S)
+  * x86_64 rejection uniform sampling: [mldsa_rej_uniform_avx2_asm.S](x86_64/mldsa/mldsa_rej_uniform_avx2_asm.S)
+  * x86_64 rejection sampling (eta=2): [mldsa_rej_uniform_eta2_avx2_asm.S](x86_64/mldsa/mldsa_rej_uniform_eta2_avx2_asm.S)
+  * x86_64 rejection sampling (eta=4): [mldsa_rej_uniform_eta4_avx2_asm.S](x86_64/mldsa/mldsa_rej_uniform_eta4_avx2_asm.S)
+- FIPS202:
+  * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
+
+<!--- bibliography --->
+[^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
+[^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)
