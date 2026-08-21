@@ -203,6 +203,90 @@
  * the implementation.
  */
 /* #define MLD_CONFIG_CONSTANTS_ONLY */
+
+/**
+ * MLD_CONFIG_KEYGEN_PCT
+ *
+ * Compliance with @[FIPS140_3_IG, p.87] requires a
+ * Pairwise Consistency Test (PCT) to be carried out on a freshly
+ * generated keypair before it can be exported.
+ *
+ * Set this option if such a check should be implemented.
+ * In this case, keypair_internal and
+ * keypair will return MLD_ERR_PCT_FAIL if the
+ * PCT failed.
+ *
+ * @note This feature will drastically lower the performance of
+ * key generation.
+ *
+ * @note This option is incompatible with MLD_CONFIG_NO_SIGN_API
+ * and MLD_CONFIG_NO_VERIFY_API as the current PCT implementation
+ * requires signature() and verify().
+ */
+/* #define MLD_CONFIG_KEYGEN_PCT */
+
+/**
+ * MLD_CONFIG_CONTEXT_PARAMETER
+ *
+ * Set this to add a caller-supplied context parameter to the public API
+ * functions, which is then forwarded unchanged to the custom callbacks
+ * (allocation, and signing hooks below).
+ *
+ * When this option is set, every public API function gains a trailing
+ * parameter
+ *
+ *   MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
+ *
+ * as its last argument; its type is configured via
+ * MLD_CONFIG_CONTEXT_PARAMETER_TYPE (see below). mldsa-native treats this
+ * value as opaque: it never dereferences it and only passes it on to the
+ * configurable hook macros. It is meant to carry per-caller state -- e.g. a
+ * pointer to a memory pool for the allocation hooks, or the resume state for
+ * the signing hooks -- into those hooks.
+ *
+ * When this option is unset (the default), no extra parameter is added and
+ * the hook macros never receive a context argument.
+ *
+ * The hooks that receive the context are the allocation hooks (see
+ * MLD_CONFIG_CUSTOM_ALLOC_FREE) and the signing hooks (see
+ * MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH); each is documented with
+ * its own option below.
+ */
+#define MLD_CONFIG_CONTEXT_PARAMETER
+
+/**
+ * MLD_CONFIG_CONTEXT_PARAMETER_TYPE
+ *
+ * Set this to define the type of the context parameter added by
+ * MLD_CONFIG_CONTEXT_PARAMETER. It can be any C type usable as a function
+ * parameter, e.g. `void *` or a pointer to a caller-defined struct such as
+ * `struct my_ctx *`.
+ *
+ * This option must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is
+ * defined; defining one without the other is a compile-time error.
+ */
+#if !defined(__ASSEMBLER__)
+#include <stdint.h>
+/* The context type and the hook implementations live in
+ * test/src/test_sign_hook.c; here we only forward-declare them. */
+struct test_sign_hook_ctx; /* Forward declaration */
+#endif                     /* !__ASSEMBLER__ */
+#define MLD_CONFIG_CONTEXT_PARAMETER_TYPE struct test_sign_hook_ctx *
+
+
+/**
+ * MLD_CONFIG_REDUCE_RAM
+ *
+ * Set this to reduce RAM usage. This trades memory for performance.
+ *
+ * For expected memory usage, see the MLD_TOTAL_ALLOC_* constants defined in
+ * mldsa_native.h.
+ *
+ * This option is useful for embedded systems with tight RAM constraints but
+ * relaxed performance requirements.
+ *
+ */
+/* #define MLD_CONFIG_REDUCE_RAM */
 /******************************************************************************
  *
  * Build-only configuration options
@@ -632,27 +716,6 @@
 /* #define MLD_CONFIG_NO_ASM_VALUE_BARRIER */
 
 /**
- * MLD_CONFIG_KEYGEN_PCT
- *
- * Compliance with @[FIPS140_3_IG, p.87] requires a
- * Pairwise Consistency Test (PCT) to be carried out on a freshly
- * generated keypair before it can be exported.
- *
- * Set this option if such a check should be implemented.
- * In this case, keypair_internal and
- * keypair will return MLD_ERR_PCT_FAIL if the
- * PCT failed.
- *
- * @note This feature will drastically lower the performance of
- * key generation.
- *
- * @note This option is incompatible with MLD_CONFIG_NO_SIGN_API
- * and MLD_CONFIG_NO_VERIFY_API as the current PCT implementation
- * requires signature() and verify().
- */
-/* #define MLD_CONFIG_KEYGEN_PCT */
-
-/**
  * MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
  *
  * If this option is set, the user must provide a runtime
@@ -717,55 +780,6 @@
 /* #define MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 /**
- * MLD_CONFIG_CONTEXT_PARAMETER
- *
- * Set this to add a caller-supplied context parameter to the public API
- * functions, which is then forwarded unchanged to the custom callbacks
- * (allocation, and signing hooks below).
- *
- * When this option is set, every public API function gains a trailing
- * parameter
- *
- *   MLD_CONFIG_CONTEXT_PARAMETER_TYPE context
- *
- * as its last argument; its type is configured via
- * MLD_CONFIG_CONTEXT_PARAMETER_TYPE (see below). mldsa-native treats this
- * value as opaque: it never dereferences it and only passes it on to the
- * configurable hook macros. It is meant to carry per-caller state -- e.g. a
- * pointer to a memory pool for the allocation hooks, or the resume state for
- * the signing hooks -- into those hooks.
- *
- * When this option is unset (the default), no extra parameter is added and
- * the hook macros never receive a context argument.
- *
- * The hooks that receive the context are the allocation hooks (see
- * MLD_CONFIG_CUSTOM_ALLOC_FREE) and the signing hooks (see
- * MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH); each is documented with
- * its own option below.
- */
-#define MLD_CONFIG_CONTEXT_PARAMETER
-
-/**
- * MLD_CONFIG_CONTEXT_PARAMETER_TYPE
- *
- * Set this to define the type of the context parameter added by
- * MLD_CONFIG_CONTEXT_PARAMETER. It can be any C type usable as a function
- * parameter, e.g. `void *` or a pointer to a caller-defined struct such as
- * `struct my_ctx *`.
- *
- * This option must be defined if and only if MLD_CONFIG_CONTEXT_PARAMETER is
- * defined; defining one without the other is a compile-time error.
- */
-#if !defined(__ASSEMBLER__)
-#include <stdint.h>
-/* The context type and the hook implementations live in
- * test/src/test_sign_hook.c; here we only forward-declare them. */
-struct test_sign_hook_ctx; /* Forward declaration */
-#endif                     /* !__ASSEMBLER__ */
-#define MLD_CONFIG_CONTEXT_PARAMETER_TYPE struct test_sign_hook_ctx *
-
-
-/**
  * Signing hooks: MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH
  *
  * Three optional, independent hooks into the ML-DSA signing rejection-sampling
@@ -827,20 +841,6 @@ int mld_sign_hook_attempt(uint16_t attempt, struct test_sign_hook_ctx *context);
 void mld_sign_hook_finish(uint16_t attempt, struct test_sign_hook_ctx *context);
 #endif /* !__ASSEMBLER__ */
 
-
-/**
- * MLD_CONFIG_REDUCE_RAM
- *
- * Set this to reduce RAM usage. This trades memory for performance.
- *
- * For expected memory usage, see the MLD_TOTAL_ALLOC_* constants defined in
- * mldsa_native.h.
- *
- * This option is useful for embedded systems with tight RAM constraints but
- * relaxed performance requirements.
- *
- */
-/* #define MLD_CONFIG_REDUCE_RAM */
 
 /*************************  Config internals  ********************************/
 
