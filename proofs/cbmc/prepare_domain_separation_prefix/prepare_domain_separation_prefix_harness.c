@@ -5,11 +5,6 @@
 
 void harness(void)
 {
-  {
-    /* Dummy use of `free` to work around CBMC issue #8814. */
-    free(NULL);
-  }
-
   uint8_t *prefix;
   const uint8_t *ph;
   size_t phlen;
