@@ -45,10 +45,9 @@ depend on the secret coefficient values. Their memory-access pattern and trip co
 candidate coefficients fall inside vs. outside the acceptance interval, but that reject pattern is
 public: it is a statistically-independent function of the public XOF stream (Section 5.5 of the
 Dilithium Round 3 specification[^Round3_Spec]) and reveals nothing about the accepted values. On
-AArch64 this is now formally proved -- the microarchitectural event trace is proven to be a function
-of the public pointers and the per-nibble accept/reject bitmap only ("constant-time up to the reject
-pattern"). On x86_64 the same property currently rests on empirical `valgrind`-based constant-time
-testing rather than a formal proof.
+both AArch64 and x86_64 this is now formally proved -- the microarchitectural event trace is proven to
+be a function of the public pointers and the per-nibble accept/reject bitmap only ("constant-time up to
+the reject pattern").
 
 <!--- bibliography --->
 [^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)

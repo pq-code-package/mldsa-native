@@ -25,7 +25,8 @@ implementation. We therefore prove properties 1 and 2 for it, but deliberately n
 
 ### Constant-time rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
 
-The AArch64 kernels `rej_uniform_eta{2,4}` sample the secret vectors `s1`/`s2` by rejection, so their
+The `rej_uniform_eta{2,4}` kernels (on both AArch64 and x86_64) sample the secret vectors `s1`/`s2` by
+rejection, so their
 control flow and memory-access pattern legitimately depend on *which* candidate coefficients are accepted
 vs. rejected. They are therefore **not** data-oblivious, and the standard one-line safety tactic (which
 asserts full obliviousness) does not apply.
@@ -66,6 +67,11 @@ accept/reject bit per nibble, accepted values discarded. (Contrast `REJ_NIBBLES_
 accepted values and is secret.) Because the whole trace factors through this bitmap, two inputs with the
 same accept/reject pattern are indistinguishable to a timing/cache adversary regardless of their
 coefficient values.
+
+The x86_64 AVX2 kernels prove the identical property (with `ensures x86`). Because the x86_64
+`rej_uniform_eta{2,4}` assembly processes a fixed-length input buffer (136 bytes for eta2, 272 for eta4)
+rather than taking a runtime `buflen` argument, its `f_events` and preconditions specialise `buflen` to
+that constant; the reject-bitmap factoring is otherwise identical.
 
 
 ## Primer
