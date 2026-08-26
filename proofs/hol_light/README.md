@@ -23,13 +23,56 @@ Unless documented otherwise, for each assembly routine listed below, we prove th
 secret-independent timing is not a requirement, and admitting variable-time execution enables a faster
 implementation. We therefore prove properties 1 and 2 for it, but deliberately not property 3.
 
-### Known gap: rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
+### Constant-time rejection sampling for the secret vector (`rej_uniform_eta{2,4}`)
 
-The AArch64 and AVX2 kernels `rej_uniform_eta{2,4}` have secret-independent timing, but we do not yet prove it (see
-[#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)): Their memory access pattern depends on which
-coefficients fall inside vs. outside the acceptance interval, but no other information about the secret coefficients is
-leaked. The indices of in bound vs. out of bounds coefficients are statistically independent of the secret key; see
-Section 5.5 of the Dilithium Round 3 specification[^Round3_Spec].
+The `rej_uniform_eta{2,4}` kernels (on both AArch64 and x86_64) sample the secret vectors `s1`/`s2` by
+rejection, so their
+control flow and memory-access pattern legitimately depend on *which* candidate coefficients are accepted
+vs. rejected. They are therefore **not** data-oblivious, and the standard one-line safety tactic (which
+asserts full obliviousness) does not apply.
+
+Instead we prove **constant-time up to the reject pattern**: the microarchitectural event trace is a
+function of the public pointers and the *reject bitmap* — one accept/reject bit per candidate nibble — and
+of nothing else about the input. In particular it does not depend on the accepted coefficient *values* (the
+secret). The reject bitmap is itself public: whether a coefficient falls in the acceptance interval is a
+statistically-independent function of the public XOF output (Section 5.5 of @[Round3_Spec]).
+
+Concretely, the constant-time safety theorems for `rej_uniform_eta2` and `rej_uniform_eta4` state
+that some event-generating function `f_events`, depending only on public data, reproduces the
+entire trace (shown here for eta2; the eta4 statement is identical with `REJ_MASK_ETA4` and `val x < 9`):
+
+```ocaml
+`?f_events.
+   !res buf buflen table (inlist:byte list) pc e stackpointer returnaddress.
+     (* same alignment / non-overlap preconditions as _MEMSAFE *)
+     ...
+     ==> ensures arm
+          (\s. (* same precondition as _MEMSAFE: code at pc, C arguments
+                  [res;buf;buflen;table], input bytes at buf, table at table,
+                  event log = e *)
+               ... /\ read events s = e)
+          (\s. read PC s = returnaddress /\
+               ?e2. read events s = APPEND e2 e /\
+                    (* the events of this call are EXACTLY f_events applied to the
+                       public arguments and the reject bitmap -- and not the
+                       accepted coefficient values *)
+                    e2 = f_events res buf buflen table pc stackpointer
+                                  returnaddress (REJ_MASK_ETA2 inlist) /\
+                    memaccess_inbounds e2 (read set) (write set))
+          (* same footprint as _MEMSAFE *)`
+```
+
+where `REJ_MASK_ETA2 l = MAP (\x. val x < 15) (NIBBLES_OF_BYTES l)` is the public reject bitmap — one
+accept/reject bit per nibble, accepted values discarded. (Contrast `REJ_NIBBLES_ETA2`, which *keeps* the
+accepted values and is secret.) Because the whole trace factors through this bitmap, two inputs with the
+same accept/reject pattern are indistinguishable to a timing/cache adversary regardless of their
+coefficient values.
+
+The x86_64 AVX2 kernels prove the identical property (with `ensures x86`). Because the x86_64
+`rej_uniform_eta{2,4}` assembly processes a fixed-length input buffer (136 bytes for eta2, 272 for eta4)
+rather than taking a runtime `buflen` argument, its `f_events` and preconditions specialise `buflen` to
+that constant; the reject-bitmap factoring is otherwise identical.
+
 
 ## Primer
 
@@ -133,7 +176,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## Routines covered
 
-All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the rejection samplers. `rej_uniform` is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct and memory-safe, with only their timing property outstanding (see [Known gap](#known-gap-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
+All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the rejection samplers. `rej_uniform` is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct and memory-safe, and secret-independent in timing up to the reject pattern (see [Constant-time rejection sampling](#constant-time-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
 
 ### AArch64
 - ML-DSA Arithmetic:
