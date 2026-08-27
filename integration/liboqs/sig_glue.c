@@ -15,7 +15,8 @@
  *
  * The shims also normalize return codes to OQS_STATUS: mldsa-native returns a
  * wider error set than liboqs's OQS_SUCCESS / OQS_ERROR, so any nonzero result
- * is collapsed to OQS_ERROR. keypair is shimmed for this normalization alone.
+ * is collapsed to OQS_ERROR. keypair and keypair_derand are shimmed for this
+ * normalization alone.
  *
  * The shims are compiled once per build (parameter set and backend), so the
  * namespaced symbol names match the names liboqs links against.
@@ -41,6 +42,7 @@
   MLD_OQS_CONCAT(MLD_OQS_CONCAT(MLD_CONFIG_NAMESPACE_PREFIX, _), sym)
 
 #define mld_oqs_keypair MLD_OQS_NS(keypair_oqs)
+#define mld_oqs_keypair_derand MLD_OQS_NS(keypair_derand_oqs)
 #define mld_oqs_signature MLD_OQS_NS(signature_oqs)
 #define mld_oqs_verify MLD_OQS_NS(verify_oqs)
 #define mld_oqs_signature_extmu MLD_OQS_NS(signature_extmu_oqs)
@@ -56,6 +58,11 @@ static int mld_oqs_status(int ret)
 int mld_oqs_keypair(uint8_t *pk, uint8_t *sk)
 {
   return mld_oqs_status(MLD_OQS_NS(keypair)(pk, sk));
+}
+
+int mld_oqs_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *seed)
+{
+  return mld_oqs_status(MLD_OQS_NS(keypair_internal)(pk, sk, seed));
 }
 
 int mld_oqs_signature(uint8_t *sig, size_t *siglen, const uint8_t *m,
@@ -105,6 +112,7 @@ int mld_oqs_verify_extmu(const uint8_t *sig, size_t siglen, const uint8_t *mu,
 }
 
 #undef mld_oqs_keypair
+#undef mld_oqs_keypair_derand
 #undef mld_oqs_signature
 #undef mld_oqs_verify
 #undef mld_oqs_signature_extmu
