@@ -314,6 +314,7 @@ EXAMPLE_DIRS := \
 	examples/bring_your_own_fips202_static \
 	examples/custom_backend \
 	examples/basic \
+	examples/context_parameter \
 	examples/basic_deterministic \
 	examples/basic_lowram \
 	examples/monolithic_build \

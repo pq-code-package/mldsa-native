@@ -49,6 +49,12 @@ custom FIPS-202 implementation using a static state. This variant demonstrates t
 See [custom_backend](custom_backend) for an example of how to use mldsa-native with a custom configuration file and a
 custom FIPS-202 backend.
 
+## Context parameter
+
+See [context_parameter](context_parameter) for an example of adding an application context to the public API and using it
+to pass a bump allocator to the custom allocation callbacks (`MLD_CONFIG_CONTEXT_PARAMETER`,
+`MLD_CONFIG_CUSTOM_ALLOC_FREE`).
+
 ## Monobuild (C only)
 
 See [monolithic_build](monolithic_build) for an example of how to build mldsa-native (with C backend) from a single
