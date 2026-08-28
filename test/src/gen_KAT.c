@@ -37,17 +37,7 @@ int main(void)
 #define MAXMLEN 2048
 #define CTXLEN 0
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int r;                                                    \
-    r = (x);                                                  \
-    if (!r)                                                   \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
+#include "test_common.h"
 
 
 
@@ -68,7 +58,7 @@ int main(void);
 int main(void)
 {
   unsigned i;
-  int rc;
+  int ret;
   uint8_t pk[MLDSA_PK_BYTES];
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t s[MLDSA_SIG_BYTES];
@@ -114,9 +104,9 @@ int main(void)
 
     print_hex(s, MLDSA_SIG_BYTES);
 
-    rc = mld_sign_verify(s, m, i, NULL, CTXLEN, pk);
+    ret = mld_sign_verify(s, m, i, NULL, CTXLEN, pk);
 
-    if (rc)
+    if (ret)
     {
       printf("ERROR: signature verification failed\n");
       return -1;

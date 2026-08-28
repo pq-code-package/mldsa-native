@@ -6,11 +6,16 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+/* Must precede the public header: common.h defines MLD_BUILD_INTERNAL before
+ * pulling in the configuration, and the configuration has an include guard. */
+#include "src/common.h"
+
 #include "../notrandombytes/notrandombytes.h"
 #include "expected_test_vectors.h"
 #include "mldsa_native.h"
 #include "src/sys.h"
 
+#include "test_common.h"
 #include "test_namespace.h"
 
 #ifndef NTESTS
@@ -18,18 +23,6 @@
 #endif
 #define MLEN 59
 #define CTXLEN 1
-
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int r;                                                    \
-    r = (x);                                                  \
-    if (!r)                                                   \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
 
 /* For test-configurations with a low threshold of signing attempts,
  * consider the possibility of signatures failing. */
@@ -56,7 +49,7 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
                           uint8_t sig[MLDSA_SIG_BYTES], uint8_t m[MLEN],
                           uint8_t ctx[CTXLEN])
 {
-  int rc;
+  int ret;
 
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
@@ -67,9 +60,9 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
 
   CHECK_SIGN_RC(mld_sign_signature(sig, m, MLEN, ctx, CTXLEN, sk));
 
-  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
+  ret = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  if (rc)
+  if (ret)
   {
     printf("ERROR: verify\n");
     return 1;
@@ -161,7 +154,7 @@ static int test_sign_empty_message(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t ctx[CTXLEN];
   uint8_t rnd[MLDSA_RNDBYTES];
-  int rc;
+  int ret;
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
@@ -169,8 +162,8 @@ static int test_sign_empty_message(void)
 
   /* Pure ML-DSA */
   CHECK_SIGN_RC(mld_sign_signature(sig, NULL, 0, ctx, CTXLEN, sk));
-  rc = mld_sign_verify(sig, NULL, 0, ctx, CTXLEN, pk);
-  if (rc)
+  ret = mld_sign_verify(sig, NULL, 0, ctx, CTXLEN, pk);
+  if (ret)
   {
     printf("ERROR: empty_message: pure verify\n");
     return 1;
@@ -181,8 +174,8 @@ static int test_sign_empty_message(void)
   MLD_CT_TESTING_SECRET(rnd, sizeof(rnd));
   CHECK_SIGN_RC(
       mld_sign_signature_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, rnd, sk));
-  rc = mld_sign_verify_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, pk);
-  if (rc)
+  ret = mld_sign_verify_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, pk);
+  if (ret)
   {
     printf("ERROR: empty_message: pre-hash verify\n");
     return 1;
@@ -201,7 +194,7 @@ static int test_pk_from_sk(void)
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t sk_corrupted[MLDSA_SK_BYTES];
   uint8_t seed[MLDSA_SEEDBYTES];
-  int rc;
+  int ret;
 
   /* Generate a keypair. Drive the internal entry point so that this test
    * also runs when the randomized API is disabled. */
@@ -224,9 +217,9 @@ static int test_pk_from_sk(void)
   /* Corrupt a byte in the t0 portion of the secret key */
   sk_corrupted[MLDSA_SEEDBYTES + MLDSA_TRBYTES + MLDSA_SEEDBYTES + 10] ^= 1;
 
-  rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
+  ret = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
-  if (rc != MLD_ERR_INVALID_KEY)
+  if (ret != MLD_ERR_INVALID_KEY)
   {
     printf("ERROR: pk_from_sk - should fail with corrupted t0 in secret key\n");
     return 1;
@@ -238,9 +231,9 @@ static int test_pk_from_sk(void)
   /* tr starts at offset 2 * MLDSA_SEEDBYTES (after rho and key) */
   sk_corrupted[2 * MLDSA_SEEDBYTES + 10] ^= 1;
 
-  rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
+  ret = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
-  if (rc != MLD_ERR_INVALID_KEY)
+  if (ret != MLD_ERR_INVALID_KEY)
   {
     printf(
         "ERROR: pk_from_sk - should fail with corrupted tr in "
@@ -262,7 +255,7 @@ static int test_wrong_pk(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  int rc;
+  int ret;
   size_t idx;
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
@@ -279,9 +272,9 @@ static int test_wrong_pk(void)
 
   pk[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
+  ret = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  if (rc != MLD_ERR_INVALID_SIGNATURE)
+  if (ret != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_pk: verify\n");
     return 1;
@@ -296,7 +289,7 @@ static int test_wrong_sig(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  int rc;
+  int ret;
   size_t idx;
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
@@ -313,9 +306,9 @@ static int test_wrong_sig(void)
 
   sig[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
+  ret = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  if (rc != MLD_ERR_INVALID_SIGNATURE)
+  if (ret != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_sig: verify\n");
     return 1;
@@ -331,7 +324,7 @@ static int test_wrong_ctx(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t m[MLEN];
   uint8_t ctx[CTXLEN];
-  int rc;
+  int ret;
   size_t idx;
 
   CHECK(mld_sign_keypair(pk, sk) == 0);
@@ -348,9 +341,9 @@ static int test_wrong_ctx(void)
 
   ctx[idx] ^= 1;
 
-  rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
+  ret = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  if (rc != MLD_ERR_INVALID_SIGNATURE)
+  if (ret != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_ctx: verify\n");
     return 1;

@@ -197,15 +197,7 @@ void mld_sign_hook_finish(uint16_t attempt, struct test_sign_hook_ctx *context)
   context->paused_attempt = 0;
 }
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    if (!(x))                                                 \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
+#include "test_common.h"
 
 /*
  * Accessors for struct test_sign_hook_ctx. The test only touches the context
@@ -270,23 +262,23 @@ static int sign_and_compare(struct test_sign_hook_ctx *ctx,
                             size_t mlen, const uint8_t *pre, size_t prelen,
                             const uint8_t *rnd, const uint8_t *sk)
 {
-  int rc;
+  int ret;
 
   test_sign_ctx_begin_op(ctx, attempts_per_call, record_stats);
 
   for (;;)
   {
-    rc = mld_signature_internal(sig, m, mlen, pre, prelen, rnd, sk,
-                                0 /* externalmu */, ctx);
-    if (rc == 0)
+    ret = mld_signature_internal(sig, m, mlen, pre, prelen, rnd, sk,
+                                 0 /* externalmu */, ctx);
+    if (ret == 0)
     {
       break;
     }
-    if (rc == MLD_ERR_SIGNING_PAUSED)
+    if (ret == MLD_ERR_SIGNING_PAUSED)
     {
       continue; /* resume from the recorded attempt */
     }
-    fprintf(stderr, "ERROR: signing failed with rc=%d\n", rc);
+    fprintf(stderr, "ERROR: signing failed with ret=%d\n", ret);
     return 1;
   }
 

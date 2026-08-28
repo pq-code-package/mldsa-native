@@ -24,17 +24,7 @@
 
 #define NUM_RANDOM_TESTS_SLOW 50
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int r;                                                    \
-    r = (x);                                                  \
-    if (!r)                                                   \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
+#include "test_common.h"
 
 /* Declarations for _c functions exposed by MLD_STATIC_TESTABLE= */
 void mld_poly_ntt_c(mld_poly *a);

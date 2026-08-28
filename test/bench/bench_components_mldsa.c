@@ -27,17 +27,7 @@
 #define MLD_BENCHMARK_NTESTS 20
 #endif
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      return 1;                                               \
-    }                                                         \
-  } while (0)
+#include "../src/test_common.h"
 
 static int cmp_uint64_t(const void *a, const void *b)
 {
