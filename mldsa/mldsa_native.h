@@ -128,11 +128,7 @@
  * string longer than 255 bytes. */
 #define MLD_ERR_INVALID_ARG (-9)
 
-/********************* Namespacing and Qualifiers *****************************/
-
-#define MLD_API_CONCAT_(x, y) x##y
-#define MLD_API_CONCAT(x, y) MLD_API_CONCAT_(x, y)
-#define MLD_API_CONCAT_UNDERSCORE(x, y) MLD_API_CONCAT(MLD_API_CONCAT(x, _), y)
+/****************************** Configuration *********************************/
 
 /* You need to make sure the config file is in the include path. */
 #if defined(MLD_CONFIG_FILE)
@@ -140,6 +136,32 @@
 #else
 #include "mldsa_native_config.h"
 #endif
+
+/* Hash algorithm constants for domain separation */
+#define MLD_PREHASH_NONE 0
+#define MLD_PREHASH_SHA2_224 1
+#define MLD_PREHASH_SHA2_256 2
+#define MLD_PREHASH_SHA2_384 3
+#define MLD_PREHASH_SHA2_512 4
+#define MLD_PREHASH_SHA2_512_224 5
+#define MLD_PREHASH_SHA2_512_256 6
+#define MLD_PREHASH_SHA3_224 7
+#define MLD_PREHASH_SHA3_256 8
+#define MLD_PREHASH_SHA3_384 9
+#define MLD_PREHASH_SHA3_512 10
+#define MLD_PREHASH_SHAKE_128 11
+#define MLD_PREHASH_SHAKE_256 12
+
+/* Maximum formatted domain separation message length */
+#define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
+
+/********************* Namespacing and Qualifiers *****************************/
+
+#if !defined(MLD_CONFIG_CONSTANTS_ONLY)
+
+#define MLD_API_CONCAT_(x, y) x##y
+#define MLD_API_CONCAT(x, y) MLD_API_CONCAT_(x, y)
+#define MLD_API_CONCAT_UNDERSCORE(x, y) MLD_API_CONCAT(MLD_API_CONCAT(x, _), y)
 
 /* Namespace prefix for the public API symbols. For multi-level builds, the
  * parameter set is appended to disambiguate the security levels. */
@@ -165,27 +187,7 @@
 #define MLD_API_QUALIFIER
 #endif
 
-/* Hash algorithm constants for domain separation */
-#define MLD_PREHASH_NONE 0
-#define MLD_PREHASH_SHA2_224 1
-#define MLD_PREHASH_SHA2_256 2
-#define MLD_PREHASH_SHA2_384 3
-#define MLD_PREHASH_SHA2_512 4
-#define MLD_PREHASH_SHA2_512_224 5
-#define MLD_PREHASH_SHA2_512_256 6
-#define MLD_PREHASH_SHA3_224 7
-#define MLD_PREHASH_SHA3_256 8
-#define MLD_PREHASH_SHA3_384 9
-#define MLD_PREHASH_SHA3_512 10
-#define MLD_PREHASH_SHAKE_128 11
-#define MLD_PREHASH_SHAKE_256 12
-
-/* Maximum formatted domain separation message length */
-#define MLD_DOMAIN_SEPARATION_MAX_BYTES (2 + 255 + 11 + 64)
-
 /****************************** Function API **********************************/
-
-#if !defined(MLD_CONFIG_CONSTANTS_ONLY)
 
 #include <stddef.h>
 #include <stdint.h>
