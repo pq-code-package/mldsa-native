@@ -52,7 +52,7 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
   int ret;
 
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, CTXLEN);
   CHECK(randombytes(m, MLEN) == 0);
@@ -100,7 +100,7 @@ static int test_sign_extmu(void)
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[MLDSA_CRHBYTES];
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
   MLD_CT_TESTING_SECRET(mu, sizeof(mu));
 
@@ -121,7 +121,7 @@ static int test_sign_pre_hash(void)
   uint8_t rnd[MLDSA_RNDBYTES];
 
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
@@ -156,7 +156,7 @@ static int test_sign_empty_message(void)
   uint8_t rnd[MLDSA_RNDBYTES];
   int ret;
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, CTXLEN);
 
@@ -200,7 +200,7 @@ static int test_pk_from_sk(void)
    * also runs when the randomized API is disabled. */
   CHECK(randombytes(seed, MLDSA_SEEDBYTES) == 0);
   MLD_CT_TESTING_SECRET(seed, MLDSA_SEEDBYTES);
-  CHECK(mld_sign_keypair_internal(pk, sk, seed) == 0);
+  CHECK_ERR(mld_sign_keypair_internal(pk, sk, seed), 0);
 
   /* Derive public key from secret key */
   CHECK(mld_sign_pk_from_sk(pk_derived, sk) == 0);
@@ -258,7 +258,7 @@ static int test_wrong_pk(void)
   int ret;
   size_t idx;
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
@@ -292,7 +292,7 @@ static int test_wrong_sig(void)
   int ret;
   size_t idx;
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
@@ -327,7 +327,7 @@ static int test_wrong_ctx(void)
   int ret;
   size_t idx;
 
-  CHECK(mld_sign_keypair(pk, sk) == 0);
+  CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(ctx, CTXLEN) == 0);
   MLD_CT_TESTING_SECRET(ctx, sizeof(ctx));
   CHECK(randombytes(m, MLEN) == 0);
@@ -362,7 +362,7 @@ static int test_sign_expected_keypair(void)
 
   /* test_vector_rnd is the seed the deterministic test RNG hands out, so the
    * internal entry point must reproduce the same keypair. */
-  CHECK(mld_sign_keypair_internal(pk, sk, test_vector_rnd) == 0);
+  CHECK_ERR(mld_sign_keypair_internal(pk, sk, test_vector_rnd), 0);
 
   /* Declassify sk's for comparison. This is for testing purposes only.
    * Don't declassify the test_vector_sk itself because we need it to stay
