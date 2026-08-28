@@ -46,17 +46,9 @@ static void print_info(void)
 #endif
 }
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      exit(1);                                                \
-    }                                                         \
-  } while (0)
+/* The test-case handlers below return void, so a failed check must exit(). */
+#define MLD_TEST_CHECK_EXIT
+#include "../src/test_common.h"
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
     !defined(MLD_CONFIG_NO_KEYPAIR_API)

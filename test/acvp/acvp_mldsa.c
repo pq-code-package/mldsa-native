@@ -69,17 +69,9 @@ static void print_info(void)
 /* maximum context length according to FIPS-204 */
 #define MAX_CTX_LENGTH 255
 
-#define CHECK(x)                                              \
-  do                                                          \
-  {                                                           \
-    int rc;                                                   \
-    rc = (x);                                                 \
-    if (!rc)                                                  \
-    {                                                         \
-      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
-      exit(1);                                                \
-    }                                                         \
-  } while (0)
+/* The test-case handlers below return void, so a failed check must exit(). */
+#define MLD_TEST_CHECK_EXIT
+#include "../src/test_common.h"
 
 typedef enum
 {
