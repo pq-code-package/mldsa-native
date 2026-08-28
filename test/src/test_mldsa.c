@@ -69,9 +69,6 @@ static int test_sign_core(uint8_t pk[MLDSA_PK_BYTES],
 
   rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  /* Constant time: Declassify outputs to check them. */
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-
   if (rc)
   {
     printf("ERROR: verify\n");
@@ -173,7 +170,6 @@ static int test_sign_empty_message(void)
   /* Pure ML-DSA */
   CHECK_SIGN_RC(mld_sign_signature(sig, NULL, 0, ctx, CTXLEN, sk));
   rc = mld_sign_verify(sig, NULL, 0, ctx, CTXLEN, pk);
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
   if (rc)
   {
     printf("ERROR: empty_message: pure verify\n");
@@ -186,7 +182,6 @@ static int test_sign_empty_message(void)
   CHECK_SIGN_RC(
       mld_sign_signature_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, rnd, sk));
   rc = mld_sign_verify_pre_hash_shake256(sig, NULL, 0, ctx, CTXLEN, pk);
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
   if (rc)
   {
     printf("ERROR: empty_message: pre-hash verify\n");
@@ -231,9 +226,6 @@ static int test_pk_from_sk(void)
 
   rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
-  /* Constant time: Declassify to check result */
-  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
-
   if (rc != MLD_ERR_INVALID_KEY)
   {
     printf("ERROR: pk_from_sk - should fail with corrupted t0 in secret key\n");
@@ -247,9 +239,6 @@ static int test_pk_from_sk(void)
   sk_corrupted[2 * MLDSA_SEEDBYTES + 10] ^= 1;
 
   rc = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
-
-  /* Constant time: Declassify to check result */
-  MLD_CT_TESTING_DECLASSIFY(&rc, sizeof(int));
 
   if (rc != MLD_ERR_INVALID_KEY)
   {
@@ -292,9 +281,6 @@ static int test_wrong_pk(void)
 
   rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
 
-  /* Constant time: Declassify outputs to check them. */
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
-
   if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
     printf("ERROR: wrong_pk: verify\n");
@@ -328,9 +314,6 @@ static int test_wrong_sig(void)
   sig[idx] ^= 1;
 
   rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
-
-  /* Constant time: Declassify outputs to check them. */
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
 
   if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
@@ -366,9 +349,6 @@ static int test_wrong_ctx(void)
   ctx[idx] ^= 1;
 
   rc = mld_sign_verify(sig, m, MLEN, ctx, CTXLEN, pk);
-
-  /* Constant time: Declassify outputs to check them. */
-  MLD_CT_TESTING_DECLASSIFY(rc, sizeof(int));
 
   if (rc != MLD_ERR_INVALID_SIGNATURE)
   {
