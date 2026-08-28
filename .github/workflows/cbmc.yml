@@ -25,7 +25,7 @@ jobs:
     with:
       name: CBMC (ML-DSA-${{ matrix.parameter_set }}${{ matrix.reduce_ram && ', REDUCE_RAM' || '' }})
       ec2_instance_type: c9g.4xlarge
-      ec2_ami: ubuntu-latest (aarch64)
+      ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
       compile_mode: native
       opt: no_opt
