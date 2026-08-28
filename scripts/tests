@@ -219,6 +219,7 @@ class TEST_TYPES(Enum):
     ABICHECK = 24
     SIGN_HOOK = 25
     RESTARTABLE_SIGN = 26
+    CONTEXT_PARAMETER = 27
 
     def is_benchmark(self):
         return self in [TEST_TYPES.BENCH, TEST_TYPES.BENCH_COMPONENTS]
@@ -233,6 +234,7 @@ class TEST_TYPES(Enum):
             TEST_TYPES.BRING_YOUR_OWN_FIPS202_STATIC,
             TEST_TYPES.CUSTOM_BACKEND,
             TEST_TYPES.BASIC,
+            TEST_TYPES.CONTEXT_PARAMETER,
             TEST_TYPES.MONOLITHIC_BUILD,
             TEST_TYPES.MONOLITHIC_BUILD_NATIVE,
             TEST_TYPES.MONOLITHIC_BUILD_MULTILEVEL,
@@ -279,6 +281,8 @@ class TEST_TYPES(Enum):
             return "Example (Custom Backend)"
         if self == TEST_TYPES.BASIC:
             return "Example (mldsa-native as code package)"
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
+            return "Example (context parameter)"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "Example (mldsa-native as code package without randombytes() implementation)"
         if self == TEST_TYPES.BASIC_LOWRAM:
@@ -319,6 +323,8 @@ class TEST_TYPES(Enum):
             return "examples/custom_backend"
         if self == TEST_TYPES.BASIC:
             return "examples/basic"
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
+            return "examples/context_parameter"
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return "examples/basic_deterministic"
         if self == TEST_TYPES.BASIC_LOWRAM:
@@ -361,6 +367,8 @@ class TEST_TYPES(Enum):
         if self == TEST_TYPES.CUSTOM_BACKEND:
             return ""
         if self == TEST_TYPES.BASIC:
+            return ""
+        if self == TEST_TYPES.CONTEXT_PARAMETER:
             return ""
         if self == TEST_TYPES.BASIC_DETERMINISTIC:
             return ""
@@ -1321,6 +1329,7 @@ def cli():
             "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
+            "context_parameter",
             "basic_deterministic",
             "basic_lowram",
             "restartable_sign",
@@ -1438,6 +1447,7 @@ def cli():
             "bring_your_own_fips202_static",
             "custom_backend",
             "basic",
+            "context_parameter",
             "basic_deterministic",
             "basic_lowram",
             "restartable_sign",

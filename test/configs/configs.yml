@@ -418,6 +418,29 @@ configs:
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
 
+  - path: examples/context_parameter/mldsa_native/mldsa_native_config.h
+    description: "Configuration with a context parameter and custom allocation"
+    defines:
+      MLD_CONFIG_NAMESPACE_PREFIX: mldsa
+      MLD_CONFIG_CONTEXT_PARAMETER:
+        content: |
+          #define MLD_CONFIG_CONTEXT_PARAMETER
+          #if !defined(__ASSEMBLER__)
+          #include "../example_context.h"
+          #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_CONTEXT_PARAMETER_TYPE: example_context *
+      MLD_CONFIG_CUSTOM_ALLOC_FREE:
+        content: |
+          #define MLD_CONFIG_CUSTOM_ALLOC_FREE
+          #if !defined(__ASSEMBLER__)
+          #define MLD_CUSTOM_ALLOC(v, T, N, context) \
+            T *v = example_context_malloc((context), sizeof(T) * (N))
+          #define MLD_CUSTOM_FREE(v, T, N, context) \
+            example_context_free((context), (v), sizeof(T) * (N))
+          #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_FILE:
+        comment: "/* No need to set this -- we _are_ already in a custom config */"
+
   - path: examples/basic_lowram/mldsa_native/mldsa_native_config.h
     description: "Configuration for low RAM build of mldsa-native"
     defines:
