@@ -134,7 +134,7 @@ jobs:
   ci-summary:
     name: CI Summary
     if: always()
-    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, isabelle, hol-light ]
+    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, isabelle, zephyr, hol-light ]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any job failed or was cancelled
