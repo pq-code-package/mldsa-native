@@ -271,6 +271,9 @@
 #undef MLDSA_POLYT0_PACKEDBYTES
 #undef MLDSA_POLYT1_PACKEDBYTES
 #undef MLDSA_POLYVECH_PACKEDBYTES
+#undef MLDSA_POLYW1_PACKEDBITS
+#undef MLDSA_POLYW1_PACKEDBITS_32
+#undef MLDSA_POLYW1_PACKEDBITS_88
 #undef MLDSA_POLYW1_PACKEDBYTES
 #undef MLDSA_POLYW1_PACKEDBYTES_32
 #undef MLDSA_POLYW1_PACKEDBYTES_88
@@ -316,6 +319,7 @@
 #undef mld_polyeta_pack
 #undef mld_polyeta_unpack
 #undef mld_polyw1_pack
+#undef mld_polyw1_unpack
 #undef mld_polyz_pack
 #undef mld_polyz_unpack
 /* mldsa/src/polyvec.h */
@@ -487,6 +491,8 @@
 #undef mld_polyt1_unpack
 #undef mld_polyw1_pack_32
 #undef mld_polyw1_pack_88
+#undef mld_polyw1_unpack_32
+#undef mld_polyw1_unpack_88
 /* mldsa/src/randombytes.h */
 #undef MLD_RANDOMBYTES_H
 /* mldsa/src/reduce.h */
