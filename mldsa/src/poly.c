@@ -1057,6 +1057,57 @@ void mld_polyw1_pack_32(uint8_t r[MLDSA_POLYW1_PACKEDBYTES_32],
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_INTERNAL_API
+void mld_polyw1_unpack_88(mld_poly *r,
+                          const uint8_t a[MLDSA_POLYW1_PACKEDBYTES_88])
+{
+  unsigned int i;
+
+  for (i = 0; i < MLDSA_N / 4; i++)
+  __loop__(
+    invariant(i <= MLDSA_N/4)
+    invariant(array_bound(r->coeffs, 0, i*4, 0, 1 << MLDSA_POLYW1_PACKEDBITS_88))
+    decreases(MLDSA_N / 4 - i))
+  {
+    r->coeffs[4 * i + 0] = a[3 * i + 0] & 0x3F;
+    r->coeffs[4 * i + 1] =
+        ((a[3 * i + 0] >> 6) | ((int32_t)a[3 * i + 1] << 2)) & 0x3F;
+    r->coeffs[4 * i + 2] =
+        ((a[3 * i + 1] >> 4) | ((int32_t)a[3 * i + 2] << 4)) & 0x3F;
+    r->coeffs[4 * i + 3] = a[3 * i + 2] >> 2;
+  }
+
+  mld_assert_bound(r->coeffs, MLDSA_N, 0, 1 << MLDSA_POLYW1_PACKEDBITS_88);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_INTERNAL_API
+void mld_polyw1_unpack_32(mld_poly *r,
+                          const uint8_t a[MLDSA_POLYW1_PACKEDBYTES_32])
+{
+  unsigned int i;
+
+  for (i = 0; i < MLDSA_N / 2; i++)
+  __loop__(
+    invariant(i <= MLDSA_N/2)
+    invariant(array_bound(r->coeffs, 0, i*2, 0, 1 << MLDSA_POLYW1_PACKEDBITS_32))
+    decreases(MLDSA_N / 2 - i))
+  {
+    r->coeffs[2 * i + 0] = a[i] & 0x0F;
+    r->coeffs[2 * i + 1] = a[i] >> 4;
+  }
+
+  mld_assert_bound(r->coeffs, MLDSA_N, 0, 1 << MLDSA_POLYW1_PACKEDBITS_32);
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
 #else  /* !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 MLD_EMPTY_CU(mld_poly)
 #endif /* MLD_CONFIG_MULTILEVEL_NO_SHARED */

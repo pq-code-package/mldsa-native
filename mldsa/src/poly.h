@@ -461,4 +461,55 @@ __contract__(
           || MLD_CONFIG_PARAMETER_SET == 87 */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+#define mld_polyw1_unpack_88 MLD_NAMESPACE(polyw1_unpack_88)
+/**
+ * Unpack polynomial w1 packed with 6 bits per coefficient.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/88
+ * (ML-DSA-44). Inverse of mld_polyw1_pack_88.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 18, SimpleBitUnpack] for b = 43.}
+ *
+ * @param[out] r Pointer to output polynomial.
+ * @param[in]  a Byte array with bit-packed polynomial.
+ */
+MLD_INTERNAL_API
+void mld_polyw1_unpack_88(mld_poly *r,
+                          const uint8_t a[MLDSA_POLYW1_PACKEDBYTES_88])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(memory_no_alias(a, MLDSA_POLYW1_PACKEDBYTES_88))
+  assigns(memory_slice(r, sizeof(mld_poly)))
+  ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYW1_PACKEDBITS_88))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+#define mld_polyw1_unpack_32 MLD_NAMESPACE(polyw1_unpack_32)
+/**
+ * Unpack polynomial w1 packed with 4 bits per coefficient.
+ * This is the variant for parameter sets with MLDSA_GAMMA2 = (MLDSA_Q-1)/32
+ * (ML-DSA-65 and ML-DSA-87). Inverse of mld_polyw1_pack_32.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 18, SimpleBitUnpack] for b = 15.}
+ *
+ * @param[out] r Pointer to output polynomial.
+ * @param[in]  a Byte array with bit-packed polynomial.
+ */
+MLD_INTERNAL_API
+void mld_polyw1_unpack_32(mld_poly *r,
+                          const uint8_t a[MLDSA_POLYW1_PACKEDBYTES_32])
+__contract__(
+  requires(memory_no_alias(r, sizeof(mld_poly)))
+  requires(memory_no_alias(a, MLDSA_POLYW1_PACKEDBYTES_32))
+  assigns(memory_slice(r, sizeof(mld_poly)))
+  ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYW1_PACKEDBITS_32))
+);
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
 #endif /* !MLD_POLY_H */
