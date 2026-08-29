@@ -157,10 +157,9 @@ void mld_polyvec_matrix_pointwise_montgomery_row_eager(mld_poly *t_row,
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
-                                                        mld_polymat_eager *mat,
-                                                        const mld_yvec_eager *y,
-                                                        mld_polyvecl *scratch)
+void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(
+    mld_polyveck *w, mld_polymat_eager *mat, const mld_yvec_eager *y,
+    mld_yvec_scratch_eager *scratch)
 {
   unsigned int i;
   *scratch = y->vec;
@@ -231,18 +230,12 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
-void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
-                                                       mld_polymat_lazy *mat,
-                                                       const mld_yvec_lazy *y,
-                                                       mld_polyvecl *scratch)
+void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
+    mld_polyveck *w, mld_polymat_lazy *mat, const mld_yvec_lazy *y,
+    mld_yvec_scratch_lazy *scratch)
 {
   unsigned int k, l;
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
-  /* Only the first poly of the polyvecl scratch is used. The polyvecl type
-   * matches the eager variant for API uniformity; in REDUCE_RAM mode the
-   * polyvecl storage is provided "for free" by the caller's polyveck/polyvecl
-   * union. */
-  mld_poly *y_ntt = &scratch->vec[0];
 
   mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
 
@@ -252,7 +245,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
     assigns(k, l, object_whole(seed_ext),
             memory_slice(w, sizeof(mld_polyveck)),
             memory_slice(mat, sizeof(mld_polymat_lazy)),
-            memory_slice(scratch, sizeof(mld_polyvecl)))
+            memory_slice(scratch, sizeof(mld_yvec_scratch_lazy)))
     invariant(l <= MLDSA_L)
     invariant(l == 0 ||
               forall(k0, 0, MLDSA_K,
@@ -261,8 +254,8 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
     decreases(MLDSA_L - l)
   )
   {
-    mld_yvec_get_poly_lazy(y_ntt, y, l);
-    mld_poly_ntt(y_ntt);
+    mld_yvec_get_poly_lazy(scratch, y, l);
+    mld_poly_ntt(scratch);
     for (k = 0; k < MLDSA_K; k++)
     __loop__(
       assigns(k, object_whole(seed_ext),
@@ -286,12 +279,12 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(mld_polyveck *w,
       if (l == 0)
       {
         mld_polymat_expand_entry(&w->vec[k], seed_ext, 0, (uint8_t)k);
-        mld_poly_pointwise_montgomery(&w->vec[k], y_ntt);
+        mld_poly_pointwise_montgomery(&w->vec[k], scratch);
       }
       else
       {
         mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
-        mld_poly_pointwise_montgomery(&mat->cur, y_ntt);
+        mld_poly_pointwise_montgomery(&mat->cur, scratch);
         mld_poly_add(&w->vec[k], &mat->cur);
       }
     }
