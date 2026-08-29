@@ -732,10 +732,10 @@ __contract__(
   typedef union
   {
     mld_polyveck w1;
-    mld_polyvecl tmp;
+    mld_yvec_scratch tmp;
   } w1tmp_u;
   mld_polyveck *w1;
-  mld_polyvecl *tmp;
+  mld_yvec_scratch *tmp;
 
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(y, mld_yvec, 1, context);

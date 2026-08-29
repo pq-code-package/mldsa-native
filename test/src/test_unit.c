@@ -1235,8 +1235,8 @@ static int test_polyvec_lazy_eager(void)
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   MLD_ALLOC(v, mld_polyvecl, 1, NULL);
 #endif
-  MLD_ALLOC(scratch_eager, mld_polyvecl, 1, NULL);
-  MLD_ALLOC(scratch_lazy, mld_polyvecl, 1, NULL);
+  MLD_ALLOC(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
+  MLD_ALLOC(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
   MLD_ALLOC(w_eager, mld_polyveck, 1, NULL);
   MLD_ALLOC(w_lazy, mld_polyveck, 1, NULL);
 
@@ -1366,8 +1366,8 @@ static int test_polyvec_lazy_eager(void)
 cleanup:
   MLD_FREE(w_lazy, mld_polyveck, 1, NULL);
   MLD_FREE(w_eager, mld_polyveck, 1, NULL);
-  MLD_FREE(scratch_lazy, mld_polyvecl, 1, NULL);
-  MLD_FREE(scratch_eager, mld_polyvecl, 1, NULL);
+  MLD_FREE(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
+  MLD_FREE(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   MLD_FREE(v, mld_polyvecl, 1, NULL);
 #endif

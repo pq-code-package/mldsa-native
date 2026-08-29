@@ -417,6 +417,9 @@
 #undef mld_yvec_init_eager
 #undef mld_yvec_init_lazy
 #undef mld_yvec_lazy
+#undef mld_yvec_scratch
+#undef mld_yvec_scratch_eager
+#undef mld_yvec_scratch_lazy
 /* mldsa/src/rounding.h */
 #undef MLD_2_POW_D
 #undef MLD_ROUNDING_H
