@@ -92,6 +92,14 @@
   author: National Institute of Standards and Technology
   url: https://csrc.nist.gov/projects/cryptographic-module-validation-program/fips-140-3-ig-announcements
 
+- id: DilithiumMemory
+  name: "Dilithium for Memory Constrained Devices"
+  author:
+  - Bos, Joppe W.
+  - Renes, Joost
+  - Sprenkels, Amber
+  url: https://eprint.iacr.org/2022/323
+
 - id: Round3_Spec
   name: "CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1)"
   author:

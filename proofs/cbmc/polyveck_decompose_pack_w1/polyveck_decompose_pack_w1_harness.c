@@ -5,6 +5,8 @@
 
 void harness(void)
 {
-  mld_polyveck *a0, *a1;
-  mld_polyveck_decompose(a1, a0);
+  uint8_t *r;
+  mld_polyveck *v0;
+  mld_poly *scratch;
+  mld_polyveck_decompose_pack_w1(r, v0, scratch);
 }

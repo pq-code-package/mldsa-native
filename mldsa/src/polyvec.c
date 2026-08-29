@@ -365,51 +365,31 @@ uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t bound)
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
-void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
+void mld_polyveck_decompose_pack_w1(
+    uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES], mld_polyveck *v0,
+    mld_poly *scratch)
 {
   unsigned int i;
   mld_assert_bound_2d(v0->vec, MLDSA_K, MLDSA_N, 0, MLDSA_Q);
 
   for (i = 0; i < MLDSA_K; i++)
   __loop__(
-    assigns(i, memory_slice(v0, sizeof(mld_polyveck)), memory_slice(v1, sizeof(mld_polyveck)))
+    assigns(i, memory_slice(v0, sizeof(mld_polyveck)),
+            memory_slice(scratch, sizeof(mld_poly)),
+            memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
     invariant(i <= MLDSA_K)
     invariant(forall(k1, 0, i,
-                     array_bound(v1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
-    invariant(forall(k2, 0, i,
-                     array_abs_bound(v0->vec[k2].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
-    invariant(forall(k3, i, MLDSA_K,
-                     array_bound(v0->vec[k3].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+                     array_abs_bound(v0->vec[k1].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
+    invariant(forall(k2, i, MLDSA_K,
+                     array_bound(v0->vec[k2].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
     decreases(MLDSA_K - i)
   )
   {
-    mld_poly_decompose(&v1->vec[i], &v0->vec[i]);
+    mld_poly_decompose(scratch, &v0->vec[i]);
+    mld_polyw1_pack(&r[i * MLDSA_POLYW1_PACKEDBYTES], scratch);
   }
 
-  mld_assert_bound_2d(v1->vec, MLDSA_K, MLDSA_N, 0,
-                      (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
   mld_assert_abs_bound_2d(v0->vec, MLDSA_K, MLDSA_N, MLDSA_GAMMA2 + 1);
-}
-#endif /* !MLD_CONFIG_NO_SIGN_API */
-
-#if !defined(MLD_CONFIG_NO_SIGN_API)
-MLD_INTERNAL_API
-void mld_polyveck_pack_w1(uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
-                          const mld_polyveck *w1)
-{
-  unsigned int i;
-  mld_assert_bound_2d(w1->vec, MLDSA_K, MLDSA_N, 0,
-                      (MLDSA_Q - 1) / (2 * MLDSA_GAMMA2));
-
-  for (i = 0; i < MLDSA_K; i++)
-  __loop__(
-    assigns(i, memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
-    invariant(i <= MLDSA_K)
-    decreases(MLDSA_K - i)
-  )
-  {
-    mld_polyw1_pack(&r[i * MLDSA_POLYW1_PACKEDBYTES], &w1->vec[i]);
-  }
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 

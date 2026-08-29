@@ -60,7 +60,7 @@ FUNCTION_NAME = sign_verify_internal
 ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
 CBMC_OBJECT_BITS = 12
 else
-CBMC_OBJECT_BITS = 11
+CBMC_OBJECT_BITS = 10
 endif
 
 # If you require access to a file-local ("static") function or object to conduct

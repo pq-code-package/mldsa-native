@@ -266,60 +266,49 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-#define mld_polyveck_decompose MLD_NAMESPACE_KL(polyveck_decompose)
+#define mld_polyveck_decompose_pack_w1 \
+  MLD_NAMESPACE_KL(polyveck_decompose_pack_w1)
 /**
  * For all coefficients a of polynomials in vector of length MLDSA_K, compute
  * high and low bits a0, a1 such a mod^+ MLDSA_Q = a1*ALPHA + a0 with
  * -ALPHA/2 < a0 <= ALPHA/2 except a1 = (MLDSA_Q-1)/ALPHA where we set
  * a1 = 0 and -ALPHA/2 <= a0 = a mod MLDSA_Q - MLDSA_Q < 0. Assumes
- * coefficients to be standard representatives.
+ * coefficients to be standard representatives. The low bits replace the input
+ * vector, the high bits are bit-packed into r.
  *
- * @reference{The reference implementation has the input polynomial as a
- * separate argument that may be aliased with either of the outputs. Removing
- * the aliasing eases CBMC proofs.}
+ * Decomposing and packing are fused so that the high bits are never held as a
+ * vector of polynomials, saving MLDSA_K * sizeof(mld_poly) bytes. During
+ * MakeHint, a single entry of w1 is instead unpacked on demand.
  *
- * @param[out]    v1 Pointer to output vector of polynomials with
- *                   coefficients a1.
- * @param[in,out] v0 Pointer to input/output vector of polynomials. Output
- *                   polynomial has coefficients a0.
+ * @spec{Combines @[FIPS204, Algorithm 36, Decompose] with
+ * @[FIPS204, Algorithm 28, w1Encode].}
+ *
+ * @reference{The reference implementation has the Decompose input as a separate
+ * argument that may be aliased with either of the outputs. Removing the
+ * aliasing eases CBMC proofs.}
+ *
+ * @param[out]    r       Pointer to output byte array with at least
+ *                        MLDSA_K * MLDSA_POLYW1_PACKEDBYTES bytes.
+ * @param[in,out] v0      Pointer to input/output vector of polynomials. Output
+ *                        polynomials have coefficients a0.
+ * @param[out]    scratch Scratch polynomial holding the high bits of the
+ *                        polynomial currently being packed.
  */
 MLD_INTERNAL_API
-void mld_polyveck_decompose(mld_polyveck *v1, mld_polyveck *v0)
-__contract__(
-  requires(memory_no_alias(v1,  sizeof(mld_polyveck)))
-  requires(memory_no_alias(v0, sizeof(mld_polyveck)))
-  requires(forall(k0, 0, MLDSA_K,
-    array_bound(v0->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
-  assigns(memory_slice(v1, sizeof(mld_polyveck)))
-  assigns(memory_slice(v0, sizeof(mld_polyveck)))
-  ensures(forall(k1, 0, MLDSA_K,
-                 array_bound(v1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
-  ensures(forall(k2, 0, MLDSA_K,
-                 array_abs_bound(v0->vec[k2].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
-);
-#endif /* !MLD_CONFIG_NO_SIGN_API */
-
-#if !defined(MLD_CONFIG_NO_SIGN_API)
-#define mld_polyveck_pack_w1 MLD_NAMESPACE_KL(polyveck_pack_w1)
-/**
- * Bit-pack polynomial vector w1 with coefficients in [0, 15] or [0, 43]. Input
- * coefficients are assumed to be standard representatives.
- *
- * @spec{Implements @[FIPS204, Algorithm 28, w1Encode].}
- *
- * @param[out] r  Pointer to output byte array with at least
- *                MLDSA_K * MLDSA_POLYW1_PACKEDBYTES bytes.
- * @param[in]  w1 Pointer to input polynomial vector.
- */
-MLD_INTERNAL_API
-void mld_polyveck_pack_w1(uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
-                          const mld_polyveck *w1)
+void mld_polyveck_decompose_pack_w1(
+    uint8_t r[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES], mld_polyveck *v0,
+    mld_poly *scratch)
 __contract__(
   requires(memory_no_alias(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
-  requires(memory_no_alias(w1, sizeof(mld_polyveck)))
-  requires(forall(k1, 0, MLDSA_K,
-    array_bound(w1->vec[k1].coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2))))
+  requires(memory_no_alias(v0, sizeof(mld_polyveck)))
+  requires(memory_no_alias(scratch, sizeof(mld_poly)))
+  requires(forall(k0, 0, MLDSA_K,
+    array_bound(v0->vec[k0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
   assigns(memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
+  assigns(memory_slice(v0, sizeof(mld_polyveck)))
+  assigns(memory_slice(scratch, sizeof(mld_poly)))
+  ensures(forall(k1, 0, MLDSA_K,
+    array_abs_bound(v0->vec[k1].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 

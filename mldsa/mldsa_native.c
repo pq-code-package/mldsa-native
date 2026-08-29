@@ -327,11 +327,10 @@
 #undef mld_polyveck
 #undef mld_polyveck_caddq
 #undef mld_polyveck_chknorm
-#undef mld_polyveck_decompose
+#undef mld_polyveck_decompose_pack_w1
 #undef mld_polyveck_invntt_tomont
 #undef mld_polyveck_ntt
 #undef mld_polyveck_pack_eta
-#undef mld_polyveck_pack_w1
 #undef mld_polyveck_reduce
 #undef mld_polyveck_unpack_eta
 #undef mld_polyvecl

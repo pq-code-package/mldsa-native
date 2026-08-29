@@ -64,6 +64,17 @@ source code and documentation.
 * Referenced from:
   - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
 
+### `DilithiumMemory`
+
+* Dilithium for Memory Constrained Devices
+* Author(s):
+  - Joppe W. Bos
+  - Joost Renes
+  - Amber Sprenkels
+* URL: https://eprint.iacr.org/2022/323
+* Referenced from:
+  - [mldsa/src/sign.c](mldsa/src/sign.c)
+
 ### `FIPS140_3_IG`
 
 * Implementation Guidance for FIPS 140-3 and the Cryptographic Module Validation Program
