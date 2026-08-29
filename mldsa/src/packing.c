@@ -74,7 +74,8 @@ void mld_pack_sig_c(uint8_t sig[MLDSA_CRYPTO_BYTES],
 
 MLD_INTERNAL_API
 int mld_pack_sig_h(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_polyveck *w0,
-                   const mld_polyveck *w1)
+                   const uint8_t w1_packed[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
+                   mld_poly *scratch)
 {
   unsigned int j, k, n;
 
@@ -100,11 +101,14 @@ int mld_pack_sig_h(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_polyveck *w0,
    * before the call), so a data-dependent early return is fine. */
   for (k = 0; k < MLDSA_K; k++)
   __loop__(
-    assigns(k, j, n, memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES))
+    assigns(k, j, n, memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES),
+            memory_slice(scratch, sizeof(mld_poly)))
     invariant(k <= MLDSA_K && n <= MLDSA_OMEGA)
     decreases(MLDSA_K - k)
   )
   {
+    mld_polyw1_unpack(scratch, w1_packed + k * MLDSA_POLYW1_PACKEDBYTES);
+
     for (j = 0; j < MLDSA_N; j++)
     __loop__(
       assigns(j, n, memory_slice(sig_h, MLDSA_POLYVECH_PACKEDBYTES))
@@ -113,7 +117,7 @@ int mld_pack_sig_h(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_polyveck *w0,
     )
     {
       const unsigned int hint_bit =
-          mld_make_hint(w0->vec[k].coeffs[j], w1->vec[k].coeffs[j]);
+          mld_make_hint(w0->vec[k].coeffs[j], scratch->coeffs[j]);
       if (hint_bit)
       {
         if (n == MLDSA_OMEGA)

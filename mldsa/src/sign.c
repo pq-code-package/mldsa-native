@@ -6,6 +6,11 @@
 /* References
  * ==========
  *
+ * - [DilithiumMemory]
+ *   Dilithium for Memory Constrained Devices
+ *   Bos, Renes, Sprenkels
+ *   https://eprint.iacr.org/2022/323
+ *
  * - [FIPS140_3_IG]
  *   Implementation Guidance for FIPS 140-3 and the Cryptographic Module
  *   Validation Program
@@ -731,28 +736,28 @@ __contract__(
 
   typedef union
   {
-    mld_polyveck w1;
-    mld_yvec_scratch tmp;
-  } w1tmp_u;
-  mld_polyveck *w1;
-  mld_yvec_scratch *tmp;
+    mld_yvec_scratch y;
+    mld_poly w;
+  } scratch_u;
+  mld_yvec_scratch *scratch_yvec;
+  mld_poly *scratch_w;
 
   MLD_ALLOC(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
   MLD_ALLOC(y, mld_yvec, 1, context);
-  MLD_ALLOC(z, mld_poly, 1, context);
-  MLD_ALLOC(w1tmp, w1tmp_u, 1, context);
+  MLD_ALLOC(scratch, scratch_u, 1, context);
+  MLD_ALLOC(w1_packed, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
   MLD_ALLOC(w0, mld_polyveck, 1, context);
   MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(t, mld_poly, 1, context);
 
-  if (challenge_bytes == NULL || y == NULL || z == NULL || w1tmp == NULL ||
-      w0 == NULL || cp == NULL || t == NULL)
+  if (challenge_bytes == NULL || y == NULL || scratch == NULL ||
+      w1_packed == NULL || w0 == NULL || cp == NULL || t == NULL)
   {
     ret = MLD_ERR_OUT_OF_MEMORY;
     goto cleanup;
   }
-  w1 = &w1tmp->w1;
-  tmp = &w1tmp->tmp;
+  scratch_yvec = &scratch->y;
+  scratch_w = &scratch->w;
 
   /* @[FIPS204, Algorithm 7, line 11] y <- ExpandMask(rhoprime, kappa). */
   mld_yvec_init(y, rhoprime, kappa);
@@ -761,20 +766,19 @@ __contract__(
    * performs the whole line: it NTTs y, accumulates the pointwise product with
    * A_hat, and applies the inverse NTT. In REDUCE_RAM mode the y sampling is
    * fused into the same pass. */
-  mld_polyvec_matrix_pointwise_montgomery_yvec(w0, mat, y, tmp);
+  mld_polyvec_matrix_pointwise_montgomery_yvec(w0, mat, y, scratch_yvec);
 
   /* @[FIPS204, Algorithm 7, line 13] w1 <- HighBits(w), here together with the
-   * low part: Decompose yields w = 2*GAMMA2*w1 + w0, keeping both w1 and w0
-   * (w0 is reused below in the line-21/26 alternative, see further down). */
+   * low part: Decompose yields w = 2*GAMMA2*w1 + w0. w0 is kept in full for
+   * the line-21/26 alternative below; w1 is kept only in its w1Encode form,
+   * from which the hint computation decodes single rows on demand. Keeping w1
+   * packed for the whole signing attempt is also done in @[DilithiumMemory]. */
   mld_polyveck_caddq(w0);
-  mld_polyveck_decompose(w1, w0);
+  mld_polyveck_decompose_pack_w1(w1_packed, w0, scratch_w);
 
-  /* @[FIPS204, Algorithm 7, line 15] ctilde <- H(mu || w1Encode(w1), lambda/4).
-   * w1Encode(w1) is packed into the w1 region of sig (mld_polyveck_pack_w1),
-   * then absorbed by H together with mu. */
-  mld_polyveck_pack_w1(sig, w1);
-
-  mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, sig,
+  /* @[FIPS204, Algorithm 7, line 15] ctilde <- H(mu || w1Encode(w1),
+   * lambda/4). */
+  mld_H(challenge_bytes, MLDSA_CTILDEBYTES, mu, MLDSA_CRHBYTES, w1_packed,
         MLDSA_K * MLDSA_POLYW1_PACKEDBYTES, NULL, 0);
   /* Constant time: Leaking challenge_bytes does not reveal any information
    * about the secret key as H() is modelled as random oracle.
@@ -790,7 +794,7 @@ __contract__(
    * z <- y + cs1, followed by the line-23 norm check ||z||_inf >= GAMMA1 -
    * BETA. mld_compute_pack_z fuses all three per polynomial and, on success,
    * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z. */
-  ret = mld_compute_pack_z(sig, cp, s1hat, y, t, z);
+  ret = mld_compute_pack_z(sig, cp, s1hat, y, t, scratch_w);
   if (ret != 0)
   {
     goto cleanup;
@@ -803,9 +807,9 @@ __contract__(
    * computation of h may instead be implemented "as described in Section 5.1 of
    * [6]", and that reference is @[Round3_Spec, Section 5.1].
    *
-   * The loop below builds w0 - cs2 + ct0 in place in w0; w1 is unmodified, and
-   * is HighBits(w) from line 13. Those are the inputs to the streamlined
-   * computation of MakeHint explained below.
+   * The loop below builds w0 - cs2 + ct0 in place in w0; w1_packed is
+   * unmodified, and holds w1Encode(HighBits(w)) from line 13. Those are the
+   * inputs to the streamlined computation of MakeHint explained below.
    *
    * Low-bits norm check:
    *   @[FIPS204, Algorithm 7, line 21] computes r0 = LowBits(w - cs2) and line
@@ -825,16 +829,16 @@ __contract__(
    *   (-GAMMA2, GAMMA2], or equals -GAMMA2 while the matching w1 coefficient is
    *   zero (the Decompose border case), and is set otherwise. This equivalence
    *   is precisely what mld_pack_sig_h -> mld_make_hint compute from w0
-   *   (= w0 - cs2 + ct0) and w1. The line-28 ||ct0||_inf >= GAMMA2 check is the
-   *   mld_poly_chknorm(z, GAMMA2) call on ct0 below; the weight bound is
-   *   enforced by mld_pack_sig_h.
+   *   (= w0 - cs2 + ct0) and the w1 row decoded from w1_packed. The line-28
+   *   ||ct0||_inf >= GAMMA2 check is the mld_poly_chknorm(scratch_w, GAMMA2)
+   *   call on ct0 below; the weight bound is enforced by mld_pack_sig_h.
    *
    * Building w0 per-component and checking norms incrementally also avoids
    * allocating a full polyveck for h. */
   for (k = 0; k < MLDSA_K; k++)
   __loop__(
     assigns(k,
-            object_whole(z),
+            object_whole(scratch_w),
             object_whole(w0))
     invariant(k <= MLDSA_K)
     invariant(forall(k0, k, MLDSA_K,
@@ -844,11 +848,11 @@ __contract__(
   {
     /* @[FIPS204, Algorithm 7, line 19] cs2[k] <- invNTT(c_hat o s2_hat)[k],
      * then subtract from w0[k] to form (w0 - cs2)[k]. */
-    mld_sk_s2hat_get_poly(z, s2hat, k);
-    mld_poly_pointwise_montgomery(z, cp);
-    mld_poly_invntt_tomont(z);
+    mld_sk_s2hat_get_poly(scratch_w, s2hat, k);
+    mld_poly_pointwise_montgomery(scratch_w, cp);
+    mld_poly_invntt_tomont(scratch_w);
 
-    mld_poly_sub(&w0->vec[k], z);
+    mld_poly_sub(&w0->vec[k], scratch_w);
     mld_poly_reduce(&w0->vec[k]);
 
     /* Low-bits norm check (see block comment above): the line-23 check on
@@ -863,14 +867,14 @@ __contract__(
     }
 
     /* @[FIPS204, Algorithm 7, line 25] ct0[k] <- invNTT(c_hat o t0_hat)[k]. */
-    mld_sk_t0hat_get_poly(z, t0hat, k);
-    mld_poly_pointwise_montgomery(z, cp);
-    mld_poly_invntt_tomont(z);
-    mld_poly_reduce(z);
+    mld_sk_t0hat_get_poly(scratch_w, t0hat, k);
+    mld_poly_pointwise_montgomery(scratch_w, cp);
+    mld_poly_invntt_tomont(scratch_w);
+    mld_poly_reduce(scratch_w);
 
     /* @[FIPS204, Algorithm 7, line 28] reject when ||ct0||_inf >= GAMMA2 (the
      * second part, the OMEGA weight bound, is enforced by mld_pack_sig_h). */
-    h_invalid = mld_poly_chknorm(z, MLDSA_GAMMA2);
+    h_invalid = mld_poly_chknorm(scratch_w, MLDSA_GAMMA2);
     /* Constant time: h_invalid may be leaked - see comment for z_invalid. */
     MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
     if (h_invalid)
@@ -881,7 +885,7 @@ __contract__(
 
     /* Add ct0[k] to (w0 - cs2)[k], leaving (w0 - cs2 + ct0)[k] in w0[k] -- the
      * MakeHint input prepared for mld_pack_sig_h (see block comment above). */
-    mld_poly_add(&w0->vec[k], z);
+    mld_poly_add(&w0->vec[k], scratch_w);
   }
 
   /* Constant time: At this point all norm checks have passed and we, hence,
@@ -895,7 +899,7 @@ __contract__(
    * (see @[FIPS204, Section 6.1]).
    */
   MLD_CT_TESTING_DECLASSIFY(w0, sizeof(*w0));
-  MLD_CT_TESTING_DECLASSIFY(w1, sizeof(*w1));
+  MLD_CT_TESTING_DECLASSIFY(w1_packed, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES);
 
   /* @[FIPS204, Algorithm 7, line 33] sigEncode(ctilde, z mod+/- q, h) is split
    * across three calls: z was already packed by mld_compute_pack_z, this call
@@ -904,10 +908,11 @@ __contract__(
 
   /* @[FIPS204, Algorithm 7, line 26] h <- MakeHint(-ct0, w - cs2 + ct0),
    * computed from (w0 = w0 - cs2 + ct0, w1) as described in the block comment
-   * above, and packed as the h component of the line-33 sigEncode. Returns
-   * MLD_ERR_FAIL if h would exceed OMEGA nonzero coefficients (the remaining
-   * part of the line-28 check), in which case we reject. */
-  ret = mld_pack_sig_h(sig, w0, w1);
+   * above, and packed as the h component of the line-33 sigEncode. w1 is
+   * recovered from its encoding one polynomial at a time into scratch_w.
+   * Returns MLD_ERR_FAIL if h would exceed OMEGA nonzero coefficients (the
+   * remaining part of the line-28 check), in which case we reject. */
+  ret = mld_pack_sig_h(sig, w0, w1_packed, scratch_w);
   if (ret != 0)
   {
     goto cleanup;
@@ -923,8 +928,8 @@ cleanup:
   MLD_FREE(t, mld_poly, 1, context);
   MLD_FREE(cp, mld_poly, 1, context);
   MLD_FREE(w0, mld_polyveck, 1, context);
-  MLD_FREE(w1tmp, w1tmp_u, 1, context);
-  MLD_FREE(z, mld_poly, 1, context);
+  MLD_FREE(w1_packed, uint8_t, (MLDSA_K * MLDSA_POLYW1_PACKEDBYTES), context);
+  MLD_FREE(scratch, scratch_u, 1, context);
   MLD_FREE(y, mld_yvec, 1, context);
   MLD_FREE(challenge_bytes, uint8_t, MLDSA_CTILDEBYTES, context);
 

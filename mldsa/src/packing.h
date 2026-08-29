@@ -107,9 +107,12 @@ __contract__(
  * MakeHint valid only for the values arising during signing; see the block
  * comment in mld_attempt_signature_generation (sign.c).}
  *
- * @param[in,out] sig Byte array containing signature.
- * @param[in]     w0  Pointer to low part of input vector.
- * @param[in]     w1  Pointer to high part of input vector.
+ * @param[in,out] sig       Byte array containing signature.
+ * @param[in]     w0        Pointer to low part of input vector.
+ * @param[in]     w1_packed Bit-packed high part of input vector, as produced
+ *                          by mld_polyw1_pack.
+ * @param[out]    scratch   Scratch polynomial, used to unpack one row of the
+ *                          high part at a time.
  *
  * @retval 0            Success.
  * @retval MLD_ERR_FAIL The total number of hints exceeds MLDSA_OMEGA. In this
@@ -120,12 +123,15 @@ __contract__(
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 int mld_pack_sig_h(uint8_t sig[MLDSA_CRYPTO_BYTES], const mld_polyveck *w0,
-                   const mld_polyveck *w1)
+                   const uint8_t w1_packed[MLDSA_K * MLDSA_POLYW1_PACKEDBYTES],
+                   mld_poly *scratch)
 __contract__(
   requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
   requires(memory_no_alias(w0, sizeof(mld_polyveck)))
-  requires(memory_no_alias(w1, sizeof(mld_polyveck)))
+  requires(memory_no_alias(w1_packed, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
+  requires(memory_no_alias(scratch, sizeof(mld_poly)))
   assigns(memory_slice(sig + MLDSA_SIG_H_OFFSET, MLDSA_POLYVECH_PACKEDBYTES))
+  assigns(memory_slice(scratch, sizeof(mld_poly)))
   ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
 );
 
