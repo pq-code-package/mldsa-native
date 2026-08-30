@@ -17,11 +17,15 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 # Check if we need to use a wrapper for execution (e.g. QEMU)
 exec_prefix = os.environ.get("EXEC_WRAPPER", "")
 exec_prefix = exec_prefix.split(" ") if exec_prefix != "" else []
+
+# Number of test cases to run concurrently; set from --jobs.
+jobs = 1
 
 
 def download_file(url, dest, token):
@@ -214,8 +218,6 @@ def get_acvp_binary(tg):
 
 
 def run_keyGen_test(tg, tc):
-    info(f"Running keyGen test case {tc['tcId']} ... ", end="")
-
     results = {"tcId": tc["tcId"]}
     acvp_bin = get_acvp_binary(tg)
     assert tg["testType"] == "AFT"
@@ -234,7 +236,6 @@ def run_keyGen_test(tg, tc):
     for line in result.stdout.splitlines():
         (k, v) = line.split("=")
         results[k] = v
-    info("done")
     return results
 
 
@@ -330,7 +331,6 @@ def filter_test_cases(acvp_data, should_drop):
 
 
 def run_sigGen_test(tg, tc):
-    info(f"Running sigGen test case {tc['tcId']} ... ", end="")
     results = {"tcId": tc["tcId"]}
     acvp_bin = get_acvp_binary(tg)
 
@@ -421,12 +421,10 @@ def run_sigGen_test(tg, tc):
     for line in result.stdout.splitlines():
         (k, v) = line.split("=")
         results[k] = v
-    info("done")
     return results
 
 
 def run_sigVer_test(tg, tc):
-    info(f"Running sigVer test case {tc['tcId']} ... ", end="")
     results = {"tcId": tc["tcId"]}
     acvp_bin = get_acvp_binary(tg)
 
@@ -490,8 +488,14 @@ def run_sigVer_test(tg, tc):
     result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
     # Extract results
     results["testPassed"] = result.returncode == 0
-    info("done")
     return results
+
+
+RUN_TEST = {
+    "keyGen": run_keyGen_test,
+    "sigGen": run_sigGen_test,
+    "sigVer": run_sigVer_test,
+}
 
 
 def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output):
@@ -524,21 +528,28 @@ def runTestSingle(promptName, prompt, expectedResultName, expectedResult, output
     # copy top level fields into the results
     results = prompt.copy()
 
+    mode = prompt["mode"]
     results["testGroups"] = []
+    work = []
     for tg in prompt["testGroups"]:
         tgResult = {
             "tgId": tg["tgId"],
             "tests": [],
         }
         results["testGroups"].append(tgResult)
-        for tc in tg["tests"]:
-            if prompt["mode"] == "keyGen":
-                result = run_keyGen_test(tg, tc)
-            elif prompt["mode"] == "sigGen":
-                result = run_sigGen_test(tg, tc)
-            elif prompt["mode"] == "sigVer":
-                result = run_sigVer_test(tg, tc)
-            tgResult["tests"].append(result)
+        work += [(tgResult, tg, tc) for tc in tg["tests"]]
+
+    # Collect in prompt order, not completion order: the comparison is strict.
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        futures = [pool.submit(RUN_TEST[mode], tg, tc) for _, tg, tc in work]
+        try:
+            for (tgResult, _, tc), future in zip(work, futures):
+                tgResult["tests"].append(future.result())
+                info(f"Running {mode} test case {tc['tcId']} ... done")
+        except BaseException:
+            for future in futures:
+                future.cancel()
+            raise
 
     # In case the testvectors are from the ACVTS server, it is expected
     # that the acvVersion is included in the output results.
@@ -572,9 +583,14 @@ def runTest(data, output):
     # if output is defined we expect only one input
     assert output is None or len(data) == 1
 
+    cases = sum(
+        len(tg["tests"]) for _, p, _, _ in data for tg in unwrap_acvts(p)["testGroups"]
+    )
+    info(f"Running {cases} test case(s) with {jobs} job(s)")
+    start = time.time()
     for promptName, prompt, expectedResultName, expectedResult in data:
         runTestSingle(promptName, prompt, expectedResultName, expectedResult, output)
-    info("ALL GOOD!")
+    info(f"ALL GOOD! ({cases} cases in {time.time() - start:.1f}s)")
 
 
 def test(
@@ -660,12 +676,20 @@ parser.add_argument(
     help="Auto-detect supported modes by running acvp_mldsa44 --info (default: True)",
 )
 parser.add_argument(
+    "-j",
+    "--jobs",
+    type=int,
+    default=1,
+    help="Number of test cases to run concurrently (default: 1)",
+)
+parser.add_argument(
     "--skip-unsupported",
     action="store_true",
     help="Skip test cases whose hash algorithm is unavailable in this Python's "
     "hashlib (e.g. SHA2-512/224, SHA2-512/256) instead of failing",
 )
 args = parser.parse_args()
+jobs = args.jobs
 
 # Determine supported modes
 if args.auto_detect and args.prompt is None:
