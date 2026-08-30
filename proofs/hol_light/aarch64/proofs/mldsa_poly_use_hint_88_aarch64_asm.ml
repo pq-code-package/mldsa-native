@@ -100,7 +100,7 @@ let poly_use_hint_88_aarch64_asm_mc = define_assert_from_elf
 ];;
 (*** BYTECODE END ***)
 
-let POLY_USE_HINT_88_AARCH64_ASM_EXEC = ARM_MK_EXEC_RULE poly_use_hint_88_aarch64_asm_mc;;
+let MLDSA_POLY_USE_HINT_88_EXEC = ARM_MK_EXEC_RULE poly_use_hint_88_aarch64_asm_mc;;
 
 (* Per-element word function matching the assembly computation *)
 let mldsa_use_hint_88_asm = new_definition
@@ -776,7 +776,7 @@ let MLDSA_USE_HINT_88_EQUIV = prove(
    on val(x i) / val(y i) appear as antecedents inside the postcondition
    (decompose-style): the assembly executes regardless of input ranges,
    and only the FIPS-equivalence + output bound require the input bounds. *)
-let POLY_USE_HINT_88_AARCH64_ASM_CORRECT = prove
+let MLDSA_POLY_USE_HINT_88_CORRECT = prove
  (`!a h x y pc.
     nonoverlapping (word pc, LENGTH poly_use_hint_88_aarch64_asm_mc) (a, 1024) /\
     nonoverlapping (a, 1024) (h, 1024)
@@ -805,7 +805,7 @@ let POLY_USE_HINT_88_AARCH64_ASM_CORRECT = prove
      `x:num->int32`; `y:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL;
-              fst POLY_USE_HINT_88_AARCH64_ASM_EXEC] THEN
+              fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
   CONV_TAC(RATOR_CONV(LAND_CONV(ONCE_DEPTH_CONV EXPAND_CASES_CONV))) THEN
@@ -824,7 +824,7 @@ let POLY_USE_HINT_88_AARCH64_ASM_CORRECT = prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
   (* Simulate 1006 instructions (the assembly is bound-independent). *)
-  MAP_EVERY (fun n -> ARM_STEPS_TAC POLY_USE_HINT_88_AARCH64_ASM_EXEC [n] THEN
+  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[])
         (1--1006) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
@@ -893,11 +893,11 @@ let POLY_USE_HINT_88_AARCH64_ASM_CORRECT = prove
 (* Public subroutine correctness (FIPS 204-aligned)                          *)
 (* ========================================================================= *)
 
-(* Subroutine form: derives directly from POLY_USE_HINT_88_AARCH64_ASM_CORRECT
+(* Subroutine form: derives directly from MLDSA_POLY_USE_HINT_88_CORRECT
    by adding the X30 -> RET return wiring via ARM_ADD_RETURN_NOSTACK_TAC. The
    bound antecedents inside the postcondition pass through unchanged
    (decompose pattern). *)
-let POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_CORRECT = prove
+let MLDSA_POLY_USE_HINT_88_SUBROUTINE_CORRECT = prove
  (`!a h x y pc returnaddress.
     nonoverlapping (word pc, LENGTH poly_use_hint_88_aarch64_asm_mc) (a, 1024) /\
     nonoverlapping (a, 1024) (h, 1024)
@@ -921,12 +921,12 @@ let POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_CORRECT = prove
                         (word_add a (word(4 * i)))) s) < 44)))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(a, 1024)])`,
-  REWRITE_TAC[fst POLY_USE_HINT_88_AARCH64_ASM_EXEC] THEN
+  REWRITE_TAC[fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
   CONV_TAC NUM_REDUCE_CONV THEN
-  ARM_ADD_RETURN_NOSTACK_TAC POLY_USE_HINT_88_AARCH64_ASM_EXEC
+  ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POLY_USE_HINT_88_EXEC
     (CONV_RULE(ONCE_DEPTH_CONV NUM_REDUCE_CONV)
-      (REWRITE_RULE[fst POLY_USE_HINT_88_AARCH64_ASM_EXEC]
-         POLY_USE_HINT_88_AARCH64_ASM_CORRECT)));;
+      (REWRITE_RULE[fst MLDSA_POLY_USE_HINT_88_EXEC]
+         MLDSA_POLY_USE_HINT_88_CORRECT)));;
 
 
 (* ========================================================================= *)
@@ -940,10 +940,10 @@ needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "poly_use_hint_88_aarch64_asm" subroutine_signatures)
-    POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_CORRECT
-    POLY_USE_HINT_88_AARCH64_ASM_EXEC;;
+    MLDSA_POLY_USE_HINT_88_SUBROUTINE_CORRECT
+    MLDSA_POLY_USE_HINT_88_EXEC;;
 
-let POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_USE_HINT_88_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a h pc returnaddress.
            nonoverlapping (word pc,LENGTH poly_use_hint_88_aarch64_asm_mc) (a,1024) /\
@@ -965,4 +965,4 @@ let POLY_USE_HINT_88_AARCH64_ASM_SUBROUTINE_SAFE = time prove
                          [a,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_USE_HINT_88_AARCH64_ASM_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_USE_HINT_88_EXEC);;

@@ -252,7 +252,7 @@ let mldsa_caddq_mc = define_assert_from_elf "mldsa_caddq_mc" "x86_64/mldsa/mldsa
 (*** BYTECODE END ***)
 
 let mldsa_caddq_tmc = define_trimmed "mldsa_caddq_tmc" mldsa_caddq_mc;;
-let MLDSA_CADDQ_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_caddq_tmc;;
+let MLDSA_POLY_CADDQ_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_caddq_tmc;;
 
 (* ------------------------------------------------------------------------- *)
 (* Functional specification of mldsa_caddq                                   *)
@@ -274,7 +274,7 @@ let mldsa_caddq_direct = prove
 (* Core correctness theorem                                                  *)
 (* ------------------------------------------------------------------------- *)
 
-let MLDSA_CADDQ_CORRECT = time prove
+let MLDSA_POLY_CADDQ_CORRECT = time prove
  (`!a x pc.
         aligned 32 a /\
         nonoverlapping (word pc,876) (a, 1024)
@@ -302,11 +302,11 @@ let MLDSA_CADDQ_CORRECT = time prove
               MAYCHANGE [memory :> bytes(a,1024)])`,
 
   MAP_EVERY X_GEN_TAC [`a:int64`; `x:num->int32`; `pc:num`] THEN
-  REWRITE_TAC[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst MLDSA_CADDQ_TMC_EXEC] THEN
+  REWRITE_TAC[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst MLDSA_POLY_CADDQ_TMC_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   CONV_TAC(RATOR_CONV(LAND_CONV(ONCE_DEPTH_CONV EXPAND_CASES_CONV))) THEN
   CONV_TAC NUM_REDUCE_CONV THEN REPEAT STRIP_TAC THEN
-  REWRITE_TAC [SOME_FLAGS; fst MLDSA_CADDQ_TMC_EXEC] THEN
+  REWRITE_TAC [SOME_FLAGS; fst MLDSA_POLY_CADDQ_TMC_EXEC] THEN
   GHOST_INTRO_TAC `init_ymm0:int256` `read YMM0` THEN
   GHOST_INTRO_TAC `init_ymm1:int256` `read YMM1` THEN
   ENSURES_INIT_TAC "s0" THEN
@@ -318,7 +318,7 @@ let MLDSA_CADDQ_CORRECT = time prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
   MAP_EVERY (fun n ->
-      X86_STEPS_TAC MLDSA_CADDQ_TMC_EXEC [n] THEN
+      X86_STEPS_TAC MLDSA_POLY_CADDQ_TMC_EXEC [n] THEN
       SIMD_SIMPLIFY_TAC[mldsa_caddq])
              (1--132) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
@@ -345,7 +345,7 @@ let MLDSA_CADDQ_CORRECT = time prove
 (* in mldsa/src/native/x86_64/src/arith_native_x86_64.h                     *)
 (* ------------------------------------------------------------------------- *)
 
-let MLDSA_CADDQ_NOIBT_SUBROUTINE_CORRECT = prove
+let MLDSA_POLY_CADDQ_NOIBT_SUBROUTINE_CORRECT = prove
  (`!a x pc stackpointer returnaddress.
         aligned 32 a /\
         nonoverlapping (word pc,LENGTH mldsa_caddq_tmc) (a,1024) /\
@@ -373,9 +373,9 @@ let MLDSA_CADDQ_NOIBT_SUBROUTINE_CORRECT = prove
                                  (word_add a (word(4 * i)))) s) < &8380417))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc MLDSA_CADDQ_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc MLDSA_POLY_CADDQ_CORRECT);;
 
-let MLDSA_CADDQ_SUBROUTINE_CORRECT = prove
+let MLDSA_POLY_CADDQ_SUBROUTINE_CORRECT = prove
  (`!a x pc stackpointer returnaddress.
         aligned 32 a /\
         nonoverlapping (word pc,LENGTH mldsa_caddq_mc) (a,1024) /\
@@ -403,7 +403,7 @@ let MLDSA_CADDQ_SUBROUTINE_CORRECT = prove
                                  (word_add a (word(4 * i)))) s) < &8380417))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_CADDQ_NOIBT_SUBROUTINE_CORRECT));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POLY_CADDQ_NOIBT_SUBROUTINE_CORRECT));;
 
 (* ========================================================================= *)
 (* Constant-time and memory safety proof.                                    *)
@@ -415,14 +415,14 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_caddq_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_CADDQ_CORRECT)
-    MLDSA_CADDQ_TMC_EXEC;;
+    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_CADDQ_CORRECT)
+    MLDSA_POLY_CADDQ_TMC_EXEC;;
 
-let MLDSA_CADDQ_SAFE = time prove
+let MLDSA_POLY_CADDQ_SAFE = time prove
  (full_spec,
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_CADDQ_TMC_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_CADDQ_TMC_EXEC);;
 
-let MLDSA_CADDQ_NOIBT_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_CADDQ_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a pc stackpointer returnaddress.
           aligned 32 a /\
@@ -444,10 +444,10 @@ let MLDSA_CADDQ_NOIBT_SUBROUTINE_SAFE = time prove
                          memaccess_inbounds e2 [a,1024; stackpointer,8]
                                                [a,1024; stackpointer,8]))
                (\s s'. true)`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc MLDSA_CADDQ_SAFE THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc MLDSA_POLY_CADDQ_SAFE THEN
   DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLDSA_CADDQ_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_CADDQ_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a pc stackpointer returnaddress.
           aligned 32 a /\
@@ -469,4 +469,4 @@ let MLDSA_CADDQ_SUBROUTINE_SAFE = time prove
                          memaccess_inbounds e2 [a,1024; stackpointer,8]
                                                [a,1024; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_CADDQ_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POLY_CADDQ_NOIBT_SUBROUTINE_SAFE));;

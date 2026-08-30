@@ -74,30 +74,30 @@ let poly_decompose_88_aarch64_asm_mc = define_assert_from_elf "poly_decompose_88
 ];;
 (*** BYTECODE END ***)
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_EXEC = ARM_MK_EXEC_RULE poly_decompose_88_aarch64_asm_mc;;
+let MLDSA_POLY_DECOMPOSE_88_EXEC = ARM_MK_EXEC_RULE poly_decompose_88_aarch64_asm_mc;;
 
 (* ========================================================================= *)
 (* Constants                                                                 *)
 (* ========================================================================= *)
 
-let LENGTH_POLY_DECOMPOSE_88_AARCH64_ASM_MC =
+let LENGTH_MLDSA_POLY_DECOMPOSE_88_MC =
   REWRITE_CONV[poly_decompose_88_aarch64_asm_mc] `LENGTH poly_decompose_88_aarch64_asm_mc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_CORE_START = new_definition
-  `POLY_DECOMPOSE_88_AARCH64_ASM_CORE_START = 0`;;
+let MLDSA_POLY_DECOMPOSE_88_CORE_START = new_definition
+  `MLDSA_POLY_DECOMPOSE_88_CORE_START = 0`;;
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_POSTAMBLE_LENGTH = new_definition
-  `POLY_DECOMPOSE_88_AARCH64_ASM_POSTAMBLE_LENGTH = 4`;;
+let MLDSA_POLY_DECOMPOSE_88_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLY_DECOMPOSE_88_POSTAMBLE_LENGTH = 4`;;
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_CORE_END = new_definition
-  `POLY_DECOMPOSE_88_AARCH64_ASM_CORE_END =
-     LENGTH poly_decompose_88_aarch64_asm_mc - POLY_DECOMPOSE_88_AARCH64_ASM_POSTAMBLE_LENGTH`;;
+let MLDSA_POLY_DECOMPOSE_88_CORE_END = new_definition
+  `MLDSA_POLY_DECOMPOSE_88_CORE_END =
+     LENGTH poly_decompose_88_aarch64_asm_mc - MLDSA_POLY_DECOMPOSE_88_POSTAMBLE_LENGTH`;;
 
 let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_POLY_DECOMPOSE_88_AARCH64_ASM_MC;
-              POLY_DECOMPOSE_88_AARCH64_ASM_CORE_START; POLY_DECOMPOSE_88_AARCH64_ASM_CORE_END;
-              POLY_DECOMPOSE_88_AARCH64_ASM_POSTAMBLE_LENGTH] THENC
+  REWRITE_CONV[LENGTH_MLDSA_POLY_DECOMPOSE_88_MC;
+              MLDSA_POLY_DECOMPOSE_88_CORE_START; MLDSA_POLY_DECOMPOSE_88_CORE_END;
+              MLDSA_POLY_DECOMPOSE_88_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ========================================================================= *)
@@ -466,7 +466,7 @@ let DECOMPOSE88_A0_CORRECT = prove(
 (* Specification                                                             *)
 (* ========================================================================= *)
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT = prove(
+let MLDSA_POLY_DECOMPOSE_88_CORRECT = prove(
  `!pc a r1 x.
     nonoverlapping (word pc, LENGTH poly_decompose_88_aarch64_asm_mc)
                    (r1, 1024) /\
@@ -475,12 +475,12 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT = prove(
     nonoverlapping (r1, 1024) (a, 1024)
     ==> ensures arm
          (\s. aligned_bytes_loaded s (word pc) poly_decompose_88_aarch64_asm_mc /\
-              read PC s = word(pc + POLY_DECOMPOSE_88_AARCH64_ASM_CORE_START) /\
+              read PC s = word(pc + MLDSA_POLY_DECOMPOSE_88_CORE_START) /\
               C_ARGUMENTS [r1; a] s /\
               (!i. i < 256
                    ==> read(memory :> bytes32(word_add a (word(4 * i)))) s =
                        x i))
-         (\s. read PC s = word(pc + POLY_DECOMPOSE_88_AARCH64_ASM_CORE_END) /\
+         (\s. read PC s = word(pc + MLDSA_POLY_DECOMPOSE_88_CORE_END) /\
               ((!i. i < 256 ==> val(x i:int32) < 8380417)
                ==> (!i. i < 256
                         ==> val(read(memory :> bytes32
@@ -497,7 +497,7 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT = prove(
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`pc:num`; `a:int64`; `r1:int64`; `x:num->int32`] THEN
   REWRITE_TAC[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; SOME_FLAGS;
-              fst POLY_DECOMPOSE_88_AARCH64_ASM_EXEC;
+              fst MLDSA_POLY_DECOMPOSE_88_EXEC;
               MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
   STRIP_TAC THEN
 
@@ -520,7 +520,7 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT = prove(
 
   (* Symbolic execution with folding to decompose88_a1/a0 *)
   MAP_UNTIL_TARGET_PC (fun n ->
-    ARM_STEPS_TAC POLY_DECOMPOSE_88_AARCH64_ASM_EXEC [n] THEN
+    ARM_STEPS_TAC MLDSA_POLY_DECOMPOSE_88_EXEC [n] THEN
     RULE_ASSUM_TAC(CONV_RULE(
       TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV THENC
       ONCE_REWRITE_CONV [GSYM h88] THENC
@@ -560,7 +560,7 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT = prove(
 (* Subroutine form: wraps CORRECT with RET handling                         *)
 (* ========================================================================= *)
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_CORRECT = prove(
+let MLDSA_POLY_DECOMPOSE_88_SUBROUTINE_CORRECT = prove(
  `!pc a r1 x returnaddress.
     nonoverlapping (word pc, LENGTH poly_decompose_88_aarch64_asm_mc)
                    (r1, 1024) /\
@@ -599,7 +599,7 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_CORRECT = prove(
           MAYCHANGE [memory :> bytes(a, 1024)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   REWRITE_TAC[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; SOME_FLAGS;
-              fst POLY_DECOMPOSE_88_AARCH64_ASM_EXEC;
+              fst MLDSA_POLY_DECOMPOSE_88_EXEC;
               MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
   REPEAT STRIP_TAC THEN
   REWRITE_TAC(!simulation_precanon_thms) THEN
@@ -607,10 +607,10 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_CORRECT = prove(
   MP_TAC(REWRITE_RULE[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; SOME_FLAGS;
     MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI]
    (SPECL [`pc:num`; `a:int64`; `r1:int64`; `x:num->int32`]
-    (CONV_RULE LENGTH_SIMPLIFY_CONV POLY_DECOMPOSE_88_AARCH64_ASM_CORRECT))) THEN
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_DECOMPOSE_88_CORRECT))) THEN
   ANTS_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
-  ARM_BIGSTEP_TAC POLY_DECOMPOSE_88_AARCH64_ASM_EXEC "s1" THEN
-  ARM_STEPS_TAC POLY_DECOMPOSE_88_AARCH64_ASM_EXEC [2] THEN
+  ARM_BIGSTEP_TAC MLDSA_POLY_DECOMPOSE_88_EXEC "s1" THEN
+  ARM_STEPS_TAC MLDSA_POLY_DECOMPOSE_88_EXEC [2] THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   DISCH_TAC THEN
   FIRST_X_ASSUM(ASSUME_TAC o C MATCH_MP
@@ -635,10 +635,10 @@ needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "poly_decompose_88_aarch64_asm" subroutine_signatures)
-    POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_CORRECT
-    POLY_DECOMPOSE_88_AARCH64_ASM_EXEC;;
+    MLDSA_POLY_DECOMPOSE_88_SUBROUTINE_CORRECT
+    MLDSA_POLY_DECOMPOSE_88_EXEC;;
 
-let POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_DECOMPOSE_88_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e pc a r1 returnaddress.
            nonoverlapping (word pc,LENGTH poly_decompose_88_aarch64_asm_mc) (r1,1024) /\
@@ -661,4 +661,4 @@ let POLY_DECOMPOSE_88_AARCH64_ASM_SUBROUTINE_SAFE = time prove
                          [r1,1024; a,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars POLY_DECOMPOSE_88_AARCH64_ASM_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_DECOMPOSE_88_EXEC);;

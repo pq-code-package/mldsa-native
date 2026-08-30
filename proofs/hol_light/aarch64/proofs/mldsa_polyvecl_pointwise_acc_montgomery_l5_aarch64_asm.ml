@@ -136,13 +136,13 @@ let mldsa_pointwise_acc_l5_mc = define_assert_from_elf
 ];;
 (*** BYTECODE END ***)
 
-let MLDSA_POINTWISE_ACC_L5_EXEC = ARM_MK_EXEC_RULE mldsa_pointwise_acc_l5_mc;;
+let MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC = ARM_MK_EXEC_RULE mldsa_pointwise_acc_l5_mc;;
 
 (* ========================================================================= *)
 (* Correctness proof                                                         *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
+let MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_CORRECT = prove
  (`!r a b x y pc.
     nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (r, 1024) /\
     nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (a, 5120) /\
@@ -175,7 +175,7 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
      `x:num->int32`; `y:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; ALL;
-              fst MLDSA_POINTWISE_ACC_L5_EXEC] THEN
+              fst MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
 
@@ -208,7 +208,7 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
   (* Simulate all 1703 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POINTWISE_ACC_L5_EXEC [n] THEN
+  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'])
         (1--1703) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
@@ -315,7 +315,7 @@ let MLDSA_POINTWISE_ACC_L5_CORRECT = prove
 (* Subroutine form                                                           *)
 (* ========================================================================= *)
 
-let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT = prove
+let MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_SUBROUTINE_CORRECT = prove
  (`!r a b x y pc returnaddress.
     nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (r, 1024) /\
     nonoverlapping (word pc, LENGTH mldsa_pointwise_acc_l5_mc) (a, 5120) /\
@@ -342,10 +342,10 @@ let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT = prove
                  abs(ival zi) <= &8380416))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(r, 1024)])`,
-  REWRITE_TAC[fst MLDSA_POINTWISE_ACC_L5_EXEC] THEN
-  ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POINTWISE_ACC_L5_EXEC
-    (REWRITE_RULE[fst MLDSA_POINTWISE_ACC_L5_EXEC]
-       MLDSA_POINTWISE_ACC_L5_CORRECT));;
+  REWRITE_TAC[fst MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC] THEN
+  ARM_ADD_RETURN_NOSTACK_TAC MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC
+    (REWRITE_RULE[fst MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC]
+       MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_CORRECT));;
 
 (* ========================================================================= *)
 (* Constant-time and memory safety proof.                                    *)
@@ -357,10 +357,10 @@ needs "mldsa_native/aarch64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:false
     (assoc "mldsa_pointwise_acc_l5" subroutine_signatures)
-    MLDSA_POINTWISE_ACC_L5_SUBROUTINE_CORRECT
-    MLDSA_POINTWISE_ACC_L5_EXEC;;
+    MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_SUBROUTINE_CORRECT
+    MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC;;
 
-let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_SAFE = time prove
+let MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e r a b pc returnaddress.
            nonoverlapping (word pc,LENGTH mldsa_pointwise_acc_l5_mc) (r,1024) /\
@@ -386,5 +386,5 @@ let MLDSA_POINTWISE_ACC_L5_SUBROUTINE_SAFE = time prove
                          [r,1024]))
                (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POINTWISE_ACC_L5_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC);;
 
