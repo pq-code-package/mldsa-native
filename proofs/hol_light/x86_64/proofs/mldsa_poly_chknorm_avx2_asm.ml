@@ -410,13 +410,13 @@ let full_spec,public_vars = mk_safety_spec
     (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_CHKNORM_CORRECT)
     MLDSA_POLY_CHKNORM_TMC_EXEC;;
 
-let MLDSA_POLY_CHKNORM_SAFE =
-  REWRITE_RULE [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS]
-  (time prove
-   (full_spec,
-    REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS] THEN
-    PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
-      MLDSA_POLY_CHKNORM_TMC_EXEC));;
+let full_spec =
+  REWRITE_CONV [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS] full_spec
+  |> concl |> rhs;;
+
+let MLDSA_POLY_CHKNORM_SAFE = time prove
+ (full_spec,
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_CHKNORM_TMC_EXEC);;
 
 let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
