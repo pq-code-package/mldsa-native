@@ -7499,27 +7499,89 @@ let MLDSA_REJ_UNIFORM_ETA2_CORRECT = prove(correct_eta2_tm,
 (* NOTE: This must be kept in sync with the CBMC specification
  * in mldsa/src/native/x86_64/src/arith_native_x86_64.h *)
 
-let MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_CORRECT =
-  (* Strengthen the base CORRECT postcondition with the array bound (the CBMC
-     postcondition) and specialise the mc length; kept local since the bound is
-     only needed to build the subroutine form below. *)
-  let correct_bound = prove
-   (`!res buf table (inlist:byte list) pc.
+(* Strengthen the base CORRECT postcondition with the array bound (the CBMC
+   postcondition) and specialise the mc length. *)
+let correct_bound = prove
+ (`!res buf table (inlist:byte list) pc.
+    LENGTH inlist = 136 /\
+    nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (res, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (buf, 136) /\
+    nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (table, 2048) /\
+    nonoverlapping (res, 1024) (buf, 136) /\
+    nonoverlapping (res, 1024) (table, 2048)
+    ==> ensures x86
+         (\s. bytes_loaded s (word pc) (BUTLAST mldsa_rej_uniform_eta2_tmc) /\
+              read RIP s = word pc /\
+              C_ARGUMENTS [res; buf; table] s /\
+              read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
+              read(memory :> bytes(table,2048)) s =
+                num_of_wordlist mldsa_rej_uniform_table)
+         (\s. read RIP s = word(pc + LENGTH (BUTLAST mldsa_rej_uniform_eta2_tmc)) /\
+              (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA2_BYTES inlist) in
+               let outlen = LENGTH outlist in
+               outlen <= 256 /\
+               C_RETURN s = word outlen /\
+               read(memory :> bytes(res,4 * outlen)) s =
+                 num_of_wordlist outlist /\
+               (!i. i < outlen
+                    ==> ival(EL i outlist:int32) < &3 /\
+                        -- &3 < ival(EL i outlist:int32))))
+         (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
+          MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9] ,,
+          MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
+          MAYCHANGE [memory :> bytes(res,1024)])`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  MATCH_MP_TAC ENSURES_STRENGTHEN_POST_X86 THEN
+  EXISTS_TAC
+   `\s:x86state.
+      read RIP s = word(pc + LENGTH(BUTLAST mldsa_rej_uniform_eta2_tmc)) /\
+      (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA2_BYTES (inlist:byte list)) in
+       let outlen = LENGTH outlist in
+       C_RETURN s = word outlen /\
+       read(memory :> bytes(res:int64,4 * outlen)) s =
+         num_of_wordlist outlist)` THEN
+  CONJ_TAC THENL
+   [MATCH_MP_TAC MLDSA_REJ_UNIFORM_ETA2_CORRECT THEN ASM_REWRITE_TAC[];
+    BETA_TAC THEN GEN_TAC THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
+    STRIP_TAC THEN ASM_REWRITE_TAC[] THEN
+    CONJ_TAC THENL
+     [MATCH_ACCEPT_TAC LENGTH_SUB_LIST_REJ_SAMPLE_ETA2_BYTES; ALL_TAC] THEN
+    MATCH_ACCEPT_TAC REJ_SAMPLE_ETA2_BYTES_EL_BOUND]);;
+
+let correct_bound_concrete =
+  CONV_RULE(REWRITE_CONV[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC;
+                         fst MLDSA_REJ_UNIFORM_ETA2_EXEC])
+    correct_bound;;
+
+(* This statement needs type-variable invention; the file's stricter
+   setting is restored immediately afterwards. *)
+type_invention_error := false;;
+
+let MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_CORRECT = prove
+ (`!res buf table (inlist:byte list) pc stackpointer returnaddress.
       LENGTH inlist = 136 /\
       nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (res, 1024) /\
       nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (buf, 136) /\
       nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (table, 2048) /\
       nonoverlapping (res, 1024) (buf, 136) /\
-      nonoverlapping (res, 1024) (table, 2048)
+      nonoverlapping (res, 1024) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (res, 1024) /\
+      nonoverlapping (stackpointer, 8) (buf, 136) /\
+      nonoverlapping (stackpointer, 8) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (word pc, LENGTH mldsa_rej_uniform_eta2_tmc)
       ==> ensures x86
-           (\s. bytes_loaded s (word pc) (BUTLAST mldsa_rej_uniform_eta2_tmc) /\
+           (\s. bytes_loaded s (word pc) mldsa_rej_uniform_eta2_tmc /\
                 read RIP s = word pc /\
+                read RSP s = stackpointer /\
+                read (memory :> bytes64 stackpointer) s = returnaddress /\
                 C_ARGUMENTS [res; buf; table] s /\
                 read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
                 read(memory :> bytes(table,2048)) s =
                   num_of_wordlist mldsa_rej_uniform_table)
-           (\s. read RIP s = word(pc + LENGTH (BUTLAST mldsa_rej_uniform_eta2_tmc)) /\
-                (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA2_BYTES inlist) in
+           (\s. read RIP s = returnaddress /\
+                read RSP s = word_add stackpointer (word 8) /\
+                (let outlist = SUB_LIST(0,256)
+                    (REJ_SAMPLE_ETA2_BYTES inlist) in
                  let outlen = LENGTH outlist in
                  outlen <= 256 /\
                  C_RETURN s = word outlen /\
@@ -7528,73 +7590,13 @@ let MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_CORRECT =
                  (!i. i < outlen
                       ==> ival(EL i outlist:int32) < &3 /\
                           -- &3 < ival(EL i outlist:int32))))
-           (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-            MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9] ,,
-            MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
+           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(res,1024)])`,
-    REPEAT GEN_TAC THEN STRIP_TAC THEN
-    MATCH_MP_TAC ENSURES_STRENGTHEN_POST_X86 THEN
-    EXISTS_TAC
-     `\s:x86state.
-        read RIP s = word(pc + LENGTH(BUTLAST mldsa_rej_uniform_eta2_tmc)) /\
-        (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA2_BYTES (inlist:byte list)) in
-         let outlen = LENGTH outlist in
-         C_RETURN s = word outlen /\
-         read(memory :> bytes(res:int64,4 * outlen)) s =
-           num_of_wordlist outlist)` THEN
-    CONJ_TAC THENL
-     [MATCH_MP_TAC MLDSA_REJ_UNIFORM_ETA2_CORRECT THEN ASM_REWRITE_TAC[];
-      BETA_TAC THEN GEN_TAC THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-      STRIP_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL
-       [MATCH_ACCEPT_TAC LENGTH_SUB_LIST_REJ_SAMPLE_ETA2_BYTES; ALL_TAC] THEN
-      MATCH_ACCEPT_TAC REJ_SAMPLE_ETA2_BYTES_EL_BOUND]) in
-  let correct_bound_concrete =
-    CONV_RULE(REWRITE_CONV[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC;
-                           fst MLDSA_REJ_UNIFORM_ETA2_EXEC])
-      correct_bound in
-  let saved_tic = !type_invention_error in
-  type_invention_error := false;
-  let th = prove
-   (`!res buf table (inlist:byte list) pc stackpointer returnaddress.
-        LENGTH inlist = 136 /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (res, 1024) /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (buf, 136) /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (table, 2048) /\
-        nonoverlapping (res, 1024) (buf, 136) /\
-        nonoverlapping (res, 1024) (table, 2048) /\
-        nonoverlapping (stackpointer, 8) (res, 1024) /\
-        nonoverlapping (stackpointer, 8) (buf, 136) /\
-        nonoverlapping (stackpointer, 8) (table, 2048) /\
-        nonoverlapping (stackpointer, 8) (word pc, LENGTH mldsa_rej_uniform_eta2_tmc)
-        ==> ensures x86
-             (\s. bytes_loaded s (word pc) mldsa_rej_uniform_eta2_tmc /\
-                  read RIP s = word pc /\
-                  read RSP s = stackpointer /\
-                  read (memory :> bytes64 stackpointer) s = returnaddress /\
-                  C_ARGUMENTS [res; buf; table] s /\
-                  read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
-                  read(memory :> bytes(table,2048)) s =
-                    num_of_wordlist mldsa_rej_uniform_table)
-             (\s. read RIP s = returnaddress /\
-                  read RSP s = word_add stackpointer (word 8) /\
-                  (let outlist = SUB_LIST(0,256)
-                      (REJ_SAMPLE_ETA2_BYTES inlist) in
-                   let outlen = LENGTH outlist in
-                   outlen <= 256 /\
-                   C_RETURN s = word outlen /\
-                   read(memory :> bytes(res,4 * outlen)) s =
-                     num_of_wordlist outlist /\
-                   (!i. i < outlen
-                        ==> ival(EL i outlist:int32) < &3 /\
-                            -- &3 < ival(EL i outlist:int32))))
-             (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(res,1024)])`,
-    REWRITE_TAC[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC] THEN
-    X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_rej_uniform_eta2_tmc
-      correct_bound_concrete) in
-  type_invention_error := saved_tic;
-  th;;
+  REWRITE_TAC[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC] THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_rej_uniform_eta2_tmc
+    correct_bound_concrete);;
+
+type_invention_error := true;;
 
 (* ------------------------------------------------------------------------- *)
 (* 4. Full (untrimmed, IBT-prefixed) subroutine wrapper via ADD_IBT_RULE.    *)
@@ -9330,50 +9332,81 @@ let MLDSA_REJ_UNIFORM_ETA2_MEMSAFE_CORE_CONCRETE =
 (* The subroutine memory safety theorem.                                     *)
 (* ------------------------------------------------------------------------- *)
 
-let MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_MEMSAFE =
-  let saved_tic = !type_invention_error in
-  type_invention_error := false;
-  let th = prove
-   (`!res buf table (inlist:byte list) e pc stackpointer returnaddress.
-        LENGTH inlist = 136 /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (res, 1024) /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (buf, 136) /\
-        nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (table, 2048) /\
-        nonoverlapping (res, 1024) (buf, 136) /\
-        nonoverlapping (res, 1024) (table, 2048) /\
-        nonoverlapping (stackpointer, 8) (res, 1024) /\
-        nonoverlapping (stackpointer, 8) (buf, 136) /\
-        nonoverlapping (stackpointer, 8) (table, 2048) /\
-        nonoverlapping (stackpointer, 8) (word pc, LENGTH mldsa_rej_uniform_eta2_tmc)
-        ==> ensures x86
-             (\s. bytes_loaded s (word pc) mldsa_rej_uniform_eta2_tmc /\
-                  read RIP s = word pc /\
-                  read RSP s = stackpointer /\
-                  read (memory :> bytes64 stackpointer) s = returnaddress /\
-                  C_ARGUMENTS [res; buf; table] s /\
-                  read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
-                  read(memory :> bytes(table,2048)) s =
-                    num_of_wordlist mldsa_rej_uniform_table /\
-                  read events s = e)
-             (\s. read RIP s = returnaddress /\
-                  read RSP s = word_add stackpointer (word 8) /\
-                  (exists e2.
-                     read events s = APPEND e2 e /\
-                     memaccess_inbounds e2
-                       [buf,136; table,2048; stackpointer,8]
-                       [res,1024]))
-             (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(res,1024)])`,
-    REWRITE_TAC[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC] THEN
-    X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_rej_uniform_eta2_tmc
-      MLDSA_REJ_UNIFORM_ETA2_MEMSAFE_CORE_CONCRETE THEN
-    DISCHARGE_MEMSAFE_TAC) in
-  type_invention_error := saved_tic;
-  th;;
+(* This statement needs type-variable invention; the file's stricter
+   setting is restored immediately afterwards. *)
+type_invention_error := false;;
+
+let MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_MEMSAFE = prove
+ (`!res buf table (inlist:byte list) e pc stackpointer returnaddress.
+      LENGTH inlist = 136 /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (res, 1024) /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (buf, 136) /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_tmc) (table, 2048) /\
+      nonoverlapping (res, 1024) (buf, 136) /\
+      nonoverlapping (res, 1024) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (res, 1024) /\
+      nonoverlapping (stackpointer, 8) (buf, 136) /\
+      nonoverlapping (stackpointer, 8) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (word pc, LENGTH mldsa_rej_uniform_eta2_tmc)
+      ==> ensures x86
+           (\s. bytes_loaded s (word pc) mldsa_rej_uniform_eta2_tmc /\
+                read RIP s = word pc /\
+                read RSP s = stackpointer /\
+                read (memory :> bytes64 stackpointer) s = returnaddress /\
+                C_ARGUMENTS [res; buf; table] s /\
+                read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
+                read(memory :> bytes(table,2048)) s =
+                  num_of_wordlist mldsa_rej_uniform_table /\
+                read events s = e)
+           (\s. read RIP s = returnaddress /\
+                read RSP s = word_add stackpointer (word 8) /\
+                (exists e2.
+                   read events s = APPEND e2 e /\
+                   memaccess_inbounds e2
+                     [buf,136; table,2048; stackpointer,8]
+                     [res,1024]))
+           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes(res,1024)])`,
+  REWRITE_TAC[LENGTH_MLDSA_REJ_UNIFORM_ETA2_TMC] THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_rej_uniform_eta2_tmc
+    MLDSA_REJ_UNIFORM_ETA2_MEMSAFE_CORE_CONCRETE THEN
+  DISCHARGE_MEMSAFE_TAC);;
+
+type_invention_error := true;;
 
 (* Full (untrimmed, IBT-prefixed) subroutine wrapper via ADD_IBT_RULE.       *)
-let MLDSA_REJ_UNIFORM_ETA2_SUBROUTINE_MEMSAFE =
-  ADD_IBT_RULE MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_MEMSAFE;;
+let MLDSA_REJ_UNIFORM_ETA2_SUBROUTINE_MEMSAFE = prove
+ (`!res buf table (inlist:byte list) e pc stackpointer returnaddress.
+      LENGTH inlist = 136 /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_mc) (res, 1024) /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_mc) (buf, 136) /\
+      nonoverlapping (word pc, LENGTH mldsa_rej_uniform_eta2_mc) (table, 2048) /\
+      nonoverlapping (res, 1024) (buf, 136) /\
+      nonoverlapping (res, 1024) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (res, 1024) /\
+      nonoverlapping (stackpointer, 8) (buf, 136) /\
+      nonoverlapping (stackpointer, 8) (table, 2048) /\
+      nonoverlapping (stackpointer, 8) (word pc, LENGTH mldsa_rej_uniform_eta2_mc)
+      ==> ensures x86
+           (\s. bytes_loaded s (word pc) mldsa_rej_uniform_eta2_mc /\
+                read RIP s = word pc /\
+                read RSP s = stackpointer /\
+                read (memory :> bytes64 stackpointer) s = returnaddress /\
+                C_ARGUMENTS [res; buf; table] s /\
+                read(memory :> bytes(buf, 136)) s = num_of_wordlist inlist /\
+                read(memory :> bytes(table,2048)) s =
+                  num_of_wordlist mldsa_rej_uniform_table /\
+                read events s = e)
+           (\s. read RIP s = returnaddress /\
+                read RSP s = word_add stackpointer (word 8) /\
+                (exists e2.
+                   read events s = APPEND e2 e /\
+                   memaccess_inbounds e2
+                     [buf,136; table,2048; stackpointer,8]
+                     [res,1024]))
+           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes(res,1024)])`,
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_REJ_UNIFORM_ETA2_NOIBT_SUBROUTINE_MEMSAFE));;
 
 (* Trailing subroutine-signature load for the constant-time harness. Loads   *)
 (* AFTER both MEMSAFE theorems.                                              *)
