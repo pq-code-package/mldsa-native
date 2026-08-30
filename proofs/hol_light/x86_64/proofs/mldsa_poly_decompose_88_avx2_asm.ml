@@ -727,7 +727,7 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
 (*** BYTECODE END ***)
 
 let mldsa_decompose88_tmc = define_trimmed "mldsa_decompose88_tmc" mldsa_decompose88_mc;;
-let MLDSA_DECOMPOSE88_EXEC = X86_MK_CORE_EXEC_RULE mldsa_decompose88_tmc;;
+let MLDSA_POLY_DECOMPOSE_88_EXEC = X86_MK_CORE_EXEC_RULE mldsa_decompose88_tmc;;
 
 (* ========================================================================= *)
 (* Word-level lane functions matching the AVX2 instruction sequence.         *)
@@ -1082,7 +1082,7 @@ let DECOMPOSE88_A0_BOUND_HI = prove(
 (* Core correctness theorem                                                  *)
 (* ========================================================================= *)
 
-let MLDSA_DECOMPOSE88_CORRECT = prove(
+let MLDSA_POLY_DECOMPOSE_88_CORRECT = prove(
  `!a1 a (x:num->int32) pc.
         ALL (nonoverlapping (word pc, 2144))
             [(a1,1024); (a,1024)] /\
@@ -1113,7 +1113,7 @@ let MLDSA_DECOMPOSE88_CORRECT = prove(
               MAYCHANGE [memory :> bytes(a,1024)])`,
   MAP_EVERY X_GEN_TAC [`a1:int64`; `a:int64`; `x:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; ALL;
-              NONOVERLAPPING_CLAUSES; fst MLDSA_DECOMPOSE88_EXEC] THEN
+              NONOVERLAPPING_CLAUSES; fst MLDSA_POLY_DECOMPOSE_88_EXEC] THEN
   STRIP_TAC THEN
   CONV_TAC(RATOR_CONV(LAND_CONV(ONCE_DEPTH_CONV
     (EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV)))) THEN
@@ -1127,7 +1127,7 @@ let MLDSA_DECOMPOSE88_CORRECT = prove(
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
   MAP_EVERY (fun n ->
-    X86_STEPS_TAC MLDSA_DECOMPOSE88_EXEC [n] THEN
+    X86_STEPS_TAC MLDSA_POLY_DECOMPOSE_88_EXEC [n] THEN
     SIMD_SIMPLIFY_TAC[decompose88_a1; decompose88_a0]) (1--399) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_NOT_JOIN_256; WORD_NOT_JOIN_128; WORD_NOT_JOIN_64]) THEN
@@ -1149,7 +1149,7 @@ let MLDSA_DECOMPOSE88_CORRECT = prove(
 (* mldsa/src/native/x86_64/src/arith_native_x86_64.h                         *)
 (* ========================================================================= *)
 
-let MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_CORRECT = prove(
+let MLDSA_POLY_DECOMPOSE_88_NOIBT_SUBROUTINE_CORRECT = prove(
  `!a1 a (x:num->int32) pc stackpointer returnaddress.
         aligned 32 a1 /\ aligned 32 a /\
         ALL (nonoverlapping (word pc, LENGTH mldsa_decompose88_tmc))
@@ -1183,9 +1183,9 @@ let MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_CORRECT = prove(
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a1,1024)] ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose88_tmc MLDSA_DECOMPOSE88_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose88_tmc MLDSA_POLY_DECOMPOSE_88_CORRECT);;
 
-let MLDSA_DECOMPOSE88_SUBROUTINE_CORRECT = prove(
+let MLDSA_POLY_DECOMPOSE_88_SUBROUTINE_CORRECT = prove(
  `!a1 a (x:num->int32) pc stackpointer returnaddress.
         aligned 32 a1 /\ aligned 32 a /\
         ALL (nonoverlapping (word pc, LENGTH mldsa_decompose88_mc))
@@ -1219,7 +1219,7 @@ let MLDSA_DECOMPOSE88_SUBROUTINE_CORRECT = prove(
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a1,1024)] ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_CORRECT));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POLY_DECOMPOSE_88_NOIBT_SUBROUTINE_CORRECT));;
 
 (* ========================================================================= *)
 (* Memory safety.                                                            *)
@@ -1233,18 +1233,18 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_decompose_88_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_DECOMPOSE88_CORRECT)
-    MLDSA_DECOMPOSE88_EXEC;;
+    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_DECOMPOSE_88_CORRECT)
+    MLDSA_POLY_DECOMPOSE_88_EXEC;;
 
 let full_spec =
   REWRITE_CONV [MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS] full_spec
   |> concl |> rhs;;
 
-let MLDSA_DECOMPOSE88_SAFE = time prove
+let MLDSA_POLY_DECOMPOSE_88_SAFE = time prove
  (full_spec,
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_DECOMPOSE88_EXEC);;
+  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_POLY_DECOMPOSE_88_EXEC);;
 
-let MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_DECOMPOSE_88_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a1 a pc stackpointer returnaddress.
           aligned 32 a1 /\ aligned 32 a /\
@@ -1269,10 +1269,10 @@ let MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_SAFE = time prove
                          memaccess_inbounds e2 [a,1024; a1,1024; a,1024; stackpointer,8]
                                                [a1,1024; a,1024; stackpointer,8]))
                (\s s'. true)`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose88_tmc MLDSA_DECOMPOSE88_SAFE THEN
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose88_tmc MLDSA_POLY_DECOMPOSE_88_SAFE THEN
   DISCHARGE_SAFETY_PROPERTY_TAC);;
 
-let MLDSA_DECOMPOSE88_SUBROUTINE_SAFE = time prove
+let MLDSA_POLY_DECOMPOSE_88_SUBROUTINE_SAFE = time prove
  (`exists f_events.
        forall e a1 a pc stackpointer returnaddress.
           aligned 32 a1 /\ aligned 32 a /\
@@ -1297,4 +1297,4 @@ let MLDSA_DECOMPOSE88_SUBROUTINE_SAFE = time prove
                          memaccess_inbounds e2 [a,1024; a1,1024; a,1024; stackpointer,8]
                                                [a1,1024; a,1024; stackpointer,8]))
                (\s s'. true)`,
-  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_DECOMPOSE88_NOIBT_SUBROUTINE_SAFE));;
+  MATCH_ACCEPT_TAC(ADD_IBT_RULE MLDSA_POLY_DECOMPOSE_88_NOIBT_SUBROUTINE_SAFE));;
