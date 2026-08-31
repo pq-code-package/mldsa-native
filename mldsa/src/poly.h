@@ -33,8 +33,8 @@
  */
 typedef struct
 {
-  int32_t coeffs[MLDSA_N]; /**< Polynomial coefficients. */
-} MLD_ALIGN mld_poly;
+  MLD_ALIGN int32_t coeffs[MLDSA_N]; /**< Polynomial coefficients. */
+} mld_poly;
 
 #define mld_poly_reduce MLD_NAMESPACE(poly_reduce)
 /**
