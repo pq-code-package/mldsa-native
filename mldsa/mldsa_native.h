@@ -887,7 +887,11 @@ int MLD_API_NAMESPACE(pk_from_sk)(
  *
  * These constants may be used to implement custom allocations using a
  * fixed-sized buffer and a simple allocator (e.g., bump allocator).
+ *
+ * They are measured for the default alignment of 32 bytes and are therefore
+ * not defined when MLD_CONFIG_ALIGN customizes the alignment.
  */
+#if !defined(MLD_CONFIG_ALIGN) || MLD_CONFIG_ALIGN == 32
 /* check-magic: off */
 #if !defined(MLD_CONFIG_REDUCE_RAM)
 #define MLD_TOTAL_ALLOC_44_KEYPAIR_NO_PCT 26912
@@ -954,5 +958,6 @@ int MLD_API_NAMESPACE(pk_from_sk)(
 #define MLD_TOTAL_ALLOC_87                                             \
   MLD_MAX4_(MLD_TOTAL_ALLOC_87_KEYPAIR, MLD_TOTAL_ALLOC_87_PK_FROM_SK, \
             MLD_TOTAL_ALLOC_87_SIGN, MLD_TOTAL_ALLOC_87_VERIFY)
+#endif /* !MLD_CONFIG_ALIGN || MLD_CONFIG_ALIGN == 32 */
 
 #endif /* !MLD_H */

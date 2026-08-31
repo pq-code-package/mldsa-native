@@ -8,7 +8,7 @@ inputs:
     description: 'GitHub token'
     required: true
   tests:
-    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, signing-bound-exhausted, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify, no-randomized'
+    description: 'List of tests to run (space-separated IDs) or "all" for all tests. Available IDs: pct-enabled, pct-enabled-broken, signing-bound-exhausted, reduce-ram, reduce-ram-pct, custom-alloc-heap, custom-zeroize, native-cap-ON, native-cap-OFF, native-cap-ID_AA64PFR1_EL1, native-cap-CPUID_AVX2, no-asm, serial-fips202, custom-randombytes, custom-memcpy, custom-memset, custom-stdlib, custom-align, nblocks-1, nblocks-4, nblocks-6, keygen-only, sign-only, verify-only, keygen-sign, keygen-verify, sign-verify, no-randomized'
     required: false
     default: 'all'
   opt:
@@ -291,6 +291,22 @@ runs:
         gh_token: ${{ inputs.gh_token }}
         compile_mode: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\\\\\"configs/custom_stdlib_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+        func: true
+        kat: true
+        acvp: true
+        opt: ${{ inputs.opt }}
+        examples: false # Some examples use a custom config themselves
+        alloc: false # Requires custom config
+        sign_hook: false # Requires custom config
+        rng_fail: true
+    - name: "Custom alignment attribute"
+      if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-align') }}
+      uses: ./.github/actions/multi-functest
+      with:
+        gh_token: ${{ inputs.gh_token }}
+        compile_mode: native
+        cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\\\\\"configs/custom_align_config.h\\\\\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
         kat: true
