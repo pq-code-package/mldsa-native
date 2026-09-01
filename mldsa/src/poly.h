@@ -138,7 +138,7 @@ MLD_INTERNAL_API
 void mld_poly_shiftl(mld_poly *a)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << 10))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS))
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
@@ -318,7 +318,7 @@ void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 __contract__(
   requires(memory_no_alias(r, MLDSA_POLYT1_PACKEDBYTES))
   requires(memory_no_alias(a, sizeof(mld_poly)))
-  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << 10))
+  requires(array_bound(a->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS))
   assigns(memory_slice(r, MLDSA_POLYT1_PACKEDBYTES))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -340,7 +340,7 @@ __contract__(
   requires(memory_no_alias(r, sizeof(mld_poly)))
   requires(memory_no_alias(a, MLDSA_POLYT1_PACKEDBYTES))
   assigns(memory_slice(r, sizeof(mld_poly)))
-  ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << 10))
+  ensures(array_bound(r->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
