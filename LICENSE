@@ -33,6 +33,10 @@ licensed under CC0-1.0. None of this is part of the library.
 
 Documentation is licensed under CC-BY-4.0.
 
+The Armv8.1-M Keccak implementation contains portions adapted from SLOTHY
+examples distributed under the MIT license. The applicable SLOTHY copyright
+notices are included below.
+
 ```
 Copyright (c) The mldsa-native project authors
 Copyright (c) The mlkem-native project authors
