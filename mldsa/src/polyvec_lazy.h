@@ -275,7 +275,7 @@ __contract__(
 )
 {
   unsigned int i;
-  for (i = 0; i < MLDSA_K; ++i)
+  for (i = 0; i < MLDSA_K; i++)
   __loop__(
     assigns(i, memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
     invariant(i <= MLDSA_K)
