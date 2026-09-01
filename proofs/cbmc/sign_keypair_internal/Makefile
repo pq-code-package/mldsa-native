@@ -21,9 +21,9 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_keypair_internal
 USE_FUNCTION_CONTRACTS=mld_shake256
-USE_FUNCTION_CONTRACTS+=mld_sample_s1_s2
-USE_FUNCTION_CONTRACTS+=mld_pack_sk_s1
-USE_FUNCTION_CONTRACTS+=mld_pack_sk_rho_key_tr_s2
+USE_FUNCTION_CONTRACTS+=mld_sample_pack_s1_s2
+USE_FUNCTION_CONTRACTS+=mld_polyvecl_unpack_eta
+USE_FUNCTION_CONTRACTS+=mld_pack_sk_rho_key_tr
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_compute_pack_t0_t1
 USE_FUNCTION_CONTRACTS+=mld_zeroize

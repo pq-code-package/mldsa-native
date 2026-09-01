@@ -4,22 +4,24 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_pack_eta_harness
+HARNESS_FILE = sample_pack_s1_s2_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_pack_eta
+PROOF_UID = mld_sample_pack_s1_s2
 
 DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
+UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
-CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pack_eta
-USE_FUNCTION_CONTRACTS=mld_polyeta_pack
+CHECK_FUNCTION_CONTRACTS=mld_sample_pack_s1_s2
+USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta_4x
+USE_FUNCTION_CONTRACTS+=mld_polyeta_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +29,7 @@ USE_DYNAMIC_FRAMES=1
 CBMC_SUPPORTED_CONFIGS = LP64:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
-FUNCTION_NAME = polyvecl_pack_eta
+FUNCTION_NAME = mld_sample_pack_s1_s2
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

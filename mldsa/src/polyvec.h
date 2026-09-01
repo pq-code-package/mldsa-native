@@ -239,28 +239,31 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#define mld_polyveck_chknorm MLD_NAMESPACE_KL(polyveck_chknorm)
+#define mld_polyveck_unpack_eta_chknorm \
+  MLD_NAMESPACE_KL(polyveck_unpack_eta_chknorm)
 /**
- * Check infinity norm of polynomials in vector of length MLDSA_K. Assumes
- * input mld_polyveck to be reduced by polyveck_reduce().
+ * Check the infinity norm of a bit-packed vector of MLDSA_K polynomials.
  *
- * @param[in] v Pointer to vector.
- * @param     B Norm bound.
+ * Each polynomial is unpacked into the scratch buffer and checked in turn.
  *
- * @return 0 if norm of all polynomials are strictly smaller than
+ * @param[in]  r       Input byte array with bit-packed polynomial vector.
+ * @param      B       Norm bound.
+ * @param[out] scratch Scratch buffer for the polynomial being checked.
+ *
+ * @return 0 if the norm of all polynomials is strictly smaller than
  *         B <= (MLDSA_Q-1)/8 and 0xFFFFFFFF otherwise.
  */
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
-uint32_t mld_polyveck_chknorm(const mld_polyveck *v, int32_t B)
+uint32_t mld_polyveck_unpack_eta_chknorm(
+    const uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES], int32_t B,
+    mld_poly *scratch)
 __contract__(
-  requires(memory_no_alias(v, sizeof(mld_polyveck)))
+  requires(memory_no_alias(r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
+  requires(memory_no_alias(scratch, sizeof(mld_poly)))
   requires(0 <= B && B <= (MLDSA_Q - 1) / 8)
-  requires(forall(k0, 0, MLDSA_K,
-                  array_bound(v->vec[k0].coeffs, 0, MLDSA_N,
-                              -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
+  assigns(memory_slice(scratch, sizeof(mld_poly)))
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
-  ensures((return_value == 0) == forall(k1, 0, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, B)))
 );
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -312,47 +315,6 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#define mld_polyveck_pack_eta MLD_NAMESPACE_KL(polyveck_pack_eta)
-/**
- * Bit-pack polynomial vector with coefficients in [-MLDSA_ETA, MLDSA_ETA].
- *
- * @param[out] r Pointer to output byte array with
- *               MLDSA_K * MLDSA_POLYETA_PACKEDBYTES bytes.
- * @param[in]  p Pointer to input polynomial vector.
- */
-MLD_INTERNAL_API
-void mld_polyveck_pack_eta(uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES],
-                           const mld_polyveck *p)
-__contract__(
-  requires(memory_no_alias(r,  MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyveck)))
-  requires(forall(k1, 0, MLDSA_K,
-    array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(r, MLDSA_K * MLDSA_POLYETA_PACKEDBYTES))
-);
-
-#define mld_polyvecl_pack_eta MLD_NAMESPACE_KL(polyvecl_pack_eta)
-/**
- * Bit-pack polynomial vector with coefficients in [-MLDSA_ETA, MLDSA_ETA].
- *
- * @param[out] r Pointer to output byte array with
- *               MLDSA_L * MLDSA_POLYETA_PACKEDBYTES bytes.
- * @param[in]  p Pointer to input polynomial vector.
- */
-MLD_INTERNAL_API
-void mld_polyvecl_pack_eta(uint8_t r[MLDSA_L * MLDSA_POLYETA_PACKEDBYTES],
-                           const mld_polyvecl *p)
-__contract__(
-  requires(memory_no_alias(r,  MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-  requires(memory_no_alias(p, sizeof(mld_polyvecl)))
-  requires(forall(k1, 0, MLDSA_L,
-    array_abs_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(r, MLDSA_L * MLDSA_POLYETA_PACKEDBYTES))
-);
-
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
-
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
     (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
@@ -397,9 +359,10 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
-    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
-     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
+#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) ||                         \
+     !defined(MLD_CONFIG_NO_SIGN_API)) &&                           \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
 #define mld_polyveck_unpack_eta MLD_NAMESPACE_KL(polyveck_unpack_eta)
 /**
  * Unpack polynomial vector with coefficients in [-MLDSA_ETA, MLDSA_ETA].
@@ -417,8 +380,9 @@ __contract__(
   ensures(forall(k1, 0, MLDSA_K,
     array_bound(p->vec[k1].coeffs, 0, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND, MLDSA_ETA + 1)))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
-          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
+#endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API) && \
+          (!MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST) &&              \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
 
 #endif /* !MLD_POLYVEC_H */

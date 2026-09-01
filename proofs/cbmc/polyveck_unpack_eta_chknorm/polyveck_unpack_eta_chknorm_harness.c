@@ -5,8 +5,10 @@
 
 void harness(void)
 {
+  uint8_t *r;
   int32_t b;
-  mld_polyveck *v;
-  uint32_t r;
-  r = mld_polyveck_chknorm(v, b);
+  mld_poly *scratch;
+  uint32_t res;
+
+  res = mld_polyveck_unpack_eta_chknorm(r, b, scratch);
 }
