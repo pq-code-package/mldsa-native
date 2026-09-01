@@ -37,13 +37,39 @@ jobs:
           acvp: true
           wycheproof: false
           examples: false
-          unit: false
+          unit: ${{ matrix.target.board == 'mps3-an547' }}
           stack: false
           alloc: false
           rng_fail: false
           check_namespace: false
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
+          extra_args: --no-auto
+      # The default an547 backend is x1, so separately run the full test suite
+      # with the retained x4 backend. Use a small QEMU-specific randomized
+      # budget for the ordinary unit test rather than bypassing it.
+      - name: Armv8.1-M x4 FIPS202 tests
+        if: matrix.target.board == 'mps3-an547'
+        uses: ./.github/actions/functest
+        env:
+          EXTRA_MAKEFILE: test/zephyr/platform.mk
+          ZEPHYR_TARGET: mps3-an547
+          ZEPHYR_FIPS202_BACKEND: fips202/native/armv81m/mve.h
+        with:
+          nix-shell: zephyr
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          opt: opt
+          func: true
+          kat: true
+          acvp: true
+          wycheproof: false
+          examples: false
+          unit: true
+          stack: false
+          alloc: false
+          rng_fail: false
+          check_namespace: false
+          extra_env: NUM_RANDOM_TESTS=1 NUM_RANDOM_TESTS_SLOW=1
           extra_args: --no-auto
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.

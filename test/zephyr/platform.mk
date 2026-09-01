@@ -33,8 +33,8 @@ ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
 ZEPHYR_QEMU_mps3-an547  := mps3-an547                    # Cortex-M55
 ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 
-ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
-ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve.h
+ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve_x1.h
+ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve_x1.h
 
 # Zephyr owns target selection, so do not infer its ABI from make's host ARCH.
 ZEPHYR_ABICHECK_ARCH_mps3-an547 := armv81m
@@ -64,14 +64,19 @@ OPT ?= 0
 # key so command-line overrides invalidate binaries built with different counts.
 NTESTS ?= 3
 NUM_RANDOM_TESTS ?= 100
+# The full unit suite has three especially expensive eager/lazy equivalence
+# loops. One randomized iteration keeps the QEMU test representative without
+# exceeding its execution deadline; non-Zephyr builds retain the source default.
+NUM_RANDOM_TESTS_SLOW ?= 1
 
 # Forward the QEMU execution deadline to exec_wrapper.py. Direct wrapper
 # invocations use the same default when the variable is absent.
 QEMU_TIMEOUT ?= 300
 export QEMU_TIMEOUT
 
-# Native backends are an OPT=1 feature (an547 builds the Armv8.1-M MVE backend).
-ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
+# Native backends are an OPT=1 feature; an547 builds an Armv8.1-M FIPS202
+# backend. Permit a CI job to override this default and test another backend.
+ZEPHYR_FIPS202_BACKEND ?= $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
 
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
@@ -80,6 +85,7 @@ ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NTESTS=$(NTESTS)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
 ZEPHYR_APP_INPUTS := \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
@@ -120,7 +126,8 @@ CFLAGS += -DMLD_CONFIG_REDUCE_RAM
 # Put the configurable test counts on CFLAGS so they forward below.
 CFLAGS += -DNTESTS=$(NTESTS) \
 	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
-	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS) \
+	-DNUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
 
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
@@ -155,11 +162,11 @@ CUSTOM_BUILD = \
 	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
-# A native assembly amalgamation can directly include development sources that
-# do not appear in LIB_SRCS. The wildcard is empty before the Armv8.1-M x1
-# backend lands and becomes an explicit dependency when that source is present.
+# Track every production assembly source included by the native assembly
+# amalgamation so changing a source rebuilds a custom Zephyr application even
+# when the generated include list itself is unchanged.
 ZEPHYR_NATIVE_ASM_INPUTS := mldsa/mldsa_native_asm.S \
-	$(wildcard dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S)
+	$(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
 
 # A custom build links the test sources directly rather than from objects, so
 # nothing otherwise makes the bins depend on the Zephyr app inputs or the
