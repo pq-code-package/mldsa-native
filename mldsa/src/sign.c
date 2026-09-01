@@ -1257,7 +1257,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
 
-  for (i = 0; i < MLDSA_K; ++i)
+  for (i = 0; i < MLDSA_K; i++)
   __loop__(
     assigns(MLD_IF_REDUCE_RAM(memory_slice(mat, sizeof(mld_polymat)),)
             i, ret,

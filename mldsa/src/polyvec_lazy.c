@@ -166,7 +166,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(mld_polyveck *w,
   *scratch = y->vec;
   mld_polyvecl_ntt(scratch);
 
-  for (i = 0; i < MLDSA_K; ++i)
+  for (i = 0; i < MLDSA_K; i++)
   __loop__(
     assigns(i, memory_slice(w, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
@@ -208,7 +208,7 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
   mld_polymat_expand_entry(t_row, seed_ext, 0, (uint8_t)i);
   mld_poly_pointwise_montgomery(t_row, &v->vec[0]);
 
-  for (l = 1; l < MLDSA_L; ++l)
+  for (l = 1; l < MLDSA_L; l++)
   __loop__(
     assigns(l, object_whole(seed_ext),
             memory_slice(t_row, sizeof(mld_poly)),

@@ -161,7 +161,7 @@ int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
 
   mld_memset(h, 0, sizeof(mld_poly));
 
-  for (j = old_hint_count; j < new_hint_count; ++j)
+  for (j = old_hint_count; j < new_hint_count; j++)
   __loop__(
     invariant(j >= old_hint_count && j <= new_hint_count &&
               new_hint_count <= MLDSA_OMEGA)
@@ -183,7 +183,7 @@ int mld_sig_unpack_hints(mld_poly *h, const uint8_t sig[MLDSA_CRYPTO_BYTES],
   /* On the last row, also verify that the trailing index slots are zero. */
   if (i == MLDSA_K - 1)
   {
-    for (j = new_hint_count; j < MLDSA_OMEGA; ++j)
+    for (j = new_hint_count; j < MLDSA_OMEGA; j++)
     __loop__(
       invariant(j <= MLDSA_OMEGA)
       decreases(MLDSA_OMEGA - j)
