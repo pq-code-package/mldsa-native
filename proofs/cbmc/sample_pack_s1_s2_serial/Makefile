@@ -4,22 +4,25 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = polyvecl_pack_eta_harness
+HARNESS_FILE = sample_pack_s1_s2_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = polyvecl_pack_eta
+PROOF_UID = mld_sample_pack_s1_s2_serial
 
-DEFINES +=
+DEFINES += -DMLD_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
+UNWINDSET += mld_sample_pack_s1_s2.0:7 # Largest value of MLDSA_L
+UNWINDSET += mld_sample_pack_s1_s2.1:8 # Largest value of MLDSA_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
-CHECK_FUNCTION_CONTRACTS=mld_polyvecl_pack_eta
-USE_FUNCTION_CONTRACTS=mld_polyeta_pack
+CHECK_FUNCTION_CONTRACTS=mld_sample_pack_s1_s2
+USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta
+USE_FUNCTION_CONTRACTS+=mld_polyeta_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -27,7 +30,7 @@ USE_DYNAMIC_FRAMES=1
 EXTERNAL_SAT_SOLVER=
 CBMCFLAGS=--smt2
 
-FUNCTION_NAME = polyvecl_pack_eta
+FUNCTION_NAME = mld_sample_pack_s1_s2_serial
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
@@ -36,14 +39,14 @@ FUNCTION_NAME = polyvecl_pack_eta
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
 # ("mldsa/poly.c") in PROJECT_SOURCES).
 # REWRITTEN_SOURCES = $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i
 # include ../Makefile.common
-# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mldsa/src/poly.c
+# $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_SOURCE = $(SRCDIR)/mldsa/poly.c
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_FUNCTIONS = foo bar
 # $(PROOFDIR)/<__SOURCE_FILE_BASENAME__>.i_OBJECTS = baz
 # Care is required with variables on the left-hand side: REWRITTEN_SOURCES must
