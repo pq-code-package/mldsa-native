@@ -126,7 +126,6 @@ __contract__(
   requires(table == mld_rej_uniform_eta_table)
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(return_value <= MLDSA_N)
-  /* check-magic: 3 == 2 + 1 (asm is eta=2-specific) */
   ensures(array_abs_bound(r, 0, return_value, 3))
 );
 
@@ -146,7 +145,6 @@ __contract__(
   requires(table == mld_rej_uniform_eta_table)
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(return_value <= MLDSA_N)
-  /* check-magic: 5 == 4 + 1 (asm is eta=4-specific) */
   ensures(array_abs_bound(r, 0, return_value, 5))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
