@@ -67,6 +67,42 @@ __contract__(
 #endif /* MLD_USE_NATIVE_FIPS202_X4 */
 
 /*
+ * Native x1 XOR bytes and extract bytes interface.
+ *
+ * These hooks let an x1 backend retain a custom internal state
+ * representation between absorb, permutation, and squeeze operations.
+ * The custom representation of the zero state must be the all-zero state.
+ */
+
+#if defined(MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_xor_bytes_x1_native(
+    uint64_t *state, const unsigned char *data, unsigned offset,
+    unsigned length)
+__contract__(
+  requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
+           0 <= length && length <= 25 * sizeof(uint64_t) - offset)
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25))
+  requires(memory_no_alias(data, length))
+  assigns(memory_slice(state, sizeof(uint64_t) * 25))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25)));
+#endif /* MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES */
+
+#if defined(MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccakf1600_extract_bytes_x1_native(
+    uint64_t *state, unsigned char *data, unsigned offset, unsigned length)
+__contract__(
+  requires(0 <= offset && offset <= 25 * sizeof(uint64_t) &&
+           0 <= length && length <= 25 * sizeof(uint64_t) - offset)
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25))
+  requires(memory_no_alias(data, length))
+  assigns(memory_slice(data, length))
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS));
+#endif /* MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES */
+
+/*
  * Native x4 XOR bytes and extract bytes interface.
  *
  * These functions allow backends to provide optimized implementations for

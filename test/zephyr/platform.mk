@@ -33,8 +33,8 @@ ZEPHYR_BOARD_mps3-an547 := mps3/corstone300/an547
 ZEPHYR_QEMU_mps3-an547  := mps3-an547                    # Cortex-M55
 ZEPHYR_BOARD_nucleo-n657x0-q := nucleo_n657x0_q          # Cortex-M55 (hardware)
 
-ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve.h
-ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve.h
+ZEPHYR_FIPS202_BACKEND_mps3-an547 := fips202/native/armv81m/mve_x1.h
+ZEPHYR_FIPS202_BACKEND_nucleo-n657x0-q := fips202/native/armv81m/mve_x1.h
 
 # Zephyr owns target selection, so do not infer its ABI from make's host ARCH.
 ZEPHYR_ABICHECK_ARCH_mps3-an547 := armv81m
@@ -155,11 +155,11 @@ CUSTOM_BUILD = \
 	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
-# A native assembly amalgamation can directly include development sources that
-# do not appear in LIB_SRCS. The wildcard is empty before the Armv8.1-M x1
-# backend lands and becomes an explicit dependency when that source is present.
+# Track every production assembly source included by the native assembly
+# amalgamation so changing a source rebuilds a custom Zephyr application even
+# when the generated include list itself is unchanged.
 ZEPHYR_NATIVE_ASM_INPUTS := mldsa/mldsa_native_asm.S \
-	$(wildcard dev/fips202/armv81m_clean/src/keccak_f1600_x1_armv7m.S)
+	$(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
 
 # A custom build links the test sources directly rather than from objects, so
 # nothing otherwise makes the bins depend on the Zephyr app inputs or the
