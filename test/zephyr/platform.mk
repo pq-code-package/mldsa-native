@@ -64,14 +64,19 @@ OPT ?= 0
 # key so command-line overrides invalidate binaries built with different counts.
 NTESTS ?= 3
 NUM_RANDOM_TESTS ?= 100
+# The full unit suite has three especially expensive eager/lazy equivalence
+# loops. One randomized iteration keeps the QEMU test representative without
+# exceeding its execution deadline; non-Zephyr builds retain the source default.
+NUM_RANDOM_TESTS_SLOW ?= 1
 
 # Forward the QEMU execution deadline to exec_wrapper.py. Direct wrapper
 # invocations use the same default when the variable is absent.
 QEMU_TIMEOUT ?= 300
 export QEMU_TIMEOUT
 
-# Native backends are an OPT=1 feature (an547 builds the Armv8.1-M MVE backend).
-ZEPHYR_FIPS202_BACKEND := $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
+# Native backends are an OPT=1 feature; an547 builds an Armv8.1-M FIPS202
+# backend. Permit a CI job to override this default and test another backend.
+ZEPHYR_FIPS202_BACKEND ?= $(if $(filter 1,$(OPT)),$(strip $(ZEPHYR_FIPS202_BACKEND_$(ZEPHYR_TARGET))))
 
 ZEPHYR_APP := $(PLATFORM_PATH)/app
 ZEPHYR_BUILD_DIR := $(BUILD_DIR)/zephyr/$(ZEPHYR_TARGET)
@@ -80,6 +85,7 @@ ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NTESTS=$(NTESTS)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
 ZEPHYR_APP_INPUTS := \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
@@ -120,7 +126,8 @@ CFLAGS += -DMLD_CONFIG_REDUCE_RAM
 # Put the configurable test counts on CFLAGS so they forward below.
 CFLAGS += -DNTESTS=$(NTESTS) \
 	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
-	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS) \
+	-DNUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
 
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
