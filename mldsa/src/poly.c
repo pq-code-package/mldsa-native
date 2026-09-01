@@ -146,7 +146,7 @@ MLD_INTERNAL_API
 void mld_poly_shiftl(mld_poly *a)
 {
   unsigned int i;
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, 1 << 10);
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS);
 
   for (i = 0; i < MLDSA_N; i++)
   __loop__(
@@ -757,7 +757,7 @@ MLD_INTERNAL_API
 void mld_polyt1_pack(uint8_t r[MLDSA_POLYT1_PACKEDBYTES], const mld_poly *a)
 {
   unsigned int i;
-  mld_assert_bound(a->coeffs, MLDSA_N, 0, 1 << 10);
+  mld_assert_bound(a->coeffs, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS);
 
   for (i = 0; i < MLDSA_N / 4; i++)
   __loop__(
@@ -788,7 +788,7 @@ void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
   for (i = 0; i < MLDSA_N / 4; i++)
   __loop__(
     invariant(i <= MLDSA_N/4)
-    invariant(array_bound(r->coeffs, 0, i*4, 0, 1 << 10))
+    invariant(array_bound(r->coeffs, 0, i*4, 0, 1 << MLDSA_POLYT1_PACKEDBITS))
     decreases(MLDSA_N / 4 - i))
   {
     r->coeffs[4 * i + 0] =
@@ -801,7 +801,7 @@ void mld_polyt1_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT1_PACKEDBYTES])
         ((a[5 * i + 3] >> 6) | ((int32_t)a[5 * i + 4] << 2)) & 0x3FF;
   }
 
-  mld_assert_bound(r->coeffs, MLDSA_N, 0, 1 << 10);
+  mld_assert_bound(r->coeffs, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS);
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 

@@ -183,7 +183,7 @@ __contract__(
   requires(memory_no_alias(t1, sizeof(mld_poly)))
   requires(i < MLDSA_K)
   assigns(memory_slice(t1, sizeof(mld_poly)))
-  ensures(array_bound(t1->coeffs, 0, MLDSA_N, 0, 1 << 10))
+  ensures(array_bound(t1->coeffs, 0, MLDSA_N, 0, 1 << MLDSA_POLYT1_PACKEDBITS))
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
