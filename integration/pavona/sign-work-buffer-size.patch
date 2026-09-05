@@ -7,12 +7,12 @@
 # sizes have to follow when mldsa-native allocates less.
 
 diff --git a/sw/device/lib/crypto/include/mldsa.h b/sw/device/lib/crypto/include/mldsa.h
-index 8ab9855..e95db5a 100644
+index c6b9424..daf54e3 100644
 --- a/sw/device/lib/crypto/include/mldsa.h
 +++ b/sw/device/lib/crypto/include/mldsa.h
-@@ -55,15 +55,15 @@ enum {
-   kOtcryptoMldsa87WorkBufferVerifyWords = 0,
+@@ -118,15 +118,15 @@ enum {
  #else
+   // Work buffer sizes in 32-bit words
    kOtcryptoMldsa44WorkBufferKeypairWords = 11584 / sizeof(uint32_t),
 -  kOtcryptoMldsa44WorkBufferSignWords = 13120 / sizeof(uint32_t),
 +  kOtcryptoMldsa44WorkBufferSignWords = 9792 / sizeof(uint32_t),
