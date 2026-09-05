@@ -60,10 +60,11 @@ We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to
 
 All AArch64 and x86_64 assembly is proved functionally correct and memory-safe at the object-code level, using
 [HOL-Light](https://hol-light.github.io/) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) verification
-infrastructure. All routines are additionally proved to have secret-independent timing, with two exceptions. The
-matrix sampler `rej_uniform` operates on public data only, and is deliberately variable-time. The secret-vector
-samplers `rej_uniform_eta{2,4}` _do_ have secret-independent timing, but this property is not yet backed by proof.
-See [proofs/hol_light](proofs/hol_light) for details.
+infrastructure. All routines are additionally proved to have secret-independent timing, with the rejection samplers
+as special cases. The matrix sampler `rej_uniform` operates on public data only, and is deliberately variable-time.
+The secret-vector samplers `rej_uniform_eta{2,4}` are proved to have secret-independent timing up to their (public)
+reject pattern -- their event trace depends on which coefficients are accepted or rejected, but not on the accepted
+values. See [proofs/hol_light](proofs/hol_light) for details.
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
