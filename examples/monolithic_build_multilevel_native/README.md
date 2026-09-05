@@ -34,8 +34,6 @@ The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.
 
 The wrapper [mldsa_native_all.c](mldsa_native_all.c) includes `mldsa_native.c` three times:
 ```c
-#define MLD_CONFIG_FILE "multilevel_config.h"
-
 /* Include level-independent code with first level */
 #define MLD_CONFIG_MULTILEVEL_WITH_SHARED 1
 #define MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS
