@@ -35,6 +35,10 @@
  * in the configuration file and include this header multiple times, setting
  * MLD_CONFIG_PARAMETER_SET accordingly for each, and #undef'ing the MLD_H
  * guard to allow multiple inclusions.
+ *
+ * In this case, the configuration file must also set
+ * MLD_CONFIG_MULTILEVEL_BUILD. Without it, the parameter set is not appended
+ * to the namespace prefix and all inclusions declare the same symbol names.
  */
 
 /******************************* Key sizes ************************************/
