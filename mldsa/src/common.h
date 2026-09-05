@@ -7,6 +7,7 @@
 #define MLD_COMMON_H
 
 #ifndef __ASSEMBLER__
+#include <stddef.h>
 #include <stdint.h>
 #endif
 
