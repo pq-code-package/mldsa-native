@@ -126,7 +126,7 @@ def config_logger(verbose):
         logger.setLevel(logging.INFO)
 
 
-def logger(test_type, scheme, cross_prefix, opt):
+def logger(test_type, scheme, dm, cross_prefix, opt):
     """Emit line indicating the processing of the given test"""
 
     test_desc = str(test_type)
@@ -145,10 +145,11 @@ def logger(test_type, scheme, cross_prefix, opt):
         sz = 18
 
     return logging.getLogger(
-        "{0:<{1}} {2:<11} {3:<17}".format(
+        "{0:<{1}} {2:<11} {4:<17} {3}".format(
             test_desc,
             sz,
             str(scheme),
+            dm or "",
             "({}{}):".format(compile_mode, opt_label),
         )
     )
@@ -474,7 +475,7 @@ class Tests:
             f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
         )
 
-        log = logger(test_type, "Compile", self.args.cross_prefix, opt)
+        log = logger(test_type, "Compile", None, self.args.cross_prefix, opt)
 
         extra_make_args = []
         # Those options are not used in the examples
@@ -565,7 +566,7 @@ class Tests:
         else:
             scheme_str = str(scheme)
 
-        log = logger(test_type, scheme_str, self.args.cross_prefix, opt)
+        log = logger(test_type, scheme_str, None, self.args.cross_prefix, opt)
 
         args = ["make", test_type.make_run_target(scheme)]
         if test_type.is_example() is False:
@@ -986,15 +987,20 @@ class Tests:
                 print(p)
             exit(0)
 
-        def run_cbmc_single_step(mldsa_parameter_set, proofs):
-            envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+        def run_cbmc_single_step(mldsa_parameter_set, mldsa_dm, proofs):
+            envvars = {
+                "MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set,
+                "CBMC_DM": mldsa_dm,
+            }
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             scheme = SCHEME.from_mode(mldsa_parameter_set)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"CBMC ({i + 1}/{num_proofs})", scheme, None, None)
-                log.info(f"Starting CBMC proof for {func}")
+                log = logger(
+                    f"CBMC ({i + 1}/{num_proofs})", scheme, mldsa_dm, None, None
+                )
+                log.info(f"Starting CBMC proof for {func}, {scheme}, {mldsa_dm}")
                 start = time.time()
                 try:
                     p = subprocess.run(
@@ -1035,8 +1041,10 @@ class Tests:
                 else:
                     log.info(f"   SUCCESS (after {dur}s)")
 
-        def run_cbmc(mldsa_parameter_set):
-            log = logger("CBMC", SCHEME.from_mode(mldsa_parameter_set), None, None)
+        def run_cbmc(mldsa_parameter_set, mldsa_dm):
+            log = logger(
+                "CBMC", SCHEME.from_mode(mldsa_parameter_set), mldsa_dm, None, None
+            )
             all_proofs = list_proofs()
             proofs = all_proofs
             if self.args.start_with is not None:
@@ -1056,9 +1064,12 @@ class Tests:
                 proofs = sorted(set(proofs))
 
             if self.args.single_step:
-                run_cbmc_single_step(mldsa_parameter_set, proofs)
+                run_cbmc_single_step(mldsa_parameter_set, mldsa_dm, proofs)
                 return
-            envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
+            envvars = {
+                "MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set,
+                "CBMC_DM": mldsa_dm,
+            }
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             cmd = (
@@ -1083,15 +1094,18 @@ class Tests:
             )
 
             if p.returncode != 0:
-                self.fail(f"CBMC proofs for parameter set={mldsa_parameter_set}")
+                self.fail(
+                    f"CBMC proofs for parameter set={mldsa_parameter_set}, dm={mldsa_dm}"
+                )
 
         mldsa_parameter_set = self.args.mldsa_parameter_set
+        dm = self.args.dm
         if mldsa_parameter_set == "ALL":
-            run_cbmc("44")
-            run_cbmc("65")
-            run_cbmc("87")
+            run_cbmc("44", dm)
+            run_cbmc("65", dm)
+            run_cbmc("87", dm)
         else:
-            run_cbmc(mldsa_parameter_set)
+            run_cbmc(mldsa_parameter_set, dm)
 
         self.check_fail()
 
@@ -1121,7 +1135,9 @@ class Tests:
         def run_hol_light_single_step(proofs, arch):
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
-                log = logger(f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None)
+                log = logger(
+                    f"HOL_LIGHT ({i + 1}/{num_proofs})", None, None, None, None
+                )
                 log.info(f"Starting HOL-Light proof for {func}")
                 start = time.time()
                 proof_bin = f"mldsa/{func}.native"
@@ -1518,6 +1534,14 @@ def cli():
         choices=["44", "65", "87", "ALL"],
         type=str.upper,
         default="ALL",
+    )
+
+    cbmc_parser.add_argument(
+        "--dm",
+        help="Value of CBMC_DM, determining the data model for CBMC proofs. Default LP64",
+        choices=["LP64"],
+        type=str.upper,
+        default="LP64",
     )
 
     cbmc_parser.add_argument(
