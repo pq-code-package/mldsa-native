@@ -30,26 +30,24 @@ same TCB, and therefore the same shared mitigations and residual risks.
 
 ### Rejection sampling
 
-Both the AArch64 and x86_64 backends are fully covered by HOL Light proofs; the full list of
-functions is maintained in [proofs/hol_light/README.md](proofs/hol_light/README.md).
-
-The rejection samplers are the only routines that do not carry all three target properties, for
-two different reasons.
+Both the AArch64 and x86_64 backends are fully covered by HOL Light proofs of functional correctness
+and memory safety; the full list of functions is maintained in
+[proofs/hol_light/README.md](proofs/hol_light/README.md). The two rejection samplers are handled
+specially with respect to secret-independent timing, for two different reasons.
 
 The matrix sampler `rej_uniform` expands the public matrix A from the public seed rho. Since it
 operates on public data only, secret-independent timing is not a requirement, and admitting
 variable-time execution enables a faster implementation. It is proven functionally correct and
 memory-safe on both backends, and is deliberately not proven constant-time.
 
-The secret-vector samplers `rej_uniform_eta{2,4}` do operate on secret data. On both backends
-these are proven functionally correct and memory-safe, but their secret-independent timing is
-not yet formally proved (see
-[#1160](https://github.com/pq-code-package/mldsa-native/issues/1160)). Their memory access
-pattern depends on which coefficients fall inside vs. outside the acceptance interval, but no
-other information about the secret coefficients is leaked, and the indices of in-bound vs.
-out-of-bound coefficients are statistically independent of the secret key; see Section 5.5 of
-the Dilithium Round 3 specification[^Round3_Spec]. This property is validated empirically through the `valgrind`-based
-constant-time tests, but not formally proved.
+The secret-vector samplers `rej_uniform_eta{2,4}` do operate on secret data, so their timing must not
+depend on the secret coefficient values. Their memory-access pattern and trip count do depend on which
+candidate coefficients fall inside vs. outside the acceptance interval, but that reject pattern is
+public: it is a statistically-independent function of the public XOF stream (Section 5.5 of the
+Dilithium Round 3 specification[^Round3_Spec]) and reveals nothing about the accepted values. On
+both AArch64 and x86_64 this is now formally proved -- the microarchitectural event trace is proven to
+be a function of the public pointers and the per-nibble accept/reject bitmap only ("constant-time up to
+the reject pattern").
 
 <!--- bibliography --->
 [^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)
