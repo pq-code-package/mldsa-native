@@ -1,0 +1,30 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Track the reduced key generation work buffer of mldsa-native. The
+# crypto library wrapper pins the work buffer sizes and cross-checks them
+# against MLD_TOTAL_ALLOC_* with a static assertion, so the keypair sizes
+# have to follow when mldsa-native allocates less.
+
+diff --git a/sw/device/lib/crypto/include/mldsa.h b/sw/device/lib/crypto/include/mldsa.h
+--- a/sw/device/lib/crypto/include/mldsa.h
++++ b/sw/device/lib/crypto/include/mldsa.h
+@@ -54,15 +54,15 @@
+   kOtcryptoMldsa87WorkBufferSignWords = 0,
+   kOtcryptoMldsa87WorkBufferVerifyWords = 0,
+ #else
+-  kOtcryptoMldsa44WorkBufferKeypairWords = 11584 / sizeof(uint32_t),
++  kOtcryptoMldsa44WorkBufferKeypairWords = 7488 / sizeof(uint32_t),
+   kOtcryptoMldsa44WorkBufferSignWords = 13120 / sizeof(uint32_t),
+   kOtcryptoMldsa44WorkBufferVerifyWords = 9120 / sizeof(uint32_t),
+ 
+-  kOtcryptoMldsa65WorkBufferKeypairWords = 14656 / sizeof(uint32_t),
++  kOtcryptoMldsa65WorkBufferKeypairWords = 8512 / sizeof(uint32_t),
+   kOtcryptoMldsa65WorkBufferSignWords = 17248 / sizeof(uint32_t),
+   kOtcryptoMldsa65WorkBufferVerifyWords = 10208 / sizeof(uint32_t),
+ 
+-  kOtcryptoMldsa87WorkBufferKeypairWords = 18752 / sizeof(uint32_t),
++  kOtcryptoMldsa87WorkBufferKeypairWords = 10560 / sizeof(uint32_t),
+   kOtcryptoMldsa87WorkBufferSignWords = 21344 / sizeof(uint32_t),
+   kOtcryptoMldsa87WorkBufferVerifyWords = 12512 / sizeof(uint32_t),
+ #endif

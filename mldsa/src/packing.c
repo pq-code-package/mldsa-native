@@ -28,24 +28,15 @@ void mld_unpack_pk_t1(mld_poly *t1,
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API
-void mld_pack_sk_s1(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                    const mld_polyvecl *s1)
-{
-  mld_polyvecl_pack_eta(sk + MLDSA_SK_S1_OFFSET, s1);
-}
-
-MLD_INTERNAL_API
-void mld_pack_sk_rho_key_tr_s2(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                               const uint8_t rho[MLDSA_SEEDBYTES],
-                               const uint8_t tr[MLDSA_TRBYTES],
-                               const uint8_t key[MLDSA_SEEDBYTES],
-                               const mld_polyveck *s2)
+void mld_pack_sk_rho_key_tr(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                            const uint8_t rho[MLDSA_SEEDBYTES],
+                            const uint8_t tr[MLDSA_TRBYTES],
+                            const uint8_t key[MLDSA_SEEDBYTES])
 {
   mld_memcpy(sk + MLDSA_SK_RHO_OFFSET, rho, MLDSA_SEEDBYTES);
   mld_memcpy(sk + MLDSA_SK_KEY_OFFSET, key, MLDSA_SEEDBYTES);
   mld_memcpy(sk + MLDSA_SK_TR_OFFSET, tr, MLDSA_TRBYTES);
-  /* s1 already packed via mld_pack_sk_s1 */
-  mld_polyveck_pack_eta(sk + MLDSA_SK_S2_OFFSET, s2);
+  /* s1 and s2 already packed via mld_sample_pack_s1_s2 */
   /* t0 already packed via mld_compute_pack_t0_t1 */
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
