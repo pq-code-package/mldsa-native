@@ -16,7 +16,9 @@
  * RV32-IM ML-DSA forward NTT, fast-multiplier variant.
  *
  * Thin wrapper: the kernel body is shared via mldsa_ntt_rv32im_asm.i, which
- * computes the Barrett low(t*q) reduction with a single multiply by q.
+ * computes the Barrett low(t*q) reduction with a single multiply by q here.
+ * The slow-multiplier variant lives in mldsa_ntt_rv32im_slowmul_asm.S.
+ * Exactly one is selected by MLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER.
  * The coarse Barrett output bound used by the shared kernel is proved in
  * @[NeonNTT_Autoformalised, Section 13.2].
  */
@@ -45,7 +47,8 @@
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_RV32IM) && \
-    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    !defined(MLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER)
 /* simpasm: header-end */
 
         .text
@@ -56,4 +59,5 @@ MLD_ASM_FN_SYMBOL(ntt_rv32im_asm)
 #include "mldsa_ntt_rv32im_asm.i"
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_RV32IM && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_ARITH_BACKEND_RV32IM && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          !MLD_USE_NATIVE_RV32IM_SLOW_MULTIPLIER */

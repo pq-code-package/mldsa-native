@@ -315,6 +315,7 @@ source code and documentation.
   - [dev/aarch64_opt/src/mldsa_intt_aarch64_asm.S](dev/aarch64_opt/src/mldsa_intt_aarch64_asm.S)
   - [dev/aarch64_opt/src/mldsa_ntt_aarch64_asm.S](dev/aarch64_opt/src/mldsa_ntt_aarch64_asm.S)
   - [dev/riscv32/src/mldsa_ntt_rv32im_asm.S](dev/riscv32/src/mldsa_ntt_rv32im_asm.S)
+  - [dev/riscv32/src/mldsa_ntt_rv32im_slowmul_asm.S](dev/riscv32/src/mldsa_ntt_rv32im_slowmul_asm.S)
   - [mldsa/src/native/aarch64/src/mldsa_intt_aarch64_asm.S](mldsa/src/native/aarch64/src/mldsa_intt_aarch64_asm.S)
   - [mldsa/src/native/aarch64/src/mldsa_ntt_aarch64_asm.S](mldsa/src/native/aarch64/src/mldsa_ntt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/mldsa_intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/mldsa_intt_aarch64_asm.S)

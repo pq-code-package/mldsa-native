@@ -6,9 +6,13 @@
 /*
  * RV32-IM ML-DSA forward NTT -- shared kernel body.
  *
- * This file is #include'd by mldsa_ntt_rv32im_asm.S. It is not a standalone
- * translation unit: the backend guard, the .global directive, and the
- * simpasm header/footer markers live in the wrapper.
+ * This file is #include'd by the thin wrapper .S files
+ *   mldsa_ntt_rv32im_asm.S         (fast multiplier: one `mul`)
+ *   mldsa_ntt_rv32im_slowmul_asm.S (slow multiplier: shift/add)
+ * which differ only in whether they #define
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER before the include. It is not a
+ * standalone translation unit: the backend guard, the .global directive,
+ * and the simpasm header/footer markers live in the wrappers.
  *
  * Layered structure: 2+2+2+2 (four passes, each merging two layers, with
  * a radix-4 inner kernel holding 4 coefficients in registers).
@@ -45,9 +49,9 @@
  * bound.
  *
  * All additions and subtractions therefore have their mathematical result
- * in signed int32 range. The low-word multiplies deliberately operate modulo
- * R, exactly as specified by RV32. The final representative is unique because
- * B < R/2.
+ * in signed int32 range. The low-word multiplies and the slow shift/add
+ * reduction deliberately operate modulo R, exactly as specified by RV32.
+ * The final representative is unique because B < R/2.
  *
  * The result is in the plain domain (no Montgomery factor). This is the same
  * domain as the C NTT: a Montgomery formulation would fold R into each
@@ -87,8 +91,9 @@
 #define zeta_h1 s4
 #define zeta_h1_w s5
 
-/* Constant q register used by mul_q_sub. t0 is caller-saved and otherwise
- * unused, so no extra save/restore is needed. */
+/* Constant q register, used only by mul_q_sub when
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER is undefined. t0 is caller-saved
+ * and otherwise unused, so no extra save/restore is needed. */
 #define q t0 /* MLDSA_Q = 8380417            */
 
 /*****************************************************************
@@ -99,12 +104,32 @@
  *
  *   rd = rd - low(rt*q)  (mod R), clobbering rt.
  *
- * q is held in the `q` register. The low multiplication and subtraction
- * intentionally retain only the low word modulo R.
+ * Two bit-identical implementations, selected by
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER:
+ *
+ *   defined   : shift/add, exploiting q = 2^23 - 2^13 + 1.
+ *   undefined : single low multiply by q (q held in `q`).
+ *
+ * For the shift/add path, the three updates give
+ *
+ *   rd - rt + (rt << 13) - (rt << 23) == rd - rt*q (mod R).
+ *
+ * RV32 shifts and additions retain the low word, so intermediate wraparound
+ * is intentional and both paths are bit-identical. The reduction is the only
+ * multiplier-dependent step; the Barrett kernel, butterflies and table are
+ * shared.
  */
 .macro mul_q_sub rd, rt
+#if defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
+        sub  \rd, \rd, \rt        /* - rt                      */
+        slli \rt, \rt, 13
+        add  \rd, \rd, \rt        /* + (rt<<13)                */
+        slli \rt, \rt, 10
+        sub  \rd, \rd, \rt        /* - (rt<<23) => - low(rt*q) */
+#else  /* MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
         mul  \rt, \rt, q          /* low(rt * q)               */
         sub  \rd, \rd, \rt
+#endif /* !MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
 .endm
 
 /* barrett rd, ra, rzeta, rw, rt :
@@ -214,9 +239,11 @@
 
         save_regs
 
+#if !defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
         /* q = 8380417 = 0x007FE001, for the multiply in mul_q_sub. */
         lui  q, 0x7FE
         addi q, q, 1
+#endif
 
         /***************************************************
          * Pass 1: C-layers 1, 2.
