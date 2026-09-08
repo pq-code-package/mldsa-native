@@ -18,7 +18,7 @@
  * addresses. Constant-time use also relies on the target's 32-bit multiplier
  * executing RV32M mul and mulh with data-independent latency. RV32IM does not
  * architecturally guarantee this property; integrators must establish it for
- * the selected core. The backend is covered by functional tests, but
+ * the selected core. The backend is covered by functional and ABI tests, but
  * currently has no formal proof.
  */
 
@@ -60,6 +60,6 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
-#endif /* !__ASSEMBLER__ */
 
+#endif /* !__ASSEMBLER__ */
 #endif /* !MLD_NATIVE_RV32IM_META_H */

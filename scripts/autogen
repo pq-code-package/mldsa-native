@@ -4499,6 +4499,59 @@ ABI_CAPS = {
             "mldsa/src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S",
         ],
     },
+    "RV32M": {
+        "asm_subdir": "riscv32",
+        "guard": None,
+        "syscap": None,
+        "description": "RISC-V RV32M integer multiplication",
+        # Generation already assembles the canonical source with
+        # -march=rv32im/-mabi=ilp32. The linked ABI test must inherit the
+        # target toolchain ABI (for example Linux ILP32D); forcing only these
+        # assembly objects to soft-float ILP32 makes them link-incompatible.
+        "cflags": [],
+        "aux_files": [
+            "test/abicheck/riscv32/callstub_riscv32.S",
+            "test/abicheck/riscv32/selftest_riscv32.S",
+        ],
+    },
+}
+
+
+# RISC-V integer-register ABI names and architectural indices.
+RISCV32_GPR_NUMBERS = {
+    "zero": 0,
+    "ra": 1,
+    "sp": 2,
+    "gp": 3,
+    "tp": 4,
+    "t0": 5,
+    "t1": 6,
+    "t2": 7,
+    "s0": 8,
+    "fp": 8,
+    "s1": 9,
+    "a0": 10,
+    "a1": 11,
+    "a2": 12,
+    "a3": 13,
+    "a4": 14,
+    "a5": 15,
+    "a6": 16,
+    "a7": 17,
+    "s2": 18,
+    "s3": 19,
+    "s4": 20,
+    "s5": 21,
+    "s6": 22,
+    "s7": 23,
+    "s8": 24,
+    "s9": 25,
+    "s10": 26,
+    "s11": 27,
+    "t3": 28,
+    "t4": 29,
+    "t5": 30,
+    "t6": 31,
 }
 
 
@@ -4549,6 +4602,18 @@ ARCH_CALLINGS = {
         "check_func": "check_armv81m_aapcs32_compliance",
         # AAPCS32 GPRs r0-r12 map directly to gpr[0..12].
         "reg_to_field": lambda reg: f"gpr[{int(reg[1:])}]",
+    },
+    ("riscv32", "ILP32"): {
+        "arch_guard": "MLD_SYS_RISCV32",
+        "extra_guards": [],
+        "asm_subdir": "riscv32",
+        "state_type": "struct riscv32_register_state",
+        "gpr_int_type": "uint32_t",
+        "fn_qualifier": "",
+        "init_func": "init_riscv32_register_state",
+        "stub_func": "call_stub_riscv32",
+        "check_func": "check_riscv32_ilp32_compliance",
+        "reg_to_field": lambda reg: f"gpr[{RISCV32_GPR_NUMBERS[reg]}]",
     },
 }
 
@@ -4650,6 +4715,24 @@ def gen_abicheck():
     # (basename, dev_dir, _cflags, arch); the cflags slot is unused here.
     joblist_abicheck_extra = [
         ("keccak_f1600_x4_mve.S", "dev/fips202/armv81m/src", "", "armv81m"),
+        (
+            "mldsa_intt_rv32im_asm.S",
+            "dev/riscv32/src",
+            "-march=rv32im -mabi=ilp32",
+            "riscv32",
+        ),
+        (
+            "mldsa_ntt_rv32im_asm.S",
+            "dev/riscv32/src",
+            "-march=rv32im -mabi=ilp32",
+            "riscv32",
+        ),
+        (
+            "mldsa_poly_pointwise_montgomery_rv32im_asm.S",
+            "dev/riscv32/src",
+            "-march=rv32im -mabi=ilp32",
+            "riscv32",
+        ),
     ]
     joblist = hol_light_asm_joblist() + joblist_abicheck_extra
 

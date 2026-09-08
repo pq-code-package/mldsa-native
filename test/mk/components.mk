@@ -200,6 +200,8 @@ ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/x86_64/src/*.S) \
                         $(wildcard mldsa/src/fips202/native/x86_64/src/*.S)
 else ifeq ($(ABICHECK_ARCH),armv81m)
 ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
+else ifeq ($(ABICHECK_ARCH),riscv32)
+ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/rv32im/src/*.S)
 else
 ABICHECK_ASM_SOURCES :=
 endif
@@ -233,6 +235,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLD_CONFIG_NAMESPACE_PREFIX=mld \
   -DMLD_ARITH_BACKEND_AARCH64 \
   -DMLD_ARITH_BACKEND_X86_64_DEFAULT \
+  -DMLD_ARITH_BACKEND_RV32IM \
   -DMLD_FIPS202_AARCH64_NEED_X1_SCALAR \
   -DMLD_FIPS202_AARCH64_NEED_X1_V84A \
   -DMLD_FIPS202_AARCH64_NEED_X2_V84A \
