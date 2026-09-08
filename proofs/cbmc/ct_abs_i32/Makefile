@@ -28,7 +28,11 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  ILP32:z3
+  LP64:bitwuzla \
+  LP64:cvc5_arrays_exp \
+  ILP32:z3 \
+  ILP32:bitwuzla \
+  ILP32:cvc5_arrays_exp
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mld_ct_abs_i32
