@@ -39,10 +39,20 @@ __contract__(
   ensures(array_abs_bound(r, 0, MLDSA_N, 94279698))
 );
 
+#define mld_intt_rv32im_asm MLD_NAMESPACE(intt_rv32im_asm)
+void mld_intt_rv32im_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
+  requires(zetas == mld_rv32im_ntt_zetas)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
+);
+
 /*
- * This contract documents the C-facing assumptions and bounds used by the
+ * These contracts document the C-facing assumptions and bounds used by the
  * assembly. Unlike the proved AArch64 and x86_64 backends, the experimental
- * RV32IM backend currently has no formal proof discharging it.
+ * RV32IM backend currently has no formal proof discharging them.
  */
 
 #endif /* !MLD_NATIVE_RV32IM_SRC_ARITH_NATIVE_RV32IM_H */
