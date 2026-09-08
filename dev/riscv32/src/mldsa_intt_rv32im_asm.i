@@ -6,9 +6,13 @@
 /*
  * RV32-IM ML-DSA inverse NTT -- shared kernel body.
  *
- * This file is #include'd by mldsa_intt_rv32im_asm.S. It is not a standalone
- * translation unit: the backend guard, the .global directive, and the
- * simpasm header/footer markers live in the wrapper.
+ * This file is #include'd by the thin wrapper .S files
+ *   mldsa_intt_rv32im_asm.S         (fast multiplier: one `mul`)
+ *   mldsa_intt_rv32im_slowmul_asm.S (slow multiplier: shift/add)
+ * which differ only in whether they #define
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER before the include. It is not a
+ * standalone translation unit: the backend guard, the .global directive,
+ * and the simpasm header/footer markers live in the wrappers.
  *
  * Layered structure: 2+2+2+2 (mirror of the forward NTT, with passes
  * applied in reverse layer order). Each pass merges two C-layers into a
@@ -38,10 +42,13 @@
  * w = round(zeta*R/q), and the kernel computes
  *
  *   t = floor(a*w/R)
- *   r = (a*zeta - t*q) mod R.
+ *   r = a*zeta - t*q.
  *
  * Hence r == a*zeta (mod q). For every call below |a| < 256q < R/2, which
- * gives |r| < B = ceil(5q/4) = 10475522.
+ * gives |r| < B = ceil(5q/4) = 10475522 < R/2. Thus r is recovered exactly
+ * from its signed low word. The low(t*q) reduction has two bit-identical
+ * implementations (see `mul_q_sub`): a single multiply, or a shift/add
+ * sequence exploiting q = 2^23 - 2^13 + 1.
  *
  * Final scaling: after the four passes, every coefficient is multiplied
  * by the plain twiddle  f = 16382 = R * 2^{-8} mod q  (= 2^24 mod q),
@@ -113,8 +120,9 @@
 #define f s6    /* plain fqscale: 16382 = R*2^-8 mod q */
 #define f_w2 s7 /* doubled Barrett mult: round(f*2^33/q) */
 
-/* Constant q register used by mul_q_sub. t0 is caller-saved and otherwise
- * unused, so no extra save/restore is needed. */
+/* Constant q register, used only by mul_q_sub when
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER is undefined. t0 is caller-saved
+ * and otherwise unused, so no extra save/restore is needed. */
 #define q t0 /* MLDSA_Q = 8380417            */
 
 /*****************************************************************
@@ -125,12 +133,31 @@
  *
  *   rd = rd - low(rt*q)  (mod R), clobbering rt.
  *
- * q is held in the `q` register. The low multiplication and subtraction
- * intentionally retain only the low word modulo R.
+ * Two bit-identical implementations, selected by
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER:
+ *
+ *   defined   : shift/add, exploiting q = 2^23 - 2^13 + 1.
+ *   undefined : single low multiply by q (q held in `q`).
+ *
+ * In the shift/add path the updates compute
+ *
+ *   rd - rt + (rt << 13) - (rt << 23) == rd - rt*q (mod R).
+ *
+ * Both paths compute the same low word. The Barrett bounds at each call show
+ * that this is also the signed full-width result. The Barrett kernels,
+ * butterflies, final scaling, and zeta table are otherwise shared.
  */
 .macro mul_q_sub rd, rt
+#if defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
+        sub  \rd, \rd, \rt        /* - rt                      */
+        slli \rt, \rt, 13
+        add  \rd, \rd, \rt        /* + (rt<<13)                */
+        slli \rt, \rt, 10
+        sub  \rd, \rd, \rt        /* - (rt<<23) => - low(rt*q) */
+#else  /* MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
         mul  \rt, \rt, q          /* low(rt * q)               */
         sub  \rd, \rd, \rt
+#endif /* !MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
 .endm
 
 /* barrett rd, ra, rzeta, rw, rt :
@@ -138,9 +165,8 @@
  *   rd == ra*rzeta (mod q), with |rd| < B = ceil(5q/4). Clobbers: rt.
  *   t = floor(ra*rw/R); rd = low(ra*rzeta) - low(t*q).
  *
- * Since |rw-rzeta*R/q| <= 1/2 and |ra| < R/2, the quotient-estimation
- * error is strictly below 5/4. The resulting signed representative is
- * therefore bounded by B and is unique because B < R/2.
+ * The quotient-estimation argument bounds the full-width difference
+ * ra*rzeta-t*q by B < R/2, so its signed low word is the same integer.
  */
 .macro barrett rd, ra, rzeta, rw, rt
         mulh  \rt, \ra, \rw       /* t   = hi(ra * w)          */
@@ -158,8 +184,8 @@
  *   qhat = (t + 1) >> 1          ~ round(ra * rf / q)
  *   rd   = low(ra * rf) - low(qhat * q)
  * For rf=16382 and rf_w2=16791564, the exact error calculation in the file
- * header gives |rd| < 100q/199 < q. The low-word computation is congruent to
- * ra*rf modulo q; the bound selects its unique signed representative.
+ * header bounds the full-width difference ra*rf-qhat*q by 100q/199 < q < R/2,
+ * so its signed low word is the same integer.
  *
  * rf_w2 fits int32 only because rf is small (here 16382); a general twiddle
  * up to q/2 would overflow the doubled constant. Final scaling only.
@@ -294,11 +320,13 @@
 
         save_regs
 
+#if !defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
         /* check-magic: 8380417 == MLDSA_Q */
         /* q = 8380417 = 0x007FE001, for the multiply in mul_q_sub (used by
          * both the butterflies and the final Barrett scaling). */
         lui  q, 0x7FE
         addi q, q, 1
+#endif /* !MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
 
         /* Position zeta_ptr at the END of the table (one past last entry).
          * The table has 255 pairs = 510 int32 = 2040 bytes. */
