@@ -76,6 +76,10 @@
 #define MLD_SYS_PPC64LE
 #endif
 
+#if defined(MLD_SYS_BIG_ENDIAN) && defined(__powerpc64__)
+#define MLD_SYS_PPC64BE
+#endif
+
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 64
 #define MLD_SYS_RISCV64
 #endif
@@ -121,6 +125,10 @@
 
 #if defined(MLD_FORCE_PPC64LE) && !defined(MLD_SYS_PPC64LE)
 #error "MLD_FORCE_PPC64LE is set, but we don't seem to be on a PPC64LE system."
+#endif
+
+#if defined(MLD_FORCE_PPC64BE) && !defined(MLD_SYS_PPC64BE)
+#error "MLD_FORCE_PPC64BE is set, but we don't seem to be on a PPC64BE system."
 #endif
 
 #if defined(MLD_FORCE_RISCV64) && !defined(MLD_SYS_RISCV64)
