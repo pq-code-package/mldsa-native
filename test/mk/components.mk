@@ -200,8 +200,29 @@ ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/x86_64/src/*.S) \
                         $(wildcard mldsa/src/fips202/native/x86_64/src/*.S)
 else ifeq ($(ABICHECK_ARCH),armv81m)
 ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
+else ifeq ($(ABICHECK_ARCH),riscv32)
+ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/rv32im/src/*.S)
 else
 ABICHECK_ASM_SOURCES :=
+endif
+
+# Keep RV32 assembly objects on the active ILP32 floating-point ABI while
+# enabling the minimum ISA needed by that ABI. The kernels themselves remain
+# restricted to RV32IM by the normal generation path.
+ifeq ($(ABICHECK_ARCH),riscv32)
+ABICHECK_RISCV32_FLOAT_ABI := $(shell \
+  $(CC) $(filter -mabi=%,$(CFLAGS)) \
+  -dM -E -x c /dev/null 2>/dev/null | \
+  sed -n 's/^\#define __riscv_float_abi_\([a-z]*\) 1$$/\1/p')
+ifeq ($(ABICHECK_RISCV32_FLOAT_ABI),soft)
+ABICHECK_RISCV32_MARCH := rv32im
+else ifeq ($(ABICHECK_RISCV32_FLOAT_ABI),single)
+ABICHECK_RISCV32_MARCH := rv32imf
+else ifeq ($(ABICHECK_RISCV32_FLOAT_ABI),double)
+ABICHECK_RISCV32_MARCH := rv32imfd
+else
+$(error Unable to determine the RISC-V floating-point ABI)
+endif
 endif
 
 # Per-capability CFLAGS injection (e.g. -march=armv8.4-a+sha3 for SHA3,
@@ -233,6 +254,9 @@ ABICHECK_ASM_CFLAGS := \
   -DMLD_CONFIG_NAMESPACE_PREFIX=mld \
   -DMLD_ARITH_BACKEND_AARCH64 \
   -DMLD_ARITH_BACKEND_X86_64_DEFAULT \
+  -DMLD_ARITH_BACKEND_RV32IM \
+  -DMLD_RV32IM_NEED_FASTMUL \
+  -DMLD_RV32IM_NEED_SLOWMUL \
   -DMLD_FIPS202_AARCH64_NEED_X1_SCALAR \
   -DMLD_FIPS202_AARCH64_NEED_X1_V84A \
   -DMLD_FIPS202_AARCH64_NEED_X2_V84A \

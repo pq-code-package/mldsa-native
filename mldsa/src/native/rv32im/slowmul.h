@@ -23,8 +23,8 @@
  * The assembly has fixed control flow and secret-independent memory
  * addresses. RV32IM does not architecturally guarantee constant-latency
  * multiplication, so integrators must establish this property for the
- * selected core. The backend is covered by functional tests, but currently
- * has no formal proof.
+ * selected core. The backend is covered by functional and ABI tests, but
+ * currently has no formal proof.
  */
 
 /* Set of primitives that this backend replaces. */
