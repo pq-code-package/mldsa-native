@@ -91,20 +91,57 @@ def _split_pipeline_name(pipeline_name):
     return proof_uid, "LP64", legacy_profiles.get(solver, solver)
 
 
+# Marker emitted by cbmc when the SMT backend returned `unknown` on the
+# verification query. cbmc still exits non-zero (cprover-status: ERROR)
+# in this case, so the pipeline shows up as `fail` in litani; but no
+# property was actually refuted -- the solver simply could not decide.
+# We surface this as a distinct "Inconclusive" outcome.
+_SOLVER_UNKNOWN_MARKER = 'SMT2 solver returned "unknown"'
+
+
+def _is_solver_inconclusive(stdout_file):
+    """Return True iff the cbmc safety-check job's stdout-file (result.xml)
+    contains the cbmc message indicating the SMT backend returned `unknown`.
+    """
+    if not stdout_file:
+        return False
+    try:
+        with open(stdout_file, encoding="utf-8", errors="replace") as f:
+            return _SOLVER_UNKNOWN_MARKER in f.read()
+    except OSError:
+        return False
+
+
 def _parse_proof_pipeline(proof_pipeline):
     """Parse a single proof pipeline, returning
     (name, dm, solver, status, duration, has_timeout)."""
     duration = 0
     has_timeout = False
+    inconclusive = False
+    has_other_failure = False
     for stage in proof_pipeline["ci_stages"]:
         for job in stage["jobs"]:
             if job.get("timeout_reached", False):
                 has_timeout = True
             if "duration" in job:
                 duration += int(job["duration"])
+            # Identify the safety-check job by its description suffix.
+            # Litani stores both description and stdout_file under
+            # wrapper_arguments (the args passed to `litani add-job`).
+            wa = job.get("wrapper_arguments") or {}
+            desc = wa.get("description") or ""
+            job_inconclusive = desc.endswith(
+                ": checking safety properties"
+            ) and _is_solver_inconclusive(wa.get("stdout_file"))
+            if job_inconclusive:
+                inconclusive = True
+            if job.get("outcome") in ("fail", "fail_ignored") and not job_inconclusive:
+                has_other_failure = True
 
     if has_timeout:
         status = "Timeout"
+    elif proof_pipeline["status"] == "fail" and inconclusive and not has_other_failure:
+        status = "Inconclusive"
     else:
         status = proof_pipeline["status"].title()
     name, dm, solver = _split_pipeline_name(proof_pipeline["name"])
@@ -240,6 +277,10 @@ def export_result_json(
             runtimes.append(metadata | {"status": "omitted"})
             continue
 
+        if status == "Inconclusive":
+            runtimes.append(metadata | {"status": "inconclusive", "duration": duration})
+            continue
+
         if status != "Success":
             failures.append(metadata | {"status": status, "duration": duration})
 
@@ -254,15 +295,17 @@ def export_result_json(
     failed = sum(1 for f in failures if f["status"] != "Timeout")
     timeout = sum(1 for f in failures if f["status"] == "Timeout")
     omitted = sum(1 for r in runtimes if r.get("status") == "omitted")
+    inconclusive = sum(1 for r in runtimes if r.get("status") == "inconclusive")
 
     result = {
         "mldsa_parameter_set": os.getenv("MLD_CONFIG_PARAMETER_SET", "unknown"),
         "summary": {
             "total": total,
-            "success": total - failed - timeout - omitted,
+            "success": total - failed - timeout - omitted - inconclusive,
             "failed": failed,
             "timeout": timeout,
             "omitted": omitted,
+            "inconclusive": inconclusive,
         },
         "failures": failures,
         "runtimes": runtimes,
@@ -310,15 +353,28 @@ def print_proof_results(
         "summarizing all proof results"
     )
 
-    # Check for timeouts and real failures.
+    # Inconclusive proofs did not refute a property, but they also did not
+    # prove it and therefore fail the run.
     proof_statuses = [row[3] for row in proof_table[1:] if any(row)]
     has_timeout = any(s == "Timeout" for s in proof_statuses)
     has_real_failure = any(s == "Fail" for s in proof_statuses)
+    has_inconclusive = any(s == "Inconclusive" for s in proof_statuses)
+    has_tool_version_failure = any(
+        pipeline["name"] == "print_tool_versions" and pipeline["status"] == "fail"
+        for pipeline in run_dict["pipelines"]
+    )
 
-    if has_timeout or has_real_failure:
-        logging.error("Not all proofs passed.")
+    if has_timeout or has_real_failure or has_inconclusive or has_tool_version_failure:
+        logging.error("Not all CBMC jobs passed.")
         if has_timeout:
             logging.error("Some proofs timed out.")
+        if has_inconclusive:
+            logging.error(
+                "Some (proof, DM, solver-profile) configurations were inconclusive "
+                "(solver returned 'unknown')."
+            )
+        if has_tool_version_failure:
+            logging.error("Printing tool versions failed.")
         logging.error(msg)
         sys.exit(1)
     logging.info(msg)

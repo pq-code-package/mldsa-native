@@ -123,11 +123,30 @@ def classify_proof(r, baseline_by_config, baseline_by_name, cfg):
     base = baseline_by_config.get((name, dm, solver), baseline_by_name.get(name, {}))
     base_val, base_failed = base.get("value"), base.get("status") == "failed"
     base_omitted = base.get("status") == "omitted"
+    base_inconclusive = base.get("status") == "inconclusive"
     solver_display = solver
     if r.get("default", False):
         solver_display += "*"
     if r.get("exploratory", False):
         solver_display += " (explore)"
+
+    # The solver did not refute a property, but it also did not prove it.
+    if r.get("status") == "inconclusive":
+        prev = (
+            f"{base_val}s"
+            if base_val
+            else "failed"
+            if base_failed
+            else "inconclusive"
+            if base_inconclusive
+            else "omitted"
+            if base_omitted
+            else "-"
+        )
+        return (
+            ProofResult(name, dm, solver_display, WARN, "?", prev, "inconclusive"),
+            True,
+        )
 
     if r.get("status") == "failed":
         prev = "failed" if base_failed else (f"{base_val}s" if base_val else "-")
@@ -184,7 +203,7 @@ def compute_total_runtime(data):
     return sum(
         r["value"]
         for r in data.get("runtimes", [])
-        if r.get("status") not in ("failed", "omitted")
+        if r.get("status") not in ("failed", "omitted", "inconclusive")
         and "value" in r
         and is_default_result(r)
     )
