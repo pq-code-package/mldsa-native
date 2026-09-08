@@ -987,11 +987,14 @@ class Tests:
                 print(p)
             exit(0)
 
+        def configuration_args():
+            args = ["--dm", self.args.dm, "--solver", self.args.solver]
+            if self.args.explore:
+                args.append("--explore")
+            return args
+
         def run_cbmc_single_step(mldsa_parameter_set, mldsa_dm, proofs):
-            envvars = {
-                "MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set,
-                "CBMC_DM": mldsa_dm,
-            }
+            envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             scheme = SCHEME.from_mode(mldsa_parameter_set)
@@ -1014,6 +1017,7 @@ class Tests:
                             "-p",
                             func,
                         ]
+                        + configuration_args()
                         + self.make_j(),
                         cwd="proofs/cbmc",
                         env=os.environ.copy() | envvars,
@@ -1066,10 +1070,7 @@ class Tests:
             if self.args.single_step:
                 run_cbmc_single_step(mldsa_parameter_set, mldsa_dm, proofs)
                 return
-            envvars = {
-                "MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set,
-                "CBMC_DM": mldsa_dm,
-            }
+            envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
             cmd = (
@@ -1083,6 +1084,7 @@ class Tests:
                     "-p",
                 ]
                 + proofs
+                + configuration_args()
                 + self.make_j()
             )
             if self.args.output_result_json:
@@ -1538,10 +1540,11 @@ def cli():
 
     cbmc_parser.add_argument(
         "--dm",
-        help="Value of CBMC_DM, determining the data model for CBMC proofs. Default LP64",
-        choices=["LP64"],
-        type=str.upper,
-        default="LP64",
+        help=(
+            "Select CBMC data models: 'default', 'all', or a comma-separated "
+            "list. Forwarded to run-cbmc-proofs.py --dm. Default: default."
+        ),
+        default="default",
     )
 
     cbmc_parser.add_argument(
@@ -1604,6 +1607,27 @@ def cli():
     cbmc_parser.add_argument(
         "--reduce-ram",
         help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--solver",
+        help=(
+            "Select CBMC solver profiles: 'default', 'all', or a "
+            "comma-separated list. Forwarded to run-cbmc-proofs.py --solver. "
+            "Default: default."
+        ),
+        default="default",
+    )
+
+    cbmc_parser.add_argument(
+        "--explore",
+        help=(
+            "Run selected CBMC configurations even when a proof does not "
+            "declare them supported. Forwarded to run-cbmc-proofs.py "
+            "--explore."
+        ),
         action="store_true",
         default=False,
     )
