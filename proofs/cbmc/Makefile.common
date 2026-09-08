@@ -180,12 +180,15 @@ PROOFDIR ?= $(abspath .)
 # intersects their product with CBMC_SUPPORTED_CONFIGS. CBMC_EXPLORE=1 permits
 # a known but undeclared configuration to be run experimentally.
 
-CBMC_DMS_ALL := LP64
+CBMC_DMS_ALL := LP64 ILP32
 
 CBMC_DM_LP64_GOTO_CC_FLAG := --64
 CBMC_DM_LP64_CBMC_FLAG := --LP64
 CBMC_DM_LP64_INCLUDE := $(CBMC_ROOT)/cbmc/include/LP64
 
+CBMC_DM_ILP32_GOTO_CC_FLAG := --32
+CBMC_DM_ILP32_CBMC_FLAG := --ILP32
+CBMC_DM_ILP32_INCLUDE := $(CBMC_ROOT)/cbmc/include/ILP32
 
 # Solver profile IDs name the executable and all solver-specific options.
 CBMC_SOLVER_PROFILES_ALL := z3 z3_smt_only z3_no_bv_extract bitwuzla
