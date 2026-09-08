@@ -37,9 +37,10 @@ endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--smt2 --arrays-uf-always
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_DEFAULT_CONFIG = LP64:z3
+CBMC_CONFIG_FLAGS = --arrays-uf-always
 
 FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_yvec
 

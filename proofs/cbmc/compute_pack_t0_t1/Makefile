@@ -33,9 +33,9 @@ USE_FUNCTION_CONTRACTS+=mld_zeroize
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_no_bv_extract --z3
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = compute_pack_t0_t1
 

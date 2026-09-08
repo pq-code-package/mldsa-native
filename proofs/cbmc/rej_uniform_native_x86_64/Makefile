@@ -26,12 +26,12 @@ USE_FUNCTION_CONTRACTS=mld_rej_uniform_avx2_asm mld_rej_uniform_c mld_sys_check_
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead.
 # Use the z3_smt_only wrapper (disable Z3's initial simplify tactic and go
 # straight to the SMT tactic) to avoid Z3 divergence in solve time across
 # platforms, which otherwise pushes this proof over the CI per-proof timeout.
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3_smt_only
+CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = rej_uniform_native_x86_64
 
