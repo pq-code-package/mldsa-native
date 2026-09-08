@@ -2325,6 +2325,10 @@ def get_config_options():
 def check_macro_typos_in_file(filename, macro_check):
     """Checks for typos in MLD_XXX and MLDSA_XXX identifiers."""
     content = read_file(filename)
+    # Backend synchronization can schedule stale generated files for deletion
+    # before this repository-wide check runs.
+    if content is None:
+        return
 
     # Separate check for wrongly ported MLK/MLKEM macros
     for m in _RE_MLKEM_MACRO_CHECK.finditer(content):
