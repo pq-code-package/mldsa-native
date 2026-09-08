@@ -49,6 +49,29 @@ __contract__(
   ensures(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
 );
 
+#define mld_poly_pointwise_montgomery_rv32im_asm \
+  MLD_NAMESPACE(poly_pointwise_montgomery_rv32im_asm)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+void mld_poly_pointwise_montgomery_rv32im_asm(int32_t a[MLDSA_N],
+                                              const int32_t b[MLDSA_N])
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
+  /* This is MLD_NTT_BOUND, the exclusive output bound in the generic C and
+   * native forward-NTT contracts and the exclusive input bound in the
+   * pointwise-Montgomery contracts. */
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  requires(array_abs_bound(a, 0, MLDSA_N, 94279698))
+  requires(array_abs_bound(b, 0, MLDSA_N, 94279698))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  /* The q-bound is both the pointwise postcondition and the inverse-NTT
+   * input precondition in the generic C and native contracts. */
+  ensures(array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
+);
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+
 /*
  * These contracts document the C-facing assumptions and bounds used by the
  * assembly. Unlike the proved AArch64 and x86_64 backends, the experimental
