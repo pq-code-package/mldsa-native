@@ -15,7 +15,7 @@
  * MLD_CONFIG_ARITH_BACKEND_FILE to native/rv32im/fastmul.h.
  *
  * This profile uses an RV32M low multiply for the Barrett `t*q` step in the
- * forward NTT wrapper.
+ * forward and inverse NTT wrappers.
  *
  * The assembly has fixed control flow and secret-independent memory
  * addresses. Constant-time use also relies on the target's 32-bit multiplier
@@ -27,6 +27,7 @@
 
 /* Set of primitives that this backend replaces. */
 #define MLD_USE_NATIVE_NTT
+#define MLD_USE_NATIVE_INTT
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -42,6 +43,13 @@ MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
 {
   mld_ntt_rv32im_fastmul_asm(data, mld_rv32im_ntt_zetas);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+{
+  mld_intt_rv32im_fastmul_asm(data, mld_rv32im_ntt_zetas);
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* !__ASSEMBLER__ */
