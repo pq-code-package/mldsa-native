@@ -39,6 +39,23 @@ __contract__(
   ensures(array_abs_bound(r, 0, MLDSA_N, 94279698))
 );
 
+#define mld_ntt_rv32im_slowmul_asm MLD_NAMESPACE(ntt_rv32im_slowmul_asm)
+void mld_ntt_rv32im_slowmul_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+__contract__(
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
+  requires(zetas == mld_rv32im_ntt_zetas)
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  /* The truncating `mulh` Barrett multiply has output bound
+   * ceil(5*q/4), so eight CT layers grow the input-q bound to
+   * q + 8*ceil(5*q/4) < 9*ceil(5*q/4). */
+  /* This is MLD_NTT_BOUND, the exclusive output bound in the generic C and
+   * native NTT contracts and the exclusive input bound in the pointwise
+   * Montgomery contracts. */
+  /* check-magic: 94279698 == 9 * ((5 * MLDSA_Q + 3) / 4) */
+  ensures(array_abs_bound(r, 0, MLDSA_N, 94279698))
+);
+
 /*
  * This contract documents the C-facing assumptions and bounds used by the
  * assembly. Unlike the proved AArch64 and x86_64 backends, the experimental
