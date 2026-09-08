@@ -502,8 +502,11 @@ class Tests:
         if test_type.is_example() and self.args.cross_prefix != "":
             cflags += " -static"
 
+        # abicheck enables all assembly profiles directly.
+        use_backend_selection = opt is True and test_type != TEST_TYPES.ABICHECK
+
         # Add FIPS202 backend selection if specified and this is an OPT build
-        if self.args.fips202_aarch64_backend != "auto" and opt is True:
+        if self.args.fips202_aarch64_backend != "auto" and use_backend_selection:
             # Make sure we're forcing AArch64 architecture
             if " -DMLD_FORCE_AARCH64" not in cflags:
                 cflags += " -DMLD_FORCE_AARCH64"
@@ -513,6 +516,18 @@ class Tests:
 
             # Specify the backend file
             cflags += f' -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
+
+        # Add RV32 arithmetic backend selection if specified and this is an OPT build
+        if self.args.arith_riscv32_backend is not None and use_backend_selection:
+            # Make sure we're forcing RV32 architecture
+            if " -DMLD_FORCE_RISCV32" not in cflags:
+                cflags += " -DMLD_FORCE_RISCV32"
+
+            # Enable native arithmetic backend
+            cflags += " -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH"
+
+            # Specify the backend file
+            cflags += f' -DMLD_CONFIG_ARITH_BACKEND_FILE=\\"native/rv32im/{self.args.arith_riscv32_backend}.h\\"'
 
         env_update = {}
         if cflags != "":
@@ -1243,6 +1258,14 @@ def cli():
             "x4_v8a_v84a_scalar",
         ],
         default="auto",
+        type=str,
+    )
+
+    common_parser.add_argument(
+        "--arith-riscv32-backend",
+        help="Select RV32IM arithmetic backend",
+        choices=["fastmul", "slowmul"],
+        default=None,
         type=str,
     )
 

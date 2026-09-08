@@ -265,4 +265,3 @@ runs:
           rng_fail: ${{ inputs.rng_fail }}
           extra_args: ${{ inputs.extra_args }}
           extra_env: ${{ inputs.extra_env }}
-
