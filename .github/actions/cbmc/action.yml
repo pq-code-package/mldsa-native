@@ -66,7 +66,7 @@ runs:
             data_dir="dev/cbmc-reduce-ram"
             variant="reduce-ram"
           fi
-          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json $reduce_ram_flag || cbmc_failed=true
+          tests cbmc --mldsa-parameter-set ${{ inputs.mldsa_parameter_set }} --dm all --solver all --per-proof-timeout 1800 --output-result-json ${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json $reduce_ram_flag || cbmc_failed=true
           echo "::endgroup::"
           python3 ${{ github.action_path }}/report.py \
             --results-json "${{ github.workspace }}/cbmc_result_${{ inputs.mldsa_parameter_set }}.json" \
