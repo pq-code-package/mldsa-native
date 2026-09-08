@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) The mlkem-native project authors
+ * Copyright (c) The mldsa-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+#ifndef MLD_DEV_RISCV32_SLOWMUL_H
+#define MLD_DEV_RISCV32_SLOWMUL_H
+
+/*
+ * Experimental arithmetic backend for the RISC-V RV32-IM ISA and the
+ * ILP32, ILP32F, and ILP32D family of ABIs for RV32-IM. It is deliberately
+ * not selected by mldsa/src/native/meta.h: users must define
+ * MLD_CONFIG_USE_NATIVE_BACKEND_ARITH and set
+ * MLD_CONFIG_ARITH_BACKEND_FILE to native/rv32im/slowmul.h.
+ *
+ * This profile replaces the Barrett low(t*q) multiply in the forward and
+ * inverse NTT wrappers by a shift/add chain exploiting q = 2^23 - 2^13 + 1.
+ * It still uses RV32M `mulh`, and constant-time use still relies on the
+ * target's RV32M multiplier, including `mul` and `mulh`, having
+ * data-independent latency even if it is comparatively slow.
+ *
+ * The assembly has fixed control flow and secret-independent memory
+ * addresses. RV32IM does not architecturally guarantee constant-latency
+ * multiplication, so integrators must establish this property for the
+ * selected core. The backend is covered by functional tests, but currently
+ * has no formal proof.
+ */
+
+/* Set of primitives that this backend replaces. */
+#define MLD_USE_NATIVE_NTT
+#define MLD_USE_NATIVE_INTT
+
+/* Identifier for this backend so that source and assembly files
+ * in the build can be appropriately guarded. */
+#define MLD_ARITH_BACKEND_RV32IM
+
+#define MLD_RV32IM_NEED_SLOWMUL
+
+#if !defined(__ASSEMBLER__)
+#include "../api.h"
+#include "src/arith_native_rv32im.h"
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
+{
+  mld_ntt_rv32im_slowmul_asm(data, mld_rv32im_ntt_zetas);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+{
+  mld_intt_rv32im_slowmul_asm(data, mld_rv32im_ntt_zetas);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* !__ASSEMBLER__ */
+
+#endif /* !MLD_DEV_RISCV32_SLOWMUL_H */
