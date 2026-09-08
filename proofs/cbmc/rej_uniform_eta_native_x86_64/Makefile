@@ -36,12 +36,9 @@ USE_FUNCTION_CONTRACTS += mld_sys_check_capability
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead.
-# Use the z3_smt_only wrapper (skips Z3's initial simplify tactic, which
-# otherwise causes solve-time divergence on this array-heavy proof), as for
-# the other heavy array proofs (e.g. pointwise_acc, poly_invntt_tomont_c).
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--external-smt2-solver $(PROOF_ROOT)/lib/z3_smt_only --z3
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:z3_smt_only
+CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = rej_uniform_eta_native_x86_64
 

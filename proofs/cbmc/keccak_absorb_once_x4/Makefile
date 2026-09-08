@@ -26,9 +26,9 @@ USE_FUNCTION_CONTRACTS+=mld_keccakf1600x4_xor_bytes
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
-# Disable any setting of EXTERNAL_SAT_SOLVER, and choose SMT backend instead
-EXTERNAL_SAT_SOLVER=
-CBMCFLAGS=--bitwuzla
+# Supported CBMC configurations
+CBMC_SUPPORTED_CONFIGS = LP64:bitwuzla
+CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = mld_keccak_absorb_once_x4
 
