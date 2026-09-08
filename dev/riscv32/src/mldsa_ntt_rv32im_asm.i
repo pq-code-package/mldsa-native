@@ -15,9 +15,13 @@
 /*
  * RV32-IM ML-DSA forward NTT -- shared kernel body.
  *
- * This file is #include'd by mldsa_ntt_rv32im_asm.S. It is not a standalone
- * translation unit: the backend guard, the .global directive, and the
- * simpasm header/footer markers live in the wrapper.
+ * This file is #include'd by the thin wrapper .S files
+ *   mldsa_ntt_rv32im_asm.S         (fast multiplier: one `mul`)
+ *   mldsa_ntt_rv32im_slowmul_asm.S (slow multiplier: shift/add)
+ * which differ only in whether they #define
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER before the include. It is not a
+ * standalone translation unit: the backend guard, the .global directive,
+ * and the simpasm header/footer markers live in the wrappers.
  *
  * Layered structure: 2+2+2+2 (four passes, each merging two layers, with
  * a radix-4 inner kernel holding 4 coefficients in registers).
@@ -28,13 +32,15 @@
  * w = round(zeta*R/q). The `barrett` macro computes
  *
  *   t = floor(a*w/R)
- *   r = (a*zeta - t*q) mod R.
+ *   r = a*zeta - t*q.
  *
  * Thus r == a*zeta (mod q). Moreover, |w-zeta*R/q| <= 1/2 and |a| < R/2
- * imply |a*zeta/q-t| < 5/4. Once the low word is interpreted as a signed
- * integer, this gives
+ * imply |a*zeta/q-t| < 5/4 and hence
  *
  *   |r| < B,  B = ceil(5q/4) = 10475522.
+ *
+ * Since B < R/2, r is recovered exactly from its signed low word, which is
+ * what the RV32 implementation computes.
  *
  * This is the coarse bound for unsigned-style Barrett multiplication proved
  * in @[NeonNTT_Autoformalised, Section 13.2]. The RV32 `mul`/`mulh` followed
@@ -54,9 +60,9 @@
  * bound.
  *
  * All additions and subtractions therefore have their mathematical result
- * in signed int32 range. The low-word multiplies deliberately operate modulo
- * R, exactly as specified by RV32. The final representative is unique because
- * B < R/2.
+ * in signed int32 range. The low-word multiplies and the slow shift/add
+ * reduction deliberately operate modulo R, exactly as specified by RV32.
+ * The final representative is unique because B < R/2.
  *
  * The result is in the plain domain (no Montgomery factor). This is the same
  * domain as the C NTT: a Montgomery formulation would fold R into each
@@ -96,8 +102,9 @@
 #define zeta_h1 s4
 #define zeta_h1_w s5
 
-/* Constant q register used by mul_q_sub. t0 is caller-saved and otherwise
- * unused, so no extra save/restore is needed. */
+/* Constant q register, used only by mul_q_sub when
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER is undefined. t0 is caller-saved
+ * and otherwise unused, so no extra save/restore is needed. */
 #define q t0 /* MLDSA_Q = 8380417            */
 
 /*****************************************************************
@@ -108,12 +115,32 @@
  *
  *   rd = rd - low(rt*q)  (mod R), clobbering rt.
  *
- * q is held in the `q` register. The low multiplication and subtraction
- * intentionally retain only the low word modulo R.
+ * Two bit-identical implementations, selected by
+ * MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER:
+ *
+ *   defined   : shift/add, exploiting q = 2^23 - 2^13 + 1.
+ *   undefined : single low multiply by q (q held in `q`).
+ *
+ * For the shift/add path, the three updates give
+ *
+ *   rd - rt + (rt << 13) - (rt << 23) == rd - rt*q (mod R).
+ *
+ * Both paths compute the same low word. The Barrett bounds at each call show
+ * that this is also the signed full-width result. The reduction is the only
+ * multiplier-dependent step; the Barrett kernel, butterflies and table are
+ * shared.
  */
 .macro mul_q_sub rd, rt
+#if defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
+        sub  \rd, \rd, \rt        /* - rt                      */
+        slli \rt, \rt, 13
+        add  \rd, \rd, \rt        /* + (rt<<13)                */
+        slli \rt, \rt, 10
+        sub  \rd, \rd, \rt        /* - (rt<<23) => - low(rt*q) */
+#else  /* MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
         mul  \rt, \rt, q          /* low(rt * q)               */
         sub  \rd, \rd, \rt
+#endif /* !MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER */
 .endm
 
 /* barrett rd, ra, rzeta, rw, rt :
@@ -122,10 +149,10 @@
  *
  * rzeta : plain centered twiddle (constant)
  * rw    : Barrett multiplier round(rzeta * 2^32 / q) (constant)
- * `mulh` is the signed floor t = floor(ra*rw/R); `mul` retains the low
- * word. `mul_q_sub` therefore leaves a value congruent to ra*rzeta modulo q.
- * The error argument in the file header gives the bound whenever |ra| < R/2,
- * which holds at every call below. Clobbers: rt.
+ * `mulh` is the signed floor t = floor(ra*rw/R). The file-header argument
+ * bounds the full-width difference ra*rzeta-t*q by B < R/2, so its signed
+ * low word is the same integer. `mul` and `mul_q_sub` compute that low word.
+ * Clobbers: rt.
  */
 .macro barrett rd, ra, rzeta, rw, rt
         mulh  \rt, \ra, \rw       /* t   = hi(ra * w)          */
@@ -223,10 +250,12 @@
 
         save_regs
 
+#if !defined(MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER)
         /* check-magic: 8380417 == MLDSA_Q */
         /* q = 8380417 = 0x007FE001, for the multiply in mul_q_sub. */
         lui  q, 0x7FE
         addi q, q, 1
+#endif
 
         /***************************************************
          * Pass 1: C-layers 1, 2.
