@@ -36,6 +36,7 @@
  * dispatches across all arches, so it pulls in every arch's header. */
 #include "aarch64/abicheck_aarch64.h"
 #include "armv81m/abicheck_armv81m.h"
+#include "riscv32/abicheck_riscv32.h"
 #include "x86_64/abicheck_x86_64.h"
 
 /* Shared registry shape: per-arch tables of (name, fn-ptr, expected count).
@@ -208,8 +209,45 @@ static const selftest_entry_t armv81m_entries[] = {
     {NULL, NULL, 0},
 };
 
+#elif defined(MLD_SYS_RISCV32)
+
+extern void selftest_riscv32_noop(void);
+extern void selftest_riscv32_corrupt_s0(void);
+extern void selftest_riscv32_corrupt_s1(void);
+extern void selftest_riscv32_corrupt_s2(void);
+extern void selftest_riscv32_corrupt_s3(void);
+extern void selftest_riscv32_corrupt_s4(void);
+extern void selftest_riscv32_corrupt_s5(void);
+extern void selftest_riscv32_corrupt_s6(void);
+extern void selftest_riscv32_corrupt_s7(void);
+extern void selftest_riscv32_corrupt_s8(void);
+extern void selftest_riscv32_corrupt_s9(void);
+extern void selftest_riscv32_corrupt_s10(void);
+extern void selftest_riscv32_corrupt_s11(void);
+extern void selftest_riscv32_corrupt_gp(void);
+extern void selftest_riscv32_corrupt_tp(void);
+
+static const selftest_entry_t riscv32_entries[] = {
+    {"noop", selftest_riscv32_noop, 0},
+    {"corrupt_gp", selftest_riscv32_corrupt_gp, 1},
+    {"corrupt_tp", selftest_riscv32_corrupt_tp, 1},
+    {"corrupt_s0", selftest_riscv32_corrupt_s0, 1},
+    {"corrupt_s1", selftest_riscv32_corrupt_s1, 1},
+    {"corrupt_s2", selftest_riscv32_corrupt_s2, 1},
+    {"corrupt_s3", selftest_riscv32_corrupt_s3, 1},
+    {"corrupt_s4", selftest_riscv32_corrupt_s4, 1},
+    {"corrupt_s5", selftest_riscv32_corrupt_s5, 1},
+    {"corrupt_s6", selftest_riscv32_corrupt_s6, 1},
+    {"corrupt_s7", selftest_riscv32_corrupt_s7, 1},
+    {"corrupt_s8", selftest_riscv32_corrupt_s8, 1},
+    {"corrupt_s9", selftest_riscv32_corrupt_s9, 1},
+    {"corrupt_s10", selftest_riscv32_corrupt_s10, 1},
+    {"corrupt_s11", selftest_riscv32_corrupt_s11, 1},
+    {NULL, NULL, 0},
+};
+
 #endif /* !MLD_SYS_AARCH64 && !(MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED) && \
-          MLD_SYS_ARMV81M_MVE */
+          !MLD_SYS_ARMV81M_MVE && MLD_SYS_RISCV32 */
 
 int abicheck_selftest(void)
 {
@@ -243,11 +281,16 @@ int abicheck_selftest(void)
                     init_armv81m_register_state, call_stub_armv81m,
                     check_armv81m_aapcs32_compliance, armv81m_entries,
                     (void (*)(void)));
+#elif defined(MLD_SYS_RISCV32)
+  SELFTEST_RUN_ARCH("riscv32", struct riscv32_register_state,
+                    init_riscv32_register_state, call_stub_riscv32,
+                    check_riscv32_ilp32_compliance, riscv32_entries,
+                    (void (*)(void)));
 #else  /* !MLD_SYS_AARCH64 && !(MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED) && \
-          MLD_SYS_ARMV81M_MVE */
+          !MLD_SYS_ARMV81M_MVE && MLD_SYS_RISCV32 */
   /* No abicheck support on this architecture. */
 #endif /* !MLD_SYS_AARCH64 && !(MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED) && \
-          !MLD_SYS_ARMV81M_MVE */
+          !MLD_SYS_ARMV81M_MVE && !MLD_SYS_RISCV32 */
 
   return failures;
 }

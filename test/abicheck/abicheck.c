@@ -12,6 +12,8 @@
 #include "x86_64/checks_x86_64_all.h"
 #elif defined(MLD_SYS_ARMV81M_MVE)
 #include "armv81m/checks_armv81m_all.h"
+#elif defined(MLD_SYS_RISCV32)
+#include "riscv32/checks_riscv32_all.h"
 #else
 /* No abicheck support on this architecture - empty registry, driver runs zero
  * kernel checks (selftest still runs). */
