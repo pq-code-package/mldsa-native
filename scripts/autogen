@@ -1038,8 +1038,8 @@ def gen_aarch64_rej_uniform_eta_table():
         yield from gen_header()
         yield '#include "../../../common.h"'
         yield ""
-        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) &&  \\"
-        yield "    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \\"
+        yield "#if defined(MLD_ARITH_BACKEND_AARCH64) && \\"
+        yield "    (!defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
         yield ""
         yield '#include "arith_native_aarch64.h"'
@@ -1056,14 +1056,16 @@ def gen_aarch64_rej_uniform_eta_table():
             formatter=_fmt_indexed_rows,
         )
         yield ""
-        yield ("#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\")
+        yield (
+            "#else /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_KEYPAIR_API || \\"
+        )
+        yield "         MLD_UNIT_TEST) && \\"
         yield "         !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
         yield "MLD_EMPTY_CU(aarch64_rej_uniform_eta_table)"
         yield ""
-        yield (
-            "#endif /* !(MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \\"
-        )
+        yield "#endif /* !(MLD_ARITH_BACKEND_AARCH64 && \\"
+        yield "          (!MLD_CONFIG_NO_KEYPAIR_API || MLD_UNIT_TEST) && \\"
         yield "          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
 
@@ -1202,7 +1204,8 @@ def gen_aarch64_polyz_unpack_table():
         yield ""
         yield '#include "arith_native_aarch64.h"'
         yield ""
-        yield "#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)"
+        yield "#if !defined(MLD_CONFIG_NO_SIGN_API) || \\"
+        yield "    !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)"
         yield "/* Table of indices used for tbl instructions in polyz_unpack_{17,19}."
         yield " * See autogen for details. */"
         yield ""
@@ -1223,7 +1226,8 @@ def gen_aarch64_polyz_unpack_table():
             )
             yield "#endif"
             yield ""
-        yield "#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */"
+        yield "#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \\"
+        yield "          MLD_UNIT_TEST */"
         yield ""
         yield "#else /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""

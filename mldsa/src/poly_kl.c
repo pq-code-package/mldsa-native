@@ -37,7 +37,7 @@
 /* End of parameter set namespacing */
 
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 MLD_STATIC_TESTABLE
 void mld_poly_decompose_c(mld_poly *a1, mld_poly *a0)
 __contract__(
@@ -101,9 +101,9 @@ void mld_poly_decompose(mld_poly *a1, mld_poly *a0)
   mld_poly_decompose_c(a1, a0);
 }
 
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 MLD_STATIC_TESTABLE void mld_poly_use_hint_c(mld_poly *a, const mld_poly *h)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
@@ -160,9 +160,9 @@ void mld_poly_use_hint(mld_poly *a, const mld_poly *h)
           65 || MLD_CONFIG_PARAMETER_SET == 87) */
   mld_poly_use_hint_c(a, h);
 }
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)
 /**
  * Sample uniformly random coefficients in [-MLDSA_ETA, MLDSA_ETA] by
  * performing rejection sampling on an array of random bytes.
@@ -275,6 +275,7 @@ __contract__(
   return ctr;
 }
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static unsigned int mld_rej_eta(int32_t *a, unsigned int target,
                                 unsigned int offset, const uint8_t *buf,
                                 unsigned int buflen)
@@ -464,6 +465,7 @@ void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
 }
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 #define MLD_POLY_UNIFORM_GAMMA1_NBLOCKS                       \
@@ -801,7 +803,8 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 MLD_STATIC_TESTABLE void mld_polyz_unpack_c(
     mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 __contract__(
@@ -895,7 +898,8 @@ void mld_polyz_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYZ_PACKEDBYTES])
 
   mld_polyz_unpack_c(r, a);
 }
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros. */
 

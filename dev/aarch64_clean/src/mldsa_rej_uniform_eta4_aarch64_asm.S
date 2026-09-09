@@ -39,7 +39,7 @@
 
 #include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
-    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4)
 /* simpasm: header-end */
@@ -346,6 +346,6 @@ mld_rej_uniform_eta4_final_copy:
 #undef MLD_STACK_SIZE
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_KEYPAIR_API || \
+          MLD_UNIT_TEST) && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4) */
