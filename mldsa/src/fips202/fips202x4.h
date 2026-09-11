@@ -27,7 +27,7 @@ typedef struct
 typedef struct
 {
   uint64_t ctx[MLD_KECCAK_LANES *
-               MLD_KECCAK_WAY]; /**< Interleaved 4-way Keccak state. */
+               MLD_KECCAK_WAY]; /**< 4-way Keccak state, stored sequentially. */
 } mld_shake256x4ctx;
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)

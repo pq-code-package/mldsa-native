@@ -69,7 +69,8 @@ __contract__(
 
 #define mld_shake128_finalize MLD_NAMESPACE(shake128_finalize)
 /**
- * Concludes the absorb phase of the SHAKE128 XOF.
+ * Concludes the absorb phase of the SHAKE128 XOF. Repeated calls on an
+ * already-finalized state leave it unchanged.
  *
  * @param[in,out] state Pointer to state.
  */
@@ -79,7 +80,7 @@ __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake128ctx)))
   requires(state->pos <= SHAKE128_RATE)
   assigns(memory_slice(state, sizeof(mld_shake128ctx)))
-  ensures(state->pos <= SHAKE128_RATE)
+  ensures(state->pos == SHAKE128_RATE)
 );
 
 #define mld_shake128_squeeze MLD_NAMESPACE(shake128_squeeze)
@@ -94,7 +95,7 @@ __contract__(
 MLD_INTERNAL_API
 void mld_shake128_squeeze(uint8_t *out, size_t outlen, mld_shake128ctx *state)
 __contract__(
-  requires(outlen <= 8 * SHAKE128_RATE /* somewhat arbitrary bound */)
+  requires(outlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mld_shake128ctx)))
   requires(memory_no_alias(out, outlen))
   requires(state->pos <= SHAKE128_RATE)
@@ -153,7 +154,8 @@ __contract__(
 
 #define mld_shake256_finalize MLD_NAMESPACE(shake256_finalize)
 /**
- * Concludes the absorb phase of the SHAKE256 XOF.
+ * Concludes the absorb phase of the SHAKE256 XOF. Repeated calls on an
+ * already-finalized state leave it unchanged.
  *
  * @param[in,out] state Pointer to state.
  */
@@ -163,7 +165,7 @@ __contract__(
   requires(memory_no_alias(state, sizeof(mld_shake256ctx)))
   requires(state->pos <= SHAKE256_RATE)
   assigns(memory_slice(state, sizeof(mld_shake256ctx)))
-  ensures(state->pos <= SHAKE256_RATE)
+  ensures(state->pos == SHAKE256_RATE)
 );
 
 #define mld_shake256_squeeze MLD_NAMESPACE(shake256_squeeze)
@@ -178,7 +180,7 @@ __contract__(
 MLD_INTERNAL_API
 void mld_shake256_squeeze(uint8_t *out, size_t outlen, mld_shake256ctx *state)
 __contract__(
-  requires(outlen <= 8 * SHAKE256_RATE /* somewhat arbitrary bound */)
+  requires(outlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(state, sizeof(mld_shake256ctx)))
   requires(memory_no_alias(out, outlen))
   requires(state->pos <= SHAKE256_RATE)
@@ -214,7 +216,7 @@ MLD_INTERNAL_API
 void mld_shake256(uint8_t *out, size_t outlen, const uint8_t *in, size_t inlen)
 __contract__(
   requires(inlen <= MLD_MAX_BUFFER_SIZE)
-  requires(outlen <= 8 * SHAKE256_RATE /* somewhat arbitrary bound */)
+  requires(outlen <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(in, inlen))
   requires(memory_no_alias(out, outlen))
   assigns(memory_slice(out, outlen))
