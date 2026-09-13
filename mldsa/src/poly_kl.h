@@ -19,7 +19,7 @@
 #include "common.h"
 #include "poly.h"
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_decompose MLD_NAMESPACE_KL(poly_decompose)
 /**
  * For all coefficients c of the input polynomial, compute high and low bits
@@ -48,9 +48,9 @@ __contract__(
   ensures(array_abs_bound(a0->coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1))
 );
 
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_use_hint MLD_NAMESPACE_KL(poly_use_hint)
 /**
  * Use hint polynomial h to correct the high bits of a in-place.
@@ -68,7 +68,7 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
 );
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
@@ -314,7 +314,8 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 #define mld_polyz_unpack MLD_NAMESPACE_KL(polyz_unpack)
 /**
  * Unpack polynomial z with coefficients in
@@ -333,7 +334,10 @@ __contract__(
   assigns(memory_slice(r, sizeof(mld_poly)))
   ensures(array_bound(r->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #define mld_polyw1_pack MLD_NAMESPACE_KL(polyw1_pack)
 /**
  * Bit-pack polynomial w1. Input coefficients must be in
