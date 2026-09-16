@@ -60,9 +60,11 @@ We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to
 
 All AArch64 and x86_64 assembly is proved functionally correct and memory-safe at the object-code level, using
 [HOL-Light](https://hol-light.github.io/) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) verification
-infrastructure. All routines are additionally proved to have secret-independent timing, with two exceptions. The
-matrix sampler `rej_uniform` operates on public data only, and is deliberately variable-time. The secret-vector
-samplers `rej_uniform_eta{2,4}` _do_ have secret-independent timing, but this property is not yet backed by proof.
+infrastructure. All routines are additionally proved to have secret-independent timing, with the rejection samplers
+as special cases. The matrix sampler `rej_uniform` operates on public data only, and is deliberately variable-time.
+The secret-vector samplers `rej_uniform_eta{2,4}` are proved to have secret-independent timing: their event trace
+depends only on the public pointers and on which candidates are accepted or rejected, never on the accepted
+coefficient values. That reject pattern is safe to leak, being statistically independent of those values.
 See [proofs/hol_light](proofs/hol_light) for details.
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
