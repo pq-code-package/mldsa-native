@@ -14,7 +14,7 @@
 #include "../abicheck_armv81m.h"
 #include "../checks_armv81m_all.h"
 
-#if defined(MLD_SYS_ARMV81M_MVE)
+#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -29,8 +29,17 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state */
-  MLD_ALIGN uint8_t buf_r1[9];   /* Output byte buffer */
+  MLD_ALIGN uint8_t buf_r0[200]; /* Bit-interleaved x1 Keccak state, naturally
+                                    aligned for 32-bit MVE state accesses */
+  MLD_ALIGN uint8_t buf_r1[8];   /* Arbitrarily byte-aligned output bytes */
+
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    fprintf(stderr,
+            "ABI check keccak_f1600_x1_state_extract_bytes_asm: host lacks "
+            "Armv8.1-M MVE, skipping\n");
+    return MLD_ABICHECK_SKIPPED;
+  }
 
   for (test_iter = 0; test_iter < MLD_ABICHECK_NUM_TESTS; test_iter++)
   {
@@ -38,13 +47,13 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
     init_armv81m_register_state(&input_state);
 
     randombytes(buf_r0, 200);
-    randombytes(buf_r1, 9);
+    randombytes(buf_r1, 8);
 
     /* Set up register state for function arguments */
     input_state.gpr[0] = (uint32_t)buf_r0;
     input_state.gpr[1] = (uint32_t)buf_r1;
-    input_state.gpr[2] = 7;
-    input_state.gpr[3] = 9;
+    input_state.gpr[2] = 192;
+    input_state.gpr[3] = 8;
 
     /* Call function through ABI test stub */
     call_stub_armv81m(
@@ -67,4 +76,4 @@ int check_keccak_f1600_x1_state_extract_bytes_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_ARMV81M_MVE */
+#endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */

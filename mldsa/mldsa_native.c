@@ -583,6 +583,7 @@
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* mldsa/src/fips202/native/api.h */
 #undef MLD_FIPS202_NATIVE_API_H
+#undef MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT
 #undef MLD_NATIVE_FUNC_FALLBACK
 #undef MLD_NATIVE_FUNC_SUCCESS
 /* mldsa/src/fips202/native/auto.h */

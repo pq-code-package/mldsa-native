@@ -2146,7 +2146,11 @@ def native_fips202_armv81m(c):
 
 def native_fips202_armv81m_x1(c):
     return native_fips202_armv81m(c) and (
-        "keccak_f1600_x1_" in c or "keccakf1600_round_constants_x1.c" in c
+        (
+            "keccak_f1600_x1_" in c
+            and "_bytes_armv7m.S" not in c
+        )
+        or "keccakf1600_round_constants_x1.c" in c
     )
 
 
@@ -4958,13 +4962,13 @@ def gen_abicheck():
             "armv81m",
         ),
         (
-            "keccak_f1600_x1_state_extract_bytes_armv7m.S",
+            "keccak_f1600_x1_state_extract_bytes_mve.S",
             "dev/fips202/armv81m_opt/src",
             "",
             "armv81m",
         ),
         (
-            "keccak_f1600_x1_state_xor_bytes_armv7m.S",
+            "keccak_f1600_x1_state_xor_bytes_mve.S",
             "dev/fips202/armv81m_opt/src",
             "",
             "armv81m",

@@ -33,6 +33,39 @@
 #define MLD_NATIVE_FUNC_FALLBACK (-1)
 
 /*
+ * A backend which provides either x1 byte hook keeps the x1 state in a
+ * custom representation between absorb, permutation, and squeeze.  Such a
+ * backend must provide the complete lifecycle: falling back to the C
+ * implementation at any one of those points would interpret the custom
+ * state as the canonical representation.
+ *
+ * Backends which only replace the x1 permutation continue to be supported.
+ */
+#if (defined(MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES) ||      \
+     defined(MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES)) && \
+    (!defined(MLD_USE_NATIVE_FIPS202_X1) ||               \
+     !defined(MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES) ||     \
+     !defined(MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES))
+#error Bad configuration: a custom-order x1 FIPS202 backend must provide x1 permutation, XOR bytes, and extract bytes together.
+#endif /* (MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES ||                             \
+          MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES) &&                         \
+          (!MLD_USE_NATIVE_FIPS202_X1 || !MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES \
+          || !MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES) */
+
+#if defined(MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES) && \
+    defined(MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES)
+#define MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT \
+  ensures(return_value == MLD_NATIVE_FUNC_SUCCESS)
+#else
+#define MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT               \
+  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK ||       \
+          return_value == MLD_NATIVE_FUNC_SUCCESS)          \
+      ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) == \
+              > array_unchanged_u64(state, 25 * 1))
+#endif /* !(MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES && \
+          MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES) */
+
+/*
  * This is the C<->native interface allowing for the drop-in
  * of custom Keccak-F1600 implementations.
  *
@@ -51,8 +84,7 @@ static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 1))
     assigns(memory_slice(state, sizeof(uint64_t) * 25 * 1))
-    ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 1))
+    MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT
 );
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
 #if defined(MLD_USE_NATIVE_FIPS202_X4)
@@ -85,8 +117,7 @@ __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25))
   requires(memory_no_alias(data, length))
   assigns(memory_slice(state, sizeof(uint64_t) * 25))
-  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25)));
+  MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT);
 #endif /* MLD_USE_NATIVE_FIPS202_X1_XOR_BYTES */
 
 #if defined(MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES)
@@ -99,8 +130,10 @@ __contract__(
   requires(memory_no_alias(state, sizeof(uint64_t) * 25))
   requires(memory_no_alias(data, length))
   assigns(memory_slice(data, length))
-  ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS));
+  MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT);
 #endif /* MLD_USE_NATIVE_FIPS202_X1_EXTRACT_BYTES */
+
+#undef MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT
 
 /*
  * Native x4 XOR bytes and extract bytes interface.

@@ -119,14 +119,16 @@
 #include "src/fips202/native/x86_64/src/keccak_f1600_x4_avx2_asm.S"
 #endif
 #if defined(MLD_SYS_ARMV81M_MVE)
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_armv7m.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_armv7m.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_extract_bytes_mve.S"
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_state_xor_bytes_mve.S"
-#endif
+#endif /* MLD_SYS_ARMV81M_MVE */
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x1_armv7m_opt_m7.S"
-#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_armv7m.S"
-#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_armv7m.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_extract_bytes_mve.S"
+#include "src/fips202/native/armv81m/src/keccak_f1600_x1_state_xor_bytes_mve.S"
 #endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -622,6 +624,7 @@
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)
 /* mldsa/src/fips202/native/api.h */
 #undef MLD_FIPS202_NATIVE_API_H
+#undef MLD_NATIVE_FIPS202_X1_RETURN_CONTRACT
 #undef MLD_NATIVE_FUNC_FALLBACK
 #undef MLD_NATIVE_FUNC_SUCCESS
 /* mldsa/src/fips202/native/auto.h */
