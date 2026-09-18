@@ -2400,7 +2400,9 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
         for c in filter(
-            lambda c: native_fips202_armv81m(c) and not native_fips202_armv81m_x1(c),
+            lambda c: native_fips202_armv81m(c)
+            and not native_fips202_armv81m_x1(c)
+            and "_bytes_armv7m.S" not in c,
             c_sources,
         ):
             yield f'#include "{c}"'
@@ -2494,7 +2496,9 @@ def gen_monolithic_asm_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
         for c in filter(
-            lambda c: native_fips202_armv81m(c) and not native_fips202_armv81m_x1(c),
+            lambda c: native_fips202_armv81m(c)
+            and not native_fips202_armv81m_x1(c)
+            and "_bytes_armv7m.S" not in c,
             asm_sources,
         ):
             yield f'#include "{c}"'
