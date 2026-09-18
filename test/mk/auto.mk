@@ -36,6 +36,8 @@ else ifneq ($(findstring riscv32, $(CROSS_PREFIX)),)
 ARCH := riscv32
 else ifneq ($(findstring powerpc64le, $(CROSS_PREFIX)),)
 ARCH := powerpc64le
+else ifneq ($(findstring powerpc64, $(CROSS_PREFIX)),)
+ARCH := powerpc64be
 else ifneq ($(findstring arm-none-eabi-, $(CROSS_PREFIX)),)
 ARCH := arm
 else
@@ -203,6 +205,13 @@ endif # riscv32
 ifeq ($(ARCH),powerpc64le)
 CFLAGS += -DMLD_FORCE_PPC64LE
 endif # powerpc64le
+
+# PowerPC 64-bit Big Endian CFLAGS configuration.
+# Big-endian toolchains default to a pre-POWER8 CPU, which would compile
+# the VSX backend out; target POWER8 so the backend is exercised.
+ifeq ($(ARCH),powerpc64be)
+CFLAGS += -DMLD_FORCE_PPC64BE -mcpu=power8
+endif # powerpc64be
 
 endif # AUTO=1
 
