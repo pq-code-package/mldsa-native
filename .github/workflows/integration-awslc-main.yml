@@ -20,4 +20,3 @@ jobs:
     uses: ./.github/workflows/integration-awslc.yml
     with:
       commit: main
-    secrets: inherit

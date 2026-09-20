@@ -18,7 +18,6 @@ jobs:
       contents: 'read'
       id-token: 'write'
     uses: ./.github/workflows/base.yml
-    secrets: inherit
   lint-markdown:
     name: Lint Markdown
     permissions:
@@ -32,7 +31,6 @@ jobs:
       contents: 'read'
       id-token: 'write'
     uses: ./.github/workflows/nix.yml
-    secrets: inherit
   riscv:
     name: RISC-V
     permissions:
@@ -47,7 +45,8 @@ jobs:
       id-token: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/ci.yml
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   cbmc:
     name: CBMC
     permissions:
@@ -56,7 +55,8 @@ jobs:
       pull-requests: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/cbmc.yml
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   oqs_integration:
     name: libOQS
     permissions:
@@ -64,7 +64,6 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-liboqs.yml
-    secrets: inherit
   awslc_integration:
     name: AWS-LC
     permissions:
@@ -74,7 +73,6 @@ jobs:
     uses: ./.github/workflows/integration-awslc.yml
     with:
       commit: v5.8.0
-    secrets: inherit
   ct-test:
     name: Constant-time
     permissions:
@@ -82,7 +80,6 @@ jobs:
       id-token: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/ct-tests.yml
-    secrets: inherit
   slothy:
     name: SLOTHY
     permissions:
@@ -90,7 +87,8 @@ jobs:
       id-token: 'write'
     needs: [ base, nix ]
     uses: ./.github/workflows/slothy.yml
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   baremetal:
     name: Baremetal
     permissions:
@@ -98,7 +96,6 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/baremetal.yml
-    secrets: inherit
   zephyr:
     name: Zephyr
     permissions:
@@ -106,7 +103,6 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/zephyr.yml
-    secrets: inherit
   pavona_integration:
     name: Pavona
     permissions:
@@ -114,7 +110,8 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/integration-pavona.yml
-    secrets: inherit
+    secrets:
+      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
   isabelle:
     name: Isabelle
     permissions:
@@ -122,13 +119,11 @@ jobs:
       id-token: 'write'
     needs: [ base ]
     uses: ./.github/workflows/isabelle.yml
-    secrets: inherit
   hol-light:
     name: HOL-Light
     permissions:
       contents: 'read'
     uses: ./.github/workflows/hol_light.yml
-    secrets: inherit
   # Single required status check for branch protection and the merge queue; jobs added to this workflow must also be added to the needs list below to gate merges.
   # riscv excluded as the RISE runners tend to be flaky.
   ci-summary:
