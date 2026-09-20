@@ -14,19 +14,6 @@ CROSS_PREFIX ?=
 CC  ?= gcc
 CPP ?= cpp
 AR  ?= ar
-CC  := $(CROSS_PREFIX)$(CC)
-CPP := $(CROSS_PREFIX)$(CPP)
-AR  := $(CROSS_PREFIX)$(AR)
-LD  := $(CC)
-OBJCOPY := $(CROSS_PREFIX)objcopy
-SIZE := $(CROSS_PREFIX)size
-
-# NOTE: gcc-ar is a wrapper around ar that ensures proper integration with GCC plugins,
-# 	such as lto. Using gcc-ar is preferred when creating or linking static libraries
-# 	if the binary is compiled with -flto. However, it is not universally present, so
-#       only use it if available.
-CC_AR ?= $(if $(and $(findstring gcc,$(shell $(CC) --version)), $(findstring gcc-ar, $(shell which $(CROSS_PREFIX)gcc-ar))),gcc-ar,ar)
-CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 
 #################
 # Common config #
@@ -106,6 +93,20 @@ ifneq ($$($(1)_FROM_ENV),)
 endif
 endef
 $(foreach var,$(RETAINED_VARS),$(eval $(call RESTORE_VAR,$(var))))
+
+CC  := $(CROSS_PREFIX)$(CC)
+CPP := $(CROSS_PREFIX)$(CPP)
+AR  := $(CROSS_PREFIX)$(AR)
+LD  := $(CC)
+OBJCOPY := $(CROSS_PREFIX)objcopy
+SIZE := $(CROSS_PREFIX)size
+
+# NOTE: gcc-ar is a wrapper around ar that ensures proper integration with GCC plugins,
+# 	such as lto. Using gcc-ar is preferred when creating or linking static libraries
+# 	if the binary is compiled with -flto. However, it is not universally present, so
+#       only use it if available.
+CC_AR ?= $(if $(and $(findstring gcc,$(shell $(CC) --version)), $(findstring gcc-ar, $(shell which $(CROSS_PREFIX)gcc-ar))),gcc-ar,ar)
+CC_AR  := $(CROSS_PREFIX)$(CC_AR)
 
 $(CONFIG):
 	@echo "  GEN     $@"
