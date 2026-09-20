@@ -208,7 +208,13 @@
 #define MLD_DEFAULT_ALIGN 32
 #define MLD_ALIGN_UP(N) \
   ((((N) + (MLD_DEFAULT_ALIGN - 1)) / MLD_DEFAULT_ALIGN) * MLD_DEFAULT_ALIGN)
-#if defined(__GNUC__)
+/* C23: alignas; C11/C17: _Alignas; otherwise compiler extensions.
+ * Must precede the declaration; cannot be used on a typedef. */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define MLD_ALIGN alignas(MLD_DEFAULT_ALIGN)
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define MLD_ALIGN _Alignas(MLD_DEFAULT_ALIGN)
+#elif defined(__GNUC__)
 #define MLD_ALIGN __attribute__((aligned(MLD_DEFAULT_ALIGN)))
 #elif defined(_MSC_VER)
 #define MLD_ALIGN __declspec(align(MLD_DEFAULT_ALIGN))
