@@ -16,6 +16,15 @@
 #include "test_namespace.h"
 
 /*
+ * The limits this test checks against are only published for the default
+ * alignment. With a customized one there is nothing to compare to, so the
+ * test reports itself as skipped.
+ */
+#if !defined(MLD_CONFIG_ALIGN) || MLD_CONFIG_ALIGN == 32
+#define MLD_TEST_ALLOC_LIMITS
+#endif
+
+/*
  * Level-dependent allocation limit macros.
  * These expand to the right MLD_TOTAL_ALLOC_{44,65,87}_* constant
  * based on MLD_CONFIG_PARAMETER_SET.
@@ -151,8 +160,7 @@ static void alloc_tracker_pop(test_ctx_t *ctx, void *addr, size_t size,
 
 static void *bump_alloc(test_ctx_t *ctx, size_t sz)
 {
-  /* Align to 32 bytes */
-  size_t aligned_sz = (sz + 31) & ~((size_t)31);
+  size_t aligned_sz = MLD_ALIGN_UP(sz);
   void *p;
 
   if (sz > MLD_BUMP_ALLOC_SIZE ||
@@ -190,6 +198,7 @@ static int bump_free(test_ctx_t *ctx, void *p)
   return 0;
 }
 
+#if defined(MLD_TEST_ALLOC_LIMITS)
 static void reset_all(test_ctx_t *ctx)
 {
   randombytes_reset();
@@ -198,6 +207,7 @@ static void reset_all(test_ctx_t *ctx)
   ctx->offset = 0;
   ctx->fail_on_counter = -1;
 }
+#endif /* MLD_TEST_ALLOC_LIMITS */
 
 void *custom_alloc(test_ctx_t *ctx, size_t sz, const char *file, int line,
                    const char *var, const char *type)
@@ -336,6 +346,8 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     }                                                                          \
   } while (0)
 
+#if defined(MLD_TEST_ALLOC_LIMITS)
+
 /* Keygen tests */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
@@ -453,10 +465,20 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
     }                                                                        \
   } while (0)
 
+#endif /* MLD_TEST_ALLOC_LIMITS */
+
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
 int main(void);
 #endif
+
+#if !defined(MLD_TEST_ALLOC_LIMITS)
+int main(void)
+{
+  printf("Allocation test skipped: no published limits for this alignment.\n");
+  return 0;
+}
+#else /* !MLD_TEST_ALLOC_LIMITS */
 int main(void)
 {
   int r = 0;
@@ -533,3 +555,4 @@ int main(void)
 
   return 0;
 }
+#endif /* MLD_TEST_ALLOC_LIMITS */

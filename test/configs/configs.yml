@@ -146,6 +146,13 @@ configs:
           }
           #endif
 
+  - path: test/configs/custom_align_config.h
+    description: "Test configuration with a non-default alignment"
+    defines:
+      MLD_CONFIG_ALIGN:
+        content: |
+          #define MLD_CONFIG_ALIGN 64
+
   - path: test/configs/break_pct_config.h
     description: "Test configuration for PCT breakage testing"
     defines:

@@ -459,6 +459,47 @@
 /* #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "SOME_FILE.h" */
 
 /**
+ * MLD_CONFIG_ALIGN [EXPERIMENTAL]
+ *
+ * Alignment, in bytes, of large buffers and structures.
+ * Must be a power of two. If unset, 32 bytes are used.
+ *
+ * Set this only to change the alignment. Wherever mldsa-native knows a
+ * declarator prefix for the compiler, that prefix follows the new value
+ * automatically; otherwise set MLD_CONFIG_ALIGN_ATTRIBUTE as well.
+ *
+ * Native backends require a minimum alignment to avoid faulting on
+ * alignment-sensitive load and store instructions; this is enforced at
+ * compile time.
+ *
+ * The MLD_TOTAL_ALLOC_* constants in mldsa_native.h are measured for the
+ * default alignment and are not defined if you customize it.
+ *
+ * @warning This option is experimental. Its scope, configuration and
+ *          function/macro signatures may change at any time. We expect a
+ *          stable API in a future version.
+ */
+/* #define MLD_CONFIG_ALIGN 32 */
+
+/**
+ * MLD_CONFIG_ALIGN_ATTRIBUTE [EXPERIMENTAL]
+ *
+ * Declarator prefix aligning the declared object.
+ *
+ * Set this only if mldsa-native knows no spelling for your compiler. Without
+ * one, it falls back to the alignment the compiler picks by itself, which is
+ * insufficient for the native backends.
+ *
+ * This option carries its own byte count, so it must align to at least
+ * MLD_CONFIG_ALIGN bytes, or to 32 bytes if MLD_CONFIG_ALIGN is unset.
+ *
+ * @warning This option is experimental. Its scope, configuration and
+ *          function/macro signatures may change at any time. We expect a
+ *          stable API in a future version.
+ */
+/* #define MLD_CONFIG_ALIGN_ATTRIBUTE __attribute__((aligned(32))) */
+
+/**
  * MLD_CONFIG_CUSTOM_ZEROIZE
  *
  * In compliance with @[FIPS204, Section 3.6.3], mldsa-native zeroizes
@@ -567,7 +608,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 
 
 /**
- * MLD_CONFIG_CUSTOM_ALLOC_FREE
+ * MLD_CONFIG_CUSTOM_ALLOC_FREE [EXPERIMENTAL]
  *
  * Set this option and define `MLD_CUSTOM_ALLOC` and
  * `MLD_CUSTOM_FREE` if you want to use custom allocation for
@@ -777,6 +818,7 @@ static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
 
 /**
  * Signing hooks: MLD_CONFIG_SIGN_HOOK_RESUME / _ATTEMPT / _FINISH
+ * [EXPERIMENTAL]
  *
  * Three optional, independent hooks into the ML-DSA signing rejection-sampling
  * loop. Each is enabled by defining the matching option, in which case the
