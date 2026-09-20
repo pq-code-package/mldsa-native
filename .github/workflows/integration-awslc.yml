@@ -35,6 +35,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -95,6 +97,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
@@ -140,6 +144,8 @@ jobs:
     runs-on: ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-os
         with:
           packages: ${{ env.DEPENDENCIES }}
