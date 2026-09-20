@@ -103,6 +103,8 @@ runs:
           custom_shell: ${{ inputs.custom_shell }}
       - name: System info
         shell: ${{ env.SHELL }}
+        env:
+          CROSS_PREFIX: ${{ inputs.cross_prefix }}
         run: |
           ARCH=$(uname -m)
           echo <<-EOF
@@ -112,7 +114,7 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $("${CROSS_PREFIX}${CC}" --version | grep -m1 "")
           EOF
           cat >> $GITHUB_STEP_SUMMARY <<-EOF
             ## Setup
@@ -121,15 +123,25 @@ runs:
             - $(nix --version || echo 'nix not present')
             - $(bash --version | grep -m1 "")
             - $(python3 --version)
-            - $(${{ inputs.cross_prefix }}${CC} --version | grep -m1 "")
+            - $("${CROSS_PREFIX}${CC}" --version | grep -m1 "")
           EOF
       - name: ${{ env.MODE }} ${{ inputs.opt }} tests (${{ env.FUNC }}, ${{ env.KAT }}, ${{ env.EXAMPLES }}, ${{ env.STACK }}, ${{ env.UNIT }}, ${{ env.ALLOC }}, ${{ env.SIGN_HOOK }}, ${{ env.RNGFAIL }})
         shell: ${{ env.SHELL }}
         env:
+          CFLAGS_EXTRA: ${{ inputs.cflags }}
+          CROSS_PREFIX: ${{ inputs.cross_prefix }}
+          EXEC_WRAPPER: ${{ inputs.exec_wrapper }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
+          EXTRA_ENV: ${{ inputs.extra_env }}
           GH_TOKEN: ${{ inputs.gh_token }}
+          LDFLAGS_EXTRA: ${{ inputs.ldflags }}
+          OPT: ${{ inputs.opt }}
         run: |
           make clean
-          ${{ inputs.extra_env }} ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="${{ inputs.exec_wrapper }}" --cross-prefix="${{ inputs.cross_prefix }}" --cflags="${{ inputs.cflags }}" --ldflags="${{ inputs.ldflags }}" --opt=${{ inputs.opt }} --${{ env.FUNC }} --${{ env.KAT }} --${{ env.ACVP }} --${{ env.WYCHEPROOF }} --${{ env.EXAMPLES }} --${{ env.STACK }} --${{ env.UNIT }} --${{ env.ALLOC }} --${{ env.SIGN_HOOK }} --${{ env.RNGFAIL }} -v ${{ inputs.extra_args }}
+          # EXTRA_ENV is a list of assignments and EXTRA_ARGS a list of
+          # arguments, so both are deliberately left unquoted. EXTRA_ENV goes
+          # through env(1) because an expansion is not an assignment prefix.
+          env $EXTRA_ENV ./scripts/tests all ${{ inputs.check_namespace == 'true' && '--check-namespace' || ''}} --exec-wrapper="$EXEC_WRAPPER" --cross-prefix="$CROSS_PREFIX" --cflags="$CFLAGS_EXTRA" --ldflags="$LDFLAGS_EXTRA" --opt="$OPT" --"$FUNC" --"$KAT" --"$ACVP" --"$WYCHEPROOF" --"$EXAMPLES" --"$STACK" --"$UNIT" --"$ALLOC" --"$SIGN_HOOK" --"$RNGFAIL" -v $EXTRA_ARGS
       - name: Post ${{ env.MODE }} Tests
         shell: ${{ env.SHELL }}
         if: success() || failure()
