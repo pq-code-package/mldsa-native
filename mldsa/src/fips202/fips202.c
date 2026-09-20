@@ -77,7 +77,9 @@ __contract__(
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES))
   ensures(return_value < r))
 {
-  while (inlen >= r - pos)
+  /* Safety: widen r to avoid type mismatch warning */
+  size_t rsize = r;
+  while (inlen >= rsize - pos)
   __loop__(
     assigns(pos, in, inlen,
       memory_slice(s, sizeof(uint64_t) *  MLD_KECCAK_LANES))
@@ -150,6 +152,8 @@ __contract__(
   ensures(return_value <= r))
 {
   unsigned int i;
+  /* Safety: widen r to avoid type mismatch warning */
+  size_t rsize = r;
   size_t out_offset = 0;
 
   /* Reference: This code is re-factored from the reference implementation
@@ -174,8 +178,8 @@ __contract__(
       mld_keccakf1600_permute(s);
       pos = 0;
     }
-    /* Safety: If bytes_to_go < r - pos, truncation to unsigned is safe. */
-    i = bytes_to_go < r - pos ? (unsigned)bytes_to_go : r - pos;
+    /* Safety: If bytes_to_go < rsize - pos, truncation to unsigned is safe. */
+    i = bytes_to_go < rsize - pos ? (unsigned)bytes_to_go : r - pos;
     mld_keccakf1600_extract_bytes(s, out + out_offset, pos, i);
     bytes_to_go -= i;
     pos += i;
