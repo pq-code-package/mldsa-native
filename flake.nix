@@ -107,6 +107,9 @@
           devShells.hol_light-cross-x86_64 = (util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchain_x86_64 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
           }).overrideAttrs (old: { shellHook = holLightShellHook; });
+          devShells.hol_light-cross-riscv32 = (util.mkShell {
+            packages = builtins.attrValues { inherit (config.packages) linters toolchain_riscv32 hol_light s2n_bignum hol_server; } ++ holLightToolchain;
+          }).overrideAttrs (old: { shellHook = holLightShellHook; });
           devShells.ci = util.mkShell {
             packages = builtins.attrValues { inherit (config.packages) linters toolchains_native; };
           };
