@@ -2,12 +2,16 @@
 
 # HOL Light proofs
 
-This directory contains HOL Light proofs for the AArch64 and x86_64 assembly routines
-used in mldsa-native. The proofs are written in the [HOL Light](https://hol-light.github.io/) theorem
-prover, utilizing the assembly verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum).
+This directory contains HOL Light proofs for the AArch64, x86_64, and RV32IM
+assembly routines used in mldsa-native. The proofs are written in the
+[HOL Light](https://hol-light.github.io/) theorem prover, utilizing the
+assembly verification infrastructure from
+[s2n-bignum](https://github.com/awslabs/s2n-bignum).
 
-Each function is proved in a separate `.ml` file in [aarch64/proofs/](aarch64/proofs) and [x86_64/proofs/](x86_64/proofs). Each file
-contains the byte code being verified, as well as the specification that is being proved.
+Each function is proved in a separate `.ml` file under
+[aarch64/proofs/](aarch64/proofs), [x86_64/proofs/](x86_64/proofs), or
+[riscv32/proofs/](riscv32/proofs). Each proof entry contains the checked
+bytecode for its corresponding object file near the top.
 
 ## What is proven
 
@@ -16,6 +20,12 @@ Unless documented otherwise, for each assembly routine listed below, we prove th
 1. **Functional correctness** — the routine computes the specified mathematical function (e.g., that `mldsa_ntt` computes the ML-DSA forward NTT modulo `q = 8380417`).
 2. **Memory safety** — the routine accesses only those memory regions permitted by its specification (input/output buffers, stack frame).
 3. **Secret-independent timing** — the sequence of microarchitectural events (e.g. memory accesses, branch decisions) emitted by the routine is a function of public inputs only, and does not depend on secret data.
+
+For RV32IM, the timing claim follows the s2n-bignum RISC-V model. In
+particular, `MUL` and `MULH` are modeled without operand-dependent timing
+events. The proof therefore applies to implementations where those
+instructions have fixed latency, or where any operand-dependent latency is
+otherwise excluded from the attacker model.
 
 ### By design: rejection sampling for the public matrix (`rej_uniform`)
 
@@ -110,9 +120,20 @@ or
 make -C proofs/hol_light/x86_64
 ```
 
-will build and run the proofs. Note that this may take hours even on powerful machines.
+For RV32IM, use the shell containing the cross toolchain:
 
-For convenience, you can also use `tests hol_light` which wraps the `make` invocation above; see `tests hol_light --help`.
+```bash
+nix develop .#hol_light-cross-riscv32 \
+  --experimental-features 'nix-command flakes'
+make -C proofs/hol_light/riscv32
+```
+
+These commands build and run the proofs. Note that this may take hours even
+on powerful machines.
+
+For convenience, you can also use `tests hol_light`, which wraps the `make`
+invocation above. Pass `-a riscv32` when cross-checking RV32IM proofs on
+another host; see `tests hol_light --help`.
 
 ## Interactive proof development
 
@@ -185,6 +206,15 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 rejection sampling (eta=4): [mldsa_rej_uniform_eta4_avx2_asm.S](x86_64/mldsa/mldsa_rej_uniform_eta4_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
+
+### RV32IM
+
+- ML-DSA Arithmetic:
+  * RV32IM forward NTT: [mldsa_ntt_rv32im_asm.S](riscv32/mldsa/mldsa_ntt_rv32im_asm.S)
+  * RV32IM forward NTT for slow multipliers: [mldsa_ntt_rv32im_slowmul_asm.S](riscv32/mldsa/mldsa_ntt_rv32im_slowmul_asm.S)
+  * RV32IM inverse NTT: [mldsa_intt_rv32im_asm.S](riscv32/mldsa/mldsa_intt_rv32im_asm.S)
+  * RV32IM inverse NTT for slow multipliers: [mldsa_intt_rv32im_slowmul_asm.S](riscv32/mldsa/mldsa_intt_rv32im_slowmul_asm.S)
+  * RV32IM pointwise multiplication: [mldsa_poly_pointwise_montgomery_rv32im_asm.S](riscv32/mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.S)
 
 <!--- bibliography --->
 [^HYBRID]: Becker, Kannwischer: Hybrid scalar/vector implementations of Keccak and SPHINCS+ on AArch64, [https://eprint.iacr.org/2022/1243](https://eprint.iacr.org/2022/1243)
