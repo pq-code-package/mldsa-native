@@ -38,4 +38,6 @@ There is no separate `_opt` source tree. The sources document their transform
 schedule, modular arithmetic, and concrete bounds inline. HOL-Light proves
 functional correctness, memory safety, and secret-independent execution for
 both multiplier profiles. The timing result assumes that `mul` and `mulh`
-have data-independent latency on the selected core.
+have data-independent latency on the selected core. CBMC checks the fastmul
+and slowmul C wrappers against the same arithmetic bounds and caller-visible
+memory footprint.

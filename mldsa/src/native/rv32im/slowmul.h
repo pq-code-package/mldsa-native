@@ -24,6 +24,7 @@
  * multiplication, so integrators must establish this property for the
  * selected core. HOL-Light proves functional correctness, memory safety, and
  * secret-independent execution subject to that multiplier assumption.
+ * CBMC proves that these C wrappers satisfy the native arithmetic contracts.
  */
 
 /* Set of primitives that this backend replaces. */

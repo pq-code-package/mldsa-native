@@ -24,6 +24,8 @@ MLD_INTERNAL_DATA_DECLARATION const int32_t mld_rv32im_ntt_zetas[510];
 
 #define mld_ntt_rv32im_fastmul_asm MLD_NAMESPACE(ntt_rv32im_fastmul_asm)
 void mld_ntt_rv32im_fastmul_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+/* This must be kept in sync with the HOL-Light subroutine specification in
+ * proofs/hol_light/riscv32/proofs/mldsa_ntt_rv32im_asm.ml. */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
@@ -41,6 +43,8 @@ __contract__(
 
 #define mld_ntt_rv32im_slowmul_asm MLD_NAMESPACE(ntt_rv32im_slowmul_asm)
 void mld_ntt_rv32im_slowmul_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+/* This must be kept in sync with the HOL-Light subroutine specification in
+ * proofs/hol_light/riscv32/proofs/mldsa_ntt_rv32im_slowmul_asm.ml. */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
@@ -58,6 +62,8 @@ __contract__(
 
 #define mld_intt_rv32im_fastmul_asm MLD_NAMESPACE(intt_rv32im_fastmul_asm)
 void mld_intt_rv32im_fastmul_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+/* This must be kept in sync with the HOL-Light subroutine specification in
+ * proofs/hol_light/riscv32/proofs/mldsa_intt_rv32im_asm.ml. */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
@@ -68,6 +74,8 @@ __contract__(
 
 #define mld_intt_rv32im_slowmul_asm MLD_NAMESPACE(intt_rv32im_slowmul_asm)
 void mld_intt_rv32im_slowmul_asm(int32_t r[MLDSA_N], const int32_t zetas[510])
+/* This must be kept in sync with the HOL-Light subroutine specification in
+ * proofs/hol_light/riscv32/proofs/mldsa_intt_rv32im_slowmul_asm.ml. */
 __contract__(
   requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
   requires(array_abs_bound(r, 0, MLDSA_N, MLDSA_Q))
@@ -82,6 +90,9 @@ __contract__(
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 void mld_poly_pointwise_montgomery_rv32im_asm(int32_t a[MLDSA_N],
                                               const int32_t b[MLDSA_N])
+/* This must be kept in sync with the HOL-Light subroutine specification in
+ * proofs/hol_light/riscv32/proofs/
+ * mldsa_poly_pointwise_montgomery_rv32im_asm.ml. */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   requires(memory_no_alias(b, sizeof(int32_t) * MLDSA_N))
@@ -100,9 +111,14 @@ __contract__(
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 /*
- * These contracts document the C-facing assumptions and bounds used by the
- * assembly. Unlike the proved AArch64 and x86_64 backends, the experimental
- * RV32IM backend currently has no formal proof discharging them.
+ * `array_abs_bound` is exclusive, matching the strict bounds in the forward
+ * NTT and pointwise HOL-Light theorems. Its MLDSA_Q form is equivalent to the
+ * inclusive `abs <= MLDSA_Q - 1` bound used by the inverse NTT theorems.
+ *
+ * The assigns clauses give the same caller-visible footprint as HOL-Light:
+ * only the 1024-byte output array changes. HOL-Light also tracks the private
+ * 16- or 32-byte stack frame used during a call and proves that the stack
+ * pointer is restored before return.
  */
 
 #endif /* !MLD_NATIVE_RV32IM_SRC_ARITH_NATIVE_RV32IM_H */
