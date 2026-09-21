@@ -1068,6 +1068,29 @@ def gen_rv32im_zeta_file():
     update_file("dev/riscv32/src/rv32im_zetas.c", "\n".join(gen()))
 
 
+def gen_rv32im_hol_light_zeta_file():
+    def gen():
+        yield from gen_hol_light_header()
+        yield "(*"
+        yield " * Barrett pairs used by the RV32-IM NTTs."
+        yield " *"
+        yield " * This is generated from the same values as rv32im_zetas.c."
+        yield " * mldsa_zetas.ml certifies the table and mldsa_ntt_shared.ml"
+        yield " * exposes it to the four RV32 transform proofs."
+        yield " * See autogen for details."
+        yield " *)"
+        yield ""
+        yield ("let rv32_mldsa_ntt_zetas = define `rv32_mldsa_ntt_zetas:int list = [")
+        yield from print_hol_light_array(gen_rv32im_fwd_ntt_zetas(), entries_per_line=4)
+        yield "]`;;"
+        yield ""
+
+    update_file(
+        "proofs/hol_light/riscv32/proofs/mldsa_zetas_table.ml",
+        "\n".join(gen()),
+    )
+
+
 def gen_aarch64_zeta_file():
     def gen():
         yield from gen_header()
@@ -5235,6 +5258,7 @@ def _main():
         gen_c_zeta_file()
         gen_aarch64_zeta_file()
         gen_rv32im_zeta_file()
+        gen_rv32im_hol_light_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_hol_light_rej_uniform_table()
