@@ -21,10 +21,8 @@
 #include "x86_64/meta.h"
 #endif
 
-/* We do not yet include the arithmetic backend for RV32-IM by default
- * as it is still experimental and undergoing review. */
-/* #if defined(MLD_SYS_RISCV32) */
-/* #include "rv32im/fastmul.h" */
-/* #endif */
+#if defined(MLD_SYS_RISCV32_M)
+#include "rv32im/fastmul.h"
+#endif
 
 #endif /* !MLD_NATIVE_META_H */
