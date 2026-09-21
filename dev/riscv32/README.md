@@ -2,16 +2,14 @@
 
 # RV32IM arithmetic backend
 
-This directory contains the experimental ML-DSA arithmetic backend for
-32-bit RISC-V implementations supporting the base integer and multiply
-extensions (`RV32IM`) with the ILP32, ILP32F, and ILP32D family of ABIs for
-RV32-IM.
+This directory contains the ML-DSA arithmetic backend for 32-bit RISC-V
+implementations supporting the base integer and multiply extensions
+(`RV32IM`) with the ILP32, ILP32F, and ILP32D family of ABIs.
 
 The backend replaces the forward NTT, inverse NTT, and pointwise Montgomery
-multiplication. It is not selected automatically; integrators must define
-`MLD_CONFIG_USE_NATIVE_BACKEND_ARITH` and set
-`MLD_CONFIG_ARITH_BACKEND_FILE` to either `native/rv32im/fastmul.h` or
-`native/rv32im/slowmul.h`.
+multiplication. When native arithmetic is enabled, `fastmul.h` is selected by
+default on RV32IM targets. Integrators can select `slowmul.h` explicitly with
+`MLD_CONFIG_ARITH_BACKEND_FILE`.
 
 All hand-maintained code lives here. `scripts/autogen` preprocesses and
 simplifies the assembly into `mldsa/src/native/rv32im/` and regenerates the
@@ -37,6 +35,7 @@ convention shared by ILP32, ILP32F, and ILP32D. Generation checks the source
 as RV32IM/ILP32; linked tests inherit the target toolchain's compatible ABI.
 
 There is no separate `_opt` source tree. The sources document their transform
-schedule, modular arithmetic, and concrete bounds inline. Functional and
-ILP32 ABI checks cover the generated code, but this backend currently has no
-formal proof.
+schedule, modular arithmetic, and concrete bounds inline. HOL-Light proves
+functional correctness, memory safety, and secret-independent execution for
+both multiplier profiles. The timing result assumes that `mul` and `mulh`
+have data-independent latency on the selected core.
