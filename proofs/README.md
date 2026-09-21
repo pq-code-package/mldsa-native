@@ -10,4 +10,9 @@ We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to
 
 ## Assembly verification: HOL-Light
 
-We use the [HOL-Light](https://github.com/jrh13/hol-light) interactive theorem prover alongside the verification infrastructure from [s2n-bignum](https://github.com/awslabs/s2n-bignum) to show the functional correctness of highly optimized assembly routines in mldsa-native at the object-code level. See [proofs/hol_light](hol_light).
+We use the [HOL-Light](https://github.com/jrh13/hol-light) interactive theorem
+prover alongside the verification infrastructure from
+[s2n-bignum](https://github.com/awslabs/s2n-bignum) to show the functional
+correctness of highly optimized AArch64, x86_64, and RV32IM assembly routines
+in mldsa-native at the object-code level. See
+[proofs/hol_light](hol_light).

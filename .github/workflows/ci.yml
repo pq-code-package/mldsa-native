@@ -925,6 +925,10 @@ jobs:
             nix_shell: 'hol_light-cross-x86_64'
             nix_cache: 'true'
             extra_args: '--force-cross aarch64 x86_64'
+          - system: ubuntu-latest
+            nix_shell: 'hol_light-cross-riscv32'
+            nix_cache: 'true'
+            extra_args: '--force-cross riscv32'
     runs-on: ${{ matrix.target.system }}
     name: Check object code in HOL-Light proofs
     steps:
