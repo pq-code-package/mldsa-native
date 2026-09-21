@@ -416,7 +416,7 @@ check-hol-light-imports
 gh_group_end
 
 # Derive the theorem-name prefix from a proof routine's basename:
-#   - strip the platform suffix (_aarch64_asm or _avx2_asm)
+#   - strip the platform suffix
 #   - uppercase
 # The routine basename already carries the namespace (`mldsa_` for arithmetic,
 # `keccak_` for the namespace-agnostic keccak proofs), so no fixup is needed.
@@ -424,17 +424,32 @@ theorem-prefix()
 {
   local routine="$1"
   local platform_suffix="$2"
-  local base="${routine%${platform_suffix}}"
+  local base
+  case "$routine" in
+    mldsa_ntt_rv32im_slowmul_asm)
+      base="mldsa_ntt_slow"
+      ;;
+    mldsa_intt_rv32im_slowmul_asm)
+      base="mldsa_intt_slow"
+      ;;
+    mldsa_poly_pointwise_montgomery_rv32im_asm)
+      base="mldsa_pointwise_montgomery"
+      ;;
+    *)
+      base="${routine%${platform_suffix}}"
+      ;;
+  esac
   echo "$base" | tr '[:lower:]' '[:upper:]'
 }
 
 check-theorems()
 {
   local success=true
-  for arch in aarch64 x86_64; do
+  for arch in aarch64 x86_64 riscv32; do
     local proofs_dir="$ROOT/proofs/hol_light/$arch/proofs"
     local platform_suffix="_aarch64_asm"
     [[ $arch == "x86_64" ]] && platform_suffix="_avx2_asm"
+    [[ $arch == "riscv32" ]] && platform_suffix="_rv32im_asm"
     local proofs
     proofs=$("$ROOT/proofs/hol_light/$arch/list_proofs.sh")
 
@@ -449,8 +464,11 @@ check-theorems()
       local safe="SAFE"
       [[ ${routine} == mldsa_rej_uniform_* ]] && safe="MEMSAFE"
 
+      local core_correct="${prefix}_CORRECT"
+      [[ $arch == "riscv32" ]] &&
+        core_correct="${prefix}_CORE_CORRECT"
       local expected=(
-        "${prefix}_CORRECT"
+        "$core_correct"
         "${prefix}_SUBROUTINE_CORRECT"
         "${prefix}_SUBROUTINE_${safe}"
       )

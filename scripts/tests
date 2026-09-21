@@ -1134,6 +1134,8 @@ class Tests:
             arch = "aarch64"
         elif machine in ["x86_64"]:
             arch = "x86_64"
+        elif machine in ["riscv32", "riscv32im"]:
+            arch = "riscv32"
         else:
             self.fail(f"HOL-Light unsupported architecture: {machine}")
             self.check_fail()
@@ -1681,8 +1683,8 @@ def cli():
     hol_light_parser.add_argument(
         "-a",
         "--arch",
-        help="Architecture for which to list/run HOL_LIGHT proofs (aarch64 or x86_64).",
-        choices=["aarch64", "x86_64"],
+        help="Architecture for which to list/run HOL_LIGHT proofs.",
+        choices=["aarch64", "x86_64", "riscv32"],
         default=None,
     )
 
