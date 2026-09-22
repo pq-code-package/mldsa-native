@@ -1,0 +1,88 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# Select the RV32-IM arithmetic backend in the Pavona build.
+
+diff --git a/sw/device/lib/crypto/impl/mldsa/mldsa-native/BUILD b/sw/device/lib/crypto/impl/mldsa/mldsa-native/BUILD
+index 236c6c9fd2..c81f6ff94a 100644
+--- a/sw/device/lib/crypto/impl/mldsa/mldsa-native/BUILD
++++ b/sw/device/lib/crypto/impl/mldsa/mldsa-native/BUILD
+@@ -10,6 +10,7 @@ cc_library(
+     srcs = [
+         "mldsa_native_alloc.c",
+         "mldsa_native_monobuild.c",
++        "mldsa_native_monobuild_asm.S",
+     ],
+     hdrs = [
+         "fips202_glue.h",
+diff --git a/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_config.h b/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_config.h
+index 7065b56cdf..8e480bf406 100644
+--- a/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_config.h
++++ b/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_config.h
+@@ -74,6 +74,17 @@
+  *****************************************************************************/
+ #define MLD_CONFIG_INTERNAL_API_QUALIFIER static
+ 
++/******************************************************************************
++ * Name:        MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
++ *              MLD_CONFIG_ARITH_BACKEND_FILE
++ *
++ * Description: Enable the RV32-IM arithmetic backend. Ibex has a single-cycle
++ *              multiplier, so use the `fastmul` profile.
++ *
++ *****************************************************************************/
++#define MLD_CONFIG_USE_NATIVE_BACKEND_ARITH
++#define MLD_CONFIG_ARITH_BACKEND_FILE "native/rv32im/fastmul.h"
++
+ /******************************************************************************
+  * Name:        MLD_CONFIG_FIPS202_CUSTOM_HEADER
+  *
+diff --git a/third_party/mldsa_native/BUILD.mldsa_native.bazel b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+index 0218bf5f7e..2e4df8600b 100644
+--- a/third_party/mldsa_native/BUILD.mldsa_native.bazel
++++ b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+@@ -10,6 +10,7 @@ cc_library(
+     hdrs = [
+         "mldsa/mldsa_native.c",
+         "mldsa/mldsa_native.h",
++        "mldsa/mldsa_native_asm.S",
+         "mldsa/src/cbmc.h",
+         "mldsa/src/common.h",
+         "mldsa/src/context.h",
+@@ -18,6 +19,16 @@ cc_library(
+         "mldsa/src/debug.c",
+         "mldsa/src/ct.c",
+         "mldsa/src/ct.h",
++        "mldsa/src/native/api.h",
++        "mldsa/src/native/rv32im/fastmul.h",
++        "mldsa/src/native/rv32im/slowmul.h",
++        "mldsa/src/native/rv32im/src/arith_native_rv32im.h",
++        "mldsa/src/native/rv32im/src/mldsa_intt_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_intt_rv32im_slowmul_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_slowmul_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_pointwise_montgomery_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/rv32im_zetas.c",
+         "mldsa/src/packing.c",
+         "mldsa/src/packing.h",
+         "mldsa/src/params.h",
+diff --git a/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_monobuild_asm.S b/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_monobuild_asm.S
+new file mode 100644
+index 0000000000..600329734b
+--- /dev/null
++++ b/sw/device/lib/crypto/impl/mldsa/mldsa-native/mldsa_native_monobuild_asm.S
+@@ -0,0 +1,14 @@
++// Copyright The mldsa-native project authors
++// Copyright zeroRISC Inc.
++// Licensed under the Apache License, Version 2.0, see LICENSE for details.
++// SPDX-License-Identifier: Apache-2.0
++
++/* Assembly counterpart of mldsa_native_monobuild.c
++ *
++ * The RV32-IM kernels are level-independent, so the assembly is included
++ * once, for the parameter set that carries the shared code.
++ */
++
++#define MLD_CONFIG_MULTILEVEL_WITH_SHARED
++#define MLD_CONFIG_PARAMETER_SET 44
++#include "mldsa/mldsa_native_asm.S"
