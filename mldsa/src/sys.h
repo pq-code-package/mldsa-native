@@ -87,7 +87,7 @@
 
 #if defined(__riscv) && defined(__riscv_xlen) && __riscv_xlen == 32
 #define MLD_SYS_RISCV32
-#if defined(__riscv_mul)
+#if defined(__riscv_mul) && !defined(__riscv_32e)
 #define MLD_SYS_RISCV32_M
 #endif
 #endif /* __riscv && __riscv_xlen && __riscv_xlen == 32 */
