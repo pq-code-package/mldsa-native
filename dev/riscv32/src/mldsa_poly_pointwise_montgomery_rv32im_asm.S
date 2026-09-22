@@ -72,6 +72,9 @@
     (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
      defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)) &&              \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+        /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
+        .option push
+        .option norvc
 /* simpasm: header-end */
 
 /*****************************************************************
@@ -178,6 +181,7 @@ mld_poly_pointwise_montgomery_rv32im_loop:
 #undef qinv
 
 /* simpasm: footer-start */
+        .option pop
 #endif /* MLD_ARITH_BACKEND_RV32IM && (!MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API || MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
           && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
