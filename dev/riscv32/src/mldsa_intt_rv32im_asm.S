@@ -49,6 +49,9 @@
 #if defined(MLD_ARITH_BACKEND_RV32IM) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     defined(MLD_RV32IM_NEED_FASTMUL)
+        /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
+        .option push
+        .option norvc
 /* simpasm: header-end */
 
         .text
@@ -59,5 +62,6 @@ MLD_ASM_FN_SYMBOL(intt_rv32im_fastmul_asm)
 #include "mldsa_intt_rv32im_asm.i"
 
 /* simpasm: footer-start */
+        .option pop
 #endif /* MLD_ARITH_BACKEND_RV32IM && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           MLD_RV32IM_NEED_FASTMUL */

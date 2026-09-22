@@ -46,6 +46,9 @@
       description: Forward-NTT twiddle table reused in reverse
 */
 
+        /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
+        .option push
+        .option norvc
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
