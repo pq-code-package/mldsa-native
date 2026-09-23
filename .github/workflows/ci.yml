@@ -95,7 +95,6 @@ jobs:
            arch: riscv32
            mode: cross-riscv32
            nix_shell: cross-riscv32
-           extra_args: '--arith-riscv32-backend fastmul'
          - runner: ubuntu-24.04-arm
            name: 'ppc64le, cross'
            arch: ppc64le
@@ -173,8 +172,8 @@ jobs:
           cflags: "${{ matrix.target.cflags || '' }} -DMLDSA_DEBUG"
           opt: 'opt'
       # The generic riscv32 opt steps above exercise the default `fastmul.h`
-      # profile through matrix.target.extra_args. Exercise `slowmul.h` here so
-      # both concrete RV32IM backend profiles are covered.
+      # profile. Exercise `slowmul.h` here so both concrete RV32IM backend
+      # profiles are covered.
       - name: build + test (riscv32, slowmul, opt)
         uses: ./.github/actions/multi-functest
         if: ${{ matrix.target.arch == 'riscv32' }}
@@ -925,6 +924,10 @@ jobs:
             nix_shell: 'hol_light-cross-x86_64'
             nix_cache: 'true'
             extra_args: '--force-cross aarch64 x86_64'
+          - system: ubuntu-latest
+            nix_shell: 'hol_light-cross-riscv32'
+            nix_cache: 'true'
+            extra_args: '--force-cross riscv32'
     runs-on: ${{ matrix.target.system }}
     name: Check object code in HOL-Light proofs
     steps:

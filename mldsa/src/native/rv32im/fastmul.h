@@ -8,11 +8,9 @@
 #define MLD_NATIVE_RV32IM_FASTMUL_H
 
 /*
- * Experimental arithmetic backend for the RISC-V RV32-IM ISA and the
- * ILP32, ILP32F, and ILP32D family of ABIs for RV32-IM. It is deliberately
- * not selected by mldsa/src/native/meta.h: users must define
- * MLD_CONFIG_USE_NATIVE_BACKEND_ARITH and set
- * MLD_CONFIG_ARITH_BACKEND_FILE to native/rv32im/fastmul.h.
+ * Arithmetic backend for the RISC-V RV32-IM ISA and the ILP32, ILP32F, and
+ * ILP32D family of ABIs. This is the default arithmetic backend selected by
+ * mldsa/src/native/meta.h on RV32IM targets.
  *
  * This profile uses an RV32M low multiply for the Barrett `t*q` step in the
  * forward and inverse NTT wrappers.
@@ -21,8 +19,9 @@
  * addresses. Constant-time use also relies on the target's 32-bit multiplier
  * executing RV32M mul and mulh with data-independent latency. RV32IM does not
  * architecturally guarantee this property; integrators must establish it for
- * the selected core. The backend is covered by functional and ABI tests, but
- * currently has no formal proof.
+ * the selected core. HOL-Light proves functional correctness, memory safety,
+ * and secret-independent execution subject to that multiplier assumption.
+ * CBMC proves that these C wrappers satisfy the native arithmetic contracts.
  */
 
 /* Set of primitives that this backend replaces. */

@@ -15,5 +15,9 @@
 
 arm/proofs/base.ml
 arm/proofs/consttime.ml
+common/consttime.ml
+common/int_linear.ml
+riscv/proofs/base.ml
+riscv/proofs/consttime.ml
 x86/proofs/base.ml
 x86/proofs/consttime.ml

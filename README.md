@@ -22,7 +22,7 @@ mldsa-native allows developers to support ML-DSA with minimal performance and ma
 
 **Maintainability and Safety:** Memory safety, type safety and absence of various classes of timing leakage are automatically checked on every change, using a combination of static model checking (using CBMC) and dynamic instrumentation (using valgrind). This reduces review and maintenance burden and accelerates safe code delivery. See [Formal Verification](#formal-verification) and [Security](#security).
 
-**Architecture Support:** Native backends are added under a unified interface, minimizing duplicated code and reasoning. mldsa-native comes with backends for AArch64 and x86-64, and experimental backends for Armv8.1-M and RV32-IM. See [Design](#design).
+**Architecture Support:** Native backends are added under a unified interface, minimizing duplicated code and reasoning. mldsa-native comes with backends for AArch64, x86-64, and RV32-IM, and an experimental backend for Armv8.1-M. See [Design](#design).
 
 ## Quickstart for Ubuntu
 
@@ -58,12 +58,16 @@ mldsa-native is used in
 
 We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
 
-All AArch64 and x86_64 assembly is proved functionally correct and memory-safe at the object-code level, using
-[HOL-Light](https://hol-light.github.io/) and the [s2n-bignum](https://github.com/awslabs/s2n-bignum) verification
-infrastructure. All routines are additionally proved to have secret-independent timing, with two exceptions. The
-matrix sampler `rej_uniform` operates on public data only, and is deliberately variable-time. The secret-vector
-samplers `rej_uniform_eta{2,4}` _do_ have secret-independent timing, but this property is not yet backed by proof.
-See [proofs/hol_light](proofs/hol_light) for details.
+All AArch64 and x86_64 assembly, and the RV32IM arithmetic backend, are
+proved functionally correct and memory-safe at the object-code level using
+[HOL-Light](https://hol-light.github.io/) and the
+[s2n-bignum](https://github.com/awslabs/s2n-bignum) verification
+infrastructure. All routines are additionally proved to have
+secret-independent timing, with two exceptions. The matrix sampler
+`rej_uniform` operates on public data only and is deliberately variable-time.
+The secret-vector samplers `rej_uniform_eta{2,4}` _do_ have
+secret-independent timing, but this property is not yet backed by proof. See
+[proofs/hol_light](proofs/hol_light) for details.
 
 Finally, [proofs/isabelle](proofs/isabelle/compress) contains proofs in [Isabelle/HOL](https://isabelle.in.tum.de/) of the correctness of
 different approaches for computing the scalar decomposition routines used in ML-DSA. Those are still experimental and do not yet operate
@@ -98,7 +102,9 @@ mldsa-native currently offers the following backends:
 * 64-bit Arm backend (using Neon)
 * 64-bit Intel/AMD backend (using AVX2)
 * 32-bit Armv8.1-M backend (using Helium/MVE). This is still experimental and disabled by default.
-* 32-bit RISC-V backend (RV32-IM, base integer + M-extension only). This is still experimental and disabled by default.
+* 32-bit RISC-V backend (RV32-IM, base integer + M-extension only). The
+  fast-multiplier profile is selected by default when native arithmetic is
+  enabled; a shift/add profile is also available.
 
 If you'd like contribute new backends, please reach out!
 

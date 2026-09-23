@@ -327,6 +327,10 @@ source code and documentation.
   - [mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_slowmul_asm.S](mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_slowmul_asm.S)
   - [proofs/hol_light/aarch64/mldsa/mldsa_intt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/mldsa_intt_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/mldsa_ntt_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/mldsa_ntt_aarch64_asm.S)
+  - [proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_asm.S](proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_asm.S)
+  - [proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_slowmul_asm.S](proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_slowmul_asm.S)
+  - [proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_asm.S](proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_asm.S)
+  - [proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_slowmul_asm.S](proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_slowmul_asm.S)
   - [proofs/isabelle/neon_ntt/README.md](proofs/isabelle/neon_ntt/README.md)
 
 ### `REF`

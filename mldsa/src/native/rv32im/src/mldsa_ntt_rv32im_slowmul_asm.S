@@ -50,6 +50,9 @@
 #if defined(MLD_ARITH_BACKEND_RV32IM) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     defined(MLD_RV32IM_NEED_SLOWMUL)
+        /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
+        .option push
+        .option norvc
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -333,6 +336,7 @@ Lmld_ntt_rv32im_p4_outer:
 
 MLD_ASM_FN_SIZE(ntt_rv32im_slowmul_asm)
 
+        .option pop
 #endif /* MLD_ARITH_BACKEND_RV32IM && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           MLD_RV32IM_NEED_SLOWMUL */
 

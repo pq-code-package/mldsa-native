@@ -288,3 +288,92 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             tests hol_light -p ${{ matrix.proof.name }} --verbose
+
+  # RV32IM proofs
+  hol_light_bytecode_riscv32:
+    name: RV32IM HOL-Light bytecode check
+    runs-on: ubuntu-latest
+    needs: [ check_modified_files ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light-cross-riscv32'
+          script: |
+            autogen --update-hol-light-bytecode --dry-run \
+              --force-cross riscv32
+  hol_light_interactive_riscv32:
+    name: RV32IM HOL-Light interactive shell test
+    runs-on: ubuntu-latest
+    needs: [ check_modified_files, hol_light_bytecode_riscv32 ]
+    if: needs.check_modified_files.outputs.run_needed == 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-shell
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light-cross-riscv32'
+          script: |
+            echo 'needs "mldsa_native/riscv32/proofs/mldsa_specs_aux.ml";; #quit;;' | hol.sh
+  hol_light_proofs_riscv32:
+    needs: [ check_modified_files, hol_light_bytecode_riscv32 ]
+    strategy:
+      fail-fast: false
+      matrix:
+        proof:
+          - name: mldsa_ntt_rv32im_asm
+            needs: ["consttime_aux.ml", "mldsa_specs.ml", "mldsa_specs_aux.ml", "mldsa_ntt_shared.ml", "mldsa_ntt_layout.ml", "mldsa_ntt_arithmetic.ml", "mldsa_zetas.ml", "mldsa_zetas_table.ml"]
+          - name: mldsa_ntt_rv32im_slowmul_asm
+            needs: ["consttime_aux.ml", "mldsa_specs.ml", "mldsa_specs_aux.ml", "mldsa_ntt_shared.ml", "mldsa_ntt_layout.ml", "mldsa_ntt_arithmetic.ml", "mldsa_zetas.ml", "mldsa_zetas_table.ml"]
+          - name: mldsa_intt_rv32im_asm
+            needs: ["consttime_aux.ml", "mldsa_specs.ml", "mldsa_specs_aux.ml", "mldsa_ntt_shared.ml", "mldsa_intt_shared.ml", "mldsa_intt_layout.ml", "mldsa_intt_arithmetic.ml", "mldsa_zetas.ml", "mldsa_zetas_table.ml"]
+          - name: mldsa_intt_rv32im_slowmul_asm
+            needs: ["consttime_aux.ml", "mldsa_specs.ml", "mldsa_specs_aux.ml", "mldsa_ntt_shared.ml", "mldsa_intt_shared.ml", "mldsa_intt_layout.ml", "mldsa_intt_arithmetic.ml", "mldsa_zetas.ml", "mldsa_zetas_table.ml"]
+          - name: mldsa_poly_pointwise_montgomery_rv32im_asm
+            needs: ["consttime_aux.ml", "mldsa_specs.ml", "mldsa_specs_aux.ml"]
+    name: RV32IM HOL Light proof for ${{ matrix.proof.name }}.S
+    runs-on: ubuntu-latest
+    if: needs.check_modified_files.outputs.run_needed == 'true'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 100
+          persist-credentials: false
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      - name: Check if dependencies changed
+        id: check_run
+        shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          run_needed=0
+          dependencies="${{ join(matrix.proof.needs, ' ') }} ${{ format('{0}.S {0}.ml', matrix.proof.name) }}"
+          for changed in $CHANGED_FILES; do
+            for needs in $dependencies; do
+              if [[ "$changed" == *"$needs" ]]; then
+                run_needed=1
+              fi
+            done
+          done
+
+          if [[ "$CHANGED_FILES" == *"nix/"* ]] || [[ "$CHANGED_FILES" == *"hol_light.yml"* ]] || [[ "$CHANGED_FILES" == *"flake"* ]] || [[ "$CHANGED_FILES" == *"proofs/hol_light/riscv32/Makefile"* ]]; then
+            run_needed=1
+          fi
+
+          echo "run_needed=${run_needed}" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/setup-shell
+        if: steps.check_run.outputs.run_needed == '1'
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          nix-shell: 'hol_light-cross-riscv32'
+          script: |
+            tests hol_light -a riscv32 \
+              -p ${{ matrix.proof.name }} --verbose
