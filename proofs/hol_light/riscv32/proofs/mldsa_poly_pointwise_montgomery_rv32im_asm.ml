@@ -460,6 +460,9 @@ let MLDSA_POINTWISE_MONTGOMERY_CORE_CORRECT = prove
 (* Add the instructions that save and restore S0 and S1, adjust the stack
    pointer, and return to the caller. *)
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mldsa/src/native/rv32im/src/arith_native_rv32im.h *)
+
 let MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_CORRECT = prove
  (`!a b:int32. !x y:num->int32. !pc:num.
     !stackpointer returnaddress:int32.

@@ -5871,6 +5871,9 @@ let MLDSA_INTT_CORE_CORRECT = prove
       ASM_REWRITE_TAC[]];
     USE_THEN "machine" ACCEPT_TAC]);;
 
+(* NOTE: This must be kept in sync with the CBMC specification
+ * in mldsa/src/native/rv32im/src/arith_native_rv32im.h *)
+
 let MLDSA_INTT_SUBROUTINE_CORRECT = prove
  (`!a zetas:int32. !x:num->int32. !pc:num.
     !stackpointer returnaddress:int32.
