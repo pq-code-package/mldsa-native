@@ -23,9 +23,14 @@
         let
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix { };
+          # HOL Light comes from nixpkgs-unstable (see the `cbmc hol_light`
+          # overlay below), where it is built against a newer OCaml than
+          # nixpkgs 26.05 provides. `build-proof.sh` compiles proof files
+          # against `hol_lib.cmxa` using the ambient OCaml, so the toolchain
+          # in the shell must match the one HOL Light was built with.
           holLightToolchain = builtins.attrValues {
-            inherit (pkgs) ocaml ledit;
-            inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
+            inherit (pkgs-unstable) ocaml ledit;
+            inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -63,7 +68,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                inherit (pkgs-unstable) cbmc;
+                inherit (pkgs-unstable) cbmc hol_light;
               })
             ];
           };
