@@ -96,7 +96,6 @@ __contract__(
     assigns(memory_slice(p, sizeof(int32_t) * MLDSA_N))
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
     ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLDSA_N, MLD_NTT_BOUND))
-    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(p, 0, MLDSA_N, MLDSA_Q))
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(p, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_NTT */
@@ -154,7 +153,6 @@ __contract__(
   assigns(memory_slice(p, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(p, 0, MLDSA_N, MLD_INTT_BOUND))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(p, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(p, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_INTT */
@@ -288,7 +286,6 @@ __contract__(
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a1, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(a0, 0, MLDSA_N, MLDSA_GAMMA2+1))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a0, MLDSA_N))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
@@ -320,7 +317,6 @@ __contract__(
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a1, 0, MLDSA_N, 0, (MLDSA_Q-1)/(2*MLDSA_GAMMA2)))
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(a0, 0, MLDSA_N, MLDSA_GAMMA2+1))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_bound(a0, 0, MLDSA_N, 0, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a0, MLDSA_N))
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
@@ -342,7 +338,6 @@ __contract__(
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POLY_CADDQ */
@@ -506,8 +501,7 @@ __contract__(
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(a, 0, MLDSA_N, MLD_NTT_BOUND))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(b, 0, MLDSA_N, MLD_NTT_BOUND))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
