@@ -278,12 +278,13 @@ let WORD_JOIN_BYTE_BIT_TO_BITVAL = prove(
 (* ------------------------------------------------------------------------- *)
 
 let MLDSA_POLY_CHKNORM_CORRECT = prove(
- `!a (x:num->int32) (bound:int32) pc.
+ `!a b (x:num->int32) (bound:int32) pc.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_tmc) (a, 1024)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) (BUTLAST mldsa_poly_chknorm_tmc) /\
                   read RIP s = word pc /\
-                  C_ARGUMENTS [a; word_zx bound] s /\
+                  C_ARGUMENTS [a; b] s /\
+                  (word_zx:int64->int32) b = bound /\
                   &0 <= ival bound /\
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
@@ -296,11 +297,13 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
   REWRITE_TAC[MESON[INT_NOT_LT; INT_GE]
    `(~(!i. i < n ==> abs(ival((x:num->int32) i)) < (b:int))) <=>
     (?i. i < n /\ abs(ival(x i)) >= b)`] THEN
-  MAP_EVERY X_GEN_TAC [`a:int64`; `x:num->int32`; `bound:int32`; `pc:num`] THEN
+  MAP_EVERY X_GEN_TAC [`a:int64`; `b:int64`; `x:num->int32`; `bound:int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES; fst MLDSA_POLY_CHKNORM_TMC_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   ENSURES_INIT_TAC "s0" THEN
+  (* Only the low 32 bits of RSI carry the bound. *)
+  UNDISCH_THEN `(word_zx:int64->int32) b = bound` (SUBST_ALL_TAC o SYM) THEN
   (* Expand the bounded forall over memory reads to 256 explicit equalities. *)
   UNDISCH_TAC
     `forall i. i < 256
@@ -358,7 +361,7 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
 (* mldsa/src/native/x86_64/src/arith_native_x86_64.h                         *)
 
 let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_CORRECT = prove(
- `!a (x:num->int32) (bound:int32) pc stackpointer returnaddress.
+ `!a b (x:num->int32) (bound:int32) pc stackpointer returnaddress.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_tmc) (a, 1024) /\
         nonoverlapping (stackpointer,8) (a, 1024)
         ==> ensures x86
@@ -366,7 +369,8 @@ let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_CORRECT = prove(
                   read RIP s = word pc /\
                   read RSP s = stackpointer /\
                   read (memory :> bytes64 stackpointer) s = returnaddress /\
-                  C_ARGUMENTS [a; word_zx bound] s /\
+                  C_ARGUMENTS [a; b] s /\
+                  (word_zx:int64->int32) b = bound /\
                   &0 <= ival bound /\
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
@@ -378,7 +382,7 @@ let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_CORRECT = prove(
   X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_poly_chknorm_tmc MLDSA_POLY_CHKNORM_CORRECT);;
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT = prove(
- `!a (x:num->int32) (bound:int32) pc stackpointer returnaddress.
+ `!a b (x:num->int32) (bound:int32) pc stackpointer returnaddress.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_mc) (a, 1024) /\
         nonoverlapping (stackpointer,8) (a, 1024)
         ==> ensures x86
@@ -386,7 +390,8 @@ let MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT = prove(
                   read RIP s = word pc /\
                   read RSP s = stackpointer /\
                   read (memory :> bytes64 stackpointer) s = returnaddress /\
-                  C_ARGUMENTS [a; word_zx bound] s /\
+                  C_ARGUMENTS [a; b] s /\
+                  (word_zx:int64->int32) b = bound /\
                   &0 <= ival bound /\
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
@@ -420,7 +425,7 @@ let MLDSA_POLY_CHKNORM_SAFE = time prove
 
 let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_SAFE = time prove
  (`exists f_events.
-       forall e a (bound:int32) pc stackpointer returnaddress.
+       forall e a b pc stackpointer returnaddress.
           nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_tmc) (a, 1024) /\
           nonoverlapping (stackpointer, 8) (a, 1024)
           ==> ensures x86
@@ -429,7 +434,7 @@ let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_SAFE = time prove
                     read RIP s = word pc /\
                     read RSP s = stackpointer /\
                     read (memory :> bytes64 stackpointer) s = returnaddress /\
-                    C_ARGUMENTS [a; word_zx bound] s /\
+                    C_ARGUMENTS [a; b] s /\
                     read events s = e)
                (\s. read RIP s = returnaddress /\
                     read RSP s = word_add stackpointer (word 8) /\
@@ -444,7 +449,7 @@ let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_SAFE = time prove
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE = time prove
  (`exists f_events.
-       forall e a (bound:int32) pc stackpointer returnaddress.
+       forall e a b pc stackpointer returnaddress.
           nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_mc) (a, 1024) /\
           nonoverlapping (stackpointer, 8) (a, 1024)
           ==> ensures x86
@@ -453,7 +458,7 @@ let MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE = time prove
                     read RIP s = word pc /\
                     read RSP s = stackpointer /\
                     read (memory :> bytes64 stackpointer) s = returnaddress /\
-                    C_ARGUMENTS [a; word_zx bound] s /\
+                    C_ARGUMENTS [a; b] s /\
                     read events s = e)
                (\s. read RIP s = returnaddress /\
                     read RSP s = word_add stackpointer (word 8) /\
