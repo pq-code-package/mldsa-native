@@ -51,12 +51,7 @@
  */
 
 /* The three hooks this integration must provide. mldsa-native calls them from
- * its signing loop; the matching declarations in the configuration file are
- * gated behind MLD_BUILD_INTERNAL, so we repeat them here to define the hooks
- * with only the public API in scope. */
-uint16_t mld_sign_hook_resume(void);
-int mld_sign_hook_attempt(uint16_t attempt);
-void mld_sign_hook_finish(uint16_t attempt);
+ * its signing loop; they are declared in the configuration file. */
 
 /* How many rejection-sampling attempts each signing call runs before pausing;
  * set by the driver before each operation. 0 means never pause (one-shot). */
