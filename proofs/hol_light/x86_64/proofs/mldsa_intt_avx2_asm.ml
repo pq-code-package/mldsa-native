@@ -4279,6 +4279,22 @@ let mldsa_intt_mc = define_assert_from_elf "mldsa_intt_mc" "x86_64/mldsa/mldsa_i
 let mldsa_intt_tmc = define_trimmed "mldsa_intt_tmc" mldsa_intt_mc;;
 let MLDSA_INTT_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_intt_tmc;;
 
+let LENGTH_MLDSA_INTT_TMC =
+  REWRITE_CONV[mldsa_intt_tmc] `LENGTH mldsa_intt_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_INTT_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_INTT_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_INTT_CORE_END = new_definition
+  `MLDSA_INTT_CORE_END = LENGTH mldsa_intt_tmc - MLDSA_INTT_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  PURE_REWRITE_CONV[LENGTH_MLDSA_INTT_TMC;
+                    MLDSA_INTT_CORE_END;
+                    MLDSA_INTT_POSTAMBLE_LENGTH] THENC
+  ONCE_DEPTH_CONV NUM_SUB_CONV;;
+
 (* ------------------------------------------------------------------------- *)
 (* Correctness proof.                                                        *)
 (* ------------------------------------------------------------------------- *)
@@ -4288,8 +4304,8 @@ let MLDSA_INTT_CORRECT = prove
   (`!a zetas (zetas_list:int32 list) x pc.
     aligned 32 a /\
     aligned 32 zetas /\
-    nonoverlapping (word pc,0x2F39) (a, 1024) /\
-    nonoverlapping (word pc,0x2F39) (zetas, 2496) /\
+    nonoverlapping (word pc, LENGTH mldsa_intt_tmc) (a, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_intt_tmc) (zetas, 2496) /\
     nonoverlapping (a, 1024) (zetas, 2496)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) (BUTLAST mldsa_intt_tmc) /\
@@ -4300,7 +4316,7 @@ let MLDSA_INTT_CORRECT = prove
               !i. i < 256
                   ==> read(memory :> bytes32(word_add a (word(4 * i)))) s =
                       x i)
-          (\s. read RIP s = word(pc + 0x2F38) /\
+          (\s. read RIP s = word(pc + MLDSA_INTT_CORE_END) /\
               (!i. i < 256
                         ==> let zi =
                       read(memory :> bytes32(word_add a (word(4 * i)))) s in
@@ -4310,6 +4326,7 @@ let MLDSA_INTT_CORRECT = prove
           MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
           MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
           MAYCHANGE [memory :> bytes(a,1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
 
   (*** Setup - introduce variables and break down assumptions ***)
   MAP_EVERY X_GEN_TAC
@@ -4482,7 +4499,8 @@ let MLDSA_INTT_NOIBT_SUBROUTINE_CORRECT = prove
           MAYCHANGE [memory :> bytes(a,1024)])`,
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_intt_tmc (CONV_RULE TWEAK_CONV MLDSA_INTT_CORRECT));;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_intt_tmc
+    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_INTT_CORRECT)));;
 
 let MLDSA_INTT_SUBROUTINE_CORRECT = prove
  (`!a zetas (zetas_list:int32 list) x pc stackpointer returnaddress.
@@ -4528,7 +4546,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_intt" subroutine_signatures)
-    MLDSA_INTT_CORRECT
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_INTT_CORRECT)
     MLDSA_INTT_TMC_EXEC;;
 
 let full_spec =
