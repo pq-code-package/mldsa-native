@@ -186,6 +186,9 @@ mld_rej_uniform_avx2_asm_scalar:
         jmp     mld_rej_uniform_avx2_asm_scalar
 
 mld_rej_uniform_avx2_asm_done:
+        /* Clear upper halves of YMM registers to avoid a performance
+         * penalty when switching to SSE. */
+        vzeroupper
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

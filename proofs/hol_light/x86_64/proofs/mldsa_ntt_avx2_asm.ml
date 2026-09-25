@@ -4364,6 +4364,7 @@ let mldsa_ntt_mc = define_assert_from_elf "mldsa_ntt_mc" "x86_64/mldsa/mldsa_ntt
                            (* VMOVDQA (Memop Word256 (%% (rdi,960))) (%_% ymm3) *)
   0xc5; 0x7d; 0x7f; 0x9f; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm11) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -4414,7 +4415,8 @@ let MLDSA_NTT_CORRECT = prove
                       (ival zi == mldsa_forward_ntt (ival o x) i) (mod &8380417) /\
                       abs(ival zi) <= &42035261))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-          MAYCHANGE [ZMM0; ZMM1; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
+          MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                     ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
           MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
           MAYCHANGE [memory :> bytes(a,1024)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -4487,11 +4489,11 @@ let MLDSA_NTT_CORRECT = prove
 
 (*** Do the entire simulation (very slow!) ****)
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_NTT_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_NTT_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_ABBREV_TAC[mldsa_montmul]
                         [WORD_ADD_MLDSA_MONTMUL;
                          WORD_ADD_MLDSA_MONTMUL_ALT; WORD_SUB_MLDSA_MONTMUL])
-        (1--2337) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
 (**** Reverse the restructuring by splitting the 256-bit words up ***)
@@ -4509,7 +4511,7 @@ let MLDSA_NTT_CORRECT = prove
 
 (*** Rewrite with assumptions then throw them away ***)
 
-  ASM_REWRITE_TAC[] THEN DISCARD_STATE_TAC "s2337" THEN
+  ASM_REWRITE_TAC[] THEN DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
 
 (*** Remove one other non-arithmetical oddity ***)
 

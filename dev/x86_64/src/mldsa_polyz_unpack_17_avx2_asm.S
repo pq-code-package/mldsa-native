@@ -138,6 +138,9 @@ unpack17_block 28
 unpack17_block 29
 unpack17_block 30
 unpack17_block 31
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */
