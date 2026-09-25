@@ -254,6 +254,23 @@ let mldsa_caddq_mc = define_assert_from_elf "mldsa_caddq_mc" "x86_64/mldsa/mldsa
 let mldsa_caddq_tmc = define_trimmed "mldsa_caddq_tmc" mldsa_caddq_mc;;
 let MLDSA_POLY_CADDQ_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_caddq_tmc;;
 
+let LENGTH_MLDSA_POLY_CADDQ_TMC =
+  REWRITE_CONV[mldsa_caddq_tmc] `LENGTH mldsa_caddq_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POLY_CADDQ_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLY_CADDQ_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POLY_CADDQ_CORE_END = new_definition
+  `MLDSA_POLY_CADDQ_CORE_END =
+     LENGTH mldsa_caddq_tmc - MLDSA_POLY_CADDQ_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POLY_CADDQ_TMC;
+              MLDSA_POLY_CADDQ_CORE_END;
+              MLDSA_POLY_CADDQ_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 (* ------------------------------------------------------------------------- *)
 (* Functional specification of mldsa_caddq                                   *)
 (* ------------------------------------------------------------------------- *)
@@ -277,7 +294,7 @@ let mldsa_caddq_direct = prove
 let MLDSA_POLY_CADDQ_CORRECT = time prove
  (`!a x pc.
         aligned 32 a /\
-        nonoverlapping (word pc,876) (a, 1024)
+        nonoverlapping (word pc, LENGTH mldsa_caddq_tmc) (a, 1024)
         ==> ensures x86
              (\s. bytes_loaded s (word pc) (BUTLAST mldsa_caddq_tmc) /\
                   read RIP s = word pc /\
@@ -286,7 +303,7 @@ let MLDSA_POLY_CADDQ_CORRECT = time prove
                       ==> read(memory :> bytes32(word_add a (word(4 * i)))) s =
                           x i) /\
                   (!i. i < 256 ==> abs(ival(x i)) < &8380417))
-             (\s. read RIP s = word(pc + 875) /\
+             (\s. read RIP s = word(pc + MLDSA_POLY_CADDQ_CORE_END) /\
                   (!i. i < 256
                       ==> ival(read(memory :> bytes32
                                  (word_add a (word(4 * i)))) s) =
@@ -300,6 +317,7 @@ let MLDSA_POLY_CADDQ_CORRECT = time prove
               MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5] ,,
               MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
 
   MAP_EVERY X_GEN_TAC [`a:int64`; `x:num->int32`; `pc:num`] THEN
   REWRITE_TAC[NONOVERLAPPING_CLAUSES; C_ARGUMENTS; fst MLDSA_POLY_CADDQ_TMC_EXEC] THEN
@@ -373,7 +391,8 @@ let MLDSA_POLY_CADDQ_NOIBT_SUBROUTINE_CORRECT = prove
                                  (word_add a (word(4 * i)))) s) < &8380417))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc MLDSA_POLY_CADDQ_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_caddq_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_CADDQ_CORRECT));;
 
 let MLDSA_POLY_CADDQ_SUBROUTINE_CORRECT = prove
  (`!a x pc stackpointer returnaddress.
@@ -415,7 +434,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_caddq_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_CADDQ_CORRECT)
+    (REWRITE_RULE[SOME_FLAGS] (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_CADDQ_CORRECT))
     MLDSA_POLY_CADDQ_TMC_EXEC;;
 
 let MLDSA_POLY_CADDQ_SAFE = time prove
