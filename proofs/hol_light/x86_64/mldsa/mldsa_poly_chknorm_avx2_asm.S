@@ -165,6 +165,7 @@ mld_poly_chknorm_avx2_asm:
         xorl %eax, %eax
         vptest %ymm1, %ymm1
         setne %al
+        vzeroupper
         retq
         .cfi_endproc
 

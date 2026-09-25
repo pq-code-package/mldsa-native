@@ -9,6 +9,7 @@
 
 needs "s2n_bignum/x86/proofs/base.ml";;
 needs "mldsa_native/common/mldsa_specs.ml";;
+needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 
 (**** print_literal_from_elf "x86/mldsa/mldsa_nttunpack_avx2_asm.o";;
  ****)
@@ -375,6 +376,7 @@ let mldsa_nttunpack_mc = define_assert_from_elf "mldsa_nttunpack_mc" "x86_64/mld
                            (* VMOVDQA (Memop Word256 (%% (rdi,960))) (%_% ymm3) *)
   0xc5; 0x7d; 0x7f; 0x9f; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm11) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -426,7 +428,8 @@ let MLDSA_NTTUNPACK_CORRECT = prove
          (MAYCHANGE [events] ,,
           MAYCHANGE [memory :> bytes(a, 1024)] ,,
           MAYCHANGE [RIP] ,,
-          MAYCHANGE [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
+          MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                     ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   
   MAP_EVERY X_GEN_TAC [`a:int64`; `l:int32 list`; `pc:num`] THEN
@@ -435,7 +438,7 @@ let MLDSA_NTTUNPACK_CORRECT = prove
   
   ASM_CASES_TAC `LENGTH(l:int32 list) = 256` THENL
    [ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0";
-    X86_SIM_TAC MLDSA_NTTUNPACK_TMC_EXEC (1--192)] THEN
+    X86_SIM_UNTIL_TARGET_PC_TAC MLDSA_NTTUNPACK_TMC_EXEC] THEN
   
   UNDISCH_TAC
    `read(memory :> bytes(a,1024)) s0 = num_of_wordlist(l:int32 list)` THEN
@@ -455,10 +458,10 @@ let MLDSA_NTTUNPACK_CORRECT = prove
   REWRITE_TAC[GSYM BYTES256_WBYTES] THEN STRIP_TAC THEN
   
   (* Step through each instruction with SIMD simplification *)
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_NTTUNPACK_TMC_EXEC [n] THEN
     SIMD_SIMPLIFY_TAC[])
-   (1--192) THEN
+   1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   
   (* Extract all the memory writes from the execution *)
@@ -568,7 +571,8 @@ let MLDSA_NTTUNPACK_SAFE = time prove
                 MAYCHANGE [memory :> bytes (a,1024)] ,,
                 MAYCHANGE [RIP] ,,
                 MAYCHANGE
-                [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
+                [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                 ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_NTTUNPACK_TMC_EXEC);;

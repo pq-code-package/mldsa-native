@@ -186,6 +186,7 @@ mld_pointwise_acc_l7_avx2_looptop2:
         cmp     eax, 16
         jb      mld_pointwise_acc_l7_avx2_looptop2
 
+        vzeroupper
         ret
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

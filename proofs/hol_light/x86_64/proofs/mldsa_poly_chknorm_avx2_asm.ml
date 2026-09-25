@@ -158,6 +158,7 @@ let mldsa_poly_chknorm_mc = define_assert_from_elf "mldsa_poly_chknorm_mc" "x86_
   0xc4; 0xe2; 0x7d; 0x17; 0xc9;
                            (* VPTEST (%_% ymm1) (%_% ymm1) *)
   0x0f; 0x95; 0xc0;        (* SETNE (% al) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)

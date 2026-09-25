@@ -96,6 +96,7 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
                            (* CMP (% rax) (Imm32 (word 1024)) *)
   0x0f; 0x85; 0x75; 0xff; 0xff; 0xff;
                            (* JNE (Imm32 (word 4294967157)) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -1356,7 +1357,7 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
   ;
    REWRITE_TAC[ARITH_RULE `32 <= b /\ b < 32 <=> F`] THEN
    ENSURES_INIT_TAC "s0" THEN
-   X86_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC (1--1) THEN
+   MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC [n]) 1 THEN
    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]
   ]);;
 

@@ -106,6 +106,7 @@ nttunpack_64_coefficients 4*64
 nttunpack_64_coefficients 4*64*2
 nttunpack_64_coefficients 4*64*3
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

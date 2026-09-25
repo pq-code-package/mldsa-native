@@ -84,6 +84,7 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
   0x75; 0x94;              (* JNE (Imm8 (word 148)) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -1070,7 +1071,7 @@ let MLDSA_POLY_USE_HINT_32_BLOCK_CORRECT = prove
    (* EXIT: the invariant at i = 32 is the postcondition. *)
    REWRITE_TAC[ARITH_RULE `32 <= b /\ b < 32 <=> F`] THEN
    ENSURES_INIT_TAC "s0" THEN
-   X86_STEPS_TAC MLDSA_POLY_USE_HINT_32_EXEC (1--1) THEN
+   MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_POLY_USE_HINT_32_EXEC [n]) 1 THEN
    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]
   ]);;
 

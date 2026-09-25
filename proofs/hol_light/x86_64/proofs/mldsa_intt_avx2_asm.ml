@@ -4272,6 +4272,7 @@ let mldsa_intt_mc = define_assert_from_elf "mldsa_intt_mc" "x86_64/mldsa/mldsa_i
                            (* VMOVDQA (Memop Word256 (%% (rdi,352))) (%_% ymm6) *)
   0xc5; 0xfd; 0x7f; 0xbf; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,480))) (%_% ymm7) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -4393,11 +4394,11 @@ let MLDSA_INTT_CORRECT = prove
 
 (*** Execute the inverse NTT simulation ***)
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_INTT_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_INTT_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_ABBREV_TAC[mldsa_montmul]
                         [WORD_ADD_MLDSA_MONTMUL;
                          WORD_ADD_MLDSA_MONTMUL_ALT; WORD_SUB_MLDSA_MONTMUL])
-        (1--2265) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
 (**** Reverse the restructuring by splitting the 256-bit words up ***)
@@ -4415,7 +4416,7 @@ let MLDSA_INTT_CORRECT = prove
 
 (*** Rewrite with assumptions then throw them away ***)
 
-  ASM_REWRITE_TAC[] THEN DISCARD_STATE_TAC "s2265" THEN
+  ASM_REWRITE_TAC[] THEN DISCARD_MATCHING_ASSUMPTIONS [`read c s = x`] THEN
 
 (*** Remove one other non-arithmetical oddity ***)
 

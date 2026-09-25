@@ -171,6 +171,7 @@ let mldsa_pointwise_mc = define_assert_from_elf "mldsa_pointwise_mc" "x86_64/mld
   0xc5; 0xfd; 0x7f; 0x17;  (* VMOVDQA (Memop Word256 (%% (rdi,0))) (%_% ymm2) *)
   0xc5; 0xfd; 0x7f; 0x67; 0x20;
                            (* VMOVDQA (Memop Word256 (%% (rdi,32))) (%_% ymm4) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -320,9 +321,9 @@ let MLDSA_POINTWISE_CORRECT = prove
    ALL_TAC] THEN
 
   (* Execute all 533 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[mldsa_pointwise_montred])
-        (1--533) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
 
