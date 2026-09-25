@@ -6,8 +6,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-/* Must precede the public header: common.h defines MLD_BUILD_INTERNAL before
- * pulling in the configuration, and the configuration has an include guard. */
 #include "src/common.h"
 
 #include "../notrandombytes/notrandombytes.h"
