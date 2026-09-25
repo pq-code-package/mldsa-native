@@ -560,39 +560,6 @@
 #undef mld_xof256_x4_init
 #undef mld_xof256_x4_release
 #undef mld_xof256_x4_squeezeblocks
-/* mldsa/src/sys.h */
-#undef MLD_ALIGN
-#undef MLD_ALIGN_UP
-#undef MLD_ALWAYS_INLINE
-#undef MLD_CET_ENDBR
-#undef MLD_CT_TESTING_DECLASSIFY
-#undef MLD_CT_TESTING_SECRET
-#undef MLD_DEFAULT_ALIGN
-#undef MLD_HAVE_INLINE_ASM
-#undef MLD_INLINE
-#undef MLD_MUST_CHECK_RETURN_VALUE
-#undef MLD_NOINLINE
-#undef MLD_RESTRICT
-#undef MLD_STATIC_TESTABLE
-#undef MLD_SYSV_ABI
-#undef MLD_SYSV_ABI_SUPPORTED
-#undef MLD_SYS_AARCH64
-#undef MLD_SYS_AARCH64_EB
-#undef MLD_SYS_AARCH64_NEON
-#undef MLD_SYS_APPLE
-#undef MLD_SYS_ARMV81M_MVE
-#undef MLD_SYS_BIG_ENDIAN
-#undef MLD_SYS_H
-#undef MLD_SYS_LINUX
-#undef MLD_SYS_LITTLE_ENDIAN
-#undef MLD_SYS_PPC64LE
-#undef MLD_SYS_RISCV32
-#undef MLD_SYS_RISCV32_M
-#undef MLD_SYS_RISCV64
-#undef MLD_SYS_RISCV64_RVV
-#undef MLD_SYS_WINDOWS
-#undef MLD_SYS_X86_64
-#undef MLD_SYS_X86_64_AVX2
 /* mldsa/src/cbmc.h */
 #undef MLD_CBMC_H
 #undef __contract__
@@ -873,4 +840,37 @@
 #undef mld_rv32im_ntt_zetas
 #endif /* MLD_SYS_RISCV32 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+/* mldsa/src/sys.h */
+#undef MLD_ALIGN
+#undef MLD_ALIGN_UP
+#undef MLD_ALWAYS_INLINE
+#undef MLD_CET_ENDBR
+#undef MLD_CT_TESTING_DECLASSIFY
+#undef MLD_CT_TESTING_SECRET
+#undef MLD_DEFAULT_ALIGN
+#undef MLD_HAVE_INLINE_ASM
+#undef MLD_INLINE
+#undef MLD_MUST_CHECK_RETURN_VALUE
+#undef MLD_NOINLINE
+#undef MLD_RESTRICT
+#undef MLD_STATIC_TESTABLE
+#undef MLD_SYSV_ABI
+#undef MLD_SYSV_ABI_SUPPORTED
+#undef MLD_SYS_AARCH64
+#undef MLD_SYS_AARCH64_EB
+#undef MLD_SYS_AARCH64_NEON
+#undef MLD_SYS_APPLE
+#undef MLD_SYS_ARMV81M_MVE
+#undef MLD_SYS_BIG_ENDIAN
+#undef MLD_SYS_H
+#undef MLD_SYS_LINUX
+#undef MLD_SYS_LITTLE_ENDIAN
+#undef MLD_SYS_PPC64LE
+#undef MLD_SYS_RISCV32
+#undef MLD_SYS_RISCV32_M
+#undef MLD_SYS_RISCV64
+#undef MLD_SYS_RISCV64_RVV
+#undef MLD_SYS_WINDOWS
+#undef MLD_SYS_X86_64
+#undef MLD_SYS_X86_64_AVX2
 #endif /* !MLD_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS */
