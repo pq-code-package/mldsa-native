@@ -7,7 +7,7 @@
 /*yaml
   Name: rej_uniform_aarch64_asm
   Description: AArch64 rejection sampling of uniform coefficients mod q
-  Signature: uint64_t mld_rej_uniform_aarch64_asm(int32_t r[256], const uint8_t *buf, unsigned buflen, const uint8_t table[256])
+  Signature: uint64_t mld_rej_uniform_aarch64_asm(int32_t r[256], const uint8_t *buf, uint64_t buflen, const uint8_t table[256])
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -26,7 +26,7 @@
       description: Input buffer
     x2:
       type: scalar
-      c_parameter: unsigned buflen
+      c_parameter: uint64_t buflen
       description: Length of input buffer (must be a multiple of 24)
       test_with: 840  # MLD_POLY_UNIFORM_NBLOCKS * SHAKE128_RATE = 5 * 168
     x3:

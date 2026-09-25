@@ -96,7 +96,7 @@ __contract__(
 #define mld_rej_uniform_aarch64_asm MLD_NAMESPACE(rej_uniform_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_aarch64_asm(int32_t r[MLDSA_N], const uint8_t *buf,
-                                     unsigned buflen, const uint8_t table[256])
+                                     uint64_t buflen, const uint8_t table[256])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_aarch64_asm.ml. */
 __contract__(
@@ -114,7 +114,7 @@ __contract__(
   MLD_NAMESPACE(rej_uniform_eta2_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta2_aarch64_asm(int32_t r[MLDSA_N],
-                                          const uint8_t *buf, unsigned buflen,
+                                          const uint8_t *buf, uint64_t buflen,
                                           const uint8_t table[4096])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta2_aarch64_asm.ml */
@@ -133,7 +133,7 @@ __contract__(
   MLD_NAMESPACE(rej_uniform_eta4_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
 uint64_t mld_rej_uniform_eta4_aarch64_asm(int32_t r[MLDSA_N],
-                                          const uint8_t *buf, unsigned buflen,
+                                          const uint8_t *buf, uint64_t buflen,
                                           const uint8_t table[4096])
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta4_aarch64_asm.ml */
