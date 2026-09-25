@@ -382,6 +382,23 @@ let mldsa_nttunpack_mc = define_assert_from_elf "mldsa_nttunpack_mc" "x86_64/mld
 let mldsa_nttunpack_tmc = define_trimmed "mldsa_nttunpack_tmc" mldsa_nttunpack_mc;;
 let MLDSA_NTTUNPACK_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_nttunpack_tmc;;
 
+let LENGTH_MLDSA_NTTUNPACK_TMC =
+  REWRITE_CONV[mldsa_nttunpack_tmc] `LENGTH mldsa_nttunpack_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_NTTUNPACK_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_NTTUNPACK_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_NTTUNPACK_CORE_END = new_definition
+  `MLDSA_NTTUNPACK_CORE_END =
+     LENGTH mldsa_nttunpack_tmc - MLDSA_NTTUNPACK_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_NTTUNPACK_TMC;
+              MLDSA_NTTUNPACK_CORE_END;
+              MLDSA_NTTUNPACK_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 (* ------------------------------------------------------------------------- *)
 (* Specification: mldsa_nttunpack performs an 8x8 transpose within each of   *)
 (* 4 blocks of 64 coefficients, converting from AVX2 lane-interleaved to     *)
@@ -396,13 +413,13 @@ let MLDSA_NTTUNPACK_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_nttunpack_tmc;;
 let MLDSA_NTTUNPACK_CORRECT = prove
   (`!a (l:int32 list) pc.
     aligned 32 a /\
-    nonoverlapping (word pc, 1171) (a, 1024)
+    nonoverlapping (word pc, LENGTH mldsa_nttunpack_tmc) (a, 1024)
     ==> ensures x86
          (\s. bytes_loaded s (word pc) (BUTLAST mldsa_nttunpack_tmc) /\
               read RIP s = word pc /\
               C_ARGUMENTS [a] s /\
               read (memory :> bytes(a, 1024)) s = num_of_wordlist l)
-         (\s. read RIP s = word (pc + 1170) /\
+         (\s. read RIP s = word (pc + MLDSA_NTTUNPACK_CORE_END) /\
               (LENGTH l = 256
                ==> read (memory :> bytes(a, 1024)) s =
                    num_of_wordlist (unpack_nttunpack l)))
@@ -410,6 +427,7 @@ let MLDSA_NTTUNPACK_CORRECT = prove
           MAYCHANGE [memory :> bytes(a, 1024)] ,,
           MAYCHANGE [RIP] ,,
           MAYCHANGE [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   
   MAP_EVERY X_GEN_TAC [`a:int64`; `l:int32 list`; `pc:num`] THEN
   REWRITE_TAC[C_ARGUMENTS; NONOVERLAPPING_CLAUSES] THEN
@@ -493,7 +511,8 @@ let MLDSA_NTTUNPACK_NOIBT_SUBROUTINE_CORRECT = prove
                  num_of_wordlist (unpack_nttunpack l)))
        (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
         MAYCHANGE [memory :> bytes(a, 1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_nttunpack_tmc MLDSA_NTTUNPACK_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_nttunpack_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_NTTUNPACK_CORRECT));;
 
 let MLDSA_NTTUNPACK_SUBROUTINE_CORRECT = prove
  (`!a (l:int32 list) pc stackpointer returnaddress.
@@ -526,13 +545,13 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_nttunpack" subroutine_signatures)
-    MLDSA_NTTUNPACK_CORRECT
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_NTTUNPACK_CORRECT)
     MLDSA_NTTUNPACK_TMC_EXEC;;
 
 let MLDSA_NTTUNPACK_SAFE = time prove
  (`exists f_events.
        forall e a pc.
-           aligned 32 a /\ nonoverlapping (word pc,1171) (a,1024)
+           aligned 32 a /\ nonoverlapping (word pc, LENGTH mldsa_nttunpack_tmc) (a,1024)
            ==> ensures x86
                (\s.
                     bytes_loaded s (word pc) (BUTLAST mldsa_nttunpack_tmc) /\
@@ -540,7 +559,7 @@ let MLDSA_NTTUNPACK_SAFE = time prove
                     C_ARGUMENTS [a] s /\
                     read events s = e)
                (\s.
-                    read RIP s = word (pc + 1170) /\
+                    read RIP s = word (pc + MLDSA_NTTUNPACK_CORE_END) /\
                     (exists e2.
                          read events s = APPEND e2 e /\
                          e2 = f_events a pc /\
@@ -550,6 +569,7 @@ let MLDSA_NTTUNPACK_SAFE = time prove
                 MAYCHANGE [RIP] ,,
                 MAYCHANGE
                 [ZMM3; ZMM4; ZMM5; ZMM6; ZMM7; ZMM8; ZMM9; ZMM10; ZMM11])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   ASSERT_CONCL_TAC full_spec THEN
   PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars MLDSA_NTTUNPACK_TMC_EXEC);;
 
@@ -578,7 +598,8 @@ let MLDSA_NTTUNPACK_NOIBT_SUBROUTINE_SAFE = time prove
             (MAYCHANGE [RSP] ,,
              MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
              MAYCHANGE [memory :> bytes (a,1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_nttunpack_tmc MLDSA_NTTUNPACK_SAFE
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_nttunpack_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_NTTUNPACK_SAFE)
     THEN DISCHARGE_SAFETY_PROPERTY_TAC);;
 
 let MLDSA_NTTUNPACK_SUBROUTINE_SAFE = time prove

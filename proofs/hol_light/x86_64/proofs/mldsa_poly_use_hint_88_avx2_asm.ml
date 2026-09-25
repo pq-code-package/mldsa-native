@@ -106,6 +106,23 @@ let poly_use_hint_88_avx2_asm_tmc =
 let MLDSA_POLY_USE_HINT_88_EXEC =
   X86_MK_CORE_EXEC_RULE poly_use_hint_88_avx2_asm_tmc;;
 
+let LENGTH_MLDSA_POLY_USE_HINT_88_TMC =
+  REWRITE_CONV[poly_use_hint_88_avx2_asm_tmc] `LENGTH poly_use_hint_88_avx2_asm_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POLY_USE_HINT_88_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLY_USE_HINT_88_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POLY_USE_HINT_88_CORE_END = new_definition
+  `MLDSA_POLY_USE_HINT_88_CORE_END =
+     LENGTH poly_use_hint_88_avx2_asm_tmc - MLDSA_POLY_USE_HINT_88_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POLY_USE_HINT_88_TMC;
+              MLDSA_POLY_USE_HINT_88_CORE_END;
+              MLDSA_POLY_USE_HINT_88_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
+
 (* ========================================================================= *)
 (* Per-element scalar correctness chain for the x86_64 AVX2 poly_use_hint_88  *)
 (* routine (ML-DSA-44, GAMMA2 = (Q-1)/88, 2*GAMMA2 = 190464). The numeric     *)
@@ -1285,7 +1302,8 @@ let MLDSA_POLY_USE_HINT_88_BODY_BLOCK_TAC : tactic =
 let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
  (`!a h xb yb pc.
     aligned 32 a /\ aligned 32 h /\
-    nonoverlapping (word pc, 0xdd) (a, 1024) /\ nonoverlapping (a, 1024) (h, 1024) /\
+    nonoverlapping (word pc, MLDSA_POLY_USE_HINT_88_CORE_END) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024) /\
     (!b k. b < 32 /\ k < 8 ==> val(word_subword (yb b:int256) (32*k,32):int32) <= 1)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) (BUTLAST poly_use_hint_88_avx2_asm_tmc) /\
@@ -1293,11 +1311,12 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
                C_ARGUMENTS [a; h] s /\
                (!b. b < 32 ==> read(memory :> bytes256(word_add a (word(32 * b)))) s = xb b) /\
                (!b. b < 32 ==> read(memory :> bytes256(word_add h (word(32 * b)))) s = yb b))
-          (\s. read RIP s = word(pc + 0xdd) /\
+          (\s. read RIP s = word(pc + MLDSA_POLY_USE_HINT_88_CORE_END) /\
                (!b. b < 32 ==>
                       read(memory :> bytes256(word_add a (word(32 * b)))) s =
                         simd8 mldsa_use_hint_88_x86_asm (xb b) (yb b)))
           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes(a, 1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`a:int64`;`h:int64`;`xb:num->int256`;`yb:num->int256`;`pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
@@ -1350,7 +1369,8 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
 let MLDSA_POLY_USE_HINT_88_CORRECT = prove
  (`!a h x y pc.
     aligned 32 a /\ aligned 32 h /\
-    nonoverlapping (word pc, 0xdd) (a, 1024) /\ nonoverlapping (a, 1024) (h, 1024)
+    nonoverlapping (word pc, MLDSA_POLY_USE_HINT_88_CORE_END) (a, 1024) /\
+    nonoverlapping (a, 1024) (h, 1024)
     ==> ensures x86
           (\s. bytes_loaded s (word pc) (BUTLAST poly_use_hint_88_avx2_asm_tmc) /\
                read RIP s = word pc /\
@@ -1359,7 +1379,7 @@ let MLDSA_POLY_USE_HINT_88_CORRECT = prove
                (!i. i < 256 ==> read(memory :> bytes32(word_add h (word(4 * i)))) s = y i) /\
                (!i. i < 256 ==> val(x i:int32) < 8380417) /\
                (!i. i < 256 ==> val(y i:int32) <= 1))
-          (\s. read RIP s = word(pc + 0xdd) /\
+          (\s. read RIP s = word(pc + MLDSA_POLY_USE_HINT_88_CORE_END) /\
                (!i. i < 256 ==>
                       read(memory :> bytes32(word_add a (word(4 * i)))) s =
                         word(mldsa_use_hint_88 (val(y i)) (val(x i)))) /\
@@ -1379,7 +1399,7 @@ let MLDSA_POLY_USE_HINT_88_CORRECT = prove
           C_ARGUMENTS [a; h] s /\
           (!b. b < 32 ==> read(memory :> bytes256(word_add a (word(32 * b)))) s = pack8 x b) /\
           (!b. b < 32 ==> read(memory :> bytes256(word_add h (word(32 * b)))) s = pack8 y b)`;
-     `\s. read RIP s = word(pc + 0xdd) /\
+     `\s. read RIP s = word(pc + MLDSA_POLY_USE_HINT_88_CORE_END) /\
           (!b. b < 32 ==>
                  read(memory :> bytes256(word_add a (word(32 * b)))) s =
                    simd8 mldsa_use_hint_88_x86_asm (pack8 x b) (pack8 y b))`] THEN
@@ -1488,7 +1508,8 @@ let MLDSA_POLY_USE_HINT_88_NOIBT_SUBROUTINE_CORRECT = prove
                       val(read(memory :> bytes32(word_add a (word(4 * i)))) s) < 44))
           (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
            MAYCHANGE [memory :> bytes(a, 1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC poly_use_hint_88_avx2_asm_tmc MLDSA_POLY_USE_HINT_88_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC poly_use_hint_88_avx2_asm_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_USE_HINT_88_CORRECT));;
 
 let MLDSA_POLY_USE_HINT_88_SUBROUTINE_CORRECT = prove
  (`!a h x y pc stackpointer returnaddress.
@@ -1531,7 +1552,7 @@ let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_use_hint_88_x86" subroutine_signatures)
     (REWRITE_RULE[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; SOME_FLAGS]
-       MLDSA_POLY_USE_HINT_88_CORRECT)
+       (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_USE_HINT_88_CORRECT))
     MLDSA_POLY_USE_HINT_88_EXEC;;
 
 let MLDSA_POLY_USE_HINT_88_SAFE = time prove
