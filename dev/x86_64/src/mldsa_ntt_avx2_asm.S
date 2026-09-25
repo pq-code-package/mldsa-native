@@ -326,6 +326,9 @@ levels2t7 1
 levels2t7 2
 levels2t7 3
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

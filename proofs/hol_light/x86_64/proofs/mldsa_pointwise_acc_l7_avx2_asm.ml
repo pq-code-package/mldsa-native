@@ -257,6 +257,7 @@ let mldsa_pointwise_acc_l7_mc = define_assert_from_elf "mldsa_pointwise_acc_l7_m
   0x83; 0xf8; 0x10;        (* CMP (% eax) (Imm8 (word 16)) *)
   0x0f; 0x82; 0x2f; 0xfd; 0xff; 0xff;
                            (* JB (Imm32 (word 4294966575)) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -413,9 +414,9 @@ let MLDSA_POINTWISE_ACC_L7_CORRECT = prove
      CONV_TAC INT_REDUCE_CONV];
    ALL_TAC] THEN
 
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_ACC_L7_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_ACC_L7_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[mldsa_pointwise_montred])
-        (1--2179) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
 

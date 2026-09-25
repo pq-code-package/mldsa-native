@@ -722,6 +722,7 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm1) *)
   0xc5; 0xfd; 0x7f; 0x96; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rsi,992))) (%_% ymm2) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -1144,9 +1145,9 @@ let MLDSA_POLY_DECOMPOSE_88_CORRECT = prove(
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_POLY_DECOMPOSE_88_EXEC [n] THEN
-    SIMD_SIMPLIFY_TAC[decompose88_a1; decompose88_a0]) (1--399) THEN
+    SIMD_SIMPLIFY_TAC[decompose88_a1; decompose88_a0]) 1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_NOT_JOIN_256; WORD_NOT_JOIN_128; WORD_NOT_JOIN_64]) THEN
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o

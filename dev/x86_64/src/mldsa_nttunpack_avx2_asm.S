@@ -106,6 +106,9 @@ nttunpack_64_coefficients 4*64
 nttunpack_64_coefficients 4*64*2
 nttunpack_64_coefficients 4*64*3
 
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

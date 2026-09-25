@@ -138,6 +138,9 @@ unpack19_block 28
 unpack19_block 29
 unpack19_block 30
 unpack19_block 31
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

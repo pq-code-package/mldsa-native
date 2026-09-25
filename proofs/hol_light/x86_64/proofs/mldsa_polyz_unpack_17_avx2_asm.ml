@@ -511,6 +511,7 @@ let mldsa_polyz_unpack_17_mc = define_assert_from_elf
   0xc5; 0xdd; 0xfa; 0xc0;  (* VPSUBD (%_% ymm0) (%_% ymm4) (%_% ymm0) *)
   0xc5; 0xfd; 0x7f; 0x87; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm0) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -750,10 +751,10 @@ let MLDSA_POLYZ_UNPACK_17_CORRECT = prove
   (*** Symbolic execution: simplify each block's lanes, then fold the just- ***)
   (*** computed YMM0 into atomic zunpack17 lanes before it is stored so the  ***)
   (*** store and subsequent steps stay cheap.                               ***)
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_POLYZ_UNPACK_17_EXEC [n] THEN
     SIMD_SIMPLIFY_TAC [] THEN
-    ZUNPACK17_FOLD_TAC) (1--276) THEN
+    ZUNPACK17_FOLD_TAC) 1 THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 

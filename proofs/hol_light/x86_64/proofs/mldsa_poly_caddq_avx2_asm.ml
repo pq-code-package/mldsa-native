@@ -247,6 +247,7 @@ let mldsa_caddq_mc = define_assert_from_elf "mldsa_caddq_mc" "x86_64/mldsa/mldsa
                            (* VPADDD (%_% ymm5) (%_% ymm5) (Memop Word256 (%% (rdi,992))) *)
   0xc5; 0xfd; 0x7f; 0xaf; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm5) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -314,7 +315,8 @@ let MLDSA_POLY_CADDQ_CORRECT = time prove
                           ival(read(memory :> bytes32
                                  (word_add a (word(4 * i)))) s) < &8380417))
              (MAYCHANGE [RIP] ,, MAYCHANGE [events] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
   CONV_TAC LENGTH_SIMPLIFY_CONV THEN
@@ -335,10 +337,10 @@ let MLDSA_POLY_CADDQ_CORRECT = time prove
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
       X86_STEPS_TAC MLDSA_POLY_CADDQ_TMC_EXEC [n] THEN
       SIMD_SIMPLIFY_TAC[mldsa_caddq])
-             (1--132) THEN
+             1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
      CONV_RULE(SIMD_SIMPLIFY_CONV[mldsa_caddq]) o
