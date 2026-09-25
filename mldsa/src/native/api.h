@@ -506,8 +506,8 @@ __contract__(
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
   ensures((return_value == MLD_NATIVE_FUNC_SUCCESS) ==> array_abs_bound(a, 0, MLDSA_N, MLDSA_Q))
-  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(a, 0, MLDSA_N, MLD_NTT_BOUND))
   ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_abs_bound(b, 0, MLDSA_N, MLD_NTT_BOUND))
+  ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged(a, MLDSA_N))
 );
 #endif /* MLD_USE_NATIVE_POINTWISE_MONTGOMERY */
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
