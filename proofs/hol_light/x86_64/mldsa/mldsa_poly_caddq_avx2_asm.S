@@ -188,6 +188,7 @@ mld_poly_caddq_avx2_asm:
         vpand %ymm1, %ymm5, %ymm5
         vpaddd 0x3e0(%rdi), %ymm5, %ymm5
         vmovdqa %ymm5, 0x3e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

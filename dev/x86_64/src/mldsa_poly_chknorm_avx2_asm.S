@@ -101,6 +101,7 @@ chknorm_vector 992,  %ymm5
 xorl    %eax, %eax
 vptest  %ymm1, %ymm1
 setne   %al
+vzeroupper
 ret
 
 /* simpasm: footer-start */

@@ -166,6 +166,7 @@ addq    $32, %rax
 cmpq    $1024, %rax
 jne mld_poly_use_hint_88_avx2_asm_loop
 
+vzeroupper
 ret
 
 /* simpasm: footer-start */

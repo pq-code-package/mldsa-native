@@ -722,12 +722,30 @@ let mldsa_decompose32_mc = define_assert_from_elf "mldsa_decompose32_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm1) *)
   0xc5; 0xfd; 0x7f; 0x96; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rsi,992))) (%_% ymm2) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
 
 let mldsa_decompose32_tmc = define_trimmed "mldsa_decompose32_tmc" mldsa_decompose32_mc;;
 let MLDSA_POLY_DECOMPOSE_32_EXEC = X86_MK_CORE_EXEC_RULE mldsa_decompose32_tmc;;
+
+let LENGTH_MLDSA_POLY_DECOMPOSE_32_TMC =
+  REWRITE_CONV[mldsa_decompose32_tmc] `LENGTH mldsa_decompose32_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POLY_DECOMPOSE_32_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLY_DECOMPOSE_32_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POLY_DECOMPOSE_32_CORE_END = new_definition
+  `MLDSA_POLY_DECOMPOSE_32_CORE_END =
+     LENGTH mldsa_decompose32_tmc - MLDSA_POLY_DECOMPOSE_32_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POLY_DECOMPOSE_32_TMC;
+              MLDSA_POLY_DECOMPOSE_32_CORE_END;
+              MLDSA_POLY_DECOMPOSE_32_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ========================================================================= *)
 (* Word-level lane functions matching the AVX2 instruction sequence.         *)
@@ -1084,7 +1102,7 @@ let DECOMPOSE32_A0_BOUND_HI = prove(
 
 let MLDSA_POLY_DECOMPOSE_32_CORRECT = prove(
  `!a1 a (x:num->int32) pc.
-        ALL (nonoverlapping (word pc, 2144))
+        ALL (nonoverlapping (word pc, LENGTH mldsa_decompose32_tmc))
             [(a1,1024); (a,1024)] /\
         nonoverlapping (a1,1024) (a,1024) /\
         aligned 32 a1 /\ aligned 32 a
@@ -1095,7 +1113,7 @@ let MLDSA_POLY_DECOMPOSE_32_CORRECT = prove(
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                   (!i. i < 256 ==> val(x i:int32) < 8380417))
-             (\s. read RIP s = word(pc + 2143) /\
+             (\s. read RIP s = word(pc + MLDSA_POLY_DECOMPOSE_32_CORE_END) /\
                   (!i. i < 256
                        ==> val(read(memory :> bytes32(word_add a1 (word(4*i)))) s) =
                            FST(mldsa_decompose_32(val(x i)))) /\
@@ -1111,6 +1129,7 @@ let MLDSA_POLY_DECOMPOSE_32_CORRECT = prove(
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a1,1024)] ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`a1:int64`; `a:int64`; `x:num->int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; ALL;
               NONOVERLAPPING_CLAUSES; fst MLDSA_POLY_DECOMPOSE_32_EXEC] THEN
@@ -1126,9 +1145,9 @@ let MLDSA_POLY_DECOMPOSE_32_CORRECT = prove(
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_POLY_DECOMPOSE_32_EXEC [n] THEN
-    SIMD_SIMPLIFY_TAC[decompose32_a1; decompose32_a0]) (1--399) THEN
+    SIMD_SIMPLIFY_TAC[decompose32_a1; decompose32_a0]) 1 THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_NOT_JOIN_256; WORD_NOT_JOIN_128; WORD_NOT_JOIN_64]) THEN
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
@@ -1183,7 +1202,8 @@ let MLDSA_POLY_DECOMPOSE_32_NOIBT_SUBROUTINE_CORRECT = prove(
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(a1,1024)] ,,
               MAYCHANGE [memory :> bytes(a,1024)])`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose32_tmc MLDSA_POLY_DECOMPOSE_32_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_decompose32_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_DECOMPOSE_32_CORRECT));;
 
 let MLDSA_POLY_DECOMPOSE_32_SUBROUTINE_CORRECT = prove(
  `!a1 a (x:num->int32) pc stackpointer returnaddress.
@@ -1233,7 +1253,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_decompose_32_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_DECOMPOSE_32_CORRECT)
+    (REWRITE_RULE[SOME_FLAGS] (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_DECOMPOSE_32_CORRECT))
     MLDSA_POLY_DECOMPOSE_32_EXEC;;
 
 let full_spec =

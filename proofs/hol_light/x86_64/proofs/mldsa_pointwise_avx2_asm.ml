@@ -171,12 +171,30 @@ let mldsa_pointwise_mc = define_assert_from_elf "mldsa_pointwise_mc" "x86_64/mld
   0xc5; 0xfd; 0x7f; 0x17;  (* VMOVDQA (Memop Word256 (%% (rdi,0))) (%_% ymm2) *)
   0xc5; 0xfd; 0x7f; 0x67; 0x20;
                            (* VMOVDQA (Memop Word256 (%% (rdi,32))) (%_% ymm4) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
 
 let mldsa_pointwise_tmc = define_trimmed "mldsa_pointwise_tmc" mldsa_pointwise_mc;;
 let MLDSA_POINTWISE_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_pointwise_tmc;;
+
+let LENGTH_MLDSA_POINTWISE_TMC =
+  REWRITE_CONV[mldsa_pointwise_tmc] `LENGTH mldsa_pointwise_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POINTWISE_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POINTWISE_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POINTWISE_CORE_END = new_definition
+  `MLDSA_POINTWISE_CORE_END =
+     LENGTH mldsa_pointwise_tmc - MLDSA_POINTWISE_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POINTWISE_TMC;
+              MLDSA_POINTWISE_CORE_END;
+              MLDSA_POINTWISE_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 
 (* ========================================================================= *)
@@ -188,9 +206,9 @@ let MLDSA_POINTWISE_CORRECT = prove
     aligned 32 a /\
     aligned 32 b /\
     aligned 32 consts /\
-    nonoverlapping (word pc, 0x0195) (a, 1024) /\
-    nonoverlapping (word pc, 0x0195) (b, 1024) /\
-    nonoverlapping (word pc, 0x0195) (consts, 2496) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_tmc) (a, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_tmc) (b, 1024) /\
+    nonoverlapping (word pc, LENGTH mldsa_pointwise_tmc) (consts, 2496) /\
     nonoverlapping (a, 1024) (b, 1024) /\
     nonoverlapping (a, 1024) (consts, 2496) /\
     nonoverlapping (b, 1024) (consts, 2496)
@@ -206,7 +224,7 @@ let MLDSA_POINTWISE_CORRECT = prove
                 read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
               (!i. i < 256 ==>
                 read(memory :> bytes32(word_add b (word(4 * i)))) s = y i))
-          (\s. read RIP s = word(pc + 0x0194) /\
+          (\s. read RIP s = word(pc + MLDSA_POINTWISE_CORE_END) /\
               (!i. i < 256 ==>
                 let zi = read(memory :> bytes32(word_add a (word(4 * i)))) s in
                 (ival zi == mldsa_pointwise (ival o x) (ival o y) i)
@@ -217,6 +235,7 @@ let MLDSA_POINTWISE_CORRECT = prove
                       ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
            MAYCHANGE [RAX] ,, MAYCHANGE SOME_FLAGS ,,
            MAYCHANGE [memory :> bytes(a, 1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
 
   (* Setup - strip quantifiers, introduce preconditions *)
   MAP_EVERY X_GEN_TAC
@@ -302,9 +321,9 @@ let MLDSA_POINTWISE_CORRECT = prove
    ALL_TAC] THEN
 
   (* Execute all 533 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_TMC_EXEC [n] THEN
+  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_POINTWISE_TMC_EXEC [n] THEN
                       SIMD_SIMPLIFY_TAC[mldsa_pointwise_montred])
-        (1--533) THEN
+        1 THEN
   ENSURES_FINAL_STATE_TAC THEN
   ASM_REWRITE_TAC[] THEN
 
@@ -409,7 +428,7 @@ let MLDSA_POINTWISE_NOIBT_SUBROUTINE_CORRECT = prove
   let TWEAK_CONV = ONCE_DEPTH_CONV WORDLIST_FROM_MEMORY_CONV in
   CONV_TAC TWEAK_CONV THEN
   X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_pointwise_tmc
-    (CONV_RULE TWEAK_CONV MLDSA_POINTWISE_CORRECT));;
+    (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POINTWISE_CORRECT)));;
 
 let MLDSA_POINTWISE_SUBROUTINE_CORRECT = prove
  (`!a b consts x y pc stackpointer returnaddress.
@@ -463,7 +482,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_pointwise_x86" subroutine_signatures)
-    MLDSA_POINTWISE_CORRECT
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POINTWISE_CORRECT)
     MLDSA_POINTWISE_TMC_EXEC;;
 
 let full_spec =

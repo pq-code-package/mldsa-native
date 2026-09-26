@@ -511,6 +511,7 @@ let mldsa_polyz_unpack_19_mc = define_assert_from_elf
   0xc5; 0xdd; 0xfa; 0xc0;  (* VPSUBD (%_% ymm0) (%_% ymm4) (%_% ymm0) *)
   0xc5; 0xfd; 0x7f; 0x87; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (Memop Word256 (%% (rdi,992))) (%_% ymm0) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -519,6 +520,23 @@ let mldsa_polyz_unpack_19_tmc =
   define_trimmed "mldsa_polyz_unpack_19_tmc" mldsa_polyz_unpack_19_mc;;
 
 let MLDSA_POLYZ_UNPACK_19_EXEC = X86_MK_CORE_EXEC_RULE mldsa_polyz_unpack_19_tmc;;
+
+let LENGTH_MLDSA_POLYZ_UNPACK_19_TMC =
+  REWRITE_CONV[mldsa_polyz_unpack_19_tmc] `LENGTH mldsa_polyz_unpack_19_tmc`
+  |> CONV_RULE(RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POLYZ_UNPACK_19_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLYZ_UNPACK_19_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POLYZ_UNPACK_19_CORE_END = new_definition
+  `MLDSA_POLYZ_UNPACK_19_CORE_END =
+     LENGTH mldsa_polyz_unpack_19_tmc - MLDSA_POLYZ_UNPACK_19_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POLYZ_UNPACK_19_TMC;
+              MLDSA_POLYZ_UNPACK_19_CORE_END;
+              MLDSA_POLYZ_UNPACK_19_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* D=20 instantiations: 32 chunks of 8 coefficients (160-bit words),         *)
@@ -678,16 +696,17 @@ let MLDSA_POLYZ_UNPACK_19_CORRECT = prove
         aligned 32 r /\
         LENGTH l = 256 /\
         ALL (nonoverlapping (r,1024))
-            [(word pc,1614); (b,640)]
+            [(word pc, LENGTH mldsa_polyz_unpack_19_tmc); (b,640)]
         ==> ensures x86
              (\s. bytes_loaded s (word pc) (BUTLAST mldsa_polyz_unpack_19_tmc) /\
                   read RIP s = word pc /\
                   C_ARGUMENTS [r; b] s /\
                   read(memory :> bytes(b,640)) s = num_of_wordlist l)
-             (\s. read RIP s = word(pc + 1613) /\
+             (\s. read RIP s = word(pc + MLDSA_POLYZ_UNPACK_19_CORE_END) /\
                   read(memory :> bytes(r,1024)) s = num_of_wordlist (MAP zunpack19 l))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,1024)])`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   MAP_EVERY X_GEN_TAC [`r:int64`; `b:int64`; `l:(20 word) list`; `pc:num`] THEN
   REWRITE_TAC[C_ARGUMENTS; MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
               NONOVERLAPPING_CLAUSES; ALL; fst MLDSA_POLYZ_UNPACK_19_EXEC] THEN
@@ -734,10 +753,10 @@ let MLDSA_POLYZ_UNPACK_19_CORRECT = prove
   (*** Symbolic execution: simplify each block's lanes, then fold the just- ***)
   (*** computed YMM0 into atomic zunpack19 lanes before it is stored so the  ***)
   (*** store and subsequent steps stay cheap.                               ***)
-  MAP_EVERY (fun n ->
+  MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_POLYZ_UNPACK_19_EXEC [n] THEN
     SIMD_SIMPLIFY_TAC [] THEN
-    ZUNPACK19_FOLD_TAC) (1--276) THEN
+    ZUNPACK19_FOLD_TAC) 1 THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
@@ -801,7 +820,7 @@ let MLDSA_POLYZ_UNPACK_19_NOIBT_SUBROUTINE_CORRECT = prove
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
               MAYCHANGE [memory :> bytes(r,1024)])`,
   X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_polyz_unpack_19_tmc
-   MLDSA_POLYZ_UNPACK_19_CORRECT THEN
+   (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLYZ_UNPACK_19_CORRECT) THEN
   REPEAT STRIP_TAC THEN
   MP_TAC(ISPECL [`l:(20 word) list`; `i:num`] ZUNPACK19_MAP_BOUND) THEN
   ASM_REWRITE_TAC[] THEN STRIP_TAC THEN ASM_REWRITE_TAC[]);;
@@ -842,7 +861,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_polyz_unpack_19_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLYZ_UNPACK_19_CORRECT)
+    (REWRITE_RULE[SOME_FLAGS] (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLYZ_UNPACK_19_CORRECT))
     MLDSA_POLYZ_UNPACK_19_EXEC;;
 
 let full_spec =

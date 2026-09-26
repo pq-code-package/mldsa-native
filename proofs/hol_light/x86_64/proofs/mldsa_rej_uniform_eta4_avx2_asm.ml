@@ -165,6 +165,7 @@ let mldsa_rej_uniform_eta4_mc = define_assert_from_elf
   0x44; 0x89; 0x14; 0x87;  (* MOV (Memop Doubleword (%%% (rdi,2,rax))) (% r10d) *)
   0xff; 0xc0;              (* INC (% eax) *)
   0xeb; 0xa8;              (* JMP (Imm8 (word 168)) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -2420,9 +2421,9 @@ let maskbit_tgt =
 let clean_body_tm = `
    !res buf table (inlist:byte list) pc N (i:num) stackpointer.
         LENGTH inlist = 272 /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val table,2048) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val table,2048) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table,2048) /\
         ~(N = 0) /\ i + 1 < N /\ 16 * (i + 1) <= 272 /\
@@ -4107,8 +4108,8 @@ let SCALAR_BODY_SETUP =
 let SCALAR_TAIL_BODY = prove
  (`!res buf table (inlist:byte list) pc (p:num) (L:num) stackpointer.
         LENGTH inlist = 272 /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table, 2048) /\
         p < 272 /\ L < 256 /\
@@ -4132,7 +4133,8 @@ let SCALAR_TAIL_BODY = prove
                    read RAX s = word(LENGTH outlist) /\ read RCX s = word(p+1) /\
                    read(memory :> bytes(res, 4 * LENGTH outlist)) s = num_of_wordlist outlist))
              (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,, MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(res,1024)])`,
   SCALAR_BODY_SETUP THEN
@@ -4332,9 +4334,9 @@ let SCALAR_TAIL_BODY = prove
 (* ENSURES_SEQUENCE_TAC + ENSURES_PRECONDITION/POSTCONDITION_THM).           *)
 (* ========================================================================= *)
 
-(* LENGTH(BUTLAST mldsa_rej_uniform_eta4_tmc) = 402 (tmc has length 403).    *)
+(* LENGTH(BUTLAST mldsa_rej_uniform_eta4_tmc) = 405 (tmc has length 406).    *)
 let LENGTH_BUTLAST_TMC = prove
- (`LENGTH(BUTLAST mldsa_rej_uniform_eta4_tmc) = 402`,
+ (`LENGTH(BUTLAST mldsa_rej_uniform_eta4_tmc) = 405`,
   MP_TAC(ISPEC `mldsa_rej_uniform_eta4_tmc` LENGTH_BUTLAST_GEN) THEN
   REWRITE_TAC[GSYM LENGTH_EQ_NIL; LENGTH_MLDSA_REJ_UNIFORM_ETA4_TMC] THEN
   CONV_TAC NUM_REDUCE_CONV THEN ARITH_TAC);;
@@ -4343,9 +4345,9 @@ let SCALAR_TAIL_RUN = prove
  (`!d res buf table (inlist:byte list) pc (p:num) stackpointer.
         272 - p <= d /\
         LENGTH inlist = 272 /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val table,2048) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val table,2048) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table,2048) /\
         p <= 272 /\
@@ -4365,7 +4367,8 @@ let SCALAR_TAIL_RUN = prove
                    read RAX s = word(LENGTH outlist) /\
                    read(memory :> bytes(res, 4 * LENGTH outlist)) s = num_of_wordlist outlist))
              (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,,
               MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(res,1024)])`,
@@ -4386,7 +4389,7 @@ let SCALAR_TAIL_RUN = prove
       ENSURES_INIT_TAC "s0" THEN
       SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--2) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--3) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[ASSUME `LENGTH(REJ_SAMPLE_ETA4_BYTES inlist:int32 list) = 256`] THEN
       REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[];
@@ -4401,7 +4404,7 @@ let SCALAR_TAIL_RUN = prove
        [MATCH_MP_TAC JAE_NOT_TAKEN_LT THEN ASM_REWRITE_TAC[] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
       SUBGOAL_THEN `&(val(word_zx(word 272:int64):int32)):int - &272 = &(val(word_sub(word_zx(word 272:int64):int32) (word 272):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--4) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--5) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[]];
     (* ================= STEP CASE: SUC d =================                  *)
@@ -4421,7 +4424,7 @@ let SCALAR_TAIL_RUN = prove
       ENSURES_INIT_TAC "s0" THEN
       SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--2) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--3) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[ASSUME `LENGTH(REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p) inlist):int32 list) = 256`; LENGTH_BUTLAST_TMC] THEN
       ASM_REWRITE_TAC[];
@@ -4442,7 +4445,7 @@ let SCALAR_TAIL_RUN = prove
          [MATCH_MP_TAC JAE_NOT_TAKEN_LT THEN ASM_REWRITE_TAC[] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
         SUBGOAL_THEN `&(val(word_zx(word 272:int64):int32)):int - &272 = &(val(word_sub(word_zx(word 272:int64):int32) (word 272):int32))` ASSUME_TAC THENL
          [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-        X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--4) THEN
+        X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--5) THEN
         ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
         REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[];
         (* --- p < 272 ---                                                   *)
@@ -4506,7 +4509,7 @@ let SCALAR_TAIL_RUN = prove
           DISCARD_OLDSTATE_TAC "s14" THEN
           SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
            [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-          X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (15--16) THEN
+          X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (15--17) THEN
           ENSURES_FINAL_STATE_TAC THEN
           REWRITE_TAC[ASSUME `SUB_LIST(0,256)(REJ_SAMPLE_ETA4_BYTES inlist:int32 list) =
                 APPEND (REJ_SAMPLE_ETA4_BYTES (SUB_LIST (0,p) inlist))
@@ -4517,7 +4520,7 @@ let SCALAR_TAIL_RUN = prove
           REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[] THEN REPEAT CONJ_TAC THEN
           (* memory fold: bytes(res,4*256) = APPEND prefix [lo]              *)
           SUBGOAL_THEN `4 * 256 = 4 * 255 + 4` SUBST1_TAC THENL [ARITH_TAC; ALL_TAC] THEN
-          MP_TAC(ISPECL [`memory:(x86state,int64->byte)component`; `res:int64`; `s16:x86state`;
+          MP_TAC(ISPECL [`memory:(x86state,int64->byte)component`; `res:int64`; `s17:x86state`;
              `REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p) inlist):int32 list`;
              `[word_sx(word_sub (word 4:int16) (word(val(EL p (inlist:byte list)) MOD 16))):int32]`;
              `4*255`; `4`] BYTES_EQ_NUM_OF_WORDLIST_APPEND) THEN
@@ -4527,12 +4530,12 @@ let SCALAR_TAIL_RUN = prove
            [ASM_REWRITE_TAC[];
             SUBGOAL_THEN `word(4 * 255):int64 = word 1020` SUBST1_TAC THENL [CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
             FIRST_X_ASSUM(fun th -> let c=concl th in
-               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`s16:x86state`))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c
+               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`s17:x86state`))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c
                then ASSUME_TAC(REWRITE_RULE[MATCH_MP LO_STORE_VAL (ASSUME `val(EL p (inlist:byte list)) MOD 16 < 9`)] th) else NO_TAC) THEN
             FIRST_X_ASSUM(fun th -> let c=concl th in
-               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c && not(can(find_term is_cond)c) && can(find_term(fun t->t=`s16:x86state`))c
+               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c && not(can(find_term is_cond)c) && can(find_term(fun t->t=`s17:x86state`))c
                then MP_TAC th else NO_TAC) THEN
-            STORE4_FROM_SPEC `s16:x86state` `word_add res (word 1020):int64`];
+            STORE4_FROM_SPEC `s17:x86state` `word_add res (word 1020):int64`];
           (* --- STEP CLEAN-RECURSIVE: body trip then IH at p+1 ---          *)
           SUBGOAL_THEN `LENGTH(REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p+1) inlist):int32 list) <= 256` ASSUME_TAC THENL
            [MP_TAC(SPECL[`inlist:byte list`;`p:num`] LENGTH_REJ_SAMPLE_STEP_1) THEN ASM_REWRITE_TAC[] THEN
@@ -4579,9 +4582,9 @@ let SCALAR_TAIL_RUN = prove
 let MLDSA_REJ_UNIFORM_ETA4_SCALAR_TAIL_AT_P = prove
  (`!res buf table (inlist:byte list) pc p stackpointer.
         LENGTH inlist = 272 /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
-        nonoverlapping_modulo (2 EXP 64) (pc, 403) (val table,2048) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
+        nonoverlapping_modulo (2 EXP 64) (pc, 406) (val table,2048) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
         nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table,2048) /\
         p <= 272 /\
@@ -4600,7 +4603,9 @@ let MLDSA_REJ_UNIFORM_ETA4_SCALAR_TAIL_AT_P = prove
                   (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4_BYTES inlist) in
                    read RAX s = word(LENGTH outlist) /\
                    read(memory :> bytes(res, 4 * LENGTH outlist)) s = num_of_wordlist outlist))
-             (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,, MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+             (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,, MAYCHANGE [events] ,, MAYCHANGE [memory :> bytes(res,1024)])`,
   REPEAT STRIP_TAC THEN
   MP_TAC(SPECL [`272 - p`; `res:int64`;`buf:int64`;`table:int64`;`inlist:byte list`;`pc:num`;`p:num`;`stackpointer:int64`] SCALAR_TAIL_RUN) THEN
@@ -4758,9 +4763,9 @@ let CORRECT_SCAFFOLD_TAC : tactic =
 let exit_offset_tm = `
   !res buf table (inlist:byte list) pc N stackpointer.
        LENGTH inlist = 272 /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val table,2048) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val table,2048) /\
        nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
        nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table,2048) /\
        16 * N = 272 /\
@@ -4782,7 +4787,9 @@ let exit_offset_tm = `
                  (let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4_BYTES inlist) in
                   read RAX s = word(LENGTH outlist) /\
                   read(memory :> bytes(res, 4 * LENGTH outlist)) s = num_of_wordlist outlist))
-            (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,, MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+            (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
+             MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                        ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
              MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,, MAYCHANGE [events] ,, MAYCHANGE [memory :> bytes(res,1024)])`;;
 
 (* Q318: post-head-guard state at pc+314, pos=16N.                           *)
@@ -5626,7 +5633,9 @@ let SI4_BODY4_TAC : tactic =
 
 (* midexit1_cframe: the MAYCHANGE frame shared by the mid-exit lemmas.       *)
 let midexit1_cframe =
-  `MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,, MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+  `MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
+   MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+              ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
    MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,, MAYCHANGE [events] ,, MAYCHANGE [memory :> bytes (res,1024)]`;;
 
 let midexit1_pre =
@@ -5657,9 +5666,9 @@ let midexit1_post =
 let midexit1_tm =
   list_mk_forall([`res:int64`;`buf:int64`;`table:int64`;`inlist:byte list`;`pc:num`;`i:num`;`stackpointer:int64`],
   mk_imp(list_mk_conj([`LENGTH (inlist:byte list) = 272`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(res:int64),1024)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(buf:int64), 272)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(table:int64),2048)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(res:int64),1024)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(buf:int64), 272)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(table:int64),2048)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(buf:int64), 272)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(table:int64),2048)`;
     `16 * (i + 1) <= 272`;
@@ -5957,9 +5966,9 @@ let me2_post =
 let midexit2_tm =
   list_mk_forall([`res:int64`;`buf:int64`;`table:int64`;`inlist:byte list`;`pc:num`;`i:num`;`stackpointer:int64`],
   mk_imp(list_mk_conj([`LENGTH (inlist:byte list) = 272`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(res:int64),1024)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(buf:int64), 272)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(table:int64),2048)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(res:int64),1024)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(buf:int64), 272)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(table:int64),2048)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(buf:int64), 272)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(table:int64),2048)`;
     `16 * (i + 1) <= 272`;
@@ -6192,9 +6201,9 @@ let me3_post =
 let midexit3_tm =
   list_mk_forall([`res:int64`;`buf:int64`;`table:int64`;`inlist:byte list`;`pc:num`;`i:num`;`stackpointer:int64`],
   mk_imp(list_mk_conj([`LENGTH (inlist:byte list) = 272`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(res:int64),1024)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(buf:int64), 272)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(table:int64),2048)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(res:int64),1024)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(buf:int64), 272)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(table:int64),2048)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(buf:int64), 272)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(table:int64),2048)`;
     `16 * (i + 1) <= 272`;
@@ -6276,9 +6285,9 @@ let me4_post =
 let midexit4_tm =
   list_mk_forall([`res:int64`;`buf:int64`;`table:int64`;`inlist:byte list`;`pc:num`;`i:num`;`stackpointer:int64`],
   mk_imp(list_mk_conj([`LENGTH (inlist:byte list) = 272`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(res:int64),1024)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(buf:int64), 272)`;
-    `nonoverlapping_modulo (2 EXP 64) (pc, 403) (val(table:int64),2048)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(res:int64),1024)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(buf:int64), 272)`;
+    `nonoverlapping_modulo (2 EXP 64) (pc, 406) (val(table:int64),2048)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(buf:int64), 272)`;
     `nonoverlapping_modulo (2 EXP 64) (val(res:int64),1024) (val(table:int64),2048)`;
     `16 * (i + 1) <= 272`;
@@ -6472,7 +6481,8 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
                   read(memory :> bytes(res,4 * outlen)) s =
                     num_of_wordlist outlist)
              (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(res,1024)])`,
   CORRECT_SCAFFOLD_TAC THEN
@@ -6515,7 +6525,8 @@ let correct_bound = prove
                     ==> ival(EL i outlist:int32) < &5 /\
                         -- &5 < ival(EL i outlist:int32))))
          (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-          MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+          MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                     ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
           MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
           MAYCHANGE [memory :> bytes(res,1024)])`,
   REPEAT GEN_TAC THEN STRIP_TAC THEN
@@ -7196,7 +7207,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
       ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
       SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--2) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--3) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[ASSUME `LENGTH(REJ_SAMPLE_ETA4_BYTES inlist:int32 list) = 256`] THEN
       REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[] THEN DISCHARGE_MEMSAFE_ASM_TAC;
@@ -7211,7 +7222,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
        [MATCH_MP_TAC JAE_NOT_TAKEN_LT THEN ASM_REWRITE_TAC[] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
       SUBGOAL_THEN `&(val(word_zx(word 272:int64):int32)):int - &272 = &(val(word_sub(word_zx(word 272:int64):int32) (word 272):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--4) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--5) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[] THEN DISCHARGE_MEMSAFE_ASM_TAC];
     (* ================= STEP CASE: SUC d =================                  *)
@@ -7231,7 +7242,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
       ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
       SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
        [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--2) THEN
+      X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--3) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
       REWRITE_TAC[ASSUME `LENGTH(REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p) inlist):int32 list) = 256`; LENGTH_BUTLAST_TMC] THEN
       ASM_REWRITE_TAC[] THEN DISCHARGE_MEMSAFE_ASM_TAC;
@@ -7252,7 +7263,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
          [MATCH_MP_TAC JAE_NOT_TAKEN_LT THEN ASM_REWRITE_TAC[] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
         SUBGOAL_THEN `&(val(word_zx(word 272:int64):int32)):int - &272 = &(val(word_sub(word_zx(word 272:int64):int32) (word 272):int32))` ASSUME_TAC THENL
          [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-        X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--4) THEN
+        X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--5) THEN
         ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
         REWRITE_TAC[LENGTH_BUTLAST_TMC] THEN ASM_REWRITE_TAC[] THEN DISCHARGE_MEMSAFE_ASM_TAC;
         (* --- p < 272 ---                                                   *)
@@ -7316,7 +7327,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
           DISCARD_OLDSTATE_TAC "s14" THEN
           SUBGOAL_THEN `&(val(word_zx(word 256:int64):int32)):int - &256 = &(val(word_sub(word_zx(word 256:int64):int32) (word 256):int32))` ASSUME_TAC THENL
            [MATCH_MP_TAC JAE_TAKEN_GE THEN CONJ_TAC THENL [ARITH_TAC; CONV_TAC NUM_REDUCE_CONV]; ALL_TAC] THEN
-          X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (15--16) THEN
+          X86_VSTEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (15--17) THEN
           ENSURES_FINAL_STATE_TAC THEN
           REWRITE_TAC[ASSUME `SUB_LIST(0,256)(REJ_SAMPLE_ETA4_BYTES inlist:int32 list) =
                 APPEND (REJ_SAMPLE_ETA4_BYTES (SUB_LIST (0,p) inlist))
@@ -7328,7 +7339,7 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
           [REPEAT CONJ_TAC THEN
           (* memory fold: bytes(res,4*256) = APPEND prefix [lo]              *)
           SUBGOAL_THEN `4 * 256 = 4 * 255 + 4` SUBST1_TAC THENL [ARITH_TAC; ALL_TAC] THEN
-          MP_TAC(ISPECL [`memory:(x86state,int64->byte)component`; `res:int64`; `s16:x86state`;
+          MP_TAC(ISPECL [`memory:(x86state,int64->byte)component`; `res:int64`; `s17:x86state`;
              `REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p) inlist):int32 list`;
              `[word_sx(word_sub (word 4:int16) (word(val(EL p (inlist:byte list)) MOD 16))):int32]`;
              `4*255`; `4`] BYTES_EQ_NUM_OF_WORDLIST_APPEND) THEN
@@ -7338,12 +7349,12 @@ let SCALAR_TAIL_RUN_MEMSAFE = prove
            [ASM_REWRITE_TAC[];
             SUBGOAL_THEN `word(4 * 255):int64 = word 1020` SUBST1_TAC THENL [CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
             FIRST_X_ASSUM(fun th -> let c=concl th in
-               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`s16:x86state`))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c
+               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`s17:x86state`))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c
                then ASSUME_TAC(REWRITE_RULE[MATCH_MP LO_STORE_VAL (ASSUME `val(EL p (inlist:byte list)) MOD 16 < 9`)] th) else NO_TAC) THEN
             FIRST_X_ASSUM(fun th -> let c=concl th in
-               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c && not(can(find_term is_cond)c) && can(find_term(fun t->t=`s16:x86state`))c
+               if is_eq c && can(find_term(fun t->try fst(dest_const t)="bytes32" with _->false))c && can(find_term(fun t->t=`val(EL p (inlist:byte list)) MOD 16`))c && not(can(find_term is_cond)c) && can(find_term(fun t->t=`s17:x86state`))c
                then MP_TAC th else NO_TAC) THEN
-            STORE4_FROM_SPEC `s16:x86state` `word_add res (word 1020):int64`];
+            STORE4_FROM_SPEC `s17:x86state` `word_add res (word 1020):int64`];
            DISCHARGE_MEMSAFE_ASM_TAC];
           (* --- STEP CLEAN-RECURSIVE: body trip then IH at p+1 ---          *)
           SUBGOAL_THEN `LENGTH(REJ_SAMPLE_ETA4_BYTES(SUB_LIST(0,p+1) inlist):int32 list) <= 256` ASSUME_TAC THENL
@@ -7678,9 +7689,9 @@ let q318_ms = `\s. (bytes_loaded s (word pc) (BUTLAST mldsa_rej_uniform_eta4_tmc
 let exit_offset_ms_tm = `
   !res buf table (inlist:byte list) pc N stackpointer e.
        LENGTH inlist = 272 /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val res,1024) /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val buf, 272) /\
-       nonoverlapping_modulo (2 EXP 64) (pc, 403) (val table,2048) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val res,1024) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val buf, 272) /\
+       nonoverlapping_modulo (2 EXP 64) (pc, 406) (val table,2048) /\
        nonoverlapping_modulo (2 EXP 64) (val res,1024) (val buf, 272) /\
        nonoverlapping_modulo (2 EXP 64) (val res,1024) (val table,2048) /\
        16 * N = 272 /\
@@ -7703,7 +7714,9 @@ let exit_offset_ms_tm = `
             (\s. read RIP s = word(pc + LENGTH(BUTLAST mldsa_rej_uniform_eta4_tmc)) /\
                  (exists e2. read events s = APPEND e2 e /\
                    memaccess_inbounds e2 [buf,272; table,2048] [res,1024]))
-            (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,, MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+            (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
+             MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                        ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
              MAYCHANGE [CF; PF; AF; ZF; SF; OF] ,, MAYCHANGE [events] ,, MAYCHANGE [memory :> bytes(res,1024)])`;;
 
 (* generic events-associativity + ZMM-frame bridge from a body/block lemma instance bth
@@ -7902,7 +7915,8 @@ let core_ms_tm = `!res buf table (inlist:byte list) e pc.
                      read events s = APPEND e2 e /\
                      memaccess_inbounds e2 [buf,272; table,2048] [res,1024]))
              (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(res,1024)])`;;
 
@@ -7932,7 +7946,8 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
                        [buf,272; table,2048]
                        [res,1024]))
              (MAYCHANGE [RIP; RAX; RCX; R8; R9; R10; R11] ,,
-              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6] ,,
+              MAYCHANGE [ZMM0; ZMM1; ZMM2; ZMM3; ZMM4; ZMM5; ZMM6; ZMM7;
+                         ZMM8; ZMM9; ZMM10; ZMM11; ZMM12; ZMM13; ZMM14; ZMM15] ,,
               MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,,
               MAYCHANGE [memory :> bytes(res,1024)])`,
   MATCH_ACCEPT_TAC MLDSA_REJ_UNIFORM_ETA4_MEMSAFE_CORE);;

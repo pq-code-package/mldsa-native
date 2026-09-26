@@ -92,6 +92,7 @@ caddq_vector 896, %ymm0
 caddq_vector 928, %ymm3
 caddq_vector 960, %ymm4
 caddq_vector 992, %ymm5
+vzeroupper
 ret
 
 /* simpasm: footer-start */

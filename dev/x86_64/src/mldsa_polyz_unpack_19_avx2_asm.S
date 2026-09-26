@@ -138,6 +138,7 @@ unpack19_block 28
 unpack19_block 29
 unpack19_block 30
 unpack19_block 31
+vzeroupper
 ret
 
 /* simpasm: footer-start */
