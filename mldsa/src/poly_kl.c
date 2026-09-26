@@ -707,23 +707,18 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
     invariant(array_bound(r->coeffs, 0, i*8, -5, MLDSA_ETA + 1))
     decreases(MLDSA_N / 8 - i))
   {
-    r->coeffs[8 * i + 0] = (a[3 * i + 0] >> 0) & 7;
-    r->coeffs[8 * i + 1] = (a[3 * i + 0] >> 3) & 7;
-    r->coeffs[8 * i + 2] = ((a[3 * i + 0] >> 6) | (a[3 * i + 1] << 2)) & 7;
-    r->coeffs[8 * i + 3] = (a[3 * i + 1] >> 1) & 7;
-    r->coeffs[8 * i + 4] = (a[3 * i + 1] >> 4) & 7;
-    r->coeffs[8 * i + 5] = ((a[3 * i + 1] >> 7) | (a[3 * i + 2] << 1)) & 7;
-    r->coeffs[8 * i + 6] = (a[3 * i + 2] >> 2) & 7;
-    r->coeffs[8 * i + 7] = (a[3 * i + 2] >> 5) & 7;
+    const int32_t t0 = a[3 * i + 0];
+    const int32_t t1 = a[3 * i + 1];
+    const int32_t t2 = a[3 * i + 2];
 
-    r->coeffs[8 * i + 0] = MLDSA_ETA - r->coeffs[8 * i + 0];
-    r->coeffs[8 * i + 1] = MLDSA_ETA - r->coeffs[8 * i + 1];
-    r->coeffs[8 * i + 2] = MLDSA_ETA - r->coeffs[8 * i + 2];
-    r->coeffs[8 * i + 3] = MLDSA_ETA - r->coeffs[8 * i + 3];
-    r->coeffs[8 * i + 4] = MLDSA_ETA - r->coeffs[8 * i + 4];
-    r->coeffs[8 * i + 5] = MLDSA_ETA - r->coeffs[8 * i + 5];
-    r->coeffs[8 * i + 6] = MLDSA_ETA - r->coeffs[8 * i + 6];
-    r->coeffs[8 * i + 7] = MLDSA_ETA - r->coeffs[8 * i + 7];
+    r->coeffs[8 * i + 0] = MLDSA_ETA - ((t0 >> 0) & 7);
+    r->coeffs[8 * i + 1] = MLDSA_ETA - ((t0 >> 3) & 7);
+    r->coeffs[8 * i + 2] = MLDSA_ETA - (((t0 >> 6) | (t1 << 2)) & 7);
+    r->coeffs[8 * i + 3] = MLDSA_ETA - ((t1 >> 1) & 7);
+    r->coeffs[8 * i + 4] = MLDSA_ETA - ((t1 >> 4) & 7);
+    r->coeffs[8 * i + 5] = MLDSA_ETA - (((t1 >> 7) | (t2 << 1)) & 7);
+    r->coeffs[8 * i + 6] = MLDSA_ETA - ((t2 >> 2) & 7);
+    r->coeffs[8 * i + 7] = MLDSA_ETA - ((t2 >> 5) & 7);
   }
 #elif MLDSA_ETA == 4
   for (i = 0; i < MLDSA_N / 2; i++)
@@ -732,10 +727,10 @@ void mld_polyeta_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYETA_PACKEDBYTES])
     invariant(array_bound(r->coeffs, 0, i*2, -11, MLDSA_ETA + 1))
     decreases(MLDSA_N / 2 - i))
   {
-    r->coeffs[2 * i + 0] = a[i] & 0x0F;
-    r->coeffs[2 * i + 1] = a[i] >> 4;
-    r->coeffs[2 * i + 0] = MLDSA_ETA - r->coeffs[2 * i + 0];
-    r->coeffs[2 * i + 1] = MLDSA_ETA - r->coeffs[2 * i + 1];
+    const int32_t t = a[i];
+
+    r->coeffs[2 * i + 0] = MLDSA_ETA - (t & 0x0F);
+    r->coeffs[2 * i + 1] = MLDSA_ETA - (t >> 4);
   }
 #else /* MLDSA_ETA == 4 */
 #error "Invalid value of MLDSA_ETA"
