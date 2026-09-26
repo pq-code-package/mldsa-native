@@ -19,57 +19,30 @@
 #include "polyvec_lazy.h"
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#define mld_pack_sk_s1 MLD_NAMESPACE_KL(pack_sk_s1)
+#define mld_pack_sk_rho_key_tr MLD_NAMESPACE_KL(pack_sk_rho_key_tr)
 /**
- * Bit-pack the s1 component into the secret key.
+ * Bit-pack rho, key, tr into the secret key.
  *
- * @spec{Partially implements @[FIPS204, Algorithm 24, skEncode] (s1
- * component).}
+ * s1 and s2 must already be packed, and t0 via mld_compute_pack_t0_t1.
  *
- * @param[out] sk Output byte array.
- * @param[in]  s1 Pointer to vector s1.
- */
-MLD_INTERNAL_API
-void mld_pack_sk_s1(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                    const mld_polyvecl *s1)
-__contract__(
-  requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-  requires(memory_no_alias(s1, sizeof(mld_polyvecl)))
-  requires(forall(k1, 0, MLDSA_L,
-    array_abs_bound(s1->vec[k1].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
-  assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
-);
-
-#define mld_pack_sk_rho_key_tr_s2 MLD_NAMESPACE_KL(pack_sk_rho_key_tr_s2)
-/**
- * Bit-pack rho, key, tr, s2 into the secret key.
- *
- * s1 must already be packed via mld_pack_sk_s1, and t0 via
- * mld_compute_pack_t0_t1.
- *
- * @spec{Partially implements @[FIPS204, Algorithm 24, skEncode] (rho, key, tr,
- * s2 components).}
+ * @spec{Partially implements @[FIPS204, Algorithm 24, skEncode] (rho, key, tr
+ * components).}
  *
  * @param[out] sk  Output byte array.
  * @param[in]  rho Byte array containing rho.
  * @param[in]  tr  Byte array containing tr.
  * @param[in]  key Byte array containing key.
- * @param[in]  s2  Pointer to vector s2.
  */
 MLD_INTERNAL_API
-void mld_pack_sk_rho_key_tr_s2(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
-                               const uint8_t rho[MLDSA_SEEDBYTES],
-                               const uint8_t tr[MLDSA_TRBYTES],
-                               const uint8_t key[MLDSA_SEEDBYTES],
-                               const mld_polyveck *s2)
+void mld_pack_sk_rho_key_tr(uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
+                            const uint8_t rho[MLDSA_SEEDBYTES],
+                            const uint8_t tr[MLDSA_TRBYTES],
+                            const uint8_t key[MLDSA_SEEDBYTES])
 __contract__(
   requires(memory_no_alias(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
   requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
   requires(memory_no_alias(tr, MLDSA_TRBYTES))
   requires(memory_no_alias(key, MLDSA_SEEDBYTES))
-  requires(memory_no_alias(s2, sizeof(mld_polyveck)))
-  requires(forall(k2, 0, MLDSA_K,
-    array_abs_bound(s2->vec[k2].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
   assigns(memory_slice(sk, MLDSA_CRYPTO_SECRETKEYBYTES))
 );
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */

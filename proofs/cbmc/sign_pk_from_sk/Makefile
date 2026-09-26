@@ -21,9 +21,8 @@ PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_pk_from_sk
 USE_FUNCTION_CONTRACTS=mld_polyvecl_unpack_eta
-USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_eta
+USE_FUNCTION_CONTRACTS+=mld_polyveck_unpack_eta_chknorm
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
-USE_FUNCTION_CONTRACTS+=mld_polyveck_chknorm
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_value_barrier_u8
 USE_FUNCTION_CONTRACTS+=mld_ct_memcmp

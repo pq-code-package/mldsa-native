@@ -1,11 +1,10 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "polyvec.h"
+#include "packing.h"
 
 void harness(void)
 {
-  mld_polyvecl *a;
-  uint8_t *b;
-  mld_polyvecl_pack_eta(b, a);
+  uint8_t *sk, *rho, *tr, *key;
+  mld_pack_sk_rho_key_tr(sk, rho, tr, key);
 }
