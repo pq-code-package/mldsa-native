@@ -46,7 +46,8 @@
 #include "../../../common.h"
 
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) &&   \
-    !defined(MLD_CONFIG_NO_VERIFY_API) &&          \
+    (!defined(MLD_CONFIG_NO_VERIFY_API) ||         \
+     defined(MLD_UNIT_TEST)) &&                    \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) &&   \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
@@ -113,8 +114,8 @@ Lmld_poly_use_hint_32_avx2_asm_loop:
 MLD_ASM_FN_SIZE(poly_use_hint_32_avx2_asm)
 
 
-#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_NO_VERIFY_API && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && (!MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST) && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87) */
 

@@ -46,7 +46,8 @@
 
 #if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) &&   \
     (!defined(MLD_CONFIG_NO_SIGN_API) ||           \
-     !defined(MLD_CONFIG_NO_VERIFY_API)) &&        \
+     !defined(MLD_CONFIG_NO_VERIFY_API) ||         \
+     defined(MLD_UNIT_TEST)) &&                    \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) &&   \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
      (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
@@ -143,6 +144,7 @@ ret
 /* simpasm: footer-start */
 
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && (!MLD_CONFIG_NO_SIGN_API || \
-          !MLD_CONFIG_NO_VERIFY_API) && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST) && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87) */

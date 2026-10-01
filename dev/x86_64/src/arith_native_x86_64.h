@@ -93,7 +93,7 @@ __contract__(
   ensures(array_bound(r, 0, return_value, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)
 #define mld_rej_uniform_eta2_avx2_asm MLD_NAMESPACE(rej_uniform_eta2_avx2_asm)
 /* This contract must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_eta2_avx2_asm.ml */
@@ -125,9 +125,9 @@ __contract__(
   ensures(return_value <= MLDSA_N)
   ensures(array_abs_bound(r, 0, return_value, 5))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_decompose_32_avx2_asm MLD_NAMESPACE(poly_decompose_32_avx2_asm)
 MLD_SYSV_ABI
 void mld_poly_decompose_32_avx2_asm(int32_t *a1, int32_t *a0)
@@ -161,7 +161,7 @@ __contract__(
   /* check-magic: 95233 == (MLDSA_Q - 1) / 88 + 1 */
   ensures(array_abs_bound(a0, 0, MLDSA_N, 95233))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
 #define mld_poly_caddq_avx2_asm MLD_NAMESPACE(poly_caddq_avx2_asm)
 MLD_SYSV_ABI
@@ -175,7 +175,7 @@ __contract__(
   ensures(array_bound(r, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_use_hint_32_avx2_asm MLD_NAMESPACE(poly_use_hint_32_avx2_asm)
 MLD_SYSV_ABI
 void mld_poly_use_hint_32_avx2_asm(int32_t *a, const int32_t *h)
@@ -205,7 +205,7 @@ __contract__(
   /* check-magic: 44 == (MLDSA_Q - 1) / (2 * ((MLDSA_Q - 1) / 88)) */
   ensures(array_bound(a, 0, MLDSA_N, 0, 44))
 );
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
 #define mld_poly_chknorm_avx2_asm MLD_NAMESPACE(poly_chknorm_avx2_asm)
 MLD_MUST_CHECK_RETURN_VALUE MLD_SYSV_ABI
@@ -222,7 +222,8 @@ __contract__(
   ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
 );
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 #define mld_polyz_unpack_17_avx2_asm MLD_NAMESPACE(polyz_unpack_17_avx2_asm)
 MLD_SYSV_ABI
 void mld_polyz_unpack_17_avx2_asm(int32_t *r, const uint8_t *a)
@@ -246,7 +247,8 @@ __contract__(
   assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
   ensures(array_bound(r, 0, MLDSA_N, -((1 << 19) - 1), (1 << 19) + 1))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 #define mld_pointwise_avx2_asm MLD_NAMESPACE(pointwise_avx2_asm)
 MLD_SYSV_ABI

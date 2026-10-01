@@ -26,8 +26,11 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_NO_SIGN_API) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
-           (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
+#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+    (!defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87))
 
 /*
  * WARNING: This file is auto-derived from the mldsa-native source file
@@ -98,8 +101,8 @@ Lmld_poly_decompose_32_loop:
 
 MLD_ASM_FN_SIZE(poly_decompose_32_aarch64_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_SIGN_API && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_SIGN_API || \
+          MLD_UNIT_TEST) && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87) */
 
