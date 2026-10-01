@@ -30,12 +30,11 @@
  */
 
 /*
- * Test configuration: Test configuration with signing bound set to 1 to
- * exercise MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED
+ * Test configuration: Test configuration with a non-default alignment
  *
  * This configuration differs from the default mldsa/mldsa_native_config.h in
  * the following places:
- *   - MLD_CONFIG_MAX_SIGNING_ATTEMPTS
+ *   - MLD_CONFIG_ALIGN
  */
 
 
@@ -480,7 +479,8 @@
  *          function/macro signatures may change at any time. We expect a
  *          stable API in a future version.
  */
-/* #define MLD_CONFIG_ALIGN 32 */
+#define MLD_CONFIG_ALIGN 64
+
 
 /**
  * MLD_CONFIG_ALIGN_ATTRIBUTE [EXPERIMENTAL]
@@ -790,9 +790,7 @@
  * In particular, in the default configuration, the signing
  * failure rate is < 2^{-256}.
  */
-#define MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND
-#define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 1
-
+/* #define MLD_CONFIG_MAX_SIGNING_ATTEMPTS 821 */
 
 /**
  * MLD_CONFIG_SERIAL_FIPS202_ONLY

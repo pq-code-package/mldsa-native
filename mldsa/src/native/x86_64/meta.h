@@ -7,6 +7,12 @@
 #ifndef MLD_NATIVE_X86_64_META_H
 #define MLD_NATIVE_X86_64_META_H
 
+/* This backend loads and stores polynomials with vmovdqa, which faults on
+ * operands that are not 32-byte aligned. */
+#if MLD_ALIGN_BYTES < 32
+#error Bad configuration: The x86_64 backend needs 32-byte aligned buffers for vmovdqa. Set MLD_CONFIG_ALIGN to at least 32, and MLD_CONFIG_ALIGN_ATTRIBUTE if no alignment declarator is known for your compiler.
+#endif
+
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
 #define MLD_ARITH_BACKEND_X86_64_DEFAULT
