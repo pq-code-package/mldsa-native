@@ -1,0 +1,24 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# MLD_ALIGN is an alignment specifier, which C forbids on a typedef. Drop it
+# from Pavona's SHAKE context types: they are empty placeholders for the KMAC
+# hardware backend, ignored by every function that takes one, so there is no
+# object whose alignment it could constrain.
+diff --git a/sw/device/lib/crypto/impl/mldsa/mldsa-native/fips202_glue.h b/sw/device/lib/crypto/impl/mldsa/mldsa-native/fips202_glue.h
+index ff39a163dc..fda2d84473 100644
+--- a/sw/device/lib/crypto/impl/mldsa/mldsa-native/fips202_glue.h
++++ b/sw/device/lib/crypto/impl/mldsa/mldsa-native/fips202_glue.h
+@@ -16,10 +16,10 @@
+ #define SHAKE256_RATE 136
+ 
+ typedef struct {
+-} MLD_ALIGN mld_shake128ctx;
++} mld_shake128ctx;
+ 
+ typedef struct {
+-} MLD_ALIGN mld_shake256ctx;
++} mld_shake256ctx;
+ 
+ static MLD_INLINE void mld_shake128_absorb_once(mld_shake128ctx *state,
+                                                 const uint8_t *input,

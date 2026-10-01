@@ -18,7 +18,11 @@
 /* This mirrors MLD_ALIGN from mldsa/src/sys.h, including the fallback to no
  * alignment at all: on a toolchain that cannot express the constraint, the
  * library's own buffers are equally unaligned, so we are no worse off. */
-#if defined(__GNUC__)
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define EXAMPLE_ALIGN alignas(EXAMPLE_ALLOC_ALIGN)
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define EXAMPLE_ALIGN _Alignas(EXAMPLE_ALLOC_ALIGN)
+#elif defined(__GNUC__)
 #define EXAMPLE_ALIGN __attribute__((aligned(EXAMPLE_ALLOC_ALIGN)))
 #elif defined(_MSC_VER)
 #define EXAMPLE_ALIGN __declspec(align(EXAMPLE_ALLOC_ALIGN))
