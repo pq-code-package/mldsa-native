@@ -83,8 +83,8 @@ let CHKNORM_LENGTH_SIMPLIFY_CONV =
 let bit_to_mask32 = new_definition `bit_to_mask32 (b : bool) : 32 word = word_neg (word (bitval b) : 32 word)`;;
 
 (* Expression used for bounds check itself *)
-let bd = new_definition `bd (v : int32) (b: int32) : bool =
-    (ival (iword (abs (ival v)) : 32 word) >= ival (word_zx (word_zx b : 64 word) : 32 word))`;;
+let bd = new_definition `bd (v : int32) (b: int64) : bool =
+    (ival (iword (abs (ival v)) : 32 word) >= ival (word_zx b : 32 word))`;;
 
 let MAX_VAL_BIT_TO_MASK32 = prove(
   `MAX (val (bit_to_mask32 b0)) (val (bit_to_mask32 b1)) = val (bit_to_mask32 (b0 \/ b1))`,
@@ -93,13 +93,12 @@ let MAX_VAL_BIT_TO_MASK32 = prove(
   REWRITE_TAC[BITVAL_CLAUSES] THEN CONV_TAC WORD_REDUCE_CONV THEN ARITH_TAC);;
 
 let BD_SIMP = prove(
-  `abs(ival(x : int32)) < &2 pow 31 ==> (bd x b <=> abs (ival x) >= ival b)`,
+  `abs(ival(x : int32)) < &2 pow 31 ==>
+   (bd x b <=> abs (ival x) >= ival ((word_zx:int64->int32) b))`,
   REWRITE_TAC[bd] THEN DISCH_TAC THEN
   SUBGOAL_THEN `ival(iword(abs(ival(x:32 word))) : 32 word) = abs(ival x)` SUBST1_TAC THENL
   [MATCH_MP_TAC IVAL_IWORD THEN REWRITE_TAC[DIMINDEX_32] THEN CONV_TAC NUM_REDUCE_CONV THEN
-   FIRST_X_ASSUM MP_TAC THEN REWRITE_TAC[INT_ABS_POS] THEN INT_ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `(word_zx:64 word -> 32 word) ((word_zx:32 word -> 64 word) b) = b` SUBST1_TAC THENL
-  [MATCH_MP_TAC WORD_ZX_ZX THEN REWRITE_TAC[DIMINDEX_32; DIMINDEX_64] THEN ARITH_TAC;
+   FIRST_X_ASSUM MP_TAC THEN REWRITE_TAC[INT_ABS_POS] THEN INT_ARITH_TAC;
    REFL_TAC]);;
 
 let BIT_TO_MASK32_OR = prove(
@@ -130,12 +129,13 @@ let WORD_JOIN_OR_TYBIT0 = prove(
 (* ------------------------------------------------------------------------- *)
 
 let MLDSA_POLY_CHKNORM_CORRECT = prove(
- `!a (x:num->int32) (bound:int32) pc.
+ `!a b (x:num->int32) (bound:int32) pc.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_mc) (a, 1024)
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mldsa_poly_chknorm_mc /\
                   read PC s = word(pc + MLDSA_POLY_CHKNORM_CORE_START) /\
-                  C_ARGUMENTS [a; word_zx bound] s /\
+                  C_ARGUMENTS [a; b] s /\
+                  (word_zx:int64->int32) b = bound /\
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                   (!i. i < 256 ==> abs(ival(x i)) < &2 pow 31))
@@ -143,12 +143,14 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
                   read X0 s = word(bitval(?i. i < 256 /\ abs(ival(x i)) >= ival bound)))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI)`,
   CONV_TAC CHKNORM_LENGTH_SIMPLIFY_CONV THEN
-  MAP_EVERY X_GEN_TAC [`a:int64`; `x:num->int32`; `bound:int32`; `pc:num`] THEN
+  MAP_EVERY X_GEN_TAC [`a:int64`; `b:int64`; `x:num->int32`; `bound:int32`; `pc:num`] THEN
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
               NONOVERLAPPING_CLAUSES] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
   (* Expand bounded foralls in precondition to 256 explicit cases *)
   ENSURES_INIT_TAC "s0" THEN
+  (* Only the low 32 bits of X1 carry the bound. *)
+  UNDISCH_THEN `(word_zx:int64->int32) b = bound` (SUBST_ALL_TAC o SYM) THEN
   UNDISCH_TAC `forall i. i < 256 ==> read (memory :> bytes32 (word_add a (word (4 * i)))) s0 = x i` THEN
   CONV_TAC(ONCE_DEPTH_CONV (EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV)) THEN REPEAT STRIP_TAC THEN
   (* Merge bytes32 reads into bytes128 reads (64 merges for 256 coefficients) *)
@@ -190,13 +192,14 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
  * in mldsa/src/native/aarch64/src/arith_native_aarch64.h *)
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT = prove(
- `!a (x:num->int32) (bound:int32) pc returnaddress.
+ `!a b (x:num->int32) (bound:int32) pc returnaddress.
         nonoverlapping (word pc, LENGTH mldsa_poly_chknorm_mc) (a, 1024)
         ==> ensures arm
              (\s. aligned_bytes_loaded s (word pc) mldsa_poly_chknorm_mc /\
                   read PC s = word pc /\
                   read X30 s = returnaddress /\
-                  C_ARGUMENTS [a; word_zx bound] s /\
+                  C_ARGUMENTS [a; b] s /\
+                  (word_zx:int64->int32) b = bound /\
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                   (!i. i < 256 ==> abs(ival(x i)) < &2 pow 31))
@@ -228,7 +231,7 @@ let full_spec,public_vars = mk_safety_spec
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE = time prove
  (`exists f_events.
-       forall e a (bound:int32) pc returnaddress.
+       forall e a b pc returnaddress.
            nonoverlapping (word pc,LENGTH mldsa_poly_chknorm_mc) (a,1024)
            ==> ensures arm
                (\s.
@@ -236,7 +239,7 @@ let MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE = time prove
                     mldsa_poly_chknorm_mc /\
                     read PC s = word pc /\
                     read X30 s = returnaddress /\
-                    C_ARGUMENTS [a; word_zx bound] s /\
+                    C_ARGUMENTS [a; b] s /\
                     read events s = e)
                (\s.
                     read PC s = returnaddress /\
