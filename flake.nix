@@ -13,6 +13,12 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+
+    # Prebuilt Rust toolchains with bare-metal targets (Dabao platform)
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ flake-parts, ... }:
@@ -192,6 +198,35 @@
               pkgs.pkgsCross.aarch64-embedded.stdenv.cc
             ];
           };
+
+          # Dabao board: newlib toolchain for the tests and Rust toolchain for
+          # the Xous baremetal image. The stock riscv32-embedded newlib is
+          # rv32gc/ilp32d, which cannot link with the soft-float RV32IMAC
+          # image.
+          devShells.dabao =
+            let
+              pkgsDabao = import pkgs.path {
+                localSystem = system;
+                crossSystem = {
+                  config = "riscv32-none-elf";
+                  libc = "newlib";
+                  gcc = { arch = "rv32imac_zicsr_zifencei"; abi = "ilp32"; };
+                };
+              };
+              rust = (pkgs.extend inputs.rust-overlay.overlays.default).rust-bin.stable.latest.minimal.override {
+                targets = [ "riscv32imac-unknown-none-elf" ];
+              };
+            in
+            util.mkShell {
+              packages = builtins.attrValues
+                {
+                  inherit (pkgs) coreutils git;
+                } ++ [
+                util.pythonEnv
+                pkgsDabao.stdenv.cc
+                rust
+              ];
+            };
 
 
 
