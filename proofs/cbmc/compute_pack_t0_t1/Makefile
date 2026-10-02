@@ -23,6 +23,7 @@ CHECK_FUNCTION_CONTRACTS=mld_compute_pack_t0_t1
 USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
 USE_FUNCTION_CONTRACTS+=mld_poly_invntt_tomont
 USE_FUNCTION_CONTRACTS+=mld_poly_add
+USE_FUNCTION_CONTRACTS+=mld_polyeta_unpack
 USE_FUNCTION_CONTRACTS+=mld_poly_reduce
 USE_FUNCTION_CONTRACTS+=mld_poly_caddq
 USE_FUNCTION_CONTRACTS+=mld_poly_power2round

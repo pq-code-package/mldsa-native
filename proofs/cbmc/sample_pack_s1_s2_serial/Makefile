@@ -4,24 +4,25 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = sample_s1_s2_harness
+HARNESS_FILE = sample_pack_s1_s2_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mld_sample_s1_s2_serial
+PROOF_UID = mld_sample_pack_s1_s2_serial
 
 DEFINES += -DMLD_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mld_sample_s1_s2.0:7 # Largest value of MLDSA_L
-UNWINDSET += mld_sample_s1_s2.1:8 # Largest value of MLDSA_K
+UNWINDSET += mld_sample_pack_s1_s2.0:7 # Largest value of MLDSA_L
+UNWINDSET += mld_sample_pack_s1_s2.1:8 # Largest value of MLDSA_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
-CHECK_FUNCTION_CONTRACTS=mld_sample_s1_s2
+CHECK_FUNCTION_CONTRACTS=mld_sample_pack_s1_s2
 USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta
+USE_FUNCTION_CONTRACTS+=mld_polyeta_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
@@ -29,7 +30,7 @@ USE_DYNAMIC_FRAMES=1
 CBMC_SUPPORTED_CONFIGS = LP64:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 
-FUNCTION_NAME = mld_sample_s1_s2_serial
+FUNCTION_NAME = mld_sample_pack_s1_s2_serial
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will
