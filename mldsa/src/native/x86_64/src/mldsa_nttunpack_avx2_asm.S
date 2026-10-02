@@ -241,6 +241,7 @@ MLD_ASM_FN_SYMBOL(nttunpack_avx2_asm)
         vmovdqa %ymm4, 0x3a0(%rdi)
         vmovdqa %ymm3, 0x3c0(%rdi)
         vmovdqa %ymm11, 0x3e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

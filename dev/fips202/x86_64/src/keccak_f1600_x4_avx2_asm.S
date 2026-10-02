@@ -652,6 +652,7 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    vmovhpd %xmm3, 0x188(%rdi)
    vmovq %xmm15, 0x250(%rdi)
    vmovhpd %xmm15, 0x318(%rdi)
+   vzeroupper
    movq   %r11, %rsp
    ret
 

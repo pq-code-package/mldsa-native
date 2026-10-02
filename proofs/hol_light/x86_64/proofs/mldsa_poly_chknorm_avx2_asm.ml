@@ -158,6 +158,7 @@ let mldsa_poly_chknorm_mc = define_assert_from_elf "mldsa_poly_chknorm_mc" "x86_
   0xc4; 0xe2; 0x7d; 0x17; 0xc9;
                            (* VPTEST (%_% ymm1) (%_% ymm1) *)
   0x0f; 0x95; 0xc0;        (* SETNE (% al) *)
+  0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
 (*** BYTECODE END ***)
@@ -168,6 +169,19 @@ let MLDSA_POLY_CHKNORM_TMC_EXEC = X86_MK_CORE_EXEC_RULE mldsa_poly_chknorm_tmc;;
 let LENGTH_MLDSA_POLY_CHKNORM_TMC =
   REWRITE_CONV[mldsa_poly_chknorm_tmc] `LENGTH mldsa_poly_chknorm_tmc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
+
+let MLDSA_POLY_CHKNORM_POSTAMBLE_LENGTH = new_definition
+  `MLDSA_POLY_CHKNORM_POSTAMBLE_LENGTH = 1`;;
+
+let MLDSA_POLY_CHKNORM_CORE_END = new_definition
+  `MLDSA_POLY_CHKNORM_CORE_END =
+     LENGTH mldsa_poly_chknorm_tmc - MLDSA_POLY_CHKNORM_POSTAMBLE_LENGTH`;;
+
+let LENGTH_SIMPLIFY_CONV =
+  REWRITE_CONV[LENGTH_MLDSA_POLY_CHKNORM_TMC;
+              MLDSA_POLY_CHKNORM_CORE_END;
+              MLDSA_POLY_CHKNORM_POSTAMBLE_LENGTH] THENC
+  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
 
 (* ------------------------------------------------------------------------- *)
 (* Helper lemmas                                                             *)
@@ -288,9 +302,10 @@ let MLDSA_POLY_CHKNORM_CORRECT = prove(
                   (!i. i < 256 ==>
                      read(memory :> bytes32(word_add a (word(4 * i)))) s = x i) /\
                   (!i. i < 256 ==> abs(ival(x i)) < &2 pow 31))
-             (\s. read RIP s = word(pc + 557) /\
+             (\s. read RIP s = word(pc + MLDSA_POLY_CHKNORM_CORE_END) /\
                   read RAX s = word(bitval(~(!i. i < 256 ==> abs(ival(x i)) < ival bound))))
              (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI)`,
+  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
   (* Bridge the CBMC-aligned universal-negation postcondition to the existential
      form that the rest of the proof reasons about. *)
   REWRITE_TAC[MESON[INT_NOT_LT; INT_GE]
@@ -375,7 +390,8 @@ let MLDSA_POLY_CHKNORM_NOIBT_SUBROUTINE_CORRECT = prove(
                   read RSP s = word_add stackpointer (word 8) /\
                   read RAX s = word(bitval(~(!i. i < 256 ==> abs(ival(x i)) < ival bound))))
              (MAYCHANGE [RSP] ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI)`,
-  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_poly_chknorm_tmc MLDSA_POLY_CHKNORM_CORRECT);;
+  X86_PROMOTE_RETURN_NOSTACK_TAC mldsa_poly_chknorm_tmc
+    (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_CHKNORM_CORRECT));;
 
 let MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT = prove(
  `!a (x:num->int32) (bound:int32) pc stackpointer returnaddress.
@@ -407,7 +423,7 @@ needs "mldsa_native/x86_64/proofs/subroutine_signatures.ml";;
 let full_spec,public_vars = mk_safety_spec
     ~keep_maychanges:true
     (assoc "mldsa_poly_chknorm_x86" subroutine_signatures)
-    (REWRITE_RULE[SOME_FLAGS] MLDSA_POLY_CHKNORM_CORRECT)
+    (REWRITE_RULE[SOME_FLAGS] (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_POLY_CHKNORM_CORRECT))
     MLDSA_POLY_CHKNORM_TMC_EXEC;;
 
 let full_spec =

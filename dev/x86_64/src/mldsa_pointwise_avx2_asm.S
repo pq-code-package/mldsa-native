@@ -210,6 +210,7 @@ mld_pointwise_avx2_looptop1:
         vmovdqa [rdi], ymm2
         vmovdqa [rdi + 32], ymm4
 
+        vzeroupper
         ret
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \

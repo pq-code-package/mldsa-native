@@ -2320,6 +2320,7 @@ MLD_ASM_FN_SYMBOL(invntt_avx2_asm)
         vmovdqa %ymm5, 0xe0(%rdi)
         vmovdqa %ymm6, 0x160(%rdi)
         vmovdqa %ymm7, 0x1e0(%rdi)
+        vzeroupper
         retq
         .cfi_endproc
 

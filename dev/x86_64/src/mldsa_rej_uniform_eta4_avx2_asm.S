@@ -231,6 +231,7 @@ mld_rej_uniform_eta4_avx2_asm_high_nibble:
         jmp     mld_rej_uniform_eta4_avx2_asm_scalar
 
 mld_rej_uniform_eta4_avx2_asm_done:
+        vzeroupper
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.

@@ -154,6 +154,7 @@ MLD_ASM_FN_SYMBOL(poly_decompose_88_avx2_asm)
         decompose88_block  960,  960, %ymm0, %ymm1, %ymm2, %ymm3
         decompose88_block  992,  992, %ymm0, %ymm1, %ymm2, %ymm3
 
+        vzeroupper
         ret
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
