@@ -790,24 +790,14 @@ __contract__(
   mld_poly_challenge(cp, challenge_bytes);
   mld_poly_ntt(cp);
 
-  /* @[FIPS204, Algorithm 7, lines 18+20] cs1 <- invNTT(c_hat o s1_hat) and
-   * z <- y + cs1, followed by the line-23 norm check ||z||_inf >= GAMMA1 -
-   * BETA. mld_compute_pack_z fuses all three per polynomial and, on success,
-   * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z. */
-  ret = mld_compute_pack_z(sig, cp, s1hat, y, t, scratch_w);
-  if (ret != 0)
-  {
-    goto cleanup;
-  }
-
-  /* The remaining steps realize @[FIPS204, Algorithm 7, lines 21-28] (the
-   * low-bits norm check and the hint h) via the faster alternative formulation
-   * of @[Round3_Spec, Section 5.1]. @[FIPS204] explicitly permits this: the
+  /* The next steps realize @[FIPS204, Algorithm 7, lines 21-28] (the low-bits
+   * norm check and the hint h) via the faster alternative formulation of
+   * @[Round3_Spec, Section 5.1]. @[FIPS204] explicitly permits this: the
    * note accompanying Algorithm 7 states that the validity checks on z and the
    * computation of h may instead be implemented "as described in Section 5.1 of
    * [6]", and that reference is @[Round3_Spec, Section 5.1].
    *
-   * The loop below builds w0 - cs2 + ct0 in place in w0; w1_packed is
+   * The two loops below build w0 - cs2 + ct0 in place in w0; w1_packed is
    * unmodified, and holds w1Encode(HighBits(w)) from line 13. Those are the
    * inputs to the streamlined computation of MakeHint explained below.
    *
@@ -833,6 +823,10 @@ __contract__(
    *   ||ct0||_inf >= GAMMA2 check is the mld_poly_chknorm(scratch_w, GAMMA2)
    *   call on ct0 below; the weight bound is enforced by mld_pack_sig_h.
    *
+   * Order: every check stops at the first failing polynomial, so the one
+   * rejecting most often per polynomial runs first. GAMMA2 < GAMMA1, hence
+   * w0 - cs2 before z; ||ct0||_inf >= GAMMA2 practically never rejects.
+   *
    * Building w0 per-component and checking norms incrementally also avoids
    * allocating a full polyveck for h. */
   for (k = 0; k < MLDSA_K; k++)
@@ -841,8 +835,11 @@ __contract__(
             object_whole(scratch_w),
             object_whole(w0))
     invariant(k <= MLDSA_K)
-    invariant(forall(k0, k, MLDSA_K,
-      array_abs_bound(w0->vec[k0].coeffs, 0, MLDSA_N, MLDSA_GAMMA2 + 1)))
+    invariant(forall(k0, 0, k,
+      array_abs_bound(w0->vec[k0].coeffs, 0, MLDSA_N,
+                      MLDSA_GAMMA2 - MLDSA_BETA)))
+    invariant(forall(k1, k, MLDSA_K,
+      array_abs_bound(w0->vec[k1].coeffs, 0, MLDSA_N, MLDSA_GAMMA2 + 1)))
     decreases(MLDSA_K - k)
   )
   {
@@ -865,7 +862,30 @@ __contract__(
       ret = MLD_ERR_FAIL; /* reject */
       goto cleanup;
     }
+  }
 
+  /* @[FIPS204, Algorithm 7, lines 18+20] cs1 <- invNTT(c_hat o s1_hat) and
+   * z <- y + cs1, followed by the line-23 norm check ||z||_inf >= GAMMA1 -
+   * BETA. mld_compute_pack_z fuses all three per polynomial and, on success,
+   * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z. */
+  ret = mld_compute_pack_z(sig, cp, s1hat, y, t, scratch_w);
+  if (ret != 0)
+  {
+    goto cleanup;
+  }
+
+  for (k = 0; k < MLDSA_K; k++)
+  __loop__(
+    assigns(k,
+            object_whole(scratch_w),
+            object_whole(w0))
+    invariant(k <= MLDSA_K)
+    invariant(forall(k0, k, MLDSA_K,
+      array_abs_bound(w0->vec[k0].coeffs, 0, MLDSA_N,
+                      MLDSA_GAMMA2 - MLDSA_BETA)))
+    decreases(MLDSA_K - k)
+  )
+  {
     /* @[FIPS204, Algorithm 7, line 25] ct0[k] <- invNTT(c_hat o t0_hat)[k]. */
     mld_sk_t0hat_get_poly(scratch_w, t0hat, k);
     mld_poly_pointwise_montgomery(scratch_w, cp);
