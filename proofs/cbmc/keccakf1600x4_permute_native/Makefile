@@ -26,7 +26,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:cvc5_arrays_exp
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mld_keccakf1600x4_permute_native

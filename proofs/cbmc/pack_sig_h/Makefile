@@ -26,7 +26,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_no_bv_extract \
+  LP64:bitwuzla
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = pack_sig_h
