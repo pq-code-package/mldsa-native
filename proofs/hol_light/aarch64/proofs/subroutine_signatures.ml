@@ -81,7 +81,7 @@ let subroutine_signatures = [
 ("mldsa_poly_chknorm",
   ([(*args*)
      ("a", "int32_t[static 256]", (*is const?*)"true");
-     ("bound", "int32_t", (*is const?*)"false");
+     ("bound", "int64_t", (*is const?*)"false");
    ],
    "uint64_t",
    [(* input buffers *)

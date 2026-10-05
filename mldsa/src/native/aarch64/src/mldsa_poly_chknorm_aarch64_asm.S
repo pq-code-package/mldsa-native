@@ -5,7 +5,7 @@
 /*yaml
   Name: poly_chknorm_aarch64_asm
   Description: AArch64 infinity-norm bound check on polynomial coefficients
-  Signature: int mld_poly_chknorm_aarch64_asm(const int32_t a[256], int32_t B)
+  Signature: int mld_poly_chknorm_aarch64_asm(const int32_t a[256], int64_t B)
   ABI:
     Architecture: aarch64
     CallingConvention: AAPCS64
@@ -18,7 +18,7 @@
       description: Input polynomial (256 x int32_t)
     x1:
       type: scalar
-      c_parameter: int32_t B
+      c_parameter: int64_t B
       description: Norm bound
       test_with: 131072  # representative non-negative bound (1 << 17)
 */
