@@ -24,7 +24,7 @@
     Check the infinity norm of the polynomial against the given bound B.
     Returns 0 if the norm is strictly smaller than B; otherwise returns 1
     (i.e. returns 1 if any |coefficient| >= B, 0 otherwise).
-  Signature: int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B)
+  Signature: int mld_poly_chknorm_avx2_asm(const int32_t *a, int64_t B)
   ABI:
     Architecture: x86_64
     CallingConvention: SysV
@@ -37,7 +37,7 @@
       description: Input polynomial (256 x int32_t)
     rsi:
       type: scalar
-      c_parameter: int32_t B
+      c_parameter: int64_t B
       description: Norm bound (must be non-negative)
       test_with: 131072  # representative non-negative bound (1 << 17)
 */

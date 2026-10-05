@@ -22,7 +22,7 @@
 typedef struct x86_64_register_state reg_state;
 
 MLD_SYSV_ABI
-int mld_poly_chknorm_avx2_asm(const int32_t *a, int32_t B);
+int mld_poly_chknorm_avx2_asm(const int32_t *a, int64_t B);
 
 int check_poly_chknorm_avx2_asm(void)
 {
