@@ -24,8 +24,8 @@
           pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
           util = pkgs.callPackage ./nix/util.nix { };
           holLightToolchain = builtins.attrValues {
-            inherit (pkgs) ocaml ledit;
-            inherit (pkgs.ocamlPackages) findlib camlp5 zarith;
+            inherit (pkgs-unstable) ocaml ledit;
+            inherit (pkgs-unstable.ocamlPackages) findlib camlp5 zarith;
           };
           zigWrapCC = zig: pkgs.symlinkJoin {
             name = "zig-wrappers";
@@ -63,7 +63,7 @@
             inherit system;
             overlays = [
               (_:_: {
-                inherit (pkgs-unstable) cbmc;
+                inherit (pkgs-unstable) cbmc hol_light;
               })
             ];
           };
