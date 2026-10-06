@@ -28,12 +28,13 @@ MLD_INTERNAL_DATA_DECLARATION const int32_t
 
 #define mld_rej_uniform_table MLD_NAMESPACE(rej_uniform_table)
 MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_table[256];
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)
 #define mld_rej_uniform_eta_table MLD_NAMESPACE(rej_uniform_eta_table)
 MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_rej_uniform_eta_table[4096];
 #endif
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_indices MLD_NAMESPACE(polyz_unpack_17_indices)
 MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_17_indices[64];
@@ -43,7 +44,8 @@ MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_17_indices[64];
 #define mld_polyz_unpack_19_indices MLD_NAMESPACE(polyz_unpack_19_indices)
 MLD_INTERNAL_DATA_DECLARATION const uint8_t mld_polyz_unpack_19_indices[64];
 #endif
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 
 /*
@@ -109,7 +111,7 @@ __contract__(
   ensures(array_bound(r, 0, (unsigned) return_value, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)
 #define mld_rej_uniform_eta2_aarch64_asm \
   MLD_NAMESPACE(rej_uniform_eta2_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
@@ -147,9 +149,9 @@ __contract__(
   ensures(return_value <= MLDSA_N)
   ensures(array_abs_bound(r, 0, return_value, 5))
 );
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_decompose_32_aarch64_asm \
   MLD_NAMESPACE(poly_decompose_32_aarch64_asm)
 void mld_poly_decompose_32_aarch64_asm(int32_t a1[MLDSA_N], int32_t a0[MLDSA_N])
@@ -183,7 +185,7 @@ __contract__(
   /* check-magic: 95233 == (MLDSA_Q - 1) / 88 + 1 */
   ensures(array_abs_bound(a0, 0, MLDSA_N, 95233))
 );
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
 #define mld_poly_caddq_aarch64_asm MLD_NAMESPACE(poly_caddq_aarch64_asm)
 void mld_poly_caddq_aarch64_asm(int32_t a[MLDSA_N])
@@ -196,7 +198,7 @@ __contract__(
   ensures(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
 );
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 #define mld_poly_use_hint_32_aarch64_asm \
   MLD_NAMESPACE(poly_use_hint_32_aarch64_asm)
 void mld_poly_use_hint_32_aarch64_asm(int32_t a[MLDSA_N],
@@ -226,7 +228,7 @@ __contract__(
   assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
   ensures(array_bound(a, 0, MLDSA_N, 0, 44))
 );
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
 #define mld_poly_chknorm_aarch64_asm MLD_NAMESPACE(poly_chknorm_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
@@ -241,7 +243,8 @@ __contract__(
   ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
 );
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 #define mld_polyz_unpack_17_aarch64_asm \
   MLD_NAMESPACE(polyz_unpack_17_aarch64_asm)
@@ -276,7 +279,8 @@ __contract__(
 );
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
