@@ -98,6 +98,19 @@ jobs:
           cross_prefix: ""
           extra_makefile: test/zephyr/platform.mk
           zephyr_target: nucleo-n657x0-q
+        # The Dabao board is attached to the rpi4 runner.
+        - system: rpi4
+          name: Baochip-1x RV32IMAC (Dabao) benchmarks
+          bench_pmu: PMU
+          archflags: ""
+          cflags: ""
+          ldflags: ""
+          bench_extra_args: ""
+          nix_shell: dabao
+          only_no_opt: false
+          cross_prefix: ""
+          extra_makefile: test/baremetal/platform/dabao/platform.mk
+          zephyr_target: ""
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
     steps:
