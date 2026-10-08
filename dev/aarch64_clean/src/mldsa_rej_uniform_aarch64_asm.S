@@ -66,6 +66,8 @@
 
     /* Temporary output on the stack */
     xtmp                        .req x7
+    xtmp0                       .req x7
+    xtmp1                       .req x11
     wtmp                        .req w7
     output_tmp                  .req x7
     output_tmp_base             .req x8
@@ -93,13 +95,16 @@
     /* Vector registers */
 
     buf0                        .req v0
+    buf0q                       .req q0
     buf1                        .req v1
+    buf1q                       .req q1
+    buf1d                       .req d1
     buf2                        .req v2
+    buf2q                       .req q2
 
     tmp0                        .req v4
     tmp1                        .req v5
     tmp2                        .req v6
-    tmp3                        .req v7
 
     sign0                       .req v4
     sign1                       .req v5
@@ -115,10 +120,16 @@
     val3                        .req v19
     val3q                       .req q19
 
-    t0                          .req d20
-    t1                          .req d21
-    t2                          .req d22
-    t3                          .req d23
+    t0                          .req d0
+    t1                          .req d1
+    t2                          .req d2
+    t3                          .req d3
+
+    unpack0                     .req v20
+    unpack0d                    .req d20
+    unpack1                     .req v21
+    unpack2                     .req v22
+    unpack3                     .req v23
 
     table0                      .req v24
     table0q                     .req q24
@@ -129,6 +140,7 @@
     table3                      .req v27
     table3q                     .req q27
 
+    bit23                       .req v28
     mldsa_q                     .req v30
     bits                        .req v31
 
@@ -151,6 +163,37 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     movz wtmp, #57345
     movk wtmp, #127, lsl #16
     dup mldsa_q.4s, wtmp
+
+    // TBL indices for expanding 3-byte samples, 0x80 indices are set to 0.
+    // [0, 1, 2, 0x80, 3, 4, 5, 0x80, 6, 7, 8, 0x80, 9, 10, 11, 0x80].
+    movz xtmp0, #0x0100
+    movk xtmp0, #0x8002, lsl #16
+    movk xtmp0, #0x0403, lsl #32
+    movk xtmp0, #0x8005, lsl #48
+    movz xtmp1, #0x0706
+    movk xtmp1, #0x8008, lsl #16
+    movk xtmp1, #0x0a09, lsl #32
+    movk xtmp1, #0x800b, lsl #48
+    fmov unpack0d, xtmp0
+    mov unpack0.d[1], xtmp1
+
+    movi bit23.4s, #0x80, lsl #16
+
+    // Each unpack consumes 12 bytes, so set unpack{1,2,3} at {12,24,36} bytes
+    // from the start. The TBL instructions are only passed the relevant
+    // vectors, so subtract {16,32} from the indices for unpack{2,3} to
+    // compensate:
+    //                 buf0              buf1              buf2
+    // unpack0 reads: [xxxxxxxxxxxx....]
+    // unpack1 reads: [............xxxx][xxxxxxxx........]
+    // unpack2 reads: (skip 16)         [........xxxxxxxx][xxxx............]
+    // unpack3 reads: (skip 32)                           [....xxxxxxxxxxxx]
+    movi tmp0.16b, #(12)
+    movi tmp1.16b, #(24 - 16)
+    movi tmp2.16b, #(36 - 32)
+    add unpack1.16b, unpack0.16b, tmp0.16b
+    add unpack2.16b, unpack0.16b, tmp1.16b
+    add unpack3.16b, unpack0.16b, tmp2.16b
 
     mov output_tmp_base, sp
     mov output_tmp, output_tmp_base
@@ -182,31 +225,22 @@ mld_rej_uniform_loop48:
         cmp     count, len
         b.hs    mld_rej_uniform_memory_copy
 
-        // First, we unpack the byte stream into a stream of signed
-        // coefficients, interpreting each consecutive 3 bytes as one
-        // signed 24-bit coefficients, presented as 32-bit integers.
-        // The topmost bit is masked out making it a 23-bit coefficient.
-        //
-        // We handle 16 coefficients a time, and use ld3 for the required
-        // de-interleaving of the byte stream.
         sub     buflen, buflen, #48
-        ld3     {buf0.16b, buf1.16b, buf2.16b}, [buf], #48
 
-        // Mask out top-most bit
-        movi    tmp0.16b, #0x80
-        bic     buf2.16b, buf2.16b, tmp0.16b
+        // Load sixteen packed 24-bit samples, mask out the top bit and expand
+        // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
+        ldp     buf0q, buf1q, [buf]
+        ldr     buf2q, [buf, #32]
+        add     buf, buf, #48
 
-        // Unpack 16 triples of bytes into 16 32-bit integers,
-        // represented as 4 vectors val0-val3.
-        zip1    tmp0.16b, buf0.16b, buf1.16b
-        zip2    tmp1.16b, buf0.16b, buf1.16b
-        uxtl    tmp2.8h, buf2.8b
-        uxtl2   tmp3.8h, buf2.16b
-
-        zip1    val0.8h, tmp0.8h, tmp2.8h
-        zip2    val1.8h, tmp0.8h, tmp2.8h
-        zip1    val2.8h, tmp1.8h, tmp3.8h
-        zip2    val3.8h, tmp1.8h, tmp3.8h
+        tbl     val0.16b, {buf0.16b}, unpack0.16b
+        tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
+        tbl     val2.16b, {buf1.16b, buf2.16b}, unpack2.16b
+        tbl     val3.16b, {buf2.16b}, unpack3.16b
+        bic     val0.16b, val0.16b, bit23.16b
+        bic     val1.16b, val1.16b, bit23.16b
+        bic     val2.16b, val2.16b, bit23.16b
+        bic     val3.16b, val3.16b, bit23.16b
 
         // At this point, val0-val3 are the signed integers to do rejection
         // sampling on. For each of them, do the following:
@@ -302,17 +336,17 @@ mld_rej_uniform_loop48_end:
     b.lo mld_rej_uniform_memory_copy
 
         sub     buflen, buflen, #24
-        ld3     {buf0.8b, buf1.8b, buf2.8b}, [buf], #24
 
-        // mask out top-most bit
-        movi    tmp0.16b, #0x80
-        bic     buf2.16b, buf2.16b, tmp0.16b
+        // Load eight packed 24-bit samples, mask out the top bit and expand
+        // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
+        ldr     buf0q, [buf]
+        ldr     buf1d, [buf, #16]
+        add     buf, buf, #24
 
-        zip1    tmp0.16b, buf0.16b, buf1.16b
-        uxtl    tmp2.8h, buf2.8b
-
-        zip1    val0.8h, tmp0.8h, tmp2.8h
-        zip2    val1.8h, tmp0.8h, tmp2.8h
+        tbl     val0.16b, {buf0.16b}, unpack0.16b
+        tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
+        bic     val0.16b, val0.16b, bit23.16b
+        bic     val1.16b, val1.16b, bit23.16b
 
         cmhi    sign0.4s, mldsa_q.4s, val0.4s
         cmhi    sign1.4s, mldsa_q.4s, val1.4s
@@ -391,6 +425,8 @@ mld_rej_uniform_return:
     .unreq output_tmp_base
     .unreq count
     .unreq xtmp
+    .unreq xtmp0
+    .unreq xtmp1
     .unreq wtmp
     .unreq final_copy_count
     .unreq initial_zero_count
@@ -405,12 +441,15 @@ mld_rej_uniform_return:
     .unreq ctr01
     .unreq ctr23
     .unreq buf0
+    .unreq buf0q
     .unreq buf1
+    .unreq buf1q
+    .unreq buf1d
     .unreq buf2
+    .unreq buf2q
     .unreq tmp0
     .unreq tmp1
     .unreq tmp2
-    .unreq tmp3
     .unreq sign0
     .unreq sign1
     .unreq sign2
@@ -427,6 +466,11 @@ mld_rej_uniform_return:
     .unreq t1
     .unreq t2
     .unreq t3
+    .unreq unpack0
+    .unreq unpack0d
+    .unreq unpack1
+    .unreq unpack2
+    .unreq unpack3
     .unreq table0
     .unreq table0q
     .unreq table1
@@ -435,6 +479,7 @@ mld_rej_uniform_return:
     .unreq table2q
     .unreq table3
     .unreq table3q
+    .unreq bit23
     .unreq mldsa_q
     .unreq bits
 
