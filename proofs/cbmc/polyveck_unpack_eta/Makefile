@@ -14,13 +14,19 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET += mld_polyveck_unpack_eta.0:8 # Largest value of MLDSA_K
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
 
+ifdef MLD_CONFIG_REDUCE_RAM
+UNWINDSET +=
+CHECK_FUNCTION_CONTRACTS=
+USE_FUNCTION_CONTRACTS=
+else
+UNWINDSET += mld_polyveck_unpack_eta.0:8 # Largest value of MLDSA_K
 CHECK_FUNCTION_CONTRACTS=mld_polyveck_unpack_eta
 USE_FUNCTION_CONTRACTS=mld_polyeta_unpack
+endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
