@@ -47,6 +47,13 @@ jobs:
           # Zephyr's CMake selects the target arch; disable the host-arch
           # auto-detection that would otherwise leak into the forwarded CFLAGS.
           extra_args: --no-auto
+      # Run the retained Armv8.1-M x4 Keccak primitives directly. The standard
+      # functional jobs above exercise the higher-level x4 FIPS202 APIs.
+      - name: Armv8.1-M x4 FIPS202 unit
+        if: matrix.target.board == 'mps3-an547'
+        run: |
+          nix develop .#zephyr --command make run_fips202_x4_unit \
+            EXTRA_MAKEFILE=test/zephyr/platform.mk
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.
       - name: bench (smoke)

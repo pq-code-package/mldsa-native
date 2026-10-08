@@ -155,6 +155,18 @@ CUSTOM_BUILD = \
 	$(ZEPHYR_CMAKE_ENV) cmake --build $(ZEPHYR_OUT) >/dev/null && \
 	cp $(ZEPHYR_OUT)/zephyr/zephyr.elf $@
 
+# Standalone native x4 Keccak coverage for the Armv8.1-M QEMU target. Keeping
+# this outside test/src/test_unit.c avoids coupling the Zephyr smoke test to
+# the much larger ML-DSA unit suite.
+.PHONY: run_fips202_x4_unit
+run_fips202_x4_unit:
+	$(MAKE) run_unit_44 \
+		EXTRA_MAKEFILE=test/zephyr/platform.mk \
+		ZEPHYR_TARGET=mps3-an547 \
+		ZEPHYR_FIPS202_BACKEND=fips202/native/armv81m/mve.h \
+		TEST_SRCS=test/zephyr/fips202_x4_unit.c \
+		OPT=1 AUTO=0 CYCLES=NO -j1
+
 # A native assembly amalgamation can directly include development sources that
 # do not appear in LIB_SRCS. The wildcard is empty before the Armv8.1-M x1
 # backend lands and becomes an explicit dependency when that source is present.
