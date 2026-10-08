@@ -35,6 +35,23 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x529c0027;       (* arm_MOV W7 (rvalue (word 57345)) *)
   0x72a00fe7;       (* arm_MOVK W7 (word 127) 16 *)
   0x4e040cfe;       (* arm_DUP_GEN Q30 X7 32 128 *)
+  0xd2802007;       (* arm_MOV X7 (rvalue (word 256)) *)
+  0xf2b00047;       (* arm_MOVK X7 (word 32770) 16 *)
+  0xf2c08067;       (* arm_MOVK X7 (word 1027) 32 *)
+  0xf2f000a7;       (* arm_MOVK X7 (word 32773) 48 *)
+  0xd280e0cb;       (* arm_MOV X11 (rvalue (word 1798)) *)
+  0xf2b0010b;       (* arm_MOVK X11 (word 32776) 16 *)
+  0xf2c1412b;       (* arm_MOVK X11 (word 2569) 32 *)
+  0xf2f0016b;       (* arm_MOVK X11 (word 32779) 48 *)
+  0x9e6700f4;       (* arm_FMOV_ItoF Q20 X7 0 *)
+  0x4e181d74;       (* arm_INS_GEN Q20 X11 64 64 *)
+  0x4f04441c;       (* arm_MOVI Q28 (word 36028797027352576) *)
+  0x4f00e584;       (* arm_MOVI Q4 (word 868082074056920076) *)
+  0x4f00e505;       (* arm_MOVI Q5 (word 578721382704613384) *)
+  0x4f00e486;       (* arm_MOVI Q6 (word 289360691352306692) *)
+  0x4e248695;       (* arm_ADD_VEC Q21 Q20 Q4 8 128 *)
+  0x4e258696;       (* arm_ADD_VEC Q22 Q20 Q5 8 128 *)
+  0x4e268697;       (* arm_ADD_VEC Q23 Q20 Q6 8 128 *)
   0x910003e8;       (* arm_ADD X8 SP (rvalue (word 0)) *)
   0xaa0803e7;       (* arm_MOV X7 X8 *)
   0xd280000b;       (* arm_MOV X11 (rvalue (word 0)) *)
@@ -54,17 +71,17 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0xeb04013f;       (* arm_CMP X9 X4 *)
   0x54000c62;       (* arm_BCS (word 396) *)
   0xd100c042;       (* arm_SUB X2 X2 (rvalue (word 48)) *)
-  0x4cdf4020;       (* arm_LD3 [Q0; Q1; Q2] X1 (Postimmediate_Offset (word 48)) 128 8 *)
-  0x4f04e404;       (* arm_MOVI Q4 (word 9259542123273814144) *)
-  0x4e641c42;       (* arm_BIC_VEC Q2 Q2 Q4 128 *)
-  0x4e013804;       (* arm_ZIP1 Q4 Q0 Q1 8 128 *)
-  0x4e017805;       (* arm_ZIP2 Q5 Q0 Q1 8 128 *)
-  0x2f08a446;       (* arm_USHLL_VEC Q6 Q2 0 8 *)
-  0x6f08a447;       (* arm_USHLL2_VEC Q7 Q2 0 8 *)
-  0x4e463890;       (* arm_ZIP1 Q16 Q4 Q6 16 128 *)
-  0x4e467891;       (* arm_ZIP2 Q17 Q4 Q6 16 128 *)
-  0x4e4738b2;       (* arm_ZIP1 Q18 Q5 Q7 16 128 *)
-  0x4e4778b3;       (* arm_ZIP2 Q19 Q5 Q7 16 128 *)
+  0xad400420;       (* arm_LDP Q0 Q1 X1 (Immediate_Offset (iword (&0))) *)
+  0x3dc00822;       (* arm_LDR Q2 X1 (Immediate_Offset (word 32)) *)
+  0x9100c021;       (* arm_ADD X1 X1 (rvalue (word 48)) *)
+  0x4e140010;       (* arm_TBL Q16 [Q0] Q20 128 *)
+  0x4e152011;       (* arm_TBL2 Q17 Q0 Q1 Q21 128 *)
+  0x4e162032;       (* arm_TBL2 Q18 Q1 Q2 Q22 128 *)
+  0x4e170053;       (* arm_TBL Q19 [Q2] Q23 128 *)
+  0x4e7c1e10;       (* arm_BIC_VEC Q16 Q16 Q28 128 *)
+  0x4e7c1e31;       (* arm_BIC_VEC Q17 Q17 Q28 128 *)
+  0x4e7c1e52;       (* arm_BIC_VEC Q18 Q18 Q28 128 *)
+  0x4e7c1e73;       (* arm_BIC_VEC Q19 Q19 Q28 128 *)
   0x6eb037c4;       (* arm_CMHI_VEC Q4 Q30 Q16 32 128 *)
   0x6eb137c5;       (* arm_CMHI_VEC Q5 Q30 Q17 32 128 *)
   0x6eb237c6;       (* arm_CMHI_VEC Q6 Q30 Q18 32 128 *)
@@ -73,14 +90,14 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x4e3f1ca5;       (* arm_AND_VEC Q5 Q5 Q31 128 *)
   0x4e3f1cc6;       (* arm_AND_VEC Q6 Q6 Q31 128 *)
   0x4e3f1ce7;       (* arm_AND_VEC Q7 Q7 Q31 128 *)
-  0x6eb03894;       (* arm_UADDLV Q20 Q4 4 32 *)
-  0x6eb038b5;       (* arm_UADDLV Q21 Q5 4 32 *)
-  0x6eb038d6;       (* arm_UADDLV Q22 Q6 4 32 *)
-  0x6eb038f7;       (* arm_UADDLV Q23 Q7 4 32 *)
-  0x9e66028c;       (* arm_FMOV_FtoI X12 Q20 0 64 *)
-  0x9e6602ad;       (* arm_FMOV_FtoI X13 Q21 0 64 *)
-  0x9e6602ce;       (* arm_FMOV_FtoI X14 Q22 0 64 *)
-  0x9e6602ef;       (* arm_FMOV_FtoI X15 Q23 0 64 *)
+  0x6eb03880;       (* arm_UADDLV Q0 Q4 4 32 *)
+  0x6eb038a1;       (* arm_UADDLV Q1 Q5 4 32 *)
+  0x6eb038c2;       (* arm_UADDLV Q2 Q6 4 32 *)
+  0x6eb038e3;       (* arm_UADDLV Q3 Q7 4 32 *)
+  0x9e66000c;       (* arm_FMOV_FtoI X12 Q0 0 64 *)
+  0x9e66002d;       (* arm_FMOV_FtoI X13 Q1 0 64 *)
+  0x9e66004e;       (* arm_FMOV_FtoI X14 Q2 0 64 *)
+  0x9e66006f;       (* arm_FMOV_FtoI X15 Q3 0 64 *)
   0x3cec7878;       (* arm_LDR Q24 X3 (Shiftreg_Offset X12 4) *)
   0x3ced7879;       (* arm_LDR Q25 X3 (Shiftreg_Offset X13 4) *)
   0x3cee787a;       (* arm_LDR Q26 X3 (Shiftreg_Offset X14 4) *)
@@ -89,14 +106,14 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x4e2058a5;       (* arm_CNT Q5 Q5 128 *)
   0x4e2058c6;       (* arm_CNT Q6 Q6 128 *)
   0x4e2058e7;       (* arm_CNT Q7 Q7 128 *)
-  0x6eb03894;       (* arm_UADDLV Q20 Q4 4 32 *)
-  0x6eb038b5;       (* arm_UADDLV Q21 Q5 4 32 *)
-  0x6eb038d6;       (* arm_UADDLV Q22 Q6 4 32 *)
-  0x6eb038f7;       (* arm_UADDLV Q23 Q7 4 32 *)
-  0x9e66028c;       (* arm_FMOV_FtoI X12 Q20 0 64 *)
-  0x9e6602ad;       (* arm_FMOV_FtoI X13 Q21 0 64 *)
-  0x9e6602ce;       (* arm_FMOV_FtoI X14 Q22 0 64 *)
-  0x9e6602ef;       (* arm_FMOV_FtoI X15 Q23 0 64 *)
+  0x6eb03880;       (* arm_UADDLV Q0 Q4 4 32 *)
+  0x6eb038a1;       (* arm_UADDLV Q1 Q5 4 32 *)
+  0x6eb038c2;       (* arm_UADDLV Q2 Q6 4 32 *)
+  0x6eb038e3;       (* arm_UADDLV Q3 Q7 4 32 *)
+  0x9e66000c;       (* arm_FMOV_FtoI X12 Q0 0 64 *)
+  0x9e66002d;       (* arm_FMOV_FtoI X13 Q1 0 64 *)
+  0x9e66004e;       (* arm_FMOV_FtoI X14 Q2 0 64 *)
+  0x9e66006f;       (* arm_FMOV_FtoI X15 Q3 0 64 *)
   0x4e180210;       (* arm_TBL Q16 [Q16] Q24 128 *)
   0x4e190231;       (* arm_TBL Q17 [Q17] Q25 128 *)
   0x4e1a0252;       (* arm_TBL Q18 [Q18] Q26 128 *)
@@ -120,29 +137,29 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0xf100605f;       (* arm_CMP X2 (rvalue (word 24)) *)
   0x54000423;       (* arm_BCC (word 132) *)
   0xd1006042;       (* arm_SUB X2 X2 (rvalue (word 24)) *)
-  0x0cdf4020;       (* arm_LD3 [Q0; Q1; Q2] X1 (Postimmediate_Offset (word 24)) 64 8 *)
-  0x4f04e404;       (* arm_MOVI Q4 (word 9259542123273814144) *)
-  0x4e641c42;       (* arm_BIC_VEC Q2 Q2 Q4 128 *)
-  0x4e013804;       (* arm_ZIP1 Q4 Q0 Q1 8 128 *)
-  0x2f08a446;       (* arm_USHLL_VEC Q6 Q2 0 8 *)
-  0x4e463890;       (* arm_ZIP1 Q16 Q4 Q6 16 128 *)
-  0x4e467891;       (* arm_ZIP2 Q17 Q4 Q6 16 128 *)
+  0x3dc00020;       (* arm_LDR Q0 X1 (Immediate_Offset (word 0)) *)
+  0xfd400821;       (* arm_LDR D1 X1 (Immediate_Offset (word 16)) *)
+  0x91006021;       (* arm_ADD X1 X1 (rvalue (word 24)) *)
+  0x4e140010;       (* arm_TBL Q16 [Q0] Q20 128 *)
+  0x4e152011;       (* arm_TBL2 Q17 Q0 Q1 Q21 128 *)
+  0x4e7c1e10;       (* arm_BIC_VEC Q16 Q16 Q28 128 *)
+  0x4e7c1e31;       (* arm_BIC_VEC Q17 Q17 Q28 128 *)
   0x6eb037c4;       (* arm_CMHI_VEC Q4 Q30 Q16 32 128 *)
   0x6eb137c5;       (* arm_CMHI_VEC Q5 Q30 Q17 32 128 *)
   0x4e3f1c84;       (* arm_AND_VEC Q4 Q4 Q31 128 *)
   0x4e3f1ca5;       (* arm_AND_VEC Q5 Q5 Q31 128 *)
-  0x6eb03894;       (* arm_UADDLV Q20 Q4 4 32 *)
-  0x6eb038b5;       (* arm_UADDLV Q21 Q5 4 32 *)
-  0x9e66028c;       (* arm_FMOV_FtoI X12 Q20 0 64 *)
-  0x9e6602ad;       (* arm_FMOV_FtoI X13 Q21 0 64 *)
+  0x6eb03880;       (* arm_UADDLV Q0 Q4 4 32 *)
+  0x6eb038a1;       (* arm_UADDLV Q1 Q5 4 32 *)
+  0x9e66000c;       (* arm_FMOV_FtoI X12 Q0 0 64 *)
+  0x9e66002d;       (* arm_FMOV_FtoI X13 Q1 0 64 *)
   0x3cec7878;       (* arm_LDR Q24 X3 (Shiftreg_Offset X12 4) *)
   0x3ced7879;       (* arm_LDR Q25 X3 (Shiftreg_Offset X13 4) *)
   0x4e205884;       (* arm_CNT Q4 Q4 128 *)
   0x4e2058a5;       (* arm_CNT Q5 Q5 128 *)
-  0x6eb03894;       (* arm_UADDLV Q20 Q4 4 32 *)
-  0x6eb038b5;       (* arm_UADDLV Q21 Q5 4 32 *)
-  0x9e66028c;       (* arm_FMOV_FtoI X12 Q20 0 64 *)
-  0x9e6602ad;       (* arm_FMOV_FtoI X13 Q21 0 64 *)
+  0x6eb03880;       (* arm_UADDLV Q0 Q4 4 32 *)
+  0x6eb038a1;       (* arm_UADDLV Q1 Q5 4 32 *)
+  0x9e66000c;       (* arm_FMOV_FtoI X12 Q0 0 64 *)
+  0x9e66002d;       (* arm_FMOV_FtoI X13 Q1 0 64 *)
   0x4e180210;       (* arm_TBL Q16 [Q16] Q24 128 *)
   0x4e190231;       (* arm_TBL Q17 [Q17] Q25 128 *)
   0x4c0078f0;       (* arm_STR Q16 X7 No_Offset *)
@@ -515,7 +532,7 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
 
   (*** First split off and handle the writeback tail once and for all ***)
 
-  ENSURES_SEQUENCE_TAC `pc + 0x1f8`
+  ENSURES_SEQUENCE_TAC `pc + 0x23c`
    `\s. read X0 s = res /\
         read X4 s = word 256 /\
         read X8 s = stackpointer /\
@@ -618,19 +635,24 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
   REWRITE_TAC[DE_MORGAN_THM; NOT_LE] THEN STRIP_TAC THEN
 
   (*** Slightly elaborated sequencing to handle N = 0 case as well ***)
-  (*** Intermediate state P' at pc + 0x168 (loop48_end: CMP X9,X4) ***)
+  (*** Intermediate state P' at pc + 0x1ac (loop48_end: CMP X9,X4) ***)
 
   MATCH_MP_TAC(MESON[]
    `!P'. (ensures arm P' Q R ==> ensures arm P Q R) /\ ensures arm P' Q R
         ==> ensures arm P Q R`) THEN
   EXISTS_TAC
    `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-        read PC s = word (pc + 0x168) /\
+        read PC s = word (pc + 0x1ac) /\
         read (memory :> bytes (table,256)) s =
         num_of_wordlist mldsa_rej_uniform_table /\
         read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-        read Q30 s = word 663965040167895004928633208018296833 /\
-        read Q31 s = word 633825300187901677051779743745 /\
+        read Q20 s = word 0x800b0a09800807068005040380020100 /\
+        read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
+        read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
+        read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
+        read Q28 s = word 0x00800000008000000080000000800000 /\
+        read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
+        read Q31 s = word 0x00000008000000040000000200000001 /\
         let outlist = REJ_SAMPLE (SUB_LIST (0,16 * N) inlist) in
         let outlen = LENGTH outlist in
         read X0 s = res /\
@@ -654,11 +676,12 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
         ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES] THEN
         REWRITE_TAC[REJ_SAMPLE_EMPTY; LENGTH] THEN
         CONV_TAC NUM_REDUCE_CONV] THEN
+      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
       GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
       ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--130) THEN
+      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--147) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC] THEN
+      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
       REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
       CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
       REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
@@ -669,12 +692,17 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
 
     (*** Set up the loop invariant ***)
 
-    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x070` `pc + 0x160`
+    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x0b4` `pc + 0x1a4`
      `\i s. read (memory :> bytes (table,256)) s =
             num_of_wordlist mldsa_rej_uniform_table /\
             read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-            read Q30 s = word 663965040167895004928633208018296833 /\
-            read Q31 s = word 633825300187901677051779743745 /\
+            read Q20 s = word 0x800b0a09800807068005040380020100 /\
+            read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
+            read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
+            read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
+            read Q28 s = word 0x00800000008000000080000000800000 /\
+            read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
+            read Q31 s = word 0x00000008000000040000000200000001 /\
             let outlist = REJ_SAMPLE(SUB_LIST(0,16 * i) inlist) in
             let outlen = LENGTH outlist in
             read X0 s = res /\
@@ -694,11 +722,12 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       (*** Pre-loop initialization: reach invariant at i=0 ***)
       FIRST_X_ASSUM(MP_TAC o SPEC `0`) THEN
       ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN STRIP_TAC THEN
+      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
       GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
       ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--132) THEN
+      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--149) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC] THEN
+      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
       REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
       CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
       REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
@@ -728,7 +757,7 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       FIRST_X_ASSUM(MP_TAC o C MATCH_MP (ASSUME `i:num < N`)) THEN
       ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
 
-      (*** Steps 1-12: LD3 + BIC + ZIP + USHLL byte extraction ***)
+      (*** Steps 1-12: LDP + LDR + ADD + TBL + BIC byte extraction ***)
 
       ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--12) THEN
       RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
@@ -751,16 +780,9 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       MP_TAC THENL
        [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
         DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN REPEAT CONJ_TAC THEN
-        GEN_REWRITE_TAC I [WORD_EQ_BITS_ALT] THEN
-        REWRITE_TAC[DIMINDEX_128] THEN CONV_TAC EXPAND_CASES_CONV THEN
-        CONV_TAC NUM_REDUCE_CONV THEN REPEAT CONJ_TAC THEN
-        CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-        REWRITE_TAC[word_subdeinterleave; BIT_WORD_OF_BITS; IN_ELIM_THM] THEN
-        CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-        REWRITE_TAC[] THEN NO_TAC;
+        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
+        CONV_TAC NUM_REDUCE_CONV THEN
+        CONV_TAC WORD_BLAST;
         DISCARD_MATCHING_ASSUMPTIONS
          [`read Q16 s = x`; `read Q17 s = x`;
           `read Q18 s = x`; `read Q19 s = x`] THEN
@@ -1182,7 +1204,7 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
       CONV_TAC WORD_RULE;
 
-      (*** Loop back: from end_pc (pc+0x160) to start_pc (pc+0x070) ***)
+      (*** Loop back: from end_pc (pc+0x1a4) to start_pc (pc+0x0b4) ***)
       X_GEN_TAC `i:num` THEN STRIP_TAC THEN
       FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN
       ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
@@ -1255,7 +1277,7 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
 
     ALL_TAC] THEN
 
-  (*** The tail computation from P' at pc+0x168 to split at pc+0x1f8 ***)
+  (*** The tail computation from P' at pc+0x1ac to split at pc+0x23c ***)
   (*** Handles: outlen >= 256 direct, or 24-byte tail body ***)
 
   CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
@@ -1334,6 +1356,13 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       (read (memory :> wbytes cur) s4:192 word)
       (24 * j,24):24 word):int32) (word 8388607)` THEN
 
+  SUBGOAL_THEN
+   `read (memory :> bytes128 cur) s4 = word_join (q1:int64) (q0:int64)`
+  ASSUME_TAC THENL
+   [CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 1)) THEN
+    ASM_REWRITE_TAC[WORD_ADD_0];
+    ALL_TAC] THEN
+
   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (5--12) THEN
 
   SUBGOAL_THEN
@@ -1346,16 +1375,9 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
   MP_TAC THENL
    [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
     DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN REPEAT CONJ_TAC THEN
-    GEN_REWRITE_TAC I [WORD_EQ_BITS_ALT] THEN
-    REWRITE_TAC[DIMINDEX_128] THEN CONV_TAC EXPAND_CASES_CONV THEN
-    CONV_TAC NUM_REDUCE_CONV THEN REPEAT CONJ_TAC THEN
-    CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-    REWRITE_TAC[word_subdeinterleave; BIT_WORD_OF_BITS; IN_ELIM_THM] THEN
-    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-    CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-    REWRITE_TAC[] THEN NO_TAC;
+    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
+    CONV_TAC NUM_REDUCE_CONV THEN
+    CONV_TAC WORD_BLAST;
     DISCARD_MATCHING_ASSUMPTIONS
      [`read Q16 s = x`; `read Q17 s = x`] THEN
     STRIP_TAC] THEN
@@ -1837,10 +1859,10 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
   ASM_REWRITE_TAC[DIMINDEX_24] THEN DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
   GLOBALIZE_PRECONDITION_TAC THEN
 
-  (* === Split computation from writeback at pc + 0x1f8 === *)
+  (* === Split computation from writeback at pc + 0x23c === *)
   (* Intermediate state: same as CORRECT but with event accumulator *)
 
-  ENSURES_SEQUENCE_TAC `pc + 0x1f8`
+  ENSURES_SEQUENCE_TAC `pc + 0x23c`
    `\s. read X0 s = res /\
         read X4 s = word 256 /\
         read X8 s = stackpointer /\
@@ -1908,12 +1930,17 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
         ==> ensures arm P Q R`) THEN
   EXISTS_TAC
    `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-        read PC s = word (pc + 0x168) /\
+        read PC s = word (pc + 0x1ac) /\
         read (memory :> bytes (table,256)) s =
         num_of_wordlist mldsa_rej_uniform_table /\
         read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-        read Q30 s = word 663965040167895004928633208018296833 /\
-        read Q31 s = word 633825300187901677051779743745 /\
+        read Q20 s = word 0x800b0a09800807068005040380020100 /\
+        read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
+        read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
+        read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
+        read Q28 s = word 0x00800000008000000080000000800000 /\
+        read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
+        read Q31 s = word 0x00000008000000040000000200000001 /\
         let outlist = REJ_SAMPLE (SUB_LIST (0,16 * N) inlist) in
         let outlen = LENGTH outlist in
         read X0 s = res /\
@@ -1941,11 +1968,12 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
         ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES] THEN
         REWRITE_TAC[REJ_SAMPLE_EMPTY; LENGTH] THEN
         CONV_TAC NUM_REDUCE_CONV] THEN
+      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
       GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
       ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--130) THEN
+      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--147) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC] THEN
+      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
       REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
       CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
       REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
@@ -1957,12 +1985,17 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
 
     (*** Set up the loop invariant with event accumulator ***)
 
-    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x070` `pc + 0x160`
+    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x0b4` `pc + 0x1a4`
      `\i s. read (memory :> bytes (table,256)) s =
             num_of_wordlist mldsa_rej_uniform_table /\
             read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-            read Q30 s = word 663965040167895004928633208018296833 /\
-            read Q31 s = word 633825300187901677051779743745 /\
+            read Q20 s = word 0x800b0a09800807068005040380020100 /\
+            read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
+            read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
+            read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
+            read Q28 s = word 0x00800000008000000080000000800000 /\
+            read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
+            read Q31 s = word 0x00000008000000040000000200000001 /\
             let outlist = REJ_SAMPLE(SUB_LIST(0,16 * i) inlist) in
             let outlen = LENGTH outlist in
             read X0 s = res /\
@@ -1987,11 +2020,12 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
 
       FIRST_X_ASSUM(MP_TAC o SPEC `0`) THEN
       ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN STRIP_TAC THEN
+      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
       GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
       ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--132) THEN
+      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--149) THEN
       ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC] THEN
+      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
       REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
       CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
       REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
@@ -2025,7 +2059,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       FIRST_X_ASSUM(MP_TAC o C MATCH_MP (ASSUME `i:num < N`)) THEN
       ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
 
-      (*** Steps 1-12: LD3 + BIC + ZIP + USHLL byte extraction ***)
+      (*** Steps 1-12: LDP + LDR + ADD + TBL + BIC byte extraction ***)
 
       ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--12) THEN
       RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
@@ -2048,16 +2082,9 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       MP_TAC THENL
        [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
         DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN REPEAT CONJ_TAC THEN
-        GEN_REWRITE_TAC I [WORD_EQ_BITS_ALT] THEN
-        REWRITE_TAC[DIMINDEX_128] THEN CONV_TAC EXPAND_CASES_CONV THEN
-        CONV_TAC NUM_REDUCE_CONV THEN REPEAT CONJ_TAC THEN
-        CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-        REWRITE_TAC[word_subdeinterleave; BIT_WORD_OF_BITS; IN_ELIM_THM] THEN
-        CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-        REWRITE_TAC[] THEN NO_TAC;
+        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
+        CONV_TAC NUM_REDUCE_CONV THEN
+        CONV_TAC WORD_BLAST;
         DISCARD_MATCHING_ASSUMPTIONS
          [`read Q16 s = x`; `read Q17 s = x`;
           `read Q18 s = x`; `read Q19 s = x`] THEN
@@ -2682,6 +2709,13 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       (read (memory :> wbytes cur) s4:192 word)
       (24 * j,24):24 word):int32) (word 8388607)` THEN
 
+  SUBGOAL_THEN
+   `read (memory :> bytes128 cur) s4 = word_join (q1:int64) (q0:int64)`
+  ASSUME_TAC THENL
+   [CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 1)) THEN
+    ASM_REWRITE_TAC[WORD_ADD_0];
+    ALL_TAC] THEN
+
   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (5--12) THEN
 
   SUBGOAL_THEN
@@ -2694,16 +2728,9 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
   MP_TAC THENL
    [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
     DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN REPEAT CONJ_TAC THEN
-    GEN_REWRITE_TAC I [WORD_EQ_BITS_ALT] THEN
-    REWRITE_TAC[DIMINDEX_128] THEN CONV_TAC EXPAND_CASES_CONV THEN
-    CONV_TAC NUM_REDUCE_CONV THEN REPEAT CONJ_TAC THEN
-    CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-    REWRITE_TAC[word_subdeinterleave; BIT_WORD_OF_BITS; IN_ELIM_THM] THEN
-    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-    CONV_TAC(TOP_DEPTH_CONV BIT_WORD_CONV) THEN
-    REWRITE_TAC[] THEN NO_TAC;
+    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
+    CONV_TAC NUM_REDUCE_CONV THEN
+    CONV_TAC WORD_BLAST;
     DISCARD_MATCHING_ASSUMPTIONS
      [`read Q16 s = x`; `read Q17 s = x`] THEN
     STRIP_TAC] THEN
