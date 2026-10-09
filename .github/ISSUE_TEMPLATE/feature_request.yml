@@ -1,0 +1,43 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+name: Feature request
+description: Suggest an idea for this project
+labels: [enhancement]
+body:
+  - type: checkboxes
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform does this concern?
+      options:
+        - label: platform independent
+        - label: aarch64
+        - label: x86_64
+        - label: rv32
+        - label: other
+  - type: checkboxes
+    id: category
+    attributes:
+      label: Issue category
+      description: Which part(s) of mldsa-native does this issue concern?
+      options:
+        - label: "core crypto: ML-DSA"
+        - label: "core crypto: FIPS202"
+        - label: documentation
+        - label: integration
+        - label: verification
+        - label: CI
+        - label: testing
+  - type: textarea
+    id: feature
+    attributes:
+      label: Describe the feature
+      description: What would you like mldsa-native to support, and why?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.
