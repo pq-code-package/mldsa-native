@@ -25,6 +25,10 @@
     {
       "_comment": "Armv8-M Architecture Reference Manual; the Arm developer site rate-limits / 403s automated link-checks.",
       "pattern": "^https://developer\\.arm\\.com"
+    },
+    {
+      "_comment": "s2n-bignum SOUNDNESS.md intermittently returns 503 to automated link checks.",
+      "pattern": "^https://github\\.com/awslabs/s2n-bignum"
     }
   ]
 }
