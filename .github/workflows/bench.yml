@@ -26,7 +26,7 @@ jobs:
       pull-requests: write
     name: ${{ matrix.target.name }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
        target:
         - system: rpi4
@@ -72,7 +72,7 @@ jobs:
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
-          only_no_opt: true
+          only_no_opt: false
           extra_makefile: ""
           zephyr_target: ""
         - system: m1-mac-mini
@@ -145,7 +145,7 @@ jobs:
       pull-requests: write
       id-token: write
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         target:
           - name: Graviton2
@@ -205,7 +205,7 @@ jobs:
             ldflags: "-flto"
             perf: PMU
     uses: ./.github/workflows/bench_ec2_reusable.yml
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'appeljr' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     with:
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
@@ -213,7 +213,7 @@ jobs:
       cflags: ${{ matrix.target.cflags }}
       ldflags: ${{ matrix.target.ldflags }}
       opt: "all"
-      store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }} # Only store optimized results
+      store_results: ${{ github.repository_owner == 'appeljr' && github.ref == 'refs/heads/main' }} # Only store optimized results
       name: ${{ matrix.target.name }}
       perf: ${{ matrix.target.perf }}
     secrets:
