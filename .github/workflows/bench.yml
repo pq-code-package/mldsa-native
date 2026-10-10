@@ -26,7 +26,7 @@ jobs:
       pull-requests: write
     name: ${{ matrix.target.name }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
        target:
         - system: rpi4
@@ -72,7 +72,7 @@ jobs:
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
-          only_no_opt: true
+          only_no_opt: false
           extra_makefile: ""
           zephyr_target: ""
         - system: m1-mac-mini
@@ -145,7 +145,7 @@ jobs:
       pull-requests: write
       id-token: write
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         target:
           - name: Graviton2
