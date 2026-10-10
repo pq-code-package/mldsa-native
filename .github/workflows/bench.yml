@@ -98,7 +98,7 @@ jobs:
           cross_prefix: ""
           extra_makefile: test/zephyr/platform.mk
           zephyr_target: nucleo-n657x0-q
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'AppelJr' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest, self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -115,7 +115,7 @@ jobs:
           archflags: ${{ matrix.target.archflags }}
           ldflags: ${{ matrix.target.ldflags }}
           perf: ${{ matrix.target.bench_pmu }}
-          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
+          store_results: ${{ github.repository_owner == 'AppelJr' && github.ref == 'refs/heads/main' }}
           bench_extra_args: ${{ matrix.target.bench_extra_args }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: ${{ matrix.target.nix_shell }}
@@ -131,7 +131,7 @@ jobs:
           archflags: ${{ matrix.target.archflags }}
           ldflags: ${{ matrix.target.ldflags }}
           perf: ${{ matrix.target.bench_pmu }}
-          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
+          store_results: ${{ github.repository_owner == 'AppelJr' && github.ref == 'refs/heads/main' }}
           bench_extra_args: ${{ matrix.target.bench_extra_args }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: ${{ matrix.target.nix_shell }}
@@ -205,7 +205,7 @@ jobs:
             ldflags: "-flto"
             perf: PMU
     uses: ./.github/workflows/bench_ec2_reusable.yml
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: github.repository_owner == 'AppelJr' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     with:
       ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
       ec2_ami: ${{ matrix.target.ec2_ami }}
@@ -213,7 +213,7 @@ jobs:
       cflags: ${{ matrix.target.cflags }}
       ldflags: ${{ matrix.target.ldflags }}
       opt: "all"
-      store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }} # Only store optimized results
+      store_results: ${{ github.repository_owner == 'AppelJr' && github.ref == 'refs/heads/main' }} # Only store optimized results
       name: ${{ matrix.target.name }}
       perf: ${{ matrix.target.perf }}
     secrets:
