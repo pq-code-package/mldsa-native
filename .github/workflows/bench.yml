@@ -72,7 +72,7 @@ jobs:
           bench_extra_args: -w exec-on-bpi
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
-          only_no_opt: true
+          only_no_opt: false
           extra_makefile: ""
           zephyr_target: ""
         - system: m1-mac-mini
