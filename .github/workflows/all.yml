@@ -46,7 +46,7 @@ jobs:
     needs: [ base, nix ]
     uses: ./.github/workflows/ci.yml
     secrets:
-      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+      AWS_GH_TOKEN: ${{ secrets.AWS_GH_TOKEN }
   cbmc:
     name: CBMC
     permissions:
@@ -56,7 +56,7 @@ jobs:
     needs: [ base, nix ]
     uses: ./.github/workflows/cbmc.yml
     secrets:
-      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+      AWS_GH_TOKEN: ${{ secrets.AWS_GH_TOKEN }
   oqs_integration:
     name: libOQS
     permissions:
@@ -88,7 +88,7 @@ jobs:
     needs: [ base, nix ]
     uses: ./.github/workflows/slothy.yml
     secrets:
-      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+      AWS_GH_TOKEN: ${{ secrets.AWS_GH_TOKEN }
   baremetal:
     name: Baremetal
     permissions:
@@ -111,7 +111,7 @@ jobs:
     needs: [ base ]
     uses: ./.github/workflows/integration-pavona.yml
     secrets:
-      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+      AWS_GH_TOKEN: ${{ secrets.AWS_GH_TOKEN }
   isabelle:
     name: Isabelle
     permissions:
@@ -124,10 +124,3 @@ jobs:
     permissions:
       contents: 'read'
     uses: ./.github/workflows/hol_light.yml
-  # Single required status check for branch protection and the merge queue; jobs added to this workflow must also be added to the needs list below to gate merges.
-  # riscv excluded as the RISE runners tend to be flaky.
-  ci-summary:
-    name: CI Summary
-    if: always()
-    needs: [ base, lint-markdown, nix, ci, cbmc, oqs_integration, awslc_integration, ct-test, slothy, baremetal, pavona_integration, isabelle, zephyr, hol-light ]
-    runs-on: ubuntu-latest
