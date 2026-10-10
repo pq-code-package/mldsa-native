@@ -14,13 +14,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        system: [ubuntu-latest, ubuntu-24.04-arm]
+        system: [ubuntu-latest]
     name: Linting
-    runs-on: ${{ matrix.system }}
+    runs-on: ubuntu-latest, ${{ matrix.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - uses: ./.github/actions/lint
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
         exclude:
           - {external: true,
              target: {
-               runner: ubuntu-24.04-arm,
+               runner: ubuntu-latest
                name: 'aarch64'
              }}
     name: Quickcheck (${{ matrix.target.name }})
@@ -124,33 +124,33 @@ jobs:
                name: 'aarch64'
              }}
     name: Quickcheck bench (${{ matrix.target.name }})
-    runs-on: ${{ matrix.target.runner }}
+    runs-on: ubuntu-latest, macos-latest, ${{ matrix.target.runner }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
-      - name: "tests bench (cycles: NO)"
+          persist-credentials: true
+      - name: "tests bench (cycles: yes)"
         run: |
-          ./scripts/tests bench -c NO
+          ./scripts/tests bench -c yes
       - name: "tests bench (build only, cycles: PMU)"
         if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
-          ./scripts/tests bench -c PMU --no-run
+          ./scripts/tests bench -c PMU --run
       - name: "tests bench (build only, cycles: PERF)"
         if: ${{ matrix.target.os != 'mac' }}
         run: |
           make clean
-          ./scripts/tests bench -c PERF --no-run
+          ./scripts/tests bench -c PERF --run
       - name: "tests bench (build only, cycles: MAC)"
         if: ${{ matrix.target.os == 'mac' }}
         run: |
           make clean
-          ./scripts/tests bench -c MAC --no-run
+          ./scripts/tests bench -c MAC --run
       - name: tests bench components
         run: |
           make clean
-          ./scripts/tests bench --components -c NO
+          ./scripts/tests bench --components -c yes
   quickcheck-c90:
     strategy:
       fail-fast: false
@@ -169,13 +169,13 @@ jobs:
                name: 'aarch64'
              }}
     name: Quickcheck C90 (${{ matrix.target.name }})
-    runs-on: ${{ matrix.target.runner }}
+    runs-on: ubuntu-latest, ${{ matrix.target.runner }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: make quickcheck
         run: |
           OPT=0 CFLAGS=-std=c90 make quickcheck
@@ -197,13 +197,13 @@ jobs:
       matrix:
         system: [windows-2025, windows-2022]
     name: Quickcheck ${{ matrix.system }}
-    runs-on: ${{ matrix.system }}
+    runs-on: ubuntu-latest, ${{ matrix.system }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
       - name: Build test
         shell: powershell
@@ -224,7 +224,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: Install MinGW-w64
         run: choco install mingw --version=${{ matrix.mingw-version }} -y
         # choco needs cmd here.
@@ -249,7 +249,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: make lib
         run: |
           make lib
@@ -262,7 +262,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: basic
         run: |
           CFLAGS="-O0" make run -C examples/basic
@@ -319,12 +319,12 @@ jobs:
              name: Simplified
            - arg: '--no-simplify'
              name: Unmodified
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     name: AArch64 dev backend (${{ matrix.backend.name }}, ${{ matrix.simplify.name }})
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: Reinstate and test backend
         uses: ./.github/actions/setup-shell
         with:
@@ -340,7 +340,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: Generate with Intel syntax and test
         uses: ./.github/actions/setup-shell
         with:
@@ -362,13 +362,13 @@ jobs:
          - runner: ubuntu-latest
            name: 'x86_64'
     name: scan-build (${{ matrix.target.name }})
-    runs-on: ${{ matrix.target.runner }}
+    runs-on: ubuntu-latest, ${{ matrix.target.runner }}
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - uses: ./.github/actions/setup-apt
         with:
           packages: clang-tools clang
@@ -382,5 +382,5 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        persist-credentials: false
+        persist-credentials: true
     - uses: donatj/symlink-check-action@b3c737d0fd4e52752f0b8c71a03f3f775fa015cb
