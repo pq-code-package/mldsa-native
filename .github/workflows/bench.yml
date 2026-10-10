@@ -99,11 +99,11 @@ jobs:
           extra_makefile: test/zephyr/platform.mk
           zephyr_target: nucleo-n657x0-q
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
-    runs-on: self-hosted-${{ matrix.target.system }}
+    runs-on: ubuntu-latest, self-hosted-${{ matrix.target.system }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          persist-credentials: true
       - uses: ./.github/actions/bench
         if: ${{ !matrix.target.only_no_opt }}
         env:
@@ -145,7 +145,7 @@ jobs:
       pull-requests: write
       id-token: write
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         target:
           - name: Graviton2
