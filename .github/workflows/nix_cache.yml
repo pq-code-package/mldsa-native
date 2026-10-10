@@ -18,4 +18,5 @@ jobs:
       actions: 'write'
       contents: 'read'
       id-token: 'write'
+       runs-on: ubuntu-latest
     uses: ./.github/workflows/nix.yml
