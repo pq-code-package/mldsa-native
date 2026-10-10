@@ -12,7 +12,7 @@ on:
     types: [ "labeled" ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }
   cancel-in-progress: true
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    name: ${{ matrix.target.name }}
+    name: ${{ matrix.target.name }
     strategy:
       fail-fast: true
       matrix:
@@ -98,48 +98,48 @@ jobs:
           cross_prefix: ""
           extra_makefile: test/zephyr/platform.mk
           zephyr_target: nucleo-n657x0-q
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
-    runs-on: self-hosted-${{ matrix.target.system }}
+    if: (github.repository_owner == 'pq-code-package' || github.repository_owner == 'AppelJr') && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    runs-on: self-hosted-${{ matrix.target.system }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: ./.github/actions/bench
-        if: ${{ !matrix.target.only_no_opt }}
+        if: ${{ !matrix.target.only_no_opt }
         env:
-          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
-          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
+          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }
+          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }
         with:
           name: ${{ matrix.target.name }} (opt)
-          cflags: ${{ matrix.target.cflags }}
-          archflags: ${{ matrix.target.archflags }}
-          ldflags: ${{ matrix.target.ldflags }}
-          perf: ${{ matrix.target.bench_pmu }}
-          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
-          bench_extra_args: ${{ matrix.target.bench_extra_args }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          nix-shell: ${{ matrix.target.nix_shell }}
-          cross_prefix: ${{ matrix.target.cross_prefix }}
+          cflags: ${{ matrix.target.cflags }
+          archflags: ${{ matrix.target.archflags }
+          ldflags: ${{ matrix.target.ldflags }
+          perf: ${{ matrix.target.bench_pmu }
+          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }
+          bench_extra_args: ${{ matrix.target.bench_extra_args }
+          gh_token: ${{ secrets.GH_TOKEN }
+          nix-shell: ${{ matrix.target.nix_shell }
+          cross_prefix: ${{ matrix.target.cross_prefix }
           opt: true
       - uses: ./.github/actions/bench
         env:
-          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
-          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
+          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }
+          ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }
         with:
           name: ${{ matrix.target.name }} (no-opt)
-          cflags: ${{ matrix.target.cflags }}
-          archflags: ${{ matrix.target.archflags }}
-          ldflags: ${{ matrix.target.ldflags }}
-          perf: ${{ matrix.target.bench_pmu }}
-          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }}
-          bench_extra_args: ${{ matrix.target.bench_extra_args }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          nix-shell: ${{ matrix.target.nix_shell }}
-          cross_prefix: ${{ matrix.target.cross_prefix }}
+          cflags: ${{ matrix.target.cflags }
+          archflags: ${{ matrix.target.archflags }
+          ldflags: ${{ matrix.target.ldflags }
+          perf: ${{ matrix.target.bench_pmu }
+          store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }
+          bench_extra_args: ${{ matrix.target.bench_extra_args }
+          gh_token: ${{ secrets.GH_TOKEN }
+          nix-shell: ${{ matrix.target.nix_shell }
+          cross_prefix: ${{ matrix.target.cross_prefix }
           opt: false
 
   ec2_all:
-    name: ${{ matrix.target.name }}
+    name: ${{ matrix.target.name }
     permissions:
       contents: write
       pull-requests: write
@@ -158,21 +158,21 @@ jobs:
           - name: Graviton3
             ec2_instance_type: c7g.medium
             ec2_ami: ubuntu (aarch64)
-            archflags: -march=armv8.4-a+sha3
+            archflags: "-march=armv8.4-a+sha3"
             cflags: "-flto -DMLD_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
           - name: Graviton4
             ec2_instance_type: c8g.medium
             ec2_ami: ubuntu (aarch64)
-            archflags: -march=armv9-a+sha3
+            archflags: "-march=armv9-a+sha3"
             cflags: "-flto -DMLD_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
           - name: Graviton5
             ec2_instance_type: c9g.medium
             ec2_ami: ubuntu (aarch64)
-            archflags: -march=armv9-a+sha3 -DMLD_SYS_AARCH64_FAST_SHA3
+            archflags: "-march=armv9-a+sha3 -DMLD_SYS_AARCH64_FAST_SHA3"
             cflags: "-flto -DMLD_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
@@ -205,16 +205,17 @@ jobs:
             ldflags: "-flto"
             perf: PMU
     uses: ./.github/workflows/bench_ec2_reusable.yml
-    if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
+    if: (github.repository_owner == 'pq-code-package' || github.repository_owner == 'AppelJr') && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     with:
-      ec2_instance_type: ${{ matrix.target.ec2_instance_type }}
-      ec2_ami: ${{ matrix.target.ec2_ami }}
-      archflags: ${{ matrix.target.archflags }}
-      cflags: ${{ matrix.target.cflags }}
-      ldflags: ${{ matrix.target.ldflags }}
+      ec2_instance_type: ${{ matrix.target.ec2_instance_type }
+      ec2_ami: ${{ matrix.target.ec2_ami }
+      archflags: ${{ matrix.target.archflags }
+      cflags: ${{ matrix.target.cflags }
+      ldflags: ${{ matrix.target.ldflags }
       opt: "all"
-      store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' }} # Only store optimized results
-      name: ${{ matrix.target.name }}
-      perf: ${{ matrix.target.perf }}
+      store_results: ${{ github.repository_owner == 'pq-code-package' && github.ref == 'refs/heads/main' } # Only store optimized results
+      name: ${{ matrix.target.name }
+      perf: ${{ matrix.target.perf }
     secrets:
-      AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}
+      AWS_GH_TOKEN: ${{ secrets.AWS_GH_TOKEN }
+"}
