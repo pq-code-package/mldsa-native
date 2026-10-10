@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -69,7 +69,7 @@ jobs:
       - uses: ./.github/actions/setup-pavona
         with:
           pavona-repository: https://github.com/pavona/pavona
-          pavona-commit: 08fe42fd9dba4dc1cbd6e16f87d7c1d946885b48 # main (2026-09-05)
+          pavona-commit: 0677cf18963782bf53e9b49af5d27977f3abf5e4 # main (2026-10-02)
 
       - name: Patch mldsa-native dependency
         run: |
@@ -120,7 +120,7 @@ jobs:
     if: ${{ always() && needs.start-ec2-runner.result != 'skipped' }} # required to stop the runner even if errors occur
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}

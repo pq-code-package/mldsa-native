@@ -92,6 +92,9 @@ caddq_vector 896, %ymm0
 caddq_vector 928, %ymm3
 caddq_vector 960, %ymm4
 caddq_vector 992, %ymm5
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */

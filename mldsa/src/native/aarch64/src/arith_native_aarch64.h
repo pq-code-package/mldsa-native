@@ -230,13 +230,14 @@ __contract__(
 
 #define mld_poly_chknorm_aarch64_asm MLD_NAMESPACE(poly_chknorm_aarch64_asm)
 MLD_MUST_CHECK_RETURN_VALUE
-int mld_poly_chknorm_aarch64_asm(const int32_t a[MLDSA_N], int32_t B)
+int mld_poly_chknorm_aarch64_asm(const int32_t a[MLDSA_N], int64_t B)
 /* This must be kept in sync with the HOL-Light specification
  * in proofs/hol_light/aarch64/proofs/mldsa_poly_chknorm_aarch64_asm.ml */
 __contract__(
   requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
   /* HOL Light precondition: abs(ival(x i)) < 2^31, i.e., a[i] != INT32_MIN */
   requires(forall(k0, 0, MLDSA_N, a[k0] > INT32_MIN))
+  requires(0 <= B && B <= INT32_MAX)
   ensures(return_value == 0 || return_value == 1)
   ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
 );

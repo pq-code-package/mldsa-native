@@ -280,11 +280,10 @@
  *
  * Build-only configuration options
  *
- * The remaining configurations are build-options only.
- * They do not affect the API described in mldsa_native.h.
+ * The remaining configurations only affect the build, not the API
+ * described in mldsa_native.h.
  *
  *****************************************************************************/
-#if defined(MLD_BUILD_INTERNAL)
 
 /**
  * MLD_CONFIG_MULTILEVEL_WITH_SHARED
@@ -858,8 +857,6 @@ static inline void *mld_posix_memalign(size_t align, size_t sz)
 */
 
 /*************************  Config internals  ********************************/
-
-#endif /* MLD_BUILD_INTERNAL */
 
 /* Default namespace
  *

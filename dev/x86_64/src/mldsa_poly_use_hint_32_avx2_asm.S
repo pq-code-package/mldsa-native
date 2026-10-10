@@ -158,6 +158,9 @@ addq    $32, %rsi
 addq    $32, %rax
 cmpq    $1024, %rax
 jne mld_poly_use_hint_32_avx2_asm_loop
+/* Clear upper halves of YMM registers to avoid a performance
+ * penalty when switching to SSE. */
+vzeroupper
 ret
 
 /* simpasm: footer-start */
