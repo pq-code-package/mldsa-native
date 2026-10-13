@@ -85,7 +85,10 @@
 /* check-magic: 96 == MLDSA_N * 3 / 8 */
 #define MLDSA_POLYETA_PACKEDBYTES 96
 
-#endif /* MLD_CONFIG_PARAMETER_SET == 87 */
+#else /* MLD_CONFIG_PARAMETER_SET == 87 */
+#error Invalid value for MLD_CONFIG_PARAMETER_SET. Must be 44, 65, or 87.
+#endif /* MLD_CONFIG_PARAMETER_SET != 44 && MLD_CONFIG_PARAMETER_SET != 65 && \
+          MLD_CONFIG_PARAMETER_SET != 87 */
 
 #define MLDSA_POLYT1_PACKEDBITS 10
 /* check-magic: 320 == MLDSA_N * MLDSA_POLYT1_PACKEDBITS / 8 */
