@@ -8,6 +8,7 @@ HARNESS_FILE = pointwise_native_rv32im_slowmul_harness
 PROOF_UID = pointwise_native_rv32im_slowmul
 
 DEFINES += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH
+DEFINES += -DMLD_SYS_RISCV32_M
 DEFINES += -DMLD_CONFIG_ARITH_BACKEND_FILE="\"$(SRCDIR)/mldsa/src/native/rv32im/slowmul.h\""
 DEFINES += -DMLD_CHECK_APIS
 
