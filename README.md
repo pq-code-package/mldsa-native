@@ -56,7 +56,7 @@ mldsa-native is used in
 
 ## Formal Verification
 
-We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202) involved in running mldsa-native with its C backend. See [proofs/cbmc](proofs/cbmc) for details.
+We use the [C Bounded Model Checker (CBMC)](https://github.com/diffblue/cbmc) to prove absence of various classes of undefined behaviour in C, including out of bounds memory accesses and integer overflows. The proofs cover all C code in [mldsa/src/*](mldsa) and [mldsa/src/fips202/*](mldsa/src/fips202), except for the Armv8.1-M backend and the debug code. See [proofs/cbmc](proofs/cbmc) for details.
 
 All AArch64 and x86_64 assembly, and the RV32IM arithmetic backend, are
 proved functionally correct and memory-safe at the object-code level using
@@ -81,7 +81,8 @@ pointwise-multiplication assembly; see its [README](proofs/isabelle/neon_ntt/REA
 
 All assembly in mldsa-native is constant-time in the sense that it is free of secret-dependent control flow, memory access,
 and instructions that are commonly variable-time, thwarting most timing side channels. C code is hardened against compiler-introduced
-timing side channels through suitable barriers and constant-time patterns.
+timing side channels through suitable barriers and constant-time patterns. The C code assumes constant-time 32x32->32 and 32x32->64 multiplication,
+which some targets do not provide, e.g., cores without a hardware multiplier or with early-terminating multiply instructions.
 
 Absence of secret-dependent branches, memory-access patterns and variable-latency instructions is also tested using `valgrind`
 with various combinations of compilers and compilation options.

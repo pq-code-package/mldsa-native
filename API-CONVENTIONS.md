@@ -18,6 +18,8 @@ All pointers to non-empty buffers are assumed to be valid and non-NULL, and ever
 
 The exception is a pointer paired with a length: it may be NULL when that length is `0` — for example, the message `m` when `mlen == 0`, or `ctx` when `ctxlen == 0`. Such cases are called out in the per-function documentation.
 
+Buffers passed to the same function must not overlap.
+
 ## Output buffers on error
 
 When a function returns an error, each caller-owned output buffer is left either unchanged or fully zeroized. An output buffer is never left holding partially computed or otherwise stale data that could be mistaken for a valid result.
