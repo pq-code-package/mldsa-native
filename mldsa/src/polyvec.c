@@ -206,8 +206,9 @@ void mld_polyvecl_pointwise_acc_montgomery(mld_poly *w, const mld_polyvecl *u,
 }
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
-    defined(MLD_UNIT_TEST)
+#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) && \
+     !defined(MLD_CONFIG_CORE_API_ONLY)) || \
+    !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
 {
@@ -232,8 +233,8 @@ uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
   }
   return t;
 }
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API || \
-          MLD_UNIT_TEST */
+#endif /* (!MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_CORE_API_ONLY) || \
+          !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
 /**************************************************************/
 /************ Vectors of polynomials of length MLDSA_K **************/
@@ -334,7 +335,7 @@ void mld_polyveck_invntt_tomont(mld_polyveck *v)
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) && !defined(MLD_CONFIG_CORE_API_ONLY)
 MLD_INTERNAL_API
 uint32_t mld_polyveck_unpack_eta_chknorm(
     const uint8_t r[MLDSA_K * MLDSA_POLYETA_PACKEDBYTES], int32_t bound,
@@ -362,7 +363,7 @@ uint32_t mld_polyveck_unpack_eta_chknorm(
   return t;
 }
 
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_CORE_API_ONLY */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 MLD_INTERNAL_API
@@ -394,8 +395,10 @@ void mld_polyveck_decompose_pack_w1(
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
-    (!defined(MLD_CONFIG_NO_SIGN_API) &&                                    \
+#if (!defined(MLD_CONFIG_NO_KEYPAIR_API) &&  \
+     !defined(MLD_CONFIG_CORE_API_ONLY)) ||  \
+    ((!defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+      !defined(MLD_CONFIG_NO_SIGN_API)) &&   \
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 MLD_INTERNAL_API
 void mld_polyvecl_unpack_eta(
@@ -410,7 +413,8 @@ void mld_polyvecl_unpack_eta(
   mld_assert_bound_2d(p->vec, MLDSA_L, MLDSA_N, MLD_POLYETA_UNPACK_LOWER_BOUND,
                       MLDSA_ETA + 1);
 }
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
+#endif /* (!MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_CORE_API_ONLY) || \
+          ((!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API) &&  \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)

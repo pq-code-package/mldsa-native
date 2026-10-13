@@ -918,6 +918,10 @@ void mld_polyt0_unpack(mld_poly *r, const uint8_t a[MLDSA_POLYT0_PACKEDBYTES])
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) &&                                   \
+     !defined(MLD_CONFIG_CORE_API_ONLY)) ||                                   \
+    defined(MLD_UNIT_TEST)
 MLD_STATIC_TESTABLE uint32_t mld_poly_chknorm_c(const mld_poly *a, int32_t B)
 __contract__(
   requires(memory_no_alias(a, sizeof(mld_poly)))
@@ -1004,6 +1008,9 @@ uint32_t mld_poly_chknorm(const mld_poly *a, int32_t B)
 #endif /* MLD_USE_NATIVE_POLY_CHKNORM */
   return mld_poly_chknorm_c(a, B);
 }
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API ||      \
+          (!MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_CORE_API_ONLY) || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
