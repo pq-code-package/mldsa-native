@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1791960012028,
+  "lastUpdate": 1791960412512,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -923299,6 +923299,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/a14b01a6851ac688fc1b7c31c8bf00f1fa04a442"
         },
         "date": 1791881586103,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2332104,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791726,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398861,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 4028005,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034565,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012799,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6896513,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25049115,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6864412,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "1f8ff64d86bcd6e18d54a0b69669f9a2cbb9e3d9",
+          "message": "Doc improvements\n\nState in API-CONVENTIONS.md and mldsa_native.h that buffers passed to\nthe same function must not overlap, document that the C code assumes\nconstant-time 32x32->32 and 32x32->64 multiplication, and exclude the\nArmv8.1-M backend and the debug code from the CBMC claim in the README,\nas in mlkem-native.\n\nPorts https://github.com/pq-code-package/mlkem-native/pull/1935.\nThe SOUNDNESS.md change is not ported: mldsa-native's SOUNDNESS.md\ndefers to mlkem-native's analysis, which now includes it.\n\n - Resolves #1463\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-14T04:33:20Z",
+          "tree_id": "105e564c2f608387c85c8911161ae306e04ceaa2",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/1f8ff64d86bcd6e18d54a0b69669f9a2cbb9e3d9"
+        },
+        "date": 1791960409561,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
