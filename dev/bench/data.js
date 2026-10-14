@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1791957663502,
+  "lastUpdate": 1791957673725,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -588629,6 +588629,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 193705,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "1f8ff64d86bcd6e18d54a0b69669f9a2cbb9e3d9",
+          "message": "Doc improvements\n\nState in API-CONVENTIONS.md and mldsa_native.h that buffers passed to\nthe same function must not overlap, document that the C code assumes\nconstant-time 32x32->32 and 32x32->64 multiplication, and exclude the\nArmv8.1-M backend and the debug code from the CBMC claim in the README,\nas in mlkem-native.\n\nPorts https://github.com/pq-code-package/mlkem-native/pull/1935.\nThe SOUNDNESS.md change is not ported: mldsa-native's SOUNDNESS.md\ndefers to mlkem-native's analysis, which now includes it.\n\n - Resolves #1463\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-14T04:33:20Z",
+          "tree_id": "105e564c2f608387c85c8911161ae306e04ceaa2",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/1f8ff64d86bcd6e18d54a0b69669f9a2cbb9e3d9"
+        },
+        "date": 1791957456238,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 68470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 198963,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 70470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 120470,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 326137,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 117160,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 198335,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 422982,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 193746,
             "unit": "cycles"
           }
         ]
