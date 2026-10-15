@@ -1046,6 +1046,117 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X4
 #define MAX_RATE 136
 
+/* Exercise XOR and extraction separately, including all state bytes and all
+ * buffer alignments. Full-state extraction checks XOR against plain bytes;
+ * extraction slices a separately initialized, nonzero state. */
+static int test_keccakf1600x4_bytes(void)
+{
+  enum
+  {
+    STATE_BYTES = MLD_KECCAK_LANES * 8
+  };
+  static const unsigned lengths[] = {0,  1,   2,   3,   4,   7,  8,  9,
+                                     15, 16,  17,  31,  32,  33, 63, 64,
+                                     65, 127, 128, 129, 199, 200};
+  int ret = 1;
+  unsigned offset, length, alignment, n, j, k;
+  MLD_ALIGN unsigned char input[MLD_KECCAK_WAY][STATE_BYTES + 8];
+  unsigned char input_copy[MLD_KECCAK_WAY][STATE_BYTES + 8];
+  MLD_ALIGN unsigned char output[MLD_KECCAK_WAY][STATE_BYTES + 8];
+  unsigned char expected[STATE_BYTES];
+  const unsigned char *in[MLD_KECCAK_WAY];
+  unsigned char *out[MLD_KECCAK_WAY];
+  MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_ALLOC(initial, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+
+  if (state == NULL || initial == NULL)
+  {
+    goto cleanup;
+  }
+
+  randombytes((unsigned char *)input, sizeof(input));
+  memcpy(input_copy, input, sizeof(input));
+  memset(initial, 0, MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+  mld_keccakf1600x4_xor_bytes(initial, input[0], input[1], input[2], input[3],
+                              0, STATE_BYTES);
+
+  for (offset = 0; offset <= STATE_BYTES; offset++)
+  {
+    /* All four buffers have the same alignment, as in the existing x4 test.
+     * The partial-lane prologue may change that shared alignment. */
+    for (alignment = 0; alignment < 4; alignment++)
+    {
+      for (j = 0; j < MLD_KECCAK_WAY; j++)
+      {
+        in[j] = input[j] + 4 + alignment;
+        out[j] = output[j] + 4 + alignment;
+      }
+      for (n = 0; n <= sizeof(lengths) / sizeof(lengths[0]); n++)
+      {
+        /* Also exercise every offset's exact endpoint, including (200, 0). */
+        length = (n == sizeof(lengths) / sizeof(lengths[0]))
+                     ? STATE_BYTES - offset
+                     : lengths[n];
+        if (length > STATE_BYTES - offset)
+        {
+          continue;
+        }
+        memcpy(state, initial,
+               MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+        mld_keccakf1600x4_xor_bytes(state, in[0], in[1], in[2], in[3], offset,
+                                    length);
+        memset(output, 0xA5, sizeof(output));
+        mld_keccakf1600x4_extract_bytes(state, output[0] + 4, output[1] + 4,
+                                        output[2] + 4, output[3] + 4, 0,
+                                        STATE_BYTES);
+        for (j = 0; j < MLD_KECCAK_WAY; j++)
+        {
+          memcpy(expected, input[j], STATE_BYTES);
+          for (k = 0; k < length; k++)
+          {
+            expected[offset + k] ^= in[j][k];
+          }
+          CHECK(memcmp(output[j] + 4, expected, STATE_BYTES) == 0);
+          for (k = 0; k < 4; k++)
+          {
+            CHECK(output[j][k] == 0xA5);
+            CHECK(output[j][STATE_BYTES + 4 + k] == 0xA5);
+          }
+        }
+        CHECK(memcmp(input, input_copy, sizeof(input)) == 0);
+
+        /* Test extraction independently of the partial XOR above, preserving
+         * both the state and every output byte outside the requested range. */
+        memcpy(state, initial,
+               MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+        memset(output, 0xA5, sizeof(output));
+        mld_keccakf1600x4_extract_bytes(state, out[0], out[1], out[2], out[3],
+                                        offset, length);
+        CHECK(memcmp(state, initial,
+                     MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t)) ==
+              0);
+        for (j = 0; j < MLD_KECCAK_WAY; j++)
+        {
+          CHECK(memcmp(out[j], input[j] + offset, length) == 0);
+          for (k = 0; k < STATE_BYTES + 8; k++)
+          {
+            if (output[j] + k < out[j] || output[j] + k >= out[j] + length)
+            {
+              CHECK(output[j][k] == 0xA5);
+            }
+          }
+        }
+      }
+    }
+  }
+  ret = 0;
+
+cleanup:
+  MLD_FREE(initial, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_FREE(state, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  return ret;
+}
+
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
   int ret = 1;
@@ -1188,6 +1299,7 @@ static int test_backend_units(void)
 #endif
 
 #ifdef MLD_USE_NATIVE_FIPS202_X4
+  CHECK(test_keccakf1600x4_bytes() == 0);
   CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
 #endif
 
