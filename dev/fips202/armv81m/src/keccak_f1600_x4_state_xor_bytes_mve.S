@@ -51,8 +51,9 @@
 // ---------------------------------------------------------------------------
 //   Prologue -- if offset is not 8-byte aligned, absorb
 //               min(length, 8-(offset%8)) bytes via predicated byte loads.
-//   Main     -- process full 8-byte groups via word-level gather loads,
-//               bit-interleave, then VEOR into even/odd state halves.
+//   Main     -- process full 8-byte groups via word-level gather loads when
+//               aligned, otherwise predicated byte loads; bit-interleave,
+//               then VEOR into even/odd state halves.
 //   Tail     -- absorb remaining <8 bytes via predicated byte loads.
 
 #include "../../../../common.h"
@@ -303,13 +304,12 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     lsl mask, mask, off
     vmsr p0, mask
 
-    // Predicated byte loads of nB bytes per instance; post-increment of 4
-    // positions qP for the main loop's [qP, #4]! loads.
+    // Advance each pointer to the next lane start after the partial lane.
     vpstttt
-    vldrbt.u8 qd0, [dp0], #4
-    vldrbt.u8 qd1, [dp1], #4
-    vldrbt.u8 qd2, [dp2], #4
-    vldrbt.u8 qd3, [dp3], #4
+    vldrbt.u8 qd0, [dp0], #8
+    vldrbt.u8 qd1, [dp1], #8
+    vldrbt.u8 qd2, [dp2], #8
+    vldrbt.u8 qd3, [dp3], #8
 
     // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
@@ -320,12 +320,14 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_state_xor_bytes_asm)
     // XOR into state (post-increments rSE/rSO by 16)
     xor_lane_and_store_postinc q0, q1, qS0, qS1, rSE, rSO
 
-    // Build qP = {d0,d1,d2,d3} as u32 lanes for gather loads
-    vmov    qP[2], qP[0],  dp0, dp2
-    vmov    qP[3], qP[1],  dp1, dp3
-    b       mld_keccak_f1600_x4_state_xor_bytes_asm_main_body
-
 mld_keccak_f1600_x4_state_xor_bytes_asm_pre_main:
+    // Gather-word loads require all four next-lane pointers to be aligned.
+    orr     tmp, dp0, dp1
+    orr     tmp, tmp, dp2
+    orr     tmp, tmp, dp3
+    tst     tmp, #3
+    bne     mld_keccak_f1600_x4_state_xor_bytes_asm_main_body_byte
+
     vmov    qP[2], qP[0],  dp0, dp2
     vmov    qP[3], qP[1],  dp1, dp3
     mov     tmp, #4
@@ -352,7 +354,7 @@ mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_start:
 mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
 
     // -----------------------------------------------------------------------
-    // TAIL: absorb <8 remaining bytes at lane offset 0
+    // TAIL: recover the next lane pointers for predicated byte loads
     // -----------------------------------------------------------------------
     ands    length, length, #7
     beq     mld_keccak_f1600_x4_state_xor_bytes_asm_exit
@@ -363,12 +365,22 @@ mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     vmov    dp0, dp2, qP[2], qP[0]
     vmov    dp1, dp3, qP[3], qP[1]
 
-    vctp.8  length
+mld_keccak_f1600_x4_state_xor_bytes_asm_main_body_byte:
+    // Unaligned input and the aligned tail share this bounded byte loop.
+    cmp     length, #0
+    beq     mld_keccak_f1600_x4_state_xor_bytes_asm_exit
+mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start:
+    // Limit the predicate to one lane, including the final partial lane.
+    mov     nB, #8
+    cmp     length, #8
+    it      lo
+    movlo   nB, length
+    vctp.8  nB
     vpstttt
-    vldrbt.u8   qd0, [dp0]
-    vldrbt.u8   qd1, [dp1]
-    vldrbt.u8   qd2, [dp2]
-    vldrbt.u8   qd3, [dp3]
+    vldrbt.u8 qd0, [dp0], #8
+    vldrbt.u8 qd1, [dp1], #8
+    vldrbt.u8 qd2, [dp2], #8
+    vldrbt.u8 qd3, [dp3], #8
 
     // Transpose from per-instance layout to per-lane layout
     transpose_streams_to_lanes
@@ -377,7 +389,10 @@ mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_end:
     to_bit_interleaving_4x q0, q1, q2, q3, q4
 
     // XOR into state (post-increments rSE/rSO by 16)
-    xor_lane_and_store_postinc qd0, qd1, qS0, qS1, rSE, rSO
+    xor_lane_and_store_postinc q0, q1, qS0, qS1, rSE, rSO
+
+    subs    length, length, nB
+    bne     mld_keccak_f1600_x4_state_xor_bytes_asm_main_loop_byte_start
 
 mld_keccak_f1600_x4_state_xor_bytes_asm_exit:
     vpop    {d8-d15}
