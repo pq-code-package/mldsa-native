@@ -1046,6 +1046,17 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X4
 #define MAX_RATE 136
 
+/* Preserve diagnostics while releasing heap-backed states on failure. */
+#define CHECK_X4_BYTES(x)                                     \
+  do                                                          \
+  {                                                           \
+    if (!(x))                                                 \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      goto cleanup;                                           \
+    }                                                         \
+  } while (0)
+
 /*
  * Test x4 Keccak byte access with aligned and unaligned buffers, including
  * ranges that cross 8-byte lane boundaries.
@@ -1130,14 +1141,14 @@ static int test_keccakf1600x4_bytes(void)
           {
             expected[offset + k] ^= in[j][k];
           }
-          CHECK(memcmp(output[j] + 4, expected, STATE_BYTES) == 0);
+          CHECK_X4_BYTES(memcmp(output[j] + 4, expected, STATE_BYTES) == 0);
           for (k = 0; k < 4; k++)
           {
-            CHECK(output[j][k] == 0xA5);
-            CHECK(output[j][STATE_BYTES + 4 + k] == 0xA5);
+            CHECK_X4_BYTES(output[j][k] == 0xA5);
+            CHECK_X4_BYTES(output[j][STATE_BYTES + 4 + k] == 0xA5);
           }
         }
-        CHECK(memcmp(input, input_copy, sizeof(input)) == 0);
+        CHECK_X4_BYTES(memcmp(input, input_copy, sizeof(input)) == 0);
 
         /* Test extraction independently of the partial XOR above, preserving
          * both the state and every output byte outside the requested range. */
@@ -1146,17 +1157,17 @@ static int test_keccakf1600x4_bytes(void)
         memset(output, 0xA5, sizeof(output));
         mld_keccakf1600x4_extract_bytes(state, out[0], out[1], out[2], out[3],
                                         offset, length);
-        CHECK(memcmp(state, initial,
-                     MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t)) ==
-              0);
+        CHECK_X4_BYTES(
+            memcmp(state, initial,
+                   MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t)) == 0);
         for (j = 0; j < MLD_KECCAK_WAY; j++)
         {
-          CHECK(memcmp(out[j], input[j] + offset, length) == 0);
+          CHECK_X4_BYTES(memcmp(out[j], input[j] + offset, length) == 0);
           for (k = 0; k < STATE_BYTES + 8; k++)
           {
             if (output[j] + k < out[j] || output[j] + k >= out[j] + length)
             {
-              CHECK(output[j][k] == 0xA5);
+              CHECK_X4_BYTES(output[j][k] == 0xA5);
             }
           }
         }
@@ -1170,6 +1181,8 @@ cleanup:
   MLD_FREE(state, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   return ret;
 }
+
+#undef CHECK_X4_BYTES
 
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
