@@ -32,6 +32,10 @@ int mld_keccak_f1600_x4_native_impl(uint64_t *state);
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   return mld_keccak_f1600_x4_native_impl(state);
 }
 
@@ -44,6 +48,10 @@ static MLD_INLINE int mld_keccakf1600_xor_bytes_x4_native(
     const uint8_t *data2, const uint8_t *data3, unsigned offset,
     unsigned length)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   mld_keccak_f1600_x4_state_xor_bytes_asm(state, data0, data1, data2, data3,
                                           offset, length);
   return MLD_NATIVE_FUNC_SUCCESS;
@@ -57,6 +65,10 @@ static MLD_INLINE int mld_keccakf1600_extract_bytes_x4_native(
     uint64_t *state, uint8_t *data0, uint8_t *data1, uint8_t *data2,
     uint8_t *data3, unsigned offset, unsigned length)
 {
+  if (!mld_sys_check_capability(MLD_SYS_CAP_ARMV81M_MVE))
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
   mld_keccak_f1600_x4_state_extract_bytes_asm(state, data0, data1, data2, data3,
                                               offset, length);
   return MLD_NATIVE_FUNC_SUCCESS;

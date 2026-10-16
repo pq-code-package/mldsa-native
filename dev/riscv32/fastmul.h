@@ -7,6 +7,10 @@
 #ifndef MLD_DEV_RISCV32_FASTMUL_H
 #define MLD_DEV_RISCV32_FASTMUL_H
 
+#if !defined(MLD_SYS_RISCV32_M)
+#error This backend can only be used on RV32 targets with the M extension.
+#endif
+
 /*
  * Arithmetic backend for the RISC-V RV32-IM ISA and the ILP32, ILP32F, and
  * ILP32D family of ABIs. This is the default arithmetic backend selected by
