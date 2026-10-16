@@ -1046,9 +1046,23 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X4
 #define MAX_RATE 136
 
-/* Exercise XOR and extraction separately, including all state bytes and all
- * buffer alignments. Full-state extraction checks XOR against plain bytes;
- * extraction slices a separately initialized, nonzero state. */
+/*
+ * Test x4 Keccak byte access with aligned and unaligned buffers, including
+ * ranges that cross 8-byte lane boundaries.
+ *
+ * Sweep every offset in the 200-byte state and all four pointer alignments
+ * modulo 4, shared by the four buffers. Representative lengths cover empty
+ * ranges, lane boundaries, and multiple lanes; STATE_BYTES - offset also
+ * reaches the state end from every offset, including the no-op (200, 0).
+ *
+ * Check partial XOR by extracting the entire state and comparing with a
+ * bytewise XOR on the original input. Check partial extraction separately
+ * from a known nonzero state, so matching partial-XOR/extraction mistakes
+ * cannot cancel. Also check unchanged input, unchanged extraction state, and
+ * 0xA5 sentinels outside the output range. The randomized permutation test
+ * below complements this sweep but only samples nonempty ranges within the
+ * first MAX_RATE bytes and does not vary buffer alignment explicitly.
+ */
 static int test_keccakf1600x4_bytes(void)
 {
   enum

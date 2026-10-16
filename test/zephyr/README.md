@@ -36,6 +36,48 @@ Currently supported targets:
 The Armv8.1-M MVE FIPS202 backend is an `OPT=1` feature and is built for
 `mps3-an547` and `nucleo-n657x0-q`.
 
+## Native x4 Keccak byte-access regression test
+
+`test_keccakf1600x4_bytes()` in [test_unit.c](../src/test_unit.c) checks the
+native x4 Keccak XOR and extraction helpers whenever
+`MLD_USE_NATIVE_FIPS202_X4` is enabled. It was added for the Armv8.1-M MVE
+helpers: their partial-lane prologue must advance buffer pointers to the next
+8-byte lane, then choose byte accesses if any resulting pointer is unaligned
+for MVE word gathers or scatters. Even an initially word-aligned buffer can
+become unaligned after processing a partial lane.
+
+The test exercises every state offset from 0 through 200 and every buffer
+alignment modulo 4. All four buffers share the selected alignment; mixed
+alignments between buffers are not covered. It uses representative lengths
+around lane and larger boundaries, zero length, and the exact remaining
+state length at each offset, including `(offset, length) = (200, 0)`. This
+covers the partial-lane prologue, aligned word path, unaligned byte path, and
+final partial lane.
+
+For each case, it checks partial XOR against a bytewise expected result by
+extracting the entire state, including bytes outside the XOR range. It then
+checks partial extraction from a separately restored nonzero state, without
+the preceding partial XOR. This prevents matching mistakes in the two partial
+operations from cancelling. Input buffers and extraction state must remain
+unchanged, and `0xA5` sentinels must survive outside the requested output range.
+The existing randomized XOR/permute/extract test provides a separate comparison
+with the x1 C reference, but samples only nonempty ranges within the first
+136 state bytes and does not explicitly vary buffer alignment.
+
+Run the full unit suite for all three ML-DSA parameter sets with this backend
+on Cortex-M55 QEMU from the repository root:
+
+```sh
+export EXTRA_MAKEFILE=test/zephyr/platform.mk
+export ZEPHYR_TARGET=mps3-an547
+nix develop .#zephyr --command ./scripts/tests unit --no-auto --opt=opt
+```
+
+`--no-auto` leaves target selection to Zephyr instead of detecting the host
+architecture. The Zephyr CI job runs the full unit suite on AN547 with native
+and portable configurations. The larger main stack in `app/prj.conf` lets the
+full ML-DSA-87 suite fit; it is needed for the suite's polynomial vectors.
+
 ## How it works
 
 Test binaries are built as Zephyr applications using Zephyr's standard
