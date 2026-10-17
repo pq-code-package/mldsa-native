@@ -117,6 +117,7 @@ source code and documentation.
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
   - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
+  - [test/configs/x3_keccak_config.h](test/configs/x3_keccak_config.h)
 
 ### `FIPS202`
 
@@ -184,6 +185,7 @@ source code and documentation.
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
   - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
+  - [test/configs/x3_keccak_config.h](test/configs/x3_keccak_config.h)
   - [test/src/test_sign_hook.c](test/src/test_sign_hook.c)
 
 ### `FIPS204_UPDATES`
@@ -225,6 +227,7 @@ source code and documentation.
   - [test/configs/serial_fips202_config.h](test/configs/serial_fips202_config.h)
   - [test/configs/test_alloc_config.h](test/configs/test_alloc_config.h)
   - [test/configs/test_sign_hook_config.h](test/configs/test_sign_hook_config.h)
+  - [test/configs/x3_keccak_config.h](test/configs/x3_keccak_config.h)
   - [test/src/test_sign_hook.c](test/src/test_sign_hook.c)
 
 ### `HYBRID`
