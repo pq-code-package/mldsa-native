@@ -85,6 +85,7 @@ void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST)) &&                                                \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_USE_X3) || defined(MLD_UNIT_TEST)
 static void mld_keccakf1600x4_extract_bytes_c(uint64_t *state,
                                               unsigned char *data0,
                                               unsigned char *data1,
@@ -197,6 +198,7 @@ void mld_keccakf1600x4_permute(uint64_t *state)
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 3);
 }
+#endif /* !MLD_CONFIG_USE_X3 || MLD_UNIT_TEST */
 
 #if defined(MLD_CONFIG_USE_X3)
 /* 3-way (x3) batched Keccak primitives (see keccakf1600.h).

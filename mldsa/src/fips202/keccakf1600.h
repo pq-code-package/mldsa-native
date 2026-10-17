@@ -51,6 +51,7 @@ __contract__(
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST)) &&                                                \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_USE_X3) || defined(MLD_UNIT_TEST)
 #define mld_keccakf1600x4_extract_bytes \
   MLD_NAMESPACE(keccakf1600x4_extract_bytes)
 MLD_INTERNAL_API
@@ -101,6 +102,7 @@ __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
 );
+#endif /* !MLD_CONFIG_USE_X3 || MLD_UNIT_TEST */
 
 #if defined(MLD_CONFIG_USE_X3)
 /* 3-way (x3) batched Keccak primitives, used with MLD_CONFIG_USE_X3. They
