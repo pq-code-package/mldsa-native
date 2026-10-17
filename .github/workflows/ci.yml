@@ -200,7 +200,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar]
+        backend: [x1_scalar, x1_v84a, x2_v84a, x4_v8a_scalar, x4_v8a_v84a_scalar, x3_v8a_v84a_scalar]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -220,7 +220,8 @@ jobs:
           compile_mode: 'native'
           opt: 'opt'
           examples: 'false'
-          cflags: "-DMLDSA_DEBUG -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
+          # The x3 backend is only used by the samplers with MLD_CONFIG_USE_X3.
+          cflags: "-DMLDSA_DEBUG ${{ matrix.backend == 'x3_v8a_v84a_scalar' && '-DMLD_CONFIG_USE_X3 ' || '' }}-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
           check_namespace: 'false'
           extra_args: "--fips202-aarch64-backend ${{ matrix.backend }}"
@@ -561,7 +562,7 @@ jobs:
          - name: native-cap
            ids: native-cap-ON native-cap-OFF native-cap-ID_AA64PFR1_EL1 native-cap-CPUID_AVX2
          - name: asm-fips202
-           ids: no-asm serial-fips202
+           ids: no-asm serial-fips202 x3-keccak
          - name: nblocks
            ids: nblocks-1 nblocks-4 nblocks-6
          - name: reduced-api
