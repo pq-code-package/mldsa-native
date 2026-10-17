@@ -23,6 +23,7 @@ int check_keccak_f1600_x1_scalar_aarch64_asm(void);
 #if defined(__ARM_FEATURE_SHA3)
 int check_keccak_f1600_x1_v84a_aarch64_asm(void);
 int check_keccak_f1600_x2_v84a_aarch64_asm(void);
+int check_keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm(void);
 #endif
 #endif /* MLD_SYS_AARCH64_NEON */
 #if defined(MLD_SYS_AARCH64_NEON)
@@ -62,6 +63,8 @@ static const abicheck_entry_t all_checks[] = {
      check_keccak_f1600_x1_v84a_aarch64_asm},
     {"keccak_f1600_x2_v84a_aarch64_asm",
      check_keccak_f1600_x2_v84a_aarch64_asm},
+    {"keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm",
+     check_keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm},
 #endif
 #endif /* MLD_SYS_AARCH64_NEON */
 #if defined(MLD_SYS_AARCH64_NEON)
