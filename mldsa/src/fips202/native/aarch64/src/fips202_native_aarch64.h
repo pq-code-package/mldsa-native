@@ -66,4 +66,18 @@ __contract__(
   assigns(memory_slice(state, sizeof(uint64_t) * 25 * 4))
 );
 
+/*
+ * 3-way hybrid Keccak-f1600: states 0 and 1 on Neon (Armv8.4-A SHA3), state 2
+ * on scalar registers with lazy rotations, interleaved 1:1 in a single pass.
+ */
+#define mld_keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm \
+  MLD_NAMESPACE(keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm)
+void mld_keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm(uint64_t state[75],
+                                                        const uint64_t rc[24])
+__contract__(
+  requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 3))
+  requires(rc == mld_keccakf1600_round_constants)
+  assigns(memory_slice(state, sizeof(uint64_t) * 25 * 3))
+);
+
 #endif /* !MLD_FIPS202_NATIVE_AARCH64_SRC_FIPS202_NATIVE_AARCH64_H */

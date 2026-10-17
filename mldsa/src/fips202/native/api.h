@@ -65,6 +65,21 @@ __contract__(
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4))
 );
 #endif /* MLD_USE_NATIVE_FIPS202_X4 */
+/*
+ * 3-fold batched Keccak-F1600 (used with MLD_CONFIG_USE_X3). To enable, set
+ * MLD_USE_NATIVE_FIPS202_X3 in your backend and define the inline wrapper
+ * mld_keccak_f1600_x3_native() to forward to your implementation.
+ */
+#if defined(MLD_USE_NATIVE_FIPS202_X3)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccak_f1600_x3_native(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 3))
+    assigns(memory_slice(state, sizeof(uint64_t) * 25 * 3))
+    ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 3))
+);
+#endif /* MLD_USE_NATIVE_FIPS202_X3 */
 
 /*
  * Native x4 XOR bytes and extract bytes interface.
