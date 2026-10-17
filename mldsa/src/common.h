@@ -20,8 +20,30 @@
 #include "mldsa_native_config.h"
 #endif
 
+#include "capability.h"
 #include "params.h"
 #include "sys.h"
+
+#if !defined(MLD_CONFIG_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
+#define MLD_HAVE_INLINE_ASM
+#endif
+
+#if defined(MLD_CONFIG_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
+#include <valgrind/memcheck.h>
+#define MLD_CT_TESTING_SECRET(ptr, len) \
+  VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
+#define MLD_CT_TESTING_DECLASSIFY(ptr, len) \
+  VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
+#else /* MLD_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__ */
+#define MLD_CT_TESTING_SECRET(ptr, len) \
+  do                                    \
+  {                                     \
+  } while (0)
+#define MLD_CT_TESTING_DECLASSIFY(ptr, len) \
+  do                                        \
+  {                                         \
+  } while (0)
+#endif /* !(MLD_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__) */
 
 /* Internal and public API have external linkage by default, but
  * this can be overwritten by the user, e.g. for single-CU builds. */

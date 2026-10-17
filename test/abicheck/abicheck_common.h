@@ -10,9 +10,9 @@
 #include <stdint.h>
 
 /*
- * Resolve the build config and sys.h. We don't include common.h: it would
- * drag in backend constant tables that older compilers do not drop, forcing
- * them into the abicheck link.
+ * Resolve the build config, sys.h and capability.h. We don't include
+ * common.h: it would drag in backend constant tables that older compilers do
+ * not drop, forcing them into the abicheck link.
  *
  * Paths use the project's -Imldsa search path (set in test/mk/components.mk)
  * so this header is includable from any depth under test/abicheck/.
@@ -23,6 +23,7 @@
 #else
 #include "mldsa_native_config.h"
 #endif
+#include "src/capability.h"
 #include "src/sys.h"
 
 /* Return codes for check_<kernel>(), shared with abicheck.c. */

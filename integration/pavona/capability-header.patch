@@ -1,0 +1,17 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0
+#
+# List the capability.h header in the Bazel build of mldsa-native.
+
+diff --git a/third_party/mldsa_native/BUILD.mldsa_native.bazel b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+index 0218bf5..7ce5e6a 100644
+--- a/third_party/mldsa_native/BUILD.mldsa_native.bazel
++++ b/third_party/mldsa_native/BUILD.mldsa_native.bazel
+@@ -13,6 +13,7 @@ cc_library(
+         "mldsa/src/cbmc.h",
+         "mldsa/src/common.h",
+         "mldsa/src/context.h",
++        "mldsa/src/capability.h",
+         "mldsa/src/randombytes.h",
+         "mldsa/src/debug.h",
+         "mldsa/src/debug.c",
