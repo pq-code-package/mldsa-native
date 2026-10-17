@@ -265,6 +265,7 @@ __contract__(
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+#if !defined(MLD_CONFIG_USE_X3)
 #define mld_poly_uniform_4x MLD_NAMESPACE(poly_uniform_4x)
 /**
  * Generate four polynomials using rejection sampling on (pseudo-)uniformly
@@ -298,6 +299,39 @@ __contract__(
   ensures(array_bound(vec2->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
   ensures(array_bound(vec3->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
 );
+
+#else /* !MLD_CONFIG_USE_X3 */
+#define mld_poly_uniform_3x MLD_NAMESPACE(poly_uniform_3x)
+/**
+ * Generate three polynomials using rejection sampling on (pseudo-)uniformly
+ * random bytes sampled from a seed. 3-way variant of
+ * mld_poly_uniform_4x, used with MLD_CONFIG_USE_X3, used by the x3 ExpandA
+ * path.
+ *
+ * @spec{Implements @[FIPS204, Algorithm 30, RejNTTPoly] (three-way batched).}
+ *
+ * @param[out] vec0 Pointer to first polynomial to be sampled.
+ * @param[out] vec1 Pointer to second polynomial to be sampled.
+ * @param[out] vec2 Pointer to third polynomial to be sampled.
+ * @param[in]  seed Pointer to consecutive array of seed buffers of size
+ *                  MLDSA_SEEDBYTES + 2 each, plus padding for alignment.
+ */
+MLD_INTERNAL_API
+void mld_poly_uniform_3x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
+                         uint8_t seed[3][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)])
+__contract__(
+  requires(memory_no_alias(vec0, sizeof(mld_poly)))
+  requires(memory_no_alias(vec1, sizeof(mld_poly)))
+  requires(memory_no_alias(vec2, sizeof(mld_poly)))
+  requires(memory_no_alias(seed,  3 * MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)))
+  assigns(memory_slice(vec0, sizeof(mld_poly)))
+  assigns(memory_slice(vec1, sizeof(mld_poly)))
+  assigns(memory_slice(vec2, sizeof(mld_poly)))
+  ensures(array_bound(vec0->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  ensures(array_bound(vec1->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+  ensures(array_bound(vec2->coeffs, 0, MLDSA_N, 0, MLDSA_Q))
+);
+#endif /* MLD_CONFIG_USE_X3 */
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) */
 
