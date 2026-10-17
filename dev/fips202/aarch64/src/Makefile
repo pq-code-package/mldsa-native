@@ -102,9 +102,53 @@ keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/kec
            -s mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop \
            -e mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_loop_end
 
+# x3 hybrid (2 Neon + 1 scalar, single pass): interleaving only; register
+# allocation and the instruction order within each stream are kept.
+keccak_f1600_x3_v8a_v84a_scalar_hybrid_aarch64_asm.S: ../../aarch64_symbolic/keccak_f1600_x3_v8a_v84a_scalar_hybrid_clean.S
+	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
+	   $^ -o $@ \
+	   -c reserved_regs="[x18,sp]" \
+	   -c inputs_are_outputs \
+	   -c variable_size \
+	   -c constraints.stalls_first_attempt=64 \
+	   -c ignore_objective=True \
+	   -c constraints.functional_only=True \
+	   -c constraints.allow_reordering=False \
+	   -c constraints.allow_spills=True \
+	   -c split_heuristic \
+	   -c split_heuristic_repeat=0 \
+	   -c split_heuristic_preprocess_naive_interleaving \
+	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
+	   -c split_heuristic_estimate_performance=False \
+	   -c absorb_spills=False \
+	   -c outputs="[hint_STACK_OFFSET_COUNT]" \
+	   -s mld_keccak_f1600_x3_v8a_v84a_scalar_hybrid_initial \
+	   -e mld_keccak_f1600_x3_v8a_v84a_scalar_hybrid_loop
+
+	slothy-cli Arm_AArch64 Arm_Cortex_A55 \
+	   $@ -o $@ \
+	   -c reserved_regs="[x18,sp]" \
+	   -c inputs_are_outputs \
+	   -c variable_size \
+	   -c constraints.stalls_first_attempt=64 \
+	   -c ignore_objective=True \
+	   -c constraints.functional_only=True \
+	   -c constraints.allow_reordering=False \
+	   -c constraints.allow_spills=True \
+	   -c split_heuristic \
+	   -c split_heuristic_repeat=0 \
+	   -c split_heuristic_preprocess_naive_interleaving \
+	   -c split_heuristic_preprocess_naive_interleaving_strategy="alternate" \
+	   -c split_heuristic_estimate_performance=False \
+	   -c absorb_spills=False \
+	   -c outputs="[hint_STACK_OFFSET_COUNT]" \
+	   -s mld_keccak_f1600_x3_v8a_v84a_scalar_hybrid_loop \
+	   -e mld_keccak_f1600_x3_v8a_v84a_scalar_hybrid_loop_end
+
 ALL=keccak_f1600_x1_scalar_aarch64_asm.S                \
   keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S       \
-  keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S
+  keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S  \
+  keccak_f1600_x3_v8a_v84a_scalar_hybrid_aarch64_asm.S
 
 all: $(ALL)
 
