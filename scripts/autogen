@@ -1588,6 +1588,7 @@ def gen_aarch64_keccak_constants_c_file():
         yield "#if (defined(MLD_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \\"
         yield "     defined(MLD_FIPS202_AARCH64_NEED_X1_V84A) ||                    \\"
         yield "     defined(MLD_FIPS202_AARCH64_NEED_X2_V84A) ||                    \\"
+        yield "     defined(MLD_FIPS202_AARCH64_NEED_X3_V84A_SCALAR_HYBRID) ||  \\"
         yield "     defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \\"
         yield "     defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \\"
         yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
@@ -1602,7 +1603,8 @@ def gen_aarch64_keccak_constants_c_file():
         yield ""
         yield "#else /* (MLD_FIPS202_AARCH64_NEED_X1_SCALAR ||                               \\"
         yield "         MLD_FIPS202_AARCH64_NEED_X1_V84A || MLD_FIPS202_AARCH64_NEED_X2_V84A \\"
-        yield "         || MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "         || MLD_FIPS202_AARCH64_NEED_X3_V84A_SCALAR_HYBRID ||             \\"
+        yield "         MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                     \\"
         yield "         MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
         yield "         !MLD_CONFIG_MULTILEVEL_NO_SHARED */"
         yield ""
@@ -1610,7 +1612,8 @@ def gen_aarch64_keccak_constants_c_file():
         yield ""
         yield "#endif /* !((MLD_FIPS202_AARCH64_NEED_X1_SCALAR ||                             \\"
         yield "          MLD_FIPS202_AARCH64_NEED_X1_V84A || MLD_FIPS202_AARCH64_NEED_X2_V84A \\"
-        yield "          || MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \\"
+        yield "          || MLD_FIPS202_AARCH64_NEED_X3_V84A_SCALAR_HYBRID ||             \\"
+        yield "          MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                     \\"
         yield "          MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \\"
         yield "          !MLD_CONFIG_MULTILEVEL_NO_SHARED) */"
         yield ""
@@ -5218,6 +5221,7 @@ def _main():
         "keccak_f1600_x1_scalar_aarch64_asm",
         "keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm",
         "keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm",
+        "keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm",
     ]
 
     parser = argparse.ArgumentParser(

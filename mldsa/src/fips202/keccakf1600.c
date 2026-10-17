@@ -197,6 +197,95 @@ void mld_keccakf1600x4_permute(uint64_t *state)
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 3);
 }
+
+#if defined(MLD_CONFIG_USE_X3)
+/* 3-way (x3) batched Keccak primitives (see keccakf1600.h).
+ * xor_bytes / extract_bytes have no native x3 variant (like x4); they loop the
+ * serial primitive over the 3 sub-states. permute dispatches to the native x3
+ * kernel when MLD_USE_NATIVE_FIPS202_X3 is defined (MLD_CONFIG_USE_X3 on
+ * AArch64), else falls back to 3x serial permute. */
+static void mld_keccakf1600x3_extract_bytes_c(uint64_t *state,
+                                              unsigned char *data0,
+                                              unsigned char *data1,
+                                              unsigned char *data2,
+                                              unsigned offset, unsigned length)
+__contract__(
+    requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
+         0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY_X3))
+    requires(memory_no_alias(data0, length))
+    requires(memory_no_alias(data1, length))
+    requires(memory_no_alias(data2, length))
+    assigns(memory_slice(data0, length))
+    assigns(memory_slice(data1, length))
+    assigns(memory_slice(data2, length))
+)
+{
+  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
+                                length);
+  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 1, data1, offset,
+                                length);
+  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 2, data2, offset,
+                                length);
+}
+
+MLD_INTERNAL_API
+void mld_keccakf1600x3_extract_bytes(uint64_t *state, unsigned char *data0,
+                                     unsigned char *data1, unsigned char *data2,
+                                     unsigned offset, unsigned length)
+{
+  mld_keccakf1600x3_extract_bytes_c(state, data0, data1, data2, offset, length);
+}
+
+static void mld_keccakf1600x3_xor_bytes_c(uint64_t *state,
+                                          const unsigned char *data0,
+                                          const unsigned char *data1,
+                                          const unsigned char *data2,
+                                          unsigned offset, unsigned length)
+__contract__(
+    requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
+         0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY_X3))
+    requires(memory_no_alias(data0, length))
+    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
+    requires((data0 == data1 &&
+              data0 == data2) ||
+         (memory_no_alias(data1, length) &&
+              memory_no_alias(data2, length)))
+    assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY_X3))
+)
+{
+  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
+                            length);
+  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 1, data1, offset,
+                            length);
+  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 2, data2, offset,
+                            length);
+}
+
+MLD_INTERNAL_API
+void mld_keccakf1600x3_xor_bytes(uint64_t *state, const unsigned char *data0,
+                                 const unsigned char *data1,
+                                 const unsigned char *data2, unsigned offset,
+                                 unsigned length)
+{
+  mld_keccakf1600x3_xor_bytes_c(state, data0, data1, data2, offset, length);
+}
+
+MLD_INTERNAL_API
+void mld_keccakf1600x3_permute(uint64_t *state)
+{
+#if defined(MLD_USE_NATIVE_FIPS202_X3)
+  if (mld_keccak_f1600_x3_native(state) == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#endif /* MLD_USE_NATIVE_FIPS202_X3 */
+  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 0);
+  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 1);
+  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
+}
+#endif /* MLD_CONFIG_USE_X3 */
 #endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
