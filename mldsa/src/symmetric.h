@@ -11,7 +11,10 @@
 #include MLD_FIPS202_HEADER_FILE
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #include MLD_FIPS202X4_HEADER_FILE
+#if defined(MLD_CONFIG_USE_X3)
+#include "fips202/fips202x3.h"
 #endif
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define MLD_STREAM128_BLOCKBYTES SHAKE128_RATE
 #define MLD_STREAM256_BLOCKBYTES SHAKE256_RATE
@@ -64,5 +67,29 @@
   mld_shake128x4_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (BUF)[3], \
                                (NBLOCKS), (CTX))
 #define mld_xof128_x4_release(CTX) mld_shake128x4_release((CTX))
+
+#if defined(MLD_CONFIG_USE_X3)
+/*
+ * 3-way XOF, used with MLD_CONFIG_USE_X3. Mirrors the x4 macros above but
+ * 3-wide. SHAKE128 backs the x3 ExpandA path (mld_poly_uniform_3x); SHAKE256
+ * backs the x3 ExpandS and ExpandMask paths (mld_poly_uniform_eta_3x,
+ * mld_poly_uniform_gamma1_3x).
+ */
+#define mld_xof128_x3_ctx mld_shake128x3ctx
+#define mld_xof128_x3_init(CTX) mld_shake128x3_init((CTX))
+#define mld_xof128_x3_absorb(CTX, IN, INBYTES) \
+  mld_shake128x3_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (INBYTES))
+#define mld_xof128_x3_squeezeblocks(BUF, NBLOCKS, CTX) \
+  mld_shake128x3_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (NBLOCKS), (CTX))
+#define mld_xof128_x3_release(CTX) mld_shake128x3_release((CTX))
+
+#define mld_xof256_x3_ctx mld_shake256x3ctx
+#define mld_xof256_x3_init(CTX) mld_shake256x3_init((CTX))
+#define mld_xof256_x3_absorb(CTX, IN, INBYTES) \
+  mld_shake256x3_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (INBYTES))
+#define mld_xof256_x3_squeezeblocks(BUF, NBLOCKS, CTX) \
+  mld_shake256x3_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (NBLOCKS), (CTX))
+#define mld_xof256_x3_release(CTX) mld_shake256x3_release((CTX))
+#endif /* MLD_CONFIG_USE_X3 */
 
 #endif /* !MLD_SYMMETRIC_H */
