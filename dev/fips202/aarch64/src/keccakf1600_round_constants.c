@@ -14,6 +14,7 @@
 #if (defined(MLD_FIPS202_AARCH64_NEED_X1_SCALAR) ||                  \
      defined(MLD_FIPS202_AARCH64_NEED_X1_V84A) ||                    \
      defined(MLD_FIPS202_AARCH64_NEED_X2_V84A) ||                    \
+     defined(MLD_FIPS202_AARCH64_NEED_X3_V8A_V84A_SCALAR_HYBRID) ||  \
      defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) ||       \
      defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
@@ -34,7 +35,8 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint64_t
 
 #else /* (MLD_FIPS202_AARCH64_NEED_X1_SCALAR ||                               \
          MLD_FIPS202_AARCH64_NEED_X1_V84A || MLD_FIPS202_AARCH64_NEED_X2_V84A \
-         || MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \
+         || MLD_FIPS202_AARCH64_NEED_X3_V8A_V84A_SCALAR_HYBRID ||             \
+         MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                     \
          MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \
          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
@@ -42,6 +44,7 @@ MLD_EMPTY_CU(fips202_aarch64_round_constants)
 
 #endif /* !((MLD_FIPS202_AARCH64_NEED_X1_SCALAR ||                             \
           MLD_FIPS202_AARCH64_NEED_X1_V84A || MLD_FIPS202_AARCH64_NEED_X2_V84A \
-          || MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                  \
+          || MLD_FIPS202_AARCH64_NEED_X3_V8A_V84A_SCALAR_HYBRID ||             \
+          MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID ||                     \
           MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) &&               \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED) */

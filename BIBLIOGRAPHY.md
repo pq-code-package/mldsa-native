@@ -153,6 +153,7 @@ source code and documentation.
   - [mldsa/mldsa_native_config.h](mldsa/mldsa_native_config.h)
   - [mldsa/src/ct.h](mldsa/src/ct.h)
   - [mldsa/src/fips202/fips202.c](mldsa/src/fips202/fips202.c)
+  - [mldsa/src/fips202/fips202x3.c](mldsa/src/fips202/fips202x3.c)
   - [mldsa/src/fips202/fips202x4.c](mldsa/src/fips202/fips202x4.c)
   - [mldsa/src/packing.h](mldsa/src/packing.h)
   - [mldsa/src/poly.c](mldsa/src/poly.c)
