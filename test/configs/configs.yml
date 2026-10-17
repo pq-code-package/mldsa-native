@@ -28,6 +28,11 @@ configs:
     defines:
       MLD_CONFIG_SERIAL_FIPS202_ONLY: true
 
+  - path: test/configs/x3_keccak_config.h
+    description: "Test configuration with the 3-way (x3) batched Keccak path"
+    defines:
+      MLD_CONFIG_USE_X3: true
+
   - path: test/configs/custom_randombytes_config.h
     description: "Test configuration with custom randombytes"
     defines:
