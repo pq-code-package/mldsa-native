@@ -7,9 +7,9 @@
 #ifndef MLD_SYS_H
 #define MLD_SYS_H
 
-#if !defined(MLD_CONFIG_NO_ASM) && (defined(__GNUC__) || defined(__clang__))
-#define MLD_HAVE_INLINE_ASM
-#endif
+/* This header must not depend on configuration options: configuration
+ * hooks may include it before all options are defined, and its include
+ * guard prevents re-evaluation. Evaluate options in common.h instead. */
 
 /* Try to find endianness, if not forced through CFLAGS already */
 #if !defined(MLD_SYS_LITTLE_ENDIAN) && !defined(MLD_SYS_BIG_ENDIAN)
@@ -245,23 +245,6 @@
 #endif
 #endif /* MLD_SYS_X86_64 */
 
-#if defined(MLD_CONFIG_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
-#include <valgrind/memcheck.h>
-#define MLD_CT_TESTING_SECRET(ptr, len) \
-  VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
-#define MLD_CT_TESTING_DECLASSIFY(ptr, len) \
-  VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
-#else /* MLD_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__ */
-#define MLD_CT_TESTING_SECRET(ptr, len) \
-  do                                    \
-  {                                     \
-  } while (0)
-#define MLD_CT_TESTING_DECLASSIFY(ptr, len) \
-  do                                        \
-  {                                         \
-  } while (0)
-#endif /* !(MLD_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__) */
-
 #if defined(__GNUC__) || defined(__clang__)
 #define MLD_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
 #else
@@ -305,26 +288,6 @@ typedef enum
   /* Armv8.1-M */
   MLD_SYS_CAP_ARMV81M_MVE
 } mld_sys_cap;
-
-#if !defined(MLD_CONFIG_CUSTOM_CAPABILITY_FUNC)
-#include "cbmc.h"
-
-MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
-__contract__(
-  ensures(return_value == 0 || return_value == 1)
-)
-{
-  /* By default, we rely on compile-time feature detection/specification:
-   * If a feature is enabled at compile-time, we assume it is supported by
-   * the host that the resulting library/binary will be built on.
-   * If this assumption is not true, you MUST overwrite this function.
-   * See the documentation of MLD_CONFIG_CUSTOM_CAPABILITY_FUNC in
-   * mldsa_native_config.h for more information. */
-  (void)cap;
-  return 1;
-}
-#endif /* !MLD_CONFIG_CUSTOM_CAPABILITY_FUNC */
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_SYS_H */
