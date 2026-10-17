@@ -3065,6 +3065,12 @@ def hol_light_asm_joblist():
             "aarch64",
         ),
         (
+            "keccak_f1600_x3_v8a_v84a_scalar_hybrid_aarch64_asm.S",
+            "dev/fips202/aarch64/src",
+            f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
+            "aarch64",
+        ),
+        (
             "keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S",
             "dev/fips202/aarch64/src",
             f"-Imldsa/src/fips202/native/aarch64/src {aarch64_flags}",
