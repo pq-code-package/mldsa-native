@@ -405,6 +405,85 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
+
+#if defined(MLD_CONFIG_USE_X3)
+/* 3-way variant of mld_poly_uniform_eta_4x (used with
+ * MLD_CONFIG_USE_X3), used by the x3 ExpandS path. Byte-for-byte identical
+ * per-lane behaviour to the x4 sampler: same SHAKE256 XOF, same 1-byte nonce
+ * seed layout, same mld_rej_eta rejection loop; only the batch width differs
+ * (3 lanes instead of 4). */
+MLD_INTERNAL_API
+void mld_poly_uniform_eta_3x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
+                             const uint8_t seed[MLDSA_CRHBYTES], uint8_t nonce0,
+                             uint8_t nonce1, uint8_t nonce2)
+{
+  /* Temporary buffers for XOF output before rejection sampling */
+  MLD_ALIGN uint8_t buf[3][MLD_ALIGN_UP(MLD_POLY_UNIFORM_ETA_NBLOCKS *
+                                        MLD_STREAM256_BLOCKBYTES)];
+
+  MLD_ALIGN uint8_t extseed[3][MLD_ALIGN_UP(MLDSA_CRHBYTES + 2)];
+
+  /* Tracks the number of coefficients we have already sampled */
+  unsigned ctr[3];
+  mld_xof256_x3_ctx state;
+  unsigned buflen;
+
+  mld_memcpy(extseed[0], seed, MLDSA_CRHBYTES);
+  mld_memcpy(extseed[1], seed, MLDSA_CRHBYTES);
+  mld_memcpy(extseed[2], seed, MLDSA_CRHBYTES);
+  extseed[0][MLDSA_CRHBYTES] = nonce0;
+  extseed[1][MLDSA_CRHBYTES] = nonce1;
+  extseed[2][MLDSA_CRHBYTES] = nonce2;
+  extseed[0][MLDSA_CRHBYTES + 1] = 0;
+  extseed[1][MLDSA_CRHBYTES + 1] = 0;
+  extseed[2][MLDSA_CRHBYTES + 1] = 0;
+
+  mld_xof256_x3_init(&state);
+  mld_xof256_x3_absorb(&state, extseed, MLDSA_CRHBYTES + 2);
+
+  /*
+   * Initially, squeeze heuristic number of MLD_POLY_UNIFORM_ETA_NBLOCKS.
+   * This should generate the coefficients with high probability.
+   */
+  mld_xof256_x3_squeezeblocks(buf, MLD_POLY_UNIFORM_ETA_NBLOCKS, &state);
+  buflen = MLD_POLY_UNIFORM_ETA_NBLOCKS * MLD_STREAM256_BLOCKBYTES;
+
+  ctr[0] = mld_rej_eta(r0->coeffs, MLDSA_N, 0, buf[0], buflen);
+  ctr[1] = mld_rej_eta(r1->coeffs, MLDSA_N, 0, buf[1], buflen);
+  ctr[2] = mld_rej_eta(r2->coeffs, MLDSA_N, 0, buf[2], buflen);
+
+  /*
+   * So long as not all entries have been generated, squeeze
+   * one more block at a time until we're done.
+   */
+  buflen = MLD_STREAM256_BLOCKBYTES;
+  while (ctr[0] < MLDSA_N || ctr[1] < MLDSA_N || ctr[2] < MLDSA_N)
+  __loop__(
+    assigns(ctr, state, memory_slice(r0, sizeof(mld_poly)),
+            memory_slice(r1, sizeof(mld_poly)), memory_slice(r2, sizeof(mld_poly)),
+            object_whole(buf[0]), object_whole(buf[1]), object_whole(buf[2]))
+    invariant(ctr[0] <= MLDSA_N && ctr[1] <= MLDSA_N && ctr[2] <= MLDSA_N)
+    invariant(array_abs_bound(r0->coeffs, 0, ctr[0], MLDSA_ETA + 1))
+    invariant(array_abs_bound(r1->coeffs, 0, ctr[1], MLDSA_ETA + 1))
+    invariant(array_abs_bound(r2->coeffs, 0, ctr[2], MLDSA_ETA + 1)))
+  {
+    mld_xof256_x3_squeezeblocks(buf, 1, &state);
+    ctr[0] = mld_rej_eta(r0->coeffs, MLDSA_N, ctr[0], buf[0], buflen);
+    ctr[1] = mld_rej_eta(r1->coeffs, MLDSA_N, ctr[1], buf[1], buflen);
+    ctr[2] = mld_rej_eta(r2->coeffs, MLDSA_N, ctr[2], buf[2], buflen);
+  }
+
+  mld_xof256_x3_release(&state);
+
+  mld_assert_abs_bound(r0->coeffs, MLDSA_N, MLDSA_ETA + 1);
+  mld_assert_abs_bound(r1->coeffs, MLDSA_N, MLDSA_ETA + 1);
+  mld_assert_abs_bound(r2->coeffs, MLDSA_N, MLDSA_ETA + 1);
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(buf, sizeof(buf));
+  mld_zeroize(extseed, sizeof(extseed));
+}
+#endif /* MLD_CONFIG_USE_X3 */
 #else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 MLD_INTERNAL_API
@@ -470,9 +549,11 @@ void mld_poly_uniform_eta(mld_poly *r, const uint8_t seed[MLDSA_CRHBYTES],
   ((MLDSA_POLYZ_PACKEDBYTES + MLD_STREAM256_BLOCKBYTES - 1) / \
    MLD_STREAM256_BLOCKBYTES)
 
-#if MLD_CONFIG_PARAMETER_SET == 65 ||              \
-    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) ||     \
-    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+/* With MLD_CONFIG_USE_X3, ExpandMask also needs the serial sampler for its
+ * 1-polynomial remainder (L=4 and L=7). */
+#if MLD_CONFIG_PARAMETER_SET == 65 || defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST) ||                 \
+    defined(MLD_CONFIG_USE_X3)
 MLD_INTERNAL_API
 void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
                              uint16_t nonce)
@@ -501,7 +582,7 @@ void mld_poly_uniform_gamma1(mld_poly *a, const uint8_t seed[MLDSA_CRHBYTES],
   mld_zeroize(extseed, sizeof(extseed));
 }
 #endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
-          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST || MLD_CONFIG_USE_X3 */
 
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
@@ -554,6 +635,54 @@ void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
   mld_zeroize(buf, sizeof(buf));
   mld_zeroize(extseed, sizeof(extseed));
 }
+
+#if defined(MLD_CONFIG_USE_X3)
+/* 3-way variant of mld_poly_uniform_gamma1_4x (used with
+ * MLD_CONFIG_USE_X3), used by the x3 ExpandMask path. Byte-for-byte identical
+ * per-lane behaviour to the x4 sampler: same SHAKE256 XOF, same 2-byte nonce
+ * layout, same mld_polyz_unpack; only the batch width differs (3 lanes). */
+MLD_INTERNAL_API
+void mld_poly_uniform_gamma1_3x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
+                                const uint8_t seed[MLDSA_CRHBYTES],
+                                uint16_t nonce0, uint16_t nonce1,
+                                uint16_t nonce2)
+{
+  /* Temporary buffers for XOF output before unpacking */
+  MLD_ALIGN uint8_t buf[3][MLD_ALIGN_UP(MLD_POLY_UNIFORM_GAMMA1_NBLOCKS *
+                                        MLD_STREAM256_BLOCKBYTES)];
+
+  MLD_ALIGN uint8_t extseed[3][MLD_ALIGN_UP(MLDSA_CRHBYTES + 2)];
+
+  mld_xof256_x3_ctx state;
+
+  mld_memcpy(extseed[0], seed, MLDSA_CRHBYTES);
+  mld_memcpy(extseed[1], seed, MLDSA_CRHBYTES);
+  mld_memcpy(extseed[2], seed, MLDSA_CRHBYTES);
+  extseed[0][MLDSA_CRHBYTES] = (uint8_t)(nonce0 & 0xFF);
+  extseed[1][MLDSA_CRHBYTES] = (uint8_t)(nonce1 & 0xFF);
+  extseed[2][MLDSA_CRHBYTES] = (uint8_t)(nonce2 & 0xFF);
+  extseed[0][MLDSA_CRHBYTES + 1] = (uint8_t)(nonce0 >> 8);
+  extseed[1][MLDSA_CRHBYTES + 1] = (uint8_t)(nonce1 >> 8);
+  extseed[2][MLDSA_CRHBYTES + 1] = (uint8_t)(nonce2 >> 8);
+
+  mld_xof256_x3_init(&state);
+  mld_xof256_x3_absorb(&state, extseed, MLDSA_CRHBYTES + 2);
+  mld_xof256_x3_squeezeblocks(buf, MLD_POLY_UNIFORM_GAMMA1_NBLOCKS, &state);
+
+  mld_polyz_unpack(r0, buf[0]);
+  mld_polyz_unpack(r1, buf[1]);
+  mld_polyz_unpack(r2, buf[2]);
+  mld_xof256_x3_release(&state);
+
+  mld_assert_bound(r0->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+  mld_assert_bound(r1->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+  mld_assert_bound(r2->coeffs, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1);
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(buf, sizeof(buf));
+  mld_zeroize(extseed, sizeof(extseed));
+}
+#endif /* MLD_CONFIG_USE_X3 */
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) */
 #endif /* !MLD_CONFIG_NO_SIGN_API */

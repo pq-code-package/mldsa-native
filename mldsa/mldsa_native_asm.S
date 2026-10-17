@@ -356,8 +356,10 @@
 #undef mld_poly_challenge
 #undef mld_poly_decompose
 #undef mld_poly_uniform_eta
+#undef mld_poly_uniform_eta_3x
 #undef mld_poly_uniform_eta_4x
 #undef mld_poly_uniform_gamma1
+#undef mld_poly_uniform_gamma1_3x
 #undef mld_poly_uniform_gamma1_4x
 #undef mld_poly_use_hint
 #undef mld_polyeta_pack
@@ -525,6 +527,7 @@
 #undef mld_poly_shiftl
 #undef mld_poly_sub
 #undef mld_poly_uniform
+#undef mld_poly_uniform_3x
 #undef mld_poly_uniform_4x
 #undef mld_polyt0_pack
 #undef mld_polyt0_unpack

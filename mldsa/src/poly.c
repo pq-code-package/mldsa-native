@@ -749,6 +749,70 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
   mld_zeroize(buf, sizeof(buf));
 }
 
+#if defined(MLD_CONFIG_USE_X3)
+/* 3-way variant of mld_poly_uniform_4x (used with
+ * MLD_CONFIG_USE_X3), used by the x3 ExpandA path. Byte-for-byte identical
+ * per-lane behaviour to the x4 sampler: same SHAKE128 XOF, same 2-byte (x,y)
+ * nonce seed layout (set by the caller), same mld_rej_uniform mod-q rejection
+ * loop; only the batch width differs (3 lanes instead of 4). */
+MLD_INTERNAL_API
+void mld_poly_uniform_3x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
+                         uint8_t seed[3][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)])
+{
+  /* Temporary buffers for XOF output before rejection sampling */
+  MLD_ALIGN uint8_t
+      buf[3][MLD_ALIGN_UP(MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES)];
+
+  /* Tracks the number of coefficients we have already sampled */
+  unsigned ctr[3];
+  mld_xof128_x3_ctx state;
+  unsigned buflen;
+
+  mld_xof128_x3_init(&state);
+  mld_xof128_x3_absorb(&state, seed, MLDSA_SEEDBYTES + 2);
+
+  /*
+   * Initially, squeeze heuristic number of MLD_POLY_UNIFORM_NBLOCKS.
+   * This should generate the matrix entries with high probability.
+   */
+
+  mld_xof128_x3_squeezeblocks(buf, MLD_POLY_UNIFORM_NBLOCKS, &state);
+  buflen = MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES;
+  ctr[0] = mld_rej_uniform(vec0->coeffs, MLDSA_N, 0, buf[0], buflen);
+  ctr[1] = mld_rej_uniform(vec1->coeffs, MLDSA_N, 0, buf[1], buflen);
+  ctr[2] = mld_rej_uniform(vec2->coeffs, MLDSA_N, 0, buf[2], buflen);
+
+  /*
+   * So long as not all matrix entries have been generated, squeeze
+   * one more block a time until we're done.
+   */
+  buflen = MLD_STREAM128_BLOCKBYTES;
+  while (ctr[0] < MLDSA_N || ctr[1] < MLDSA_N || ctr[2] < MLDSA_N)
+  __loop__(
+    assigns(ctr, state, object_whole(buf),
+            memory_slice(vec0, sizeof(mld_poly)), memory_slice(vec1, sizeof(mld_poly)),
+            memory_slice(vec2, sizeof(mld_poly)))
+    invariant(ctr[0] <= MLDSA_N && ctr[1] <= MLDSA_N && ctr[2] <= MLDSA_N)
+    invariant(array_bound(vec0->coeffs, 0, ctr[0], 0, MLDSA_Q))
+    invariant(array_bound(vec1->coeffs, 0, ctr[1], 0, MLDSA_Q))
+    invariant(array_bound(vec2->coeffs, 0, ctr[2], 0, MLDSA_Q)))
+  {
+    mld_xof128_x3_squeezeblocks(buf, 1, &state);
+    ctr[0] = mld_rej_uniform(vec0->coeffs, MLDSA_N, ctr[0], buf[0], buflen);
+    ctr[1] = mld_rej_uniform(vec1->coeffs, MLDSA_N, ctr[1], buf[1], buflen);
+    ctr[2] = mld_rej_uniform(vec2->coeffs, MLDSA_N, ctr[2], buf[2], buflen);
+  }
+  mld_xof128_x3_release(&state);
+
+  mld_assert_bound(vec0->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(vec1->coeffs, MLDSA_N, 0, MLDSA_Q);
+  mld_assert_bound(vec2->coeffs, MLDSA_N, 0, MLDSA_Q);
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(buf, sizeof(buf));
+}
+#endif /* MLD_CONFIG_USE_X3 */
+
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) */
 
