@@ -68,6 +68,7 @@ OBJ = mldsa/mldsa_intt_aarch64_asm.o \
       mldsa/keccak_f1600_x1_scalar_aarch64_asm.o \
       mldsa/keccak_f1600_x1_v84a_aarch64_asm.o \
       mldsa/keccak_f1600_x2_v84a_aarch64_asm.o \
+      mldsa/keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm.o \
       mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.o \
       mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.o \
       mldsa/mldsa_polyz_unpack_17_aarch64_asm.o \
