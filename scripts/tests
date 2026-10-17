@@ -1258,6 +1258,7 @@ def cli():
             "x2_v84a",
             "x4_v8a_scalar",
             "x4_v8a_v84a_scalar",
+            "x3_v84a_scalar",
         ],
         default="auto",
         type=str,
