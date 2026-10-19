@@ -796,13 +796,14 @@ size_t mld_prepare_domain_separation_prefix(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg)
 __contract__(
-  requires(ctxlen <= 255)
+  requires(ctxlen <= MLD_MAX_BUFFER_SIZE)
   requires(phlen <= MLD_MAX_BUFFER_SIZE)
   requires(ctxlen == 0 || memory_no_alias(ctx, ctxlen))
   requires(hashalg == MLD_PREHASH_NONE || memory_no_alias(ph, phlen))
   requires(memory_no_alias(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
   assigns(memory_slice(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
+  ensures(ctxlen > 255 ==> return_value == 0)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
