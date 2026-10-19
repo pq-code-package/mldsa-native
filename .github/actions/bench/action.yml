@@ -46,6 +46,9 @@ inputs:
   custom_shell:
     description: The shell to use. Only relevant if no nix-shell specified
     default: "bash"
+  platform:
+    description: Test platform profile
+    default: ""
   cross_prefix:
     description: "Binary prefix for cross-compilation builds"
     default: ""
@@ -85,6 +88,7 @@ runs:
         BENCH_LDFLAGS: ${{ inputs.ldflags }}
         BENCH_OPT: ${{ inputs.opt }}
         BENCH_PERF: ${{ inputs.perf }}
+        BENCH_PLATFORM: ${{ inputs.platform }}
       run: |
         if [[ "$BENCH_OPT" == "false" ]]; then
           bench_opt=no_opt
@@ -98,9 +102,15 @@ runs:
           read -ra extra_args <<<"$BENCH_EXTRA_ARGS"
         fi
 
+        platform_args=()
+        if [[ -n "$BENCH_PLATFORM" ]]; then
+          platform_args+=("--platform=$BENCH_PLATFORM")
+        fi
+
         bench=(
           ./scripts/tests bench
           -c "$BENCH_PERF"
+          "${platform_args[@]}"
           "--cross-prefix=$BENCH_CROSS_PREFIX"
           "--cflags=$BENCH_CFLAGS $BENCH_ARCHFLAGS"
           "--ldflags=$BENCH_LDFLAGS"

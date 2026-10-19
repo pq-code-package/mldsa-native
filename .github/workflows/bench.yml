@@ -38,7 +38,6 @@ jobs:
           bench_extra_args: ""
           nix_shell: bench
           only_no_opt: false
-          extra_makefile: ""
           zephyr_target: ""
         - system: rpi5
           name: Arm Cortex-A76 (Raspberry Pi 5) benchmarks
@@ -50,7 +49,6 @@ jobs:
           nix_shell: bench
           only_no_opt: false
           cross_prefix: ""
-          extra_makefile: ""
           zephyr_target: ""
         - system: a55
           name: Arm Cortex-A55 (Snapdragon 888) benchmarks
@@ -61,7 +59,6 @@ jobs:
           bench_extra_args: -w exec-on-a55
           nix_shell: bench
           only_no_opt: false
-          extra_makefile: ""
           zephyr_target: ""
         - system: bpi
           name: SpacemiT K1 8 (Banana Pi F3) benchmarks
@@ -73,7 +70,6 @@ jobs:
           cross_prefix: riscv64-unknown-linux-gnu-
           nix_shell: cross-riscv64
           only_no_opt: true
-          extra_makefile: ""
           zephyr_target: ""
         - system: m1-mac-mini
           name: Mac Mini (M1, 2020) benchmarks
@@ -84,7 +80,6 @@ jobs:
           bench_extra_args: "-r"
           nix_shell: bench
           only_no_opt: false
-          extra_makefile: ""
           zephyr_target: ""
         - system: nucleo-n657x0
           name: Arm Cortex-M55 (NUCLEO-N657X0-Q) benchmarks
@@ -95,8 +90,8 @@ jobs:
           bench_extra_args: ""
           nix_shell: zephyr
           only_no_opt: false
+          platform: zephyr
           cross_prefix: ""
-          extra_makefile: test/zephyr/platform.mk
           zephyr_target: nucleo-n657x0-q
     if: github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork && (github.event.label.name == 'benchmark' || github.ref == 'refs/heads/main')
     runs-on: self-hosted-${{ matrix.target.system }}
@@ -107,10 +102,10 @@ jobs:
       - uses: ./.github/actions/bench
         if: ${{ !matrix.target.only_no_opt }}
         env:
-          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
           ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
         with:
           name: ${{ matrix.target.name }} (opt)
+          platform: ${{ matrix.target.platform }}
           cflags: ${{ matrix.target.cflags }}
           archflags: ${{ matrix.target.archflags }}
           ldflags: ${{ matrix.target.ldflags }}
@@ -123,10 +118,10 @@ jobs:
           opt: true
       - uses: ./.github/actions/bench
         env:
-          EXTRA_MAKEFILE: ${{ matrix.target.extra_makefile }}
           ZEPHYR_TARGET: ${{ matrix.target.zephyr_target }}
         with:
           name: ${{ matrix.target.name }} (no-opt)
+          platform: ${{ matrix.target.platform }}
           cflags: ${{ matrix.target.cflags }}
           archflags: ${{ matrix.target.archflags }}
           ldflags: ${{ matrix.target.ldflags }}
