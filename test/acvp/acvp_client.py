@@ -138,26 +138,21 @@ def detect_supported_modes():
     acvp_call = exec_prefix + [acvp_bin, "--info"]
     try:
         result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
-        if result.returncode != 0:
-            err(
-                f"Warning: {acvp_call} failed (rc={result.returncode}), assuming all modes supported"
-            )
-            return {"keyGen", "sigGen", "sigVer"}
-        modes = set()
-        for line in result.stdout.splitlines():
-            line = line.strip()
-            if line in ("keyGen", "sigGen", "sigVer"):
-                modes.add(line)
-        return modes
     except FileNotFoundError:
-        err(f"Warning: {acvp_bin} not found, assuming all modes supported")
-        return {"keyGen", "sigGen", "sigVer"}
+        err(f"Error: {acvp_call[0]} not found")
+        sys.exit(1)
+    if result.returncode != 0:
+        err(f"Error: {acvp_call} failed (rc={result.returncode})")
+        sys.exit(1)
+    modes = set()
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if line in ("keyGen", "sigGen", "sigVer"):
+            modes.add(line)
+    return modes
 
 
-def loadDefaultAcvpData(version, supported_modes=None):
-    if supported_modes is None:
-        supported_modes = {"keyGen", "sigGen", "sigVer"}
-
+def loadDefaultAcvpData(version, supported_modes):
     data_dir = f"test/acvp/.acvp-data/{version}/files"
     acvp_jsons_for_version = [
         (
@@ -593,9 +588,7 @@ def runTest(data, output):
     info(f"ALL GOOD! ({cases} cases in {time.time() - start:.1f}s)")
 
 
-def test(
-    prompt, expected, output, version, supported_modes=None, skip_unsupported=False
-):
+def test(prompt, expected, output, version, supported_modes, skip_unsupported=False):
     assert prompt is not None or output is None, (
         "cannot produce output if there is no input"
     )
@@ -617,7 +610,7 @@ def test(
 
     # Seed key-format cases require keyGen to expand the key; drop them when the
     # build does not provide it (unconditionally, unlike --skip-unsupported).
-    if supported_modes is not None and "keyGen" not in supported_modes:
+    if "keyGen" not in supported_modes:
         seed_reasons = filter_test_cases(data, seed_key_format)
         if seed_reasons:
             summary = ", ".join(sorted(set(seed_reasons)))
