@@ -317,8 +317,8 @@ int MLD_API_NAMESPACE(keypair)(
  *                        message representative mu (when externalmu != 0).
  * @param      mlen       Length of m. Must equal MLDSA_CRHBYTES when
  *                        externalmu != 0.
- * @param[in]  pre        Pointer to prefix string. Ignored when
- *                        externalmu != 0.
+ * @param[in]  pre        Pointer to prefix string. May be NULL if
+ *                        prelen == 0. Ignored when externalmu != 0.
  * @param      prelen     Length of prefix string. Ignored when
  *                        externalmu != 0.
  * @param[in]  rnd        Random seed.
@@ -470,7 +470,8 @@ int MLD_API_NAMESPACE(signature_extmu)(
  *                       externalmu != 0).
  * @param     mlen       Length of m. Must equal MLDSA_CRHBYTES when
  *                       externalmu != 0.
- * @param[in] pre        Pointer to prefix string. Ignored when externalmu != 0.
+ * @param[in] pre        Pointer to prefix string. May be NULL if prelen == 0.
+ *                       Ignored when externalmu != 0.
  * @param     prelen     Length of prefix string. Ignored when externalmu != 0.
  * @param[in] pk         Bit-packed public key.
  * @param     externalmu 0: m/mlen is the raw message; mu = H(H(pk), pre, m) is
