@@ -581,10 +581,6 @@
  * - T: Type of structure to be freed.
  * - N: Number of elements to be freed.
  *
- * @warning This option is experimental. Its scope, configuration and
- *          function/macro signatures may change at any time. We expect a
- *          stable API in a future version.
- *
  * @note Even if this option is set, some allocations further down
  * the call stack will still be made from the stack. Those will
  * likely be added to the scope of this option in the future.
