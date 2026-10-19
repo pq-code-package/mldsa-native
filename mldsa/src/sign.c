@@ -134,7 +134,7 @@ static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   /* Deliberately break public key for testing purposes */
   if (mld_break_pct())
   {
-    pk_test[0] = ~pk_test[0];
+    pk_test[0] ^= 0xFF;
   }
 #endif /* MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST */
 
