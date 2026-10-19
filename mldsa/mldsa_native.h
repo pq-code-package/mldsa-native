@@ -388,8 +388,10 @@ int MLD_API_NAMESPACE(signature_internal)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
+ * @retval MLD_ERR_SIGNING_PAUSED          This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         removes this function.
  * @retval MLD_ERR_INVALID_ARG             The context string exceeded 255
  *                                         bytes.
  */
@@ -434,8 +436,10 @@ int MLD_API_NAMESPACE(signature)(
  * @retval MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED The rejection-sampling loop exceeded
  *                                         MLD_CONFIG_MAX_SIGNING_ATTEMPTS
  *                                         iterations.
- * @retval MLD_ERR_SIGNING_PAUSED          A MLD_CONFIG_SIGN_HOOK_ATTEMPT hook
- *                                         paused signing; re-invoke to resume.
+ * @retval MLD_ERR_SIGNING_PAUSED          This should currently never happen:
+ *                                         signing hooks require
+ *                                         MLD_CONFIG_NO_RANDOMIZED_API, which
+ *                                         removes this function.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
