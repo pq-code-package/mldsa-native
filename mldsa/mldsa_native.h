@@ -824,8 +824,8 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  * @return The total length of the formatted prefix, or 0 on error.
  *         Errors are:
  *         - The context string exceeded 255 bytes.
- *         - For HashML-DSA: hashalg was unsupported, ph was NULL, or phlen
- *           did not match the output length of hashalg.
+ *         - For HashML-DSA: hashalg was unsupported, or phlen did not match
+ *           the output length of hashalg.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE

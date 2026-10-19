@@ -1648,7 +1648,7 @@ size_t mld_prepare_domain_separation_prefix(
 
   if (hashalg != MLD_PREHASH_NONE)
   {
-    if (ph == NULL || mld_validate_hash_length(hashalg, phlen) != 0)
+    if (mld_validate_hash_length(hashalg, phlen) != 0)
     {
       return 0;
     }
