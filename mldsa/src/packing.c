@@ -2,10 +2,9 @@
  * Copyright (c) The mldsa-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
-#include <string.h>
+#include "packing.h"
 
 #include "common.h"
-#include "packing.h"
 #include "poly.h"
 #include "polyvec.h"
 #include "rounding.h"
