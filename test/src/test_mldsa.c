@@ -25,14 +25,16 @@
 /* For test-configurations with a low threshold of signing attempts,
  * consider the possibility of signatures failing. */
 #if defined(MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND)
-#define CHECK_SIGN_RC(rc)                      \
-  do                                           \
-  {                                            \
-    if (rc == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED) \
-    {                                          \
-      return 0;                                \
-    }                                          \
-    CHECK(rc == 0);                            \
+#define CHECK_SIGN_RC(call)                                                    \
+  do                                                                           \
+  {                                                                            \
+    const int mld_sign_rc = (call);                                            \
+    if (mld_sign_rc == MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED)                        \
+    {                                                                          \
+      printf("MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED (%s,%d)\n", __FILE__, __LINE__); \
+      return 0;                                                                \
+    }                                                                          \
+    CHECK(mld_sign_rc == 0);                                                   \
   } while (0)
 #else /* MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND */
 #define CHECK_SIGN_RC(rc) CHECK(rc == 0)

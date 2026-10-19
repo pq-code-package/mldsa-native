@@ -103,7 +103,7 @@ runs:
         CFLAGS='-Itest -DMLD_CONFIG_FILE=\"configs/low_signing_bound_config.h\"' make func -j4
         output=$(make run_func 2>&1)
         echo "$output"
-        if ! echo "$output" | grep -q "MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED"; then
+        if ! grep -q "MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED" <<<"$output"; then
            echo "ERROR: Expected MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED message not found"
            exit 1
         fi
