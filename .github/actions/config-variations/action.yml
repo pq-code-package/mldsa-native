@@ -12,7 +12,7 @@ inputs:
     required: false
     default: 'all'
   opt:
-    description: 'Optimization level to pass to multi-functest'
+    description: 'Optimization level to pass to functest'
     required: false
     default: 'all'
   extra_cflags:
@@ -24,10 +24,10 @@ runs:
   steps:
     - name: "PCT enabled"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'pct-enabled') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -41,10 +41,10 @@ runs:
         extra_args: "--exclude-example basic_deterministic --exclude-example restartable_sign"
     - name: "REDUCE_RAM"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'reduce-ram') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_REDUCE_RAM -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -55,10 +55,10 @@ runs:
         examples: true
     - name: "REDUCE_RAM + PCT"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'reduce-ram-pct') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_REDUCE_RAM -DMLD_CONFIG_KEYGEN_PCT -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -109,10 +109,10 @@ runs:
         fi
     - name: "Custom allocation (heap based)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-alloc-heap') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_heap_alloc_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -126,10 +126,10 @@ runs:
         rng_fail: true
     - name: "Custom zeroization (explicit_bzero)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-zeroize') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_zeroize_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -142,10 +142,10 @@ runs:
         rng_fail: true
     - name: "Custom native capability functions (static ON)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'native-cap-ON') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_native_capability_config_1.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -158,10 +158,10 @@ runs:
         rng_fail: true
     - name: "Custom native capability functions (static OFF)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'native-cap-OFF') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_native_capability_config_0.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -174,10 +174,10 @@ runs:
         rng_fail: true
     - name: "Custom native capability functions (ID_AA64PFR1_EL1 detection)"
       if: ${{ (inputs.tests == 'all' || contains(inputs.tests, 'native-cap-ID_AA64PFR1_EL1')) && runner.os == 'Linux' && runner.arch == 'ARM64' }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -march=armv8.4-a+sha3 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_native_capability_config_ID_AA64PFR1_EL1.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -190,10 +190,10 @@ runs:
         rng_fail: true
     - name: "Custom native capability functions (CPUID AVX2 detection)"
       if: ${{ (inputs.tests == 'all' || contains(inputs.tests, 'native-cap-CPUID_AVX2')) && runner.os == 'Linux' && runner.arch == 'X64' }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -mavx2 -mbmi2 -mpopcnt -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_native_capability_config_CPUID_AVX2.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -206,10 +206,10 @@ runs:
         rng_fail: true
     - name: "No ASM"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'no-asm') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/no_asm_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -222,10 +222,10 @@ runs:
         rng_fail: true
     - name: "Serial FIPS202 (no batched Keccak)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'serial-fips202') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/serial_fips202_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -238,10 +238,10 @@ runs:
         rng_fail: true
     - name: "Custom randombytes"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-randombytes') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_randombytes_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -254,10 +254,10 @@ runs:
         rng_fail: false # Uses its own randombytes implementation
     - name: "Custom memcpy"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-memcpy') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_memcpy_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -270,10 +270,10 @@ runs:
         rng_fail: true
     - name: "Custom memset"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-memset') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_memset_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -286,10 +286,10 @@ runs:
         rng_fail: true
     - name: "Custom stdlib (memcpy + memset)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'custom-stdlib') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -std=c11 -D_GNU_SOURCE -Itest -DMLD_CONFIG_FILE=\\\"configs/custom_stdlib_config.h\\\" -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -302,10 +302,10 @@ runs:
         rng_fail: true
     - name: "MLD_POLY_UNIFORM_NBLOCKS=1"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-1') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLD_POLY_UNIFORM_NBLOCKS=1"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -318,10 +318,10 @@ runs:
         rng_fail: true
     - name: "MLD_POLY_UNIFORM_NBLOCKS=4"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-4') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLD_POLY_UNIFORM_NBLOCKS=4"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -334,10 +334,10 @@ runs:
         rng_fail: true
     - name: "MLD_POLY_UNIFORM_NBLOCKS=6"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'nblocks-6') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -DMLD_POLY_UNIFORM_NBLOCKS=6"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -350,10 +350,10 @@ runs:
         rng_fail: true
     - name: "Keygen-only API"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-only') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_SIGN_API -DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -365,10 +365,10 @@ runs:
         examples: true
     - name: "Sign-only API"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'sign-only') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_KEYPAIR_API -DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -380,10 +380,10 @@ runs:
         examples: true
     - name: "Verify-only API"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'verify-only') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_KEYPAIR_API -DMLD_CONFIG_NO_SIGN_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -395,10 +395,10 @@ runs:
         examples: true
     - name: "Keygen+Sign API (no verify)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-sign') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_VERIFY_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -410,10 +410,10 @@ runs:
         examples: true
     - name: "Keygen+Verify API (no sign)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'keygen-verify') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_SIGN_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -425,10 +425,10 @@ runs:
         examples: true
     - name: "Sign+Verify API (no keygen)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'sign-verify') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_KEYPAIR_API -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         ldflags: "-fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"
         func: true
@@ -440,10 +440,10 @@ runs:
         examples: true
     - name: "No randomized API (deterministic only)"
       if: ${{ inputs.tests == 'all' || contains(inputs.tests, 'no-randomized') }}
-      uses: ./.github/actions/multi-functest
+      uses: ./.github/actions/functest
       with:
         gh_token: ${{ inputs.gh_token }}
-        compile_mode: native
+        platform: native
         # Defined empty rather than bare so it does not clash with configs
         # that define it themselves.
         cflags: "${{ inputs.extra_cflags }} -DMLD_CONFIG_NO_RANDOMIZED_API= -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all"

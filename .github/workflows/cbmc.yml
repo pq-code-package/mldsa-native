@@ -31,7 +31,7 @@ jobs:
       ec2_instance_type: c9g.4xlarge
       ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
-      compile_mode: native
+      platform: native
       opt: no_opt
       lint: false
       verbose: true

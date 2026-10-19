@@ -251,10 +251,10 @@ jobs:
         with:
           persist-credentials: false
       - name: native build+functest (default)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -265,10 +265,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "${{ matrix.cflags }}"
       - name: native build+functest (C90)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -279,10 +279,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
       - name: native build+functest (C99)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -293,10 +293,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
       - name: native build+functest (C11)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -308,10 +308,10 @@ jobs:
           cflags: "-std=c11 ${{ matrix.cflags }}"
       - name: native build+functest (C17)
         if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -323,10 +323,10 @@ jobs:
           cflags: "-std=c17 ${{ matrix.cflags }}"
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -442,10 +442,10 @@ jobs:
         with:
           persist-credentials: false
       - name: native build+functest (default)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -456,10 +456,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "${{ matrix.cflags }}"
       - name: native build+functest (C90)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -470,10 +470,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c90 ${{ matrix.cflags }}"
       - name: native build+functest (C99)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -484,10 +484,10 @@ jobs:
           extra_args: ${{ matrix.compiler.extra_args }}
           cflags: "-std=c99 ${{ matrix.cflags }}"
       - name: native build+functest (C11)
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -499,10 +499,10 @@ jobs:
           cflags: "-std=c11 ${{ matrix.cflags }}"
       - name: native build+functest (C17)
         if: ${{ matrix.compiler.family == 'zig' || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 8) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 7) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
@@ -514,10 +514,10 @@ jobs:
           cflags: "-std=c17 ${{ matrix.cflags }}"
       - name: native build+functest (C23)
         if: ${{ (matrix.compiler.family == 'zig' && matrix.compiler.version >= 0.14) || (matrix.compiler.family == 'gcc' && matrix.compiler.version >= 14) || (matrix.compiler.family == 'clang' && matrix.compiler.version >= 18) }}
-        uses: ./.github/actions/multi-functest
+        uses: ./.github/actions/functest
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-          compile_mode: native
+          platform: native
           func: true
           kat: false
           acvp: false
