@@ -213,7 +213,7 @@ static int test_pk_from_sk(void)
   /* Test with corrupted t0 in secret key - should fail validation */
   memcpy(sk_corrupted, sk, MLDSA_SK_BYTES);
   /* Corrupt a byte in the t0 portion of the secret key */
-  sk_corrupted[MLDSA_SEEDBYTES + MLDSA_TRBYTES + MLDSA_SEEDBYTES + 10] ^= 1;
+  sk_corrupted[MLDSA_SK_T0_OFFSET + 10] ^= 1;
 
   ret = mld_sign_pk_from_sk(pk_derived, sk_corrupted);
 
