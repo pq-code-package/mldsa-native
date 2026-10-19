@@ -20,9 +20,6 @@
 #include "ct.h"
 #include "debug.h"
 
-/* check-magic: -4186625 == pow(2,32,MLDSA_Q) */
-#define MLD_MONT (-4186625)
-
 /* Upper bound for domain of mld_reduce32() */
 #define MLD_REDUCE32_DOMAIN_MAX (INT32_MAX - ((int32_t)1 << 22))
 
