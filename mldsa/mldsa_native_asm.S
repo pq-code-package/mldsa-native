@@ -536,7 +536,6 @@
 /* mldsa/src/randombytes.h */
 #undef MLD_RANDOMBYTES_H
 /* mldsa/src/reduce.h */
-#undef MLD_MONT
 #undef MLD_REDUCE32_DOMAIN_MAX
 #undef MLD_REDUCE32_RANGE_MAX
 #undef MLD_REDUCE_H
