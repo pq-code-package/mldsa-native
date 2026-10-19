@@ -18,9 +18,6 @@ The generated configuration in
 - `MLD_CONFIG_CONTEXT_PARAMETER_TYPE`
 - `MLD_CONFIG_CUSTOM_ALLOC_FREE`
 
-Note that `MLD_CONFIG_CUSTOM_ALLOC_FREE` is marked experimental: its scope and
-the signatures of `MLD_CUSTOM_ALLOC`/`MLD_CUSTOM_FREE` may still change.
-
 ## The allocator
 
 The context in [`example_context.h`](example_context.h) holds a bump allocator
