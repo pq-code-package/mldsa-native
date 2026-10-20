@@ -13,7 +13,6 @@
  */
 
 #include "polyvec.h"
-
 #include "debug.h"
 #include "polyvec_lazy.h"
 

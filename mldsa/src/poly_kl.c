@@ -19,7 +19,6 @@
  */
 
 #include "poly_kl.h"
-
 #include "ct.h"
 #include "debug.h"
 #include "rounding.h"

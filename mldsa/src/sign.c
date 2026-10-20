@@ -35,7 +35,6 @@
  */
 
 #include "sign.h"
-
 #include "cbmc.h"
 #include "ct.h"
 #include "debug.h"
