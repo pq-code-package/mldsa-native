@@ -1,0 +1,263 @@
+Copyright (c) The mldsa-native project authors
+SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+Changes to xous-core for the Dabao test platform, see README.md.
+
+diff --git a/baremetal/Cargo.toml b/baremetal/Cargo.toml
+index a954a4c..5d1e544 100644
+--- a/baremetal/Cargo.toml
++++ b/baremetal/Cargo.toml
+@@ -74,6 +74,8 @@ factory-utils = ["ux-api/loader-baosec"]
+ ci-security = []
+ spim-tests = []
+ redteam = ["bao1x-hal/redteam"]
++# links an mldsa-native test binary, see DABAO_LINK_OBJ in build.rs
++mldsa-bench = []
+ 
+ verilator-only = []
+ default = ["bao1x-usb"]
+diff --git a/baremetal/build.rs b/baremetal/build.rs
+index 0e61134..99f670f 100644
+--- a/baremetal/build.rs
++++ b/baremetal/build.rs
+@@ -37,6 +37,15 @@ fn main() {
+         .unwrap();
+     println!("cargo:rustc-link-search={}", out_dir.display());
+ 
++    // The test object linked in by the mldsa-bench feature
++    #[cfg(feature = "mldsa-bench")]
++    {
++        let obj = env::var("DABAO_LINK_OBJ").expect("mldsa-bench requires DABAO_LINK_OBJ");
++        println!("cargo:rerun-if-env-changed=DABAO_LINK_OBJ");
++        println!("cargo:rerun-if-changed={}", obj);
++        println!("cargo:rustc-link-arg={}", obj);
++    }
++
+     println!("cargo:rerun-if-changed=build.rs");
+     println!("cargo:rerun-if-changed=link.x");
+ }
+diff --git a/baremetal/src/asm.rs b/baremetal/src/asm.rs
+index 95aabad..a8c6f9c 100644
+--- a/baremetal/src/asm.rs
++++ b/baremetal/src/asm.rs
+@@ -38,8 +38,9 @@ pub extern "C" fn _start() {
+         asm! (
+             // Place the stack pointer at the end of RAM
+             "mv          sp, {ram_top}",
+-            // subtract four from sp to make room for a DMA "gutter"
+-            "addi        sp, sp, -4",
++            // make room for a DMA "gutter", keeping sp 16-byte aligned as the
++            // psABI requires (C varargs depend on it)
++            "addi        sp, sp, -16",
+ 
+         "50:",
+             // Install a machine mode trap handler
+diff --git a/baremetal/src/main.rs b/baremetal/src/main.rs
+index fc7ab30..5b71d99 100644
+--- a/baremetal/src/main.rs
++++ b/baremetal/src/main.rs
+@@ -5,6 +5,8 @@ extern crate alloc;
+ // contains runtime setup
+ mod asm;
+ 
++#[cfg(feature = "mldsa-bench")]
++mod mldsa;
+ mod platform;
+ mod repl;
+ 
+diff --git a/baremetal/src/mldsa.rs b/baremetal/src/mldsa.rs
+new file mode 100644
+index 0000000..ab1e382
+--- /dev/null
++++ b/baremetal/src/mldsa.rs
+@@ -0,0 +1,59 @@
++//! Runs an mldsa-native test binary linked in as a static library.
++//!
++//! The C side provides `mld_bench_entry`, which runs the test's `main()` with
++//! a heap carved out of the Rust allocator, and prints through `mld_putchar`.
++//! Every exit path ends in `mld_bench_exit`, which reports the return code as
++//! `DABAO_EXIT <rc>` and resets the chip back into boot1. A watchdog, fed on
++//! every line of output, resets the chip if the test hangs or traps.
++
++use alloc::vec::Vec;
++use core::sync::atomic::Ordering;
++
++use bao1x_hal::wdt::Wdt;
++use utralib::*;
++
++extern "C" {
++    fn mld_bench_entry(heap: *mut u8, heap_len: usize) -> i32;
++}
++
++const C_HEAP_LEN: usize = 128 * 1024;
++
++fn usb_tx_empty() -> bool { critical_section::with(|cs| crate::USB_TX.borrow(cs).borrow().is_empty()) }
++
++fn flush() {
++    while !usb_tx_empty() {
++        crate::platform::usb::glue::flush_tx();
++    }
++}
++
++#[no_mangle]
++pub extern "C" fn mld_putchar(c: u8) {
++    critical_section::with(|cs| crate::USB_TX.borrow(cs).borrow_mut().push_back(c));
++    if c == b'\n' {
++        flush();
++        Wdt::new().feed();
++    }
++}
++
++#[no_mangle]
++pub extern "C" fn mld_bench_exit(rc: i32) -> ! {
++    for c in alloc::format!("DABAO_EXIT {}\r\n", rc).bytes() {
++        mld_putchar(c);
++    }
++    flush();
++    // wait for the last packet to leave before resetting
++    while !crate::platform::usb::TX_IDLE.load(Ordering::SeqCst) {}
++    crate::delay(100);
++    let mut csr = CSR::new(utra::sysctrl::HW_SYSCTRL_BASE as *mut u32);
++    csr.wo(utra::sysctrl::SFR_RCURST0, 0x0000_55aa);
++    loop {}
++}
++
++pub fn run() -> ! {
++    // The watchdog counts at 43.75 MHz: a full reload lasts about 98 s, and
++    // the reset follows a second expiry without a feed.
++    Wdt::new().enable(0xFFFF_FFFF, true);
++    let mut heap: Vec<u8> = Vec::with_capacity(C_HEAP_LEN);
++    let rc = unsafe { mld_bench_entry(heap.as_mut_ptr(), C_HEAP_LEN) };
++    mld_bench_exit(rc)
++}
+diff --git a/baremetal/src/platform/bao1x/link.x b/baremetal/src/platform/bao1x/link.x
+index 452ba9c..1a6fd5f 100644
+--- a/baremetal/src/platform/bao1x/link.x
++++ b/baremetal/src/platform/bao1x/link.x
+@@ -2,7 +2,7 @@
+ MEMORY
+ {
+   /* Note: ORIGIN is updated by xtask for baremetal targets */
+-  FLASH : ORIGIN = 0x60060400, LENGTH = 256k - 1024
++  FLASH : ORIGIN = 0x60060400, LENGTH = 1024k - 1024
+   RAM : ORIGIN = 0x61000000, LENGTH = 2048k
+ }
+ 
+@@ -66,15 +66,35 @@ SECTIONS
+ 
+   .rodata : ALIGN(4)
+   {
+-    *(.rodata .rodata.*);
++    *(.rodata .rodata.* .srodata .srodata.*);
+ 
+     /* 4-byte align the end (VMA) of this section.
+        This is required by LLD to ensure the LMA of the following .data
+        section will have the correct alignment. */
++    /* C constructors/destructors; newlib's exit() walks these */
++    . = ALIGN(4);
++    __init_array_start = .;
++    KEEP(*(SORT(.init_array.*) .init_array));
++    __init_array_end = .;
++    __fini_array_start = .;
++    KEEP(*(SORT(.fini_array.*) .fini_array));
++    __fini_array_end = .;
++
+     . = ALIGN(4);
+     _etext = .;
+   } > REGION_RODATA
+ 
++  /* Initialized data of a linked C test (see mldsa.rs), stored after .rodata
++     and copied into place by the C side before it runs */
++  .mld_data : ALIGN(4)
++  {
++    _smld_data = .;
++    KEEP(*(.mld_data));
++    . = ALIGN(4);
++    _emld_data = .;
++  } > REGION_DATA AT > REGION_RODATA
++  _smld_data_lma = LOADADDR(.mld_data);
++
+   .data : ALIGN(4)
+   {
+     _sidata = LOADADDR(.data);
+@@ -178,4 +198,7 @@ then modify your build script to compile the C code _without_ the
+ -fPIC flag. See the documentation of the `gcc::Config.fpic` method for
+ details.");
+ 
+-/* Do not exceed this mark in the error messages above                                    | */
+\ No newline at end of file
++/* Do not exceed this mark in the error messages above                                    | */
++/* Must match DATA_SIZE_BYTES in bao1x.rs: the heap starts right after it */
++ASSERT(_ebss <= ORIGIN(RAM) + 0x6000, "
++ERROR: .data and .bss overflow the reserved region below the heap");
+\ No newline at end of file
+diff --git a/baremetal/src/repl.rs b/baremetal/src/repl.rs
+index 38796b4..22cf5f9 100644
+--- a/baremetal/src/repl.rs
++++ b/baremetal/src/repl.rs
+@@ -478,6 +478,10 @@ impl Repl {
+                     }
+                 }
+             }
++            #[cfg(feature = "mldsa-bench")]
++            "mldsa" => {
++                crate::mldsa::run();
++            }
+             "reset" => {
+                 let mut csr = CSR::new(utra::sysctrl::HW_SYSCTRL_BASE as *mut u32);
+                 csr.wo(utra::sysctrl::SFR_RCURST0, 0x0000_55aa);
+diff --git a/tools/src/elf.rs b/tools/src/elf.rs
+index 267af3c..5634c86 100644
+--- a/tools/src/elf.rs
++++ b/tools/src/elf.rs
+@@ -150,6 +150,17 @@ pub fn read_program<P: AsRef<Path>>(filename: P) -> Result<ProgramDescription, E
+ }
+ 
+ #[allow(clippy::cognitive_complexity)]
++/// Load address of the byte at virtual address `vaddr`, from the program headers.
++fn load_address(elf: &ElfFile, vaddr: u64) -> Option<u64> {
++    elf.program_iter()
++        .find(|ph| {
++            ph.get_type() == Ok(ProgramType::Load)
++                && ph.virtual_addr() <= vaddr
++                && vaddr < ph.virtual_addr() + ph.mem_size()
++        })
++        .map(|ph| ph.physical_addr() + (vaddr - ph.virtual_addr()))
++}
++
+ pub fn read_loader<P: AsRef<Path>>(filename: P) -> Result<ProgramDescription, ElfReadError> {
+     let mut b = Vec::new();
+     {
+@@ -286,6 +297,17 @@ pub fn process_program(b: &[u8], rom_only: bool) -> Result<ProgramDescription, E
+             bss_size += s.size() as u32;
+             debug!("Skipping copy of {} @ {:08x} because nobits", name, s.address());
+             continue;
++        } else if let Some(lma) = load_address(&elf, s.address()).filter(|&lma| lma != s.address()) {
++            // Initialized data with a separate load address (e.g. from a linked
++            // C program): stored at its load address, which follows the
++            // preceding ROM section, and copied into RAM by the program itself.
++            let offset = lma - text_offset as u64;
++            let section_data = s.raw_data(&elf);
++            program_data.seek(SeekFrom::Start(offset)).map_err(ElfReadError::FileSeekError)?;
++            program_data.write(section_data).map_err(ElfReadError::WriteSectionError)?;
++            program_offset = offset + section_data.len() as u64;
++            text_size = program_offset as u32;
++            continue;
+         } else if text_offset == 0 && (s.address() != 0 || s.size() != 0) {
+             text_offset = s.address() as u32;
+             text_size += s.size() as u32;
+diff --git a/xtask/src/builder.rs b/xtask/src/builder.rs
+index 78443e6..bbb697a 100644
+--- a/xtask/src/builder.rs
++++ b/xtask/src/builder.rs
+@@ -901,7 +901,9 @@ impl Builder {
+             return Err("Target unknown: please check your UTRA target".into());
+         }
+ 
+-        crate::utils::ensure_compiler(&self.target.as_deref(), false, false)?;
++        if !self.baremetal {
++            crate::utils::ensure_compiler(&self.target.as_deref(), false, false)?;
++        }
+         crate::utils::ensure_kernel_compiler(&self.target_kernel.as_deref(), false)?;
+         self.locale_override(); // apply the locale override
+ 
