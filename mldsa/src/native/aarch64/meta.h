@@ -75,7 +75,7 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
                                           mld_rej_uniform_table);
 }
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
@@ -133,9 +133,9 @@ static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
   return (int)outlen;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
-#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
@@ -164,7 +164,7 @@ static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
-#endif /* !MLD_CONFIG_NO_SIGN_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
@@ -177,7 +177,7 @@ static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 
-#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
     (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
 MLD_MUST_CHECK_RETURN_VALUE
@@ -206,7 +206,7 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
-#endif /* !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST */
 
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
@@ -218,7 +218,8 @@ static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
   return mld_poly_chknorm_aarch64_asm(a, B);
 }
 
-#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *buf)
@@ -247,7 +248,8 @@ static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
           || MLD_CONFIG_PARAMETER_SET == 87 */
-#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
