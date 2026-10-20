@@ -31,7 +31,6 @@
 #define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
 
 #if !defined(__ASSEMBLER__)
-#include <string.h>
 #include "../../common.h"
 #include "../api.h"
 #include "src/arith_native_x86_64.h"

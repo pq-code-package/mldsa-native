@@ -19,7 +19,6 @@
  */
 
 #include "poly.h"
-
 #include "common.h"
 #include "ct.h"
 #include "debug.h"

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 #include "packing.h"
-
 #include "common.h"
 #include "poly.h"
 #include "polyvec.h"

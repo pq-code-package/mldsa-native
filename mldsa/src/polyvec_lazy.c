@@ -13,7 +13,6 @@
  */
 
 #include "polyvec_lazy.h"
-
 #include "debug.h"
 
 /* This namespacing is not done at the top to avoid a naming conflict
