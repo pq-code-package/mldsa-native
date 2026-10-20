@@ -605,5 +605,20 @@ configs:
             cassert(0);
           }
           #endif /* !__ASSEMBLER__ */
+      MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST:
+        content: |
+          #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
+          #if !defined(__ASSEMBLER__)
+          #include "../../mldsa/src/cbmc.h"
+          #include "../../mldsa/src/sys.h"
+          static MLD_INLINE int mld_break_pct(void)
+          __contract__(
+            ensures(return_value == 0 || return_value == 1))
+          {
+            /* Fail if we forget to invoke mld_break_pct by contract. */
+            cassert(0);
+            return 0;
+          }
+          #endif /* !__ASSEMBLER__ */
       MLD_CONFIG_FILE:
         comment: "/* No need to set this -- we _are_ already in a custom config */"
