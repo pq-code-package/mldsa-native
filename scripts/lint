@@ -371,6 +371,27 @@ gh_group_start "Check contracts"
 check-contracts
 gh_group_end
 
+check-config-variations()
+{
+  # Each step of the config-variations action must be selected in the CI
+  # matrix, and each selected ID must name a step.
+  local steps ids
+  steps=$(grep -o "contains(inputs.tests, '[^']*')" "$ROOT"/.github/actions/config-variations/action.yml | cut -d"'" -f2 | sort -u)
+  ids=$(grep -h '^ *ids:' "$ROOT"/.github/workflows/*.yml | cut -d: -f2- | tr ' ' '\n' | sed '/^$/d' | sort -u)
+  if diff <(echo "$steps") <(echo "$ids"); then
+    info "Check config variations"
+    gh_summary_success "Check config variations"
+  else
+    error "Check config variations"
+    gh_summary_failure "Check config variations"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check config variations"
+check-config-variations
+gh_group_end
+
 check-doxygen()
 {
   if ! command -v doxygen >/dev/null; then
