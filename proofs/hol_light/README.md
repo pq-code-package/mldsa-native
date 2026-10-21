@@ -66,7 +66,7 @@ entire trace (shown here for eta2; the eta4 statement is identical with `REJ_MAS
                     e2 = f_events res buf buflen table pc stackpointer
                                   returnaddress (REJ_MASK_ETA2 inlist) /\
                     memaccess_inbounds e2 (read set) (write set))
-          (* same footprint as _MEMSAFE *)`
+          (\s s'. T)`
 ```
 
 where `REJ_MASK_ETA2 l = MAP (\x. val x < 15) (NIBBLES_OF_BYTES l)` is the reject pattern — one
@@ -194,7 +194,7 @@ echo '1+1;;' | nc -w 5 127.0.0.1 2012
 
 ## Routines covered
 
-All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the rejection samplers. `rej_uniform` is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct, memory-safe, and secret-independent in timing: their event trace is a function of the public pointers and the reject pattern only, never of the accepted coefficient values (see [Constant-time rejection sampling](#constant-time-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
+All routines listed below have been proven correct, memory-safe, and secret-independent in their timing, except for the matrix sampler `rej_uniform`, which is proven correct and memory-safe, and is variable-time by design (see [By design](#by-design-rejection-sampling-for-the-public-matrix-rej_uniform)). `rej_uniform_eta{2,4}` are proven correct, memory-safe, and secret-independent in timing: their event trace is a function of the public pointers and the reject pattern only, never of the accepted coefficient values (see [Constant-time rejection sampling](#constant-time-rejection-sampling-for-the-secret-vector-rej_uniform_eta24)).
 
 ### AArch64
 - ML-DSA Arithmetic:
