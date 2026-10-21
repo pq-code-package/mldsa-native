@@ -46,9 +46,9 @@ candidate coefficients fall inside vs. outside the acceptance interval. The XOF 
 itself secret, but the resulting reject pattern is still safe to leak: each acceptance decision is
 statistically independent of the accepted coefficient values (Section 5.5 of the Dilithium Round 3
 specification[^Round3_Spec]), so the pattern reveals nothing about the secret vector. On both AArch64
-and x86_64 this is now formally proved -- the microarchitectural event trace is proven to be a function
-of the public pointers and the reject pattern (one accept/reject bit per candidate nibble) only, and
-never of the accepted coefficient values.
+and x86_64, the microarchitectural event trace is proven to be a function of the public pointers and the
+reject pattern (one accept/reject bit per candidate nibble) only, and never of the accepted coefficient
+values.
 
 <!--- bibliography --->
 [^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)
