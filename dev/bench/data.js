@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792589774170,
+  "lastUpdate": 1792591386431,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -928403,6 +928403,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/6daba6073b1b51097e36c20c5ba61f644d0273cc"
         },
         "date": 1792050086639,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2134310,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791748,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398890,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034558,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6516715,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25055900,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6865674,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jakemas@amazon.com",
+            "name": "Jake Massimo",
+            "username": "jakemas"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "d7b1b6dd2081d67fef4a075e824024019f64d784",
+          "message": "Add constant-time (f_events) proofs for rej_uniform_eta2 and rej_uniform_eta4\n\nSigned-off-by: Jake Massimo <jakemas@amazon.com>",
+          "timestamp": "2026-10-21T11:15:11Z",
+          "tree_id": "52f86b7ec43ef39a161a74d0a46f28537f7a964d",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/d7b1b6dd2081d67fef4a075e824024019f64d784"
+        },
+        "date": 1792591382807,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
