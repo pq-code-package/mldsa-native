@@ -167,7 +167,9 @@ jobs:
           - name: Graviton5
             ec2_instance_type: c9g.medium
             ec2_ami: ubuntu (aarch64)
-            archflags: -march=armv9-a+sha3 -DMLD_SYS_AARCH64_FAST_SHA3
+            # 3-way batched Keccak (x3). Not combined with MLD_SYS_AARCH64_FAST_SHA3,
+            # which selects the x2_v84a backend before MLD_CONFIG_USE_X3 is checked.
+            archflags: -march=armv9-a+sha3 -DMLD_CONFIG_USE_X3
             cflags: "-flto -DMLD_FORCE_AARCH64"
             ldflags: "-flto"
             perf: PERF
