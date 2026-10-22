@@ -33,3 +33,30 @@ let () =
      concl SIMD_ABBREV_TEST_LEGACY <> simd_abbrev_test_statement
   then failwith "SIMD abbreviation regression changed its claim";
   Printf.printf "SIMD_ABBREVIATION_REGRESSIONS_PASSED\n%!";;
+
+(* REAL_INTEGER_TAC proves structural integer closure without consulting
+   assumptions. Keep those facts out of its recursively split subgoals. *)
+let () =
+  let goal =
+    `integer(real_of_int(x:int) +
+             real_of_int(y:int) * real_of_int(z:int))` in
+  let context = ["unused",ADD_ASSUM `p:bool` (ASSUME `q:bool`)] in
+  List.iter (fun tac ->
+    let _,goals,justify = tac (context,goal) in
+    let th = justify null_inst [] in
+    if goals <> [] || concl th <> goal || hyp th <> [] then
+      failwith "Integer closure changed its closed claim";
+    let th = justify ([],[`v:int`,`x:int`],[]) [] in
+    if concl th <>
+       `integer(real_of_int(v:int) +
+                real_of_int(y:int) * real_of_int(z:int))` ||
+       hyp th <> [] then
+      failwith "Integer closure lost later instantiation")
+   [REAL_INTEGER_TAC; POP_ASSUM_LIST(K REAL_INTEGER_TAC)];
+  let bad = `integer(real_of_int(x:int) / &2)` in
+  let rejects tac =
+    try ignore(tac (["bad",ASSUME bad],bad)); false with Failure _ -> true in
+  if not(rejects REAL_INTEGER_TAC) ||
+     not(rejects (POP_ASSUM_LIST(K REAL_INTEGER_TAC))) then
+    failwith "Integer closure accepted a generally non-integral expression";
+  Printf.printf "CONTEXT_FREE_INTEGER_CLOSURE_REGRESSIONS_PASSED\n%!";;

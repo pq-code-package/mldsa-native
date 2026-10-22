@@ -4456,7 +4456,9 @@ let MLDSA_INTT_CORRECT = prove
       REWRITE_TAC[INT_REM_EQ] THEN
       REWRITE_TAC[REAL_INT_CONGRUENCE; INT_OF_NUM_EQ; ARITH_EQ] THEN
       REWRITE_TAC[GSYM REAL_OF_INT_CLAUSES] THEN
-      CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN REAL_INTEGER_TAC;
+      CONV_TAC(RAND_CONV REAL_POLY_CONV) THEN
+      (* Integer closure needs no execution assumptions. *)
+      POP_ASSUM_LIST(K REAL_INTEGER_TAC);
       MATCH_MP_TAC(INT_ARITH
        `l':int <= l /\ u <= u'
         ==> l <= x /\ x <= u ==> l' <= x /\ x <= u'`) THEN
