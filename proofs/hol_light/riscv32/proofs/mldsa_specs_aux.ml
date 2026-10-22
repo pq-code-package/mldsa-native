@@ -541,9 +541,13 @@ let RV32_MEMOIZED_ASM_CONGBOUND_RULE lfn =
    reads. The RV32 proof uses the same mechanism for scalar X-register reads,
    so keep that small specialization local. *)
 
-let RV32_SIMPLIFY_ABBREV_TAC =
+let RV32_SIMPLIFY_ABBREV_WITH_TAC abbrev_tac =
   let readable =
-    can (term_match [] `read X (s:riscvstate):int32 = whatever`) in
+    function
+    | Comb(Comb(Const("=",_),(Comb(Comb(Const("read",_),_),s) as l)),r) ->
+        type_of s = `:riscvstate` && type_of r = `:int32` &&
+        not (is_read_pc l)
+    | _ -> false in
   fun unfold_defs unfold_aux ->
     let pats =
       map (lhand o snd o strip_forall o concl) unfold_defs in
@@ -565,9 +569,12 @@ let RV32_SIMPLIFY_ABBREV_TAC =
       let tms =
         sort free_in (find_terms pam (rand(concl th''))) in
       (MP_TAC th'' THEN
-       MAP_EVERY AUTO_ABBREV_TAC tms THEN
+       MAP_EVERY abbrev_tac tms THEN
        DISCH_TAC) (asl,w) in
     TRY(FIRST_X_ASSUM(ttac o check (readable o concl)));;
+
+let RV32_SIMPLIFY_ABBREV_TAC =
+  RV32_SIMPLIFY_ABBREV_WITH_TAC AUTO_ABBREV_TAC;;
 
 (* Cache all powers of the ML-DSA root. The RV32 transform proofs evaluate
    thousands of concrete powers; using the generic modular exponentiation
