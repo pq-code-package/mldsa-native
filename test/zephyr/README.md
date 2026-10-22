@@ -36,6 +36,40 @@ Currently supported targets:
 The Armv8.1-M MVE FIPS202 backend is an `OPT=1` feature and is built for
 `mps3-an547` and `nucleo-n657x0-q`.
 
+## Native x4 Keccak byte-access regression test
+
+`test_keccakf1600x4_xor_permute_extract()` in
+[test_unit.c](../src/test_unit.c) compares native x4 Keccak XOR, permutation,
+and extraction with the x1 C reference when `MLD_USE_NATIVE_FIPS202_X4` is
+enabled. The Armv8.1-M MVE byte-access helpers must advance partial-lane
+pointers to the next 8-byte lane, then use byte accesses if any resulting
+pointer is unaligned for word gathers or scatters. An initially aligned
+buffer can become unaligned after processing a partial lane.
+
+The randomized trials cycle through eight equal and mixed buffer-offset
+tuples for inputs and outputs. Equal offsets allow the aligned word path;
+mixed offsets exercise the byte path. Thirteen fixed extraction cases follow
+the randomized trials, covering alignment after a partial-lane prologue,
+word and byte paths with partial tails, each output individually unaligned,
+prologue-only and tail-only ranges, empty ranges, and the state endpoint.
+Sentinels before and after each output range detect out-of-range writes.
+This follows the test structure merged in mlkem-native PR #1766.
+
+Run the full unit suite for all three ML-DSA parameter sets with this backend
+on Cortex-M55 QEMU from the repository root:
+
+```sh
+export EXTRA_MAKEFILE=test/zephyr/platform.mk
+export ZEPHYR_TARGET=mps3-an547
+nix develop .#zephyr --command ./scripts/tests unit --no-auto --opt=opt
+```
+
+`--no-auto` leaves target selection to Zephyr instead of detecting the host
+architecture. Zephyr CI runs unit tests on every emulated target, including
+native and portable configurations on AN547. The larger main stack in
+`app/prj.conf` lets the full ML-DSA-87 suite fit; it is needed for the suite's
+polynomial vectors.
+
 ## How it works
 
 Test binaries are built as Zephyr applications using Zephyr's standard
