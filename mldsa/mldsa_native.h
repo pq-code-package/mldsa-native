@@ -793,6 +793,7 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
 #endif /* !MLD_CONFIG_CORE_API_ONLY */
 
 #if !defined(MLD_CONFIG_CORE_API_ONLY)
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 /**
  * Prepare domain separation prefix for ML-DSA signing.
  *
@@ -828,14 +829,15 @@ int MLD_API_NAMESPACE(verify_pre_hash_shake256)(
  * @return The total length of the formatted prefix, or 0 on error.
  *         Errors are:
  *         - The context string exceeded 255 bytes.
- *         - For HashML-DSA: hashalg was unsupported, ph was NULL, or phlen
- *           did not match the output length of hashalg.
+ *         - For HashML-DSA: hashalg was unsupported, or phlen did not match
+ *           the output length of hashalg.
  */
 MLD_API_QUALIFIER
 MLD_API_MUST_CHECK_RETURN_VALUE
 size_t MLD_API_NAMESPACE(prepare_domain_separation_prefix)(
     uint8_t prefix[MLD_DOMAIN_SEPARATION_MAX_BYTES], const uint8_t *ph,
     size_t phlen, const uint8_t *ctx, size_t ctxlen, int hashalg);
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 /**

@@ -385,6 +385,10 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) &&                                   \
+     !defined(MLD_CONFIG_CORE_API_ONLY)) ||                                   \
+    defined(MLD_UNIT_TEST)
 #define mld_poly_chknorm MLD_NAMESPACE(poly_chknorm)
 /**
  * Check infinity norm of polynomial against given bound. Assumes input
@@ -413,6 +417,9 @@ __contract__(
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
   ensures((return_value == 0) == array_abs_bound(a->coeffs, 0, MLDSA_N, B))
 );
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API ||      \
+          (!MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_CORE_API_ONLY) || \
+          MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
