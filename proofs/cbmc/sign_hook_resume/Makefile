@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = sign_resume_harness
+HARNESS_FILE = sign_hook_resume_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = mld_sign_resume
+PROOF_UID = mld_sign_hook_resume
 
 DEFINES +=
 INCLUDES +=
