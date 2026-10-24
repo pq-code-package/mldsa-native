@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792814923870,
+  "lastUpdate": 1792815077559,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -112860,6 +112860,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 1390246,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "jakemas@amazon.com",
+            "name": "Jake Massimo",
+            "username": "jakemas"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "d7b1b6dd2081d67fef4a075e824024019f64d784",
+          "message": "Add constant-time (f_events) proofs for rej_uniform_eta2 and rej_uniform_eta4\n\nSigned-off-by: Jake Massimo <jakemas@amazon.com>",
+          "timestamp": "2026-10-21T11:15:11Z",
+          "tree_id": "52f86b7ec43ef39a161a74d0a46f28537f7a964d",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/d7b1b6dd2081d67fef4a075e824024019f64d784"
+        },
+        "date": 1792815074272,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 462600,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 2137875,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 555712,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 779146,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 3490537,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 859822,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 1260345,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 4287512,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 1380430,
             "unit": "cycles"
           }
         ]
