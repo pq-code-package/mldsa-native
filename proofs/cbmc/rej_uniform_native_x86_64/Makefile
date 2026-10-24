@@ -30,7 +30,9 @@ USE_DYNAMIC_FRAMES=1
 # straight to the SMT tactic) to avoid Z3 divergence in solve time across
 # platforms, which otherwise pushes this proof over the CI per-proof timeout.
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3_smt_only
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_smt_only \
+  LP64:bitwuzla
 CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = rej_uniform_native_x86_64
