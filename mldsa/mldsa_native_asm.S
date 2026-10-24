@@ -112,6 +112,7 @@
 #include "src/fips202/native/aarch64/src/keccak_f1600_x1_scalar_aarch64_asm.S"
 #include "src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S"
 #include "src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S"
+#include "src/fips202/native/aarch64/src/keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm.S"
 #include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S"
 #include "src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S"
 #endif /* MLD_SYS_AARCH64 */
@@ -355,8 +356,10 @@
 #undef mld_poly_challenge
 #undef mld_poly_decompose
 #undef mld_poly_uniform_eta
+#undef mld_poly_uniform_eta_3x
 #undef mld_poly_uniform_eta_4x
 #undef mld_poly_uniform_gamma1
+#undef mld_poly_uniform_gamma1_3x
 #undef mld_poly_uniform_gamma1_4x
 #undef mld_poly_use_hint
 #undef mld_polyeta_pack
@@ -524,6 +527,7 @@
 #undef mld_poly_shiftl
 #undef mld_poly_sub
 #undef mld_poly_uniform
+#undef mld_poly_uniform_3x
 #undef mld_poly_uniform_4x
 #undef mld_polyt0_pack
 #undef mld_polyt0_unpack
@@ -548,6 +552,11 @@
 #undef mld_xof128_init
 #undef mld_xof128_release
 #undef mld_xof128_squeezeblocks
+#undef mld_xof128_x3_absorb
+#undef mld_xof128_x3_ctx
+#undef mld_xof128_x3_init
+#undef mld_xof128_x3_release
+#undef mld_xof128_x3_squeezeblocks
 #undef mld_xof128_x4_absorb
 #undef mld_xof128_x4_ctx
 #undef mld_xof128_x4_init
@@ -558,6 +567,11 @@
 #undef mld_xof256_init
 #undef mld_xof256_release
 #undef mld_xof256_squeezeblocks
+#undef mld_xof256_x3_absorb
+#undef mld_xof256_x3_ctx
+#undef mld_xof256_x3_init
+#undef mld_xof256_x3_release
+#undef mld_xof256_x3_squeezeblocks
 #undef mld_xof256_x4_absorb
 #undef mld_xof256_x4_ctx
 #undef mld_xof256_x4_init
@@ -592,6 +606,16 @@
 #undef mld_shake256_init
 #undef mld_shake256_release
 #undef mld_shake256_squeeze
+/* mldsa/src/fips202/fips202x3.h */
+#undef MLD_FIPS202_FIPS202X3_H
+#undef mld_shake128x3_absorb_once
+#undef mld_shake128x3_init
+#undef mld_shake128x3_release
+#undef mld_shake128x3_squeezeblocks
+#undef mld_shake256x3_absorb_once
+#undef mld_shake256x3_init
+#undef mld_shake256x3_release
+#undef mld_shake256x3_squeezeblocks
 /* mldsa/src/fips202/fips202x4.h */
 #undef MLD_FIPS202_FIPS202X4_H
 #undef mld_shake128x4_absorb_once
@@ -606,9 +630,13 @@
 #undef MLD_FIPS202_KECCAKF1600_H
 #undef MLD_KECCAK_LANES
 #undef MLD_KECCAK_WAY
+#undef MLD_KECCAK_WAY_X3
 #undef mld_keccakf1600_extract_bytes
 #undef mld_keccakf1600_permute
 #undef mld_keccakf1600_xor_bytes
+#undef mld_keccakf1600x3_extract_bytes
+#undef mld_keccakf1600x3_permute
+#undef mld_keccakf1600x3_xor_bytes
 #undef mld_keccakf1600x4_extract_bytes
 #undef mld_keccakf1600x4_permute
 #undef mld_keccakf1600x4_xor_bytes
@@ -632,6 +660,7 @@
 #undef mld_keccak_f1600_x1_scalar_aarch64_asm
 #undef mld_keccak_f1600_x1_v84a_aarch64_asm
 #undef mld_keccak_f1600_x2_v84a_aarch64_asm
+#undef mld_keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm
 #undef mld_keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
 #undef mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
 #undef mld_keccakf1600_round_constants
@@ -647,6 +676,10 @@
 #undef MLD_FIPS202_AARCH64_NEED_X2_V84A
 #undef MLD_FIPS202_NATIVE_AARCH64_X2_V84A_H
 #undef MLD_USE_NATIVE_FIPS202_X4
+/* mldsa/src/fips202/native/aarch64/x3_v84a_scalar.h */
+#undef MLD_FIPS202_AARCH64_NEED_X3_V84A_SCALAR_HYBRID
+#undef MLD_FIPS202_NATIVE_AARCH64_X3_V84A_SCALAR_H
+#undef MLD_USE_NATIVE_FIPS202_X3
 /* mldsa/src/fips202/native/aarch64/x4_v8a_scalar.h */
 #undef MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID
 #undef MLD_FIPS202_NATIVE_AARCH64_X4_V8A_SCALAR_H
