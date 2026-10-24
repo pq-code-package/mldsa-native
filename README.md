@@ -51,6 +51,8 @@ make test
 mldsa-native is used in
  - AWS' Cryptography library [AWS-LC](https://github.com/aws/aws-lc/)
  - [libOQS](https://github.com/open-quantum-safe/liboqs/) of the Open Quantum Safe project
+ - [PyCryptodome](https://github.com/Legrandin/pycryptodome) - a self-contained Python package of low-level cryptographic primitives
+ - [TF-PSA-Crypto](https://github.com/Mbed-TLS/TF-PSA-Crypto) - the PSA Cryptography API implementation of Mbed TLS
  - [Pavona](https://github.com/pavona/pavona) - a library of modular, tapeout-proven, and secure-by-default open silicon blocks
  - [CHERIoT-PQC](https://github.com/CHERIoT-Platform/cheriot-pqc) — post-quantum cryptography support for the CHERIoT platform
 
