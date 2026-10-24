@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792826274980,
+  "lastUpdate": 1792826298206,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -432411,6 +432411,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 135636,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "a12d5b99179553f6e50b2454f8003db2a0bbdd3e",
+          "message": "tests: Reject platform Makefiles for examples\n\nBefore platform profiles, the standalone example Makefiles did not\ninclude `EXTRA_MAKEFILE` or the test platform hooks. Bare-metal and\nZephyr CI callers already disabled examples explicitly, but manual\n`examples` or default `all` invocations silently built host examples\nwhile tests used the selected platform Makefile.\n\nReject examples whenever the resolved configuration uses a platform\nMakefile. Keep `all --no-examples` and prefix-based Linux profiles\nunchanged, and document the pre-existing limitation in BUILDING.md.\n\n - Ports pq-code-package/mlkem-native#1747.\n - Resolves #1424.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-24T05:06:58Z",
+          "tree_id": "907bb65aa2f1fb47a252c9dc98e79bce1a38df2e",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/a12d5b99179553f6e50b2454f8003db2a0bbdd3e"
+        },
+        "date": 1792826126042,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 47905,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 139382,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 49633,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81980,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 227900,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 82277,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 132735,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 280309,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 128553,
             "unit": "cycles"
           }
         ]
