@@ -175,6 +175,138 @@ For convenience, you can also use `tests hol_light`, which wraps the `make`
 invocation above. Pass `-a riscv32` when cross-checking RV32IM proofs on
 another host; see `tests hol_light --help`.
 
+### RV32IM arithmetic proof unrolling
+
+All five RV32IM routine entries execute every core instruction symbolically:
+
+| Routine | Core instructions |
+| --- | ---: |
+| Forward NTT | 9,369 |
+| Forward NTT, slow multiplier | 12,439 |
+| Inverse NTT | 11,936 |
+| Inverse NTT, slow multiplier | 15,774 |
+| Pointwise Montgomery multiplication | 2,821 |
+
+Their bytecode assertions and public core, subroutine and safety
+specifications are unchanged. The local helpers first prove exact output
+words without input bounds; the existing arithmetic theorems then establish
+the mathematical result and output bounds. Inverse NTT execution includes
+the final scaling loop. Pointwise execution retains the second input array
+as frame-protected immutable reads.
+
+The entries enable scoped s2n-bignum context rewriting and memory snapshots,
+and explicitly request permitted-frame seeding. They use ordinary arithmetic
+abbreviations and memoized output-expression traversal. Their block-based
+safety proofs track intermediate frames and keep the final trace function
+under a short name until the whole safety proof has been assembled.
+No HOL Light source or kernel change is needed.
+
+### Symbolic execution support
+
+The Nix package pins the reviewed s2n-bignum fork revision and source hash
+in `nix/s2n_bignum/default.nix`. The normal cross shell selects this package;
+the production proofs do not require a local override or a HOL Light patch.
+The selected source includes nine execution optimizations plus the two
+opt-in helpers described below. It excludes phase profiling, goal-only
+abbreviations, omission of intermediate frames and the replay-only proof cache.
+
+For development against an editable s2n-bignum checkout, use Nix's dependency
+redirect from the repository root:
+
+```bash
+nix develop .#hol_light-cross-riscv32 \
+  --redirect .#s2n_bignum "$HOME/repos/s2n-bignum-task-speedups"
+```
+
+The shell exports the selected source as `S2N_BIGNUM_DIR` and points the
+namespaced HOL Light import at it. The redirect affects only that development
+shell; it does not change the committed revision or source hash.
+
+Context rewriting reuses preparation for unchanged assumption-list tails.
+A HOL Light conversion takes a term `t` and returns a theorem
+`Gamma |- t = u`: a checked equality to the simplified term `u`, with any
+hypotheses `Gamma` used by the rewrite.
+
+Output folding opts into `MEMOIZED_TOP_DEPTH_CONV`. For an expression such as
+`f 0 + f 0`, ordinary traversal proves the simplification of `f 0` twice;
+the new traversal remembers the first equality theorem and reuses it.
+The cache keys are exact terms, including types and variable names, not
+rewrite patterns. Its limit of 16384 entries bounds the number of results,
+not their total size. `CACHE_LAST_THEOREM_CONV` rebuilds the conversion when
+the actual context proof objects or basic rewrite table change. Reused
+theorems keep their hypotheses: a fact derived from one context is not
+treated as an unconditional equality in a different context.
+
+Arithmetic names use ordinary `AUTO_ABBREV_TAC`, which rewrites the whole
+context. Existing s2n-bignum `TOP_DEPTH_CONV` callers remain unchanged.
+
+A HOL Light tactic returns subgoals and a justification function. Once the
+subgoals have been proved, that function assembles the input goal's theorem
+and applies substitutions found during the remaining proof.
+
+The safety specification chooses a function describing the complete event
+trace. Substituting that large function into saved instruction theorems
+repeatedly traverses the same expression. All five RV32 entries select
+`PROVE_SAFETY_SPEC_TAC ~defer_witness:true`, wrapping the complete safety
+driver in `WITH_DEFERRED_ABBREVS_TAC`, including its existential introduction.
+For the function `t`, the wrapper supplies a fresh name `n` under the
+temporary theorem hypothesis `t = n`. Saved justifications substitute that
+short name while assembling the proof.
+
+Only afterwards does existential elimination remove the naming equation,
+using the checked theorem `|- ?n. t = n`, proved by choosing `t`.
+No naming equation remains in the final theorem; ordinary kernel checks
+still reject captured local variables. Memory-access bounds, intermediate
+frame tracking and public claims are unchanged. Callers without the flag
+keep the ordinary witness path.
+
+`ENSURES_INIT_TAC` tracks the actual writes from an initially empty frame
+by default, preserving the intermediate frame facts used by existing proofs.
+Use `ENSURES_INIT_TAC ~seed_frame:true` to start from the permitted frame
+instead. This requires a proof that the frame is reflexive; unsupported
+frames fall back to the empty starter. Opted-in callers keep frame size
+bounded while stepping through longer instruction sequences.
+
+The RV32 NTT helper has focused regressions for specification parameters,
+restoring scoped tactic options on success and failure, and preserving
+hypotheses when folding the final output expressions. From the repository
+root, inside the HOL Light cross shell, build and run them with:
+
+```bash
+unroll_test_dir="$(mktemp -d /tmp/mldsa-ntt-unroll-tests.XXXXXX)"
+cd proofs/hol_light
+riscv32/proofs/build-proof.sh \
+  "$PWD/riscv32/proofs/mldsa_ntt_unroll_tests.ml" \
+  "$HOLLIGHT_DIR/hol.sh" "$unroll_test_dir/ntt-unroll-tests.native"
+OCAMLRUNPARAM=l=2000000000 "$unroll_test_dir/ntt-unroll-tests.native"
+```
+
+Require a zero exit status, the factory-regression success message and the
+final `Running time` line. These focused checks do not prove the NTT itself;
+the complete routine entries must also prove correctness and safety.
+
+The ARM and x86 NTT proofs use ordinary `SIMD_SIMPLIFY_ABBREV_TAC`, which
+rewrites the whole context when it introduces arithmetic names. At the final
+integer-closure goal, these proofs discard execution assumptions before
+calling `REAL_INTEGER_TAC`, which does not consult them.
+
+The shared regressions check the abbreviation's claim and unchanged
+integer-closure claims, including later instantiation and rejection of a
+generally non-integral expression. From the repository root, inside the
+HOL Light shell, run:
+
+```bash
+simd_test_dir="$(mktemp -d /tmp/mldsa-simd-tests.XXXXXX)"
+cd proofs/hol_light
+aarch64/proofs/build-proof.sh \
+  "$PWD/common/mldsa_specs_tests.ml" \
+  "$HOLLIGHT_DIR/hol.sh" "$simd_test_dir/mldsa-specs-tests.native"
+"$simd_test_dir/mldsa-specs-tests.native"
+```
+
+Require a zero exit status, both regression success messages and the
+final `Running time` line. The complete routine proofs remain necessary.
+
 ## Interactive proof development
 
 For interactive proof development, start the HOL Light server:

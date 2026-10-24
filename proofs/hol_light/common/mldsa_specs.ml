@@ -11,6 +11,7 @@
 
 needs "Library/words.ml";;
 needs "Library/isum.ml";;
+needs "s2n_bignum/common/misc.ml";;
 
 (* ------------------------------------------------------------------------- *)
 (* The pure forms of forward and inverse NTT with no reordering.             *)
@@ -1165,11 +1166,12 @@ let rec LOCAL_CONGBOUND_RULE lfn asms =
 (* The ABBREV form also introduces abbreviations for relevant subterms.      *)
 (* ------------------------------------------------------------------------- *)
 
-let SIMD_SIMPLIFY_CONV unfold_defs =
+let SIMD_SIMPLIFY_CONV =
+  CACHE_LAST_THEOREM_CONV (fun unfold_defs ->
   TOP_DEPTH_CONV
    (REWR_CONV WORD_SUBWORD_AND ORELSEC WORD_SIMPLE_SUBWORD_CONV) THENC
   DEPTH_CONV WORD_NUM_RED_CONV THENC
-  REWRITE_CONV (map GSYM unfold_defs);;
+  REWRITE_CONV (map GSYM unfold_defs));;
 
 let SIMD_SIMPLIFY_TAC unfold_defs =
   let arm_simdable = can (term_match [] `read X (s:armstate):int128 = whatever`) in
@@ -1207,8 +1209,6 @@ let SIMD_SIMPLIFY_ABBREV_TAC =
       let tms = sort free_in (find_terms pam (rand(concl th''))) in
       (MP_TAC th'' THEN MAP_EVERY AUTO_ABBREV_TAC tms THEN DISCH_TAC) (asl,w) in
   TRY(FIRST_X_ASSUM(ttac o check (simdable o concl)));;
-
-
 
 (* ========================================================================= *)
 (* zunpack: gamma1 - x unpacking for polyz                                   *)
