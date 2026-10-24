@@ -4394,11 +4394,13 @@ let MLDSA_INTT_CORRECT = prove
 
 (*** Execute the inverse NTT simulation ***)
 
-  MAP_UNTIL_TARGET_PC (fun n -> X86_STEPS_TAC MLDSA_INTT_TMC_EXEC [n] THEN
-                      SIMD_SIMPLIFY_ABBREV_TAC[mldsa_montmul]
+  (let step = X86_STEPS_TAC MLDSA_INTT_TMC_EXEC
+   and simplify = SIMD_SIMPLIFY_ABBREV_TAC[mldsa_montmul]
                         [WORD_ADD_MLDSA_MONTMUL;
-                         WORD_ADD_MLDSA_MONTMUL_ALT; WORD_SUB_MLDSA_MONTMUL])
-        1 THEN
+                         WORD_ADD_MLDSA_MONTMUL_ALT; WORD_SUB_MLDSA_MONTMUL] in
+   MAP_UNTIL_TARGET_PC (fun n -> step [n] THEN
+                      simplify)
+        1) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
 (**** Reverse the restructuring by splitting the 256-bit words up ***)
