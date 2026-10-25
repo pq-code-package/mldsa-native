@@ -61,7 +61,7 @@ runs:
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mldsa_parameter_set }}
           REDUCE_RAM: ${{ inputs.reduce_ram }}
-          WORKSPACE: ${{ github.workspace }}
+          RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
           echo "::group::cbmc_$PARAMETER_SET"
           reduce_ram_flag=""
@@ -72,10 +72,13 @@ runs:
             data_dir="dev/cbmc-reduce-ram"
             variant="reduce-ram"
           fi
-          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$WORKSPACE/cbmc_result_$PARAMETER_SET.json" $reduce_ram_flag || cbmc_failed=true
+          # Write the results at their gh-pages path; see cbmc_publish.yml.
+          result="$RESULTS_DIR/$data_dir/mldsa-$PARAMETER_SET.json"
+          mkdir -p "$(dirname "$result")"
+          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$result" $reduce_ram_flag || cbmc_failed=true
           echo "::endgroup::"
           python3 "$ACTION_PATH/report.py" \
-            --results-json "$WORKSPACE/cbmc_result_$PARAMETER_SET.json" \
+            --results-json "$result" \
             --mldsa-parameter-set "$PARAMETER_SET" \
             --min-runtime 20 \
             --regression-threshold 1.5 \
@@ -83,3 +86,11 @@ runs:
             --data-dir "$data_dir" \
             --variant "$variant"
           if [ "$cbmc_failed" = "true" ]; then exit 1; fi
+      - name: Upload CBMC results for publishing
+        if: ${{ github.event_name == 'merge_group' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cbmc-results-mldsa-${{ inputs.mldsa_parameter_set }}${{ inputs.reduce_ram == 'true' && '-reduce-ram' || '' }}
+          path: ${{ runner.temp }}/cbmc-results/
+          if-no-files-found: error
+          retention-days: 7
