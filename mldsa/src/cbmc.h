@@ -105,6 +105,15 @@
  * Note that the range on qvar is _exclusive_ between qvar_lb .. qvar_ub
  * https://diffblue.github.io/cbmc/contracts-quantifiers.html
  *
+ * forall(qvar, qvar_lb, qvar_ub, predicate) quantifies directly over
+ * [qvar_lb, qvar_ub).
+ *
+ * forall(qvar, qvar_lb, qvar_ub, qvar_max, predicate) additionally takes a
+ * compile-time constant qvar_max. It quantifies over [0, qvar_max) and
+ * restricts to [qvar_lb, qvar_ub) via an implication. Use this form when
+ * qvar_ub is variable, so the propositional backend can expand a constant
+ * range. A variable qvar_lb alone does not require this form.
+ *
  * The quantified variable is declared as uint32_t, so these macros
  * quantify only over indices in [0, UINT32_MAX). Bounds larger than
  * UINT32_MAX (4 GiB) are NOT supported: the explicit (uint32_t) casts
@@ -122,12 +131,23 @@
  * Prevent clang-format from corrupting CBMC's special ==> operator
  */
 /* clang-format off */
-#define forall(qvar, qvar_lb, qvar_ub, predicate)                              \
+#define CBMC_FORALL(qvar, qvar_lb, qvar_ub, predicate)                         \
   __CPROVER_forall                                                             \
   {                                                                            \
     uint32_t qvar;                                                             \
     ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> (predicate) \
   }
+
+#define CBMC_FORALL_BOUNDED(qvar, qvar_lb, qvar_ub, qvar_max, predicate)       \
+  CBMC_FORALL(qvar, 0, qvar_max,                                               \
+              ((uint32_t)(qvar_lb) <= (qvar) &&                                \
+               (qvar) < (uint32_t)(qvar_ub)) ==> (predicate))
+
+/* The final argument keeps the selector's variadic tail nonempty in C99. */
+#define CBMC_FORALL_SELECT(_1, _2, _3, _4, _5, NAME, ...) NAME
+#define forall(...)                                                        \
+  CBMC_FORALL_SELECT(__VA_ARGS__, CBMC_FORALL_BOUNDED, CBMC_FORALL,           \
+                     unused)(__VA_ARGS__)
 
 #define exists(qvar, qvar_lb, qvar_ub, predicate)                              \
   __CPROVER_exists                                                             \

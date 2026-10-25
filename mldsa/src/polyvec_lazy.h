@@ -288,7 +288,7 @@ __contract__(
   __loop__(
     assigns(i, memory_slice(t0, sizeof(mld_sk_t0hat_eager)))
     invariant(i <= MLDSA_K)
-    invariant(forall(k0, 0, i,
+    invariant(forall(k0, 0, i, MLDSA_K,
       array_bound(t0->vec.vec[k0].coeffs, 0, MLDSA_N,
                   -(1 << (MLDSA_D - 1)) + 1, (1 << (MLDSA_D - 1)) + 1)))
     decreases(MLDSA_K - i)
