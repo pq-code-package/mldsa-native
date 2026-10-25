@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792950720715,
+  "lastUpdate": 1792950746613,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -599807,6 +599807,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 193695,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "a7549918eba30765d397fe5ce667291d31b28333",
+          "message": "CI: Publish CBMC baselines from merge queue runs\n\nPR reports compare CBMC runtimes with baselines on gh-pages\n(dev/cbmc[-reduce-ram]/mldsa-{44,65,87}.json). report.py wrote them in\nCI runs on main. Since 529a89dd (\"CI: Do not run on pushes to main\"),\nCI runs on PRs and in the merge queue only, and the baselines are\nstill those of 2026-07-03, from before per-configuration timings.\n\nThe merge queue tests the exact commit that main is then fast-forwarded\nto, so its timings are the right baseline. When a batch of PRs merges\nas one push, the run for the tip covers the whole batch.\n\n- Each CBMC job writes its result file at its gh-pages path under\n  $RUNNER_TEMP/cbmc-results. In merge queue runs it uploads that tree\n  as artifact cbmc-results-mldsa-<set>[-reduce-ram]. A failing proof\n  fails the step before the upload.\n- cbmc_publish.yml runs on each push to main. It finds the merge queue\n  run of all.yml for the pushed commit, downloads its artifacts into a\n  gh-pages checkout, and pushes them as one commit with the workflow\n  token. If bench.yml pushed first, it rebases and retries once. For a\n  commit that reached main outside the merge queue, it warns and skips.\n\nThe workflow pushes with git instead of the Contents API that\npush_to_gh_pages() used. A result file now has 3010 entries (215\nproofs, 2 data models, 7 solver profiles), about 570 KiB. Its base64\nencoding is too long for the single `-F content=...` argument of\n`gh api`: Linux limits one argument to 128 KiB.\n\nRemove push_to_gh_pages() and the refs/heads/main branch of report.py\nmain() that called it.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-25T16:14:56Z",
+          "tree_id": "43d969365a78aba8fe93fb41c194111041136ea6",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/a7549918eba30765d397fe5ce667291d31b28333"
+        },
+        "date": 1792950499867,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 68263,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 198874,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 70423,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 120576,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 325926,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 117081,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 198541,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 422139,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 193754,
             "unit": "cycles"
           }
         ]
