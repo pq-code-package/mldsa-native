@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792916998867,
+  "lastUpdate": 1792917123615,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -75975,6 +75975,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 853291,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "4ec47ced108bdec652b169ee203e01d9a39c7fd5",
+          "message": "CBMC: Add cvc5 profiles with quantifier instantiation\n\ncvc5_arrays_exp returns unknown on most proofs that lack a second\nsolver, because cvc5 gives up on quantifier instantiation by default.\nAdd two cvc5 profiles that instantiate more aggressively:\n\n- cvc5_mbqi_enum: --mbqi --mbqi-enum\n- cvc5_enum_inst: --enum-inst\n\nUse them as a second solver for 21 proofs that discharge in about 150s\nor less locally: 20 with cvc5_mbqi_enum, and poly_use_hint_c with\ncvc5_enum_inst. Also add bitwuzla as a second solver for\npoly_power2round.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-25T06:42:28Z",
+          "tree_id": "69302df728c97d83837e0ec5148f08d9cb556d1f",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/4ec47ced108bdec652b169ee203e01d9a39c7fd5"
+        },
+        "date": 1792917120649,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 295318,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 1110298,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 322756,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 536415,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 1817668,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 514367,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 825690,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 2325584,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 852301,
             "unit": "cycles"
           }
         ]
