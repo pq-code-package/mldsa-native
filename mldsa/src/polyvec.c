@@ -86,7 +86,7 @@ void mld_polyvecl_ntt(mld_polyvecl *v)
     assigns(i, memory_slice(v, sizeof(mld_polyvecl)))
     invariant(i <= MLDSA_L)
     invariant(forall(k0, i, MLDSA_L, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
-    invariant(forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k1, 0, i, MLDSA_L, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     decreases(MLDSA_L - i))
   {
     mld_poly_ntt(&v->vec[i]);
@@ -253,7 +253,7 @@ void mld_polyveck_reduce(mld_polyveck *v)
     assigns(i, memory_slice(v, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
-    invariant(forall(k2, 0, i,
+    invariant(forall(k2, 0, i, MLDSA_K,
       array_bound(v->vec[k2].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
     decreases(MLDSA_K - i)
   )
@@ -279,7 +279,7 @@ void mld_polyveck_caddq(mld_polyveck *v)
     assigns(i, memory_slice(v, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
-    invariant(forall(k1, 0, i, array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+    invariant(forall(k1, 0, i, MLDSA_K, array_bound(v->vec[k1].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
     decreases(MLDSA_K - i))
   {
     mld_poly_caddq(&v->vec[i]);
@@ -302,7 +302,7 @@ void mld_polyveck_ntt(mld_polyveck *v)
     assigns(i, memory_slice(v, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
-    invariant(forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+    invariant(forall(k1, 0, i, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
     decreases(MLDSA_K - i))
   {
     mld_poly_ntt(&v->vec[i]);
@@ -324,7 +324,7 @@ void mld_polyveck_invntt_tomont(mld_polyveck *v)
     assigns(i, memory_slice(v, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
     invariant(forall(k0, i, MLDSA_K, forall(k1, 0, MLDSA_N, v->vec[k0].coeffs[k1] == loop_entry(*v).vec[k0].coeffs[k1])))
-    invariant(forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
+    invariant(forall(k1, 0, i, MLDSA_K, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, MLD_INTT_BOUND)))
     decreases(MLDSA_K - i))
   {
     mld_poly_invntt_tomont(&v->vec[i]);
@@ -379,7 +379,7 @@ void mld_polyveck_decompose_pack_w1(
             memory_slice(scratch, sizeof(mld_poly)),
             memory_slice(r, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES))
     invariant(i <= MLDSA_K)
-    invariant(forall(k1, 0, i,
+    invariant(forall(k1, 0, i, MLDSA_K,
                      array_abs_bound(v0->vec[k1].coeffs, 0, MLDSA_N, MLDSA_GAMMA2+1)))
     invariant(forall(k2, i, MLDSA_K,
                      array_bound(v0->vec[k2].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
