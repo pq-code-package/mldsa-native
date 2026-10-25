@@ -12,6 +12,7 @@
 needs "s2n_bignum/arm/proofs/base.ml";;
 
 needs "mldsa_native/common/keccak_spec.ml";;
+needs "mldsa_native/common/stack_zero.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.o";;
  ****)
@@ -300,6 +301,8 @@ let keccak_f1600_x1_scalar_mc = define_assert_from_elf
   0xa90a2805;       (* arm_STP X5 X10 X0 (Immediate_Offset (iword (&160))) *)
   0xa90b500f;       (* arm_STP X15 X20 X0 (Immediate_Offset (iword (&176))) *)
   0xf9006019;       (* arm_STR X25 X0 (Immediate_Offset (word 192)) *)
+  0xa9007fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&0))) *)
+  0xa9017fff;       (* arm_STP XZR XZR SP (Immediate_Offset (iword (&16))) *)
   0xa94253f3;       (* arm_LDP X19 X20 SP (Immediate_Offset (iword (&32))) *)
   0xa9435bf5;       (* arm_LDP X21 X22 SP (Immediate_Offset (iword (&48))) *)
   0xa94463f7;       (* arm_LDP X23 X24 SP (Immediate_Offset (iword (&64))) *)
@@ -377,7 +380,8 @@ let KECCAK_F1600_X1_SCALAR_CORRECT = prove
                 wordlist_from_memory(a,25) s = A /\
                 wordlist_from_memory(rc,24) s = round_constants)
            (\s. read PC s = word(pc + KECCAK_F1600_X1_SCALAR_CORE_END) /\
-                wordlist_from_memory(a,25) s = keccak 24 A)
+                wordlist_from_memory(a,25) s = keccak 24 A /\
+                read (memory :> bytes(stackpointer,32)) s = 0)
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [X19; X20; X21; X22; X23; X24;
                        X25; X26; X27; X28; X29; X30] ,,
@@ -478,7 +482,8 @@ let KECCAK_F1600_X1_SCALAR_CORRECT = prove
     (*** The tail of deferred rotations and writeback ***)
 
     GHOST_REGLIST_TAC THEN
-    ARM_SIM_TAC KECCAK_F1600_X1_SCALAR_EXEC (1--38) THEN
+    ARM_SIM_TAC KECCAK_F1600_X1_SCALAR_EXEC (1--40) THEN
+    CONJ_TAC THENL [ALL_TAC; STACK_ZERO_TAC] THEN
     CONV_TAC(LAND_CONV WORDLIST_FROM_MEMORY_CONV) THEN
     ASM_REWRITE_TAC[] THEN
     FIRST_X_ASSUM(fun th -> GEN_REWRITE_TAC RAND_CONV [SYM th]) THEN
@@ -504,7 +509,8 @@ let KECCAK_F1600_X1_SCALAR_SUBROUTINE_CORRECT = prove
                 wordlist_from_memory(a,25) s = A /\
                 wordlist_from_memory(rc,24) s = round_constants)
            (\s. read PC s = returnaddress /\
-                wordlist_from_memory(a,25) s = keccak 24 A)
+                wordlist_from_memory(a,25) s = keccak 24 A /\
+                read (memory :> bytes(word_sub stackpointer (word 128),32)) s = 0)
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
             MAYCHANGE [memory :> bytes(a,200);
                        memory :> bytes(word_sub stackpointer (word 128),128)])`,
