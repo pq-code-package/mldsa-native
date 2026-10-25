@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1792912772623,
+  "lastUpdate": 1792912796579,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -434826,6 +434826,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 129000,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "8bd08a02de7b5b79ca710629b42e6aeb3fd61756",
+          "message": "CBMC: Use a second solver for 149/215 proofs\n\nA soundness bug in a single SMT solver would silently invalidate every\nproof discharged by it. To mitigate this risk, we aim to have each\nproof discharged by at least two solvers.\n\n149 of 215 proofs gain a second solver: 98 bitwuzla, 25\ncvc5_arrays_exp, and 26 Z3 profiles alongside a bitwuzla or cvc5\ndefault. The other 66 do not, mostly because bitwuzla timed out or\ncvc5 returned unknown, either under a local 300s per-proof cap or\nin CI.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-25T05:52:14Z",
+          "tree_id": "3115ca6a62667e196bd2e513c5c4fa1864330c60",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/8bd08a02de7b5b79ca710629b42e6aeb3fd61756"
+        },
+        "date": 1792912615039,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 48163,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 139307,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 49445,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 82215,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 226885,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 82827,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 132928,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 280362,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 128633,
             "unit": "cycles"
           }
         ]
