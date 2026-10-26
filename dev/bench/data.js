@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793004771616,
+  "lastUpdate": 1793006534135,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -923429,6 +923429,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 134385,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "33031ee66dfe0231cc5995dd1d4ced467df6b8de",
+          "message": "HOL-Light: Drop unused context during integer closure\n\nAfter the NTT output congruence has been reduced to a real polynomial,\nREAL_INTEGER_TAC proves integer closure from the expression's structure.\nIt does not consult context facts, but its recursive subgoals still\ncarried the large execution context.\n\nDiscard that context immediately before the four ARM/x86 NTT and\nINTT integer-closure calls. Leave instruction reasoning, congruence\nrewriting, output bounds and HOL Light's tactic unchanged.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-10-26T06:22:37Z",
+          "tree_id": "2a859737821c3adb4875d485d3f10b303459cb02",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/33031ee66dfe0231cc5995dd1d4ced467df6b8de"
+        },
+        "date": 1793006462194,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 47127,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 131353,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 47314,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81746,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 215225,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 79346,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 133541,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 277537,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 134225,
             "unit": "cycles"
           }
         ]
