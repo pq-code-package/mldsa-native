@@ -279,10 +279,9 @@ let MLDSA_POLYZ_UNPACK_17_CORRECT = prove
     (0 -- 15) THEN
 
   (*** Symbolic execution with per-step simplification ***)
-  (let step = ARM_STEPS_TAC MLDSA_POLYZ_UNPACK_17_EXEC
-   and simplify = SIMD_SIMPLIFY_TAC (map GSYM BASE_SIMPS_D18) in
+  (let simplify = SIMD_SIMPLIFY_TAC (map GSYM BASE_SIMPS_D18) in
    MAP_UNTIL_TARGET_PC (fun n ->
-    step [n] THEN
+    ARM_STEPS_TAC MLDSA_POLYZ_UNPACK_17_EXEC [n] THEN
     simplify THEN
     SIMP_ZUNPACK_TAC 18 ZUNPACK17_CORRECT) 1) THEN
 

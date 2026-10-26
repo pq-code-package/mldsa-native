@@ -824,10 +824,9 @@ let MLDSA_POLY_USE_HINT_88_CORRECT = prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
   (* Simulate 1006 instructions (the assembly is bound-independent). *)
-  (let step = ARM_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC
-   and simplify = SIMD_SIMPLIFY_TAC[] in
-   MAP_EVERY (fun n -> step [n] THEN
-                      simplify)
+  (let simplify = SIMD_SIMPLIFY_TAC[] in
+   MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC [n] THEN
+                       simplify)
         (1--1006)) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 

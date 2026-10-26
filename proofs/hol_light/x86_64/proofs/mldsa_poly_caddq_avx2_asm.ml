@@ -337,10 +337,9 @@ let MLDSA_POLY_CADDQ_CORRECT = time prove
   ASM_REWRITE_TAC[WORD_ADD_0] THEN
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
   STRIP_TAC THEN
-  (let step = X86_STEPS_TAC MLDSA_POLY_CADDQ_TMC_EXEC
-   and simplify = SIMD_SIMPLIFY_TAC[mldsa_caddq] in
+  (let simplify = SIMD_SIMPLIFY_TAC[mldsa_caddq] in
    MAP_UNTIL_TARGET_PC (fun n ->
-      step [n] THEN
+      X86_STEPS_TAC MLDSA_POLY_CADDQ_TMC_EXEC [n] THEN
       simplify)
              1) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
