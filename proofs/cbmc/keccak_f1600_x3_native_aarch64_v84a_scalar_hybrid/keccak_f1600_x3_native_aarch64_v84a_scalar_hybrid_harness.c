@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-int mld_keccak_f1600_x3_native(uint64_t *state);
+int mld_keccak_f1600_xN_native(uint64_t *state);
 
 void harness(void)
 {
   uint64_t *s;
-  int t = mld_keccak_f1600_x3_native(s);
+  int t = mld_keccak_f1600_xN_native(s);
 }
