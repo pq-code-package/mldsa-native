@@ -204,8 +204,9 @@ void mld_keccakf1600x4_permute(uint64_t *state)
 /* 3-way (x3) batched Keccak primitives (see keccakf1600.h).
  * xor_bytes / extract_bytes have no native x3 variant (like x4); they loop the
  * serial primitive over the 3 sub-states. permute dispatches to the native x3
- * kernel when MLD_USE_NATIVE_FIPS202_X3 is defined (MLD_CONFIG_USE_X3 on
- * AArch64), else falls back to 3x serial permute. */
+ * kernel when the backend provides a batched Keccak with factor 3
+ * (MLD_USE_NATIVE_FIPS202_XN) (MLD_CONFIG_USE_X3 on AArch64), else falls back
+ * to 3x serial permute. */
 static void mld_keccakf1600x3_extract_bytes_c(uint64_t *state,
                                               unsigned char *data0,
                                               unsigned char *data1,
@@ -277,12 +278,12 @@ void mld_keccakf1600x3_xor_bytes(uint64_t *state, const unsigned char *data0,
 MLD_INTERNAL_API
 void mld_keccakf1600x3_permute(uint64_t *state)
 {
-#if defined(MLD_USE_NATIVE_FIPS202_X3)
-  if (mld_keccak_f1600_x3_native(state) == MLD_NATIVE_FUNC_SUCCESS)
+#if defined(MLD_USE_NATIVE_FIPS202_XN) && MLD_FIPS202_NATIVE_XN_WAY == 3
+  if (mld_keccak_f1600_xN_native(state) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_NATIVE_FIPS202_X3 */
+#endif /* MLD_USE_NATIVE_FIPS202_XN && MLD_FIPS202_NATIVE_XN_WAY == 3 */
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 0);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 1);
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);

@@ -66,20 +66,37 @@ __contract__(
 );
 #endif /* MLD_USE_NATIVE_FIPS202_X4 */
 /*
- * 3-fold batched Keccak-F1600 (used with MLD_CONFIG_USE_X3). To enable, set
- * MLD_USE_NATIVE_FIPS202_X3 in your backend and define the inline wrapper
- * mld_keccak_f1600_x3_native() to forward to your implementation.
+ * Batched Keccak-F1600 of any batching factor.
+ *
+ * Instead of MLD_USE_NATIVE_FIPS202_X4, a backend may provide one batched
+ * Keccak-F1600 of its own batching factor: set MLD_USE_NATIVE_FIPS202_XN and
+ * MLD_FIPS202_NATIVE_XN_WAY (the factor, 2 to 8) in the backend, and define
+ * the inline wrapper mld_keccak_f1600_xN_native() to forward to the
+ * implementation. It permutes MLD_FIPS202_NATIVE_XN_WAY Keccak states stored
+ * one after another (25 lanes each).
+ *
+ * Backends that set MLD_USE_NATIVE_FIPS202_X4 keep working unchanged.
  */
-#if defined(MLD_USE_NATIVE_FIPS202_X3)
+#if defined(MLD_USE_NATIVE_FIPS202_XN)
+#if defined(MLD_USE_NATIVE_FIPS202_X4)
+#error \
+    "A FIPS202 backend can set MLD_USE_NATIVE_FIPS202_X4 or MLD_USE_NATIVE_FIPS202_XN, not both"
+#endif
+#if !defined(MLD_FIPS202_NATIVE_XN_WAY)
+#error "MLD_USE_NATIVE_FIPS202_XN requires MLD_FIPS202_NATIVE_XN_WAY"
+#endif
+#if MLD_FIPS202_NATIVE_XN_WAY < 2 || MLD_FIPS202_NATIVE_XN_WAY > 8
+#error "MLD_FIPS202_NATIVE_XN_WAY must be between 2 and 8"
+#endif
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_keccak_f1600_x3_native(uint64_t *state)
+static MLD_INLINE int mld_keccak_f1600_xN_native(uint64_t *state)
 __contract__(
-    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * 3))
-    assigns(memory_slice(state, sizeof(uint64_t) * 25 * 3))
+    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * MLD_FIPS202_NATIVE_XN_WAY))
+    assigns(memory_slice(state, sizeof(uint64_t) * 25 * MLD_FIPS202_NATIVE_XN_WAY))
     ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
-    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 3))
+    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * MLD_FIPS202_NATIVE_XN_WAY))
 );
-#endif /* MLD_USE_NATIVE_FIPS202_X3 */
+#endif /* MLD_USE_NATIVE_FIPS202_XN */
 
 /*
  * Native x4 XOR bytes and extract bytes interface.

@@ -11,8 +11,9 @@
 #error This backend can only be used if SHA3 extensions are available.
 #endif
 
-/* Part of backend API */
-#define MLD_USE_NATIVE_FIPS202_X3
+/* Part of backend API: one batched Keccak-F1600 with batching factor 3 */
+#define MLD_USE_NATIVE_FIPS202_XN
+#define MLD_FIPS202_NATIVE_XN_WAY 3
 /* Guard for assembly file */
 #define MLD_FIPS202_AARCH64_NEED_X3_V84A_SCALAR_HYBRID
 
@@ -20,7 +21,7 @@
 #include "../api.h"
 #include "src/fips202_native_aarch64.h"
 MLD_MUST_CHECK_RETURN_VALUE
-static MLD_INLINE int mld_keccak_f1600_x3_native(uint64_t *state)
+static MLD_INLINE int mld_keccak_f1600_xN_native(uint64_t *state)
 {
   if (!mld_sys_check_capability(MLD_SYS_CAP_AARCH64_NEON) ||
       !mld_sys_check_capability(MLD_SYS_CAP_AARCH64_SHA3))
