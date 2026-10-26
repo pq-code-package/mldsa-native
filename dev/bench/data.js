@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793004364117,
+  "lastUpdate": 1793004771616,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -947311,6 +947311,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/a7549918eba30765d397fe5ce667291d31b28333"
         },
         "date": 1792953914786,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2332104,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791726,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398861,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 4028005,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034565,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012799,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6896513,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25049115,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6864412,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "ee777eca7128a3f6ee52c5ae81259279d664f99f",
+          "message": "CBMC: Add a second solver for 8 more proofs\n\nAdd a second solver for 8 proofs that discharge in about 175s or less\nlocally for ML-DSA-87:\n\n- bitwuzla: nttunpack_native_x86_64, poly_invntt_tomont_c,\n  poly_pointwise_montgomery_c, poly_uniform, poly_uniform_eta\n- cvc5_mbqi_enum: polyvecl_pointwise_acc_montgomery_native\n- z3_smt_only: invntt_layer (bitwuzla default)\n- z3_no_bv_extract: ntt_butterfly_block (bitwuzla default)\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-26T06:01:04Z",
+          "tree_id": "7e171b261593982f47c50ddce3f777ae732fbcb5",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/ee777eca7128a3f6ee52c5ae81259279d664f99f"
+        },
+        "date": 1793004767934,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
