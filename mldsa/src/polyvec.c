@@ -220,7 +220,8 @@ uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t bound)
   __loop__(
     invariant(i <= MLDSA_L)
     invariant(t == 0 || t == 0xFFFFFFFF)
-    invariant((t == 0) == forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, bound)))
+    invariant(t == 0 ==> forall(k1, 0, i, array_abs_bound(v->vec[k1].coeffs, 0, MLDSA_N, bound)))
+    invariant(forall(k2, 0, i, array_abs_bound(v->vec[k2].coeffs, 0, MLDSA_N, bound)) ==> t == 0)
     decreases(MLDSA_L - i)
   )
   {
