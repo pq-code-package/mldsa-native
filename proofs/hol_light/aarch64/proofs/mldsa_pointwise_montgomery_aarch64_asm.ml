@@ -126,9 +126,10 @@ let MLDSA_POINTWISE_MONTGOMERY_CORRECT = prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
   (* Simulate all 679 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'])
-        (1--679) THEN
+  (let simplify = SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'] in
+   MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC [n] THEN
+                       simplify)
+        (1--679)) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Split bytes128 -> bytes32 for output memory *)

@@ -208,9 +208,11 @@ let MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_CORRECT = prove
   DISCARD_MATCHING_ASSUMPTIONS [`read (memory :> bytes32 a) s = x`] THEN
 
   (* Simulate all 1703 instructions with SIMD simplification *)
-  MAP_EVERY (fun n -> ARM_STEPS_TAC MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC [n] THEN
-                      SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'])
-        (1--1703) THEN
+  (let simplify = SIMD_SIMPLIFY_TAC[arm_mldsa_pointwise_montred'] in
+   MAP_EVERY (fun n ->
+     ARM_STEPS_TAC MLDSA_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5_EXEC [n] THEN
+     simplify)
+        (1--1703)) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 
   (* Discard unused input memory (a, b) bytes128 reads *)

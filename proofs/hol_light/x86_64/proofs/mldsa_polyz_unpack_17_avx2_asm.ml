@@ -751,10 +751,11 @@ let MLDSA_POLYZ_UNPACK_17_CORRECT = prove
   (*** Symbolic execution: simplify each block's lanes, then fold the just- ***)
   (*** computed YMM0 into atomic zunpack17 lanes before it is stored so the  ***)
   (*** store and subsequent steps stay cheap.                               ***)
-  MAP_UNTIL_TARGET_PC (fun n ->
+  (let simplify = SIMD_SIMPLIFY_TAC [] in
+   MAP_UNTIL_TARGET_PC (fun n ->
     X86_STEPS_TAC MLDSA_POLYZ_UNPACK_17_EXEC [n] THEN
-    SIMD_SIMPLIFY_TAC [] THEN
-    ZUNPACK17_FOLD_TAC) 1 THEN
+    simplify THEN
+    ZUNPACK17_FOLD_TAC) 1) THEN
 
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
 

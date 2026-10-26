@@ -62,23 +62,6 @@ let MAP_UNTIL_TARGET_PC f n = fun (asl, w) ->
   in core n (asl, w);;
 
 (* ========================================================================= *)
-(* SIMD simplification: subword extraction + numeric reduction + folding.    *)
-(* ========================================================================= *)
-
-let SIMD_SIMPLIFY_CONV unfold_defs =
-  TOP_DEPTH_CONV
-   (REWR_CONV WORD_SUBWORD_AND ORELSEC WORD_SIMPLE_SUBWORD_CONV) THENC
-  DEPTH_CONV WORD_NUM_RED_CONV THENC
-  REWRITE_CONV (map GSYM unfold_defs);;
-
-let SIMD_SIMPLIFY_TAC unfold_defs =
-  let simdable = can (term_match [] `read X (s:armstate):int128 = whatever`) in
-  TRY(FIRST_X_ASSUM
-   (ASSUME_TAC o
-    CONV_RULE(RAND_CONV (SIMD_SIMPLIFY_CONV unfold_defs)) o
-    check (simdable o concl)));;
-
-(* ========================================================================= *)
 (* Parametric infrastructure for d-bit packed coefficients (SIMD).           *)
 (* Supports d=18 (GAMMA1=2^17) and d=20 (GAMMA1=2^19).                      *)
 (* ========================================================================= *)
