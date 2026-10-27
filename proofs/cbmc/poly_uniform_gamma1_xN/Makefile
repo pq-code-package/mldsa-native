@@ -4,11 +4,11 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_uniform_gamma1_4x_harness
+HARNESS_FILE = poly_uniform_gamma1_xN_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_uniform_gamma1_4x
+PROOF_UID = poly_uniform_gamma1_xN
 
 DEFINES +=
 INCLUDES +=
@@ -23,7 +23,7 @@ ifdef MLD_CONFIG_REDUCE_RAM
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
-CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_4x
+CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_xN
 USE_FUNCTION_CONTRACTS=mld_shake256xN_absorb_once
 USE_FUNCTION_CONTRACTS+=mld_shake256xN_squeezeblocks
 USE_FUNCTION_CONTRACTS+=mld_polyz_unpack
@@ -38,7 +38,7 @@ CBMC_SUPPORTED_CONFIGS = \
   LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3
 
-FUNCTION_NAME = poly_uniform_gamma1_4x
+FUNCTION_NAME = poly_uniform_gamma1_xN
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

@@ -75,7 +75,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
   }
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-#if defined(MLD_CONFIG_USE_X3)
+#if MLD_KECCAK_WAY == 3
   /*
    * x3 ExpandA (MLD_CONFIG_USE_X3): sample 3 matrix
    * entries at a time via mld_poly_uniform_3x. The (x, y) nonce assignment and
@@ -111,7 +111,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
       seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
     }
 
-    mld_poly_uniform_3x(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
+    mld_poly_uniform_xN(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
                         &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
                         &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
                         seed_ext);
@@ -122,7 +122,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
     mld_poly_permute_bitrev_to_custom_optional(
         &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L]);
   }
-#else  /* MLD_CONFIG_USE_X3 */
+#else  /* MLD_KECCAK_WAY == 3 */
   /* Sample 4 matrix entries a time. */
   for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
   __loop__(
@@ -151,7 +151,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
       seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
     }
 
-    mld_poly_uniform_4x(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
+    mld_poly_uniform_xN(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
                         &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
                         &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
                         &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L],
@@ -165,7 +165,7 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
     mld_poly_permute_bitrev_to_custom_optional(
         &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L]);
   }
-#endif /* !MLD_CONFIG_USE_X3 */
+#endif /* MLD_KECCAK_WAY != 3 */
 #else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
   i = 0;
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */

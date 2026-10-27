@@ -24,7 +24,7 @@ CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_3x
+USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_xN
 # L=5 (ML-DSA-65) uses a zeroized scratch lane; L=4 and L=7 sample one
 # polynomial serially.
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
