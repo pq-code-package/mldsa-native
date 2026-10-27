@@ -17,15 +17,15 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202x3.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202x4.c
 
 ifdef MLD_CONFIG_REDUCE_RAM
 CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_3x
-USE_FUNCTION_CONTRACTS=mld_shake256x3_absorb_once
-USE_FUNCTION_CONTRACTS+=mld_shake256x3_squeezeblocks
+USE_FUNCTION_CONTRACTS=mld_shake256xN_absorb_once
+USE_FUNCTION_CONTRACTS+=mld_shake256xN_squeezeblocks
 USE_FUNCTION_CONTRACTS+=mld_polyz_unpack
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 endif

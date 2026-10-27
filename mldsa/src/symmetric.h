@@ -11,10 +11,7 @@
 #include MLD_FIPS202_HEADER_FILE
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #include MLD_FIPS202X4_HEADER_FILE
-#if defined(MLD_CONFIG_USE_X3)
-#include "fips202/fips202x3.h"
 #endif
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define MLD_STREAM128_BLOCKBYTES SHAKE128_RATE
 #define MLD_STREAM256_BLOCKBYTES SHAKE256_RATE
@@ -48,48 +45,81 @@
 #define mld_xof128_squeezeblocks(OUT, OUTBLOCKS, STATE) \
   mld_shake128_squeeze(OUT, (OUTBLOCKS) * SHAKE128_RATE, STATE)
 
-#define mld_xof256_x4_ctx mld_shake256x4ctx
-#define mld_xof256_x4_init(CTX) mld_shake256x4_init((CTX))
-#define mld_xof256_x4_absorb(CTX, IN, INBYTES)                          \
+/*
+ * Batched XOF for MLD_KECCAK_WAY inputs (the batching factor, see common.h).
+ * IN and BUF are arrays of MLD_KECCAK_WAY rows (one per input/output).
+ */
+#if defined(MLD_CONFIG_FIPS202X4_CUSTOM_HEADER)
+/* A custom FIPS202 implementation provides the 4-way mld_shake*x4_* API. */
+#if MLD_KECCAK_WAY != 4
+#error \
+    "MLD_CONFIG_FIPS202X4_CUSTOM_HEADER requires the default batching factor 4"
+#endif
+#define mld_xof256_xN_ctx mld_shake256x4ctx
+#define mld_xof256_xN_init(CTX) mld_shake256x4_init((CTX))
+#define mld_xof256_xN_absorb(CTX, IN, INBYTES)                          \
   mld_shake256x4_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (IN)[3], \
                              (INBYTES))
-#define mld_xof256_x4_squeezeblocks(BUF, NBLOCKS, CTX)                 \
+#define mld_xof256_xN_squeezeblocks(BUF, NBLOCKS, CTX)                 \
   mld_shake256x4_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (BUF)[3], \
                                (NBLOCKS), (CTX))
-#define mld_xof256_x4_release(CTX) mld_shake256x4_release((CTX))
+#define mld_xof256_xN_release(CTX) mld_shake256x4_release((CTX))
 
-#define mld_xof128_x4_ctx mld_shake128x4ctx
-#define mld_xof128_x4_init(CTX) mld_shake128x4_init((CTX))
-#define mld_xof128_x4_absorb(CTX, IN, INBYTES)                          \
+#define mld_xof128_xN_ctx mld_shake128x4ctx
+#define mld_xof128_xN_init(CTX) mld_shake128x4_init((CTX))
+#define mld_xof128_xN_absorb(CTX, IN, INBYTES)                          \
   mld_shake128x4_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (IN)[3], \
                              (INBYTES))
-#define mld_xof128_x4_squeezeblocks(BUF, NBLOCKS, CTX)                 \
+#define mld_xof128_xN_squeezeblocks(BUF, NBLOCKS, CTX)                 \
   mld_shake128x4_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (BUF)[3], \
                                (NBLOCKS), (CTX))
-#define mld_xof128_x4_release(CTX) mld_shake128x4_release((CTX))
+#define mld_xof128_xN_release(CTX) mld_shake128x4_release((CTX))
+#else /* MLD_CONFIG_FIPS202X4_CUSTOM_HEADER */
+#define mld_xof256_xN_ctx mld_shake256xNctx
+#define mld_xof256_xN_init(CTX) mld_shake256xN_init((CTX))
+#define mld_xof256_xN_absorb(CTX, IN, INBYTES)                              \
+  mld_shake256xN_absorb_once((CTX), (const uint8_t *)(IN), sizeof((IN)[0]), \
+                             (INBYTES))
+#define mld_xof256_xN_squeezeblocks(BUF, NBLOCKS, CTX)                        \
+  mld_shake256xN_squeezeblocks((uint8_t *)(BUF), sizeof((BUF)[0]), (NBLOCKS), \
+                               (CTX))
+#define mld_xof256_xN_release(CTX) mld_shake256xN_release((CTX))
 
-#if defined(MLD_CONFIG_USE_X3)
-/*
- * 3-way XOF, used with MLD_CONFIG_USE_X3. Mirrors the x4 macros above but
- * 3-wide. SHAKE128 backs the x3 ExpandA path (mld_poly_uniform_3x); SHAKE256
- * backs the x3 ExpandS and ExpandMask paths (mld_poly_uniform_eta_3x,
- * mld_poly_uniform_gamma1_3x).
- */
-#define mld_xof128_x3_ctx mld_shake128x3ctx
-#define mld_xof128_x3_init(CTX) mld_shake128x3_init((CTX))
-#define mld_xof128_x3_absorb(CTX, IN, INBYTES) \
-  mld_shake128x3_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (INBYTES))
-#define mld_xof128_x3_squeezeblocks(BUF, NBLOCKS, CTX) \
-  mld_shake128x3_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (NBLOCKS), (CTX))
-#define mld_xof128_x3_release(CTX) mld_shake128x3_release((CTX))
+#define mld_xof128_xN_ctx mld_shake128xNctx
+#define mld_xof128_xN_init(CTX) mld_shake128xN_init((CTX))
+#define mld_xof128_xN_absorb(CTX, IN, INBYTES)                              \
+  mld_shake128xN_absorb_once((CTX), (const uint8_t *)(IN), sizeof((IN)[0]), \
+                             (INBYTES))
+#define mld_xof128_xN_squeezeblocks(BUF, NBLOCKS, CTX)                        \
+  mld_shake128xN_squeezeblocks((uint8_t *)(BUF), sizeof((BUF)[0]), (NBLOCKS), \
+                               (CTX))
+#define mld_xof128_xN_release(CTX) mld_shake128xN_release((CTX))
+#endif /* !MLD_CONFIG_FIPS202X4_CUSTOM_HEADER */
 
-#define mld_xof256_x3_ctx mld_shake256x3ctx
-#define mld_xof256_x3_init(CTX) mld_shake256x3_init((CTX))
-#define mld_xof256_x3_absorb(CTX, IN, INBYTES) \
-  mld_shake256x3_absorb_once((CTX), (IN)[0], (IN)[1], (IN)[2], (INBYTES))
-#define mld_xof256_x3_squeezeblocks(BUF, NBLOCKS, CTX) \
-  mld_shake256x3_squeezeblocks((BUF)[0], (BUF)[1], (BUF)[2], (NBLOCKS), (CTX))
-#define mld_xof256_x3_release(CTX) mld_shake256x3_release((CTX))
-#endif /* MLD_CONFIG_USE_X3 */
+/* STEP-4 TRANSITION (removed in step 5, when the samplers become generic): the
+ * 4-way and 3-way samplers still use width-specific names. */
+#if MLD_KECCAK_WAY == 4
+#define mld_xof128_x4_ctx mld_xof128_xN_ctx
+#define mld_xof128_x4_init mld_xof128_xN_init
+#define mld_xof128_x4_absorb mld_xof128_xN_absorb
+#define mld_xof128_x4_squeezeblocks mld_xof128_xN_squeezeblocks
+#define mld_xof128_x4_release mld_xof128_xN_release
+#define mld_xof256_x4_ctx mld_xof256_xN_ctx
+#define mld_xof256_x4_init mld_xof256_xN_init
+#define mld_xof256_x4_absorb mld_xof256_xN_absorb
+#define mld_xof256_x4_squeezeblocks mld_xof256_xN_squeezeblocks
+#define mld_xof256_x4_release mld_xof256_xN_release
+#elif MLD_KECCAK_WAY == 3
+#define mld_xof128_x3_ctx mld_xof128_xN_ctx
+#define mld_xof128_x3_init mld_xof128_xN_init
+#define mld_xof128_x3_absorb mld_xof128_xN_absorb
+#define mld_xof128_x3_squeezeblocks mld_xof128_xN_squeezeblocks
+#define mld_xof128_x3_release mld_xof128_xN_release
+#define mld_xof256_x3_ctx mld_xof256_xN_ctx
+#define mld_xof256_x3_init mld_xof256_xN_init
+#define mld_xof256_x3_absorb mld_xof256_xN_absorb
+#define mld_xof256_x3_squeezeblocks mld_xof256_xN_squeezeblocks
+#define mld_xof256_x3_release mld_xof256_xN_release
+#endif /* MLD_KECCAK_WAY == 3 */
 
 #endif /* !MLD_SYMMETRIC_H */

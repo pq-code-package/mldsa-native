@@ -1040,13 +1040,14 @@ cleanup:
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
 
 /*
- * Test that x4 Keccak (xor_bytes, permute, extract_bytes) produces
- * the same results as the x1 C reference.
+ * Test that the batched Keccak (xor_bytes, permute, extract_bytes) produces
+ * the same results as the x1 C reference, for each of the MLD_KECCAK_WAY
+ * states.
  */
-#ifdef MLD_USE_NATIVE_FIPS202_X4
+#if defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
 #define MAX_RATE 136
 
-static int test_keccakf1600x4_xor_permute_extract(void)
+static int test_keccakf1600xN_xor_permute_extract(void)
 {
   int ret = 1;
   int i, j;
@@ -1082,14 +1083,13 @@ static int test_keccakf1600x4_xor_permute_extract(void)
       randombytes(input[j], xor_length);
     }
 
-    /* Run x4 implementation */
+    /* Run the batched implementation */
     memset(state_x4, 0, MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
-    mld_keccakf1600x4_xor_bytes(state_x4, input[0], input[1], input[2],
-                                input[3], xor_offset, xor_length);
-    mld_keccakf1600x4_permute(state_x4);
-    mld_keccakf1600x4_extract_bytes(state_x4, output_x4[0], output_x4[1],
-                                    output_x4[2], output_x4[3], ext_offset,
-                                    ext_length);
+    mld_keccakf1600xN_xor_bytes(state_x4, input[0], MAX_RATE, xor_offset,
+                                xor_length);
+    mld_keccakf1600xN_permute(state_x4);
+    mld_keccakf1600xN_extract_bytes(state_x4, output_x4[0], MAX_RATE,
+                                    ext_offset, ext_length);
 
     /* Compare each lane against x1 C reference */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
@@ -1113,7 +1113,7 @@ cleanup:
 }
 
 #undef MAX_RATE
-#endif /* MLD_USE_NATIVE_FIPS202_X4 */
+#endif /* MLD_USE_NATIVE_FIPS202_X4 || MLD_USE_NATIVE_FIPS202_XN */
 
 static int test_backend_units(void)
 {
@@ -1187,8 +1187,8 @@ static int test_backend_units(void)
   CHECK(test_keccakf1600_permute() == 0);
 #endif
 
-#ifdef MLD_USE_NATIVE_FIPS202_X4
-  CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
+#if defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
+  CHECK(test_keccakf1600xN_xor_permute_extract() == 0);
 #endif
 
   return 0;

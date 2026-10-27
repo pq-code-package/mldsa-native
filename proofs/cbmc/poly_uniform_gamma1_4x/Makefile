@@ -24,8 +24,8 @@ CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_4x
-USE_FUNCTION_CONTRACTS=mld_shake256x4_absorb_once
-USE_FUNCTION_CONTRACTS+=mld_shake256x4_squeezeblocks
+USE_FUNCTION_CONTRACTS=mld_shake256xN_absorb_once
+USE_FUNCTION_CONTRACTS+=mld_shake256xN_squeezeblocks
 USE_FUNCTION_CONTRACTS+=mld_polyz_unpack
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 endif
