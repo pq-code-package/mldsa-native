@@ -475,8 +475,8 @@
  * with mldsa-native.
  *
  * If set, it must be the name of a file serving as the
- * replacement for mldsa/src/fips202/fips202x4.h, and exposing
- * the same API (see FIPS202.md).
+ * replacement for mldsa/src/fips202/fips202xN.h, and exposing
+ * the 4-way batched API listed in FIPS202.md.
  */
 #define MLD_CONFIG_FIPS202X4_CUSTOM_HEADER "../custom_fips202/fips202x4.h"
 

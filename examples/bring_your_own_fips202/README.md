@@ -17,7 +17,7 @@ Use this approach when:
 2. A secure random number generator implementing [`randombytes.h`](../../mldsa/src/randombytes.h)
 3. Custom FIPS-202 implementation with headers compatible with:
    - [`fips202.h`](../../mldsa/src/fips202/fips202.h)
-   - [`fips202x4.h`](../../mldsa/src/fips202/fips202x4.h)
+   - the 4-way batched API listed in [`FIPS202.md`](../../FIPS202.md), see [`custom_fips202/fips202x4.h`](custom_fips202/fips202x4.h)
 4. Your application source code
 
 ## Configuration

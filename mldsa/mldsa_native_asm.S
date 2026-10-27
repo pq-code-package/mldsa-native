@@ -266,18 +266,20 @@
 #undef MLD_ERR_SIGNING_PAUSED
 #undef MLD_ERR_SIGN_ATTEMPTS_EXHAUSTED
 #undef MLD_EXTERNAL_API
-#undef MLD_FIPS202X4_HEADER_FILE
+#undef MLD_FIPS202XN_HEADER_FILE
 #undef MLD_FIPS202_HEADER_FILE
 #undef MLD_FREE
 #undef MLD_HAVE_INLINE_ASM
 #undef MLD_INTERNAL_API
 #undef MLD_INTERNAL_DATA_DECLARATION
 #undef MLD_INTERNAL_DATA_DEFINITION
+#undef MLD_KECCAK_WAY
 #undef MLD_MULTILEVEL_BUILD
 #undef MLD_NAMESPACE
 #undef MLD_NAMESPACE_KL
 #undef MLD_NAMESPACE_PREFIX
 #undef MLD_NAMESPACE_PREFIX_KL
+#undef MLD_XN_LANES
 #undef mld_memcpy
 #undef mld_memset
 /* mldsa/src/packing.h */
@@ -567,6 +569,11 @@
 #undef mld_xof128_x4_init
 #undef mld_xof128_x4_release
 #undef mld_xof128_x4_squeezeblocks
+#undef mld_xof128_xN_absorb
+#undef mld_xof128_xN_ctx
+#undef mld_xof128_xN_init
+#undef mld_xof128_xN_release
+#undef mld_xof128_xN_squeezeblocks
 #undef mld_xof256_absorb_once
 #undef mld_xof256_ctx
 #undef mld_xof256_init
@@ -582,6 +589,11 @@
 #undef mld_xof256_x4_init
 #undef mld_xof256_x4_release
 #undef mld_xof256_x4_squeezeblocks
+#undef mld_xof256_xN_absorb
+#undef mld_xof256_xN_ctx
+#undef mld_xof256_xN_init
+#undef mld_xof256_xN_release
+#undef mld_xof256_xN_squeezeblocks
 /* mldsa/src/cbmc.h */
 #undef MLD_CBMC_H
 #undef __contract__
@@ -611,40 +623,25 @@
 #undef mld_shake256_init
 #undef mld_shake256_release
 #undef mld_shake256_squeeze
-/* mldsa/src/fips202/fips202x3.h */
-#undef MLD_FIPS202_FIPS202X3_H
-#undef mld_shake128x3_absorb_once
-#undef mld_shake128x3_init
-#undef mld_shake128x3_release
-#undef mld_shake128x3_squeezeblocks
-#undef mld_shake256x3_absorb_once
-#undef mld_shake256x3_init
-#undef mld_shake256x3_release
-#undef mld_shake256x3_squeezeblocks
-/* mldsa/src/fips202/fips202x4.h */
-#undef MLD_FIPS202_FIPS202X4_H
-#undef mld_shake128x4_absorb_once
-#undef mld_shake128x4_init
-#undef mld_shake128x4_release
-#undef mld_shake128x4_squeezeblocks
-#undef mld_shake256x4_absorb_once
-#undef mld_shake256x4_init
-#undef mld_shake256x4_release
-#undef mld_shake256x4_squeezeblocks
+/* mldsa/src/fips202/fips202xN.h */
+#undef MLD_FIPS202_FIPS202XN_H
+#undef mld_shake128xN_absorb_once
+#undef mld_shake128xN_init
+#undef mld_shake128xN_release
+#undef mld_shake128xN_squeezeblocks
+#undef mld_shake256xN_absorb_once
+#undef mld_shake256xN_init
+#undef mld_shake256xN_release
+#undef mld_shake256xN_squeezeblocks
 /* mldsa/src/fips202/keccakf1600.h */
 #undef MLD_FIPS202_KECCAKF1600_H
 #undef MLD_KECCAK_LANES
-#undef MLD_KECCAK_WAY
-#undef MLD_KECCAK_WAY_X3
 #undef mld_keccakf1600_extract_bytes
 #undef mld_keccakf1600_permute
 #undef mld_keccakf1600_xor_bytes
-#undef mld_keccakf1600x3_extract_bytes
-#undef mld_keccakf1600x3_permute
-#undef mld_keccakf1600x3_xor_bytes
-#undef mld_keccakf1600x4_extract_bytes
-#undef mld_keccakf1600x4_permute
-#undef mld_keccakf1600x4_xor_bytes
+#undef mld_keccakf1600xN_extract_bytes
+#undef mld_keccakf1600xN_permute
+#undef mld_keccakf1600xN_xor_bytes
 #endif /* !MLD_CONFIG_FIPS202_CUSTOM_HEADER */
 
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202)

@@ -17,11 +17,11 @@ REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202x4.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202xN.c
 
 CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_eta_4x
-USE_FUNCTION_CONTRACTS=mld_shake256x4_absorb_once
-USE_FUNCTION_CONTRACTS+=mld_shake256x4_squeezeblocks
+USE_FUNCTION_CONTRACTS=mld_shake256xN_absorb_once
+USE_FUNCTION_CONTRACTS+=mld_shake256xN_squeezeblocks
 USE_FUNCTION_CONTRACTS+=mld_rej_eta
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 APPLY_LOOP_CONTRACTS=on

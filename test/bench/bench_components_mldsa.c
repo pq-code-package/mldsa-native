@@ -147,21 +147,23 @@ static int bench(void)
 #endif /* !MLD_CONFIG_USE_X3 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
-  /* keccakf1600x4_permute — raw 4-way permutation (four sequential Keccak
-   * states, one call); x4 counterpart to keccakf1600x3_permute below (per
-   * state: x4 value / 4 vs x3 value / 3). x4 build only (same reason as
-   * eta_4x above). Guard matches its declaration in keccakf1600.h. */
-#if !defined(MLD_CONFIG_USE_X3) && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+  /* Batched permutation, named after the batching factor (per state: x4 / 4
+   * vs x3 / 3). */
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) &&                                \
     (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST))
   {
-    MLD_ALIGN uint64_t x4_state[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
-    CHECK(mld_randombytes((uint8_t *)x4_state, sizeof(x4_state)) == 0);
-    BENCH("keccakf1600x4_permute", mld_keccakf1600x4_permute(x4_state))
+#if MLD_KECCAK_WAY == 3
+#define MLD_BENCH_PERMUTE_NAME "keccakf1600x3_permute"
+#else
+#define MLD_BENCH_PERMUTE_NAME "keccakf1600x4_permute"
+#endif
+    MLD_ALIGN uint64_t xn_state[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+    CHECK(mld_randombytes((uint8_t *)xn_state, sizeof(xn_state)) == 0);
+    BENCH(MLD_BENCH_PERMUTE_NAME, mld_keccakf1600xN_permute(xn_state))
   }
-#endif /* !MLD_CONFIG_USE_X3 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
-          (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST) */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_NO_KEYPAIR_API || \
+          !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
 #if defined(MLD_CONFIG_USE_X3)
   /*
@@ -169,13 +171,6 @@ static int bench(void)
    * permutation and the ExpandA, ExpandS and ExpandMask samplers, to compare
    * with the x4 sampler rows above (per poly: x3 value / 3 vs x4 value / 4).
    */
-
-  /* Raw x3 permutation (three sequential Keccak states, one call). */
-  {
-    MLD_ALIGN uint64_t x3_state[MLD_KECCAK_LANES * MLD_KECCAK_WAY_X3];
-    CHECK(mld_randombytes((uint8_t *)x3_state, sizeof(x3_state)) == 0);
-    BENCH("keccakf1600x3_permute", mld_keccakf1600x3_permute(x3_state))
-  }
 
   /* ExpandA x3 sampler (SHAKE128, three matrix entries per call). */
   {
