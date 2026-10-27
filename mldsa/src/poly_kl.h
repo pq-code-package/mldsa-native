@@ -72,84 +72,38 @@ __contract__(
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-#if !defined(MLD_CONFIG_USE_X3)
-#define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
+#define mld_poly_uniform_eta_xN MLD_NAMESPACE_KL(poly_uniform_eta_xN)
+#define MLD_POLY_UNIFORM_ETA_XN_PARAM(i) mld_poly *r##i,
+#define MLD_POLY_UNIFORM_ETA_XN_NONCE(i) uint8_t nonce##i,
+#define MLD_POLY_UNIFORM_ETA_XN_REQUIRES(i) \
+  requires(memory_no_alias(r##i, sizeof(mld_poly)))
+#define MLD_POLY_UNIFORM_ETA_XN_ASSIGNS(i) \
+  assigns(memory_slice(r##i, sizeof(mld_poly)))
+#define MLD_POLY_UNIFORM_ETA_XN_ENSURES(i) \
+  ensures(array_abs_bound(r##i->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 /**
- * Sample four polynomials with uniformly random coefficients in
- * [-MLDSA_ETA, MLDSA_ETA] by performing rejection sampling on the output
- * stream from SHAKE256(seed|nonce_i).
+ * Sample MLD_KECCAK_WAY polynomials (the batching factor) with uniformly
+ * random coefficients in [-MLDSA_ETA, MLDSA_ETA] by performing rejection
+ * sampling on the output stream from SHAKE256(seed|nonce_i). The parameters
+ * are r0, ..., r{MLD_KECCAK_WAY-1}, then nonce0, ..., then seed.
  *
- * @spec{Implements @[FIPS204, Algorithm 31, RejBoundedPoly] (four-way
- * batched).}
+ * @spec{Implements @[FIPS204, Algorithm 31, RejBoundedPoly] (batched).}
  *
- * @param[out] r0     Pointer to first output polynomial.
- * @param[out] r1     Pointer to second output polynomial.
- * @param[out] r2     Pointer to third output polynomial.
- * @param[out] r3     Pointer to fourth output polynomial.
- * @param[in]  seed   Byte array with seed of length MLDSA_CRHBYTES.
- * @param      nonce0 First nonce.
- * @param      nonce1 Second nonce.
- * @param      nonce2 Third nonce.
- * @param      nonce3 Fourth nonce.
+ * r0, ... are the output polynomials and nonce0, ... their nonces, one per
+ * lane (MLD_XN_LANES).
+ *
+ * @param[in] seed Byte array with seed of length MLDSA_CRHBYTES.
  */
 MLD_INTERNAL_API
-void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
-                             mld_poly *r3, const uint8_t seed[MLDSA_CRHBYTES],
-                             uint8_t nonce0, uint8_t nonce1, uint8_t nonce2,
-                             uint8_t nonce3)
+void mld_poly_uniform_eta_xN(MLD_XN_LANES(MLD_POLY_UNIFORM_ETA_XN_PARAM)
+                                 MLD_XN_LANES(MLD_POLY_UNIFORM_ETA_XN_NONCE)
+                                     const uint8_t seed[MLDSA_CRHBYTES])
 __contract__(
-  requires(memory_no_alias(r0, sizeof(mld_poly)))
-  requires(memory_no_alias(r1, sizeof(mld_poly)))
-  requires(memory_no_alias(r2, sizeof(mld_poly)))
-  requires(memory_no_alias(r3, sizeof(mld_poly)))
+  MLD_XN_LANES(MLD_POLY_UNIFORM_ETA_XN_REQUIRES)
   requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  assigns(memory_slice(r0, sizeof(mld_poly)))
-  assigns(memory_slice(r1, sizeof(mld_poly)))
-  assigns(memory_slice(r2, sizeof(mld_poly)))
-  assigns(memory_slice(r3, sizeof(mld_poly)))
-  ensures(array_abs_bound(r0->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-  ensures(array_abs_bound(r1->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-  ensures(array_abs_bound(r2->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-  ensures(array_abs_bound(r3->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
+  MLD_XN_LANES(MLD_POLY_UNIFORM_ETA_XN_ASSIGNS)
+  MLD_XN_LANES(MLD_POLY_UNIFORM_ETA_XN_ENSURES)
 );
-
-#else /* !MLD_CONFIG_USE_X3 */
-#define mld_poly_uniform_eta_3x MLD_NAMESPACE_KL(poly_uniform_eta_3x)
-/**
- * Sample three polynomials with uniformly random coefficients in
- * [-MLDSA_ETA, MLDSA_ETA] by performing rejection sampling on the output
- * stream from SHAKE256(seed|nonce_i). 3-way variant of
- * mld_poly_uniform_eta_4x, used with MLD_CONFIG_USE_X3, used by the x3
- * ExpandS path.
- *
- * @spec{Implements @[FIPS204, Algorithm 31, RejBoundedPoly] (three-way
- * batched).}
- *
- * @param[out] r0     Pointer to first output polynomial.
- * @param[out] r1     Pointer to second output polynomial.
- * @param[out] r2     Pointer to third output polynomial.
- * @param[in]  seed   Byte array with seed of length MLDSA_CRHBYTES.
- * @param      nonce0 First nonce.
- * @param      nonce1 Second nonce.
- * @param      nonce2 Third nonce.
- */
-MLD_INTERNAL_API
-void mld_poly_uniform_eta_3x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
-                             const uint8_t seed[MLDSA_CRHBYTES], uint8_t nonce0,
-                             uint8_t nonce1, uint8_t nonce2)
-__contract__(
-  requires(memory_no_alias(r0, sizeof(mld_poly)))
-  requires(memory_no_alias(r1, sizeof(mld_poly)))
-  requires(memory_no_alias(r2, sizeof(mld_poly)))
-  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  assigns(memory_slice(r0, sizeof(mld_poly)))
-  assigns(memory_slice(r1, sizeof(mld_poly)))
-  assigns(memory_slice(r2, sizeof(mld_poly)))
-  ensures(array_abs_bound(r0->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-  ensures(array_abs_bound(r1->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-  ensures(array_abs_bound(r2->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
-);
-#endif /* MLD_CONFIG_USE_X3 */
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
@@ -178,12 +132,10 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-/* The serial sampler is used by the default x4 ExpandMask for L=5, and by the
- * x3 ExpandMask (MLD_CONFIG_USE_X3) for its 1-polynomial remainder (L=4 and
- * L=7). */
-#if (MLD_CONFIG_PARAMETER_SET == 65 && !defined(MLD_CONFIG_USE_X3)) || \
-    (MLD_CONFIG_PARAMETER_SET != 65 && defined(MLD_CONFIG_USE_X3)) ||  \
-    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) ||                         \
+/* The serial sampler is used by ExpandMask for a single left-over polynomial
+ * (MLDSA_L % MLD_KECCAK_WAY == 1). */
+#if (MLDSA_L % MLD_KECCAK_WAY == 1) ||         \
+    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || \
     defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /**
@@ -207,95 +159,46 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* (MLD_CONFIG_PARAMETER_SET == 65 && !MLD_CONFIG_USE_X3) ||  \
-          (MLD_CONFIG_PARAMETER_SET != 65 && MLD_CONFIG_USE_X3) ||   \
-          MLD_CONFIG_SERIAL_FIPS202_ONLY || MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST */
+#endif /*  (MLDSA_L % MLD_KECCAK_WAY == 1) ||MLD_CONFIG_SERIAL_FIPS202_ONLY \
+          ||MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
-#if !defined(MLD_CONFIG_USE_X3)
-#define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
+#define mld_poly_uniform_gamma1_xN MLD_NAMESPACE_KL(poly_uniform_gamma1_xN)
+#define MLD_POLY_UNIFORM_GAMMA1_XN_PARAM(i) mld_poly *r##i,
+#define MLD_POLY_UNIFORM_GAMMA1_XN_NONCE(i) uint16_t nonce##i,
+#define MLD_POLY_UNIFORM_GAMMA1_XN_REQUIRES(i) \
+  requires(memory_no_alias(r##i, sizeof(mld_poly)))
+#define MLD_POLY_UNIFORM_GAMMA1_XN_ASSIGNS(i) \
+  assigns(memory_slice(r##i, sizeof(mld_poly)))
+#define MLD_POLY_UNIFORM_GAMMA1_XN_ENSURES(i)                        \
+  ensures(array_bound(r##i->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), \
+                      MLDSA_GAMMA1 + 1))
 /**
- * Sample four polynomials with uniformly random coefficients in
- * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output streams of
- * SHAKE256(seed|nonce_i).
+ * Sample MLD_KECCAK_WAY polynomials (the batching factor) with uniformly
+ * random coefficients in [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking
+ * output streams of SHAKE256(seed|nonce_i). The parameters are r0, ...,
+ * r{MLD_KECCAK_WAY-1}, then nonce0, ..., then seed.
  *
- * @spec{Partially implements @[FIPS204, Algorithm 34, ExpandMask] (four-way
- * batched, i.e. four iterations of the loop body of lines 3-5).}
+ * @spec{Partially implements @[FIPS204, Algorithm 34, ExpandMask] (batched,
+ * i.e. MLD_KECCAK_WAY iterations of the loop body of lines 3-5).}
  *
- * @param[out] r0     Pointer to first output polynomial.
- * @param[out] r1     Pointer to second output polynomial.
- * @param[out] r2     Pointer to third output polynomial.
- * @param[out] r3     Pointer to fourth output polynomial.
- * @param[in]  seed   Byte array with seed of length MLDSA_CRHBYTES.
- * @param      nonce0 First 16-bit nonce.
- * @param      nonce1 Second 16-bit nonce.
- * @param      nonce2 Third 16-bit nonce.
- * @param      nonce3 Fourth 16-bit nonce.
+ * r0, ... are the output polynomials and nonce0, ... their 16-bit nonces,
+ * one per lane (MLD_XN_LANES).
+ *
+ * @param[in] seed Byte array with seed of length MLDSA_CRHBYTES.
  */
 MLD_INTERNAL_API
-void mld_poly_uniform_gamma1_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
-                                mld_poly *r3,
-                                const uint8_t seed[MLDSA_CRHBYTES],
-                                uint16_t nonce0, uint16_t nonce1,
-                                uint16_t nonce2, uint16_t nonce3)
+void mld_poly_uniform_gamma1_xN(
+    MLD_XN_LANES(MLD_POLY_UNIFORM_GAMMA1_XN_PARAM)
+        MLD_XN_LANES(MLD_POLY_UNIFORM_GAMMA1_XN_NONCE)
+            const uint8_t seed[MLDSA_CRHBYTES])
 __contract__(
-  requires(memory_no_alias(r0, sizeof(mld_poly)))
-  requires(memory_no_alias(r1, sizeof(mld_poly)))
-  requires(memory_no_alias(r2, sizeof(mld_poly)))
-  requires(memory_no_alias(r3, sizeof(mld_poly)))
+  MLD_XN_LANES(MLD_POLY_UNIFORM_GAMMA1_XN_REQUIRES)
   requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  assigns(memory_slice(r0, sizeof(mld_poly)))
-  assigns(memory_slice(r1, sizeof(mld_poly)))
-  assigns(memory_slice(r2, sizeof(mld_poly)))
-  assigns(memory_slice(r3, sizeof(mld_poly)))
-  ensures(array_bound(r0->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  ensures(array_bound(r1->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
+  MLD_XN_LANES(MLD_POLY_UNIFORM_GAMMA1_XN_ASSIGNS)
+  MLD_XN_LANES(MLD_POLY_UNIFORM_GAMMA1_XN_ENSURES)
 );
-
-#else /* !MLD_CONFIG_USE_X3 */
-#define mld_poly_uniform_gamma1_3x MLD_NAMESPACE_KL(poly_uniform_gamma1_3x)
-/**
- * Sample three polynomials with uniformly random coefficients in
- * [-(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1] by unpacking output streams of
- * SHAKE256(seed|nonce_i). 3-way variant of
- * mld_poly_uniform_gamma1_4x, used with MLD_CONFIG_USE_X3, used by the x3
- * ExpandMask path. Byte-for-byte identical per-lane behaviour to the x4
- * sampler: same SHAKE256 XOF, same 2-byte nonce layout, same mld_polyz_unpack;
- * only the batch width differs (3 lanes instead of 4).
- *
- * @spec{Partially implements @[FIPS204, Algorithm 34, ExpandMask] (three-way
- * batched).}
- *
- * @param[out] r0     Pointer to first output polynomial.
- * @param[out] r1     Pointer to second output polynomial.
- * @param[out] r2     Pointer to third output polynomial.
- * @param[in]  seed   Byte array with seed of length MLDSA_CRHBYTES.
- * @param      nonce0 First 16-bit nonce.
- * @param      nonce1 Second 16-bit nonce.
- * @param      nonce2 Third 16-bit nonce.
- */
-MLD_INTERNAL_API
-void mld_poly_uniform_gamma1_3x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
-                                const uint8_t seed[MLDSA_CRHBYTES],
-                                uint16_t nonce0, uint16_t nonce1,
-                                uint16_t nonce2)
-__contract__(
-  requires(memory_no_alias(r0, sizeof(mld_poly)))
-  requires(memory_no_alias(r1, sizeof(mld_poly)))
-  requires(memory_no_alias(r2, sizeof(mld_poly)))
-  requires(memory_no_alias(seed, MLDSA_CRHBYTES))
-  assigns(memory_slice(r0, sizeof(mld_poly)))
-  assigns(memory_slice(r1, sizeof(mld_poly)))
-  assigns(memory_slice(r2, sizeof(mld_poly)))
-  ensures(array_bound(r0->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  ensures(array_bound(r1->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-  ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
-);
-#endif /* MLD_CONFIG_USE_X3 */
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) */
 #endif /* !MLD_CONFIG_NO_SIGN_API */

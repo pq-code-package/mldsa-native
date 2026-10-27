@@ -16,7 +16,7 @@
 #include "debug.h"
 #include "polyvec_lazy.h"
 
-#if defined(MLD_CONFIG_USE_X3)
+#if MLD_KECCAK_WAY == 3
 #include "ct.h" /* mld_zeroize, for the x3 ExpandMask scratch-lane remainder */
 #endif
 
@@ -47,7 +47,7 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
   {
     mld_poly_uniform_gamma1(&v->vec[i], seed, (uint16_t)(kappa + i));
   }
-#elif defined(MLD_CONFIG_USE_X3)
+#elif MLD_KECCAK_WAY == 3
   /*
    * x3 ExpandMask (MLD_CONFIG_USE_X3): sample the L
    * mask polynomials 3 at a time via mld_poly_uniform_gamma1_3x. The nonce
@@ -59,51 +59,55 @@ void mld_polyvecl_uniform_gamma1(mld_polyvecl *v,
 #if MLDSA_L == 4
   /* L = 4 = 1 + 3: one serial poly + one 3-way batch. */
   mld_poly_uniform_gamma1(&v->vec[0], seed, kappa);
-  mld_poly_uniform_gamma1_3x(&v->vec[1], &v->vec[2], &v->vec[3], seed,
+  mld_poly_uniform_gamma1_xN(&v->vec[1], &v->vec[2], &v->vec[3],
                              (uint16_t)(kappa + 1), (uint16_t)(kappa + 2),
-                             (uint16_t)(kappa + 3));
+                             (uint16_t)(kappa + 3), seed);
 #elif MLDSA_L == 5
   /* L = 5 = 3 + 2: two 3-way batches, the 3rd lane of the 2nd batch is a
    * throwaway (scratch poly, nonce 0xFF, zeroized after). */
   {
     MLD_ALIGN mld_poly scratch;
-    mld_poly_uniform_gamma1_3x(&v->vec[0], &v->vec[1], &v->vec[2], seed, kappa,
-                               (uint16_t)(kappa + 1), (uint16_t)(kappa + 2));
-    mld_poly_uniform_gamma1_3x(&v->vec[3], &v->vec[4], &scratch, seed,
+    mld_poly_uniform_gamma1_xN(&v->vec[0], &v->vec[1], &v->vec[2], kappa,
+                               (uint16_t)(kappa + 1), (uint16_t)(kappa + 2),
+                               seed);
+    mld_poly_uniform_gamma1_xN(&v->vec[3], &v->vec[4], &scratch,
                                (uint16_t)(kappa + 3), (uint16_t)(kappa + 4),
-                               0xFF /* irrelevant */);
+                               0xFF /* irrelevant */, seed);
     mld_zeroize(&scratch, sizeof(scratch));
   }
 #elif MLDSA_L == 7
   /* L = 7 = 1 + 3 + 3: one serial poly + two 3-way batches. */
   mld_poly_uniform_gamma1(&v->vec[0], seed, kappa);
-  mld_poly_uniform_gamma1_3x(&v->vec[1], &v->vec[2], &v->vec[3], seed,
+  mld_poly_uniform_gamma1_xN(&v->vec[1], &v->vec[2], &v->vec[3],
                              (uint16_t)(kappa + 1), (uint16_t)(kappa + 2),
-                             (uint16_t)(kappa + 3));
-  mld_poly_uniform_gamma1_3x(&v->vec[4], &v->vec[5], &v->vec[6], seed,
+                             (uint16_t)(kappa + 3), seed);
+  mld_poly_uniform_gamma1_xN(&v->vec[4], &v->vec[5], &v->vec[6],
                              (uint16_t)(kappa + 4), (uint16_t)(kappa + 5),
-                             (uint16_t)(kappa + 6));
+                             (uint16_t)(kappa + 6), seed);
 #endif /* MLDSA_L == 7 */
-#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && MLD_CONFIG_USE_X3 */
+#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && MLD_KECCAK_WAY == 3 */
 #if MLDSA_L == 4
-  mld_poly_uniform_gamma1_4x(&v->vec[0], &v->vec[1], &v->vec[2], &v->vec[3],
-                             seed, kappa, (uint16_t)(kappa + 1),
-                             (uint16_t)(kappa + 2), (uint16_t)(kappa + 3));
+  mld_poly_uniform_gamma1_xN(&v->vec[0], &v->vec[1], &v->vec[2], &v->vec[3],
+                             kappa, (uint16_t)(kappa + 1),
+                             (uint16_t)(kappa + 2), (uint16_t)(kappa + 3),
+                             seed);
 #elif MLDSA_L == 5
-  mld_poly_uniform_gamma1_4x(&v->vec[0], &v->vec[1], &v->vec[2], &v->vec[3],
-                             seed, kappa, (uint16_t)(kappa + 1),
-                             (uint16_t)(kappa + 2), (uint16_t)(kappa + 3));
+  mld_poly_uniform_gamma1_xN(&v->vec[0], &v->vec[1], &v->vec[2], &v->vec[3],
+                             kappa, (uint16_t)(kappa + 1),
+                             (uint16_t)(kappa + 2), (uint16_t)(kappa + 3),
+                             seed);
   mld_poly_uniform_gamma1(&v->vec[4], seed, (uint16_t)(kappa + 4));
 #elif MLDSA_L == 7
-  mld_poly_uniform_gamma1_4x(&v->vec[0], &v->vec[1], &v->vec[2],
-                             &v->vec[3 /* irrelevant */], seed, kappa,
+  mld_poly_uniform_gamma1_xN(&v->vec[0], &v->vec[1], &v->vec[2],
+                             &v->vec[3 /* irrelevant */], kappa,
                              (uint16_t)(kappa + 1), (uint16_t)(kappa + 2),
-                             0xFF /* irrelevant */);
-  mld_poly_uniform_gamma1_4x(&v->vec[3], &v->vec[4], &v->vec[5], &v->vec[6],
-                             seed, (uint16_t)(kappa + 3), (uint16_t)(kappa + 4),
-                             (uint16_t)(kappa + 5), (uint16_t)(kappa + 6));
+                             0xFF /* irrelevant */, seed);
+  mld_poly_uniform_gamma1_xN(&v->vec[3], &v->vec[4], &v->vec[5], &v->vec[6],
+                             (uint16_t)(kappa + 3), (uint16_t)(kappa + 4),
+                             (uint16_t)(kappa + 5), (uint16_t)(kappa + 6),
+                             seed);
 #endif /* MLDSA_L == 7 */
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_USE_X3 */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && MLD_KECCAK_WAY != 3 */
 
   mld_assert_bound_2d(v->vec, MLDSA_L, MLDSA_N, -(MLDSA_GAMMA1 - 1),
                       MLDSA_GAMMA1 + 1);

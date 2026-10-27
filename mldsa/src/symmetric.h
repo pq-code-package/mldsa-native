@@ -96,30 +96,5 @@
 #define mld_xof128_xN_release(CTX) mld_shake128xN_release((CTX))
 #endif /* !MLD_CONFIG_FIPS202X4_CUSTOM_HEADER */
 
-/* STEP-4 TRANSITION (removed in step 5, when the samplers become generic): the
- * 4-way and 3-way samplers still use width-specific names. */
-#if MLD_KECCAK_WAY == 4
-#define mld_xof128_x4_ctx mld_xof128_xN_ctx
-#define mld_xof128_x4_init mld_xof128_xN_init
-#define mld_xof128_x4_absorb mld_xof128_xN_absorb
-#define mld_xof128_x4_squeezeblocks mld_xof128_xN_squeezeblocks
-#define mld_xof128_x4_release mld_xof128_xN_release
-#define mld_xof256_x4_ctx mld_xof256_xN_ctx
-#define mld_xof256_x4_init mld_xof256_xN_init
-#define mld_xof256_x4_absorb mld_xof256_xN_absorb
-#define mld_xof256_x4_squeezeblocks mld_xof256_xN_squeezeblocks
-#define mld_xof256_x4_release mld_xof256_xN_release
-#elif MLD_KECCAK_WAY == 3
-#define mld_xof128_x3_ctx mld_xof128_xN_ctx
-#define mld_xof128_x3_init mld_xof128_xN_init
-#define mld_xof128_x3_absorb mld_xof128_xN_absorb
-#define mld_xof128_x3_squeezeblocks mld_xof128_xN_squeezeblocks
-#define mld_xof128_x3_release mld_xof128_xN_release
-#define mld_xof256_x3_ctx mld_xof256_xN_ctx
-#define mld_xof256_x3_init mld_xof256_xN_init
-#define mld_xof256_x3_absorb mld_xof256_xN_absorb
-#define mld_xof256_x3_squeezeblocks mld_xof256_xN_squeezeblocks
-#define mld_xof256_x3_release mld_xof256_xN_release
-#endif /* MLD_KECCAK_WAY == 3 */
 
 #endif /* !MLD_SYMMETRIC_H */

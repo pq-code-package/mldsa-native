@@ -24,7 +24,7 @@ CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_4x
+USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_xN
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
 USE_FUNCTION_CONTRACTS+=mld_poly_uniform_gamma1
 endif

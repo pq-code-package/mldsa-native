@@ -4,39 +4,36 @@
 include ../Makefile_params.common
 
 HARNESS_ENTRY = harness
-HARNESS_FILE = poly_uniform_3x_harness
+HARNESS_FILE = poly_uniform_eta_xN_harness
 
 # This should be a unique identifier for this proof, and will appear on the
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
-PROOF_UID = poly_uniform_3x
+PROOF_UID = poly_uniform_eta_xN
 
-DEFINES += -DMLD_CONFIG_USE_X3
+DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
-PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c $(SRCDIR)/mldsa/src/fips202/fips202x4.c
+PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202x4.c
 
-ifdef MLD_CONFIG_REDUCE_RAM
-CHECK_FUNCTION_CONTRACTS=
-USE_FUNCTION_CONTRACTS=
-else
-CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_3x
-USE_FUNCTION_CONTRACTS=mld_shake128xN_absorb_once
-USE_FUNCTION_CONTRACTS+=mld_shake128xN_squeezeblocks
-USE_FUNCTION_CONTRACTS+=mld_rej_uniform
+CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_eta_xN
+USE_FUNCTION_CONTRACTS=mld_shake256xN_absorb_once
+USE_FUNCTION_CONTRACTS+=mld_shake256xN_squeezeblocks
+USE_FUNCTION_CONTRACTS+=mld_rej_eta
 USE_FUNCTION_CONTRACTS+=mld_zeroize
-endif
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3
 
-FUNCTION_NAME = poly_uniform_3x
+FUNCTION_NAME = poly_uniform_eta_xN
 
 # If this proof is found to consume huge amounts of RAM, you can set the
 # EXPENSIVE variable. With new enough versions of the proof tools, this will

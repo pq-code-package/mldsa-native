@@ -105,16 +105,16 @@ static int bench(void)
    * under MLD_CONFIG_USE_X3 its Keccak falls back to a non-native path, so the
    * number would not reflect the real x4 kernel. Guard also matches its
    * declaration in poly.h. */
-#if !defined(MLD_CONFIG_USE_X3) && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
   {
     MLD_ALIGN mld_poly poly_a0, poly_a1, poly_a2, poly_a3;
     MLD_ALIGN uint8_t seed_ext4[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
     CHECK(mld_randombytes((uint8_t *)seed_ext4, sizeof(seed_ext4)) == 0);
-    BENCH("poly_uniform_4x", mld_poly_uniform_4x(&poly_a0, &poly_a1, &poly_a2,
+    BENCH("poly_uniform_4x", mld_poly_uniform_xN(&poly_a0, &poly_a1, &poly_a2,
                                                  &poly_a3, seed_ext4))
   }
-#endif /* !MLD_CONFIG_USE_X3 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
@@ -122,29 +122,29 @@ static int bench(void)
   /* poly_uniform_eta_4x — exercises rej_uniform_eta{2,4}_avx2_asm on x86.
    * Not benchmarked with MLD_CONFIG_USE_X3, where the AArch64 backend provides
    * the x3 kernel instead and this row would measure a fallback. */
-#if !defined(MLD_CONFIG_USE_X3) && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     !defined(MLD_CONFIG_NO_KEYPAIR_API)
   {
     MLD_ALIGN mld_poly poly_eta0, poly_eta1, poly_eta2, poly_eta3;
     BENCH(
         "poly_uniform_eta_4x",
-        mld_poly_uniform_eta_4x(&poly_eta0, &poly_eta1, &poly_eta2, &poly_eta3,
-                                (const uint8_t *)data0, 0, 1, 2, 3))
+        mld_poly_uniform_eta_xN(&poly_eta0, &poly_eta1, &poly_eta2, &poly_eta3,
+                                0, 1, 2, 3, (const uint8_t *)data0))
   }
-#endif /* !MLD_CONFIG_USE_X3 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
           !MLD_CONFIG_NO_KEYPAIR_API */
 
   /* poly_uniform_gamma1_4x — ExpandMask x4 sampler. x4 build only (same reason
    * as eta_4x above). Guard matches its declaration in poly_kl.h. */
-#if !defined(MLD_CONFIG_USE_X3) && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
   {
     MLD_ALIGN mld_poly poly_g0, poly_g1, poly_g2, poly_g3;
     BENCH("poly_uniform_gamma1_4x",
-          mld_poly_uniform_gamma1_4x(&poly_g0, &poly_g1, &poly_g2, &poly_g3,
-                                     (const uint8_t *)data0, 0, 1, 2, 3))
+          mld_poly_uniform_gamma1_xN(&poly_g0, &poly_g1, &poly_g2, &poly_g3, 0,
+                                     1, 2, 3, (const uint8_t *)data0))
   }
-#endif /* !MLD_CONFIG_USE_X3 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
   /* Batched permutation, named after the batching factor (per state: x4 / 4
@@ -165,7 +165,7 @@ static int bench(void)
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_NO_KEYPAIR_API || \
           !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
 
-#if defined(MLD_CONFIG_USE_X3)
+#if MLD_KECCAK_WAY == 3
   /*
    * x3 (3-way) batched Keccak benchmarks, built with MLD_CONFIG_USE_X3: the raw
    * permutation and the ExpandA, ExpandS and ExpandMask samplers, to compare
@@ -178,7 +178,7 @@ static int bench(void)
     MLD_ALIGN uint8_t seed_ext[3][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
     CHECK(mld_randombytes((uint8_t *)seed_ext, sizeof(seed_ext)) == 0);
     BENCH("poly_uniform_3x",
-          mld_poly_uniform_3x(&poly_a0, &poly_a1, &poly_a2, seed_ext))
+          mld_poly_uniform_xN(&poly_a0, &poly_a1, &poly_a2, seed_ext))
   }
 
   /* ExpandS x3 sampler (SHAKE256, three secret polynomials per call). */
@@ -187,8 +187,8 @@ static int bench(void)
   {
     MLD_ALIGN mld_poly poly_s0, poly_s1, poly_s2;
     BENCH("poly_uniform_eta_3x",
-          mld_poly_uniform_eta_3x(&poly_s0, &poly_s1, &poly_s2,
-                                  (const uint8_t *)data0, 0, 1, 2))
+          mld_poly_uniform_eta_xN(&poly_s0, &poly_s1, &poly_s2, 0, 1, 2,
+                                  (const uint8_t *)data0))
   }
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -199,12 +199,12 @@ static int bench(void)
   {
     MLD_ALIGN mld_poly poly_g0, poly_g1, poly_g2;
     BENCH("poly_uniform_gamma1_3x",
-          mld_poly_uniform_gamma1_3x(&poly_g0, &poly_g1, &poly_g2,
-                                     (const uint8_t *)data0, 0, 1, 2))
+          mld_poly_uniform_gamma1_xN(&poly_g0, &poly_g1, &poly_g2, 0, 1, 2,
+                                     (const uint8_t *)data0))
   }
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) */
-#endif /* MLD_CONFIG_USE_X3 */
+#endif /* MLD_KECCAK_WAY == 3 */
 
   BENCH("poly_chknorm",
         chknorm_acc ^=
