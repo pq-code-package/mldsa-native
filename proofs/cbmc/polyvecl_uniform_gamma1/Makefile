@@ -14,7 +14,7 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
+UNWINDSET += mld_polyvecl_uniform_gamma1.0:8 # Batched loop; at most 3 iterations
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c

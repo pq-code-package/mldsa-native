@@ -14,7 +14,11 @@ DEFINES += -DMLD_CONFIG_USE_X3
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
+# The batched ExpandS loops are statically bounded and unrolled: loop 0
+# (batches), loops 1 and 2 (lanes). 9 covers batching factors up to 8 and the
+# largest L + K.
+UNWINDSET += mld_sample_pack_s1_s2.0:9 mld_sample_pack_s1_s2.1:9
+UNWINDSET += mld_sample_pack_s1_s2.2:9
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
@@ -26,7 +30,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = mld_sample_pack_s1_s2_x3
