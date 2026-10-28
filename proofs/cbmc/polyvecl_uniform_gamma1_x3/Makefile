@@ -14,7 +14,7 @@ DEFINES += -DMLD_CONFIG_USE_X3
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
+UNWINDSET += mld_polyvecl_uniform_gamma1.0:8 # Batched loop; at most 2 iterations
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec.c
@@ -25,11 +25,9 @@ USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
 USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_xN
-# L=5 (ML-DSA-65) uses a zeroized scratch lane; L=4 and L=7 sample one
-# polynomial serially.
-ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
-USE_FUNCTION_CONTRACTS+=mld_zeroize
-else
+# L=4 and L=7 leave one polynomial over (sampled serially); L=5 leaves two,
+# which go into a first batch together with a throwaway lane.
+ifneq ($(MLD_CONFIG_PARAMETER_SET),65)
 USE_FUNCTION_CONTRACTS+=mld_poly_uniform_gamma1
 endif
 endif
@@ -38,7 +36,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:cvc5_mbqi_enum
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = polyvecl_uniform_gamma1_x3

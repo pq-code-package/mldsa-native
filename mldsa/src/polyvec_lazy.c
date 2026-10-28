@@ -62,46 +62,45 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
                                      const uint8_t rho[MLDSA_SEEDBYTES])
 {
   unsigned int i, j;
-  MLD_ALIGN uint8_t seed_ext[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  MLD_ALIGN uint8_t seed_ext[MLD_KECCAK_WAY][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
 
-  for (j = 0; j < 4; j++)
+  for (j = 0; j < MLD_KECCAK_WAY; j++)
   __loop__(
     assigns(j, object_whole(seed_ext))
-    invariant(j <= 4)
-    decreases(4 - j)
+    invariant(j <= MLD_KECCAK_WAY)
+    decreases(MLD_KECCAK_WAY - j)
   )
   {
     mld_memcpy(seed_ext[j], rho, MLDSA_SEEDBYTES);
   }
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-#if MLD_KECCAK_WAY == 3
-  /*
-   * x3 ExpandA (MLD_CONFIG_USE_X3): sample 3 matrix
-   * entries at a time via mld_poly_uniform_3x. The (x, y) nonce assignment and
-   * sampling order are identical to the x4 path below, so the sampled matrix A
-   * is byte-for-byte the same; only the batch width (3 vs 4) differs. Any
-   * remainder (K*L % 3) is sampled individually by the shared serial tail loop
-   * below.
-   */
-  for (i = 0; i < (MLDSA_K * MLDSA_L / 3) * 3; i += 3)
+/* Matrix entry i + j (row-major) of the current batch, for lane j. */
+#define MLD_EXPANDA_PTR(j) \
+  (&mat->vec[(i + (j)) / MLDSA_L].vec[(i + (j)) % MLDSA_L])
+#define MLD_EXPANDA_ENTRY(j) MLD_EXPANDA_PTR(j),
+#define MLD_EXPANDA_PERMUTE(j) \
+  mld_poly_permute_bitrev_to_custom_optional(MLD_EXPANDA_PTR(j));
+  /* Sample MLD_KECCAK_WAY matrix entries at a time. */
+  for (i = 0; i < (MLDSA_K * MLDSA_L / MLD_KECCAK_WAY) * MLD_KECCAK_WAY;
+       i += MLD_KECCAK_WAY)
   __loop__(
     assigns(i, j, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
-    invariant(i <= (MLDSA_K * MLDSA_L / 3) * 3 && i % 3 == 0)
+    invariant(i <= (MLDSA_K * MLDSA_L / MLD_KECCAK_WAY) * MLD_KECCAK_WAY && i % MLD_KECCAK_WAY == 0)
     /* vectors 0 .. i / MLDSA_L are completely sampled */
     invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
       array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
     /* last vector is sampled up to i % MLDSA_L */
     invariant(forall(k2, i / MLDSA_L, i / MLDSA_L + 1, forall(l2, 0, i % MLDSA_L,
       array_bound(mat->vec[k2].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    decreases((MLDSA_K * MLDSA_L / 3) * 3 - i)
+    decreases((MLDSA_K * MLDSA_L / MLD_KECCAK_WAY) * MLD_KECCAK_WAY - i)
   )
   {
-    for (j = 0; j < 3; j++)
+    for (j = 0; j < MLD_KECCAK_WAY; j++)
     __loop__(
       assigns(j, object_whole(seed_ext))
-      invariant(j <= 3)
-      decreases(3 - j)
+      invariant(j <= MLD_KECCAK_WAY)
+      decreases(MLD_KECCAK_WAY - j)
     )
     {
       uint8_t x = (uint8_t)((i + j) / MLDSA_L);
@@ -111,61 +110,9 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
       seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
     }
 
-    mld_poly_uniform_xN(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
-                        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
-                        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
-                        seed_ext);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[i / MLDSA_L].vec[i % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L]);
+    mld_poly_uniform_xN(MLD_XN_LANES(MLD_EXPANDA_ENTRY) seed_ext);
+    MLD_XN_LANES(MLD_EXPANDA_PERMUTE)
   }
-#else  /* MLD_KECCAK_WAY == 3 */
-  /* Sample 4 matrix entries a time. */
-  for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
-  __loop__(
-    assigns(i, j, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
-    invariant(i <= (MLDSA_K * MLDSA_L / 4) * 4 && i % 4 == 0)
-    /* vectors 0 .. i / MLDSA_L are completely sampled */
-    invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
-      array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    /* last vector is sampled up to i % MLDSA_L */
-    invariant(forall(k2, i / MLDSA_L, i / MLDSA_L + 1, forall(l2, 0, i % MLDSA_L,
-      array_bound(mat->vec[k2].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    decreases((MLDSA_K * MLDSA_L / 4) * 4 - i)
-  )
-  {
-    for (j = 0; j < 4; j++)
-    __loop__(
-      assigns(j, object_whole(seed_ext))
-      invariant(j <= 4)
-      decreases(4 - j)
-    )
-    {
-      uint8_t x = (uint8_t)((i + j) / MLDSA_L);
-      uint8_t y = (uint8_t)((i + j) % MLDSA_L);
-
-      seed_ext[j][MLDSA_SEEDBYTES + 0] = y;
-      seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
-    }
-
-    mld_poly_uniform_xN(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
-                        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
-                        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
-                        &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L],
-                        seed_ext);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[i / MLDSA_L].vec[i % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L]);
-  }
-#endif /* MLD_KECCAK_WAY != 3 */
 #else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
   i = 0;
 #endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
@@ -350,3 +297,6 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_polymat_expand_entry
+#undef MLD_EXPANDA_PTR
+#undef MLD_EXPANDA_ENTRY
+#undef MLD_EXPANDA_PERMUTE
