@@ -1,5 +1,6 @@
 /*
  * Copyright (c) The mldsa-native project authors
+ * Copyright (c) The mlkem-native project authors
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
@@ -1046,14 +1047,61 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X4
 #define MAX_RATE 136
 
+/* Preserve diagnostics while releasing heap-backed states on failure. */
+#define CHECK_X4_BYTES(x)                                     \
+  do                                                          \
+  {                                                           \
+    if (!(x))                                                 \
+    {                                                         \
+      fprintf(stderr, "ERROR (%s,%d)\n", __FILE__, __LINE__); \
+      goto cleanup;                                           \
+    }                                                         \
+  } while (0)
+
+/* Reserve eight leading guard bytes, keeping alignment modulo four,
+ * four bytes for the alignment shift and row padding, MAX_RATE data bytes, and
+ * sixteen trailing guard bytes. Check the guards for out-of-range writes. */
+#define OUTPUT_BYTES (8 + 4 + MAX_RATE + 16)
+
 static int test_keccakf1600x4_xor_permute_extract(void)
 {
+  static const uint8_t buffer_offset_cases[][MLD_KECCAK_WAY] = {
+      {0, 0, 0, 0}, {0, 1, 2, 3}, {1, 1, 1, 1}, {1, 2, 3, 0},
+      {2, 2, 2, 2}, {2, 3, 0, 1}, {3, 3, 3, 3}, {3, 0, 1, 2},
+  };
+  /* Append fixed extraction regressions after the randomized trials.
+   * Offset 1, length 15 consumes a seven-byte prologue and one full lane. */
+  static const struct
+  {
+    uint8_t offset, length;
+    uint8_t output_offsets[MLD_KECCAK_WAY];
+  } extract_cases[] = {
+      {1, 15, {0, 0, 0, 0}},  /* Unaligned after the prologue. */
+      {1, 15, {1, 1, 1, 1}},  /* Aligned after the prologue. */
+      {0, 17, {0, 0, 0, 0}},  /* Word stores and a partial tail. */
+      {0, 17, {1, 1, 1, 1}},  /* Byte stores and a partial tail. */
+      {0, 17, {1, 0, 0, 0}},  /* Only output 0 is unaligned. */
+      {0, 17, {0, 1, 0, 0}},  /* Only output 1 is unaligned. */
+      {0, 17, {0, 0, 1, 0}},  /* Only output 2 is unaligned. */
+      {0, 17, {0, 0, 0, 1}},  /* Only output 3 is unaligned. */
+      {1, 7, {0, 0, 0, 0}},   /* Prologue only. */
+      {0, 7, {0, 0, 0, 0}},   /* Tail only. */
+      {0, 0, {0, 0, 0, 0}},   /* Empty range. */
+      {199, 1, {0, 0, 0, 0}}, /* Final state byte. */
+      {200, 0, {0, 0, 0, 0}}, /* Empty range at the state endpoint. */
+  };
+  const int num_extract_cases =
+      (int)(sizeof(extract_cases) / sizeof(extract_cases[0]));
   int ret = 1;
-  int i, j;
-  unsigned char output_x4[MLD_KECCAK_WAY][MAX_RATE];
-  unsigned char output_x1[MAX_RATE];
-  unsigned char input[MLD_KECCAK_WAY][MAX_RATE];
+  int i, j, k;
   uint8_t xor_offset, xor_length, ext_offset, ext_length;
+  MLD_ALIGN unsigned char output_base[MLD_KECCAK_WAY][OUTPUT_BYTES];
+  unsigned char output_x1[MAX_RATE];
+  MLD_ALIGN unsigned char input_base[MLD_KECCAK_WAY][MAX_RATE + 4];
+  unsigned char *output_x4[MLD_KECCAK_WAY];
+  unsigned char *input[MLD_KECCAK_WAY];
+  const uint8_t *input_offsets;
+  const uint8_t *output_offsets;
   MLD_ALLOC(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   MLD_ALLOC(state_x1, uint64_t, MLD_KECCAK_LANES, NULL);
 
@@ -1062,7 +1110,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     goto cleanup;
   }
 
-  for (i = 0; i < NUM_RANDOM_TESTS; i++)
+  for (i = 0; i < NUM_RANDOM_TESTS + num_extract_cases; i++)
   {
     /* Generate random offset and length for xor_bytes */
     randombytes(&xor_offset, 1);
@@ -1076,10 +1124,27 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     ext_offset = ext_offset % MAX_RATE;
     ext_length = (uint8_t)(1 + (ext_length % (MAX_RATE - ext_offset)));
 
-    /* Generate different random input for each lane */
+    /* Select the buffer offsets for this iteration. */
+    input_offsets =
+        buffer_offset_cases[(size_t)i % (sizeof(buffer_offset_cases) /
+                                         sizeof(buffer_offset_cases[0]))];
+    output_offsets = input_offsets;
+    if (i >= NUM_RANDOM_TESTS)
+    {
+      int c = i - NUM_RANDOM_TESTS;
+      ext_offset = extract_cases[c].offset;
+      ext_length = extract_cases[c].length;
+      output_offsets = extract_cases[c].output_offsets;
+    }
+
+    /* Generate different random input for each lane. */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
+      input[j] = input_base[j] + input_offsets[j];
       randombytes(input[j], xor_length);
+      /* Leave eight leading bytes and room for an over-store sentinel. */
+      output_x4[j] = output_base[j] + 8 + output_offsets[j];
+      memset(output_base[j], 0xA5, OUTPUT_BYTES);
     }
 
     /* Run x4 implementation */
@@ -1100,7 +1165,15 @@ static int test_keccakf1600x4_xor_permute_extract(void)
       mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
                                     ext_length);
 
-      CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
+      CHECK_X4_BYTES(memcmp(output_x4[j], output_x1, ext_length) == 0);
+      for (k = 0; k < 8 + output_offsets[j]; k++)
+      {
+        CHECK_X4_BYTES(output_base[j][k] == 0xA5);
+      }
+      for (k = 8 + output_offsets[j] + ext_length; k < OUTPUT_BYTES; k++)
+      {
+        CHECK_X4_BYTES(output_base[j][k] == 0xA5);
+      }
     }
   }
 
@@ -1111,6 +1184,9 @@ cleanup:
   MLD_FREE(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   return ret;
 }
+
+#undef OUTPUT_BYTES
+#undef CHECK_X4_BYTES
 
 #undef MAX_RATE
 #endif /* MLD_USE_NATIVE_FIPS202_X4 */
