@@ -618,10 +618,10 @@ __contract__(
   requires(buflen <= (MLD_POLY_UNIFORM_NBLOCKS * MLD_STREAM128_BLOCKBYTES) && buflen % 3 == 0)
   requires(memory_no_alias(a, sizeof(int32_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(array_bound(a, 0, offset, 0, MLDSA_Q))
+  requires(array_bound(a, 0, offset, MLDSA_N, 0, MLDSA_Q))
   assigns(memory_slice(a, sizeof(int32_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(array_bound(a, 0, return_value, 0, MLDSA_Q))
+  ensures(array_bound(a, 0, return_value, MLDSA_N, 0, MLDSA_Q))
 )
 {
 #if defined(MLD_USE_NATIVE_REJ_UNIFORM)
@@ -726,10 +726,10 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
             memory_slice(vec2, sizeof(mld_poly)), memory_slice(vec3, sizeof(mld_poly)))
     invariant(ctr[0] <= MLDSA_N && ctr[1] <= MLDSA_N)
     invariant(ctr[2] <= MLDSA_N && ctr[3] <= MLDSA_N)
-    invariant(array_bound(vec0->coeffs, 0, ctr[0], 0, MLDSA_Q))
-    invariant(array_bound(vec1->coeffs, 0, ctr[1], 0, MLDSA_Q))
-    invariant(array_bound(vec2->coeffs, 0, ctr[2], 0, MLDSA_Q))
-    invariant(array_bound(vec3->coeffs, 0, ctr[3], 0, MLDSA_Q)))
+    invariant(array_bound(vec0->coeffs, 0, ctr[0], MLDSA_N, 0, MLDSA_Q))
+    invariant(array_bound(vec1->coeffs, 0, ctr[1], MLDSA_N, 0, MLDSA_Q))
+    invariant(array_bound(vec2->coeffs, 0, ctr[2], MLDSA_N, 0, MLDSA_Q))
+    invariant(array_bound(vec3->coeffs, 0, ctr[3], MLDSA_N, 0, MLDSA_Q)))
   {
     mld_xof128_x4_squeezeblocks(buf, 1, &state);
     ctr[0] = mld_rej_uniform(vec0->coeffs, MLDSA_N, ctr[0], buf[0], buflen);
