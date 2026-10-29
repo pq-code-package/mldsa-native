@@ -177,9 +177,32 @@
          (((array_var)[(qvar)]) < (int)(value_ub)))                    \
   }
 
-#define array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
-  array_bound_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), (qvar_lb),   \
+#define array_bound_bounded_core(qvar, qvar_lb, qvar_ub, qvar_max,       \
+                                 array_var, value_lb, value_ub)          \
+  CBMC_FORALL(qvar, 0, qvar_max,                                         \
+              ((uint32_t)(qvar_lb) <= (qvar) &&                          \
+               (qvar) < (uint32_t)(qvar_ub)) ==>                         \
+                  (((int)(value_lb) <= ((array_var)[(qvar)])) &&         \
+                   (((array_var)[(qvar)]) < (int)(value_ub))))
+
+/*
+ * array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) and
+ * array_bound(array_var, qvar_lb, qvar_ub, qvar_max, value_lb, value_ub)
+ * mirror the two forms of forall.
+ */
+#define CBMC_ARRAY_BOUND(array_var, qvar_lb, qvar_ub, value_lb, value_ub) \
+  array_bound_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), (qvar_lb),        \
       (qvar_ub), (array_var), (value_lb), (value_ub))
+
+#define CBMC_ARRAY_BOUND_BOUNDED(array_var, qvar_lb, qvar_ub, qvar_max,       \
+                                 value_lb, value_ub)                          \
+  array_bound_bounded_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), (qvar_lb),    \
+      (qvar_ub), (qvar_max), (array_var), (value_lb), (value_ub))
+
+#define CBMC_ARRAY_BOUND_SELECT(_1, _2, _3, _4, _5, _6, NAME, ...) NAME
+#define array_bound(...)                                                       \
+  CBMC_ARRAY_BOUND_SELECT(__VA_ARGS__, CBMC_ARRAY_BOUND_BOUNDED,               \
+                          CBMC_ARRAY_BOUND, unused)(__VA_ARGS__)
 
 #define array_unchanged_core(qvar, qvar_lb, qvar_ub, array_var)                   \
   __CPROVER_forall                                                                \
@@ -245,8 +268,16 @@
  * Note that since the lower bound in array_bound is inclusive, we have to
  * raise it by 1 here.
  */
-#define array_abs_bound(arr, lb, ub, k) \
+#define CBMC_ARRAY_ABS_BOUND(arr, lb, ub, k) \
   array_bound((arr), (lb), (ub), -((int)(k)) + 1, (k))
+
+#define CBMC_ARRAY_ABS_BOUND_BOUNDED(arr, lb, ub, max, k) \
+  array_bound((arr), (lb), (ub), (max), -((int)(k)) + 1, (k))
+
+/* array_abs_bound takes an optional constant max like array_bound. */
+#define array_abs_bound(...)                                    \
+  CBMC_FORALL_SELECT(__VA_ARGS__, CBMC_ARRAY_ABS_BOUND_BOUNDED, \
+                     CBMC_ARRAY_ABS_BOUND, unused)(__VA_ARGS__)
 
 #endif /* CBMC */
 

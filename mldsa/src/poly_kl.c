@@ -282,10 +282,10 @@ __contract__(
   requires(buflen <= (MLD_POLY_UNIFORM_ETA_NBLOCKS * MLD_STREAM256_BLOCKBYTES))
   requires(memory_no_alias(a, sizeof(int32_t) * target))
   requires(memory_no_alias(buf, buflen))
-  requires(array_abs_bound(a, 0, offset, MLDSA_ETA + 1))
+  requires(array_abs_bound(a, 0, offset, MLDSA_N, MLDSA_ETA + 1))
   assigns(memory_slice(a, sizeof(int32_t) * target))
   ensures(offset <= return_value && return_value <= target)
-  ensures(array_abs_bound(a, 0, return_value, MLDSA_ETA + 1))
+  ensures(array_abs_bound(a, 0, return_value, MLDSA_N, MLDSA_ETA + 1))
 )
 {
 #if MLDSA_ETA == 2 && defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2)
@@ -381,10 +381,10 @@ void mld_poly_uniform_eta_4x(mld_poly *r0, mld_poly *r1, mld_poly *r2,
             object_whole(buf[3]))
     invariant(ctr[0] <= MLDSA_N && ctr[1] <= MLDSA_N)
     invariant(ctr[2] <= MLDSA_N && ctr[3] <= MLDSA_N)
-    invariant(array_abs_bound(r0->coeffs, 0, ctr[0], MLDSA_ETA + 1))
-    invariant(array_abs_bound(r1->coeffs, 0, ctr[1], MLDSA_ETA + 1))
-    invariant(array_abs_bound(r2->coeffs, 0, ctr[2], MLDSA_ETA + 1))
-    invariant(array_abs_bound(r3->coeffs, 0, ctr[3], MLDSA_ETA + 1)))
+    invariant(array_abs_bound(r0->coeffs, 0, ctr[0], MLDSA_N, MLDSA_ETA + 1))
+    invariant(array_abs_bound(r1->coeffs, 0, ctr[1], MLDSA_N, MLDSA_ETA + 1))
+    invariant(array_abs_bound(r2->coeffs, 0, ctr[2], MLDSA_N, MLDSA_ETA + 1))
+    invariant(array_abs_bound(r3->coeffs, 0, ctr[3], MLDSA_N, MLDSA_ETA + 1)))
   {
     mld_xof256_x4_squeezeblocks(buf, 1, &state);
     ctr[0] = mld_rej_eta(r0->coeffs, MLDSA_N, ctr[0], buf[0], buflen);
