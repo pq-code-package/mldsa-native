@@ -308,6 +308,28 @@ mld_rej_uniform_eta2_final_copy:
         cmp final_copy_count, #MLDSA_N
         b.lt mld_rej_uniform_eta2_final_copy
 
+    // Zeroize the stack buffer
+    eor val0.16b, val0.16b, val0.16b
+    mov output_tmp, output_tmp_base
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp], #32
+
     mov x0, count
     pop_stack
     ret

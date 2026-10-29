@@ -8,6 +8,7 @@
  needs "mldsa_native/x86_64/proofs/mldsa_utils.ml";;
 
  needs "mldsa_native/x86_64/proofs/keccak_utils.ml";;
+ needs "mldsa_native/common/stack_zero.ml";;
 
 (**** print_literal_from_elf "x86/sha3/keccak_f1600_x4_avx2.o";;
 ****)
@@ -746,6 +747,55 @@ let keccak_f1600_x4_avx2_mc = define_assert_from_elf
                            (* VMOVQ (Memop Quadword (%% (rdi,592))) (%_% xmm15) *)
   0xc5; 0x79; 0x17; 0xbf; 0x18; 0x03; 0x00; 0x00;
                            (* VMOVHPD (Memop Quadword (%% (rdi,792))) (%_% xmm15) *)
+  0xc5; 0xfd; 0xef; 0xc0;  (* VPXOR (%_% ymm0) (%_% ymm0) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x04; 0x24;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,0))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x20;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,32))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x40;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,64))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x44; 0x24; 0x60;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,96))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,128))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,160))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,192))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x00; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,224))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x00; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,256))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x20; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,288))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x40; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,320))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x60; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,352))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,384))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,416))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,448))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x01; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,480))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x00; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,512))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x20; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,544))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x40; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,576))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x60; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,608))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0x80; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,640))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xa0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,672))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xc0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,704))) (%_% ymm0) *)
+  0xc5; 0xfe; 0x7f; 0x84; 0x24; 0xe0; 0x02; 0x00; 0x00;
+                           (* VMOVDQU (Memop Word256 (%% (rsp,736))) (%_% ymm0) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0x4c; 0x89; 0xdc;        (* MOV (% rsp) (% r11) *)
   0xc3                     (* RET *)
@@ -802,6 +852,7 @@ let KECCAK_F1600_X4_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 400),25) s = A3 /\
               wordlist_from_memory(word_add bitstate_in (word 600),25) s = A4)
              (\s. read RIP s = word(pc + KECCAK_F1600_X4_CORE_END) /\
+                  read (memory :> bytes(stackpointer,0x300)) s = 0 /\
                   wordlist_from_memory(bitstate_in,25) s = keccak 24 A1 /\
                   wordlist_from_memory(word_add bitstate_in (word 200),25) s = keccak 24 A2 /\
                   wordlist_from_memory(word_add bitstate_in (word 400),25) s = keccak 24 A3 /\
@@ -1024,6 +1075,7 @@ let KECCAK_F1600_X4_CORRECT = prove
       check (can (term_match [] `read qqq s:int256 = xxx`) o concl))) THEN
     CONV_TAC(ONCE_DEPTH_CONV NORMALIZE_RELATIVE_ADDRESS_CONV) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+    CONJ_TAC THENL [STACK_ZERO_TAC; ALL_TAC] THEN
     REPEAT CONJ_TAC THEN
     BITBLAST_TAC]);;
 
@@ -1055,6 +1107,8 @@ let KECCAK_F1600_X4_NOIBT_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = A4)
          (\s. read RIP s = returnaddress /\
               read RSP s = word_add stackpointer (word 8) /\
+              read (memory :> bytes(word_sub (word_and stackpointer (word 0xffffffffffffffe0))
+                                             (word 0x300), 0x300)) s = 0 /\
               wordlist_from_memory(bitstate_in, 25) s = keccak 24 A1 /\
               wordlist_from_memory(word_add bitstate_in (word 200), 25) s = keccak 24 A2 /\
               wordlist_from_memory(word_add bitstate_in (word 400), 25) s = keccak 24 A3 /\
@@ -1149,6 +1203,8 @@ let KECCAK_F1600_X4_SUBROUTINE_CORRECT = prove
               wordlist_from_memory(word_add bitstate_in (word 600), 25) s = A4)
          (\s. read RIP s = returnaddress /\
               read RSP s = word_add stackpointer (word 8) /\
+              read (memory :> bytes(word_sub (word_and stackpointer (word 0xffffffffffffffe0))
+                                             (word 0x300), 0x300)) s = 0 /\
               wordlist_from_memory(bitstate_in, 25) s = keccak 24 A1 /\
               wordlist_from_memory(word_add bitstate_in (word 200), 25) s = keccak 24 A2 /\
               wordlist_from_memory(word_add bitstate_in (word 400), 25) s = keccak 24 A3 /\

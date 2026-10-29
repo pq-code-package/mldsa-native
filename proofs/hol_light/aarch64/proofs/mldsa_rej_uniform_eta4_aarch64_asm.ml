@@ -14,6 +14,7 @@
 needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_eta_table.ml";;
+needs "mldsa_native/common/stack_zero.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.o";;
  ****)
@@ -105,6 +106,26 @@ let mldsa_rej_uniform_eta4_mc = define_assert_from_elf
   0x9100416b;       (* arm_ADD X11 X11 (rvalue (word 16)) *)
   0xf104017f;       (* arm_CMP X11 (rvalue (word 256)) *)
   0x54fffe4b;       (* arm_BLT (word 2097096) *)
+  0x6e301e10;       (* arm_EOR_VEC Q16 Q16 Q16 128 *)
+  0xaa0803e7;       (* arm_MOV X7 X8 *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
+  0xac8140f0;       (* arm_STP Q16 Q16 X7 (Postimmediate_Offset (iword (&32))) *)
   0xaa0903e0;       (* arm_MOV X0 X9 *)
   0x910903ff;       (* arm_ADD SP SP (rvalue (word 576)) *)
   0xd65f03c0        (* arm_RET X30 *)
@@ -642,6 +663,15 @@ let CASE_B_TRUNCATE_L = prove
 (* ------------------------------------------------------------------------- *)
 
 
+let READ_BYTES_PREFIX_MOD = prove
+ (`!(a:int64) k n (s:armstate).
+     k <= n
+     ==> read (memory :> bytes(a,k)) s =
+         read (memory :> bytes(a,n)) s MOD 2 EXP (8 * k)`,
+  REPEAT STRIP_TAC THEN
+  REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_MOD] THEN
+  ASM_SIMP_TAC[ARITH_RULE `k <= n ==> MIN n k = k`]);;
+
 let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
  (`!res buf buflen table (inlist:byte list) pc stackpointer.
       8 divides val buflen /\
@@ -663,6 +693,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
                 read(memory :> bytes(buf,val buflen)) s =
                 num_of_wordlist inlist)
            (\s. read PC s = word(pc + MLDSA_REJ_UNIFORM_ETA4_CORE_END) /\
+                read (memory :> bytes(stackpointer,576)) s = 0 /\
                 let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4_BYTES inlist) in
                 let outlen = LENGTH outlist in
                 C_RETURN s = word outlen /\
@@ -687,7 +718,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
        read X0 s = res /\ read X4 s = word 256 /\
        read X8 s = stackpointer /\
        read Q7 s = word 20769504351625144638033088116686852 /\
-       ALL (nonoverlapping (res,1024)) [(word pc,344); (stackpointer,576)] /\
+       ALL (nonoverlapping (res,1024)) [(word pc,424); (stackpointer,576)] /\
        ?n. let niblist = REJ_NIBBLES_ETA4(SUB_LIST(0,8*n) inlist) in
            let niblen = LENGTH niblist in
            niblen < 272 /\
@@ -698,7 +729,17 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
  CONJ_TAC THENL
   [ALL_TAC;
 
-   ENSURES_INIT_TAC "s0" THEN
+   ENSURES_SEQUENCE_TAC `pc + 332`
+    `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_eta4_mc /\
+         read PC s = word(pc + 332) /\
+         read X8 s = stackpointer /\
+         let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4_BYTES inlist) in
+         let outlen = LENGTH outlist in
+         read X9 s = word outlen /\
+         read(memory :> bytes(res,4 * outlen)) s =
+         num_of_wordlist outlist` THEN
+   CONJ_TAC THENL
+   [ENSURES_INIT_TAC "s0" THEN
    FIRST_X_ASSUM(X_CHOOSE_THEN `nn:num` MP_TAC) THEN
    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
    ABBREV_TAC `niblist = REJ_NIBBLES_ETA4
@@ -713,7 +754,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
      `read (memory :> bytes(stackpointer,8 * 64)) s0` THEN
    MEMORY_128_FROM_64_TAC "stackpointer" 0 32 THEN
    ASM_REWRITE_TAC[WORD_ADD_0] THEN STRIP_TAC THEN
-   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--245) THEN
+   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--244) THEN
    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
    SUBGOAL_THEN
      `LENGTH(SUB_LIST(0,256)(REJ_SAMPLE_ETA4_BYTES inlist):int32 list) =
@@ -810,7 +851,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
            UNDISCH_TAC `LENGTH(niblist:int16 list) = niblen` THEN
            DISCH_THEN SUBST1_TAC THEN ASM_REWRITE_TAC[];
            ALL_TAC] THEN
-         MP_TAC(GEN `k:num` (ISPECL [`s245:armstate`; `stackpointer:int64`;
+         MP_TAC(GEN `k:num` (ISPECL [`s244:armstate`; `stackpointer:int64`;
                                       `niblist:int16 list`; `k:num`]
                                      BK_FROM_STACK_GE256)) THEN
          ASM_REWRITE_TAC[] THEN
@@ -903,7 +944,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
           [ASM_REWRITE_TAC[] THEN MATCH_MP_TAC SUB_LIST_REFL THEN
            REWRITE_TAC[LENGTH_MAP] THEN ASM_ARITH_TAC;
            ALL_TAC] THEN
-         MP_TAC(ISPECL [`stackpointer:int64`; `256`; `s245:armstate`]
+         MP_TAC(ISPECL [`stackpointer:int64`; `256`; `s244:armstate`]
                        BYTES_EXISTS_WORDLIST) THEN
          REWRITE_TAC[ARITH_RULE `2 * 256 = 512`] THEN
          DISCH_THEN(X_CHOOSE_THEN `L:int16 list` STRIP_ASSUME_TAC) THEN
@@ -911,7 +952,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
            ASSUME_TAC THENL
           [MATCH_MP_TAC PREFIX_FROM_STACK THEN
            MAP_EVERY EXISTS_TAC
-             [`stackpointer:int64`; `s245:armstate`] THEN
+             [`stackpointer:int64`; `s244:armstate`] THEN
            ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC;
            ALL_TAC] THEN
          MATCH_MP_TAC CASE_B_TRUNCATE_L THEN
@@ -920,7 +961,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
          CONJ_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
          SUBGOAL_THEN `256 <= LENGTH (L:int16 list)` ASSUME_TAC THENL
           [ASM_REWRITE_TAC[] THEN ARITH_TAC; ALL_TAC] THEN
-         MP_TAC(GEN `k:num` (ISPECL [`s245:armstate`; `stackpointer:int64`;
+         MP_TAC(GEN `k:num` (ISPECL [`s244:armstate`; `stackpointer:int64`;
                                       `L:int16 list`; `k:num`]
                                      BK_FROM_STACK_GE256)) THEN
          ASM_REWRITE_TAC[ARITH_RULE `2 * 256 = 512`] THEN
@@ -1009,7 +1050,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
          UNDISCH_TAC `LENGTH(niblist:int16 list) = niblen` THEN
          DISCH_THEN SUBST1_TAC THEN ASM_REWRITE_TAC[];
          ALL_TAC] THEN
-       MP_TAC(GEN `k:num` (ISPECL [`s245:armstate`; `stackpointer:int64`;
+       MP_TAC(GEN `k:num` (ISPECL [`s244:armstate`; `stackpointer:int64`;
                                     `niblist:int16 list`; `k:num`]
                                    BK_FROM_STACK_GE256)) THEN
        ASM_REWRITE_TAC[] THEN
@@ -1074,7 +1115,31 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
         [MATCH_MP_TAC STACK_CONTENT_LARGE THEN ASM_REWRITE_TAC[];
          ALL_TAC] THEN
        MATCH_MP_TAC PAIR_MAP_IDX_128 THEN
-       ASM_REWRITE_TAC[]]]] THEN
+       ASM_REWRITE_TAC[]]];
+
+    ENSURES_INIT_TAC "s0" THEN
+    FIRST_X_ASSUM(MP_TAC o check (is_let o concl)) THEN
+    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
+    ABBREV_TAC `outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4_BYTES inlist):int32 list` THEN
+    ABBREV_TAC `outlen = LENGTH(outlist:int32 list)` THEN
+    STRIP_TAC THEN
+    SUBGOAL_THEN `4 * outlen <= 1024` ASSUME_TAC THENL
+     [EXPAND_TAC "outlen" THEN EXPAND_TAC "outlist" THEN
+      REWRITE_TAC[LENGTH_SUB_LIST] THEN ARITH_TAC;
+      ALL_TAC] THEN
+    UNDISCH_TAC `read (memory :> bytes(res,4 * outlen)) s0 =
+                 num_of_wordlist(outlist:int32 list)` THEN
+    MP_TAC(SPECL [`res:int64`; `4 * outlen`; `1024`; `s0:armstate`]
+                 READ_BYTES_PREFIX_MOD) THEN
+    ANTS_TAC THENL [ASM_REWRITE_TAC[]; DISCH_THEN SUBST1_TAC] THEN
+    DISCH_TAC THEN
+    ABBREV_TAC `r = read (memory :> bytes(res,1024)) s0` THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--21) THEN
+    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+    CONJ_TAC THENL [STACK_ZERO_TAC; ALL_TAC] THEN
+    MP_TAC(SPECL [`res:int64`; `4 * outlen`; `1024`; `s21:armstate`]
+                 READ_BYTES_PREFIX_MOD) THEN
+    ASM_REWRITE_TAC[]]] THEN
 
  SUBGOAL_THEN
   `?N. buflen < 8 * (N + 1) \/
@@ -1167,7 +1232,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
             read Q16 s = word(num_of_wordlist lis0):int128 /\
             read Q17 s = word(num_of_wordlist lis1):int128) /\
          curlen < 256 /\
-         nonoverlapping (stackpointer,576) (word pc,344)` THEN
+         nonoverlapping (stackpointer,576) (word pc,424)` THEN
    CONJ_TAC THENL
     [(* First half: SIMD compute chain — 29 steps *)
      GHOST_INTRO_TAC `nibbles1:int128` `read Q17` THEN
@@ -1498,7 +1563,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
    ASM_REWRITE_TAC[] THEN DISCH_TAC THEN
    SUBGOAL_THEN
     `nonoverlapping (word_add stackpointer (word(2 * (curlen + len0))):int64,
-                     16) (word pc:int64, 344)`
+                     16) (word pc:int64, 424)`
    ASSUME_TAC THENL [NONOVERLAPPING_TAC; ALL_TAC] THEN
    SUBGOAL_THEN `val(word len0:int64) = len0` ASSUME_TAC THENL
     [MATCH_MP_TAC VAL_WORD_EQ THEN REWRITE_TAC[DIMINDEX_64] THEN
@@ -1639,7 +1704,7 @@ let MLDSA_REJ_UNIFORM_ETA4_CORRECT = prove
              read X9 s = word niblen /\
              read (memory :> bytes (stackpointer,2 * niblen)) s =
              num_of_wordlist (REJ_NIBBLES_ETA4(SUB_LIST(0,8*N) inlist):int16 list) /\
-             ALL (nonoverlapping (res,1024)) [(word pc,344); (stackpointer,576)]` THEN
+             ALL (nonoverlapping (res,1024)) [(word pc,424); (stackpointer,576)]` THEN
        CONJ_TAC THENL
         [(* pc+248 -> pc+108: CMP X2,8; BCS back *)
          ENSURES_INIT_TAC "s0" THEN
@@ -1786,6 +1851,7 @@ let MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_CORRECT = prove
                   read(memory :> bytes(buf,val buflen)) s =
                   num_of_wordlist inlist)
              (\s. read PC s = returnaddress /\
+                  read (memory :> bytes(word_sub stackpointer (word 576),576)) s = 0 /\
                   let outlist = SUB_LIST(0,256) (REJ_SAMPLE_ETA4 inlist) in
                   let outlen = LENGTH outlist in
                   outlen <= 256 /\
@@ -1836,6 +1902,7 @@ let MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_CORRECT = prove
                   read(memory :> bytes(buf,val buflen)) s =
                   num_of_wordlist inlist)
              (\s. read PC s = returnaddress /\
+                  read (memory :> bytes(word_sub stackpointer (word 576),576)) s = 0 /\
                   let outlist = SUB_LIST(0,256)
                       (REJ_SAMPLE_ETA4_BYTES inlist) in
                   let outlen = LENGTH outlist in
@@ -2011,7 +2078,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
         read X0 s = res /\ read X4 s = word 256 /\
         read X8 s = stackpointer /\
         read Q7 s = word 20769504351625144638033088116686852 /\
-        ALL (nonoverlapping (res,1024)) [(word pc,344); (stackpointer,576)] /\
+        ALL (nonoverlapping (res,1024)) [(word pc,424); (stackpointer,576)] /\
         ?n. let niblist = REJ_NIBBLES_ETA4(SUB_LIST(0,8*n) inlist) in
             let niblen = LENGTH niblist in
             niblen < 272 /\
@@ -2027,7 +2094,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
   CONJ_TAC THENL
    [ALL_TAC;
 
-    (* ---- Writeback branch (pc+256 -> pc+336) ----
+    (* ---- Writeback branch (pc+256 -> pc+416) ----
        Skip BIGNUM_LDIGITIZE_TAC and MEMORY_128_FROM_64_TAC: they introduce
        ~100 stack bytes64/bytes128 reads needed for CORRECT to derive nibble
        values, but irrelevant to memory safety (only events + PC + memaccess
@@ -2043,7 +2110,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
     SUBGOAL_THEN `val(word niblen:int64) = niblen` ASSUME_TAC THENL
      [MATCH_MP_TAC VAL_WORD_EQ THEN REWRITE_TAC[DIMINDEX_64] THEN
       UNDISCH_TAC `niblen < 272` THEN ARITH_TAC; ALL_TAC] THEN
-    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--245) THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC (1--265) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     TRY DISCHARGE_MEMSAFE_TAC THEN
     ALL_TAC] THEN
@@ -2147,7 +2214,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
              read Q16 s = word(num_of_wordlist lis0):int128 /\
              read Q17 s = word(num_of_wordlist lis1):int128) /\
           curlen < 256 /\
-          nonoverlapping (stackpointer,576) (word pc,344) /\
+          nonoverlapping (stackpointer,576) (word pc,424) /\
           (exists e_acc.
             read events s = APPEND e_acc e /\
             memaccess_inbounds e_acc
@@ -2528,7 +2595,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
       ASM_REWRITE_TAC[] THEN DISCH_TAC THEN
       SUBGOAL_THEN
        `nonoverlapping (word_add stackpointer (word(2 * (curlen + len0))):int64,
-                        16) (word pc:int64, 344)`
+                        16) (word pc:int64, 424)`
       ASSUME_TAC THENL [NONOVERLAPPING_TAC; ALL_TAC] THEN
       SUBGOAL_THEN `val(word len0:int64) = len0` ASSUME_TAC THENL
        [MATCH_MP_TAC VAL_WORD_EQ THEN REWRITE_TAC[DIMINDEX_64] THEN
@@ -2674,7 +2741,7 @@ let MLDSA_REJ_UNIFORM_ETA4_MEMSAFE = prove
               read X9 s = word niblen /\
               read (memory :> bytes (stackpointer,2 * niblen)) s =
               num_of_wordlist (REJ_NIBBLES_ETA4(SUB_LIST(0,8*N) inlist):int16 list) /\
-              ALL (nonoverlapping (res,1024)) [(word pc,344); (stackpointer,576)] /\
+              ALL (nonoverlapping (res,1024)) [(word pc,424); (stackpointer,576)] /\
               (exists e_acc.
                 read events s = APPEND e_acc e /\
                 memaccess_inbounds e_acc
@@ -3095,7 +3162,7 @@ let MLDSA_ETA4_LOOP8_TRIP_MINIMAL = prove
 (* REJECT-MASK, demonstrated. (Accepted VALUES never enter the trace.)        *)
 (*                                                                            *)
 (*     add x7; add x12; add x9; cmp x2,#8].                                   *)
-(* BEFORE `add x7`. (b) stores need `nonoverlapping (word pc,344)             *)
+(* BEFORE `add x7`. (b) stores need `nonoverlapping (word pc,424)             *)
 (* (stackpointer,576)` in context (from the theorem's ALL clause) AND the 2nd *)
 (* store additionally needs val len0<=8 (UADDLV_BOUND_LEMMA) + the MEMSAFE    *)
 (* WORD_ADD_SHL1 rewrite (eta4.ml:2971) on the word_shl'd X7 offset, else     *)
@@ -3519,7 +3586,7 @@ let MLDSA_ETA4_LOOP8_COMPUTE = prove
       8 * (i + 1) <= val buflen /\
       NUM_ACCEPTED(SUB_LIST(0,16 * i) mask) < 256 /\
       ALL (nonoverlapping (word_sub stackpointer (word 576),576))
-          [(word pc,344); (buf,val buflen); (table,4096)]
+          [(word pc,424); (buf,val buflen); (table,4096)]
       ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_eta4_mc /\
                 read PC s = word (pc + 0x74) /\
@@ -3680,7 +3747,7 @@ let MLDSA_ETA4_LOOP8_COMPUTE = prove
   FIRST_X_ASSUM(fun th -> if is_eq(concl th) && lhs(concl th) = `read X7 s29:int64`
     then ASSUME_TAC(GEN_REWRITE_RULE RAND_CONV [WORD_ADD_SHL1] th) else failwith "no") THEN
   SUBGOAL_THEN
-   `nonoverlapping (word_add sp0 (word(2*(curlen + val(len0:int64)))):int64,16) (word pc:int64,344)`
+   `nonoverlapping (word_add sp0 (word(2*(curlen + val(len0:int64)))):int64,16) (word pc:int64,424)`
     ASSUME_TAC THENL [NONOVERLAPPING_TAC; ALL_TAC] THEN
   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC [30] THEN
   ARM_VERBOSE_STEP_TAC MLDSA_REJ_UNIFORM_ETA4_EXEC "s31" THEN
@@ -3860,7 +3927,7 @@ let MLDSA_ETA4_LOOP8_BODY_ADAPTED =
     [`mask = REJ_MASK_ETA4 inlist`;
      `LENGTH (inlist:byte list) = val (buflen:int64)`;
      `ALL (nonoverlapping (word_sub stackpointer (word 576),576))
-          [(word pc,344); (buf:int64,val (buflen:int64)); (table:int64,4096)]`] in
+          [(word pc,424); (buf:int64,val (buflen:int64)); (table:int64,4096)]`] in
   prove(mk_imp(ambient, conj2),
     REPEAT STRIP_TAC THEN
     ASM_CASES_TAC mi THENL
@@ -4121,5 +4188,5 @@ let MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_SAFE = time prove
                       ARITH_RULE `16*(i+1)=16*i+16`] THEN CONV_TAC WORD_RULE; ALL_TAC] THEN
         DISCHARGE_SAFETY_PROPERTY_TAC;
         ARM_SIM_TAC ~preprocess_tac:(TRY STRIP_EXISTS_ASSUM_TAC)
-            ~canonicalize_pc_diff:false MLDSA_REJ_UNIFORM_ETA4_EXEC (1--3) THEN
+            ~canonicalize_pc_diff:false MLDSA_REJ_UNIFORM_ETA4_EXEC (1--23) THEN
         DISCHARGE_SAFETY_PROPERTY_TAC]]]);;
