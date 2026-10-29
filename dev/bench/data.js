@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793265306601,
+  "lastUpdate": 1793275572389,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -929432,6 +929432,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 134239,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "f89fc5779656bf99716cc73542d71c833b1f5e56",
+          "message": "CBMC: Add a second solver for 2 slow proofs\n\nAdd cvc5_mbqi_enum as a second solver for poly_decompose_c and cadical\nas a second solver for sign_keypair_internal.\n\nThese are quite slow: locally for ML-DSA-87, poly_decompose_c takes\nabout 370s with cvc5_mbqi_enum and sign_keypair_internal about 385s\nwith cadical. No faster non-Z3 option was found for them.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-29T10:32:26Z",
+          "tree_id": "770748fe3fbf5fd3f3ae2af50fb54c8185c754b4",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/f89fc5779656bf99716cc73542d71c833b1f5e56"
+        },
+        "date": 1793275502955,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 47127,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 131340,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 47312,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81743,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 215189,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 79284,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 133545,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 277712,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 134257,
             "unit": "cycles"
           }
         ]
