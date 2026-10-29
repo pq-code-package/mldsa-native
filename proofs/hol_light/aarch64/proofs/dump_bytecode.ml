@@ -73,3 +73,23 @@ print_string "==== bytecode end =====================================\n\n";;
 print_string "=== bytecode start: aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.o ===\n";;
 print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: aarch64/mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.o ===\n";;
+print_literal_from_elf "aarch64/mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
