@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793397901388,
+  "lastUpdate": 1793397918704,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -277987,6 +277987,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 173707,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "beb27b55ac865ba7657b4c0d0b85248127773f96",
+          "message": "CBMC: Add CaDiCaL as a second solver for polyvecl_chknorm\n\nWith the bound only restricted to an interval, CaDiCaL does not finish\nthe polyvecl_chknorm proof. The library only calls\nmld_polyvecl_chknorm with B = MLDSA_GAMMA1 - MLDSA_BETA or\nB = MLDSA_ETA + 1, so restrict the precondition to these two values.\n\nAlso give the loop invariant's quantifier the constant range MLDSA_L,\nso the propositional backend expands it.\n\nLocally for ML-DSA-87, polyvecl_chknorm takes about 170s with cadical.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T19:54:12Z",
+          "tree_id": "b80001f43f00aac635785eff7a69d3ef245f1a01",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/beb27b55ac865ba7657b4c0d0b85248127773f96"
+        },
+        "date": 1793397634754,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 63540,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 191028,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 67748,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 110600,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 320078,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 113025,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 174716,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 384147,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 172826,
             "unit": "cycles"
           }
         ]
