@@ -30,8 +30,10 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
-CBMC_DEFAULT_CONFIG = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_smt_only \
+  LP64:cadical
+CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 
@@ -44,8 +46,8 @@ FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
 # This function is large enough to need...
 # Optimal CBMC_OBJECT_BITS depends on the parameter set; the values below
 # avoid SMT-solver timeouts for each L. See pq-code-package/mldsa-native#1131.
-ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
-CBMC_OBJECT_BITS = 12
+ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
+CBMC_OBJECT_BITS = 8
 else
 CBMC_OBJECT_BITS = 12
 endif
