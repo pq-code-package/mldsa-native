@@ -168,7 +168,7 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_eager(
   __loop__(
     assigns(i, memory_slice(w, sizeof(mld_polyveck)))
     invariant(i <= MLDSA_K)
-    invariant(forall(k0, 0, i,
+    invariant(forall(k0, 0, i, MLDSA_K,
                      array_abs_bound(w->vec[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
     decreases(MLDSA_K - i)
   )
@@ -262,10 +262,10 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
               memory_slice(mat, sizeof(mld_polymat_lazy)))
       invariant(k <= MLDSA_K)
       invariant(l != 0 ||
-                forall(k1, 0, k,
+                forall(k1, 0, k, MLDSA_K,
                        array_abs_bound(w->vec[k1].coeffs, 0, MLDSA_N, MLDSA_Q)))
       invariant(l == 0 ||
-                forall(k2, 0, k,
+                forall(k2, 0, k, MLDSA_K,
                        array_abs_bound(w->vec[k2].coeffs, 0, MLDSA_N,
                                        ((int)l + 1) * MLDSA_Q)))
       invariant(l == 0 ||
