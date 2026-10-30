@@ -15,6 +15,11 @@ INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
+# For CaDiCaL, unroll the per-entry sampling loop instead of applying its
+# loop contract: with a symbolic loop index, the havoc of the sampled entry
+# is at a symbolic offset into the matrix, which is very expensive for the
+# propositional backend.
+UNWINDSET += $(if $(filter cadical,$(CBMC_SOLVER)),mld_polyvec_matrix_expand_eager.1:56) # Largest value of MLDSA_K * MLDSA_L
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
@@ -30,7 +35,9 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3 \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3
 
 FUNCTION_NAME = polyvec_matrix_expand_serial
