@@ -15,6 +15,13 @@ INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
 UNWINDSET +=
+# For CaDiCaL, unroll the sampling loops instead of applying their loop
+# contracts: with a symbolic loop index, the havoc of the sampled entries
+# is at a symbolic offset into the matrix, which is very expensive for the
+# propositional backend.
+UNWINDSET += $(if $(filter cadical,$(CBMC_SOLVER)),mld_polyvec_matrix_expand_eager.1:4) # Inner loop over the 4 batched entries
+UNWINDSET += $(if $(filter cadical,$(CBMC_SOLVER)),mld_polyvec_matrix_expand_eager.2:14) # Largest value of MLDSA_K * MLDSA_L / 4
+UNWINDSET += $(if $(filter cadical,$(CBMC_SOLVER)),mld_polyvec_matrix_expand_eager.3:3) # Largest value of (MLDSA_K * MLDSA_L) % 4
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/polyvec_lazy.c
@@ -32,7 +39,14 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
+# With cadical, ML-DSA-87 runs out of resources in CI.
+ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
 CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+else
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_no_bv_extract \
+  LP64:cadical
+endif
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = polyvec_matrix_expand
