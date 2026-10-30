@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793382589707,
+  "lastUpdate": 1793396341200,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -936194,6 +936194,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 134386,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "c1bf806638f495a00cafa298a36b9ed6ddbebb49",
+          "message": "CBMC: Add CaDiCaL as a second solver for 2 pointwise proofs\n\nAdd cadical as a second solver for\npolyvecl_pointwise_acc_montgomery_c and\npolyvec_matrix_pointwise_montgomery_row.\n\nFor polyvecl_pointwise_acc_montgomery_c, give the outer loop\ninvariant the constant range MLDSA_N, so the propositional backend\nexpands the quantifier. With this change, z3 times out for ML-DSA-44,\nso switch the default to z3_smt_only. Use CBMC_OBJECT_BITS = 8 for\nML-DSA-65, where z3_smt_only times out with 12.\n\nLocally for ML-DSA-87, polyvecl_pointwise_acc_montgomery_c takes\nabout 290s with z3_smt_only and 270s with cadical, and\npolyvec_matrix_pointwise_montgomery_row about 930s with cadical.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T19:31:01Z",
+          "tree_id": "e33b57842b6fbd4e373802223c2b29905a3777bc",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/c1bf806638f495a00cafa298a36b9ed6ddbebb49"
+        },
+        "date": 1793396249294,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 47125,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 131340,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 47313,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81754,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 215183,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 79294,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 133661,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 277820,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 134504,
             "unit": "cycles"
           }
         ]
