@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793399645813,
+  "lastUpdate": 1793401240097,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -960419,6 +960419,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/fe47bf8afdb548224f32e7ef04fe580188f2d972"
         },
         "date": 1793382179763,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2134310,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791748,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398890,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034558,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6516715,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25055900,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6865674,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "beb27b55ac865ba7657b4c0d0b85248127773f96",
+          "message": "CBMC: Add CaDiCaL as a second solver for polyvecl_chknorm\n\nWith the bound only restricted to an interval, CaDiCaL does not finish\nthe polyvecl_chknorm proof. The library only calls\nmld_polyvecl_chknorm with B = MLDSA_GAMMA1 - MLDSA_BETA or\nB = MLDSA_ETA + 1, so restrict the precondition to these two values.\n\nAlso give the loop invariant's quantifier the constant range MLDSA_L,\nso the propositional backend expands it.\n\nLocally for ML-DSA-87, polyvecl_chknorm takes about 170s with cadical.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T19:54:12Z",
+          "tree_id": "b80001f43f00aac635785eff7a69d3ef245f1a01",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/beb27b55ac865ba7657b4c0d0b85248127773f96"
+        },
+        "date": 1793401236668,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
