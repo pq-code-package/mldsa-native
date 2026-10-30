@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793380593040,
+  "lastUpdate": 1793382183525,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -957245,6 +957245,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/debf43e8ee9f6a1f74f8246a7dbc0939be7187ff"
         },
         "date": 1793374586301,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2134310,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791748,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398890,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034558,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6516715,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25055900,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6865674,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "fe47bf8afdb548224f32e7ef04fe580188f2d972",
+          "message": "CBMC: Use CaDiCaL as second solver for sign_signature_pre_hash_shake256\n\nWith bitwuzla, sign_signature_pre_hash_shake256 takes 1450-1780s in CI\nfor ML-DSA-87, close to the 1800s timeout, and occasionally times out.\nReplace it by cadical, which takes about 35s locally for ML-DSA-87.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T13:52:39Z",
+          "tree_id": "cfe11085d440264622c74400852157bbde67e981",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/fe47bf8afdb548224f32e7ef04fe580188f2d972"
+        },
+        "date": 1793382179763,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
