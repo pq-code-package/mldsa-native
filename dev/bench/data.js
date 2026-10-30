@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793328167350,
+  "lastUpdate": 1793371136128,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -932606,6 +932606,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 134486,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "ba077270234e9ea06c13efaede8567f77f125a1b",
+          "message": "CBMC: Add CaDiCaL as a second solver for matrix_pointwise_montgomery_yvec\n\nWith cadical, --arrays-uf-always makes CBMC 6.11.0 crash with an\ninvariant violation in arrayst::collect_arrays (diffblue/cbmc#9236).\nPass that flag only to the SMT backends.\n\nGive the loop invariants with variable upper bounds in\nmld_polyvec_matrix_pointwise_montgomery_yvec_eager and _lazy the\nconstant range MLDSA_K, so the propositional backend expands them.\n\nAdd cadical as a second solver.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T09:53:29Z",
+          "tree_id": "341c804f3a28397fad4f5e0e41e3a5d8fcf66c79",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/ba077270234e9ea06c13efaede8567f77f125a1b"
+        },
+        "date": 1793371065966,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 47127,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 131343,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 47312,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81743,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 215161,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 79287,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 133547,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 277666,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 134385,
             "unit": "cycles"
           }
         ]
