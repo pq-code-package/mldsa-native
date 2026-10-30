@@ -133,17 +133,18 @@ __contract__(
  * input mld_polyvecl to be reduced by polyvecl_reduce().
  *
  * @param[in] v Pointer to vector.
- * @param     B Norm bound.
+ * @param     B Norm bound. Must be MLDSA_GAMMA1 - MLDSA_BETA or
+ *              MLDSA_ETA + 1, the only bounds used by the library.
  *
  * @return 0 if norm of all polynomials is strictly smaller than
- *         B <= (MLDSA_Q-1)/8 and 0xFFFFFFFF otherwise.
+ *         B and 0xFFFFFFFF otherwise.
  */
 MLD_INTERNAL_API
 MLD_MUST_CHECK_RETURN_VALUE
 uint32_t mld_polyvecl_chknorm(const mld_polyvecl *v, int32_t B)
 __contract__(
   requires(memory_no_alias(v, sizeof(mld_polyvecl)))
-  requires(0 <= B && B <= (MLDSA_Q - 1) / 8)
+  requires(B == MLDSA_GAMMA1 - MLDSA_BETA || B == MLDSA_ETA + 1)
   requires(forall(k0, 0, MLDSA_L,
     array_bound(v->vec[k0].coeffs, 0, MLDSA_N, -MLD_REDUCE32_RANGE_MAX, MLD_REDUCE32_RANGE_MAX)))
   ensures(return_value == 0 || return_value == 0xFFFFFFFF)
