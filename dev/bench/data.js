@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793324581119,
+  "lastUpdate": 1793324617345,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -732668,6 +732668,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 408409,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "17ebc1aa493265515a92239c76507ae28777cd4a",
+          "message": "CBMC: Add optional constant ranges to array_bound\n\nCBMC's propositional backend needs a constant upper limit to expand\na quantifier. The rejection sampling contracts and the x4 sampling\nloop invariants bound arrays up to a variable index, so CaDiCaL\nignores these quantifiers.\n\nLike forall, give array_bound and array_abs_bound an optional\ncompile-time constant max, which quantifies over [0, max) and\nrestricts to [lb, ub) through an implication. Use it with MLDSA_N\nfor the mld_rej_uniform and mld_rej_eta contracts and the\npoly_uniform_4x and poly_uniform_eta_4x loop invariants. Other calls\nretain the existing form.\n\nAdd CaDiCaL as a second solver for pointwise_acc_native_aarch64,\npoly_uniform_4x and poly_uniform_eta_4x.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T00:01:08Z",
+          "tree_id": "2cbf44017b053a7264b06b4f71cb3b871ff263f5",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/17ebc1aa493265515a92239c76507ae28777cd4a"
+        },
+        "date": 1793324616721,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 140649,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 490304,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 151280,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 247071,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 797344,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 244531,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 400884,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1023953,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 408376,
             "unit": "cycles"
           }
         ]
