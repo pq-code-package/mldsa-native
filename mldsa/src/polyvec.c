@@ -119,7 +119,7 @@ __contract__(
   __loop__(
     assigns(i, j, memory_slice(w, sizeof(mld_poly)))
     invariant(i <= MLDSA_N)
-    invariant(array_abs_bound(w->coeffs, 0, i, MLDSA_Q))
+    invariant(array_abs_bound(w->coeffs, 0, i, MLDSA_N, MLDSA_Q))
     decreases(MLDSA_N - i)
   )
   {
