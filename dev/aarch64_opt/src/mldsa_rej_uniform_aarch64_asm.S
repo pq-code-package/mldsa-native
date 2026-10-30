@@ -65,7 +65,6 @@
     len                         .req x4
 
     /* Temporary output on the stack */
-    xtmp                        .req x7
     xtmp0                       .req x7
     xtmp1                       .req x11
     wtmp                        .req w7
@@ -122,8 +121,6 @@
 
     t0                          .req d0
     t1                          .req d1
-    t2                          .req d2
-    t3                          .req d3
 
     unpack0                     .req v20
     unpack0d                    .req d20
@@ -141,8 +138,10 @@
     table3q                     .req q27
 
     bit23                       .req v28
+    packed_bits                 .req v29
     mldsa_q                     .req v30
     bits                        .req v31
+    bitsd                       .req d31
 
     .text
     .global MLD_ASM_NAMESPACE(rej_uniform_aarch64_asm)
@@ -150,14 +149,17 @@
 MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     push_stack
 
-    // Load 0x1, 0x2, 0x4, 0x8
-    movz xtmp, 0x1
-    movk xtmp, 0x2, lsl 32
-    mov bits.d[0], xtmp
+    // [1, 2, 4, 8]
+    movz xtmp0, 0x1
+    movk xtmp0, 0x2, lsl 32
+    movz xtmp1, 0x4
+    movk xtmp1, 0x8, lsl 32
+    fmov bitsd, xtmp0
+    mov bits.d[1], xtmp1
 
-    movz xtmp, 0x4
-    movk xtmp, 0x8, lsl 32
-    mov bits.d[1], xtmp
+    // [1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 8, 8, 8, 8].
+    movi packed_bits.16b, #1
+    mul packed_bits.4s, bits.4s, packed_bits.4s
 
     // load q = 8380417
     movz wtmp, #57345
@@ -242,17 +244,9 @@ mld_rej_uniform_loop48:
         bic     val2.16b, val2.16b, bit23.16b
         bic     val3.16b, val3.16b, bit23.16b
 
-        // At this point, val0-val3 are the signed integers to do rejection
-        // sampling on. For each of them, do the following:
-        // - Check which coefficients are within range, and represent the set
-        //   of lane-indices of those coefficients as an 4-bit bitmap.
-        // - Move the respective lanes to the front of the vector. This is the
-        //   most complex part, and is done by interpreting the 4-bit bitmap as
-        //   an index into a lookup table giving the lane-table to be use for
-        //   the `tbl` instruction.
-        // - Write the vector to the output buffer, but merely increase the output
-        //   buffer pointer by the number of valid coefficients.
-
+        // Build a 4-bit validity bitmap for each vector, then use it to look
+        // up a TBL permutation that moves valid lanes to the front of the
+        // vector. Store each vector and advance the output by its valid count.
 
         // Set valid lanes to -1 (0b1...1)
         cmhi    sign0.4s, mldsa_q.4s, val0.4s
@@ -260,48 +254,43 @@ mld_rej_uniform_loop48:
         cmhi    sign2.4s, mldsa_q.4s, val2.4s
         cmhi    sign3.4s, mldsa_q.4s, val3.4s
 
-        // If lane i is valid and has value -1, retain only i-th bit
-        and     sign0.16b, sign0.16b, bits.16b
-        and     sign1.16b, sign1.16b, bits.16b
-        and     sign2.16b, sign2.16b, bits.16b
-        and     sign3.16b, sign3.16b, bits.16b
+        // Pack the four vectors' masks into interleaved bytes in each 32-bit
+        // lane: [s0[0], s1[0], s2[0], s3[0], s0[1], s1[1], s2[1], s3[1], ...].
+        trn1    sign0.16b, sign0.16b, sign1.16b
+        trn1    sign1.16b, sign2.16b, sign3.16b
+        trn1    sign0.8h, sign0.8h, sign1.8h
 
-        // Get 4-bit bitmap of valid lane indices by adding lanes
+        // Retain bit i in each valid byte of 32-bit lane i.
+        and     sign0.16b, sign0.16b, packed_bits.16b
+
+        // Sum the 32-bit lanes to get four byte-sized bitmaps. Each is at most
+        // 15, so carries cannot cross byte boundaries.
         uaddlv  t0, sign0.4s
-        uaddlv  t1, sign1.4s
-        uaddlv  t2, sign2.4s
-        uaddlv  t3, sign3.4s
 
-        fmov    rec_idx_0, t0
-        fmov    rec_idx_1, t1
-        fmov    rec_idx_2, t2
-        fmov    rec_idx_3, t3
+        fmov    rec_idx_3, t0
+        ubfx    rec_idx_0, rec_idx_3, #0, #4
+        ubfx    rec_idx_1, rec_idx_3, #8, #4
+        ubfx    rec_idx_2, rec_idx_3, #16, #4
+        ubfx    rec_idx_3, rec_idx_3, #24, #4
 
         ldr     table0q, [table_idx, rec_idx_0, lsl #4]
         ldr     table1q, [table_idx, rec_idx_1, lsl #4]
         ldr     table2q, [table_idx, rec_idx_2, lsl #4]
         ldr     table3q, [table_idx, rec_idx_3, lsl #4]
 
-        // Compute number of valid coefficients. Recall that at this
-        // point, lane i has value 2^i (hence popcount 1) if its coefficient
-        // is valid, and 0 otherwise.
+        // Each byte has one bit set if its coefficient is valid. Sum the byte
+        // popcounts into four packed counts. Each sum is at most four, so
+        // carries cannot cross byte boundaries.
         cnt     sign0.16b, sign0.16b
-        cnt     sign1.16b, sign1.16b
-        cnt     sign2.16b, sign2.16b
-        cnt     sign3.16b, sign3.16b
-
-        // Extract number of valid coefficients
         uaddlv  t0, sign0.4s
-        uaddlv  t1, sign1.4s
-        uaddlv  t2, sign2.4s
-        uaddlv  t3, sign3.4s
 
-        fmov    ctr0, t0
-        fmov    ctr1, t1
-        fmov    ctr2, t2
-        fmov    ctr3, t3
+        fmov    ctr3, t0
+        ubfx    ctr0, ctr3, #0, #3
+        ubfx    ctr1, ctr3, #8, #3
+        ubfx    ctr2, ctr3, #16, #3
+        ubfx    ctr3, ctr3, #24, #3
 
-        // Move valid coefficients to the front
+        // Move valid coefficients to the front.
         tbl     val0.16b, {val0.16b}, table0.16b
         tbl     val1.16b, {val1.16b}, table1.16b
         tbl     val2.16b, {val2.16b}, table2.16b
@@ -424,7 +413,6 @@ mld_rej_uniform_return:
     .unreq output_tmp
     .unreq output_tmp_base
     .unreq count
-    .unreq xtmp
     .unreq xtmp0
     .unreq xtmp1
     .unreq wtmp
@@ -464,8 +452,6 @@ mld_rej_uniform_return:
     .unreq val3q
     .unreq t0
     .unreq t1
-    .unreq t2
-    .unreq t3
     .unreq unpack0
     .unreq unpack0d
     .unreq unpack1
@@ -480,8 +466,10 @@ mld_rej_uniform_return:
     .unreq table3
     .unreq table3q
     .unreq bit23
+    .unreq packed_bits
     .unreq mldsa_q
     .unreq bits
+    .unreq bitsd
 
 
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
