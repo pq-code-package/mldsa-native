@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793325572758,
+  "lastUpdate": 1793327173067,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -953036,6 +953036,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/f89fc5779656bf99716cc73542d71c833b1f5e56"
         },
         "date": 1793278529852,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2134310,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791748,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398890,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732866,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034558,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6516715,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25055900,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6865674,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "17ebc1aa493265515a92239c76507ae28777cd4a",
+          "message": "CBMC: Add optional constant ranges to array_bound\n\nCBMC's propositional backend needs a constant upper limit to expand\na quantifier. The rejection sampling contracts and the x4 sampling\nloop invariants bound arrays up to a variable index, so CaDiCaL\nignores these quantifiers.\n\nLike forall, give array_bound and array_abs_bound an optional\ncompile-time constant max, which quantifies over [0, max) and\nrestricts to [lb, ub) through an implication. Use it with MLDSA_N\nfor the mld_rej_uniform and mld_rej_eta contracts and the\npoly_uniform_4x and poly_uniform_eta_4x loop invariants. Other calls\nretain the existing form.\n\nAdd CaDiCaL as a second solver for pointwise_acc_native_aarch64,\npoly_uniform_4x and poly_uniform_eta_4x.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-10-30T00:01:08Z",
+          "tree_id": "2cbf44017b053a7264b06b4f71cb3b871ff263f5",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/17ebc1aa493265515a92239c76507ae28777cd4a"
+        },
+        "date": 1793327169698,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
