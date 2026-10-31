@@ -61,6 +61,7 @@ jobs:
             dev/aarch64_clean/**
             dev/aarch64_opt/**
             dev/fips202/aarch64/**
+            dev/fips202/aarch64_symbolic/**
             mldsa/src/native/aarch64/**
             mldsa/src/fips202/native/aarch64/**
             flake.nix

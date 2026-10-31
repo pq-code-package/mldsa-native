@@ -8,7 +8,7 @@
 
 #include "../common.h"
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && !defined(MLD_CONFIG_USE_X3)
 
 #include <stddef.h>
 
@@ -121,5 +121,5 @@ void mld_shake256x4_release(mld_shake256x4ctx *state);
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_USE_X3 */
 #endif /* !MLD_FIPS202_FIPS202X4_H */

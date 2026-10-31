@@ -15,7 +15,7 @@
 
 #include "../common.h"
 #if !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
-    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && !defined(MLD_CONFIG_USE_X3)
 
 #include "../ct.h"
 #include "fips202.h"
@@ -184,4 +184,4 @@ void mld_shake256x4_release(mld_shake256x4ctx *state)
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */
 
 #endif /* !MLD_CONFIG_MULTILEVEL_NO_SHARED && !MLD_CONFIG_SERIAL_FIPS202_ONLY \
-        */
+          && !MLD_CONFIG_USE_X3 */
