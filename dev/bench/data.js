@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793607211035,
+  "lastUpdate": 1793607225741,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -956184,6 +956184,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 294420,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "a1ac75830796f0193854802c2840e35c62f9696c",
+          "message": "sys.h: Do not depend on configuration options\n\nsys.h evaluated MLD_CONFIG_NO_ASM, MLD_CONFIG_CT_TESTING_ENABLED and\nMLD_CONFIG_CUSTOM_CAPABILITY_FUNC when it was first included.\nConfiguration hooks such as MLD_CONFIG_CUSTOM_ZEROIZE include sys.h,\nand its include guard prevents re-evaluation, so an option defined\nafter such a hook was silently ignored or, for the capability function,\ncaused a redefinition error. This affects the order of the config\ntemplate and test/configs/no_asm_config.h: the \"No ASM\" configuration\nkept the inline-assembly value barrier and never built the volatile\nopt-blocker, and a late CT_TESTING_ENABLED made constant-time tests\nvacuous.\n\nMove the inline-assembly decision and the CT-testing macros to\ncommon.h, after the whole configuration has been read. Move the default\nmld_sys_check_capability() to a new shared header capability.h,\nincluded from common.h, so that multilevel builds still define it only\nonce. Document in sys.h that it must not depend on configuration\noptions. Add capability.h to the Pavona Bazel build via a patch.\n\n - Ports pq-code-package/mlkem-native#1938.\n - Resolves #1469.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-02T06:02:34Z",
+          "tree_id": "a067b9b7d9b8ee801dd4e24861fb03f02eb8f2d3",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/a1ac75830796f0193854802c2840e35c62f9696c"
+        },
+        "date": 1793607224994,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 102879,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 373891,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 111273,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 177263,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 605187,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 179432,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 284829,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 771645,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 294610,
             "unit": "cycles"
           }
         ]
