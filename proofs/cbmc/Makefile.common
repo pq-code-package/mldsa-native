@@ -715,6 +715,13 @@ ifdef MLD_CONFIG_REDUCE_RAM
 DEFINES += -DMLD_CONFIG_REDUCE_RAM
 endif
 
+# Proofs can set CBMC_STACK_ALLOC to use the default stack allocation for
+# MLD_ALLOC/MLD_FREE instead of the instrumented malloc/free. This does not
+# cover the allocation-failure paths.
+ifneq ($(strip $(CBMC_STACK_ALLOC)),)
+DEFINES += -DCBMC_STACK_ALLOC
+endif
+
 # Give visibility to all static functions
 DEFINES += -Dstatic=
 
