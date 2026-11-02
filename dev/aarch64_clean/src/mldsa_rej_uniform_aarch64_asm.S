@@ -374,41 +374,41 @@ mld_rej_uniform_final_copy:
 
     // Zeroize the stack buffer
     eor val0.16b, val0.16b, val0.16b
-    mov output_tmp, output_tmp_base
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp_base]
+    stp val0q, val0q, [output_tmp_base, #32]
+    stp val0q, val0q, [output_tmp_base, #64]
+    stp val0q, val0q, [output_tmp_base, #96]
+    stp val0q, val0q, [output_tmp_base, #128]
+    stp val0q, val0q, [output_tmp_base, #160]
+    stp val0q, val0q, [output_tmp_base, #192]
+    stp val0q, val0q, [output_tmp_base, #224]
+    stp val0q, val0q, [output_tmp_base, #256]
+    stp val0q, val0q, [output_tmp_base, #288]
+    stp val0q, val0q, [output_tmp_base, #320]
+    stp val0q, val0q, [output_tmp_base, #352]
+    stp val0q, val0q, [output_tmp_base, #384]
+    stp val0q, val0q, [output_tmp_base, #416]
+    stp val0q, val0q, [output_tmp_base, #448]
+    stp val0q, val0q, [output_tmp_base, #480]
+    stp val0q, val0q, [output_tmp_base, #512]
+    stp val0q, val0q, [output_tmp_base, #544]
+    stp val0q, val0q, [output_tmp_base, #576]
+    stp val0q, val0q, [output_tmp_base, #608]
+    stp val0q, val0q, [output_tmp_base, #640]
+    stp val0q, val0q, [output_tmp_base, #672]
+    stp val0q, val0q, [output_tmp_base, #704]
+    stp val0q, val0q, [output_tmp_base, #736]
+    stp val0q, val0q, [output_tmp_base, #768]
+    stp val0q, val0q, [output_tmp_base, #800]
+    stp val0q, val0q, [output_tmp_base, #832]
+    stp val0q, val0q, [output_tmp_base, #864]
+    stp val0q, val0q, [output_tmp_base, #896]
+    stp val0q, val0q, [output_tmp_base, #928]
+    stp val0q, val0q, [output_tmp_base, #960]
+    stp val0q, val0q, [output_tmp_base, #992]
+    add output_tmp, output_tmp_base, #1024
+    stp val0q, val0q, [output_tmp]
+    stp val0q, val0q, [output_tmp, #32]
 
     mov x0, count
     b mld_rej_uniform_return

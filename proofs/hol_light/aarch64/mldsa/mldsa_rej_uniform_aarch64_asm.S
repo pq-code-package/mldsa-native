@@ -207,41 +207,41 @@ Lmld_rej_uniform_final_copy:
         cmp x11, #0x100
         b.lt Lmld_rej_uniform_final_copy
         eor v16.16b, v16.16b, v16.16b
-        mov x7, x8
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
+        stp q16, q16, [x8]
+        stp q16, q16, [x8, #0x20]
+        stp q16, q16, [x8, #0x40]
+        stp q16, q16, [x8, #0x60]
+        stp q16, q16, [x8, #0x80]
+        stp q16, q16, [x8, #0xa0]
+        stp q16, q16, [x8, #0xc0]
+        stp q16, q16, [x8, #0xe0]
+        stp q16, q16, [x8, #0x100]
+        stp q16, q16, [x8, #0x120]
+        stp q16, q16, [x8, #0x140]
+        stp q16, q16, [x8, #0x160]
+        stp q16, q16, [x8, #0x180]
+        stp q16, q16, [x8, #0x1a0]
+        stp q16, q16, [x8, #0x1c0]
+        stp q16, q16, [x8, #0x1e0]
+        stp q16, q16, [x8, #0x200]
+        stp q16, q16, [x8, #0x220]
+        stp q16, q16, [x8, #0x240]
+        stp q16, q16, [x8, #0x260]
+        stp q16, q16, [x8, #0x280]
+        stp q16, q16, [x8, #0x2a0]
+        stp q16, q16, [x8, #0x2c0]
+        stp q16, q16, [x8, #0x2e0]
+        stp q16, q16, [x8, #0x300]
+        stp q16, q16, [x8, #0x320]
+        stp q16, q16, [x8, #0x340]
+        stp q16, q16, [x8, #0x360]
+        stp q16, q16, [x8, #0x380]
+        stp q16, q16, [x8, #0x3a0]
+        stp q16, q16, [x8, #0x3c0]
+        stp q16, q16, [x8, #0x3e0]
+        add x7, x8, #0x400
+        stp q16, q16, [x7]
+        stp q16, q16, [x7, #0x20]
         mov x0, x9
         b Lmld_rej_uniform_return
 

@@ -290,25 +290,24 @@ mld_rej_uniform_eta4_final_copy:
 
     // Zeroize the stack buffer
     eor val0.16b, val0.16b, val0.16b
-    mov output_tmp, output_tmp_base
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
-    stp val0q, val0q, [output_tmp], #32
+    stp val0q, val0q, [output_tmp_base]
+    stp val0q, val0q, [output_tmp_base, #32]
+    stp val0q, val0q, [output_tmp_base, #64]
+    stp val0q, val0q, [output_tmp_base, #96]
+    stp val0q, val0q, [output_tmp_base, #128]
+    stp val0q, val0q, [output_tmp_base, #160]
+    stp val0q, val0q, [output_tmp_base, #192]
+    stp val0q, val0q, [output_tmp_base, #224]
+    stp val0q, val0q, [output_tmp_base, #256]
+    stp val0q, val0q, [output_tmp_base, #288]
+    stp val0q, val0q, [output_tmp_base, #320]
+    stp val0q, val0q, [output_tmp_base, #352]
+    stp val0q, val0q, [output_tmp_base, #384]
+    stp val0q, val0q, [output_tmp_base, #416]
+    stp val0q, val0q, [output_tmp_base, #448]
+    stp val0q, val0q, [output_tmp_base, #480]
+    stp val0q, val0q, [output_tmp_base, #512]
+    stp val0q, val0q, [output_tmp_base, #544]
 
     mov x0, count
     pop_stack

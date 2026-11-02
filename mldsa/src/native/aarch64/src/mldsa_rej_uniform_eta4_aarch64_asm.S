@@ -147,25 +147,24 @@ Lmld_rej_uniform_eta4_final_copy:
         cmp x11, #0x100
         b.lt Lmld_rej_uniform_eta4_final_copy
         eor v16.16b, v16.16b, v16.16b
-        mov x7, x8
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
-        stp q16, q16, [x7], #0x20
+        stp q16, q16, [x8]
+        stp q16, q16, [x8, #0x20]
+        stp q16, q16, [x8, #0x40]
+        stp q16, q16, [x8, #0x60]
+        stp q16, q16, [x8, #0x80]
+        stp q16, q16, [x8, #0xa0]
+        stp q16, q16, [x8, #0xc0]
+        stp q16, q16, [x8, #0xe0]
+        stp q16, q16, [x8, #0x100]
+        stp q16, q16, [x8, #0x120]
+        stp q16, q16, [x8, #0x140]
+        stp q16, q16, [x8, #0x160]
+        stp q16, q16, [x8, #0x180]
+        stp q16, q16, [x8, #0x1a0]
+        stp q16, q16, [x8, #0x1c0]
+        stp q16, q16, [x8, #0x1e0]
+        stp q16, q16, [x8, #0x200]
+        stp q16, q16, [x8, #0x220]
         mov x0, x9
         add sp, sp, #0x240
         .cfi_adjust_cfa_offset -0x240
