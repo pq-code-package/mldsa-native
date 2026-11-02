@@ -580,12 +580,15 @@ configs:
       MLD_CONFIG_KEYGEN_PCT: true
       MLD_CONFIG_CUSTOM_ALLOC_FREE:
         content: |
+          /* CBMC_STACK_ALLOC selects the default stack allocation. */
+          #if !defined(CBMC_STACK_ALLOC)
           #define MLD_CONFIG_CUSTOM_ALLOC_FREE
           #if !defined(__ASSEMBLER__)
           #include <stdlib.h>
           #define MLD_CUSTOM_ALLOC(v, T, N) T* v = (T *)malloc(sizeof(T) * (N))
           #define MLD_CUSTOM_FREE(v, T, N) free(v)
           #endif /* !__ASSEMBLER__ */
+          #endif /* !CBMC_STACK_ALLOC */
       MLD_CONFIG_CUSTOM_ZEROIZE:
         content: |
           #define MLD_CONFIG_CUSTOM_ZEROIZE
