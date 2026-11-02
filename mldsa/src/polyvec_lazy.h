@@ -72,6 +72,8 @@
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_row_eager)
 #define mld_polyvec_matrix_pointwise_montgomery_row_lazy \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_row_lazy)
+#define mld_polyvec_matrix_pointwise_montgomery_rows \
+  MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_rows)
 #define mld_polyvec_matrix_pointwise_montgomery_yvec_eager \
   MLD_NAMESPACE_KL(polyvec_matrix_pointwise_montgomery_yvec_eager)
 #define mld_polyvec_matrix_pointwise_montgomery_yvec_lazy \
@@ -87,6 +89,12 @@
 #define mld_yvec_get_poly_eager MLD_ADD_PARAM_SET(mld_yvec_get_poly_eager)
 #define mld_yvec_get_poly_lazy MLD_ADD_PARAM_SET(mld_yvec_get_poly_lazy)
 /* End of parameter set namespacing */
+
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+#define MLD_MATRIX_ROW_BATCH_SIZE 4
+#else
+#define MLD_MATRIX_ROW_BATCH_SIZE 1
+#endif
 
 /** Eager s1hat: precomputed s1 vector in NTT domain. */
 typedef struct
@@ -424,8 +432,8 @@ typedef struct
 /** Lazy polymat: store seed, sample elements A[k][l] on demand. */
 typedef struct
 {
-  mld_poly cur; /**< On-demand sampled matrix element A[k][l]. */
-  uint8_t rho[MLDSA_SEEDBYTES]; /**< Public seed used to expand A. */
+  mld_poly cur[MLD_MATRIX_ROW_BATCH_SIZE]; /**< Current column's entries. */
+  uint8_t rho[MLDSA_SEEDBYTES];            /**< Public seed used to expand A. */
 } mld_polymat_lazy;
 
 static MLD_INLINE void mld_poly_permute_bitrev_to_custom_optional(mld_poly *p)
@@ -652,6 +660,36 @@ typedef mld_yvec_scratch_eager mld_yvec_scratch;
 #define mld_polyvec_matrix_pointwise_montgomery_yvec \
   mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #endif /* !MLD_CONFIG_REDUCE_RAM */
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+/**
+ * Compute up to MLD_MATRIX_ROW_BATCH_SIZE consecutive rows of A * v.
+ * The batch begins at i; only min(MLDSA_K-i, batch size) outputs are written.
+ * In x4 reduced-RAM mode, four entries in the same column are sampled
+ * together. A partial final batch uses scalar sampling.
+ */
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_rows(
+    mld_poly t_rows[MLD_MATRIX_ROW_BATCH_SIZE], mld_polymat *mat,
+    const mld_polyvecl *v, unsigned int i)
+__contract__(
+  requires(memory_no_alias(t_rows, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE))
+  requires(memory_no_alias(mat, sizeof(mld_polymat)))
+  requires(memory_no_alias(v, sizeof(mld_polyvecl)))
+  requires(i < MLDSA_K)
+  requires(forall(l1, 0, MLDSA_L,
+    array_abs_bound(v->vec[l1].coeffs, 0, MLDSA_N, MLD_NTT_BOUND)))
+  MLD_IF_NOT_REDUCE_RAM(
+    requires(forall(k1, 0, MLDSA_K, forall(l2, 0, MLDSA_L,
+      array_bound(mat->vec[k1].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+  )
+  assigns(memory_slice(t_rows, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE))
+  MLD_IF_REDUCE_RAM(assigns(memory_slice(mat, sizeof(mld_polymat))))
+  ensures(forall(k0, 0, MLD_MATRIX_ROW_BATCH_SIZE,
+    i + k0 >= MLDSA_K ||
+    array_abs_bound(t_rows[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
+);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API || \
           !MLD_CONFIG_NO_VERIFY_API */

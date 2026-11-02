@@ -684,7 +684,8 @@ void mld_poly_uniform(mld_poly *a, const uint8_t seed[MLDSA_SEEDBYTES + 2])
 }
 
 #if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
-    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_CONFIG_REDUCE_RAM_X4) || \
+     defined(MLD_UNIT_TEST))
 MLD_INTERNAL_API
 void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
                          mld_poly *vec3,
@@ -750,7 +751,7 @@ void mld_poly_uniform_4x(mld_poly *vec0, mld_poly *vec1, mld_poly *vec2,
 }
 
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST) */
+          MLD_CONFIG_REDUCE_RAM_X4 || MLD_UNIT_TEST) */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_INTERNAL_API

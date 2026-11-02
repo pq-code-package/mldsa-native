@@ -346,7 +346,7 @@ __contract__(
   unsigned int k;
   int ret;
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(t0k, mld_poly, 1, context);
+  MLD_ALLOC(t0k, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_ALLOC(t1k, mld_poly, 1, context);
 
   if (mat == NULL || t0k == NULL || t1k == NULL)
@@ -362,22 +362,25 @@ __contract__(
   __loop__(
     assigns(k, memory_slice(pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
             memory_slice(t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES),
-            memory_slice(t0k, sizeof(mld_poly)),
+            memory_slice(t0k, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE),
             memory_slice(t1k, sizeof(mld_poly))
             MLD_IF_REDUCE_RAM(, memory_slice(mat, sizeof(mld_polymat))))
     invariant(k <= MLDSA_K)
     decreases(MLDSA_K - k)
   )
   {
-    /* t0k = (A * s1hat)_k in NTT domain */
-    mld_polyvec_matrix_pointwise_montgomery_row(t0k, mat, s1hat, k);
+    mld_poly *t0row = &t0k[k % MLD_MATRIX_ROW_BATCH_SIZE];
+    if (k % MLD_MATRIX_ROW_BATCH_SIZE == 0)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_rows(t0k, mat, s1hat, k);
+    }
 
-    /* t0k = invNTT(t0k) */
-    mld_poly_invntt_tomont(t0k);
+    /* t0row = invNTT(t0row) */
+    mld_poly_invntt_tomont(t0row);
 
-    /* t0k += s2[k], unpacked on demand into the (still unused) t1k. */
+    /* t0row += s2[k], unpacked on demand into the (still unused) t1k. */
     mld_polyeta_unpack(t1k, s2_packed + k * MLDSA_POLYETA_PACKEDBYTES);
-    mld_poly_add(t0k, t1k);
+    mld_poly_add(t0row, t1k);
 
     /* Reference: The following reduction is not present in the reference
      *            implementation. Omitting this reduction requires the output
@@ -389,22 +392,22 @@ __contract__(
      *            and can consequently, relax the bounds requirements for the
      *            invntt.
      */
-    mld_poly_reduce(t0k);
+    mld_poly_reduce(t0row);
 
-    /* Decompose into t1[k] and t0[k] (in place into t0k). */
-    mld_poly_caddq(t0k);
-    mld_poly_power2round(t1k, t0k, t0k);
+    /* Decompose into t1[k] and t0[k] (in place into t0row). */
+    mld_poly_caddq(t0row);
+    mld_poly_power2round(t1k, t0row, t0row);
 
     /* Pack t1[k] into pk and t0[k] into the t0 output buffer. */
     mld_polyt1_pack(pk_t1 + k * MLDSA_POLYT1_PACKEDBYTES, t1k);
-    mld_polyt0_pack(t0_packed + k * MLDSA_POLYT0_PACKEDBYTES, t0k);
+    mld_polyt0_pack(t0_packed + k * MLDSA_POLYT0_PACKEDBYTES, t0row);
   }
 
   ret = 0;
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(t1k, mld_poly, 1, context);
-  MLD_FREE(t0k, mld_poly, 1, context);
+  MLD_FREE(t0k, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   return ret;
 }
@@ -1270,7 +1273,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   MLD_ALLOC(z, mld_polyvecl, 1, context);
   MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(w1, mld_poly, 1, context);
+  MLD_ALLOC(w1, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_ALLOC(tmp, mld_poly, 1, context);
 
   if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || z == NULL ||
@@ -1319,7 +1322,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   __loop__(
     assigns(MLD_IF_REDUCE_RAM(memory_slice(mat, sizeof(mld_polymat)),)
             i, ret,
-            memory_slice(w1, sizeof(mld_poly)),
+            memory_slice(w1, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE),
             memory_slice(tmp, sizeof(mld_poly)),
             memory_slice(buf, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES)
     )
@@ -1327,8 +1330,11 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
     decreases(MLDSA_K - i)
   )
   {
-    /* w1 = (A * z)_i in NTT domain */
-    mld_polyvec_matrix_pointwise_montgomery_row(w1, mat, z, i);
+    mld_poly *w1row = &w1[i % MLD_MATRIX_ROW_BATCH_SIZE];
+    if (i % MLD_MATRIX_ROW_BATCH_SIZE == 0)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_rows(w1, mat, z, i);
+    }
 
     /* tmp = c * t1_i * 2^d in NTT domain */
     mld_unpack_pk_t1(tmp, pk, i);
@@ -1336,11 +1342,11 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
     mld_poly_ntt(tmp);
     mld_poly_pointwise_montgomery(tmp, cp);
 
-    /* w1 = invNTT(w1 - c * t1_i * 2^d) */
-    mld_poly_sub(w1, tmp);
-    mld_poly_reduce(w1);
-    mld_poly_invntt_tomont(w1);
-    mld_poly_caddq(w1);
+    /* w1row = invNTT(w1row - c * t1_i * 2^d) */
+    mld_poly_sub(w1row, tmp);
+    mld_poly_reduce(w1row);
+    mld_poly_invntt_tomont(w1row);
+    mld_poly_caddq(w1row);
 
     /* tmp = h_i (decoded and validated from signature). A non-zero return
      * means the hint encoding is malformed, i.e. the signature is invalid. */
@@ -1350,9 +1356,9 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
       goto cleanup;
     }
 
-    /* w1 = use_hint(w1, tmp), then pack into buf[i] */
-    mld_poly_use_hint(w1, tmp);
-    mld_polyw1_pack(buf + i * MLDSA_POLYW1_PACKEDBYTES, w1);
+    /* w1row = use_hint(w1row, tmp), then pack into buf[i] */
+    mld_poly_use_hint(w1row, tmp);
+    mld_polyw1_pack(buf + i * MLDSA_POLYW1_PACKEDBYTES, w1row);
   }
 
   /* Call random oracle and verify challenge */
@@ -1369,7 +1375,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(tmp, mld_poly, 1, context);
-  MLD_FREE(w1, mld_poly, 1, context);
+  MLD_FREE(w1, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(cp, mld_poly, 1, context);
   MLD_FREE(z, mld_polyvecl, 1, context);

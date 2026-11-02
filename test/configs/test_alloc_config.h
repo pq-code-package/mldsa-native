@@ -283,6 +283,17 @@ struct test_ctx_t; /* Forward declaration */
  *
  */
 /* #define MLD_CONFIG_REDUCE_RAM */
+
+/**
+ * MLD_CONFIG_REDUCE_RAM_X4
+ *
+ * Batch four matrix rows when using MLD_CONFIG_REDUCE_RAM. Matrix entries
+ * are generated on demand with SHAKE128x4 rather than stored in full.
+ * This uses more scratch memory than the scalar reduced-RAM configuration.
+ * Requires MLD_CONFIG_REDUCE_RAM and is incompatible with
+ * MLD_CONFIG_SERIAL_FIPS202_ONLY.
+ */
+/* #define MLD_CONFIG_REDUCE_RAM_X4 */
 /******************************************************************************
  *
  * Build-only configuration options

@@ -101,7 +101,7 @@ void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 }
 
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
-     defined(MLD_UNIT_TEST)) &&                                                \
+     defined(MLD_CONFIG_REDUCE_RAM_X4) || defined(MLD_UNIT_TEST)) &&           \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 static void mld_keccakf1600x4_extract_bytes_c(uint64_t *state,
                                               unsigned char *data0,
@@ -216,7 +216,8 @@ void mld_keccakf1600x4_permute(uint64_t *state)
   mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 3);
 }
 #endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+          MLD_CONFIG_REDUCE_RAM_X4 || MLD_UNIT_TEST) &&            \
+          !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 static const uint64_t mld_KeccakF_RoundConstants[MLD_KECCAK_NROUNDS] = {
     (uint64_t)0x0000000000000001ULL, (uint64_t)0x0000000000008082ULL,

@@ -1548,7 +1548,10 @@ static int test_polyvec_lazy_eager(void)
   MLD_ALLOC(mat_lazy, mld_polymat_lazy, 1, NULL);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   MLD_ALLOC(v, mld_polyvecl, 1, NULL);
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  MLD_ALLOC(rows, mld_poly, 4, NULL);
 #endif
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
   MLD_ALLOC(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
   MLD_ALLOC(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
   MLD_ALLOC(w_eager, mld_polyveck, 1, NULL);
@@ -1562,7 +1565,10 @@ static int test_polyvec_lazy_eager(void)
       mat_lazy == NULL ||
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
       v == NULL ||
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+      rows == NULL ||
 #endif
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
       scratch_eager == NULL || scratch_lazy == NULL || w_eager == NULL ||
       w_lazy == NULL)
   {
@@ -1638,6 +1644,22 @@ static int test_polyvec_lazy_eager(void)
       mld_poly_caddq(poly_lazy);
       CHECK(memcmp(poly_eager, poly_lazy, sizeof(mld_poly)) == 0);
     }
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+    /* Compare every valid batch start, including partial final batches. */
+    for (i = 0; i < MLDSA_K; i++)
+    {
+      unsigned int r;
+      mld_polyvec_matrix_pointwise_montgomery_rows(rows, mat_lazy, v, i);
+      for (r = 0; r < 4 && i + r < MLDSA_K; r++)
+      {
+        mld_polyvec_matrix_pointwise_montgomery_row_eager(poly_eager, mat_eager,
+                                                          v, i + r);
+        mld_poly_caddq(poly_eager);
+        mld_poly_caddq(&rows[r]);
+        CHECK(memcmp(poly_eager, &rows[r], sizeof(mld_poly)) == 0);
+      }
+    }
+#endif /* MLD_CONFIG_REDUCE_RAM_X4 */
   }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
@@ -1683,8 +1705,11 @@ cleanup:
   MLD_FREE(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
   MLD_FREE(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_FREE(v, mld_polyvecl, 1, NULL);
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  MLD_FREE(rows, mld_poly, 4, NULL);
 #endif
+  MLD_FREE(v, mld_polyvecl, 1, NULL);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
   MLD_FREE(mat_lazy, mld_polymat_lazy, 1, NULL);
   MLD_FREE(mat_eager, mld_polymat_eager, 1, NULL);
   MLD_FREE(poly_lazy, mld_poly, 1, NULL);

@@ -19,6 +19,38 @@
 /* This namespacing is not done at the top to avoid a naming conflict
  * with native backends, which are currently not yet namespaced. */
 #define mld_polymat_expand_entry MLD_ADD_PARAM_SET(mld_polymat_expand_entry)
+#define mld_polymat_expand_column4 MLD_ADD_PARAM_SET(mld_polymat_expand_column4)
+
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+/* Four entries from one column, without retaining complete matrix rows. */
+static void mld_polymat_expand_column4(mld_poly p[4],
+                                       const uint8_t rho[MLDSA_SEEDBYTES],
+                                       unsigned int k, unsigned int l)
+__contract__(
+  requires(memory_no_alias(p, 4 * sizeof(mld_poly)))
+  requires(memory_no_alias(rho, MLDSA_SEEDBYTES))
+  requires(k + 4 <= MLDSA_K)
+  requires(l < MLDSA_L)
+  assigns(memory_slice(p, 4 * sizeof(mld_poly)))
+  ensures(forall(j0, 0, 4, array_bound(p[j0].coeffs, 0, MLDSA_N, 0, MLDSA_Q)))
+)
+{
+  unsigned int j;
+  MLD_ALIGN uint8_t seed[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  for (j = 0; j < 4; j++)
+  {
+    mld_memcpy(seed[j], rho, MLDSA_SEEDBYTES);
+    seed[j][MLDSA_SEEDBYTES] = (uint8_t)l;
+    seed[j][MLDSA_SEEDBYTES + 1] = (uint8_t)(k + j);
+  }
+  mld_poly_uniform_4x(&p[0], &p[1], &p[2], &p[3], seed);
+  for (j = 0; j < 4; j++)
+  {
+    mld_poly_permute_bitrev_to_custom_optional(&p[j]);
+  }
+  mld_zeroize(seed, sizeof(seed));
+}
+#endif /* MLD_CONFIG_REDUCE_RAM_X4 */
 
 /**
  * Sample a single matrix entry A[k][l] of ExpandA(rho) by rejection sampling
@@ -217,9 +249,9 @@ void mld_polyvec_matrix_pointwise_montgomery_row_lazy(mld_poly *t_row,
     decreases(MLDSA_L - l)
   )
   {
-    mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)i);
-    mld_poly_pointwise_montgomery(&mat->cur, &v->vec[l]);
-    mld_poly_add(t_row, &mat->cur);
+    mld_polymat_expand_entry(&mat->cur[0], seed_ext, (uint8_t)l, (uint8_t)i);
+    mld_poly_pointwise_montgomery(&mat->cur[0], &v->vec[l]);
+    mld_poly_add(t_row, &mat->cur[0]);
   }
   mld_poly_reduce(t_row);
 
@@ -234,6 +266,51 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
     mld_polyveck *w, mld_polymat_lazy *mat, const mld_yvec_lazy *y,
     mld_yvec_scratch_lazy *scratch)
 {
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  unsigned int k, l, j;
+  MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+  mld_memcpy(seed_ext, mat->rho, MLDSA_SEEDBYTES);
+
+  /* Keep columns outermost: sample and NTT each y[l] only once. */
+  for (l = 0; l < MLDSA_L; l++)
+  {
+    mld_yvec_get_poly_lazy(scratch, y, l);
+    mld_poly_ntt(scratch);
+    for (k = 0; k + 4 <= MLDSA_K; k += 4)
+    {
+      mld_polymat_expand_column4(mat->cur, mat->rho, k, l);
+      for (j = 0; j < 4; j++)
+      {
+        mld_poly_pointwise_montgomery(&mat->cur[j], scratch);
+        if (l == 0)
+        {
+          w->vec[k + j] = mat->cur[j];
+        }
+        else
+        {
+          mld_poly_add(&w->vec[k + j], &mat->cur[j]);
+        }
+      }
+    }
+    /* ML-DSA-65 has two rows remaining. Do not generate dummy rows. */
+    for (; k < MLDSA_K; k++)
+    {
+      mld_polymat_expand_entry(&mat->cur[0], seed_ext, (uint8_t)l, (uint8_t)k);
+      mld_poly_pointwise_montgomery(&mat->cur[0], scratch);
+      if (l == 0)
+      {
+        w->vec[k] = mat->cur[0];
+      }
+      else
+      {
+        mld_poly_add(&w->vec[k], &mat->cur[0]);
+      }
+    }
+  }
+  mld_zeroize(seed_ext, sizeof(seed_ext));
+  mld_polyveck_reduce(w);
+  mld_polyveck_invntt_tomont(w);
+#else  /* MLD_CONFIG_REDUCE_RAM_X4 */
   unsigned int k, l;
   MLD_ALIGN uint8_t seed_ext[MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
 
@@ -283,9 +360,10 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
       }
       else
       {
-        mld_polymat_expand_entry(&mat->cur, seed_ext, (uint8_t)l, (uint8_t)k);
-        mld_poly_pointwise_montgomery(&mat->cur, scratch);
-        mld_poly_add(&w->vec[k], &mat->cur);
+        mld_polymat_expand_entry(&mat->cur[0], seed_ext, (uint8_t)l,
+                                 (uint8_t)k);
+        mld_poly_pointwise_montgomery(&mat->cur[0], scratch);
+        mld_poly_add(&w->vec[k], &mat->cur[0]);
       }
     }
   }
@@ -294,11 +372,58 @@ void mld_polyvec_matrix_pointwise_montgomery_yvec_lazy(
   mld_zeroize(seed_ext, sizeof(seed_ext));
   mld_polyveck_reduce(w);
   mld_polyveck_invntt_tomont(w);
+#endif /* !MLD_CONFIG_REDUCE_RAM_X4 */
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #endif /* MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+MLD_INTERNAL_API
+void mld_polyvec_matrix_pointwise_montgomery_rows(
+    mld_poly t_rows[MLD_MATRIX_ROW_BATCH_SIZE], mld_polymat *mat,
+    const mld_polyvecl *v, unsigned int i)
+{
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  unsigned int l, j;
+  if (i + 4 <= MLDSA_K)
+  {
+    for (l = 0; l < MLDSA_L; l++)
+    {
+      mld_polymat_expand_column4(mat->cur, mat->rho, i, l);
+      for (j = 0; j < 4; j++)
+      {
+        mld_poly_pointwise_montgomery(&mat->cur[j], &v->vec[l]);
+        if (l == 0)
+        {
+          t_rows[j] = mat->cur[j];
+        }
+        else
+        {
+          mld_poly_add(&t_rows[j], &mat->cur[j]);
+        }
+      }
+    }
+    for (j = 0; j < 4; j++)
+    {
+      mld_poly_reduce(&t_rows[j]);
+    }
+  }
+  else
+  {
+    for (j = 0; j < MLDSA_K - i; j++)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_row_lazy(&t_rows[j], mat, v,
+                                                       i + j);
+    }
+  }
+#else  /* MLD_CONFIG_REDUCE_RAM_X4 */
+  mld_polyvec_matrix_pointwise_montgomery_row(&t_rows[0], mat, v, i);
+#endif /* !MLD_CONFIG_REDUCE_RAM_X4 */
+}
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
+
 /* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef mld_polymat_expand_entry
+#undef mld_polymat_expand_column4

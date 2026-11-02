@@ -349,6 +349,7 @@
 #undef mld_polyvecl_unpack_eta
 #undef mld_polyvecl_unpack_z
 /* mldsa/src/polyvec_lazy.h */
+#undef MLD_MATRIX_ROW_BATCH_SIZE
 #undef MLD_POLYVEC_LAZY_H
 #undef mld_poly_permute_bitrev_to_custom_optional
 #undef mld_polymat
@@ -361,6 +362,7 @@
 #undef mld_polyvec_matrix_pointwise_montgomery_row
 #undef mld_polyvec_matrix_pointwise_montgomery_row_eager
 #undef mld_polyvec_matrix_pointwise_montgomery_row_lazy
+#undef mld_polyvec_matrix_pointwise_montgomery_rows
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec_eager
 #undef mld_polyvec_matrix_pointwise_montgomery_yvec_lazy

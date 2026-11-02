@@ -23,6 +23,14 @@
 #include "params.h"
 #include "sys.h"
 
+#if defined(MLD_CONFIG_REDUCE_RAM_X4) && !defined(MLD_CONFIG_REDUCE_RAM)
+#error Bad configuration: MLD_CONFIG_REDUCE_RAM_X4 requires MLD_CONFIG_REDUCE_RAM.
+#endif
+
+#if defined(MLD_CONFIG_REDUCE_RAM_X4) && defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+#error Bad configuration: MLD_CONFIG_REDUCE_RAM_X4 is incompatible with MLD_CONFIG_SERIAL_FIPS202_ONLY.
+#endif
+
 /* Internal and public API have external linkage by default, but
  * this can be overwritten by the user, e.g. for single-CU builds. */
 #if !defined(MLD_CONFIG_INTERNAL_API_QUALIFIER)
