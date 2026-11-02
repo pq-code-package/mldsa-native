@@ -600,12 +600,15 @@ __contract__(
  * target pointer should simply be set to NULL. The calling
  * code will handle this case and invoke MLD_CUSTOM_FREE.
  */
+/* CBMC_STACK_ALLOC selects the default stack allocation. */
+#if !defined(CBMC_STACK_ALLOC)
 #define MLD_CONFIG_CUSTOM_ALLOC_FREE
 #if !defined(__ASSEMBLER__)
 #include <stdlib.h>
 #define MLD_CUSTOM_ALLOC(v, T, N) T *v = (T *)malloc(sizeof(T) * (N))
 #define MLD_CUSTOM_FREE(v, T, N) free(v)
 #endif
+#endif /* !CBMC_STACK_ALLOC */
 
 
 /**
