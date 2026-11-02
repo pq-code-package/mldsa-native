@@ -173,7 +173,7 @@
   {                                                                    \
     uint32_t qvar;                                                     \
     ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> \
-        (((int)(value_lb) <= ((array_var)[(qvar)])) &&                 \
+        (((int)(value_lb) <= ((array_var)[(qvar)])) &                  \
          (((array_var)[(qvar)]) < (int)(value_ub)))                    \
   }
 
@@ -182,7 +182,7 @@
   CBMC_FORALL(qvar, 0, qvar_max,                                         \
               ((uint32_t)(qvar_lb) <= (qvar) &&                          \
                (qvar) < (uint32_t)(qvar_ub)) ==>                         \
-                  (((int)(value_lb) <= ((array_var)[(qvar)])) &&         \
+                  (((int)(value_lb) <= ((array_var)[(qvar)])) &          \
                    (((array_var)[(qvar)]) < (int)(value_ub))))
 
 /*
