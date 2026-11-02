@@ -23,7 +23,9 @@
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
+#ifndef NUM_RANDOM_TESTS_SLOW
 #define NUM_RANDOM_TESTS_SLOW 50
+#endif
 
 #include "test_common.h"
 
@@ -55,7 +57,7 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
 
-#if defined(MLD_USE_NATIVE_FIPS202_X1)
+#if defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
 static void keccakf1600_xor_bytes_ref(uint64_t *state,
                                       const unsigned char *data,
                                       unsigned offset, unsigned length)
@@ -86,6 +88,9 @@ static void keccakf1600_extract_bytes_ref(const uint64_t *state,
   }
 }
 
+#endif /* MLD_USE_NATIVE_FIPS202_X1 || MLD_USE_NATIVE_FIPS202_X4 */
+
+#if defined(MLD_USE_NATIVE_FIPS202_X1)
 static void print_keccak_state_bytes(const char *label,
                                      const unsigned char *state_bytes,
                                      size_t len)
@@ -1397,9 +1402,9 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
       memset(state_x1, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-      mld_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
+      keccakf1600_xor_bytes_ref(state_x1, input[j], xor_offset, xor_length);
       mld_keccakf1600_permute_c(state_x1);
-      mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
+      keccakf1600_extract_bytes_ref(state_x1, output_x1, ext_offset,
                                     ext_length);
 
       CHECK_X4_BYTES(memcmp(output_x4[j], output_x1, ext_length) == 0);
