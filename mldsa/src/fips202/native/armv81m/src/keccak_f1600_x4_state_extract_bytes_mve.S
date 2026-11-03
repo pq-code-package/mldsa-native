@@ -192,6 +192,8 @@ Lmld_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
 Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_body:
         lsr.w lr, r6, #0x3
         wls lr, lr, Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end @ imm = #0xb4
+        mov.w r0, #0x55
+        vdup.8 q5, r0
 
 Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
         vldrw.u32 q0, [r8], #16
@@ -212,12 +214,11 @@ Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
         vsli.8 q1, q4, #0x4
         vshr.u8 q4, q1, #0x5
         vsli.8 q1, q4, #0x6
-        mov.w r0, #0x55
-        vdup.8 q4, r0
-        vand q0, q0, q4
-        vand q1, q1, q4
+        vand q0, q0, q5
+        vand q1, q1, q5
         vshl.i32 q1, q1, #0x1
         vorr q0, q0, q1
+        vstrw.32 q0, [q7, #4]!
         vsli.32 q2, q2, #0x8
         vsli.16 q2, q2, #0x4
         vsli.8 q2, q2, #0x1
@@ -232,13 +233,12 @@ Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
         vsli.8 q3, q1, #0x4
         vshr.u8 q1, q3, #0x5
         vsli.8 q3, q1, #0x6
-        vand q1, q2, q4
-        vand q3, q3, q4
+        vand q1, q2, q5
+        vand q3, q3, q5
         vshl.i32 q3, q3, #0x1
         vorr q1, q1, q3
-        vstrw.32 q0, [q7, #4]!
         vstrw.32 q1, [q7, #4]!
-        le lr, Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start @ imm = #-0xb4
+        le lr, Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start @ imm = #-0xac
 
 Lmld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
         ands r6, r6, #0x7

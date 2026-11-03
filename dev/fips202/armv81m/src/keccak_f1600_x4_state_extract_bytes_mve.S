@@ -286,16 +286,31 @@ mld_keccak_f1600_x4_state_extract_bytes_asm_pre_main:
 mld_keccak_f1600_x4_state_extract_bytes_asm_main_body:
     lsr     lr, length, #3
     wls     lr, lr, mld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end
+    // Hoist the mask only when at least one full lane will be processed.
+    mov     r0, #0x55
+    vdup.u8 q5, r0
 mld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start:
     vldrw.u32 qd0, [rSE], #16
     vldrw.u32 qd1, [rSO], #16
 
-    // De-interleave (clobbers r0, q2, q3, q4)
-    from_bit_interleaving_4x q0, q1, q2, q3, q4, r0
-
-    // Scatter-store 8 bytes per instance (two u32 stores with post-increment)
-    vstrw.u32   qd0, [qP, #4]!
-    vstrw.u32   qd1, [qP, #4]!
+    // Store the low words before expanding the high halves. q5 retains
+    // the mask throughout the aligned loop; the byte paths use their own mask.
+    vrev32.u16 q2, q0
+    vrev32.u16 q3, q1
+    deinterleave_even q0, q4
+    deinterleave_even q1, q4
+    vand.u32 q0, q0, q5
+    vand.u32 q1, q1, q5
+    vshl.u32 q1, q1, #1
+    vorr q0, q0, q1
+    vstrw.u32 qd0, [qP, #4]!
+    deinterleave_even q2, q1
+    deinterleave_even q3, q1
+    vand.u32 q1, q2, q5
+    vand.u32 q3, q3, q5
+    vshl.u32 q3, q3, #1
+    vorr q1, q1, q3
+    vstrw.u32 qd1, [qP, #4]!
 
     le      lr, mld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_start
 mld_keccak_f1600_x4_state_extract_bytes_asm_main_loop_end:
