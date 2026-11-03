@@ -52,6 +52,9 @@ CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 # With cadical, keep asserted quantifiers so that the propositional back end
 # expands them like the assumed ones.
 CBMC_CONFIG_FLAGS += $(if $(filter cadical,$(CBMC_SOLVER)),--no-forall-skolemization)
+# TODO: Use the instrumented malloc/free with cadical, too. Its
+# propositional encoding currently needs too much memory.
+CBMC_STACK_ALLOC = $(if $(filter cadical,$(CBMC_SOLVER)),1)
 
 FUNCTION_NAME = sign_verify_internal
 
