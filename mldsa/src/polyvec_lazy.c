@@ -396,7 +396,7 @@ void mld_polyvec_matrix_pointwise_montgomery_rows(
         mld_poly_pointwise_montgomery(&mat->cur[j], &v->vec[l]);
         if (l == 0)
         {
-          t_rows[j] = mat->cur[j];
+          mld_memcpy(&t_rows[j], &mat->cur[j], sizeof(t_rows[j]));
         }
         else
         {
