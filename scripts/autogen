@@ -2176,6 +2176,14 @@ def native_arith_rv32im(c):
     return native_arith(c) and rv32im(c)
 
 
+def native_armv81m_memops(c):
+    return c.endswith("/native/armv81m/memops.h")
+
+
+def native_arith_armv81m(c):
+    return native_arith(c) and armv81m(c) and not native_armv81m_memops(c)
+
+
 def native_arith_core(c):
     return (
         native_arith(c)
@@ -2183,6 +2191,8 @@ def native_arith_core(c):
         and not native_arith_aarch64(c)
         and not native_arith_riscv64(c)
         and not native_arith_rv32im(c)
+        and not native_arith_armv81m(c)
+        and not native_armv81m_memops(c)
     )
 
 
@@ -2296,12 +2306,20 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
     )
     yield "#endif"
+    yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_armv81m, desc="native code (Arith, Armv8.1-M)"
+    )
+    yield "#endif"
     yield "#if defined(MLD_SYS_RISCV32)"
     yield from gen_monolithic_undef_all_core(
         filt=native_arith_rv32im, desc="native code (Arith, RV32IM)"
     )
     yield "#endif"
     yield "#endif"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_armv81m_memops, desc="optional MVE memory hooks"
+    )
     # sys.h last: the native sections above are guarded by its MLD_SYS_* macros
     yield from gen_monolithic_undef_all_core(filt=is_sys_h, desc="")
     yield "#endif"
@@ -2378,6 +2396,10 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_X86_64)"
         for c in filter(native_arith_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_arith_armv81m, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#if defined(MLD_SYS_RISCV32)"
@@ -2478,6 +2500,10 @@ def gen_monolithic_asm_file():
         for c in filter(native_arith_x86_64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_ARMV81M_MVE)"
+        for c in filter(native_arith_armv81m, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#if defined(MLD_SYS_RISCV32)"
         for c in filter(native_arith_rv32im, asm_sources):
             yield f'#include "{c}"'
@@ -2554,6 +2580,7 @@ def get_config_options():
         "MLD_SYS_AARCH64_SLOW_BARREL_SHIFTER",
         "MLD_SYS_AARCH64_FAST_SHA3",
         "MLD_RV32IM_INTERNAL_USE_SLOW_MULTIPLIER",
+        "MLD_ARMV81M_USE_MVE_MEMOPS",
         "MLDSA_DEBUG",  # TODO: Rename?
         "MLD_BREAK_PCT",  # Use in PCT breakage test
         "MLD_ALLOW_NONCOMPLIANT_SIGNING_BOUND",  # Internal testing escape hatch
@@ -3050,6 +3077,8 @@ def upstream_src_dir_for_dev_dir(dev_dir):
         return "mldsa/src/native/aarch64/src"
     if dev_dir.startswith("dev/x86_64/"):
         return "mldsa/src/native/x86_64/src"
+    if dev_dir.startswith("dev/armv81m/"):
+        return "mldsa/src/native/armv81m/src"
     if dev_dir.startswith("dev/riscv32/"):
         return "mldsa/src/native/rv32im/src"
     raise ValueError(
@@ -3627,6 +3656,22 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Idev/fips202/armv81m -Imldsa/src/fips202/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+    )
+    synchronize_backend(
+        "dev/armv81m",
+        "mldsa/src/native/armv81m",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/armv81m -Imldsa/src/native/armv81m -march=armv8.1-m.main+mve -mthumb",
+    )
+    synchronize_backend(
+        "dev/armv81m/src",
+        "mldsa/src/native/armv81m/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/armv81m/src -Imldsa/src/native/armv81m/src -march=armv8.1-m.main+mve -mthumb",
     )
     synchronize_backend(
         "dev/riscv32/src",

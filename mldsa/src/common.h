@@ -189,6 +189,15 @@
 #define MLD_FIPS202X4_HEADER_FILE MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
 #endif
 
+/* Optional MVE memory hooks, after sys.h has detected the compiler target. */
+#if defined(MLD_ARMV81M_USE_MVE_MEMOPS)
+#include "native/armv81m/memops.h"
+/* Re-establish aliases when common.h is re-included for another level. */
+#define mld_zeroize MLD_NAMESPACE(armv81m_zeroize)
+#define mld_memcpy MLD_NAMESPACE(armv81m_memcpy)
+#define mld_memset MLD_NAMESPACE(armv81m_memset)
+#endif /* MLD_ARMV81M_USE_MVE_MEMOPS */
+
 /* Standard library function replacements */
 #if !defined(__ASSEMBLER__)
 #if !defined(MLD_CONFIG_CUSTOM_MEMCPY)

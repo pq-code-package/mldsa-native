@@ -98,6 +98,9 @@
 #include "src/native/x86_64/src/mldsa_rej_uniform_eta2_avx2_asm.S"
 #include "src/native/x86_64/src/mldsa_rej_uniform_eta4_avx2_asm.S"
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_ARMV81M_MVE)
+#include "src/native/armv81m/src/poly_pointwise_montgomery_mve.S"
+#endif
 #if defined(MLD_SYS_RISCV32)
 #include "src/native/rv32im/src/mldsa_intt_rv32im_asm.S"
 #include "src/native/rv32im/src/mldsa_intt_rv32im_slowmul_asm.S"
@@ -281,6 +284,7 @@
 #undef MLD_NAMESPACE_PREFIX_KL
 #undef mld_memcpy
 #undef mld_memset
+#undef mld_zeroize
 /* mldsa/src/packing.h */
 #undef MLD_PACKING_H
 #undef mld_pack_sig_c
@@ -836,6 +840,22 @@
 #undef MLD_NATIVE_X86_64_SRC_CONSTS_H
 #undef mld_qdata
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_ARMV81M_MVE)
+/*
+ * Undefine macros from native code (Arith, Armv8.1-M)
+ */
+/* mldsa/src/native/armv81m/meta.h */
+#undef MLD_ARITH_BACKEND_ARMV81M
+#undef MLD_NATIVE_ARMV81M_META_H
+#undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLY_CHKNORM
+#undef MLD_USE_NATIVE_POLY_USE_HINT_32
+/* mldsa/src/native/armv81m/src/arith_native_armv81m.h */
+#undef MLD_NATIVE_ARMV81M_SRC_ARITH_NATIVE_ARMV81M_H
+#undef mld_poly_chknorm_mve
+#undef mld_poly_pointwise_montgomery_mve_asm
+#undef mld_poly_use_hint_32_mve
+#endif /* MLD_SYS_ARMV81M_MVE */
 #if defined(MLD_SYS_RISCV32)
 /*
  * Undefine macros from native code (Arith, RV32IM)
@@ -864,6 +884,14 @@
 #undef mld_rv32im_ntt_zetas
 #endif /* MLD_SYS_RISCV32 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
+/*
+ * Undefine macros from optional MVE memory hooks
+ */
+/* mldsa/src/native/armv81m/memops.h */
+#undef MLD_CONFIG_CUSTOM_MEMCPY
+#undef MLD_CONFIG_CUSTOM_MEMSET
+#undef MLD_CONFIG_CUSTOM_ZEROIZE
+#undef MLD_NATIVE_ARMV81M_MEMOPS_H
 /* mldsa/src/sys.h */
 #undef MLD_ALIGN
 #undef MLD_ALIGN_UP
