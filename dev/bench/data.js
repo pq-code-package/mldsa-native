@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793691736823,
+  "lastUpdate": 1793691777634,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -904557,6 +904557,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 318008,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "c82f84693206241bfd84b244af9a9898ce8cbacf",
+          "message": "HOL Light: Fail bytecode update if a proof's bytecode is not dumped\n\nThe AArch64 dump_bytecode.ml did not dump the five Keccak objects, so\n`autogen --update-hol-light-bytecode` silently skipped their proofs.\nAdd the missing entries, and make autogen require, for every assembly\nfile in proofs/hol_light/<arch>/mldsa, a proof file with BYTECODE\nSTART/END markers and matching bytecode in the dump.\n\nThis isn't a soundness risk as outdated bytecode is caught when the\nproof itself runs, but it is still desirable to also catch outdated bytecode\nearlier.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-03T05:04:05Z",
+          "tree_id": "921540c8a6116b7c4993cacef5adc568a8a6c456",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/c82f84693206241bfd84b244af9a9898ce8cbacf"
+        },
+        "date": 1793691193277,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 113364,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 354346,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 117192,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 195616,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 583531,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 193000,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 322105,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 747535,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 317957,
             "unit": "cycles"
           }
         ]
