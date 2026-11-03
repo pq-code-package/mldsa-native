@@ -1675,6 +1675,7 @@ size_t mld_prepare_domain_separation_prefix(
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 MLD_EXTERNAL_API
+/* NOLINTNEXTLINE(readability-function-cognitive-complexity) */
 int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
                         const uint8_t sk[MLDSA_CRYPTO_SECRETKEYBYTES],
                         MLD_CONFIG_CONTEXT_PARAMETER_TYPE context)
@@ -1689,10 +1690,35 @@ int mld_sign_pk_from_sk(uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
   MLD_ALLOC(s2k, mld_poly, 1, context);
   MLD_ALLOC(t0_packed, uint8_t, MLDSA_K *MLDSA_POLYT0_PACKEDBYTES, context);
 
-  if (rho == NULL || tr == NULL || tr_computed == NULL || key == NULL ||
-      s1 == NULL || s2k == NULL || t0_packed == NULL)
+  /* Check each allocation separately: a single combined condition makes the
+   * propositional encoding of the CBMC proof much larger. */
+  ret = MLD_ERR_OUT_OF_MEMORY;
+  if (rho == NULL)
   {
-    ret = MLD_ERR_OUT_OF_MEMORY;
+    goto cleanup;
+  }
+  if (tr == NULL)
+  {
+    goto cleanup;
+  }
+  if (tr_computed == NULL)
+  {
+    goto cleanup;
+  }
+  if (key == NULL)
+  {
+    goto cleanup;
+  }
+  if (s1 == NULL)
+  {
+    goto cleanup;
+  }
+  if (s2k == NULL)
+  {
+    goto cleanup;
+  }
+  if (t0_packed == NULL)
+  {
     goto cleanup;
   }
 
