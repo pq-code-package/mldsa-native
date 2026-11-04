@@ -24,6 +24,9 @@ inputs:
   reduce_ram:
     description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled"
     default: "false"
+  reduce_ram_x4:
+    description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM_X4 enabled"
+    default: "false"
   gh_token:
     description: Github access token to use
     required: true
@@ -54,13 +57,14 @@ runs:
               - litani Version $(litani --version)
               - $(bash --version | grep -m1 "")
             EOF
-      - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }}, reduce_ram=${{ inputs.reduce_ram }})
+      - name: Run CBMC proofs (MLD_CONFIG_PARAMETER_SET=${{ inputs.mldsa_parameter_set }}, reduce_ram=${{ inputs.reduce_ram }}, reduce_ram_x4=${{ inputs.reduce_ram_x4 }})
         shell: ${{ env.SHELL }}
         env:
           ACTION_PATH: ${{ github.action_path }}
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mldsa_parameter_set }}
           REDUCE_RAM: ${{ inputs.reduce_ram }}
+          REDUCE_RAM_X4: ${{ inputs.reduce_ram_x4 }}
           RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
           echo "::group::cbmc_$PARAMETER_SET"
@@ -71,6 +75,11 @@ runs:
             reduce_ram_flag="--reduce-ram"
             data_dir="dev/cbmc-reduce-ram"
             variant="reduce-ram"
+          fi
+          if [ "$REDUCE_RAM_X4" = "true" ]; then
+            reduce_ram_flag="--reduce-ram-x4"
+            data_dir="dev/cbmc-reduce-ram-x4"
+            variant="reduce-ram-x4"
           fi
           # Write the results at their gh-pages path; see cbmc_publish.yml.
           result="$RESULTS_DIR/$data_dir/mldsa-$PARAMETER_SET.json"
@@ -90,7 +99,7 @@ runs:
         if: ${{ github.event_name == 'merge_group' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: cbmc-results-mldsa-${{ inputs.mldsa_parameter_set }}${{ inputs.reduce_ram == 'true' && '-reduce-ram' || '' }}
+          name: cbmc-results-mldsa-${{ inputs.mldsa_parameter_set }}${{ inputs.reduce_ram_x4 == 'true' && '-reduce-ram-x4' || (inputs.reduce_ram == 'true' && '-reduce-ram' || '') }}
           path: ${{ runner.temp }}/cbmc-results/
           if-no-files-found: error
           retention-days: 7
