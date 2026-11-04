@@ -131,12 +131,34 @@
  * Prevent clang-format from corrupting CBMC's special ==> operator
  */
 /* clang-format off */
+/*
+ * TODO: Remove CBMC_NO_SKOLEM once CBMC no longer skolemizes asserted
+ * quantifiers that the SAT back end can expand; see
+ * https://github.com/diffblue/cbmc/issues/9387.
+ *
+ * With CBMC_NO_SKOLEM, every quantifier below is wrapped in a single-value
+ * exists, which CBMC does not skolemize when asserted. This keeps the SAT
+ * encoding of some proofs much smaller.
+ */
+#if defined(CBMC_NO_SKOLEM)
+#define CBMC_NO_SKOLEM_CORE(wvar, ...)                                         \
+  __CPROVER_exists                                                             \
+  {                                                                            \
+    uint32_t wvar;                                                             \
+    ((wvar) < 1u) && (__VA_ARGS__)                                             \
+  }
+#define CBMC_NO_SKOLEM_WRAP(...)                                               \
+  CBMC_NO_SKOLEM_CORE(CBMC_CONCAT(_cbmc_no_skolem, __COUNTER__), __VA_ARGS__)
+#else /* CBMC_NO_SKOLEM */
+#define CBMC_NO_SKOLEM_WRAP(...) (__VA_ARGS__)
+#endif /* !CBMC_NO_SKOLEM */
+
 #define CBMC_FORALL(qvar, qvar_lb, qvar_ub, predicate)                         \
-  __CPROVER_forall                                                             \
+  CBMC_NO_SKOLEM_WRAP(__CPROVER_forall                                         \
   {                                                                            \
     uint32_t qvar;                                                             \
     ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> (predicate) \
-  }
+  })
 
 #define CBMC_FORALL_BOUNDED(qvar, qvar_lb, qvar_ub, qvar_max, predicate)       \
   CBMC_FORALL(qvar, 0, qvar_max,                                               \
