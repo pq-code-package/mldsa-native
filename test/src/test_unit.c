@@ -23,7 +23,9 @@
 #endif
 #endif /* !NUM_RANDOM_TESTS */
 
+#ifndef NUM_RANDOM_TESTS_SLOW
 #define NUM_RANDOM_TESTS_SLOW 50
+#endif
 
 #include "test_common.h"
 
@@ -54,6 +56,39 @@ unsigned int mld_rej_eta_c(int32_t *a, unsigned int target, unsigned int offset,
                            const uint8_t *buf, unsigned int buflen);
 #endif
 void mld_keccakf1600_permute_c(uint64_t *state);
+
+#if defined(MLD_USE_NATIVE_FIPS202_X4)
+static void keccakf1600_xor_bytes_ref(uint64_t *state,
+                                      const unsigned char *data,
+                                      unsigned offset, unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    state[lane] ^= (uint64_t)data[i] << shift;
+  }
+}
+
+static void keccakf1600_extract_bytes_ref(const uint64_t *state,
+                                          unsigned char *data, unsigned offset,
+                                          unsigned length)
+{
+  unsigned i;
+
+  for (i = 0; i < length; i++)
+  {
+    unsigned pos = offset + i;
+    unsigned lane = pos >> 3;
+    unsigned shift = 8 * (pos & 7);
+    data[i] = (unsigned char)(state[lane] >> shift);
+  }
+}
+
+#endif /* MLD_USE_NATIVE_FIPS202_X4 */
 
 #if defined(MLD_USE_NATIVE_FIPS202_X1)
 static void print_u64_array(const char *label, const uint64_t *array,
@@ -1107,11 +1142,13 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   MLD_ALLOC(input_1, unsigned char, MAX_RATE + 3, NULL);
   MLD_ALLOC(input_2, unsigned char, MAX_RATE + 3, NULL);
   MLD_ALLOC(input_3, unsigned char, MAX_RATE + 3, NULL);
+  MLD_ALLOC(input_copy, unsigned char, MLD_KECCAK_WAY *(MAX_RATE + 3), NULL);
 
   unsigned char *output_x4[MLD_KECCAK_WAY];
   unsigned char *output_base[MLD_KECCAK_WAY];
   unsigned char *input_base[MLD_KECCAK_WAY];
   unsigned char *input[MLD_KECCAK_WAY];
+  unsigned char *input_snapshot[MLD_KECCAK_WAY];
   const uint8_t *input_offsets;
   const uint8_t *output_offsets;
   output_base[0] = output_x4_0;
@@ -1126,7 +1163,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   if (state_x4 == NULL || state_x1 == NULL || output_x1 == NULL ||
       output_x4_0 == NULL || output_x4_1 == NULL || output_x4_2 == NULL ||
       output_x4_3 == NULL || input_0 == NULL || input_1 == NULL ||
-      input_2 == NULL || input_3 == NULL)
+      input_2 == NULL || input_3 == NULL || input_copy == NULL)
   {
     goto cleanup;
   }
@@ -1161,8 +1198,11 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     /* Generate different random input for each lane. */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
+      input_snapshot[j] = input_copy + j * (MAX_RATE + 3);
+      memset(input_base[j], 0xA5, MAX_RATE + 3);
       input[j] = input_base[j] + input_offsets[j];
       randombytes(input[j], xor_length);
+      memcpy(input_snapshot[j], input_base[j], MAX_RATE + 3);
       /* Leave eight leading bytes and room for an over-store sentinel. */
       output_x4[j] = output_base[j] + 8 + output_offsets[j];
       memset(output_base[j], 0xA5, OUTPUT_BYTES);
@@ -1180,10 +1220,13 @@ static int test_keccakf1600x4_xor_permute_extract(void)
     /* Compare each lane against x1 C reference */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
     {
+      CHECK_X4_BYTES(memcmp(input_base[j], input_snapshot[j], MAX_RATE + 3) ==
+                     0);
       memset(state_x1, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-      mld_keccakf1600_xor_bytes(state_x1, input[j], xor_offset, xor_length);
+      keccakf1600_xor_bytes_ref(state_x1, input_snapshot[j] + input_offsets[j],
+                                xor_offset, xor_length);
       mld_keccakf1600_permute_c(state_x1);
-      mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
+      keccakf1600_extract_bytes_ref(state_x1, output_x1, ext_offset,
                                     ext_length);
 
       CHECK_X4_BYTES(memcmp(output_x4[j], output_x1, ext_length) == 0);
@@ -1201,6 +1244,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
   ret = 0;
 
 cleanup:
+  MLD_FREE(input_copy, unsigned char, MLD_KECCAK_WAY *(MAX_RATE + 3), NULL);
   MLD_FREE(input_3, unsigned char, MAX_RATE + 3, NULL);
   MLD_FREE(input_2, unsigned char, MAX_RATE + 3, NULL);
   MLD_FREE(input_1, unsigned char, MAX_RATE + 3, NULL);
@@ -1341,7 +1385,10 @@ static int test_polyvec_lazy_eager(void)
   MLD_ALLOC(mat_lazy, mld_polymat_lazy, 1, NULL);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
   MLD_ALLOC(v, mld_polyvecl, 1, NULL);
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  MLD_ALLOC(rows, mld_poly, 4, NULL);
 #endif
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
   MLD_ALLOC(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
   MLD_ALLOC(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
   MLD_ALLOC(w_eager, mld_polyveck, 1, NULL);
@@ -1355,7 +1402,10 @@ static int test_polyvec_lazy_eager(void)
       mat_lazy == NULL ||
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
       v == NULL ||
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+      rows == NULL ||
 #endif
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
       scratch_eager == NULL || scratch_lazy == NULL || w_eager == NULL ||
       w_lazy == NULL)
   {
@@ -1431,6 +1481,22 @@ static int test_polyvec_lazy_eager(void)
       mld_poly_caddq(poly_lazy);
       CHECK(memcmp(poly_eager, poly_lazy, sizeof(mld_poly)) == 0);
     }
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+    /* Compare every valid batch start, including partial final batches. */
+    for (i = 0; i < MLDSA_K; i++)
+    {
+      unsigned int r;
+      mld_polyvec_matrix_pointwise_montgomery_rows(rows, mat_lazy, v, i);
+      for (r = 0; r < 4 && i + r < MLDSA_K; r++)
+      {
+        mld_polyvec_matrix_pointwise_montgomery_row_eager(poly_eager, mat_eager,
+                                                          v, i + r);
+        mld_poly_caddq(poly_eager);
+        mld_poly_caddq(&rows[r]);
+        CHECK(memcmp(poly_eager, &rows[r], sizeof(mld_poly)) == 0);
+      }
+    }
+#endif /* MLD_CONFIG_REDUCE_RAM_X4 */
   }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
 
@@ -1476,8 +1542,11 @@ cleanup:
   MLD_FREE(scratch_lazy, mld_yvec_scratch_lazy, 1, NULL);
   MLD_FREE(scratch_eager, mld_yvec_scratch_eager, 1, NULL);
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
-  MLD_FREE(v, mld_polyvecl, 1, NULL);
+#if defined(MLD_CONFIG_REDUCE_RAM_X4)
+  MLD_FREE(rows, mld_poly, 4, NULL);
 #endif
+  MLD_FREE(v, mld_polyvecl, 1, NULL);
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_VERIFY_API */
   MLD_FREE(mat_lazy, mld_polymat_lazy, 1, NULL);
   MLD_FREE(mat_eager, mld_polymat_eager, 1, NULL);
   MLD_FREE(poly_lazy, mld_poly, 1, NULL);
