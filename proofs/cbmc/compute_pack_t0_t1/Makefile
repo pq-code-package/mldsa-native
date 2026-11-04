@@ -20,7 +20,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_compute_pack_t0_t1
-USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_row
+USE_FUNCTION_CONTRACTS=mld_polyvec_matrix_pointwise_montgomery_rows
 USE_FUNCTION_CONTRACTS+=mld_poly_invntt_tomont
 USE_FUNCTION_CONTRACTS+=mld_poly_add
 USE_FUNCTION_CONTRACTS+=mld_polyeta_unpack
