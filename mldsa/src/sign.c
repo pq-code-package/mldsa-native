@@ -61,6 +61,7 @@
   MLD_ADD_PARAM_SET(mld_compute_pack_t0_t1) MLD_CONTEXT_PARAMETERS_5
 #define mld_get_max_signing_attempts \
   MLD_ADD_PARAM_SET(mld_get_max_signing_attempts)
+#define mld_reconstruct_w1_row MLD_ADD_PARAM_SET(mld_reconstruct_w1_row)
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
 static int mld_check_pct(uint8_t const pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
@@ -345,7 +346,7 @@ __contract__(
   unsigned int k;
   int ret;
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(t0k, mld_poly, 1, context);
+  MLD_ALLOC(t0k, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_ALLOC(t1k, mld_poly, 1, context);
 
   if (mat == NULL || t0k == NULL || t1k == NULL)
@@ -361,22 +362,30 @@ __contract__(
   __loop__(
     assigns(k, memory_slice(pk_t1, MLDSA_K * MLDSA_POLYT1_PACKEDBYTES),
             memory_slice(t0_packed, MLDSA_K * MLDSA_POLYT0_PACKEDBYTES),
-            memory_slice(t0k, sizeof(mld_poly)),
+            memory_slice(t0k, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE),
             memory_slice(t1k, sizeof(mld_poly))
             MLD_IF_REDUCE_RAM(, memory_slice(mat, sizeof(mld_polymat))))
     invariant(k <= MLDSA_K)
+    invariant(k % MLD_MATRIX_ROW_BATCH_SIZE == 0 ||
+      forall(k0, 0, MLD_MATRIX_ROW_BATCH_SIZE,
+        k0 < k % MLD_MATRIX_ROW_BATCH_SIZE ||
+        k - k % MLD_MATRIX_ROW_BATCH_SIZE + k0 >= MLDSA_K ||
+        array_abs_bound(t0k[k0].coeffs, 0, MLDSA_N, MLDSA_Q)))
     decreases(MLDSA_K - k)
   )
   {
-    /* t0k = (A * s1hat)_k in NTT domain */
-    mld_polyvec_matrix_pointwise_montgomery_row(t0k, mat, s1hat, k);
+    mld_poly *t0row = &t0k[k % MLD_MATRIX_ROW_BATCH_SIZE];
+    if (k % MLD_MATRIX_ROW_BATCH_SIZE == 0)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_rows(t0k, mat, s1hat, k);
+    }
 
-    /* t0k = invNTT(t0k) */
-    mld_poly_invntt_tomont(t0k);
+    /* t0row = invNTT(t0row) */
+    mld_poly_invntt_tomont(t0row);
 
-    /* t0k += s2[k], unpacked on demand into the (still unused) t1k. */
+    /* t0row += s2[k], unpacked on demand into the (still unused) t1k. */
     mld_polyeta_unpack(t1k, s2_packed + k * MLDSA_POLYETA_PACKEDBYTES);
-    mld_poly_add(t0k, t1k);
+    mld_poly_add(t0row, t1k);
 
     /* Reference: The following reduction is not present in the reference
      *            implementation. Omitting this reduction requires the output
@@ -388,22 +397,22 @@ __contract__(
      *            and can consequently, relax the bounds requirements for the
      *            invntt.
      */
-    mld_poly_reduce(t0k);
+    mld_poly_reduce(t0row);
 
-    /* Decompose into t1[k] and t0[k] (in place into t0k). */
-    mld_poly_caddq(t0k);
-    mld_poly_power2round(t1k, t0k, t0k);
+    /* Decompose into t1[k] and t0[k] (in place into t0row). */
+    mld_poly_caddq(t0row);
+    mld_poly_power2round(t1k, t0row, t0row);
 
     /* Pack t1[k] into pk and t0[k] into the t0 output buffer. */
     mld_polyt1_pack(pk_t1 + k * MLDSA_POLYT1_PACKEDBYTES, t1k);
-    mld_polyt0_pack(t0_packed + k * MLDSA_POLYT0_PACKEDBYTES, t0k);
+    mld_polyt0_pack(t0_packed + k * MLDSA_POLYT0_PACKEDBYTES, t0row);
   }
 
   ret = 0;
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(t1k, mld_poly, 1, context);
-  MLD_FREE(t0k, mld_poly, 1, context);
+  MLD_FREE(t0k, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   return ret;
 }
@@ -1250,6 +1259,57 @@ cleanup:
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
+/**
+ * Reconstruct and pack one row of w1 during verification, using tmp as scratch.
+ * The caller supplies the corresponding row of A*z in the NTT domain.
+ * Returns MLD_ERR_FAIL if the signature's hint encoding is malformed.
+ */
+MLD_MUST_CHECK_RETURN_VALUE
+static int mld_reconstruct_w1_row(mld_poly *w1row, mld_poly *tmp,
+                                  uint8_t packed[MLDSA_POLYW1_PACKEDBYTES],
+                                  const mld_poly *cp,
+                                  const uint8_t pk[MLDSA_CRYPTO_PUBLICKEYBYTES],
+                                  const uint8_t sig[MLDSA_CRYPTO_BYTES],
+                                  unsigned int i)
+__contract__(
+  requires(i < MLDSA_K)
+  requires(memory_no_alias(w1row, sizeof(mld_poly)))
+  requires(memory_no_alias(tmp, sizeof(mld_poly)))
+  requires(memory_no_alias(packed, MLDSA_POLYW1_PACKEDBYTES))
+  requires(memory_no_alias(cp, sizeof(mld_poly)))
+  requires(memory_no_alias(pk, MLDSA_CRYPTO_PUBLICKEYBYTES))
+  requires(memory_no_alias(sig, MLDSA_CRYPTO_BYTES))
+  requires(array_abs_bound(w1row->coeffs, 0, MLDSA_N, MLDSA_Q))
+  requires(array_abs_bound(cp->coeffs, 0, MLDSA_N, MLD_NTT_BOUND))
+  assigns(memory_slice(w1row, sizeof(mld_poly)),
+          memory_slice(tmp, sizeof(mld_poly)),
+          memory_slice(packed, MLDSA_POLYW1_PACKEDBYTES))
+  ensures(return_value == 0 || return_value == MLD_ERR_FAIL)
+)
+{
+  /* tmp = c * t1_i * 2^d in NTT domain */
+  mld_unpack_pk_t1(tmp, pk, i);
+  mld_poly_shiftl(tmp);
+  mld_poly_ntt(tmp);
+  mld_poly_pointwise_montgomery(tmp, cp);
+
+  /* w1row = invNTT(w1row - c * t1_i * 2^d) */
+  mld_poly_sub(w1row, tmp);
+  mld_poly_reduce(w1row);
+  mld_poly_invntt_tomont(w1row);
+  mld_poly_caddq(w1row);
+
+  /* tmp = h_i (decoded and validated from signature). */
+  if (mld_sig_unpack_hints(tmp, sig, i) != 0)
+  {
+    return MLD_ERR_FAIL;
+  }
+
+  mld_poly_use_hint(w1row, tmp);
+  mld_polyw1_pack(packed, w1row);
+  return 0;
+}
+
 MLD_MUST_CHECK_RETURN_VALUE
 MLD_EXTERNAL_API
 int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
@@ -1269,7 +1329,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   MLD_ALLOC(z, mld_polyvecl, 1, context);
   MLD_ALLOC(cp, mld_poly, 1, context);
   MLD_ALLOC(mat, mld_polymat, 1, context);
-  MLD_ALLOC(w1, mld_poly, 1, context);
+  MLD_ALLOC(w1, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_ALLOC(tmp, mld_poly, 1, context);
 
   if (buf == NULL || mu == NULL || c == NULL || c2 == NULL || z == NULL ||
@@ -1314,44 +1374,47 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
   mld_poly_challenge(cp, c);
   mld_poly_ntt(cp);
 
+  /* Keep bounds for the unconsumed fixed lanes explicit for caller proofs. */
   for (i = 0; i < MLDSA_K; i++)
   __loop__(
     assigns(MLD_IF_REDUCE_RAM(memory_slice(mat, sizeof(mld_polymat)),)
             i, ret,
-            memory_slice(w1, sizeof(mld_poly)),
+            memory_slice(w1, sizeof(mld_poly) * MLD_MATRIX_ROW_BATCH_SIZE),
             memory_slice(tmp, sizeof(mld_poly)),
             memory_slice(buf, MLDSA_K * MLDSA_POLYW1_PACKEDBYTES)
     )
     invariant(i <= MLDSA_K)
+    invariant(i % MLD_MATRIX_ROW_BATCH_SIZE == 0 ||
+      1 >= MLD_MATRIX_ROW_BATCH_SIZE ||
+      1 < i % MLD_MATRIX_ROW_BATCH_SIZE ||
+      i - i % MLD_MATRIX_ROW_BATCH_SIZE + 1 >= MLDSA_K ||
+      array_abs_bound(w1[1].coeffs, 0, MLDSA_N, MLDSA_Q))
+    invariant(i % MLD_MATRIX_ROW_BATCH_SIZE == 0 ||
+      2 >= MLD_MATRIX_ROW_BATCH_SIZE ||
+      2 < i % MLD_MATRIX_ROW_BATCH_SIZE ||
+      i - i % MLD_MATRIX_ROW_BATCH_SIZE + 2 >= MLDSA_K ||
+      array_abs_bound(w1[2].coeffs, 0, MLDSA_N, MLDSA_Q))
+    invariant(i % MLD_MATRIX_ROW_BATCH_SIZE == 0 ||
+      3 >= MLD_MATRIX_ROW_BATCH_SIZE ||
+      3 < i % MLD_MATRIX_ROW_BATCH_SIZE ||
+      i - i % MLD_MATRIX_ROW_BATCH_SIZE + 3 >= MLDSA_K ||
+      array_abs_bound(w1[3].coeffs, 0, MLDSA_N, MLDSA_Q))
     decreases(MLDSA_K - i)
   )
   {
-    /* w1 = (A * z)_i in NTT domain */
-    mld_polyvec_matrix_pointwise_montgomery_row(w1, mat, z, i);
+    mld_poly *w1row = &w1[i % MLD_MATRIX_ROW_BATCH_SIZE];
+    if (i % MLD_MATRIX_ROW_BATCH_SIZE == 0)
+    {
+      mld_polyvec_matrix_pointwise_montgomery_rows(w1, mat, z, i);
+    }
 
-    /* tmp = c * t1_i * 2^d in NTT domain */
-    mld_unpack_pk_t1(tmp, pk, i);
-    mld_poly_shiftl(tmp);
-    mld_poly_ntt(tmp);
-    mld_poly_pointwise_montgomery(tmp, cp);
-
-    /* w1 = invNTT(w1 - c * t1_i * 2^d) */
-    mld_poly_sub(w1, tmp);
-    mld_poly_reduce(w1);
-    mld_poly_invntt_tomont(w1);
-    mld_poly_caddq(w1);
-
-    /* tmp = h_i (decoded and validated from signature). A non-zero return
-     * means the hint encoding is malformed, i.e. the signature is invalid. */
-    if (mld_sig_unpack_hints(tmp, sig, i) != 0)
+    /* A malformed hint encoding means the signature is invalid. */
+    if (mld_reconstruct_w1_row(w1row, tmp, buf + i * MLDSA_POLYW1_PACKEDBYTES,
+                               cp, pk, sig, i) != 0)
     {
       ret = MLD_ERR_INVALID_SIGNATURE;
       goto cleanup;
     }
-
-    /* w1 = use_hint(w1, tmp), then pack into buf[i] */
-    mld_poly_use_hint(w1, tmp);
-    mld_polyw1_pack(buf + i * MLDSA_POLYW1_PACKEDBYTES, w1);
   }
 
   /* Call random oracle and verify challenge */
@@ -1368,7 +1431,7 @@ int mld_sign_verify_internal(const uint8_t sig[MLDSA_CRYPTO_BYTES],
 cleanup:
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
   MLD_FREE(tmp, mld_poly, 1, context);
-  MLD_FREE(w1, mld_poly, 1, context);
+  MLD_FREE(w1, mld_poly, MLD_MATRIX_ROW_BATCH_SIZE, context);
   MLD_FREE(mat, mld_polymat, 1, context);
   MLD_FREE(cp, mld_poly, 1, context);
   MLD_FREE(z, mld_polyvecl, 1, context);
@@ -1774,5 +1837,6 @@ cleanup:
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1
 #undef mld_get_max_signing_attempts
+#undef mld_reconstruct_w1_row
 #undef MLD_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN
