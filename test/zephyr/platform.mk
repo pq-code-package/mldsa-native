@@ -64,6 +64,9 @@ OPT ?= 0
 # key so command-line overrides invalidate binaries built with different counts.
 NTESTS ?= 3
 NUM_RANDOM_TESTS ?= 100
+# The x4 QEMU job can request fewer slow unit-test iterations; retain the
+# source default for existing Zephyr jobs.
+NUM_RANDOM_TESTS_SLOW ?= 50
 
 # Forward the QEMU execution deadline to exec_wrapper.py. Direct wrapper
 # invocations use the same default when the variable is absent.
@@ -80,6 +83,7 @@ ZEPHYR_BUILD_KEY := $(ZEPHYR_TARGET)|OPT=$(OPT)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|FIPS202=$(ZEPHYR_FIPS202_BACKEND)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NTESTS=$(NTESTS)
 ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|NUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
 ZEPHYR_APP_INPUTS := \
 	$(ZEPHYR_APP)/CMakeLists.txt \
 	$(ZEPHYR_APP)/Kconfig \
@@ -120,7 +124,13 @@ CFLAGS += -DMLD_CONFIG_REDUCE_RAM
 # Put the configurable test counts on CFLAGS so they forward below.
 CFLAGS += -DNTESTS=$(NTESTS) \
 	-DMLD_BENCHMARK_NTESTS=10 -DMLD_BENCHMARK_NITERATIONS=10 -DMLD_BENCHMARK_NWARMUP=10 \
-	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS)
+	-DNUM_RANDOM_TESTS=$(NUM_RANDOM_TESTS) \
+	-DNUM_RANDOM_TESTS_SLOW=$(NUM_RANDOM_TESTS_SLOW)
+
+# A reduced-RAM x4 run must not reuse binaries from a scalar reduced-RAM run.
+# CFLAGS from scripts/tests is available here before this simply-expanded key
+# is evaluated; the feature is also a build-time part of the CMake inputs.
+ZEPHYR_BUILD_KEY := $(ZEPHYR_BUILD_KEY)|REDUCE_RAM_X4=$(if $(filter -DMLD_CONFIG_REDUCE_RAM_X4%,$(CFLAGS)),1,0)
 
 # The binary's CFLAGS, forwarded to the CMake build (which applies them to the
 # mldsa amalgamation and test sources alike). '=' not ':=', so the recipe-time
