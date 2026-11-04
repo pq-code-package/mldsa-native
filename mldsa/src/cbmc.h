@@ -169,13 +169,9 @@
 
 #define array_bound_core(qvar, qvar_lb, qvar_ub, array_var,            \
                          value_lb, value_ub)                           \
-  __CPROVER_forall                                                     \
-  {                                                                    \
-    uint32_t qvar;                                                     \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> \
-        (((int)(value_lb) <= ((array_var)[(qvar)])) &&                 \
-         (((array_var)[(qvar)]) < (int)(value_ub)))                    \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub,                                  \
+              (((int)(value_lb) <= ((array_var)[(qvar)])) &&           \
+               (((array_var)[(qvar)]) < (int)(value_ub))))
 
 #define array_bound_bounded_core(qvar, qvar_lb, qvar_ub, qvar_max,       \
                                  array_var, value_lb, value_ub)          \
@@ -205,45 +201,28 @@
                           CBMC_ARRAY_BOUND, unused)(__VA_ARGS__)
 
 #define array_unchanged_core(qvar, qvar_lb, qvar_ub, array_var)                   \
-  __CPROVER_forall                                                                \
-  {                                                                               \
-    uint32_t qvar;                                                                \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>         \
-    ((array_var)[(qvar)]) == (old(* (int32_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                    \
+              (old(* (int32_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged(array_var, N) \
     array_unchanged_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_unchanged_u64_core(qvar, qvar_lb, qvar_ub, array_var)                \
-  __CPROVER_forall                                                                 \
-  {                                                                                \
-    uint32_t qvar;                                                                 \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>          \
-    ((array_var)[(qvar)]) == (old(* (uint64_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                     \
+              (old(* (uint64_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged_u64(array_var, N) \
     array_unchanged_u64_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_unchanged_u8_core(qvar, qvar_lb, qvar_ub, array_var)                \
-  __CPROVER_forall                                                                \
-  {                                                                               \
-    uint32_t qvar;                                                                \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>         \
-    ((array_var)[(qvar)]) == (old(* (uint8_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                    \
+              (old(* (uint8_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged_u8(array_var, N) \
     array_unchanged_u8_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_zeroized_u8_core(qvar, qvar_lb, qvar_ub, array_var)              \
-  __CPROVER_forall                                                            \
-  {                                                                           \
-    uint32_t qvar;                                                            \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>     \
-    ((array_var)[(qvar)]) == 0                                                \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) == 0)
 
 #define array_zeroized_u8(array_var, N) \
     array_zeroized_u8_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
