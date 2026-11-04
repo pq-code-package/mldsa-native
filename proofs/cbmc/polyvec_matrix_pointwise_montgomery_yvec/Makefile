@@ -24,6 +24,9 @@ ifdef MLD_CONFIG_REDUCE_RAM
 USE_FUNCTION_CONTRACTS=mld_yvec_get_poly
 USE_FUNCTION_CONTRACTS+=mld_poly_pointwise_montgomery
 USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
+ifdef MLD_CONFIG_REDUCE_RAM_X4
+USE_FUNCTION_CONTRACTS+=mld_polyveck_accumulate_column_x4
+endif
 USE_FUNCTION_CONTRACTS+=mld_poly_add
 USE_FUNCTION_CONTRACTS+=mld_poly_ntt
 USE_FUNCTION_CONTRACTS+=mld_polyveck_reduce

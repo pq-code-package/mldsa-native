@@ -715,6 +715,13 @@ ifdef MLD_CONFIG_REDUCE_RAM
 DEFINES += -DMLD_CONFIG_REDUCE_RAM
 endif
 
+ifdef MLD_CONFIG_REDUCE_RAM_X4
+ifndef MLD_CONFIG_REDUCE_RAM
+$(error MLD_CONFIG_REDUCE_RAM_X4 requires MLD_CONFIG_REDUCE_RAM)
+endif
+DEFINES += -DMLD_CONFIG_REDUCE_RAM_X4
+endif
+
 # Give visibility to all static functions
 DEFINES += -Dstatic=
 
