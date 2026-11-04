@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793807258473,
+  "lastUpdate": 1793807299266,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -743915,6 +743915,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 408194,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "e35057401398c3884416a995ea1f1a409db7092d",
+          "message": "HOL-Light: Drop duplicate SIMD simplifier from aarch64_utils.ml\n\naarch64_utils.ml redefined SIMD_SIMPLIFY_CONV and SIMD_SIMPLIFY_TAC,\nshadowing the shared definitions in common/mldsa_specs.ml that it\nalready loads. The conversion is identical and the shared tactic only\nadditionally matches x86 int256 registers, which never occur in Arm\ngoals, so use the shared definitions.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-04T13:26:13Z",
+          "tree_id": "04d91c32228e7bb760078a60309440dc70881a33",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/e35057401398c3884416a995ea1f1a409db7092d"
+        },
+        "date": 1793807298224,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 140675,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 490574,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 151297,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 246922,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 797236,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 244487,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 400673,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1023077,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 408087,
             "unit": "cycles"
           }
         ]
