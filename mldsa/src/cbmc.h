@@ -189,19 +189,38 @@
 #define CBMC_CONCAT_(left, right) left##right
 #define CBMC_CONCAT(left, right) CBMC_CONCAT_(left, right)
 
+/*
+ * CBMC_EAGER_AND(A, B) is equivalent to (A && B) for side-effect-free
+ * operands, but evaluates B unconditionally. With (A && B), CBMC guards the
+ * checks it generates for memory accesses in B by A, so they appear a second
+ * time with a guard that reads memory.
+ *
+ * With CBMC_NO_SKOLEM, array_bound uses CBMC_EAGER_AND, which keeps the SAT
+ * encoding much smaller. Otherwise, it uses (A && B): the eager form makes
+ * many proofs slower without CBMC_NO_SKOLEM.
+ */
+#define CBMC_EAGER_AND(A, B) ((((A) & (B))) != 0)
+#if defined(CBMC_NO_SKOLEM)
+#define CBMC_BOUND_AND(A, B) CBMC_EAGER_AND(A, B)
+#else
+#define CBMC_BOUND_AND(A, B) ((A) && (B))
+#endif
+
 #define array_bound_core(qvar, qvar_lb, qvar_ub, array_var,            \
                          value_lb, value_ub)                           \
   CBMC_FORALL(qvar, qvar_lb, qvar_ub,                                  \
-              (((int)(value_lb) <= ((array_var)[(qvar)])) &&           \
-               (((array_var)[(qvar)]) < (int)(value_ub))))
+              CBMC_BOUND_AND(                                          \
+                  ((int)(value_lb) <= ((array_var)[(qvar)])),          \
+                  (((array_var)[(qvar)]) < (int)(value_ub))))
 
 #define array_bound_bounded_core(qvar, qvar_lb, qvar_ub, qvar_max,       \
                                  array_var, value_lb, value_ub)          \
   CBMC_FORALL(qvar, 0, qvar_max,                                         \
               ((uint32_t)(qvar_lb) <= (qvar) &&                          \
                (qvar) < (uint32_t)(qvar_ub)) ==>                         \
-                  (((int)(value_lb) <= ((array_var)[(qvar)])) &&         \
-                   (((array_var)[(qvar)]) < (int)(value_ub))))
+                  CBMC_BOUND_AND(                                        \
+                      ((int)(value_lb) <= ((array_var)[(qvar)])),        \
+                      (((array_var)[(qvar)]) < (int)(value_ub))))
 
 /*
  * array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) and
