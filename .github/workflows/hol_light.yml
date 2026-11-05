@@ -44,7 +44,7 @@ jobs:
   # if the byte code needs updating.
   hol_light_bytecode:
     name: AArch64 HOL-Light bytecode check
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     needs: [ check_modified_files ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
@@ -59,7 +59,7 @@ jobs:
             autogen --update-hol-light-bytecode --dry-run
   hol_light_interactive:
     name: AArch64 HOL-Light interactive shell test
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     needs: [ check_modified_files, hol_light_bytecode ]
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
@@ -125,7 +125,7 @@ jobs:
           - name: mldsa_rej_uniform_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_table.ml"]
     name: AArch64 HOL Light proof for ${{ matrix.proof.name }}.S
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     if: needs.check_modified_files.outputs.run_needed == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
