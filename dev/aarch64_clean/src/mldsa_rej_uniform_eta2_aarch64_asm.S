@@ -308,6 +308,45 @@ mld_rej_uniform_eta2_final_copy:
         cmp final_copy_count, #MLDSA_N
         b.lt mld_rej_uniform_eta2_final_copy
 
+    // Zeroize the stack buffer
+    stp xzr, xzr, [output_tmp_base]
+    stp xzr, xzr, [output_tmp_base, #16]
+    stp xzr, xzr, [output_tmp_base, #32]
+    stp xzr, xzr, [output_tmp_base, #48]
+    stp xzr, xzr, [output_tmp_base, #64]
+    stp xzr, xzr, [output_tmp_base, #80]
+    stp xzr, xzr, [output_tmp_base, #96]
+    stp xzr, xzr, [output_tmp_base, #112]
+    stp xzr, xzr, [output_tmp_base, #128]
+    stp xzr, xzr, [output_tmp_base, #144]
+    stp xzr, xzr, [output_tmp_base, #160]
+    stp xzr, xzr, [output_tmp_base, #176]
+    stp xzr, xzr, [output_tmp_base, #192]
+    stp xzr, xzr, [output_tmp_base, #208]
+    stp xzr, xzr, [output_tmp_base, #224]
+    stp xzr, xzr, [output_tmp_base, #240]
+    stp xzr, xzr, [output_tmp_base, #256]
+    stp xzr, xzr, [output_tmp_base, #272]
+    stp xzr, xzr, [output_tmp_base, #288]
+    stp xzr, xzr, [output_tmp_base, #304]
+    stp xzr, xzr, [output_tmp_base, #320]
+    stp xzr, xzr, [output_tmp_base, #336]
+    stp xzr, xzr, [output_tmp_base, #352]
+    stp xzr, xzr, [output_tmp_base, #368]
+    stp xzr, xzr, [output_tmp_base, #384]
+    stp xzr, xzr, [output_tmp_base, #400]
+    stp xzr, xzr, [output_tmp_base, #416]
+    stp xzr, xzr, [output_tmp_base, #432]
+    stp xzr, xzr, [output_tmp_base, #448]
+    stp xzr, xzr, [output_tmp_base, #464]
+    stp xzr, xzr, [output_tmp_base, #480]
+    stp xzr, xzr, [output_tmp_base, #496]
+    add output_tmp, output_tmp_base, #512
+    stp xzr, xzr, [output_tmp]
+    stp xzr, xzr, [output_tmp, #16]
+    stp xzr, xzr, [output_tmp, #32]
+    stp xzr, xzr, [output_tmp, #48]
+
     mov x0, count
     pop_stack
     ret

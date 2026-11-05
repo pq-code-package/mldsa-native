@@ -17,6 +17,7 @@ needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/common/mldsa_specs.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
 needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_table.ml";;
+needs "mldsa_native/common/stack_zero.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_aarch64_asm.o";;
  ****)
@@ -166,6 +167,76 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x9100416b;       (* arm_ADD X11 X11 (rvalue (word 16)) *)
   0xf104017f;       (* arm_CMP X11 (rvalue (word 256)) *)
   0x54fffecb;       (* arm_BLT (word 2097112) *)
+  0xa9007d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&0))) *)
+  0xa9017d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&16))) *)
+  0xa9027d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&32))) *)
+  0xa9037d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&48))) *)
+  0xa9047d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&64))) *)
+  0xa9057d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&80))) *)
+  0xa9067d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&96))) *)
+  0xa9077d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&112))) *)
+  0xa9087d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&128))) *)
+  0xa9097d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&144))) *)
+  0xa90a7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&160))) *)
+  0xa90b7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&176))) *)
+  0xa90c7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&192))) *)
+  0xa90d7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&208))) *)
+  0xa90e7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&224))) *)
+  0xa90f7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&240))) *)
+  0xa9107d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&256))) *)
+  0xa9117d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&272))) *)
+  0xa9127d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&288))) *)
+  0xa9137d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&304))) *)
+  0xa9147d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&320))) *)
+  0xa9157d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&336))) *)
+  0xa9167d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&352))) *)
+  0xa9177d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&368))) *)
+  0xa9187d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&384))) *)
+  0xa9197d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&400))) *)
+  0xa91a7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&416))) *)
+  0xa91b7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&432))) *)
+  0xa91c7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&448))) *)
+  0xa91d7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&464))) *)
+  0xa91e7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&480))) *)
+  0xa91f7d1f;       (* arm_STP XZR XZR X8 (Immediate_Offset (iword (&496))) *)
+  0x91080107;       (* arm_ADD X7 X8 (rvalue (word 512)) *)
+  0xa9007cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&0))) *)
+  0xa9017cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&16))) *)
+  0xa9027cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&32))) *)
+  0xa9037cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&48))) *)
+  0xa9047cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&64))) *)
+  0xa9057cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&80))) *)
+  0xa9067cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&96))) *)
+  0xa9077cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&112))) *)
+  0xa9087cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&128))) *)
+  0xa9097cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&144))) *)
+  0xa90a7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&160))) *)
+  0xa90b7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&176))) *)
+  0xa90c7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&192))) *)
+  0xa90d7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&208))) *)
+  0xa90e7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&224))) *)
+  0xa90f7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&240))) *)
+  0xa9107cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&256))) *)
+  0xa9117cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&272))) *)
+  0xa9127cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&288))) *)
+  0xa9137cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&304))) *)
+  0xa9147cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&320))) *)
+  0xa9157cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&336))) *)
+  0xa9167cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&352))) *)
+  0xa9177cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&368))) *)
+  0xa9187cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&384))) *)
+  0xa9197cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&400))) *)
+  0xa91a7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&416))) *)
+  0xa91b7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&432))) *)
+  0xa91c7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&448))) *)
+  0xa91d7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&464))) *)
+  0xa91e7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&480))) *)
+  0xa91f7cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&496))) *)
+  0x91100107;       (* arm_ADD X7 X8 (rvalue (word 1024)) *)
+  0xa9007cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&0))) *)
+  0xa9017cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&16))) *)
+  0xa9027cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&32))) *)
+  0xa9037cff;       (* arm_STP XZR XZR X7 (Immediate_Offset (iword (&48))) *)
   0xaa0903e0;       (* arm_MOV X0 X9 *)
   0x14000001;       (* arm_B (word 4) *)
   0x911103ff;       (* arm_ADD SP SP (rvalue (word 1088)) *)
@@ -496,6 +567,7 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
                   read(memory :> bytes(buf,val buflen)) s =
                   num_of_wordlist inlist)
              (\s. read PC s = word(pc + MLDSA_REJ_UNIFORM_CORE_END) /\
+                  read(memory :> bytes(stackpointer,1088)) s = 0 /\
                   let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
                   let outlen = LENGTH outlist in
                   C_RETURN s = word outlen /\
@@ -542,10 +614,9 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       `read (memory :> bytes(stackpointer,8 * 128)) s0` THEN
     MEMORY_128_FROM_64_TAC "stackpointer" 0 64 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN STRIP_TAC THEN
-    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--182) THEN
-    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--180) THEN
     SUBGOAL_THEN
-     `read (memory :> bytes (res,4 * MIN 256 outlen)) s182 =
+     `read (memory :> bytes (res,4 * MIN 256 outlen)) s180 =
       num_of_wordlist (SUB_LIST (0,256) outlist:int32 list)`
     ASSUME_TAC THENL
      [REWRITE_TAC[NUM_OF_WORDLIST_SUB_LIST_0; DIMINDEX_32] THEN
@@ -563,6 +634,11 @@ let MLDSA_REJ_UNIFORM_CORRECT = prove
       RULE_ASSUM_TAC(CONV_RULE(ONCE_DEPTH_CONV(READ_MEMORY_SPLIT_CONV 1))) THEN
       ASM_REWRITE_TAC[];
       ALL_TAC] THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (181--218) THEN
+    ENSURES_FINAL_STATE_TAC THEN
+    CONJ_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
+    CONJ_TAC THENL [STACK_ZERO_TAC; ALL_TAC] THEN
+    ASM_REWRITE_TAC[] THEN
     FIRST_X_ASSUM DISJ_CASES_TAC THENL
      [SUBGOAL_THEN `SUB_LIST (0,8 * n) (inlist:(24 word)list) = inlist`
       SUBST_ALL_TAC THENL
@@ -1685,6 +1761,7 @@ let MLDSA_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
                   read(memory :> bytes(buf,val buflen)) s =
                   num_of_wordlist inlist)
              (\s. read PC s = returnaddress /\
+                  read(memory :> bytes(word_sub stackpointer (word 1088),1088)) s = 0 /\
                   let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
                   let outlen = LENGTH outlist in
                   C_RETURN s = word outlen /\
@@ -1874,7 +1951,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       `read (memory :> bytes(stackpointer,8 * 128)) s0` THEN
     MEMORY_128_FROM_64_TAC "stackpointer" 0 64 THEN
     ASM_REWRITE_TAC[WORD_ADD_0] THEN STRIP_TAC THEN
-    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--182) THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--218) THEN
     ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
     ASM_REWRITE_TAC[GSYM REJ_SAMPLE] THEN
     (* Normalize val(word buflen) if needed *)
