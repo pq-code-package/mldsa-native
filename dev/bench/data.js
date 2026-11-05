@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793894233334,
+  "lastUpdate": 1793894636006,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -976222,6 +976222,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/e35057401398c3884416a995ea1f1a409db7092d"
         },
         "date": 1793810619537,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2332104,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17791726,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398861,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 4028005,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15034565,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012799,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6896513,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25049115,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6864412,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "e71e3d6f2a798b09205691910693e3eadf498855",
+          "message": "CI: Test liboqs integration with OQS_MEMOPT_BUILD\n\nBump liboqs to a commit that supports compile_opts_if_memopt and add\nmemopt builds on x86_64 and AArch64. Drop liboqs' mldsa-native patch\non import, since our META files already contain its change.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-05T13:08:35Z",
+          "tree_id": "63fd2ed7160d861d913ab0effa33339663f11d4f",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/e71e3d6f2a798b09205691910693e3eadf498855"
+        },
+        "date": 1793894632892,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
