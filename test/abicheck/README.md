@@ -30,17 +30,16 @@ Before trusting any verdict, `abicheck.c` runs a self-test: hand-written
 corrupters (`<arch>/selftest_<arch>.S`) that each clobber one callee-saved
 register, confirming the checker fires.
 
-The `mldsa/src/.../*.S` sources are assembled directly. On unsupported
-architectures the registry is empty and the driver exits cleanly.
+The `mldsa/src/.../*.S` sources are assembled directly with the build's CPU
+flags. Their system capability guards omit code for unsupported features. On
+unsupported architectures the registry is empty and the driver exits cleanly.
 
 ## Code generation
 
 Each kernel's buffer sizes, calling convention, and required CPU features come
 from a `/*yaml ... */` block in its `dev/` assembly source. `scripts/autogen`
-turns that into the per-kernel `check_<name>.c`, the `checks_<arch>_all.h`
-registry, and the per-arch `abicheck_<arch>.mk` (CFLAGS per feature, e.g.
-`-mavx2`), all included via `abicheck.mk` from `test/mk/components.mk`. Edit the
-YAML, not the generated files.
+turns that into the per-kernel `check_<name>.c` and the `checks_<arch>_all.h`
+registry. Edit the YAML, not the generated files.
 
 <!--- bibliography --->
 [^AAPCS32]: Arm Limited: Procedure Call Standard for the Arm Architecture (AAPCS32), [https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst](https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst)

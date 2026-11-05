@@ -14,7 +14,7 @@
 #include "../abicheck_riscv32.h"
 #include "../checks_riscv32_all.h"
 
-#if defined(MLD_SYS_RISCV32)
+#if defined(MLD_SYS_RISCV32) && defined(MLD_SYS_RISCV32_M)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -62,4 +62,4 @@ int check_ntt_rv32im_slowmul_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_RISCV32 */
+#endif /* MLD_SYS_RISCV32 && MLD_SYS_RISCV32_M */

@@ -25,7 +25,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 .macro chknorm a
@@ -82,4 +83,5 @@ mld_poly_chknorm_loop:
         .unreq bound
         .unreq flags
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */

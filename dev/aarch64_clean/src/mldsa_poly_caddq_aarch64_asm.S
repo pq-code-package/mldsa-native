@@ -20,7 +20,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_ARITH_BACKEND_AARCH64) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
 .macro caddq inout
@@ -73,4 +74,5 @@ mld_poly_caddq_loop:
         .unreq q_reg
         .unreq tmp
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */

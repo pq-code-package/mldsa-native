@@ -14,7 +14,7 @@
 #include "../abicheck_armv81m.h"
 #include "../checks_armv81m_all.h"
 
-#if defined(MLD_SYS_ARMV81M_MVE) && defined(__ARM_FEATURE_MVE)
+#if defined(MLD_SYS_ARMV81M_MVE)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -76,4 +76,4 @@ int check_keccak_f1600_x4_mve_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_ARMV81M_MVE && __ARM_FEATURE_MVE */
+#endif /* MLD_SYS_ARMV81M_MVE */

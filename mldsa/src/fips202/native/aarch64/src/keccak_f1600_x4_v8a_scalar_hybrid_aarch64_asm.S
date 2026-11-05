@@ -35,7 +35,8 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -1072,8 +1073,8 @@ Lmld_keccak_f1600_x4_v8a_scalar_hybrid_done:
 
 MLD_ASM_FN_SIZE(keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm)
 
-#endif /* MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_AARCH64_NEON && MLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID \
+          && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

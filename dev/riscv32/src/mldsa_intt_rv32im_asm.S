@@ -46,7 +46,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_RV32IM) && \
+#if defined(MLD_SYS_RISCV32_M) && \
+    defined(MLD_ARITH_BACKEND_RV32IM) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     defined(MLD_RV32IM_NEED_FASTMUL)
         /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
@@ -63,5 +64,5 @@ MLD_ASM_FN_SYMBOL(intt_rv32im_fastmul_asm)
 
 /* simpasm: footer-start */
         .option pop
-#endif /* MLD_ARITH_BACKEND_RV32IM && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
-          MLD_RV32IM_NEED_FASTMUL */
+#endif /* MLD_SYS_RISCV32_M && MLD_ARITH_BACKEND_RV32IM && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && MLD_RV32IM_NEED_FASTMUL */

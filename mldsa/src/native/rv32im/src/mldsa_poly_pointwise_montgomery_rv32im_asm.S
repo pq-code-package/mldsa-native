@@ -68,7 +68,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_RV32IM) &&                                      \
+#if defined(MLD_SYS_RISCV32_M) && \
+    defined(MLD_ARITH_BACKEND_RV32IM) &&                                      \
     (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
      defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)) &&              \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
@@ -123,9 +124,10 @@ Lmld_poly_pointwise_montgomery_rv32im_loop:
 MLD_ASM_FN_SIZE(poly_pointwise_montgomery_rv32im_asm)
 
         .option pop
-#endif /* MLD_ARITH_BACKEND_RV32IM && (!MLD_CONFIG_NO_SIGN_API || \
-          !MLD_CONFIG_NO_VERIFY_API || MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) \
-          && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_RISCV32_M && MLD_ARITH_BACKEND_RV32IM && \
+          (!MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

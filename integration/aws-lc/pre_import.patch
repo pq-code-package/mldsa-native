@@ -1,0 +1,17 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Resolve the NEON and AVX2 guards of the imported assembly.
+diff --git a/crypto/fipsmodule/ml_dsa/importer.sh b/crypto/fipsmodule/ml_dsa/importer.sh
+index 86c245d..da2ab96 100644
+--- a/crypto/fipsmodule/ml_dsa/importer.sh
++++ b/crypto/fipsmodule/ml_dsa/importer.sh
+@@ -159,6 +159,8 @@ for file in $SRC/native/aarch64/src/*.S $SRC/native/x86_64/src/*.S; do
+   # the whole guard collapses and the body is included unconditionally.
+   sed -e ':a' -e 'N' -e '$!ba' -e 's/\\\n/ /g' "$file" | \
+     unifdef -D$backend_define \
++            -DMLD_SYS_AARCH64_NEON \
++            -DMLD_SYS_X86_64_AVX2 \
+             -UMLD_CONFIG_MULTILEVEL_NO_SHARED \
+             -DMLD_CONFIG_MULTILEVEL_WITH_SHARED \
+             -UMLD_CONFIG_NO_KEYPAIR_API \

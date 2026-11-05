@@ -39,7 +39,8 @@
 
 #include "../../../../common.h"
 
-#if defined(MLD_FIPS202_X86_64_NEED_X4_AVX2) && \
+#if defined(MLD_SYS_X86_64_AVX2) && \
+    defined(MLD_FIPS202_X86_64_NEED_X4_AVX2) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -659,4 +660,5 @@ MLD_ASM_FN_SYMBOL(keccak_f1600_x4_avx2_asm)
    ret
 
 /* simpasm: footer-start */
-#endif /* MLD_FIPS202_X86_64_NEED_X4_AVX2 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_X86_64_AVX2 && MLD_FIPS202_X86_64_NEED_X4_AVX2 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */

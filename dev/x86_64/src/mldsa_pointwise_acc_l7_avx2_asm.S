@@ -52,7 +52,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
+#if defined(MLD_SYS_X86_64_AVX2) && \
+    defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7)
 /* simpasm: header-end */
@@ -191,5 +192,6 @@ mld_pointwise_acc_l7_avx2_looptop2:
         vzeroupper
         ret
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-          && (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7) */
+#endif /* MLD_SYS_X86_64_AVX2 && MLD_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7) */

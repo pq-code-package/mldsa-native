@@ -6,6 +6,8 @@
 
 #include "../../../mldsa/src/sys.h"
 
+#if defined(MLD_SYS_AARCH64)
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",@progbits
 #endif
@@ -246,3 +248,5 @@ asm_call_stub_aarch64:
         .cfi_def_cfa_offset 0
         ret
         .cfi_endproc
+
+#endif /* MLD_SYS_AARCH64 */
