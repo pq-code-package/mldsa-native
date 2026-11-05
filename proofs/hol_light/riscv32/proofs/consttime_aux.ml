@@ -10,24 +10,28 @@
 (* Load s2n_bignum/riscv/proofs/consttime.ml before loading this file.       *)
 (* ========================================================================= *)
 
-(* The upstream safety tactic builds one theorem containing the complete
-   instruction trace. That becomes too deep for the long RV32 NTT routines;
-   the slow inverse proof, for example, visits 15,793 machine states.
+(* HOL Light tactics return subgoals and a saved justification function.
+   That function later combines their proof theorems into a theorem of the
+   input goal. Long instruction sequences can leave deeply nested saved
+   justifications; the slow inverse safety proof reaches state s15793.
 
    `MATERIALIZE_ONE_GOAL_TAC` saves the result reached after one block of
-   instructions as a separate theorem. `GEN_PROVE_SAFETY_SPEC_TAC` repeats
-   that process in blocks of 125 instructions.
+   instructions as a checked theorem, rather than replaying the block's
+   justification at final assembly. `GEN_PROVE_SAFETY_SPEC_TAC` repeats
+   this in blocks of 125 instructions.
    `CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC` uses the saved block theorems to
-   prove the final trace and memory-access claims without rebuilding one large
-   proof term. `PROVE_SAFETY_SPEC_TAC` is the entry point used by all five
-   top-level RV32 proof files. *)
+   prove the final trace and memory-access claims. HOL Light stores theorem
+   hypotheses and conclusions, not an explicit derivation tree; the saved
+   tactic functions are proof-construction code outside the kernel.
+   `PROVE_SAFETY_SPEC_TAC` is the entry point for all five RV32 routines. *)
 
 (* Finish the safety proof without expanding the saved trace. Keep each local
    trace definition folded, then reuse the existing proof that every memory
    access is within its permitted region. *)
 let CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC
+    ?(abbreviate_witness:(goal->conv) option)
     (stored_abbrevs:thm list ref):tactic =
-  fun (asl,w) ->
+  fun ((asl,w) as goal) ->
     let _,body = dest_exists w in
     let event_eq,f_events_eq =
       match conjuncts body with
@@ -72,6 +76,17 @@ let CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC
         (CONV_RULE
           (RAND_CONV (DEPTH_CONV BETA_CONV))
           applied_equals_open) in
+    (* Keep the closed function short while the instruction proofs are
+       instantiated. Remove its naming equation only after the enclosing
+       existential has been proved, not inside this closing tactic. *)
+    let compact_equals_closed =
+      match abbreviate_witness with
+      | None -> compact_equals_closed
+      | Some abbreviate ->
+          let definition = abbreviate goal (lhs(concl closed_equals_open)) in
+          let applied =
+            List.fold_left (fun th arg -> AP_THM th arg) definition args in
+          TRANS compact_equals_closed applied in
     (EXISTS_TAC compact_trace THEN
      CONJ_TAC THENL [
        (if empty_trace then REWRITE_TAC[APPEND] else REFL_TAC);
@@ -81,9 +96,13 @@ let CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC
        ]
      ]) (asl,w);;
 
-(* Run a tactic that leaves one goal, then save the work it has already done
-   as a theorem. Quantifying the new variables and assumptions lets later
-   steps reuse that theorem instead of rebuilding the same proof term. *)
+(* Run a tactic that leaves one goal. Package that goal's assumptions as
+   implication premises and universally quantify the block-local variables.
+   Assemble the block's theorem once, using an assumption of this package
+   as its remaining proof obligation. Later steps prove the package and
+   apply the saved theorem, rather than replaying the block's justification.
+   Keep later substitutions and reject local variables escaping into
+   undischarged hypotheses. *)
 let MATERIALIZE_ONE_GOAL_TAC (tac:tactic):tactic =
   fun ((asl0,w0) as goal0) ->
     let ((mvs,inst),goals,just) = tac goal0 in
@@ -138,7 +157,9 @@ let MATERIALIZE_ONE_GOAL_TAC (tac:tactic):tactic =
    abbreviated until the final memory bounds are proved. *)
 let GEN_PROVE_SAFETY_SPEC_TAC =
   let mainfn ?(public_vars:term list option)
-    ?(tac_before_maychange_simp:tactic option) exec
+    ?(tac_before_maychange_simp:tactic option)
+    ?(abbreviate_witness:(goal->conv) option)
+    exec
     (extra_unpack_thms:thm list) single_step_tac
     :tactic =
 
@@ -211,14 +232,21 @@ let GEN_PROVE_SAFETY_SPEC_TAC =
 
       ENSURES_FINAL_STATE_TAC THEN
       ASM_REWRITE_TAC[] THEN
-      CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC stored_abbrevs)
+      CLOSE_ABBREVIATED_SAFETY_PROPERTY_TAC
+        ?abbreviate_witness stored_abbrevs)
   in mainfn;;
 
 (* Provide the block-based driver through the RISC-V entry point used by the
    top-level proofs. *)
 
-let PROVE_SAFETY_SPEC_TAC ?(public_vars:term list option) exec:tactic =
-  GEN_PROVE_SAFETY_SPEC_TAC ?public_vars:public_vars exec
-    [ALIGNED_BYTES_LOADED_APPEND_CLAUSE;
-     MAYCHANGE_REGS_PERMITTED_BY_ABI]
-    RISCV_SINGLE_STEP_TAC;;
+let PROVE_SAFETY_SPEC_TAC ?(public_vars:term list option)
+    ?(defer_witness=false) exec:tactic =
+  let driver ?abbreviate_witness () =
+    GEN_PROVE_SAFETY_SPEC_TAC ?public_vars ?abbreviate_witness exec
+      [ALIGNED_BYTES_LOADED_APPEND_CLAUSE;
+       MAYCHANGE_REGS_PERMITTED_BY_ABI]
+      RISCV_SINGLE_STEP_TAC in
+  if defer_witness then
+    WITH_DEFERRED_ABBREVS_TAC (fun abbreviate ->
+      driver ~abbreviate_witness:abbreviate ())
+  else driver ();;

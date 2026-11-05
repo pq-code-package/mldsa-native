@@ -95,7 +95,7 @@ let MLDSA_POINTWISE_MONTGOMERY_LENGTH_SIMPLIFY_CONV =
      MLDSA_POINTWISE_MONTGOMERY_POSTAMBLE_LENGTH] THENC
   NUM_REDUCE_CONV THENC REWRITE_CONV[ADD_0];;
 
-needs "mldsa_native/riscv32/proofs/mldsa_specs_aux.ml";;
+needs "mldsa_native/riscv32/proofs/mldsa_unroll_shared.ml";;
 
 (* Proof outline:
 
@@ -103,10 +103,10 @@ needs "mldsa_native/riscv32/proofs/mldsa_specs_aux.ml";;
    2. `RV32_MLDSA_MONTMUL` proves that the multiply, multiply-high, and
       subtraction instructions used for one coefficient equal the word-level
       operation `mldsa_montmul`.
-   3. `MLDSA_POINTWISE_MONTGOMERY_CORE_EXACT` follows the 256-iteration loop.
-      It proves that each iteration reads `a[i]` and `b[i]`, writes their exact
-      word-level Montgomery product to `a[i]`, and leaves unread coefficients
-      available to later iterations.
+   3. `MLDSA_POINTWISE_MONTGOMERY_CORE_EXACT` symbolically executes all
+      2,821 core instructions, including every loop branch. It proves the
+      exact Montgomery output words, retaining 256 mutable coefficient
+      reads and 256 frame-protected immutable input reads throughout.
    4. `RV32_MLDSA_MONTMUL_CORRECT` proves the modular result and output bound
       for that word operation. `MLDSA_POINTWISE_MONTGOMERY_CORE_CORRECT`
       applies it to every word produced by the loop.
@@ -178,147 +178,17 @@ let MLDSA_POINTWISE_MONTGOMERY_CORE_EXACT = prove
         [PC; S0; S1; T0; A0; A1; A2; A3; A4; A5; A6; A7] ,,
        MAYCHANGE [memory :> bytes(a,1024)] ,,
        MAYCHANGE [events])`,
-  MAP_EVERY X_GEN_TAC
-   [`a:int32`; `b:int32`; `x:num->int32`; `y:num->int32`; `pc:num`] THEN
-  CONV_TAC MLDSA_POINTWISE_MONTGOMERY_LENGTH_SIMPLIFY_CONV THEN
-  REWRITE_TAC[fst MLDSA_POINTWISE_MONTGOMERY_EXEC; C_ARGUMENTS] THEN
-  REPEAT STRIP_TAC THEN
-  ENSURES_WHILE_UP_TAC `256` `pc + 32` `pc + 72`
-   `\i s.
-      read S0 s = word 8380417 /\
-      read S1 s = word 58728449 /\
-      read T0 s = word_add a (word 1024) /\
-      read A0 s = word_add a (word (4 * i)) /\
-      read A1 s = word_add b (word (4 * i)) /\
-      (!j. j < 256
-           ==> read (memory :> bytes32 (word_add a (word (4 * j)))) s =
-               if j < i then
-                 mldsa_montmul
-                   (word_sx (y j),
-                    word_sx
-                     (word_mul (y j) (word 58728449)))
-                   (x j)
-               else x j) /\
-      (!j. j < 256
-           ==> read (memory :> bytes32 (word_add b (word (4 * j)))) s =
-               y j)` THEN
-  CONJ_TAC THENL [CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
-  ASM_REWRITE_TAC[] THEN REPEAT CONJ_TAC THENL
-   [ENSURES_INIT_TAC "s0" THEN
-    RISCV_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC (1--5) THEN
-    ENSURES_FINAL_STATE_TAC THEN
-    ASM_REWRITE_TAC
-     [WORD_ADD_0; MULT_CLAUSES; ARITH_RULE `~(j < 0)`];
-    X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-    SUBGOAL_THEN
-     `aligned 4 (word_add a (word (4 * i)):int32)`
-    ASSUME_TAC THENL
-     [ASM_SIMP_TAC[ALIGNED_WORD_ADD_EQ; ALIGNED_WORD; DIMINDEX_32] THEN
-      CONJ_TAC THENL
-       [CONV_TAC NUM_DIVIDES_CONV;
-        MATCH_MP_TAC DIVIDES_RMUL THEN REWRITE_TAC[DIVIDES_REFL]];
-      ALL_TAC] THEN
-    SUBGOAL_THEN
-     `aligned 4 (word_add b (word (4 * i)):int32)`
-    ASSUME_TAC THENL
-     [ASM_SIMP_TAC[ALIGNED_WORD_ADD_EQ; ALIGNED_WORD; DIMINDEX_32] THEN
-      CONJ_TAC THENL
-       [CONV_TAC NUM_DIVIDES_CONV;
-        MATCH_MP_TAC DIVIDES_RMUL THEN REWRITE_TAC[DIVIDES_REFL]];
-      ALL_TAC] THEN
-    ENSURES_INIT_TAC "s0" THEN
-    FIRST_ASSUM
-     (fun th ->
-       let th' =
-         check
-          (fun th ->
-            is_forall (concl th) && vfree_in `a:int32` (concl th))
-          th in
-       ASSUME_TAC (MP (SPEC `i:num` th') (ASSUME `i < 256`))) THEN
-    FIRST_ASSUM
-     (fun th ->
-       let th' =
-         check
-          (fun th ->
-            is_forall (concl th) && vfree_in `b:int32` (concl th))
-          th in
-       ASSUME_TAC (MP (SPEC `i:num` th') (ASSUME `i < 256`))) THEN
-    RISCV_VSTEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC (1--7) THEN
-    RISCV_STEP_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC [] "s8" None
-     (fun th -> LABEL_TAC "store_update" th THEN STRIP_TAC) THEN
-    SUBGOAL_THEN
-     `!j. j < 256
-          ==> read (memory :> bytes32 (word_add a (word (4 * j)))) s8 =
-              if j < i + 1 then
-                mldsa_montmul
-                  (word_sx (y j:int32),
-                   word_sx
-                    (word_mul (y j:int32) (word 58728449)))
-                  (x j:int32)
-              else (x j:int32)`
-    ASSUME_TAC THENL
-     [X_GEN_TAC `j:num` THEN DISCH_TAC THEN
-      REWRITE_TAC[ARITH_RULE `j < i + 1 <=> j < i \/ j = i`] THEN
-      ASM_CASES_TAC `j:num = i` THEN
-      ASM_REWRITE_TAC[RV32_MLDSA_MONTMUL] THEN
-      USE_THEN "store_update"
-       (fun th -> ONCE_REWRITE_TAC[GSYM th]) THEN
-      CONV_TAC(ONCE_DEPTH_CONV COMPONENT_READ_OVER_WRITE_CONV) THEN
-      TRANS_TAC EQ_TRANS
-       `read
-         (memory :>
-          bytes32 (word_add a (word (4 * j)))) s7` THEN
-      CONJ_TAC THENL
-       [READ_OVER_WRITE_TAC;
-        FIRST_ASSUM
-         (fun th ->
-           let th' =
-             check
-              (fun th ->
-                is_forall (concl th) &&
-                vfree_in `a:int32` (concl th) &&
-                vfree_in `s7:riscvstate` (concl th))
-              th in
-           ACCEPT_TAC
-            (MP (SPEC `j:num` th') (ASSUME `j < 256`)))];
-      ALL_TAC] THEN
-    DISCARD_OLDSTATE_TAC "s8" THEN
-    RISCV_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC (9--10) THEN
-    ENSURES_FINAL_STATE_TAC THEN
-    ASM_REWRITE_TAC[RV32_MLDSA_MONTMUL] THEN
-    CONJ_TAC THEN CONV_TAC WORD_RULE;
-    X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-    ENSURES_INIT_TAC "s0" THEN
-    RISCV_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC [1] THEN
-    SUBGOAL_THEN
-     `~((4 * i) MOD 4294967296 = 1024)`
-    ASSUME_TAC THENL
-     [SUBGOAL_THEN `4 * i < 4294967296` ASSUME_TAC THENL
-       [UNDISCH_TAC `i:num < 256` THEN ARITH_TAC;
-        ASM_REWRITE_TAC[MOD_LT] THEN
-        UNDISCH_TAC `i:num < 256` THEN ARITH_TAC];
-      ALL_TAC] THEN
-    SUBGOAL_THEN
-     `~(word_add a (word (4 * i)):int32 =
-        word_add a (word 1024))`
-    ASSUME_TAC THENL
-     [REWRITE_TAC[
-        WORD_RULE
-         `word_add a (word x):int32 = word_add a (word y) <=>
-          (word x:int32) = word y`;
-        WORD_EQ; DIMINDEX_32; CONG] THEN
-      CONV_TAC NUM_REDUCE_CONV THEN
-      ASM_REWRITE_TAC[];
-      ALL_TAC] THEN
-    ENSURES_FINAL_STATE_TAC THEN
-    ASM_REWRITE_TAC[];
-    ENSURES_INIT_TAC "s0" THEN
-    RISCV_STEPS_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC [1] THEN
-    ENSURES_FINAL_STATE_TAC THEN
-    ASM_REWRITE_TAC[] THEN
-    X_GEN_TAC `i:num` THEN DISCH_TAC THEN
-    FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN
-    ASM_REWRITE_TAC[]]);;
+  RV32_MLDSA_UNROLL_WITH_CACHES_TAC
+   (CONV_TAC MLDSA_POINTWISE_MONTGOMERY_LENGTH_SIMPLIFY_CONV THEN
+    REWRITE_TAC[fst MLDSA_POINTWISE_MONTGOMERY_EXEC; C_ARGUMENTS] THEN
+    REPEAT STRIP_TAC THEN
+    CONV_TAC(RATOR_CONV(LAND_CONV
+      (ONCE_DEPTH_CONV EXPAND_CASES_CONV))) THEN
+    CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[WORD_ADD_0] THEN
+    RV32_MLDSA_UNROLL_TAC MLDSA_POINTWISE_MONTGOMERY_EXEC 2821 256
+      [mldsa_montmul] [GSYM RV32_MLDSA_MONTMUL]
+      (RV32_MLDSA_UNROLL_LAYOUT_WITH_CONV
+        (fun _ -> failwith "pointwise: no coefficient layout"))));;
 
 let INT_ABS_LT_BOUNDS = prove
  (`!x k:int.
@@ -568,5 +438,7 @@ let MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_SAFE = time prove
                    [a,1024; word_sub stackpointer (word 16),16])
           (\s s'. true)`,
   ASSERT_CONCL_TAC full_spec THEN
-  PROVE_SAFETY_SPEC_TAC ~public_vars:public_vars
+  PROVE_SAFETY_SPEC_TAC
+    ~defer_witness:true
+    ~public_vars:public_vars
     MLDSA_POINTWISE_MONTGOMERY_EXEC);;
