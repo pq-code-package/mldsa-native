@@ -32,11 +32,13 @@
       description: Permutation index table (64 x uint8_t)
 */
 
- #include "../../../common.h"
+#include "../../../common.h"
 #if defined(MLD_ARITH_BACKEND_AARCH64) && \
-           (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)) && \
-           !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
-           (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44)
+    (!defined(MLD_CONFIG_NO_SIGN_API) || \
+     !defined(MLD_CONFIG_NO_VERIFY_API) || defined(MLD_UNIT_TEST)) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+     MLD_CONFIG_PARAMETER_SET == 44)
 /* simpasm: header-end */
 
 .macro trim_map_17 a
@@ -137,6 +139,7 @@ mld_polyz_unpack_17_loop:
         .unreq gamma1
 /* simpasm: footer-start */
 #endif /* MLD_ARITH_BACKEND_AARCH64 && (!MLD_CONFIG_NO_SIGN_API || \
-          !MLD_CONFIG_NO_VERIFY_API) && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          !MLD_CONFIG_NO_VERIFY_API || MLD_UNIT_TEST) && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44) \
         */
