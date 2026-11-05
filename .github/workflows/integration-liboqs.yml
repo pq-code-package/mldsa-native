@@ -25,6 +25,9 @@ jobs:
           - system: ubuntu-latest
             name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
+          - system: ubuntu-latest
+            name: Haswell, memopt
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=haswell -DOQS_MEMOPT_BUILD=ON -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
           # AArch64
           - system: ubuntu-24.04-arm
             name: Auto
@@ -32,6 +35,9 @@ jobs:
           - system: ubuntu-24.04-arm
             name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
+          - system: ubuntu-24.04-arm
+            name: Auto, memopt
+            flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DOQS_MEMOPT_BUILD=ON -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
     name: Build (${{ matrix.name }}, ${{ matrix.system }})
     runs-on: ${{ matrix.system }}
     steps:
@@ -43,7 +49,7 @@ jobs:
           packages: 'cmake python3-jinja2 python3-tabulate python3-git python3-pytest valgrind'
       - uses: ./.github/actions/setup-oqs
         with:
-          commit: 'e6b9e783747536f34700aab4bd10718c2fecab3f' # main (2026-09-29)
+          commit: '8c41c854d7fdd423a672ebc94976e4b7992b392f' # main (2026-11-02)
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           repository: 'open-quantum-safe/liboqs'
       - name: Apply patch
@@ -55,6 +61,8 @@ jobs:
           sed -i "/name: mldsa-native/,/preserve_folder_structure/s/git_commit: .*/git_commit: $GITHUB_SHA/" scripts/copy_from_upstream/copy_from_upstream.yml
           # Temporarily remove oldpqclean because of build failures in its SHA3 assembly
           yq e -i 'del(.kems[] | select(.name == "kyber"))' scripts/copy_from_upstream/copy_from_upstream.yml
+          # Our META files already contain the changes of liboqs' mldsa-native patches
+          yq e -i 'del(.upstreams[] | select(.name == "mldsa-native") | .patches)' scripts/copy_from_upstream/copy_from_upstream.yml
           git diff >> "$GITHUB_STEP_SUMMARY";
       - name: Apply integration patches
         run: |
