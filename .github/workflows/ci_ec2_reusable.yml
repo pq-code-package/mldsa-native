@@ -240,6 +240,8 @@ jobs:
             tests all --no-examples --opt opt --cflags="-DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_scalar.h\\\""
             make clean
             tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x4_v8a_v84a_scalar.h\\\""
+            make clean
+            tests all --no-examples --opt opt --cflags="-march=armv8.4-a+sha3 -DMLD_CONFIG_USE_X3 -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\\"fips202/native/aarch64/x3_v84a_scalar.h\\\""
   stop-ec2-runner:
     name: Stop instance (${{ inputs.ec2_instance_type }})
     permissions:

@@ -373,4 +373,21 @@ let subroutine_signatures = [
    [(* temporary buffers *)
    ])
 );
+
+("sha3_keccak3_f1600_alt",
+  ([(*args*)
+     ("a", "uint64_t[static 75]", (*is const?*)"false");
+     ("rc", "uint64_t[static 24]", (*is const?*)"true");
+   ],
+   "void",
+   [(* input buffers *)
+    ("a", "75"(* num elems *), 8(* elem bytesize *));
+    ("rc", "24"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* output buffers *)
+    ("a", "75"(* num elems *), 8(* elem bytesize *));
+   ],
+   [(* temporary buffers *)
+   ])
+);
 ];;

@@ -67,9 +67,17 @@
  */
 #if defined(__APPLE__) || defined(MLD_SYS_AARCH64_FAST_SHA3)
 #include "x2_v84a.h"
-#else
+#elif defined(MLD_CONFIG_USE_X3)
+/*
+ * 3-way hybrid (two states on Neon with SHA3, one on scalar registers, single
+ * pass), selected with MLD_CONFIG_USE_X3. Intended for cores that execute the
+ * SHA3 instructions on all SIMD pipes (e.g. Neoverse V3). When
+ * MLD_CONFIG_USE_X3 is not set, the x4 hybrid below is used.
+ */
+#include "x3_v84a_scalar.h"
+#else /* !(__APPLE__ || MLD_SYS_AARCH64_FAST_SHA3) && MLD_CONFIG_USE_X3 */
 #include "x4_v8a_v84a_scalar.h"
-#endif
+#endif /* !(__APPLE__ || MLD_SYS_AARCH64_FAST_SHA3) && !MLD_CONFIG_USE_X3 */
 
 #else /* __ARM_FEATURE_SHA3 */
 

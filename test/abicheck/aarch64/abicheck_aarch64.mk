@@ -21,6 +21,7 @@ ABICHECK_REQ_SHA3_FILES :=
 ABICHECK_REQ_NEON_FILES := \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S \
+  mldsa/src/fips202/native/aarch64/src/keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S \
   mldsa/src/native/aarch64/src/mldsa_intt_aarch64_asm.S \
@@ -47,6 +48,7 @@ $(ABICHECK_REQ_NEON_OBJS): CFLAGS += -march=armv8-a+simd
 ABICHECK_REQ_SHA3_FILES := \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x1_v84a_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x2_v84a_aarch64_asm.S \
+  mldsa/src/fips202/native/aarch64/src/keccak_f1600_x3_v84a_scalar_hybrid_aarch64_asm.S \
   mldsa/src/fips202/native/aarch64/src/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S
 ABICHECK_REQ_SHA3_OBJS := $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_REQ_SHA3_FILES))
 $(ABICHECK_REQ_SHA3_OBJS): CFLAGS += -march=armv8.4-a+sha3
