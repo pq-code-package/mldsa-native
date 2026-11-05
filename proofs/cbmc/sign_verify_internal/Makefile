@@ -45,8 +45,13 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_no_bv_extract \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
+# With cadical, keep asserted quantifiers so that the propositional back end
+# expands them like the assumed ones.
+CBMC_CONFIG_FLAGS += $(if $(filter cadical,$(CBMC_SOLVER)),--no-forall-skolemization)
 
 FUNCTION_NAME = sign_verify_internal
 
