@@ -50,10 +50,10 @@
 //
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_AARCH64_NEED_X2_V84A) && \
+#if defined(MLD_SYS_AARCH64_NEON) && defined(__ARM_FEATURE_SHA3) && \
+    defined(MLD_FIPS202_AARCH64_NEED_X2_V84A) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
-#if defined(__ARM_FEATURE_SHA3)
 /* simpasm: header-end */
 
 /****************** REGISTER ALLOCATIONS *******************/
@@ -433,7 +433,7 @@ mld_keccak_f1600_x2_v84a_loop:
 #undef KECCAK_F1600_ROUNDS
 
 /* simpasm: footer-start */
-#endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLD_FIPS202_AARCH64_NEED_X2_V84A && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
+#endif /* MLD_SYS_AARCH64_NEON && __ARM_FEATURE_SHA3 && \
+          MLD_FIPS202_AARCH64_NEED_X2_V84A && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
         */

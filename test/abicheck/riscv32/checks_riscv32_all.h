@@ -18,19 +18,23 @@
 
 #if defined(MLD_SYS_RISCV32)
 
+#if defined(MLD_SYS_RISCV32_M)
 int check_intt_rv32im_fastmul_asm(void);
 int check_intt_rv32im_slowmul_asm(void);
 int check_ntt_rv32im_fastmul_asm(void);
 int check_ntt_rv32im_slowmul_asm(void);
 int check_poly_pointwise_montgomery_rv32im_asm(void);
+#endif /* MLD_SYS_RISCV32_M */
 
 static const abicheck_entry_t all_checks[] = {
+#if defined(MLD_SYS_RISCV32_M)
     {"intt_rv32im_fastmul_asm", check_intt_rv32im_fastmul_asm},
     {"intt_rv32im_slowmul_asm", check_intt_rv32im_slowmul_asm},
     {"ntt_rv32im_fastmul_asm", check_ntt_rv32im_fastmul_asm},
     {"ntt_rv32im_slowmul_asm", check_ntt_rv32im_slowmul_asm},
     {"poly_pointwise_montgomery_rv32im_asm",
      check_poly_pointwise_montgomery_rv32im_asm},
+#endif           /* MLD_SYS_RISCV32_M */
     {NULL, NULL} /* Sentinel */
 };
 

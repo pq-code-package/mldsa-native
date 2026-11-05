@@ -15,7 +15,7 @@
 #include "../checks_x86_64_all.h"
 
 #if defined(MLD_SYS_X86_64) && defined(MLD_SYSV_ABI_SUPPORTED) && \
-    defined(__AVX2__)
+    defined(MLD_SYS_X86_64_AVX2)
 
 #include "../../../notrandombytes/notrandombytes.h"
 
@@ -73,4 +73,4 @@ int check_poly_use_hint_88_avx2_asm(void)
   return MLD_ABICHECK_PASSED;
 }
 
-#endif /* MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED && __AVX2__ */
+#endif /* MLD_SYS_X86_64 && MLD_SYSV_ABI_SUPPORTED && MLD_SYS_X86_64_AVX2 */

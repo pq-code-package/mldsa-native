@@ -56,7 +56,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
 
@@ -544,4 +545,5 @@ mld_intt_layer1234_start:
     .unreq ninv_tw
 
 /* simpasm: footer-start */
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */

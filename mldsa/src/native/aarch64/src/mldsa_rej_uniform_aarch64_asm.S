@@ -38,7 +38,8 @@
 */
 
  #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -215,7 +216,8 @@ Lmld_rej_uniform_return:
 
 MLD_ASM_FN_SIZE(rej_uniform_aarch64_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

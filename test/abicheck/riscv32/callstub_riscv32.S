@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mldsa/src/sys.h"
+
+#if defined(MLD_SYS_RISCV32)
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",@progbits
 #endif
@@ -145,3 +149,5 @@ asm_call_stub_riscv32:
         .cfi_def_cfa_offset 0
         ret
         .cfi_endproc
+
+#endif /* MLD_SYS_RISCV32 */
