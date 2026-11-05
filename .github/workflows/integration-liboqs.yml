@@ -29,13 +29,13 @@ jobs:
             name: Haswell, memopt
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=haswell -DOQS_MEMOPT_BUILD=ON -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
           # AArch64
-          - system: ubuntu-24.04-arm
+          - system: ubuntu-26.04-arm
             name: Auto
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
-          - system: ubuntu-24.04-arm
+          - system: ubuntu-26.04-arm
             name: C
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=generic -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
-          - system: ubuntu-24.04-arm
+          - system: ubuntu-26.04-arm
             name: Auto, memopt
             flags: -DOQS_DIST_BUILD=OFF -DOQS_OPT_TARGET=auto -DOQS_MEMOPT_BUILD=ON -DCMAKE_BUILD_TYPE=Debug -DOQS_ENABLE_TEST_CONSTANT_TIME=ON
     name: Build (${{ matrix.name }}, ${{ matrix.system }})
