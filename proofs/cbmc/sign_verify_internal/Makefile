@@ -45,8 +45,13 @@ APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
-CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+CBMC_SUPPORTED_CONFIGS = \
+  LP64:z3_no_bv_extract \
+  LP64:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
+# With cadical, keep CBMC from skolemizing asserted quantifiers.
+# TODO: Remove once https://github.com/diffblue/cbmc/issues/9387 is fixed.
+CBMC_NO_SKOLEM = $(if $(filter cadical,$(CBMC_SOLVER)),1)
 
 FUNCTION_NAME = sign_verify_internal
 
