@@ -50,6 +50,16 @@ and x86_64, the microarchitectural event trace is proven to be a function of the
 reject pattern (one accept/reject bit per candidate nibble) only, and never of the accepted coefficient
 values.
 
+### CBMC proofs discharged by a single solver
+
+In mlkem-native, every CBMC proof is discharged by at least two independently developed solvers.
+In mldsa-native, a few proofs, mostly of top-level functions, are currently only discharged by Z3;
+their Makefiles list a single entry in `CBMC_SUPPORTED_CONFIGS`.
+
+For these proofs, solver-specific bugs or incompleteness could lead to unsound results going
+undetected. Adding a second solver for them is tracked in
+[#1527](https://github.com/pq-code-package/mldsa-native/issues/1527).
+
 <!--- bibliography --->
 [^Round3_Spec]: Bai, Ducas, Kiltz, Lepoint, Lyubashevsky, Schwabe, Seiler, Stehlé: CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation (Version 3.1), [https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf](https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf)
 [^mlkem_native_soundness]: pq-code-package: mlkem-native SOUNDNESS document, [https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md](https://github.com/pq-code-package/mlkem-native/blob/main/SOUNDNESS.md)
