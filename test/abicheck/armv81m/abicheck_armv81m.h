@@ -21,9 +21,10 @@
  * gpr is sized to 16 entries so mve[] (which follows) is 16-byte aligned;
  * slots 13..15 are unused. The struct is MLD_ALIGN-aligned so the stub's
  * 128-bit vldrw.u32 / vstrw.32 are aligned. */
-struct MLD_ALIGN armv81m_register_state
+struct armv81m_register_state
 {
-  uint32_t gpr[16];   /* r0-r12 in slots 0..12; slots 13..15 are padding */
+  /* r0-r12 in slots 0..12; slots 13..15 are padding */
+  MLD_ALIGN uint32_t gpr[16];
   uint32_t mve[8][4]; /* q0-q7 (full 128-bit MVE registers as four 32-bit
                          lanes each) */
 };
