@@ -85,117 +85,99 @@ void mld_keccakf1600_xor_bytes(uint64_t *state, const unsigned char *data,
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST)) &&                                                \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-static void mld_keccakf1600x4_extract_bytes_c(uint64_t *state,
-                                              unsigned char *data0,
-                                              unsigned char *data1,
-                                              unsigned char *data2,
-                                              unsigned char *data3,
-                                              unsigned offset, unsigned length)
+static MLD_INLINE void mld_keccakf1600xN_extract_bytes_c(uint64_t *state,
+                                                         unsigned char *data,
+                                                         size_t stride,
+                                                         unsigned offset,
+                                                         unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(length <= stride && stride <= MLD_MAX_BUFFER_SIZE)
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(data0, length))
-    requires(memory_no_alias(data1, length))
-    requires(memory_no_alias(data2, length))
-    requires(memory_no_alias(data3, length))
-    assigns(memory_slice(data0, length))
-    assigns(memory_slice(data1, length))
-    assigns(memory_slice(data2, length))
-    assigns(memory_slice(data3, length))
+    requires(memory_no_alias(data, (MLD_KECCAK_WAY - 1) * stride + length))
+    assigns(memory_slice(data, (MLD_KECCAK_WAY - 1) * stride + length))
 )
 {
-  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
-                                length);
-  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 1, data1, offset,
-                                length);
-  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 2, data2, offset,
-                                length);
-  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * 3, data3, offset,
-                                length);
+/* One call per state, unrolled */
+#define MLD_KECCAKF1600XN_EXTRACT_STATE(j)                      \
+  mld_keccakf1600_extract_bytes(state + MLD_KECCAK_LANES * (j), \
+                                data + (j) * stride, offset, length);
+  MLD_XN_LANES(MLD_KECCAKF1600XN_EXTRACT_STATE)
 }
 
 MLD_INTERNAL_API
-void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
-                                     unsigned char *data1, unsigned char *data2,
-                                     unsigned char *data3, unsigned offset,
+void mld_keccakf1600xN_extract_bytes(uint64_t *state, unsigned char *data,
+                                     size_t stride, unsigned offset,
                                      unsigned length)
 {
-#if defined(MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES)
-  if (mld_keccakf1600_extract_bytes_x4_native(state, data0, data1, data2, data3,
-                                              offset, length) ==
-      MLD_NATIVE_FUNC_SUCCESS)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES) && MLD_KECCAK_WAY == 4
+  if (mld_keccakf1600_extract_bytes_x4_native(
+          state, data, data + stride, data + 2 * stride, data + 3 * stride,
+          offset, length) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES */
-  mld_keccakf1600x4_extract_bytes_c(state, data0, data1, data2, data3, offset,
-                                    length);
+#endif /* MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES && MLD_KECCAK_WAY == 4 */
+  mld_keccakf1600xN_extract_bytes_c(state, data, stride, offset, length);
 }
 
-static void mld_keccakf1600x4_xor_bytes_c(uint64_t *state,
-                                          const unsigned char *data0,
-                                          const unsigned char *data1,
-                                          const unsigned char *data2,
-                                          const unsigned char *data3,
-                                          unsigned offset, unsigned length)
+static MLD_INLINE void mld_keccakf1600xN_xor_bytes_c(uint64_t *state,
+                                                     const unsigned char *data,
+                                                     size_t stride,
+                                                     unsigned offset,
+                                                     unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires((stride == 0 || length <= stride) && stride <= MLD_MAX_BUFFER_SIZE)
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(data0, length))
-    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
-    requires((data0 == data1 &&
-              data0 == data2 &&
-              data0 == data3) ||
-         (memory_no_alias(data1, length) &&
-              memory_no_alias(data2, length) &&
-              memory_no_alias(data3, length)))
+    requires(memory_no_alias(data, (MLD_KECCAK_WAY - 1) * stride + length))
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
 )
 {
-  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 0, data0, offset,
-                            length);
-  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 1, data1, offset,
-                            length);
-  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 2, data2, offset,
-                            length);
-  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * 3, data3, offset,
-                            length);
+/* One call per state, unrolled */
+#define MLD_KECCAKF1600XN_XOR_STATE(j)                      \
+  mld_keccakf1600_xor_bytes(state + MLD_KECCAK_LANES * (j), \
+                            data + (j) * stride, offset, length);
+  MLD_XN_LANES(MLD_KECCAKF1600XN_XOR_STATE)
 }
 
 MLD_INTERNAL_API
-void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
-                                 const unsigned char *data1,
-                                 const unsigned char *data2,
-                                 const unsigned char *data3, unsigned offset,
+void mld_keccakf1600xN_xor_bytes(uint64_t *state, const unsigned char *data,
+                                 size_t stride, unsigned offset,
                                  unsigned length)
 {
-#if defined(MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES)
-  if (mld_keccakf1600_xor_bytes_x4_native(state, data0, data1, data2, data3,
-                                          offset,
-                                          length) == MLD_NATIVE_FUNC_SUCCESS)
+#if defined(MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES) && MLD_KECCAK_WAY == 4
+  if (mld_keccakf1600_xor_bytes_x4_native(
+          state, data, data + stride, data + 2 * stride, data + 3 * stride,
+          offset, length) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES */
-  mld_keccakf1600x4_xor_bytes_c(state, data0, data1, data2, data3, offset,
-                                length);
+#endif /* MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES && MLD_KECCAK_WAY == 4 */
+  mld_keccakf1600xN_xor_bytes_c(state, data, stride, offset, length);
 }
 
 MLD_INTERNAL_API
-void mld_keccakf1600x4_permute(uint64_t *state)
+void mld_keccakf1600xN_permute(uint64_t *state)
 {
-#if defined(MLD_USE_NATIVE_FIPS202_X4)
+#if defined(MLD_USE_NATIVE_FIPS202_XN)
+  if (mld_keccak_f1600_xN_native(state) == MLD_NATIVE_FUNC_SUCCESS)
+  {
+    return;
+  }
+#elif defined(MLD_USE_NATIVE_FIPS202_X4) && MLD_KECCAK_WAY == 4
   if (mld_keccak_f1600_x4_native(state) == MLD_NATIVE_FUNC_SUCCESS)
   {
     return;
   }
-#endif /* MLD_USE_NATIVE_FIPS202_X4 */
-  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 0);
-  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 1);
-  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 2);
-  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * 3);
+#endif /* !MLD_USE_NATIVE_FIPS202_XN && MLD_USE_NATIVE_FIPS202_X4 && \
+          MLD_KECCAK_WAY == 4 */
+/* One call per state, unrolled */
+#define MLD_KECCAKF1600XN_PERMUTE_STATE(j) \
+  mld_keccakf1600_permute(state + MLD_KECCAK_LANES * (j));
+  MLD_XN_LANES(MLD_KECCAKF1600XN_PERMUTE_STATE)
 }
 #endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM || \
           MLD_UNIT_TEST) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
@@ -508,3 +490,6 @@ MLD_EMPTY_CU(keccakf1600)
  * Don't modify by hand -- this is auto-generated by scripts/autogen. */
 #undef MLD_KECCAK_NROUNDS
 #undef MLD_KECCAK_ROL
+#undef MLD_KECCAKF1600XN_EXTRACT_STATE
+#undef MLD_KECCAKF1600XN_XOR_STATE
+#undef MLD_KECCAKF1600XN_PERMUTE_STATE

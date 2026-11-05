@@ -14,13 +14,17 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
+# The batched ExpandS loops are statically bounded and unrolled: loop 0
+# (batches), loops 1 and 2 (lanes). 9 covers batching factors up to 8 and the
+# largest L + K.
+UNWINDSET += mld_sample_pack_s1_s2.0:9 mld_sample_pack_s1_s2.1:9
+UNWINDSET += mld_sample_pack_s1_s2.2:9
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_sample_pack_s1_s2
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta_4x
+USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta_xN
 USE_FUNCTION_CONTRACTS+=mld_polyeta_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1

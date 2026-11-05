@@ -24,95 +24,74 @@
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
     defined(MLD_UNIT_TEST)
-static void mld_keccak_absorb_once_x4(uint64_t *s, unsigned r,
-                                      const uint8_t *in0, const uint8_t *in1,
-                                      const uint8_t *in2, const uint8_t *in3,
+static void mld_keccak_absorb_once_xN(uint64_t *s, unsigned r,
+                                      const uint8_t *in, size_t stride,
                                       size_t inlen, uint8_t p)
 __contract__(
-  requires(inlen <= MLD_MAX_BUFFER_SIZE)
+  requires(inlen <= stride && stride <= MLD_MAX_BUFFER_SIZE)
   requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
   requires(r > 0)
   requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
-  requires(memory_no_alias(in0, inlen))
-  requires(memory_no_alias(in1, inlen))
-  requires(memory_no_alias(in2, inlen))
-  requires(memory_no_alias(in3, inlen))
+  requires(memory_no_alias(in, (MLD_KECCAK_WAY - 1) * stride + inlen))
   assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY)))
 {
-  while (inlen >= r)
+  size_t pos = 0;
+  while (inlen - pos >= r)
   __loop__(
-    assigns(inlen, in0, in1, in2, in3, memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    invariant(inlen <= loop_entry(inlen))
-    invariant(in0 == loop_entry(in0) + (loop_entry(inlen) - inlen))
-    invariant(in1 == loop_entry(in1) + (loop_entry(inlen) - inlen))
-    invariant(in2 == loop_entry(in2) + (loop_entry(inlen) - inlen))
-    invariant(in3 == loop_entry(in3) + (loop_entry(inlen) - inlen))
-    decreases(inlen))
+    assigns(pos, memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
+    invariant(pos <= inlen)
+    decreases(inlen - pos))
   {
-    mld_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, r);
-    mld_keccakf1600x4_permute(s);
-
-    in0 += r;
-    in1 += r;
-    in2 += r;
-    in3 += r;
-    inlen -= r;
+    mld_keccakf1600xN_xor_bytes(s, in + pos, stride, 0, r);
+    mld_keccakf1600xN_permute(s);
+    pos += r;
   }
 
-  /* Safety: At this point, inlen < r, so the truncations to unsigned are safe
-   * below. */
-  if (inlen > 0)
+  /* Safety: At this point, inlen - pos < r, so the truncations to unsigned are
+   * safe below. */
+  if (pos < inlen)
   {
-    mld_keccakf1600x4_xor_bytes(s, in0, in1, in2, in3, 0, (unsigned)inlen);
+    mld_keccakf1600xN_xor_bytes(s, in + pos, stride, 0,
+                                (unsigned)(inlen - pos));
   }
 
-  if (inlen == r - 1)
+  /* The padding is the same for every state: stride 0. */
+  if (inlen - pos == r - 1)
   {
     p |= 128;
-    mld_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, (unsigned)inlen, 1);
+    mld_keccakf1600xN_xor_bytes(s, &p, 0, (unsigned)(inlen - pos), 1);
   }
   else
   {
-    mld_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, (unsigned)inlen, 1);
+    mld_keccakf1600xN_xor_bytes(s, &p, 0, (unsigned)(inlen - pos), 1);
     p = 128;
-    mld_keccakf1600x4_xor_bytes(s, &p, &p, &p, &p, r - 1, 1);
+    mld_keccakf1600xN_xor_bytes(s, &p, 0, r - 1, 1);
   }
 }
 
-static void mld_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1,
-                                        uint8_t *out2, uint8_t *out3,
+static void mld_keccak_squeezeblocks_xN(uint8_t *out, size_t stride,
                                         size_t nblocks, uint64_t *s, unsigned r)
 __contract__(
     requires(r <= sizeof(uint64_t) * MLD_KECCAK_LANES)
     requires(nblocks <= 8 /* somewhat arbitrary bound */)
+    requires(nblocks * r <= stride && stride <= MLD_MAX_BUFFER_SIZE)
     requires(memory_no_alias(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(out0, nblocks * r))
-    requires(memory_no_alias(out1, nblocks * r))
-    requires(memory_no_alias(out2, nblocks * r))
-    requires(memory_no_alias(out3, nblocks * r))
+    requires(memory_no_alias(out, (MLD_KECCAK_WAY - 1) * stride + nblocks * r))
     assigns(memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    assigns(memory_slice(out0, nblocks * r))
-    assigns(memory_slice(out1, nblocks * r))
-    assigns(memory_slice(out2, nblocks * r))
-    assigns(memory_slice(out3, nblocks * r)))
+    assigns(memory_slice(out, (MLD_KECCAK_WAY - 1) * stride + nblocks * r)))
 {
   size_t current_offset = 0;
   while (nblocks > 0)
   __loop__(
     assigns(nblocks, current_offset,
             memory_slice(s, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY),
-            memory_slice(out0, nblocks * r),
-            memory_slice(out1, nblocks * r),
-            memory_slice(out2, nblocks * r),
-            memory_slice(out3, nblocks * r))
+            memory_slice(out, (MLD_KECCAK_WAY - 1) * stride + nblocks * r))
     invariant(nblocks <= loop_entry(nblocks))
     invariant(current_offset == (loop_entry(nblocks) - nblocks) * r)
     decreases(nblocks))
   {
-    mld_keccakf1600x4_permute(s);
-    mld_keccakf1600x4_extract_bytes(
-        s, &out0[current_offset], &out1[current_offset], &out2[current_offset],
-        &out3[current_offset], 0, r);
+    mld_keccakf1600xN_permute(s);
+    mld_keccakf1600xN_extract_bytes(s, out + current_offset, stride, 0, r);
     current_offset += r;
     nblocks--;
   }
@@ -122,63 +101,55 @@ __contract__(
 
 #if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 MLD_INTERNAL_API
-void mld_shake128x4_absorb_once(mld_shake128x4ctx *state, const uint8_t *in0,
-                                const uint8_t *in1, const uint8_t *in2,
-                                const uint8_t *in3, size_t inlen)
+void mld_shake128xN_absorb_once(mld_shake128xNctx *state, const uint8_t *in,
+                                size_t stride, size_t inlen)
 {
-  mld_memset(state, 0, sizeof(mld_shake128x4ctx));
-  mld_keccak_absorb_once_x4(state->ctx, SHAKE128_RATE, in0, in1, in2, in3,
-                            inlen, 0x1F);
+  mld_memset(state, 0, sizeof(mld_shake128xNctx));
+  mld_keccak_absorb_once_xN(state->ctx, SHAKE128_RATE, in, stride, inlen, 0x1F);
 }
 
 MLD_INTERNAL_API
-void mld_shake128x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                                  uint8_t *out3, size_t nblocks,
-                                  mld_shake128x4ctx *state)
+void mld_shake128xN_squeezeblocks(uint8_t *out, size_t stride, size_t nblocks,
+                                  mld_shake128xNctx *state)
 {
-  mld_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
-                              SHAKE128_RATE);
+  mld_keccak_squeezeblocks_xN(out, stride, nblocks, state->ctx, SHAKE128_RATE);
 }
 
 MLD_INTERNAL_API
-void mld_shake128x4_init(mld_shake128x4ctx *state) { (void)state; }
+void mld_shake128xN_init(mld_shake128xNctx *state) { (void)state; }
 MLD_INTERNAL_API
-void mld_shake128x4_release(mld_shake128x4ctx *state)
+void mld_shake128xN_release(mld_shake128xNctx *state)
 {
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(state, sizeof(mld_shake128x4ctx));
+  mld_zeroize(state, sizeof(mld_shake128xNctx));
 }
 #endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \
-    (!defined(MLD_CONFIG_NO_SIGN_API) &&                                    \
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
+    (!defined(MLD_CONFIG_NO_SIGN_API) &&   \
      (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)))
 MLD_INTERNAL_API
-void mld_shake256x4_absorb_once(mld_shake256x4ctx *state, const uint8_t *in0,
-                                const uint8_t *in1, const uint8_t *in2,
-                                const uint8_t *in3, size_t inlen)
+void mld_shake256xN_absorb_once(mld_shake256xNctx *state, const uint8_t *in,
+                                size_t stride, size_t inlen)
 {
-  mld_memset(state, 0, sizeof(mld_shake256x4ctx));
-  mld_keccak_absorb_once_x4(state->ctx, SHAKE256_RATE, in0, in1, in2, in3,
-                            inlen, 0x1F);
+  mld_memset(state, 0, sizeof(mld_shake256xNctx));
+  mld_keccak_absorb_once_xN(state->ctx, SHAKE256_RATE, in, stride, inlen, 0x1F);
 }
 
 MLD_INTERNAL_API
-void mld_shake256x4_squeezeblocks(uint8_t *out0, uint8_t *out1, uint8_t *out2,
-                                  uint8_t *out3, size_t nblocks,
-                                  mld_shake256x4ctx *state)
+void mld_shake256xN_squeezeblocks(uint8_t *out, size_t stride, size_t nblocks,
+                                  mld_shake256xNctx *state)
 {
-  mld_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, state->ctx,
-                              SHAKE256_RATE);
+  mld_keccak_squeezeblocks_xN(out, stride, nblocks, state->ctx, SHAKE256_RATE);
 }
 
 MLD_INTERNAL_API
-void mld_shake256x4_init(mld_shake256x4ctx *state) { (void)state; }
+void mld_shake256xN_init(mld_shake256xNctx *state) { (void)state; }
 MLD_INTERNAL_API
-void mld_shake256x4_release(mld_shake256x4ctx *state)
+void mld_shake256xN_release(mld_shake256xNctx *state)
 {
   /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
-  mld_zeroize(state, sizeof(mld_shake256x4ctx));
+  mld_zeroize(state, sizeof(mld_shake256xNctx));
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API || (!MLD_CONFIG_NO_SIGN_API && \
           (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST)) */

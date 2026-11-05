@@ -166,8 +166,8 @@ def check_contracts():
 # The value is the number of loops allowed to lack a decreases clause (default 1).
 DECREASES_EXCEPTIONS = {
     ("mldsa/src/poly.c", "mld_poly_uniform"): 1,
-    ("mldsa/src/poly.c", "mld_poly_uniform_4x"): 1,
-    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta_4x"): 1,
+    ("mldsa/src/poly.c", "mld_poly_uniform_xN"): 1,
+    ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta_xN"): 1,
     ("mldsa/src/poly_kl.c", "mld_poly_uniform_eta"): 1,
     ("mldsa/src/poly_kl.c", "mld_poly_challenge"): 1,
 }
