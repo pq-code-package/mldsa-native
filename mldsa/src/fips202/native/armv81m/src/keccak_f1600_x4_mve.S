@@ -67,7 +67,8 @@
 //   784     S[0][24]_odd,  S[1][24]_odd,  S[2][24]_odd,  S[3][24]_odd
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
+#if defined(MLD_SYS_ARMV81M_MVE) && \
+    defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -710,7 +711,8 @@ Lmld_keccak_f1600_x4_mve_asm_roundend:
 
 MLD_ASM_FN_SIZE(keccak_f1600_x4_mve_asm)
 
-#endif /* MLD_FIPS202_ARMV81M_NEED_X4 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_ARMV81M_MVE && MLD_FIPS202_ARMV81M_NEED_X4 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

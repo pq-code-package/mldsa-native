@@ -35,10 +35,10 @@
 */
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
+#if defined(MLD_SYS_AARCH64_NEON) && defined(__ARM_FEATURE_SHA3) && \
+    defined(MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
-#if defined(__ARM_FEATURE_SHA3)
 /* simpasm: header-end */
 
 #define KECCAK_F1600_ROUNDS 24
@@ -2411,7 +2411,7 @@ mld_keccak_f1600_x4_v8a_v84a_scalar_hybrid_done:
 #undef STACK_LOC_1
 
 /* simpasm: footer-start */
-#endif /* __ARM_FEATURE_SHA3 */
 
-#endif /* MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID && \
+#endif /* MLD_SYS_AARCH64_NEON && __ARM_FEATURE_SHA3 && \
+          MLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED */

@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mldsa/src/sys.h"
+
+#if defined(MLD_SYS_ARMV81M_MVE)
+
 /*
  * Armv8.1-M (Thumb-2, AAPCS32+MVE) selftest stubs.
  *
@@ -62,3 +66,5 @@ corrupt_q selftest_armv81m_corrupt_q4, q4
 corrupt_q selftest_armv81m_corrupt_q5, q5
 corrupt_q selftest_armv81m_corrupt_q6, q6
 corrupt_q selftest_armv81m_corrupt_q7, q7
+
+#endif /* MLD_SYS_ARMV81M_MVE */

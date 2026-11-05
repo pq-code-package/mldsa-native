@@ -44,7 +44,8 @@
 
 #include "../../../common.h"
 
-#if defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
+#if defined(MLD_SYS_X86_64_AVX2) && \
+    defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /* simpasm: header-end */
@@ -108,5 +109,5 @@ ret
 
 /* simpasm: footer-start */
 
-#endif /* MLD_ARITH_BACKEND_X86_64_DEFAULT && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-        */
+#endif /* MLD_SYS_X86_64_AVX2 && MLD_ARITH_BACKEND_X86_64_DEFAULT && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */

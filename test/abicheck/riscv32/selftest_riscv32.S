@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
  */
 
+#include "../../../mldsa/src/sys.h"
+
+#if defined(MLD_SYS_RISCV32)
+
 #if defined(__ELF__)
 .section .note.GNU-stack,"",@progbits
 #endif
@@ -43,3 +47,5 @@ define_corrupter selftest_riscv32_corrupt_s10, s10
 define_corrupter selftest_riscv32_corrupt_s11, s11
 define_corrupter selftest_riscv32_corrupt_gp, gp
 define_corrupter selftest_riscv32_corrupt_tp, tp
+
+#endif /* MLD_SYS_RISCV32 */

@@ -57,7 +57,8 @@
 //   Tail     -- extract remaining <8 bytes via predicated byte stores.
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
+#if defined(MLD_SYS_ARMV81M_MVE) && \
+    defined(MLD_FIPS202_ARMV81M_NEED_X4) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 /*
@@ -327,7 +328,8 @@ Lmld_keccak_f1600_x4_state_extract_bytes_asm_exit:
 
 MLD_ASM_FN_SIZE(keccak_f1600_x4_state_extract_bytes_asm)
 
-#endif /* MLD_FIPS202_ARMV81M_NEED_X4 && !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+#endif /* MLD_SYS_ARMV81M_MVE && MLD_FIPS202_ARMV81M_NEED_X4 && \
+          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 #if defined(__ELF__)
 .section .note.GNU-stack,"",%progbits

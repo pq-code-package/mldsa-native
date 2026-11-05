@@ -38,7 +38,8 @@
 */
 
 #include "../../../common.h"
-#if defined(MLD_ARITH_BACKEND_AARCH64) && \
+#if defined(MLD_SYS_AARCH64_NEON) && \
+    defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_NO_KEYPAIR_API) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4)
@@ -154,8 +155,8 @@ Lmld_rej_uniform_eta4_final_copy:
 
 MLD_ASM_FN_SIZE(rej_uniform_eta4_aarch64_asm)
 
-#endif /* MLD_ARITH_BACKEND_AARCH64 && !MLD_CONFIG_NO_KEYPAIR_API && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+#endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
+          !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4) */
 
 #if defined(__ELF__)
