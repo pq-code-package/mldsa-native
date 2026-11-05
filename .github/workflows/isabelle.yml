@@ -20,7 +20,7 @@ jobs:
         run: /home/isabelle/Isabelle/bin/isabelle build -D proofs/isabelle/compress
   neon_ntt:
     # AArch64 is required: hw_exec.c rejects non-AArch64 hosts at compile time.
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     container:
       # arm64 image variant; "_X11_Latex" is required because the NeonNTT
       # ROOT builds a PDF document.
