@@ -1,0 +1,600 @@
+# Copyright (c) The mldsa-native project authors
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+#
+# MS AMD 64bit ABI assembly files, AAPCS64 assembly files
+# for MS Windows 11/64bit (using ml64.exe or armasm64.exe,
+# respectively) and this Makefile include file contributed
+# by:
+#
+# Ingo A. Kubbilun
+# <ingo.kubbilun@gmail.com>, Oct. 2026
+# (GERMANY)
+#
+
+!IFDEF ARM64
+
+OBJ_ASSEMBLY_FILES_44 = \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_eta2_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_poly_decompose_88_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_poly_use_hint_88_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\mldsa_polyz_unpack_17_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\aarch64\rej_uniform_table.obj
+
+OBJ_ASSEMBLY_FILES_65 = \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_eta4_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_poly_decompose_32_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_poly_use_hint_32_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\mldsa_polyz_unpack_19_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\aarch64\rej_uniform_table.obj
+
+OBJ_ASSEMBLY_FILES_87 = \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_rej_uniform_eta2_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_poly_decompose_32_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_poly_use_hint_32_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\mldsa_polyz_unpack_19_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\aarch64\rej_uniform_table.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_44 = \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_eta2_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_decompose_88_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_use_hint_88_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyz_unpack_17_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_table.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_65 = \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_eta4_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_decompose_32_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_use_hint_32_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyz_unpack_19_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_table.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_87 = \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_intt_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_ntt_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_caddq_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_chknorm_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_pointwise_montgomery_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_rej_uniform_eta2_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_decompose_32_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_poly_use_hint_32_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\mldsa_polyz_unpack_19_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x1_scalar_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccak_f1600_x4_v8a_scalar_hybrid_aarch64.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\keccakf1600_round_constants.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\aarch64_zetas.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\polyz_unpack_table.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_eta_table.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\rej_uniform_table.obj
+
+!ELSE
+
+OBJ_ASSEMBLY_FILES_44 = \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_acc_l4_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_poly_decompose_88_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_poly_use_hint_88_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_polyz_unpack_17_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_eta2_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\consts.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_FILES_65 = \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_acc_l5_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_poly_decompose_32_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_poly_use_hint_32_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_polyz_unpack_19_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_eta4_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\consts.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_FILES_87 = \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_acc_l7_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_poly_decompose_32_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_poly_use_hint_32_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_polyz_unpack_19_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\mldsa_rej_uniform_eta2_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\consts.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_44 = \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_acc_l4_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_decompose_88_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_use_hint_88_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_polyz_unpack_17_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_eta2_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\consts.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_65 = \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_acc_l5_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_decompose_32_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_use_hint_32_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_polyz_unpack_19_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_eta4_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\consts.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+OBJ_ASSEMBLY_ALLOC_FILES_87 = \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_invntt_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_ntt_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_nttunpack_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_acc_l7_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_pointwise_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_caddq_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_chknorm_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_decompose_32_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_poly_use_hint_32_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_polyz_unpack_19_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\mldsa_rej_uniform_eta2_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\consts.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\rej_uniform_table.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccak_f1600_x4_avx2.obj \
+                $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64\keccakf1600_constants.obj
+
+!ENDIF
+
+OBJ_FILES_44 =  $(OBJ_FILES_44) \
+                $(OBJ_ASSEMBLY_FILES_44)
+
+OBJ_FILES_44_ALLOC = $(OBJ_FILES_44_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_44)
+
+OBJ_FILES_65 =  $(OBJ_FILES_65) \
+                $(OBJ_ASSEMBLY_FILES_65)
+
+OBJ_FILES_65_ALLOC = $(OBJ_FILES_65_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_65)
+
+OBJ_FILES_87 =  $(OBJ_FILES_87) \
+                $(OBJ_ASSEMBLY_FILES_87)
+
+OBJ_FILES_87_ALLOC = $(OBJ_FILES_87_ALLOC) \
+                $(OBJ_ASSEMBLY_ALLOC_FILES_87)
+
+#
+# ML-DSA 44
+#
+
+!IFDEF ARM64
+
+#
+# Comment from author: armasm64.exe has bugs:
+# a) ALIGN 16 in code sections does NOT emit
+#    correct 'HINT #0x0' (NOPs) but zeros
+# b) 'RELOC 2' for PDATA sections meaning
+#    IMAGE_REL_ARM64_ADDR32NB still emit ADDR64
+#    instead
+#
+# The bottom line is: you may also use clang-cl
+# to compile Aarch64 assembly stuff on MS Windows.
+# You have to add:
+# --target=aarch64-pc-windows-msvc
+# in this case.
+# Claude Code provided the fix_pdata.py script,
+# which performs well here, though.
+#
+# clang-cl works for ARM64 but obviously not for
+# AMD64 assembly (ml64.exe is used in this case)
+# because we had to convert the SysV AMD64 ABI
+# to MS AMD64 ABI by hand...
+#
+
+# compilation of C files for mldsa44 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA44_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA44_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA44_$(<B:mldsa_=)_asm\"" -o $(MLDSA44_BUILD_DIR)\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA44_BUILD_DIR)\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA44_$(<B)_asm\"" -o $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA44_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa44 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA44_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA44_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA44_$(<B:mldsa_=)_asm /Fo$(MLDSA44_BUILD_DIR)\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA44_$(<B)_asm /Fo$(MLDSA44_BUILD_DIR)\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-DSA 65
+#
+
+!IFDEF ARM64
+
+# compilation of C files for mldsa65 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA65_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA65_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA65_$(<B:mldsa_=)_asm\"" -o $(MLDSA65_BUILD_DIR)\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA65_BUILD_DIR)\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA65_$(<B)_asm\"" -o $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA65_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa65 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA65_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA65_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA65_$(<B:mldsa_=)_asm /Fo$(MLDSA65_BUILD_DIR)\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA65_$(<B)_asm /Fo$(MLDSA65_BUILD_DIR)\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-DSA 87
+#
+
+!IFDEF ARM64
+
+# compilation of C files for mldsa87 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA87_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA87_BUILD_DIR)\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\aarch64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA87_$(<B:mldsa_=)_asm\"" -o $(MLDSA87_BUILD_DIR)\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA87_BUILD_DIR)\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"PQCP_MLDSA_NATIVE_MLDSA87_$(<B)_asm\"" -o $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA87_BUILD_DIR)\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa87 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA87_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA87_BUILD_DIR)\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\x86_64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA87_$(<B:mldsa_=)_asm /Fo$(MLDSA87_BUILD_DIR)\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64
+    $(CC) $(CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64 mkdir $(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=PQCP_MLDSA_NATIVE_MLDSA87_$(<B)_asm /Fo$(MLDSA87_BUILD_DIR)\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-DSA 44 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for mldsa44 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mldsa_=mld_)_asm\"" -o $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA44_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mld_$(<B)_asm\"" -o $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa44 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mldsa_=mld_)_asm /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=44 /c /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa44 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mld_$(<B)_asm /Fo$(MLDSA44_BUILD_DIR)\alloc\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-DSA 65 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for mldsa65 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mldsa_=mld_)_asm\"" -o $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA65_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mld_$(<B)_asm\"" -o $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa65 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mldsa_=mld_)_asm /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=65 /c /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa65 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mld_$(<B)_asm /Fo$(MLDSA65_BUILD_DIR)\alloc\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
+
+#
+# ML-DSA 87 (ALLOC)
+#
+
+!IFDEF ARM64
+
+# compilation of C files for mldsa87 (assembly part)
+{mldsa\src\native\aarch64\src}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part)
+{mldsa\src\native\aarch64\win64}.asm{$(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"$(<B:mldsa_=mld_)_asm\"" -o $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA87_BUILD_DIR)\alloc\mldsa\aarch64\$(<B).obj
+
+# compilation of C files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\src}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\aarch64\win64}.asm{$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64
+    $(AS) $(ASFLAGS) -predefine "FUNC_NAME SETS \"mld_$(<B)_asm\"" -o $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj $<
+    @python fix_pdata.py $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\aarch64\$(<B).obj
+
+!ELSE
+
+# compilation of C files for mldsa87 (assembly part)
+{mldsa\src\native\x86_64\src}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part)
+{mldsa\src\native\x86_64\win64}.asm{$(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=$(<B:mldsa_=mld_)_asm /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\x86_64\$(<B).obj $<
+
+# compilation of C files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\src}.c{$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(CC) $(ALLOC_CFLAGS) /D MLD_CONFIG_PARAMETER_SET=87 /c /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64\ $<
+
+# compilation of ASM files for mldsa87 (assembly part, FIPS 202)
+{mldsa\src\fips202\native\x86_64\win64}.asm{$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64}.obj:
+    @if NOT EXIST $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64 mkdir $(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64
+    $(AS) $(ASFLAGS) /D FUNC_NAME=mld_$(<B)_asm /Fo$(MLDSA87_BUILD_DIR)\alloc\mldsa\fips202\x86_64\$(<B).obj $<
+
+!ENDIF
