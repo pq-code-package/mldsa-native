@@ -41,7 +41,9 @@ $(OBJ): %.o : %.S
 	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
-	$(STRIP) $@
+	# Keep function symbols: check-binary matches each symbol's code against
+	# the proof's accepted byte list (proofs/hol_light/bind.yml).
+	$(STRIP) --strip-debug $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 

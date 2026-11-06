@@ -13,6 +13,11 @@ Each function is proved in a separate `.ml` file under
 [riscv32/proofs/](riscv32/proofs). Each proof entry contains the checked
 bytecode for its corresponding object file near the top.
 
+Since proof scripts are OCaml code that could bypass HOL Light's kernel, the proofs can also be re-checked by replaying
+their kernel traces in a separate kernel and comparing definitions and statements with *accepted* copies: reviewed
+text files, checked into [hol_trace/accepted/](hol_trace/accepted), that record which definitions each proof may rely on
+and which theorems it claims. See [hol_trace/README.md](hol_trace/README.md).
+
 ## What is proven
 
 Unless documented otherwise, for each assembly routine listed below, we prove three properties:
@@ -174,6 +179,10 @@ on powerful machines.
 For convenience, you can also use `tests hol_light`, which wraps the `make`
 invocation above. Pass `-a riscv32` when cross-checking RV32IM proofs on
 another host; see `tests hol_light --help`.
+
+To re-check the proofs in a separate HOL Light process that loads none of s2n-bignum or the proof scripts, use
+`hol-trace gen`, `hol-trace check` and `check-binary` in the `hol_trace-cross` nix shell; see
+[hol_trace/README.md](hol_trace/README.md).
 
 ## Interactive proof development
 

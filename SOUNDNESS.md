@@ -26,6 +26,25 @@ FIPS 203 vs. FIPS 204 specifications and the differing modular arithmetic consta
 analysis applies to mldsa-native unchanged: the same proof tools, the same ISA models, the
 same TCB, and therefore the same shared mitigations and residual risks.
 
+### HOLTrace replay and binary binding
+
+HOL Light proof scripts are OCaml programs and therefore run in the same
+process as the trusted kernel. To remove the scripts from the replay's
+trusted computing base, mldsa-native records each proof's primitive kernel
+inferences and replays them in a separate HOL Light process. That process
+loads neither s2n-bignum nor the proof scripts, but still trusts OCaml.
+
+The replay must reproduce reviewed definitions and theorem statements in
+[`proofs/hol_light/hol_trace/accepted/`](proofs/hol_light/hol_trace/accepted/).
+The accepted base layer is generated from the pinned HOL Light and s2n-bignum
+sources, while the specification and proof layers record the definitions and
+claims that reviewers must inspect. See the
+[HOLTrace documentation](proofs/hol_light/hol_trace/README.md).
+
+Each accepted proof also fixes the routine's machine code as a byte list.
+`scripts/check-binary` compares those bytes with the functions found in ELF
+objects, archives, and executables.
+
 ## Additional risks specific to mldsa-native
 
 ### Rejection sampling
