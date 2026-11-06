@@ -1,0 +1,57 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_pointwise_montgomery_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_pointwise_montgomery_aarch64_asm MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_CORRECT
+  |- !a:int64 b:int64 x:(num -> int32) y:(num -> int32) pc:num returnaddress:int64.
+       nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_mc) (a, 1024)
+       /\ nonoverlapping (a, 1024) (b, 1024)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mldsa_pointwise_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [a; b] s
+               /\ (!i:num. i < 256 ==> abs (ival (x i)) <= &94279697)
+               /\ (!i:num. i < 256 ==> abs (ival (y i)) <= &94279697)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add b (word (4 * i) : int64))) s = y i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s in
+                        (ival zi
+                        == mldsa_pointwise ((ival : int32 -> int) o x) ((ival : int32 -> int) o y)
+                             i) (mod &8380417)
+                        /\ abs (ival zi) <= &8380416)))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (a, 1024)])
+
+theorem mldsa_pointwise_montgomery_aarch64_asm MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 b:int64 pc:num returnaddress:int64.
+         nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_mc) (a, 1024)
+         /\ nonoverlapping (a, 1024) (b, 1024)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) mldsa_pointwise_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [a; b] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events b a pc returnaddress
+                      /\ memaccess_inbounds e2 [a, 1024; b, 1024] [a, 1024]))
+               (\s:armstate s':armstate. T)

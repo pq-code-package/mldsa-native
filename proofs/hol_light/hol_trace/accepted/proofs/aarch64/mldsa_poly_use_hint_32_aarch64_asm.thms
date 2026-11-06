@@ -1,0 +1,56 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_use_hint_32_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_poly_use_hint_32_aarch64_asm MLDSA_POLY_USE_HINT_32_SUBROUTINE_CORRECT
+  |- !a:int64 h:int64 x:(num -> int32) y:(num -> int32) pc:num returnaddress:int64.
+       nonoverlapping ((word pc : int64), LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024)
+       /\ nonoverlapping (a, 1024) (h, 1024)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) poly_use_hint_32_aarch64_asm_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [a; h] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add h (word (4 * i) : int64))) s = y i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ ((!i:num. i < 256 ==> val (x i) < 8380417) /\ (!i:num. i < 256 ==> val (y i) <= 1)
+                  ==> (!i:num.
+                        i < 256
+                        ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s
+                            = (word (mldsa_use_hint_32 (val (y i)) (val (x i))) : int32))
+                      /\ (!i:num.
+                           i < 256
+                           ==> val (read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s)
+                               < 16)))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (a, 1024)])
+
+theorem mldsa_poly_use_hint_32_aarch64_asm MLDSA_POLY_USE_HINT_32_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 h:int64 pc:num returnaddress:int64.
+         nonoverlapping ((word pc : int64), LENGTH poly_use_hint_32_aarch64_asm_mc) (a, 1024)
+         /\ nonoverlapping (a, 1024) (h, 1024)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) poly_use_hint_32_aarch64_asm_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [a; h] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events h a pc returnaddress
+                      /\ memaccess_inbounds e2 [a, 1024; h, 1024] [a, 1024]))
+               (\s:armstate s':armstate. T)

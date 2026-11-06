@@ -1,0 +1,57 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_rej_uniform_eta2_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+definition REJ_MASK_ETA2
+  |- REJ_MASK_ETA2
+     = (specification "REJ_MASK_ETA2" REJ_MASK_ETA2:(byte list -> bool list).
+         !l:(byte list). REJ_MASK_ETA2 l = MAP (\x:int16. val x < 15) (NIBBLES_OF_BYTES l))
+
+definition REJ_NIBBLES_ETA2
+  |- REJ_NIBBLES_ETA2
+     = (specification "REJ_NIBBLES_ETA2" REJ_NIBBLES_ETA2:(byte list -> int16 list).
+         !l:(byte list). REJ_NIBBLES_ETA2 l = FILTER (\x:int16. val x < 15) (NIBBLES_OF_BYTES l))
+
+definition REJ_SAMPLE_ETA2_BYTES
+  |- REJ_SAMPLE_ETA2_BYTES
+     = (specification "REJ_SAMPLE_ETA2_BYTES" REJ_SAMPLE_ETA2_BYTES:(byte list -> int32 list).
+         !l:(byte list).
+           REJ_SAMPLE_ETA2_BYTES l
+           = MAP
+               (\x:int16.
+                 (word_sx (word_sub (word 2 : int16) (word_umod x (word 5 : int16))) : int32))
+               (REJ_NIBBLES_ETA2 l))
+
+# mldsa_rej_uniform_eta2_mc: 550 bytes
+# sha256 735d081f1de94bf5dcc2232cc78f6407b216505a2bb9c2450522f3aa28498ff1
+definition mldsa_rej_uniform_eta2_mc
+  |- mldsa_rej_uniform_eta2_mc
+     = #x[f3 0f 1e fa 41 b8 0f 0f 0f 0f c4 c1 79 6e d8 c4 e2 7d 58 db 41 b8 02 02 02 02 c4 c1 79 6e
+          e0 c4 e2 7d 58 e4 41 b8 0f 0f 0f 0f c4 c1 79 6e e8 c4 e2 7d 58 ed 41 b8 60 e6 ff ff c4 c1
+          49 c4 f0 00 c4 e2 7d 79 f6 41 b8 05 00 00 00 c4 c1 41 c4 f8 00 c4 e2 7d 79 ff 31 c0 31 c9
+          3d f8 00 00 00 0f 87 2e 01 00 00 83 f9 78 0f 87 25 01 00 00 c4 e2 7d 30 04 0e c5 f5 71 f0
+          04 c5 fd eb c1 c5 fd db c3 c5 fd f8 cd c5 dd f8 c0 c5 7d d7 c1 c4 c3 7d 39 c0 00 45 0f b6
+          d0 c4 21 7a 7e 0c d2 c4 42 39 00 c9 c4 c2 7d 21 c9 c4 e2 75 0b d6 c5 ed d5 d7 c5 f5 fe ca
+          c5 fe 7f 0c 87 f3 45 0f b8 ca 44 01 c8 41 c1 e8 08 83 c1 04 3d f8 00 00 00 0f 87 c0 00 00
+          00 c4 c1 39 73 d8 08 45 0f b6 d0 c4 21 7a 7e 0c d2 c4 42 39 00 c9 c4 c2 7d 21 c9 c4 e2 75
+          0b d6 c5 ed d5 d7 c5 f5 fe ca c5 fe 7f 0c 87 f3 45 0f b8 ca 44 01 c8 41 c1 e8 08 83 c1 04
+          3d f8 00 00 00 77 7e c4 c3 7d 39 c0 01 45 0f b6 d0 c4 21 7a 7e 0c d2 c4 42 39 00 c9 c4 c2
+          7d 21 c9 c4 e2 75 0b d6 c5 ed d5 d7 c5 f5 fe ca c5 fe 7f 0c 87 f3 45 0f b8 ca 44 01 c8 41
+          c1 e8 08 83 c1 04 3d f8 00 00 00 77 3c c4 c1 39 73 d8 08 45 0f b6 d0 c4 21 7a 7e 0c d2 c4
+          42 39 00 c9 c4 c2 7d 21 c9 c4 e2 75 0b d6 c5 ed d5 d7 c5 f5 fe ca c5 fe 7f 0c 87 f3 45 0f
+          b8 ca 44 01 c8 83 c1 04 e9 c7 fe ff ff 3d 00 01 00 00 0f 83 84 00 00 00 81 f9 88 00 00 00
+          73 7c 44 0f b6 1c 0e ff c1 45 89 da 41 83 e2 0f 41 83 fa 0f 73 2b 45 89 d3 45 69 db cd 00
+          00 00 41 c1 eb 0a 45 6b db 05 45 29 da 41 bb 02 00 00 00 45 29 d3 44 89 1c 87 ff c0 3d 00
+          01 00 00 73 3d 44 0f b6 5c 0e ff 41 c1 eb 04 41 83 e3 0f 41 83 fb 0f 73 9a 45 89 da 45 69
+          d2 cd 00 00 00 41 c1 ea 0a 45 6b d2 05 45 29 d3 41 ba 02 00 00 00 45 29 da 44 89 14 87 ff
+          c0 e9 71 ff ff ff c5 f8 77 c3]
+
+definition mldsa_rej_uniform_eta2_tmc
+  |- mldsa_rej_uniform_eta2_tmc = TRIM_LIST (4, 0) mldsa_rej_uniform_eta2_mc

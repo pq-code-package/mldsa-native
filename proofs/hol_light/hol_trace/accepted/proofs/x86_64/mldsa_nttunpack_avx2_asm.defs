@@ -1,0 +1,58 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_nttunpack_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_nttunpack_mc: 1178 bytes
+# sha256 04846fed21883cedf4b731aa1265ad2718bab596c39d0e465a3aaf8ace78da9e
+definition mldsa_nttunpack_mc
+  |- mldsa_nttunpack_mc
+     = #x[f3 0f 1e fa c5 fd 6f 27 c5 fd 6f 6f 20 c5 fd 6f 77 40 c5 fd 6f 7f 60 c5 7d 6f 87 80 00 00
+          00 c5 7d 6f 8f a0 00 00 00 c5 7d 6f 97 c0 00 00 00 c5 7d 6f 9f e0 00 00 00 c4 c3 5d 46 d8
+          20 c4 43 5d 46 c0 31 c4 c3 55 46 e1 20 c4 43 55 46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d 46 d2
+          31 c4 c3 45 46 f3 20 c4 43 45 46 db 31 c5 e5 6c fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d 6d
+          d2 c5 5d 6c c6 c5 dd 6d f6 c4 c1 35 6c e3 c4 41 35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa
+          c5 c5 73 d7 20 c4 43 45 02 c0 aa c5 fe 12 fe c4 e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02
+          f6 aa c5 fe 12 ec c4 e3 65 02 ed aa c5 e5 73 d3 20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3
+          2d 02 db aa c4 c1 2d 73 d2 20 c4 43 2d 02 db aa c5 7d 7f 0f c5 7d 7f 47 20 c5 fd 7f 7f 40
+          c5 fd 7f 77 60 c5 fd 7f af 80 00 00 00 c5 fd 7f a7 a0 00 00 00 c5 fd 7f 9f c0 00 00 00 c5
+          7d 7f 9f e0 00 00 00 c5 fd 6f a7 00 01 00 00 c5 fd 6f af 20 01 00 00 c5 fd 6f b7 40 01 00
+          00 c5 fd 6f bf 60 01 00 00 c5 7d 6f 87 80 01 00 00 c5 7d 6f 8f a0 01 00 00 c5 7d 6f 97 c0
+          01 00 00 c5 7d 6f 9f e0 01 00 00 c4 c3 5d 46 d8 20 c4 43 5d 46 c0 31 c4 c3 55 46 e1 20 c4
+          43 55 46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d 46 d2 31 c4 c3 45 46 f3 20 c4 43 45 46 db 31 c5
+          e5 6c fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d 6d d2 c5 5d 6c c6 c5 dd 6d f6 c4 c1 35 6c e3
+          c4 41 35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa c5 c5 73 d7 20 c4 43 45 02 c0 aa c5 fe 12
+          fe c4 e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02 f6 aa c5 fe 12 ec c4 e3 65 02 ed aa c5 e5
+          73 d3 20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3 2d 02 db aa c4 c1 2d 73 d2 20 c4 43 2d 02
+          db aa c5 7d 7f 8f 00 01 00 00 c5 7d 7f 87 20 01 00 00 c5 fd 7f bf 40 01 00 00 c5 fd 7f b7
+          60 01 00 00 c5 fd 7f af 80 01 00 00 c5 fd 7f a7 a0 01 00 00 c5 fd 7f 9f c0 01 00 00 c5 7d
+          7f 9f e0 01 00 00 c5 fd 6f a7 00 02 00 00 c5 fd 6f af 20 02 00 00 c5 fd 6f b7 40 02 00 00
+          c5 fd 6f bf 60 02 00 00 c5 7d 6f 87 80 02 00 00 c5 7d 6f 8f a0 02 00 00 c5 7d 6f 97 c0 02
+          00 00 c5 7d 6f 9f e0 02 00 00 c4 c3 5d 46 d8 20 c4 43 5d 46 c0 31 c4 c3 55 46 e1 20 c4 43
+          55 46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d 46 d2 31 c4 c3 45 46 f3 20 c4 43 45 46 db 31 c5 e5
+          6c fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d 6d d2 c5 5d 6c c6 c5 dd 6d f6 c4 c1 35 6c e3 c4
+          41 35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa c5 c5 73 d7 20 c4 43 45 02 c0 aa c5 fe 12 fe
+          c4 e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02 f6 aa c5 fe 12 ec c4 e3 65 02 ed aa c5 e5 73
+          d3 20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3 2d 02 db aa c4 c1 2d 73 d2 20 c4 43 2d 02 db
+          aa c5 7d 7f 8f 00 02 00 00 c5 7d 7f 87 20 02 00 00 c5 fd 7f bf 40 02 00 00 c5 fd 7f b7 60
+          02 00 00 c5 fd 7f af 80 02 00 00 c5 fd 7f a7 a0 02 00 00 c5 fd 7f 9f c0 02 00 00 c5 7d 7f
+          9f e0 02 00 00 c5 fd 6f a7 00 03 00 00 c5 fd 6f af 20 03 00 00 c5 fd 6f b7 40 03 00 00 c5
+          fd 6f bf 60 03 00 00 c5 7d 6f 87 80 03 00 00 c5 7d 6f 8f a0 03 00 00 c5 7d 6f 97 c0 03 00
+          00 c5 7d 6f 9f e0 03 00 00 c4 c3 5d 46 d8 20 c4 43 5d 46 c0 31 c4 c3 55 46 e1 20 c4 43 55
+          46 c9 31 c4 c3 4d 46 ea 20 c4 43 4d 46 d2 31 c4 c3 45 46 f3 20 c4 43 45 46 db 31 c5 e5 6c
+          fd c5 e5 6d ed c4 c1 3d 6c da c4 41 3d 6d d2 c5 5d 6c c6 c5 dd 6d f6 c4 c1 35 6c e3 c4 41
+          35 6d db c4 41 7e 12 c8 c4 43 45 02 c9 aa c5 c5 73 d7 20 c4 43 45 02 c0 aa c5 fe 12 fe c4
+          e3 55 02 ff aa c5 d5 73 d5 20 c4 e3 55 02 f6 aa c5 fe 12 ec c4 e3 65 02 ed aa c5 e5 73 d3
+          20 c4 e3 65 02 e4 aa c4 c1 7e 12 db c4 e3 2d 02 db aa c4 c1 2d 73 d2 20 c4 43 2d 02 db aa
+          c5 7d 7f 8f 00 03 00 00 c5 7d 7f 87 20 03 00 00 c5 fd 7f bf 40 03 00 00 c5 fd 7f b7 60 03
+          00 00 c5 fd 7f af 80 03 00 00 c5 fd 7f a7 a0 03 00 00 c5 fd 7f 9f c0 03 00 00 c5 7d 7f 9f
+          e0 03 00 00 c5 f8 77 c3]
+
+definition mldsa_nttunpack_tmc
+  |- mldsa_nttunpack_tmc = TRIM_LIST (4, 0) mldsa_nttunpack_mc

@@ -2570,6 +2570,10 @@ def check_macro_typos():
             if filename.endswith(".ml"):
                 return True
 
+        # Exclude the HOL Light terms accepted by hol-trace
+        if filename.startswith("proofs/hol_light/hol_trace/accepted/"):
+            return True
+
         # 3b. Isabelle .thy files: <name>_def is the auto-generated
         # unfolding-rule name for a `definition <name> = ...`. Allow it.
         if is_autogen or filename.startswith("proofs/isabelle"):
