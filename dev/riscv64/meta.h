@@ -1,0 +1,270 @@
+/*
+ * Copyright (c) The mldsa-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+#ifndef MLD_DEV_RISCV64_META_H
+#define MLD_DEV_RISCV64_META_H
+
+/* Identifier for this backend so that source and assembly files
+ * in the build can be appropriately guarded. */
+#define MLD_ARITH_BACKEND_RISCV64
+
+/* Set of primitives that this backend replaces */
+#define MLD_USE_NATIVE_NTT
+#define MLD_USE_NATIVE_INTT
+#define MLD_USE_NATIVE_REJ_UNIFORM
+#define MLD_USE_NATIVE_REJ_UNIFORM_ETA2
+#define MLD_USE_NATIVE_REJ_UNIFORM_ETA4
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#define MLD_USE_NATIVE_POLY_CADDQ
+#define MLD_USE_NATIVE_POLY_USE_HINT_32
+#define MLD_USE_NATIVE_POLY_USE_HINT_88
+#define MLD_USE_NATIVE_POLY_CHKNORM
+#define MLD_USE_NATIVE_POLYZ_UNPACK_17
+#define MLD_USE_NATIVE_POLYZ_UNPACK_19
+#define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
+#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
+#define MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+
+#if !defined(__ASSEMBLER__)
+#if !defined(CBMC)
+#include <riscv_vector.h>
+#endif
+
+#include "../../common.h"
+#include "../api.h"
+#include "src/arith_native_riscv64.h"
+
+/* Returns the vector register length VLEN in bits.
+ * CBMC proofs use the contract instead of the body. */
+static MLD_INLINE int mld_rv64v_vlen(void)
+__contract__(
+  ensures(return_value >= 0)
+)
+{
+#if !defined(CBMC)
+  return (int)(32 * __riscv_vsetvlmax_e32m1());
+#else
+  return 0;
+#endif
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_ntt_native(int32_t data[MLDSA_N])
+{
+  /* VLEN = 128 and VLEN = 256 only for now */
+  const int vlen = mld_rv64v_vlen();
+  if (vlen == 256)
+  {
+    mld_ntt_vlen256_riscv64_asm(data, mld_rv64v_ntt_zetas);
+    return MLD_NATIVE_FUNC_SUCCESS;
+  }
+  if (vlen == 128)
+  {
+    mld_ntt_vlen128_riscv64_asm(data, mld_rv64v_ntt_zetas);
+    return MLD_NATIVE_FUNC_SUCCESS;
+  }
+  return MLD_NATIVE_FUNC_FALLBACK;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_intt_native(int32_t data[MLDSA_N])
+{
+  /* VLEN = 128 and VLEN = 256 only for now */
+  const int vlen = mld_rv64v_vlen();
+  if (vlen == 256)
+  {
+    mld_intt_vlen256_riscv64_asm(data, mld_rv64v_intt_zetas);
+    return MLD_NATIVE_FUNC_SUCCESS;
+  }
+  if (vlen == 128)
+  {
+    mld_intt_vlen128_riscv64_asm(data, mld_rv64v_intt_zetas);
+    return MLD_NATIVE_FUNC_SUCCESS;
+  }
+  return MLD_NATIVE_FUNC_FALLBACK;
+}
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
+{
+  /* Safety: The return value is at most len <= MLDSA_N, hence the cast
+   * is safe. */
+  return (int)mld_rej_uniform_riscv64_asm(r, len, buf, buflen);
+}
+
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_rej_uniform_eta2_native(int32_t *r, unsigned len,
+                                                  const uint8_t *buf,
+                                                  unsigned buflen)
+{
+  uint64_t outlen;
+  /* Constant time: Inputs and outputs to this function are secret.
+   * It is safe to leak which coefficients are accepted/rejected.
+   * The assembly implementation must not leak any other information about the
+   * accepted coefficients. Constant-time testing cannot cover this, and we
+   * hence have to manually verify the assembly.
+   * We declassify prior the input data and mark the outputs as secret.
+   */
+  MLD_CT_TESTING_DECLASSIFY(buf, buflen);
+  outlen = mld_rej_uniform_eta2_riscv64_asm(r, len, buf, buflen);
+  MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
+  /* Safety: outlen is at most len <= MLDSA_N, hence the cast is safe. */
+  return (int)outlen;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 4
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_rej_uniform_eta4_native(int32_t *r, unsigned len,
+                                                  const uint8_t *buf,
+                                                  unsigned buflen)
+{
+  uint64_t outlen;
+  /* Constant time: see mld_rej_uniform_eta2_native(). */
+  MLD_CT_TESTING_DECLASSIFY(buf, buflen);
+  outlen = mld_rej_uniform_eta4_riscv64_asm(r, len, buf, buflen);
+  MLD_CT_TESTING_SECRET(r, sizeof(int32_t) * outlen);
+  /* Safety: outlen is at most len <= MLDSA_N, hence the cast is safe. */
+  return (int)outlen;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 4 */
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_32_riscv64_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_88_riscv64_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_caddq_native(int32_t a[MLDSA_N])
+{
+  mld_poly_caddq_riscv64_asm(a);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
+{
+  mld_poly_use_hint_32_riscv64_asm(a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
+{
+  mld_poly_use_hint_88_riscv64_asm(a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
+{
+  return mld_poly_chknorm_riscv64_asm(a, B);
+}
+
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyz_unpack_17_native(int32_t *r, const uint8_t *buf)
+{
+  mld_polyz_unpack_17_riscv64_asm(r, buf);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyz_unpack_19_native(int32_t *r, const uint8_t *buf)
+{
+  mld_polyz_unpack_19_riscv64_asm(r, buf);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
+
+#if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
+    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_pointwise_montgomery_native(
+    int32_t a[MLDSA_N], const int32_t b[MLDSA_N])
+{
+  mld_poly_pointwise_montgomery_riscv64_asm(a, b);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
+          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
+    int32_t w[MLDSA_N], const int32_t u[4][MLDSA_N],
+    const int32_t v[4][MLDSA_N])
+{
+  mld_polyvecl_pointwise_acc_montgomery_l4_riscv64_asm(w, u, v);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 4 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 5
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l5_native(
+    int32_t w[MLDSA_N], const int32_t u[5][MLDSA_N],
+    const int32_t v[5][MLDSA_N])
+{
+  mld_polyvecl_pointwise_acc_montgomery_l5_riscv64_asm(w, u, v);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 5 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
+    int32_t w[MLDSA_N], const int32_t u[7][MLDSA_N],
+    const int32_t v[7][MLDSA_N])
+{
+  mld_polyvecl_pointwise_acc_montgomery_l7_riscv64_asm(w, u, v);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */
+
+#endif /* !__ASSEMBLER__ */
+
+#endif /* !MLD_DEV_RISCV64_META_H */

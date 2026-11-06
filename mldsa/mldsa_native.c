@@ -85,6 +85,9 @@
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
 #endif
+#if defined(MLD_SYS_RISCV64)
+#include "src/native/riscv64/src/rv64v_zetas.c"
+#endif
 #if defined(MLD_SYS_RISCV32)
 #include "src/native/rv32im/src/rv32im_zetas.c"
 #endif
@@ -100,6 +103,9 @@
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.c"
 #include "src/fips202/native/armv81m/src/keccakf1600_round_constants.c"
+#endif
+#if defined(MLD_SYS_RISCV64)
+#include "src/fips202/native/riscv64/src/keccakf1600_round_constants.c"
 #endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
@@ -657,6 +663,21 @@
 #undef mld_keccak_f1600_x4_state_xor_bytes_asm
 #undef mld_keccakf1600_round_constants
 #endif /* MLD_SYS_ARMV81M_MVE */
+#if defined(MLD_SYS_RISCV64)
+/*
+ * Undefine macros from native code (FIPS202, RISC-V 64)
+ */
+/* mldsa/src/fips202/native/riscv64/auto.h */
+#undef MLD_FIPS202_NATIVE_RISCV64_AUTO_H
+/* mldsa/src/fips202/native/riscv64/src/fips202_native_riscv64.h */
+#undef MLD_FIPS202_NATIVE_RISCV64_SRC_FIPS202_NATIVE_RISCV64_H
+#undef mld_keccak_f1600_x1_zbb_riscv64_asm
+#undef mld_keccakf1600_round_constants
+/* mldsa/src/fips202/native/riscv64/x1_zbb.h */
+#undef MLD_FIPS202_NATIVE_RISCV64_X1_ZBB_H
+#undef MLD_FIPS202_RISCV64_NEED_X1_ZBB
+#undef MLD_USE_NATIVE_FIPS202_X1
+#endif /* MLD_SYS_RISCV64 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mldsa/src/native/api.h */
@@ -782,6 +803,54 @@
 #undef MLD_NATIVE_X86_64_SRC_CONSTS_H
 #undef mld_qdata
 #endif /* MLD_SYS_X86_64 */
+#if defined(MLD_SYS_RISCV64)
+/*
+ * Undefine macros from native code (Arith, RISC-V 64)
+ */
+/* mldsa/src/native/riscv64/meta.h */
+#undef MLD_ARITH_BACKEND_RISCV64
+#undef MLD_NATIVE_RISCV64_META_H
+#undef MLD_USE_NATIVE_INTT
+#undef MLD_USE_NATIVE_NTT
+#undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+#undef MLD_USE_NATIVE_POLYZ_UNPACK_17
+#undef MLD_USE_NATIVE_POLYZ_UNPACK_19
+#undef MLD_USE_NATIVE_POLY_CADDQ
+#undef MLD_USE_NATIVE_POLY_CHKNORM
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#undef MLD_USE_NATIVE_POLY_USE_HINT_32
+#undef MLD_USE_NATIVE_POLY_USE_HINT_88
+#undef MLD_USE_NATIVE_REJ_UNIFORM
+#undef MLD_USE_NATIVE_REJ_UNIFORM_ETA2
+#undef MLD_USE_NATIVE_REJ_UNIFORM_ETA4
+/* mldsa/src/native/riscv64/src/arith_native_riscv64.h */
+#undef MLD_NATIVE_RISCV64_SRC_ARITH_NATIVE_RISCV64_H
+#undef mld_intt_vlen128_riscv64_asm
+#undef mld_intt_vlen256_riscv64_asm
+#undef mld_ntt_vlen128_riscv64_asm
+#undef mld_ntt_vlen256_riscv64_asm
+#undef mld_poly_caddq_riscv64_asm
+#undef mld_poly_chknorm_riscv64_asm
+#undef mld_poly_decompose_32_riscv64_asm
+#undef mld_poly_decompose_88_riscv64_asm
+#undef mld_poly_pointwise_montgomery_riscv64_asm
+#undef mld_poly_use_hint_32_riscv64_asm
+#undef mld_poly_use_hint_88_riscv64_asm
+#undef mld_polyvecl_pointwise_acc_montgomery_l4_riscv64_asm
+#undef mld_polyvecl_pointwise_acc_montgomery_l5_riscv64_asm
+#undef mld_polyvecl_pointwise_acc_montgomery_l7_riscv64_asm
+#undef mld_polyz_unpack_17_riscv64_asm
+#undef mld_polyz_unpack_19_riscv64_asm
+#undef mld_rej_uniform_eta2_riscv64_asm
+#undef mld_rej_uniform_eta4_riscv64_asm
+#undef mld_rej_uniform_riscv64_asm
+#undef mld_rv64v_intt_zetas
+#undef mld_rv64v_ntt_zetas
+#endif /* MLD_SYS_RISCV64 */
 #if defined(MLD_SYS_RISCV32)
 /*
  * Undefine macros from native code (Arith, RV32IM)

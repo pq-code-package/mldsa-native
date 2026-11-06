@@ -16,6 +16,10 @@
 #include "aarch64/auto.h"
 #endif
 
+#if defined(MLD_SYS_RISCV64)
+#include "riscv64/auto.h"
+#endif
+
 /* The x86_64 backend requires toolchain support for the SysV ABI */
 #if defined(MLD_SYS_X86_64_AVX2) && defined(MLD_SYSV_ABI_SUPPORTED) &&       \
     (!defined(MLD_CONFIG_NO_KEYPAIR_API) ||                                  \

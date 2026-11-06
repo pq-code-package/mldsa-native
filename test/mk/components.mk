@@ -8,14 +8,16 @@ ifeq ($(OPT),1)
 		$(wildcard mldsa/src/fips202/native/aarch64/src/*.c) \
 		$(wildcard mldsa/src/fips202/native/x86_64/src/*.c) \
 		$(wildcard mldsa/src/fips202/native/x86_64/src/*.S) \
-		$(wildcard mldsa/src/fips202/native/armv81m/src/*.[csS])
+		$(wildcard mldsa/src/fips202/native/armv81m/src/*.[csS]) \
+		$(wildcard mldsa/src/fips202/native/riscv64/src/*.[csS])
 endif
 
 SOURCES += $(wildcard mldsa/src/*.c)
 ifeq ($(OPT),1)
 	SOURCES += $(wildcard mldsa/src/native/aarch64/src/*.[csS]) \
 		$(wildcard mldsa/src/native/x86_64/src/*.[csS]) \
-		$(wildcard mldsa/src/native/rv32im/src/*.[csS])
+		$(wildcard mldsa/src/native/rv32im/src/*.[csS]) \
+		$(wildcard mldsa/src/native/riscv64/src/*.[csS])
 	CFLAGS += -DMLD_CONFIG_USE_NATIVE_BACKEND_ARITH \
 		-DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 endif
@@ -202,6 +204,9 @@ else ifeq ($(ABICHECK_ARCH),armv81m)
 ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/fips202/native/armv81m/src/*.S)
 else ifeq ($(ABICHECK_ARCH),riscv32)
 ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/rv32im/src/*.S)
+else ifeq ($(ABICHECK_ARCH),riscv64)
+ABICHECK_ASM_SOURCES := $(wildcard mldsa/src/native/riscv64/src/*.S) \
+                        $(wildcard mldsa/src/fips202/native/riscv64/src/*.S)
 else
 ABICHECK_ASM_SOURCES :=
 endif
@@ -255,6 +260,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLD_ARITH_BACKEND_AARCH64 \
   -DMLD_ARITH_BACKEND_X86_64_DEFAULT \
   -DMLD_ARITH_BACKEND_RV32IM \
+  -DMLD_ARITH_BACKEND_RISCV64 \
   -DMLD_RV32IM_NEED_FASTMUL \
   -DMLD_RV32IM_NEED_SLOWMUL \
   -DMLD_FIPS202_AARCH64_NEED_X1_SCALAR \
@@ -263,6 +269,7 @@ ABICHECK_ASM_CFLAGS := \
   -DMLD_FIPS202_AARCH64_NEED_X4_V8A_SCALAR_HYBRID \
   -DMLD_FIPS202_AARCH64_NEED_X4_V8A_V84A_SCALAR_HYBRID \
   -DMLD_FIPS202_ARMV81M_NEED_X4 \
+  -DMLD_FIPS202_RISCV64_NEED_X1_ZBB \
   -DMLD_FIPS202_X86_64_NEED_X4_AVX2
 
 ABICHECK_ASM_OBJS = $(call MAKE_OBJS,$(ABICHECK_DIR),$(ABICHECK_ASM_SOURCES))
