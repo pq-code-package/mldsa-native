@@ -11,4 +11,5 @@
 include test/abicheck/aarch64/abicheck_aarch64.mk
 include test/abicheck/armv81m/abicheck_armv81m.mk
 include test/abicheck/riscv32/abicheck_riscv32.mk
+include test/abicheck/riscv64/abicheck_riscv64.mk
 include test/abicheck/x86_64/abicheck_x86_64.mk

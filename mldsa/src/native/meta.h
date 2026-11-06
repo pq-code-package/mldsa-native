@@ -21,6 +21,10 @@
 #include "x86_64/meta.h"
 #endif
 
+#if defined(MLD_SYS_RISCV64_RVV)
+#include "riscv64/meta.h"
+#endif
+
 #if defined(MLD_SYS_RISCV32_M)
 #include "rv32im/fastmul.h"
 #endif
