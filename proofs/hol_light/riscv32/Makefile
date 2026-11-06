@@ -41,7 +41,9 @@ $(OBJ): %.o : %.S
 	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
-	$(STRIP) $@
+	# Keep the function's symbol, which check-binary looks for; strips
+	# without --keep-symbol drop it.
+	$(STRIP) $(patsubst %,--keep-symbol=%,$(shell sed -n 's/^\.global //p' $<)) $@ 2>/dev/null || $(STRIP) $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 

@@ -6,7 +6,9 @@
 # extension-less python scripts under scripts/ and proofs/.
 extend-include = [
     ".github/actions/cbmc/merge",
+    "scripts/check-binary",
     "proofs/cbmc/scripts/deps",
+    "proofs/hol_light/hol_trace/hol-trace",
     "proofs/hol_light/scripts/deps",
     "scripts/autogen",
     "scripts/cfify",
