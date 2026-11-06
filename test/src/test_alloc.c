@@ -247,13 +247,40 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
   }
 }
 
-#define TEST_ALLOC_FAILURE(test_name, call, alloc_limit, global_high_mark_ptr) \
+#if !defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_NO_SIGN_API)
+static int buffer_is_filled(const uint8_t *buf, size_t len, uint8_t value)
+{
+  size_t i;
+  for (i = 0; i < len; i++)
+  {
+    if (buf[i] != value)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+#define OUTPUT_STABLE_OR_ZERO(buf)               \
+  (buffer_is_filled((buf), sizeof(buf), 0xA5) || \
+   buffer_is_filled((buf), sizeof(buf), 0))
+
+#define KEYPAIR_OUTPUTS_STABLE_OR_ZERO(pk, sk)   \
+  ((buffer_is_filled((pk), sizeof(pk), 0xA5) &&  \
+    buffer_is_filled((sk), sizeof(sk), 0xA5)) || \
+   (buffer_is_filled((pk), sizeof(pk), 0) &&     \
+    buffer_is_filled((sk), sizeof(sk), 0)))
+#endif /* !MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_NO_SIGN_API */
+
+#define TEST_ALLOC_FAILURE(test_name, call, alloc_limit, global_high_mark_ptr, \
+                           prepare, output_ok)                                 \
   do                                                                           \
   {                                                                            \
     int num_allocs, i, rc;                                                     \
     /* First pass: count allocations */                                        \
     ctx->high_mark = 0;                                                        \
     reset_all(ctx);                                                            \
+    prepare;                                                                   \
     rc = call;                                                                 \
     if (rc != 0)                                                               \
     {                                                                          \
@@ -273,6 +300,7 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
     {                                                                          \
       reset_all(ctx);                                                          \
       ctx->fail_on_counter = i;                                                \
+      prepare;                                                                 \
       rc = call;                                                               \
       if (rc != MLD_ERR_OUT_OF_MEMORY)                                         \
       {                                                                        \
@@ -315,6 +343,14 @@ void custom_free(test_ctx_t *ctx, void *p, size_t sz, const char *file,
                 test_name, (int)ctx->offset, i + 1, num_allocs);               \
         return 1;                                                              \
       }                                                                        \
+      if (!(output_ok))                                                        \
+      {                                                                        \
+        fprintf(stderr,                                                        \
+                "ERROR: %s left partial caller output after allocation "       \
+                "%d/%d failed\n",                                              \
+                test_name, i + 1, num_allocs);                                 \
+        return 1;                                                              \
+      }                                                                        \
     }                                                                          \
     if (ctx->high_mark > (alloc_limit))                                        \
     {                                                                          \
@@ -345,8 +381,14 @@ static int test_keygen_alloc_failure(test_ctx_t *ctx)
   uint8_t pk[MLDSA_PK_BYTES];
   uint8_t sk[MLDSA_SK_BYTES];
 
-  TEST_ALLOC_FAILURE("mld_keypair", mld_keypair(pk, sk, ctx),
-                     MLD_TOTAL_ALLOC_KEYPAIR, &ctx->global_high_mark_keypair);
+  TEST_ALLOC_FAILURE(
+      "mld_keypair", mld_keypair(pk, sk, ctx), MLD_TOTAL_ALLOC_KEYPAIR,
+      &ctx->global_high_mark_keypair,
+      do {
+        memset(pk, 0xA5, sizeof(pk));
+        memset(sk, 0xA5, sizeof(sk));
+      } while (0),
+      KEYPAIR_OUTPUTS_STABLE_OR_ZERO(pk, sk));
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
@@ -357,7 +399,8 @@ static int test_pk_from_sk_alloc_failure(test_ctx_t *ctx)
 
   TEST_ALLOC_FAILURE("mld_pk_from_sk", mld_pk_from_sk(pk, test_vector_sk, ctx),
                      MLD_TOTAL_ALLOC_PK_FROM_SK,
-                     &ctx->global_high_mark_pk_from_sk);
+                     &ctx->global_high_mark_pk_from_sk,
+                     memset(pk, 0xA5, sizeof(pk)), OUTPUT_STABLE_OR_ZERO(pk));
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
@@ -374,7 +417,8 @@ static int test_sign_alloc_failure(test_ctx_t *ctx)
       mld_signature(sig, (const uint8_t *)TEST_VECTOR_MSG, TEST_VECTOR_MSG_LEN,
                     (const uint8_t *)TEST_VECTOR_CTX, TEST_VECTOR_CTX_LEN,
                     test_vector_sk, ctx),
-      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign,
+      memset(sig, 0xA5, sizeof(sig)), OUTPUT_STABLE_OR_ZERO(sig));
   return 0;
 }
 
@@ -382,9 +426,10 @@ static int test_signature_extmu_alloc_failure(test_ctx_t *ctx)
 {
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[64] = {0};
-  TEST_ALLOC_FAILURE("mld_signature_extmu",
-                     mld_signature_extmu(sig, mu, test_vector_sk, ctx),
-                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+  TEST_ALLOC_FAILURE(
+      "mld_signature_extmu", mld_signature_extmu(sig, mu, test_vector_sk, ctx),
+      MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign,
+      memset(sig, 0xA5, sizeof(sig)), OUTPUT_STABLE_OR_ZERO(sig));
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_RANDOMIZED_API */
@@ -398,7 +443,9 @@ static int test_signature_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
                          sig, (const uint8_t *)TEST_VECTOR_MSG,
                          TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                          TEST_VECTOR_CTX_LEN, rnd, test_vector_sk, ctx),
-                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign);
+                     MLD_TOTAL_ALLOC_SIGN, &ctx->global_high_mark_sign,
+                     memset(sig, 0xA5, sizeof(sig)),
+                     OUTPUT_STABLE_OR_ZERO(sig));
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
@@ -411,7 +458,7 @@ static int test_verify_alloc_failure(test_ctx_t *ctx)
       mld_verify(test_vector_sig, (const uint8_t *)TEST_VECTOR_MSG,
                  TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
                  TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
-      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify, (void)0, 1);
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
@@ -422,7 +469,8 @@ static int test_verify_extmu_alloc_failure(test_ctx_t *ctx)
   TEST_ALLOC_FAILURE("mld_verify_extmu",
                      mld_verify_extmu(test_vector_sig_extmu, test_vector_mu,
                                       test_vector_pk, ctx),
-                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+                     MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify,
+                     (void)0, 1);
   return 0;
 }
 
@@ -434,7 +482,7 @@ static int test_verify_pre_hash_shake256_alloc_failure(test_ctx_t *ctx)
           test_vector_sig_pre_hash_shake256, (const uint8_t *)TEST_VECTOR_MSG,
           TEST_VECTOR_MSG_LEN, (const uint8_t *)TEST_VECTOR_CTX,
           TEST_VECTOR_CTX_LEN, test_vector_pk, ctx),
-      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify);
+      MLD_TOTAL_ALLOC_VERIFY, &ctx->global_high_mark_verify, (void)0, 1);
   return 0;
 }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
