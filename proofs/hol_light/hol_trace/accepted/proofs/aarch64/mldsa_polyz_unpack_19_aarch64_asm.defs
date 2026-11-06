@@ -1,0 +1,20 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_polyz_unpack_19_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_polyz_unpack_19_mc: 140 bytes
+# sha256 f62993fef8a4ba95fd064214a560443451efb0b94804293b53edf57de743014f
+definition mldsa_polyz_unpack_19_mc
+  |- mldsa_polyz_unpack_19_mc
+     = #x[58 00 c0 3d 59 04 c0 3d 5a 08 c0 3d 5b 0c c0 3d 83 1f c0 d2 7c 0c 08 4e fd d5 00 4f 1e 45
+          00 4f 09 02 80 d2 20 a0 40 4c 21 60 00 91 22 70 df 4c 04 00 18 4e 05 20 19 4e 26 00 1a 4e
+          27 20 1b 4e 84 44 bc 6e 84 1c 3d 4e c4 87 a4 6e a5 44 bc 6e a5 1c 3d 4e c5 87 a5 6e c6 44
+          bc 6e c6 1c 3d 4e c6 87 a6 6e e7 44 bc 6e e7 1c 3d 4e c7 87 a7 6e 05 04 80 3d 06 08 80 3d
+          07 0c 80 3d 04 04 84 3c 29 05 00 f1 01 fd ff 54 c0 03 5f d6]

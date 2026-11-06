@@ -1,0 +1,19 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_caddq_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_poly_caddq_mc: 92 bytes
+# sha256 f4b0d7c6cf3806fe6d5ab7e94b7c135302ad450eeae48bb2a4d7c4c8224b699d
+definition mldsa_poly_caddq_mc
+  |- mldsa_poly_caddq_mc
+     = #x[29 00 9c 52 e9 0f a0 72 24 0d 04 4e 01 02 80 d2 00 00 c0 3d 01 04 c0 3d 02 08 c0 3d 03 0c
+          c0 3d 05 04 21 6f a0 94 a4 4e 25 04 21 6f a1 94 a4 4e 45 04 21 6f a2 94 a4 4e 65 04 21 6f
+          a3 94 a4 4e 01 04 80 3d 02 08 80 3d 03 0c 80 3d 00 04 84 3c 21 04 00 f1 e1 fd ff 54 c0 03
+          5f d6]

@@ -2565,10 +2565,14 @@ def check_macro_typos():
             if m.startswith("MLDSA_NATIVE_MLDSA") or m in ["MLDSA_DIR"]:
                 return True
 
-        # 3. Exclude HOL-Light proof scripts
+        # 3. Exclude HOL-Light proof scripts and their theorem names.
         if is_autogen or filename.startswith("proofs/hol_light"):
-            if filename.endswith(".ml"):
+            if filename.endswith((".ml", "/list_thms.sh")):
                 return True
+
+        # Exclude the HOL Light terms accepted by hol-trace.
+        if filename.startswith("proofs/hol_light/hol_trace/accepted/"):
+            return True
 
         # 3b. Isabelle .thy files: <name>_def is the auto-generated
         # unfolding-rule name for a `definition <name> = ...`. Allow it.

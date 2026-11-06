@@ -1,0 +1,107 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_intt_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_intt_mc: 2736 bytes
+# sha256 6dcf9100ace60dc47a15609b904c4ee43db01f519c8d73f51fc4c54eef9a2e81
+definition mldsa_intt_mc
+  |- mldsa_intt_mc
+     = #x[ff 03 01 d1 e8 27 00 6d ea 2f 01 6d ec 37 02 6d ee 3f 03 6d 25 00 9c 52 e5 0f a0 72 bf 0c
+          04 4e e3 03 00 aa 04 02 80 d2 7b 04 c0 3d 72 00 c0 3d 63 08 c0 3d 6d 0c c0 3d 22 0c c0 3d
+          68 1c c0 3d 75 18 c0 3d 4a 2a 9b 4e 57 6a 9b 4e 66 28 8d 4e 72 68 8d 4e 2c 14 c0 3d 31 10
+          c0 3d 5d 69 c6 4e ee 6a d2 4e 4a 29 c6 4e fa 2a d2 4e a3 87 ae 6e ad 2a 88 4e 26 04 c0 3d
+          58 85 ba 4e 5e 85 ba 6e 6c b4 ac 6e 29 08 c0 3d c5 b7 a2 6e 64 9c b1 4e 63 14 c0 3d aa 87
+          ae 4e 7a 10 c0 3d cf 9f a9 4e be 6a 88 4e 15 87 aa 6e 1d 87 aa 4e af 40 9f 6f 30 04 c6 3c
+          4a 6b 83 4e 84 41 9f 6f 43 2b 83 4e 20 14 c0 3d 59 69 de 4e ac b6 a6 6e 61 68 cd 4e b5 9e
+          b0 4e 37 84 b9 6e e2 85 a4 6e f4 85 a4 4e e4 b6 a0 6e 67 28 cd 4e 43 b4 a6 6e 4f 29 de 4e
+          95 41 9f 6f 2c 0c c0 3d ed 84 af 6e 4a 9c b0 4e 30 10 c0 3d 25 08 c0 3d 6a 40 9f 6f ab 6b
+          94 4e a2 b5 ac 6e 49 04 42 fc b1 9d a5 4e b8 2b 94 4e ac 2a 8a 4e aa 6a 8a 4e f6 9e b0 4e
+          5a 00 df 3c 0d 2b cc 4e 63 29 ca 4e 51 40 9f 6f 96 40 9f 6f b7 85 a3 6e 6a 69 ca 4e e0 d2
+          ba 4f 15 6b cc 4e fd 82 9a 4f b7 86 aa 6e e8 da ba 4f 26 84 b9 4e ab 86 aa 4e 1d 40 9f 6f
+          be 85 a3 4e 22 04 c0 3d e3 8a 9a 4f ec 84 af 4e 03 41 9f 6f cd 87 ab 6e 95 85 a6 6e 3a 86
+          b6 4e bc d1 a9 4f b2 81 89 4f a8 87 a3 6e b8 b6 a2 6e cf 87 ab 4e aa 87 a3 4e 8e 85 a6 4e
+          10 d1 a9 4f 23 86 b6 6e 08 81 89 4f 31 04 c6 3c 84 08 00 d1 44 04 42 fc a0 9e b1 4e 67 28
+          c0 3d 7b 2c c0 3d 08 42 9f 6f 7d 20 c0 3d c9 29 9a 4e 79 24 c0 3d 00 43 9f 6f 6f 04 84 3c
+          e1 28 9b 4e 2f 14 c0 3d ec 68 9b 4e 70 b4 a2 6e b5 2b 99 4e 68 00 9f 3c b3 6b 99 4e 92 43
+          9f 6f 36 0c c0 3d ad 6a c1 4e 65 6a cc 4e 77 9c b1 4e b1 2a c1 4e 3d 10 c0 3d 17 42 9f 6f
+          be 85 a5 6e 78 2a cc 4e 6a 00 9d 3c d0 b7 af 6e 2a 08 c0 3d cc 69 9a 4e 72 00 9e 3c cb 9f
+          bd 4e 28 86 b8 6e 14 28 97 4e 22 04 c0 3d 1a 68 97 4e 13 b5 b6 6e 4e 00 df 3c 35 29 d4 4e
+          08 9d aa 4e 86 29 da 4e 20 69 d4 4e 0b 42 9f 6f a7 86 a6 6e 9c 69 da 4e aa 86 a6 4e f2 80
+          8e 4f b4 85 a5 4e fe d0 ae 4f 15 84 bc 6e 0d 84 bc 4e 29 86 b8 4e a1 da ae 4f 31 04 c6 3c
+          ae 8a 8e 4f 35 85 b4 6e d2 43 9f 6f 2e 40 9f 6f 68 42 9f 6f 43 85 ad 6e 4f 85 ad 4e 7c d0
+          a4 4f 4a 86 ae 4e 53 86 ae 6e 72 80 84 4f 03 85 ab 6e 1a 85 ab 4e 70 d2 a4 4f 2e 85 b4 4e
+          68 82 84 4f b8 b6 a2 6e 84 04 00 f1 e4 f6 ff b5 73 b4 a2 6e c0 69 9a 4e 6f 04 84 3c de 29
+          9a 4e ba 9e b1 4e 6a 00 9d 3c 5d 04 42 fc 1a 43 9f 6f 6a 9c b1 4e 4e 00 df 3c 6a 42 9f 6f
+          08 42 9f 6f 56 6b 8a 4e 59 2b 8a 4e c1 2b d9 4e 02 28 d6 4e cd 6b d9 4e 07 68 d6 4e 92 43
+          9f 6f 36 84 a2 6e a3 85 a7 4e db d2 ae 4f a4 85 a7 6e 68 00 9f 3c 80 d8 ae 4f 30 84 a2 4e
+          72 00 9e 3c 97 88 8e 4f 04 86 a3 4e 11 86 a3 6e ce 82 8e 4f 64 04 84 3c 17 40 9f 6f 6e 43
+          9f 6f 2b 82 9d 4f 2a d2 bd 4f c0 85 b7 6e c6 85 b7 4e 0c d0 bd 4f 00 80 9d 4f 66 00 9d 3c
+          4b 41 9f 6f 80 41 9f 6f 6b 00 9e 3c 60 00 9f 3c c5 ff 87 52 bd 0c 04 4e 65 c0 81 52 05 08
+          a0 72 be 0c 04 4e 84 00 80 d2 40 04 c8 3c 41 00 d9 3c 42 00 da 3c 43 00 db 3c 44 00 dc 3c
+          45 00 dd 3c 46 00 de 3c 47 00 df 3c 08 30 c0 3d 1b 20 c0 3d 14 70 c0 3d 17 60 c0 3d 18 f0
+          c0 3d 1c 10 c0 3d 19 d0 c0 3d 0a e0 c0 3d 6f 87 a8 6e 1a 00 c0 3d 12 c0 c0 3d e9 86 b4 4e
+          eb 81 84 4f f3 86 b4 6e 56 85 b8 6e 0d 90 c0 3d ec d1 a4 4f 4e 87 bc 6e 11 80 c0 3d 57 86
+          b9 4e cf d9 a3 4f 52 86 b9 6e d9 89 83 4f 30 86 ad 6e 8b 41 9f 6f 55 85 b8 4e f9 41 9f 6f
+          0c 8a 85 4f ea 86 b5 6e 4e d1 a3 4f f7 86 b5 4e 7b 87 a8 4e 4f 81 83 4f 38 87 ab 4e 2a 87
+          ab 6e 19 40 c0 3d 48 da a6 4f 55 87 bc 4e 1a 50 c0 3d 14 da a5 4f dc d2 a7 4f 2b 87 ba 4e
+          cf 41 9f 6f 31 86 ad 4e cd 82 87 4f 0e a0 c0 3d 16 b0 c0 3d 8d 43 9f 6f 30 87 ba 6e bc 86
+          bb 6e 8c 42 9f 6f 74 85 a9 4e da 85 b6 4e ce 85 b6 6e 96 db a1 4f 69 85 a9 6e d9 81 86 4f
+          2b 86 ba 6e 31 86 ba 4e ba 86 bb 4e 7b d9 a2 4f 75 89 82 4f 4b 8a 86 4f 0b 41 9f 6f c8 d1
+          a6 4f 52 87 b4 4e 75 43 9f 6f 3b 86 b7 6e 8e 8b 81 4f 5c 87 b4 6e 37 86 b7 4e 19 41 9f 6f
+          ba 86 af 4e af 86 af 6e 68 82 85 4f ce 42 9f 6f 76 85 ad 6e 94 85 b9 6e 95 85 b9 4e cc d2
+          a3 4f 11 8a 84 4f 19 da a4 4f 70 85 ad 4e cb 82 83 4f 73 d2 a5 4f f6 d1 a1 4f 8d da a2 4f
+          94 8a 82 4f 8b 41 9f 6f b4 41 9f 6f 4d 86 b7 6e 57 86 b7 4e 31 43 9f 6f 68 42 9f 6f 92 86
+          ab 6e 94 86 ab 4e 2c d1 a2 4f ef 81 81 4f 2b 86 a8 6e cf 42 9f 6f 33 86 a8 4e 79 d1 a2 4f
+          11 87 b3 4e 18 87 b3 6e 73 81 82 4f 08 db a0 4f 33 43 9f 6f 39 81 82 4f 84 04 00 d1 b6 86
+          b0 6e 99 41 9f 6f ac 86 b0 4e 09 8b 80 4f 09 41 9f 6f d0 85 b9 6e ce 85 b9 4e d8 d2 a1 4f
+          cb 85 ba 6e 15 da a0 4f d9 85 ba 4e ce 82 81 4f 0e 43 9f 6f 10 8a 80 4f b0 42 9f 6f 38 85
+          ae 4e 35 b7 be 6e 7a d1 a0 4f 28 9f bd 4e a8 42 9f 6f 19 9f bd 4e 76 81 80 4f 2b 86 ac 6e
+          08 20 80 3d 28 85 ae 6e 0e 86 af 4e 69 d1 a0 4f 15 86 af 6e 56 43 9f 6f 6f 81 80 4f 2f 41
+          9f 6f 2b 86 ac 4e 50 89 81 4f 16 a0 80 3d 5a d9 a1 4f 0f 90 80 3d 09 d1 a0 4f 0c 81 80 4f
+          50 43 9f 6f 6a d3 a1 4f cf b5 be 6e 16 86 b3 4e 13 86 b3 6e 2c 41 9f 6f c8 86 b4 4e da 86
+          b4 6e 7b 83 81 4f 71 b5 be 6e 5b 41 9f 6f 74 9d bd 4e 16 b7 be 6e 34 42 9f 6f ce 9d bd 4e
+          f0 b6 be 6e 14 10 80 3d ab d2 a0 4f 94 db a0 4f f1 9e bd 4e 97 8b 80 4f 11 42 9f 6f aa 82
+          80 4f 0c d0 80 3d d9 42 9f 6f 11 04 81 3c 11 b0 c0 3d ee 41 9f 6f 0c 80 c0 3d b0 d1 a0 4f
+          19 4c 80 3d bc 81 80 4f 0d 90 c0 3d 0e 5c 80 3d 4e 82 81 4f 1c 42 9f 6f 15 30 c0 3d 6a 41
+          9f 6f 97 42 9f 6f 1c 7c 80 3d 0b c0 c0 3d 5c d2 a1 4f 0a dc 80 3d 70 8a 80 4f 73 da a0 4f
+          4a d3 a0 4f 92 85 ad 4e 8c 85 ad 6e 70 42 9f 6f 09 a0 c0 3d 14 e0 c0 3d f8 86 bb 4e f9 86
+          bb 6e 53 83 80 4f 8e 43 9f 6f 2d 85 b1 4e 5c 86 ad 6e 53 41 9f 6f 37 d3 a0 4f 2f 83 80 4f
+          13 ac 80 3d 13 20 c0 3d 16 b5 be 6e ef 42 9f 6f 1a 86 ae 4e 0a 9d bd 4e 48 86 ad 4e 4d b7
+          be 6e 0f bc 80 3d 32 85 b1 6e 5b 9f bd 4e 97 d9 a5 4f bb 41 9f 6f 59 82 86 4f 4d d2 a6 4f
+          1b 6c 80 3d 7b 86 b5 6e 75 86 b5 4e 92 89 85 4f 09 86 ae 6e 1a 9f bd 4e 0c f0 c0 3d b9 41
+          9f 6f 90 86 ac 6e 11 b7 be 6e 0d 82 87 4f f2 42 9f 6f 3a 42 9f 6f 31 d1 a0 4f 18 d2 a7 4f
+          10 d0 c0 3d 1a 3c 80 3d 4f 86 b9 6e 37 81 80 4f 13 60 c0 3d 0e 70 c0 3d e9 d9 a2 4f 94 86
+          ac 4e 6c 85 b0 4e fa 89 82 4f 70 85 b0 6e 8b 85 b4 6e 37 42 9f 6f 94 85 b4 4e 6c 86 ae 6e
+          71 83 84 4f ca 42 9f 6f 76 86 ae 4e 0e 10 c0 3d 17 ec 80 3d 77 d3 a4 4f 13 40 c0 3d 0f 50
+          c0 3d 3a 41 9f 6f 0a 2c 80 3d 6a d1 a3 4f 1b 85 b4 6e 0d 43 9f 6f 08 85 b4 4e 74 86 af 6e
+          09 da a6 4f 73 86 af 4e 0f 00 c0 3d 98 8a 84 4f f1 42 9f 6f f7 85 ae 4e ee 85 ae 6e 6f 81
+          83 4f eb 86 b5 6e 10 8a 86 4f f7 86 b5 4e 55 86 b9 4e 99 da a4 4f 92 d1 a5 4f d4 d9 a3 4f
+          8c 81 85 4f 30 41 9f 6f 4c 42 9f 6f 38 43 9f 6f 19 86 ad 6e 10 86 ad 4e 8d 8b 82 4f 29 d3
+          a3 4f 32 83 83 4f 99 db a2 4f 32 41 9f 6f 4f 41 9f 6f 09 87 ac 6e dc 89 83 4f 0c 87 ac 4e
+          9c 42 9f 6f 54 87 b2 4e 78 86 b6 4e 2d 43 9f 6f 52 87 b2 6e 7a d9 a1 4f f9 86 b8 4e 6e 89
+          81 4f 8a 87 b1 6e 91 87 b1 4e fc 86 b8 6e 2b d1 a2 4f 76 86 b6 6e 38 86 ac 6e 4e 43 9f 6f
+          31 86 ac 4e cc d2 a2 4f b7 85 af 6e ba 85 af 4e 33 81 82 4f e9 d2 a1 4f ef 82 81 4f 73 41
+          9f 6f 2d 87 a8 6e 2f 41 9f 6f 37 87 a8 4e 08 db a0 4f d9 82 82 4f 84 04 00 f1 e4 e4 ff b5
+          16 8b 80 4f e9 b6 be 6e 99 41 9f 6f f7 9e bd 4e 37 41 9f 6f 16 41 9f 6f 4b d9 a1 4f c9 85
+          b9 6e 17 04 81 3c 57 89 81 4f 38 d9 a0 4f 77 41 9f 6f 29 89 80 4f 09 43 9f 6f f8 86 b3 6e
+          f3 86 b3 4e 88 8b 80 4f d7 85 b9 4e ab 81 80 4f b9 86 b0 6e 2a 85 af 6e 2f 85 af 4e b0 86
+          b0 4e 9c db a0 4f e9 86 ba 4e 2e 86 b0 4e b5 d1 a0 4f 2d 86 b0 6e d0 9d bd 4e ec 86 ba 6e
+          b1 81 80 4f 88 43 9f 6f dc b5 be 6e 6e 86 b4 6e 74 86 b4 4e b3 d1 a0 4f 7a d3 a1 4f 90 43
+          9f 6f 9c d1 a0 4f 7b 83 81 4f 10 0c 80 3d 8c 81 80 4f 8c 43 9f 6f 5b 43 9f 6f 3a d3 a1 4f
+          0c 9c 80 3d cc d1 a0 4f 0d 85 bb 6e 1b 85 bb 4e d0 81 80 4f 88 9e bd 4e 90 41 9f 6f 4c 82
+          81 4f 8e b6 be 6e 10 ac 80 3d 54 d2 a1 4f 39 83 81 4f 59 43 9f 6f 71 42 9f 6f 32 9d bd 4e
+          dc 86 b9 4e 29 b5 be 6e d7 86 b9 6e 11 8c 80 3d ab 42 9f 6f c8 41 9f 6f 95 b7 be 6e 0b 7c
+          80 3d 91 9f bd 4e 08 2c 80 3d 5c 81 80 4f b1 42 9f 6f 55 d1 a0 4f e8 9d bd 4e 11 4c 80 3d
+          ef b5 be 6e 0a 8b 80 4f 18 db a0 4f 8c 42 9f 6f e8 41 9f 6f 0a 43 9f 6f 78 b7 be 6e 08 5c
+          80 3d ae 81 80 4f 50 85 ac 6e b1 d1 a0 4f 4a 85 ac 4e 6d 9f bd 4e 54 b5 be 6e 2e 42 9f 6f
+          0d 43 9f 6f f8 d2 a0 4f 0e bc 80 3d 08 d2 a0 4f 0d 3c 80 3d 32 41 9f 6f e9 82 80 4f 0e 82
+          80 4f 12 1c 80 3d 5b 9d bd 4e bc 42 9f 6f 0e 41 9f 6f 9b 42 9f 6f 1c dc 80 3d 09 43 9f 6f
+          0e ec 80 3d 1b 6c 80 3d 09 cc 80 3d e8 27 40 6d ea 2f 41 6d ec 37 42 6d ee 3f 43 6d ff 03
+          01 91 c0 03 5f d6]

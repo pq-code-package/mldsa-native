@@ -1,0 +1,76 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_intt_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_intt_aarch64_asm MLDSA_INTT_SUBROUTINE_CORRECT
+  |- !a:int64 z_78:int64 z_123456:int64 zetas_78:(int32 list) zetas_123456:(int32 list)
+      x:(num -> int32) pc:num stackpointer:int64 returnaddress:int64.
+       aligned 16 stackpointer
+       /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+            [a, 1024; word_sub stackpointer (word 64 : int64), 64]
+            [(word pc : int64), LENGTH mldsa_intt_mc; z_78, LENGTH intt_zetas_layer78 * 4;
+             z_123456, LENGTH intt_zetas_layer123456 * 4]
+       /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 64 : int64), 64)
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mldsa_intt_mc
+               /\ read PC s = (word pc : int64)
+               /\ read SP s = stackpointer
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [a; z_78; z_123456] s
+               /\ (wordlist_from_memory (z_78, LENGTH intt_zetas_layer78) s : int32 list) = zetas_78
+               /\ (wordlist_from_memory (z_123456, LENGTH intt_zetas_layer123456) s : int32 list)
+                  = zetas_123456
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i))
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ (zetas_78 = MAP (iword : int -> int32) intt_zetas_layer78
+                  /\ zetas_123456 = MAP (iword : int -> int32) intt_zetas_layer123456
+                  /\ (!i:num. i < 256 ==> abs (ival (x i)) <= &8380416)
+                  ==> (!i:num.
+                        i < 256
+                        ==> (let zi:int32 =
+                                read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s in
+                            (ival zi == arm_mldsa_inverse_ntt ((ival : int32 -> int) o x) i)
+                              (mod &8380417)
+                            /\ abs (ival zi) <= &8380416))))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 1024);
+                           memory :> bytes (word_sub stackpointer (word 64 : int64), 64)])
+
+theorem mldsa_intt_aarch64_asm MLDSA_INTT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 z_78:int64 z_123456:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 16 stackpointer
+         /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool)
+              [a, 1024; word_sub stackpointer (word 64 : int64), 64]
+              [(word pc : int64), LENGTH mldsa_intt_mc; z_78, LENGTH intt_zetas_layer78 * 4;
+               z_123456, LENGTH intt_zetas_layer123456 * 4]
+         /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 64 : int64), 64)
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) mldsa_intt_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read SP s = stackpointer
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [a; z_78; z_123456] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events z_78 z_123456 a pc (word_sub stackpointer (word 64 : int64))
+                             returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 1024; z_78, 1536; z_123456, 640;
+                            word_sub stackpointer (word 64 : int64), 64]
+                           [a, 1024; word_sub stackpointer (word 64 : int64), 64]))
+               (\s:armstate s':armstate. T)

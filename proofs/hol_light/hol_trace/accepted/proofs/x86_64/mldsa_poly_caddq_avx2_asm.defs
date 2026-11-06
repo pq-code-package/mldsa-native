@@ -1,0 +1,48 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_caddq_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_caddq_mc: 883 bytes
+# sha256 d818db2ba5e45b6db5616e9f82de7d71badf774dfe0ea72d8ca3f86c89293018
+definition mldsa_caddq_mc
+  |- mldsa_caddq_mc
+     = #x[f3 0f 1e fa c5 e9 ef d2 b8 01 e0 7f 00 c5 f9 6e c8 c4 e2 7d 58 c9 c5 ed 66 07 c5 fd db c1
+          c5 fd fe 07 c5 fd 7f 07 c5 ed 66 5f 20 c5 e5 db d9 c5 e5 fe 5f 20 c5 fd 7f 5f 20 c5 ed 66
+          67 40 c5 dd db e1 c5 dd fe 67 40 c5 fd 7f 67 40 c5 ed 66 6f 60 c5 d5 db e9 c5 d5 fe 6f 60
+          c5 fd 7f 6f 60 c5 ed 66 87 80 00 00 00 c5 fd db c1 c5 fd fe 87 80 00 00 00 c5 fd 7f 87 80
+          00 00 00 c5 ed 66 9f a0 00 00 00 c5 e5 db d9 c5 e5 fe 9f a0 00 00 00 c5 fd 7f 9f a0 00 00
+          00 c5 ed 66 a7 c0 00 00 00 c5 dd db e1 c5 dd fe a7 c0 00 00 00 c5 fd 7f a7 c0 00 00 00 c5
+          ed 66 af e0 00 00 00 c5 d5 db e9 c5 d5 fe af e0 00 00 00 c5 fd 7f af e0 00 00 00 c5 ed 66
+          87 00 01 00 00 c5 fd db c1 c5 fd fe 87 00 01 00 00 c5 fd 7f 87 00 01 00 00 c5 ed 66 9f 20
+          01 00 00 c5 e5 db d9 c5 e5 fe 9f 20 01 00 00 c5 fd 7f 9f 20 01 00 00 c5 ed 66 a7 40 01 00
+          00 c5 dd db e1 c5 dd fe a7 40 01 00 00 c5 fd 7f a7 40 01 00 00 c5 ed 66 af 60 01 00 00 c5
+          d5 db e9 c5 d5 fe af 60 01 00 00 c5 fd 7f af 60 01 00 00 c5 ed 66 87 80 01 00 00 c5 fd db
+          c1 c5 fd fe 87 80 01 00 00 c5 fd 7f 87 80 01 00 00 c5 ed 66 9f a0 01 00 00 c5 e5 db d9 c5
+          e5 fe 9f a0 01 00 00 c5 fd 7f 9f a0 01 00 00 c5 ed 66 a7 c0 01 00 00 c5 dd db e1 c5 dd fe
+          a7 c0 01 00 00 c5 fd 7f a7 c0 01 00 00 c5 ed 66 af e0 01 00 00 c5 d5 db e9 c5 d5 fe af e0
+          01 00 00 c5 fd 7f af e0 01 00 00 c5 ed 66 87 00 02 00 00 c5 fd db c1 c5 fd fe 87 00 02 00
+          00 c5 fd 7f 87 00 02 00 00 c5 ed 66 9f 20 02 00 00 c5 e5 db d9 c5 e5 fe 9f 20 02 00 00 c5
+          fd 7f 9f 20 02 00 00 c5 ed 66 a7 40 02 00 00 c5 dd db e1 c5 dd fe a7 40 02 00 00 c5 fd 7f
+          a7 40 02 00 00 c5 ed 66 af 60 02 00 00 c5 d5 db e9 c5 d5 fe af 60 02 00 00 c5 fd 7f af 60
+          02 00 00 c5 ed 66 87 80 02 00 00 c5 fd db c1 c5 fd fe 87 80 02 00 00 c5 fd 7f 87 80 02 00
+          00 c5 ed 66 9f a0 02 00 00 c5 e5 db d9 c5 e5 fe 9f a0 02 00 00 c5 fd 7f 9f a0 02 00 00 c5
+          ed 66 a7 c0 02 00 00 c5 dd db e1 c5 dd fe a7 c0 02 00 00 c5 fd 7f a7 c0 02 00 00 c5 ed 66
+          af e0 02 00 00 c5 d5 db e9 c5 d5 fe af e0 02 00 00 c5 fd 7f af e0 02 00 00 c5 ed 66 87 00
+          03 00 00 c5 fd db c1 c5 fd fe 87 00 03 00 00 c5 fd 7f 87 00 03 00 00 c5 ed 66 9f 20 03 00
+          00 c5 e5 db d9 c5 e5 fe 9f 20 03 00 00 c5 fd 7f 9f 20 03 00 00 c5 ed 66 a7 40 03 00 00 c5
+          dd db e1 c5 dd fe a7 40 03 00 00 c5 fd 7f a7 40 03 00 00 c5 ed 66 af 60 03 00 00 c5 d5 db
+          e9 c5 d5 fe af 60 03 00 00 c5 fd 7f af 60 03 00 00 c5 ed 66 87 80 03 00 00 c5 fd db c1 c5
+          fd fe 87 80 03 00 00 c5 fd 7f 87 80 03 00 00 c5 ed 66 9f a0 03 00 00 c5 e5 db d9 c5 e5 fe
+          9f a0 03 00 00 c5 fd 7f 9f a0 03 00 00 c5 ed 66 a7 c0 03 00 00 c5 dd db e1 c5 dd fe a7 c0
+          03 00 00 c5 fd 7f a7 c0 03 00 00 c5 ed 66 af e0 03 00 00 c5 d5 db e9 c5 d5 fe af e0 03 00
+          00 c5 fd 7f af e0 03 00 00 c5 f8 77 c3]
+
+definition mldsa_caddq_tmc
+  |- mldsa_caddq_tmc = TRIM_LIST (4, 0) mldsa_caddq_mc

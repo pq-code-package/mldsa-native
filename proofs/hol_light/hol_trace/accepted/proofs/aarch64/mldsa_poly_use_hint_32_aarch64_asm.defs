@@ -1,0 +1,25 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_use_hint_32_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# poly_use_hint_32_aarch64_asm_mc: 276 bytes
+# sha256 d6961ba61dc57a3b20a549a82acfe1b6d13352c2bc92fb7058e986715c13f27d
+definition poly_use_hint_32_aarch64_asm_mc
+  |- poly_use_hint_32_aarch64_asm_mc
+     = #x[24 00 9c 52 e4 0f a0 72 94 0c 04 4e 05 20 9c 52 65 0f a0 72 b5 0c 04 4e 07 c0 9f 52 e7 00
+          a0 72 f6 0c 04 4e 2b 80 80 52 0b 02 a8 72 77 0d 04 4e f8 05 00 4f 03 02 80 d2 01 04 c0 3d
+          02 08 c0 3d 03 0c c0 3d 00 00 c0 3d 25 04 c0 3d 26 08 c0 3d 27 0c c0 3d 24 04 c4 3c 31 b4
+          b7 4e 31 26 2e 4f 39 34 b5 4e 21 96 b6 6e 31 1e 79 4e 21 84 b9 4e 21 98 a0 6e 21 14 00 4f
+          31 94 a5 4e 31 1e 38 4e 52 b4 b7 4e 52 26 2e 4f 59 34 b5 4e 42 96 b6 6e 52 1e 79 4e 42 84
+          b9 4e 42 98 a0 6e 22 14 00 4f 52 94 a6 4e 52 1e 38 4e 73 b4 b7 4e 73 26 2e 4f 79 34 b5 4e
+          63 96 b6 6e 73 1e 79 4e 63 84 b9 4e 63 98 a0 6e 23 14 00 4f 73 94 a7 4e 73 1e 38 4e 10 b4
+          b7 4e 10 26 2e 4f 19 34 b5 4e 00 96 b6 6e 10 1e 79 4e 00 84 b9 4e 00 98 a0 6e 20 14 00 4f
+          10 94 a4 4e 10 1e 38 4e 11 04 80 3d 12 08 80 3d 13 0c 80 3d 10 04 84 3c 63 04 00 f1 61 f9
+          ff 54 c0 03 5f d6]

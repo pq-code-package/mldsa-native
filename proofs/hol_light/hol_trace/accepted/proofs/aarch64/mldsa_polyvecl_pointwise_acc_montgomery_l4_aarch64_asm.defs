@@ -1,0 +1,29 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_pointwise_acc_l4_mc: 392 bytes
+# sha256 e6f619d4700c1047c49f79238aae54dced7dbc7471e2adc2c63c47ee2d6c7b9d
+definition mldsa_pointwise_acc_l4_mc
+  |- mldsa_pointwise_acc_l4_mc
+     = #x[23 00 9c 52 e3 0f a0 72 60 0c 04 4e 23 00 84 52 03 70 a0 72 61 0c 04 4e 03 08 80 d2 31 04
+          c0 3d 32 08 c0 3d 33 0c c0 3d 30 04 c4 3c 55 04 c0 3d 56 08 c0 3d 57 0c c0 3d 54 04 c4 3c
+          18 c2 b4 0e 19 c2 b4 4e 3a c2 b5 0e 3b c2 b5 4e 5c c2 b6 0e 5d c2 b6 4e 7e c2 b7 0e 7f c2
+          b7 4e 30 f0 c0 3d 31 f4 c0 3d 32 f8 c0 3d 33 fc c0 3d 54 f0 c0 3d 55 f4 c0 3d 56 f8 c0 3d
+          57 fc c0 3d 18 82 b4 0e 19 82 b4 4e 3a 82 b5 0e 3b 82 b5 4e 5c 82 b6 0e 5d 82 b6 4e 7e 82
+          b7 0e 7f 82 b7 4e 30 f0 c1 3d 31 f4 c1 3d 32 f8 c1 3d 33 fc c1 3d 54 f0 c1 3d 55 f4 c1 3d
+          56 f8 c1 3d 57 fc c1 3d 18 82 b4 0e 19 82 b4 4e 3a 82 b5 0e 3b 82 b5 4e 5c 82 b6 0e 5d 82
+          b6 4e 7e 82 b7 0e 7f 82 b7 4e 30 f0 c2 3d 31 f4 c2 3d 32 f8 c2 3d 33 fc c2 3d 54 f0 c2 3d
+          55 f4 c2 3d 56 f8 c2 3d 57 fc c2 3d 18 82 b4 0e 19 82 b4 4e 3a 82 b5 0e 3b 82 b5 4e 5c 82
+          b6 0e 5d 82 b6 4e 7e 82 b7 0e 7f 82 b7 4e 10 1b 99 4e 10 9e a1 4e 18 a2 a0 0e 19 a2 a0 4e
+          10 5b 99 4e 51 1b 9b 4e 31 9e a1 4e 3a a2 a0 0e 3b a2 a0 4e 51 5b 9b 4e 92 1b 9d 4e 52 9e
+          a1 4e 5c a2 a0 0e 5d a2 a0 4e 92 5b 9d 4e d3 1b 9f 4e 73 9e a1 4e 7e a2 a0 0e 7f a2 a0 4e
+          d3 5b 9f 4e 11 04 80 3d 12 08 80 3d 13 0c 80 3d 10 04 84 3c 63 10 00 f1 e3 f4 ff b5 c0 03
+          5f d6]

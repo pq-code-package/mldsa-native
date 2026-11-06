@@ -1,0 +1,37 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_chknorm_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_poly_chknorm_mc: 565 bytes
+# sha256 e9119f95df71a772d3ce0523a652d385a849e044caad592805d9fe949875cd60
+definition mldsa_poly_chknorm_mc
+  |- mldsa_poly_chknorm_mc
+     = #x[f3 0f 1e fa 83 ee 01 c5 f1 ef c9 c5 f9 6e d6 c4 e2 7d 58 d2 c4 e2 7d 1e 07 c5 fd 66 c2 c5
+          f5 eb c8 c4 e2 7d 1e 5f 20 c5 e5 66 da c5 f5 eb cb c4 e2 7d 1e 67 40 c5 dd 66 e2 c5 f5 eb
+          cc c4 e2 7d 1e 6f 60 c5 d5 66 ea c5 f5 eb cd c4 e2 7d 1e 87 80 00 00 00 c5 fd 66 c2 c5 f5
+          eb c8 c4 e2 7d 1e 9f a0 00 00 00 c5 e5 66 da c5 f5 eb cb c4 e2 7d 1e a7 c0 00 00 00 c5 dd
+          66 e2 c5 f5 eb cc c4 e2 7d 1e af e0 00 00 00 c5 d5 66 ea c5 f5 eb cd c4 e2 7d 1e 87 00 01
+          00 00 c5 fd 66 c2 c5 f5 eb c8 c4 e2 7d 1e 9f 20 01 00 00 c5 e5 66 da c5 f5 eb cb c4 e2 7d
+          1e a7 40 01 00 00 c5 dd 66 e2 c5 f5 eb cc c4 e2 7d 1e af 60 01 00 00 c5 d5 66 ea c5 f5 eb
+          cd c4 e2 7d 1e 87 80 01 00 00 c5 fd 66 c2 c5 f5 eb c8 c4 e2 7d 1e 9f a0 01 00 00 c5 e5 66
+          da c5 f5 eb cb c4 e2 7d 1e a7 c0 01 00 00 c5 dd 66 e2 c5 f5 eb cc c4 e2 7d 1e af e0 01 00
+          00 c5 d5 66 ea c5 f5 eb cd c4 e2 7d 1e 87 00 02 00 00 c5 fd 66 c2 c5 f5 eb c8 c4 e2 7d 1e
+          9f 20 02 00 00 c5 e5 66 da c5 f5 eb cb c4 e2 7d 1e a7 40 02 00 00 c5 dd 66 e2 c5 f5 eb cc
+          c4 e2 7d 1e af 60 02 00 00 c5 d5 66 ea c5 f5 eb cd c4 e2 7d 1e 87 80 02 00 00 c5 fd 66 c2
+          c5 f5 eb c8 c4 e2 7d 1e 9f a0 02 00 00 c5 e5 66 da c5 f5 eb cb c4 e2 7d 1e a7 c0 02 00 00
+          c5 dd 66 e2 c5 f5 eb cc c4 e2 7d 1e af e0 02 00 00 c5 d5 66 ea c5 f5 eb cd c4 e2 7d 1e 87
+          00 03 00 00 c5 fd 66 c2 c5 f5 eb c8 c4 e2 7d 1e 9f 20 03 00 00 c5 e5 66 da c5 f5 eb cb c4
+          e2 7d 1e a7 40 03 00 00 c5 dd 66 e2 c5 f5 eb cc c4 e2 7d 1e af 60 03 00 00 c5 d5 66 ea c5
+          f5 eb cd c4 e2 7d 1e 87 80 03 00 00 c5 fd 66 c2 c5 f5 eb c8 c4 e2 7d 1e 9f a0 03 00 00 c5
+          e5 66 da c5 f5 eb cb c4 e2 7d 1e a7 c0 03 00 00 c5 dd 66 e2 c5 f5 eb cc c4 e2 7d 1e af e0
+          03 00 00 c5 d5 66 ea c5 f5 eb cd 31 c0 c4 e2 7d 17 c9 0f 95 c0 c5 f8 77 c3]
+
+definition mldsa_poly_chknorm_tmc
+  |- mldsa_poly_chknorm_tmc = TRIM_LIST (4, 0) mldsa_poly_chknorm_mc

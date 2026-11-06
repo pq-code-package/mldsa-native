@@ -1,0 +1,25 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_use_hint_32_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# poly_use_hint_32_avx2_asm_mc: 196 bytes
+# sha256 4b6bea8f1608c85e2ca1ae7278f9f8d4c0193d339f4c2b4285501a91d5dba835
+definition poly_use_hint_32_avx2_asm_mc
+  |- poly_use_hint_32_avx2_asm_mc
+     = #x[f3 0f 1e fa b9 7f 00 00 00 41 b8 01 04 00 00 c4 41 79 6e c0 c4 42 7d 58 c0 31 c0 c5 c9 ef
+          f6 c5 f9 6e e9 b9 00 e1 7b 00 41 b9 00 02 00 00 c4 c1 79 6e f9 c4 e2 7d 58 ff c5 f9 6e e1
+          b9 0f 00 00 00 c4 e2 7d 58 ed c5 f9 6e d9 c4 e2 7d 58 e4 c4 e2 7d 58 db c5 fd 6f 07 c5 fd
+          6f 16 c5 d5 fe c8 c5 f5 72 d1 07 c4 c1 75 e4 c8 c4 e2 75 0b cf c5 7d 66 dc c5 25 df c9 c5
+          ad 72 f1 0a c5 ad fa c9 c5 f5 72 f1 09 c5 fd fa c1 c4 c1 7d fe c3 c5 fd 66 c6 c5 fd df c2
+          c5 fd 72 f0 01 c5 ed fa d0 c4 c1 6d fe d1 c5 ed db d3 c5 fd 7f 17 48 83 c7 20 48 83 c6 20
+          48 83 c0 20 48 3d 00 04 00 00 75 94 c5 f8 77 c3]
+
+definition poly_use_hint_32_avx2_asm_tmc
+  |- poly_use_hint_32_avx2_asm_tmc = TRIM_LIST (4, 0) poly_use_hint_32_avx2_asm_mc

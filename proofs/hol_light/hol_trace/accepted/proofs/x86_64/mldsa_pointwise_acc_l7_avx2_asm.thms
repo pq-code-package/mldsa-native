@@ -1,0 +1,199 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_pointwise_acc_l7_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_pointwise_acc_l7_avx2_asm MLDSA_POINTWISE_ACC_L7_NOIBT_SUBROUTINE_CORRECT
+  |- !c:int64 a:int64 b:int64 consts:int64 x:(num -> int32) y:(num -> int32) pc:num
+      stackpointer:int64 returnaddress:int64.
+       aligned 32 c
+       /\ aligned 32 a
+       /\ aligned 32 b
+       /\ aligned 32 consts
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (c, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (a, 7168)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (b, 7168)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (consts, 2496)
+       /\ nonoverlapping (c, 1024) (a, 7168)
+       /\ nonoverlapping (c, 1024) (b, 7168)
+       /\ nonoverlapping (c, 1024) (consts, 2496)
+       /\ nonoverlapping (a, 7168) (b, 7168)
+       /\ nonoverlapping (a, 7168) (consts, 2496)
+       /\ nonoverlapping (b, 7168) (consts, 2496)
+       /\ nonoverlapping (stackpointer, 8) (c, 1024)
+       /\ nonoverlapping (stackpointer, 8) (a, 7168)
+       /\ nonoverlapping (stackpointer, 8) (b, 7168)
+       /\ nonoverlapping (stackpointer, 8) (consts, 2496)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_pointwise_acc_l7_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [c; a; b; consts] s
+               /\ (wordlist_from_memory (consts, 624) s : int32 list)
+                  = MAP (iword : int -> int32) mldsa_complete_qdata
+               /\ (!i:num. i < 1792 ==> abs (ival (x i)) <= &8380416)
+               /\ (!i:num. i < 1792 ==> abs (ival (y i)) <= &94279697)
+               /\ (!i:num.
+                    i < 1792
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i)
+               /\ (!i:num.
+                    i < 1792
+                    ==> read (memory :> bytes32 (word_add b (word (4 * i) : int64))) s = y i))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add c (word (4 * i) : int64))) s in
+                        (ival zi
+                        == mldsa_pointwise_acc_l7 ((ival : int32 -> int) o x)
+                             ((ival : int32 -> int) o y)
+                             i) (mod &8380417)
+                        /\ abs (ival zi) <= &8380416)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (c, 1024)])
+
+theorem mldsa_pointwise_acc_l7_avx2_asm MLDSA_POINTWISE_ACC_L7_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) c:int64 a:int64 b:int64 consts:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 32 c
+         /\ aligned 32 a
+         /\ aligned 32 b
+         /\ aligned 32 consts
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (c, 1024)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (a, 7168)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (b, 7168)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_tmc) (consts, 2496)
+         /\ nonoverlapping (c, 1024) (a, 7168)
+         /\ nonoverlapping (c, 1024) (b, 7168)
+         /\ nonoverlapping (c, 1024) (consts, 2496)
+         /\ nonoverlapping (a, 7168) (b, 7168)
+         /\ nonoverlapping (a, 7168) (consts, 2496)
+         /\ nonoverlapping (b, 7168) (consts, 2496)
+         /\ nonoverlapping (stackpointer, 8) (c, 1024)
+         /\ nonoverlapping (stackpointer, 8) (a, 7168)
+         /\ nonoverlapping (stackpointer, 8) (b, 7168)
+         /\ nonoverlapping (stackpointer, 8) (consts, 2496)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mldsa_pointwise_acc_l7_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [c; a; b; consts] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events c a b consts pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 7168; b, 7168; consts, 2496; c, 1024; stackpointer, 8]
+                           [c, 1024; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mldsa_pointwise_acc_l7_avx2_asm MLDSA_POINTWISE_ACC_L7_SUBROUTINE_CORRECT
+  |- !c:int64 a:int64 b:int64 consts:int64 x:(num -> int32) y:(num -> int32) pc:num
+      stackpointer:int64 returnaddress:int64.
+       aligned 32 c
+       /\ aligned 32 a
+       /\ aligned 32 b
+       /\ aligned 32 consts
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (c, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (a, 7168)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (b, 7168)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (consts, 2496)
+       /\ nonoverlapping (c, 1024) (a, 7168)
+       /\ nonoverlapping (c, 1024) (b, 7168)
+       /\ nonoverlapping (c, 1024) (consts, 2496)
+       /\ nonoverlapping (a, 7168) (b, 7168)
+       /\ nonoverlapping (a, 7168) (consts, 2496)
+       /\ nonoverlapping (b, 7168) (consts, 2496)
+       /\ nonoverlapping (stackpointer, 8) (c, 1024)
+       /\ nonoverlapping (stackpointer, 8) (a, 7168)
+       /\ nonoverlapping (stackpointer, 8) (b, 7168)
+       /\ nonoverlapping (stackpointer, 8) (consts, 2496)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_pointwise_acc_l7_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [c; a; b; consts] s
+               /\ (wordlist_from_memory (consts, 624) s : int32 list)
+                  = MAP (iword : int -> int32) mldsa_complete_qdata
+               /\ (!i:num. i < 1792 ==> abs (ival (x i)) <= &8380416)
+               /\ (!i:num. i < 1792 ==> abs (ival (y i)) <= &94279697)
+               /\ (!i:num.
+                    i < 1792
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i)
+               /\ (!i:num.
+                    i < 1792
+                    ==> read (memory :> bytes32 (word_add b (word (4 * i) : int64))) s = y i))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add c (word (4 * i) : int64))) s in
+                        (ival zi
+                        == mldsa_pointwise_acc_l7 ((ival : int32 -> int) o x)
+                             ((ival : int32 -> int) o y)
+                             i) (mod &8380417)
+                        /\ abs (ival zi) <= &8380416)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (c, 1024)])
+
+theorem mldsa_pointwise_acc_l7_avx2_asm MLDSA_POINTWISE_ACC_L7_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 ->
+          (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) c:int64 a:int64 b:int64 consts:int64 pc:num
+        stackpointer:int64 returnaddress:int64.
+         aligned 32 c
+         /\ aligned 32 a
+         /\ aligned 32 b
+         /\ aligned 32 consts
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (c, 1024)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (a, 7168)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (b, 7168)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_pointwise_acc_l7_mc) (consts, 2496)
+         /\ nonoverlapping (c, 1024) (a, 7168)
+         /\ nonoverlapping (c, 1024) (b, 7168)
+         /\ nonoverlapping (c, 1024) (consts, 2496)
+         /\ nonoverlapping (a, 7168) (b, 7168)
+         /\ nonoverlapping (a, 7168) (consts, 2496)
+         /\ nonoverlapping (b, 7168) (consts, 2496)
+         /\ nonoverlapping (stackpointer, 8) (c, 1024)
+         /\ nonoverlapping (stackpointer, 8) (a, 7168)
+         /\ nonoverlapping (stackpointer, 8) (b, 7168)
+         /\ nonoverlapping (stackpointer, 8) (consts, 2496)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mldsa_pointwise_acc_l7_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [c; a; b; consts] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events c a b consts pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 7168; b, 7168; consts, 2496; c, 1024; stackpointer, 8]
+                           [c, 1024; stackpointer, 8]))
+               (\s:x86state s':x86state. T)

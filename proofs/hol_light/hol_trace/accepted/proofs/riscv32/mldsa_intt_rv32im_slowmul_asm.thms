@@ -1,0 +1,76 @@
+# Copyright (c) The mlkem-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_intt_rv32im_slowmul_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_intt_rv32im_slowmul_asm MLDSA_INTT_SLOW_SUBROUTINE_CORRECT
+  |- !a:int32 zetas:int32 x:(num -> int32) pc:num stackpointer:int32 returnaddress:int32.
+       aligned 4 a
+       /\ aligned 4 zetas
+       /\ aligned 16 stackpointer
+       /\ aligned 4 returnaddress
+       /\ ALLPAIRS (nonoverlapping : int32 # num -> int32 # num -> bool)
+            [a, 1024; word_sub stackpointer (word 32 : int32), 32]
+            [(word pc : int32), LENGTH mldsa_intt_slowmul_mc; zetas, 2040]
+       /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 32 : int32), 32)
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_intt_slowmul_mc
+               /\ read PC s = (word pc : int32)
+               /\ read SP s = stackpointer
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [a; zetas] s
+               /\ (wordlist_from_memory (zetas, 510) s : int32 list)
+                  = MAP (iword : int -> int32) rv32_mldsa_ntt_zetas
+               /\ (!i:num. i < 256 ==> abs (ival (x i)) <= &8380416)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int32))) s = x i))
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ read SP s = stackpointer
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add a (word (4 * i) : int32))) s in
+                        (ival zi == mldsa_bitreverse_inverse_ntt ((ival : int32 -> int) o x) i)
+                          (mod &8380417)
+                        /\ abs (ival zi) <= &8380416)))
+             (MAYCHANGE_REGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 1024);
+                           memory :> bytes (word_sub stackpointer (word 32 : int32), 32)])
+
+theorem mldsa_intt_rv32im_slowmul_asm MLDSA_INTT_SLOW_SUBROUTINE_SAFE
+  |- ?f_events:(int32 -> int32 -> num -> int32 -> int32 -> (32 address_uarch_event) list).
+       !e:((32 address_uarch_event) list) a:int32 zetas:int32 pc:num stackpointer:int32
+        returnaddress:int32.
+         aligned 4 a
+         /\ aligned 4 zetas
+         /\ aligned 16 stackpointer
+         /\ aligned 4 returnaddress
+         /\ ALLPAIRS (nonoverlapping : int32 # num -> int32 # num -> bool)
+              [a, 1024; word_sub stackpointer (word 32 : int32), 32]
+              [(word pc : int32), LENGTH mldsa_intt_slowmul_mc; zetas, 2040]
+         /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 32 : int32), 32)
+         ==> ensures riscv
+               (\s:riscvstate.
+                 aligned_bytes_loaded s (word pc : int32) mldsa_intt_slowmul_mc
+                 /\ read PC s = (word pc : int32)
+                 /\ read SP s = stackpointer
+                 /\ read RA s = returnaddress
+                 /\ C_ARGUMENTS [a; zetas] s
+                 /\ read events s = e)
+               (\s:riscvstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((32 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events zetas a pc (word_sub stackpointer (word 32 : int32))
+                             returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 1024; zetas, 2040; word_sub stackpointer (word 32 : int32), 32]
+                           [a, 1024; word_sub stackpointer (word 32 : int32), 32]))
+               (\s:riscvstate s':riscvstate. T)
