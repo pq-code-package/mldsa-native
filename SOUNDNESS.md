@@ -31,8 +31,9 @@ same TCB, and therefore the same shared mitigations and residual risks.
 HOL Light proof scripts are OCaml programs and therefore run in the same
 process as the trusted kernel. To remove the scripts from the replay's
 trusted computing base, mldsa-native records each proof's primitive kernel
-inferences and replays them in a separate HOL Light process. That process
-loads neither s2n-bignum nor the proof scripts, but still trusts OCaml.
+inferences and replays them in separate HOL Light and HolLean processes.
+Neither process loads s2n-bignum or the proof scripts. HolLean is a
+re-implementation of the HOL Light kernel in Lean.
 
 The replay must reproduce reviewed definitions and theorem statements in
 [`proofs/hol_light/hol_trace/accepted/`](proofs/hol_light/hol_trace/accepted/).
