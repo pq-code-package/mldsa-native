@@ -1,0 +1,1403 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-11-06T21:46:49Z",
+  "source": {
+    "commit": "e71e3d6f2a798b09205691910693e3eadf498855",
+    "root": "/local/home/beckphan/repos/mldsa-native-task-binary",
+    "host": "Linux dev-dsk-beckphan-1a-d90e7be3.eu-west-1.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64"
+  },
+  "rebuild": {
+    "script": "scripts/build-binaries",
+    "command": "scripts/build-binaries",
+    "replacement": "The script stages and validates the full matrix before replacing binaries/, and restores the prior directory if replacement validation fails."
+  },
+  "selection": {
+    "gcc": {
+      "shells": [
+        "gcc49",
+        "gcc8",
+        "gcc12",
+        "gcc16"
+      ],
+      "rationale": "Four generations with major-version labels 4, 8, 12, and 16; GCC 4.9 is the oldest selected compiler with working split-DWARF output on AArch64."
+    },
+    "clang": {
+      "shells": [
+        "clang6",
+        "clang12",
+        "clang17",
+        "clang23"
+      ],
+      "rationale": "Oldest and newest shells plus the nearest integer third points; major-version gaps are 6, 5, and 6."
+    }
+  },
+  "matrix": {
+    "layouts": [
+      "multilevel",
+      "multilevel-mono"
+    ],
+    "optimizations": [
+      "O0",
+      "O2",
+      "O3"
+    ],
+    "compile_flags": [
+      "-g",
+      "-gdwarf-4",
+      "-gsplit-dwarf",
+      "-fPIC"
+    ],
+    "primary_artifact": "libmldsa.so",
+    "debug_artifact": "libmldsa.so.dwp",
+    "artifact_count": 48,
+    "debug_artifact_count": 48
+  },
+  "link": {
+    "intermediate_archive_command": "ar rcsD <intermediate-libmldsa.a> <object-files>",
+    "command": "ld -shared -Bsymbolic -soname libmldsa.so --version-script=binaries/libmldsa.map --whole-archive <intermediate-libmldsa.a> --no-whole-archive -o <artifact>/libmldsa.so",
+    "internal_relocations": "Static symbol references are resolved. Compiler-generated local address tables may retain R_AARCH64_RELATIVE loader rebases.",
+    "dynamic_relocations": "Every non-relative target is validated as undefined in the shared object.",
+    "exports": {
+      "count": 42,
+      "symbols": [
+        "mldsa44_keypair",
+        "mldsa44_keypair_internal",
+        "mldsa44_pk_from_sk",
+        "mldsa44_prepare_domain_separation_prefix",
+        "mldsa44_signature",
+        "mldsa44_signature_extmu",
+        "mldsa44_signature_internal",
+        "mldsa44_signature_pre_hash_internal",
+        "mldsa44_signature_pre_hash_shake256",
+        "mldsa44_verify",
+        "mldsa44_verify_extmu",
+        "mldsa44_verify_internal",
+        "mldsa44_verify_pre_hash_internal",
+        "mldsa44_verify_pre_hash_shake256",
+        "mldsa65_keypair",
+        "mldsa65_keypair_internal",
+        "mldsa65_pk_from_sk",
+        "mldsa65_prepare_domain_separation_prefix",
+        "mldsa65_signature",
+        "mldsa65_signature_extmu",
+        "mldsa65_signature_internal",
+        "mldsa65_signature_pre_hash_internal",
+        "mldsa65_signature_pre_hash_shake256",
+        "mldsa65_verify",
+        "mldsa65_verify_extmu",
+        "mldsa65_verify_internal",
+        "mldsa65_verify_pre_hash_internal",
+        "mldsa65_verify_pre_hash_shake256",
+        "mldsa87_keypair",
+        "mldsa87_keypair_internal",
+        "mldsa87_pk_from_sk",
+        "mldsa87_prepare_domain_separation_prefix",
+        "mldsa87_signature",
+        "mldsa87_signature_extmu",
+        "mldsa87_signature_internal",
+        "mldsa87_signature_pre_hash_internal",
+        "mldsa87_signature_pre_hash_shake256",
+        "mldsa87_verify",
+        "mldsa87_verify_extmu",
+        "mldsa87_verify_internal",
+        "mldsa87_verify_pre_hash_internal",
+        "mldsa87_verify_pre_hash_shake256"
+      ]
+    }
+  },
+  "debug": {
+    "format": "DWARF 4 split DWARF package",
+    "compile_flags": "-g -gdwarf-4 -gsplit-dwarf",
+    "package_command": "dwp -o <artifact>/libmldsa.so.dwp <unique-dwo-inputs>",
+    "empty_units": "Compiler-generated DWO files without .debug_info.dwo are omitted because they contain no compilation unit.",
+    "duplicate_dwo_ids": "Byte-identical duplicate DWO IDs from repeated multilevel translation units are deduplicated before packaging."
+  },
+  "toolchains": {
+    "gcc49": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 4.9.4",
+      "nix_shell": ".#gcc49",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc8": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 8.5.0",
+      "nix_shell": ".#gcc8",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc12": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 12.3.0",
+      "nix_shell": ".#gcc12",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "gcc16": {
+      "family": "GCC",
+      "version_line": "gcc (GCC) 16.2.0",
+      "nix_shell": ".#gcc16",
+      "cc": "gcc",
+      "ar": "GNU ar (GNU Binutils) 2.46",
+      "ld": "GNU ld (GNU Binutils) 2.46",
+      "dwp": "GNU dwp (GNU Binutils) 2.46"
+    },
+    "clang6": {
+      "family": "Clang",
+      "version_line": "clang version 6.0.1 (tags/RELEASE_601/final)",
+      "nix_shell": ".#clang6",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.40",
+      "ld": "GNU ld (GNU Binutils) 2.40",
+      "dwp": "GNU dwp (GNU Binutils) 2.40"
+    },
+    "clang12": {
+      "family": "Clang",
+      "version_line": "clang version 12.0.1",
+      "nix_shell": ".#clang12",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "clang17": {
+      "family": "Clang",
+      "version_line": "clang version 17.0.6",
+      "nix_shell": ".#clang17",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.41",
+      "ld": "GNU ld (GNU Binutils) 2.41",
+      "dwp": "GNU dwp (GNU Binutils) 2.41"
+    },
+    "clang23": {
+      "family": "Clang",
+      "version_line": "clang version 23.1.3",
+      "nix_shell": ".#clang23",
+      "cc": "clang",
+      "ar": "GNU ar (GNU Binutils) 2.46",
+      "ld": "GNU ld (GNU Binutils) 2.46",
+      "dwp": "GNU dwp (GNU Binutils) 2.46"
+    }
+  },
+  "recipes": {
+    "multilevel": {
+      "source": "examples/multilevel_build",
+      "description": "Compile separate source files for all three parameter sets, archive every object, and final-link the complete archive into a shared object.",
+      "compile_command": "env CC=<cc> CFLAGS='-O<level> -g -gdwarf-4 -gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=.' make -C examples/multilevel_build BUILD_DIR=<work>/objects AUTO=0 mldsa_objs -j2",
+      "automatic_host_isa_flags": false
+    },
+    "multilevel-mono": {
+      "source": "examples/monolithic_build_multilevel/mldsa_native_all.c",
+      "description": "Compile the single multilevel translation unit, archive it, and final-link the complete archive into a shared object.",
+      "compile_command": "<cc> <warning-flags> -O<level> -g -gdwarf-4 -gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. -Iexamples/monolithic_build_multilevel/mldsa_native -c examples/monolithic_build_multilevel/mldsa_native_all.c -o <work>/mldsa_native.o",
+      "automatic_host_isa_flags": false
+    }
+  },
+  "artifacts": {
+    "multilevel": {
+      "gcc49": {
+        "O0": {
+          "path": "binaries/multilevel/gcc49/O0/libmldsa.so",
+          "size_bytes": 216240,
+          "sha256": "fb73df13e98e8f91e2491e35d2905c0cf10a90a934ac53253c31f584bb334239",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O0/libmldsa.so.dwp",
+            "size_bytes": 79360,
+            "sha256": "81556e143e49d016efceec814726ada3ed96ec37019728bb317607e292441ee5",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc49/O2/libmldsa.so",
+          "size_bytes": 182584,
+          "sha256": "3df3dcfb03b66bbcfcac1ba17317943bc99144bb745c12a60b77b51be619b9f4",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O2/libmldsa.so.dwp",
+            "size_bytes": 200296,
+            "sha256": "17369f9b746b2eaa47be4f952c51a48755a9ae295fd8641d09e07de8247abd49",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc49/O3/libmldsa.so",
+          "size_bytes": 190728,
+          "sha256": "f9d1807ae1b9ff9800e8978c270461a93f9e0af73000a4da81e8a1ae719c5f3c",
+          "debug": {
+            "path": "binaries/multilevel/gcc49/O3/libmldsa.so.dwp",
+            "size_bytes": 218968,
+            "sha256": "9a3e18478bdfab89f3a73c1d2ec9a6e0fc33865f02329f64017cf12cb1e4a855",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc8": {
+        "O0": {
+          "path": "binaries/multilevel/gcc8/O0/libmldsa.so",
+          "size_bytes": 220944,
+          "sha256": "da5fcada604797ae2a7ff71ce173766757bb2fe927fc1cd1a19df88df74d32a4",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O0/libmldsa.so.dwp",
+            "size_bytes": 86640,
+            "sha256": "b45939c58bde4ffbddb33b7f807fd706d55ed00e7dafd3cbc97b7e1bd9952504",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 31
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc8/O2/libmldsa.so",
+          "size_bytes": 200808,
+          "sha256": "54e85eca7ecf569f27af6227449aaebbf01dab3306e92b0e035afe31d119e0c8",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O2/libmldsa.so.dwp",
+            "size_bytes": 217584,
+            "sha256": "9167173acbaa693743a321cf3b3a9309d2719f0463b35835ed0a8e3895ce9bef",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 31
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc8/O3/libmldsa.so",
+          "size_bytes": 288928,
+          "sha256": "dee555fcf0549119cee334046dac7231e650b591f4668591d16edcf9fc34dc31",
+          "debug": {
+            "path": "binaries/multilevel/gcc8/O3/libmldsa.so.dwp",
+            "size_bytes": 241952,
+            "sha256": "06e18a1126b94fabae1c2a5d5747aee83239b5abf2d5818ffc13cf6d6d4b0c15",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 31
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc12": {
+        "O0": {
+          "path": "binaries/multilevel/gcc12/O0/libmldsa.so",
+          "size_bytes": 223392,
+          "sha256": "bd2fafc346071829394ae02b21840d41af6d906156d084f07c3d6562e9d5dc11",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O0/libmldsa.so.dwp",
+            "size_bytes": 95536,
+            "sha256": "fb68dc85365090b29b6e0f53dbd30fea5eaed2ab39e970f7a9f7966e36218220",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc12/O2/libmldsa.so",
+          "size_bytes": 199704,
+          "sha256": "0dc6756e5098cf2a01d9b61f38656b5bb2a7804dcea81ab7c31638966f979965",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O2/libmldsa.so.dwp",
+            "size_bytes": 220408,
+            "sha256": "b834f94b7f66527d04a4db776b5e0e564cd7474c5ede8d999bcdf2ac9ea1bd0e",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc12/O3/libmldsa.so",
+          "size_bytes": 288248,
+          "sha256": "4614220ac58a41e138fa6fff16ec4a05a09331cbb14afcf3c197def57976fe4b",
+          "debug": {
+            "path": "binaries/multilevel/gcc12/O3/libmldsa.so.dwp",
+            "size_bytes": 247848,
+            "sha256": "a348d8655b888c9121ad9cd20da0f5f16610580e7ec015b72e2de20d3f144915",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc16": {
+        "O0": {
+          "path": "binaries/multilevel/gcc16/O0/libmldsa.so",
+          "size_bytes": 216272,
+          "sha256": "6d8d47026de1358d2cbad1067cedb73175aa9452838920c50680cab2f05d7d98",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O0/libmldsa.so.dwp",
+            "size_bytes": 95264,
+            "sha256": "836247f188ced820fa1bc0fa8f84179c8dc21e84a108ca10be32c88d10f18be3",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/gcc16/O2/libmldsa.so",
+          "size_bytes": 198296,
+          "sha256": "7cacee27c779f7ff5fb9342f2770fc82435d58174b9464ecf27b636191407092",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O2/libmldsa.so.dwp",
+            "size_bytes": 234352,
+            "sha256": "10cab4eaa30f8cb8920da4c327bb9caefc5a479973cb946c0697e5ce0c27b200",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/gcc16/O3/libmldsa.so",
+          "size_bytes": 298160,
+          "sha256": "4e4e012855bcadfffaff78cac92181e48995bd7560ca93d84065584797eb6d23",
+          "debug": {
+            "path": "binaries/multilevel/gcc16/O3/libmldsa.so.dwp",
+            "size_bytes": 258816,
+            "sha256": "9c9562ba1e34892ec16adbdcddceaed10b665899237ddb7da9e1cf7a6b3c9bb4",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 25
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang6": {
+        "O0": {
+          "path": "binaries/multilevel/clang6/O0/libmldsa.so",
+          "size_bytes": 246792,
+          "sha256": "496d066ed0bb822b627325477fc6e38c9ec314fff1aeae6aaeefe75195f5a819",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O0/libmldsa.so.dwp",
+            "size_bytes": 66480,
+            "sha256": "3333b643078d52e3f78a6cbfbf78af4e0352b4e421fc1765a3690c1969f91d6f",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 4,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang6/O2/libmldsa.so",
+          "size_bytes": 199200,
+          "sha256": "659b9460b5b55109aed7118c41e2be0af98ea9dbd590e7ee90cb42d9a416541f",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O2/libmldsa.so.dwp",
+            "size_bytes": 117992,
+            "sha256": "2182541c051de1802dedf26c7d93d811559772118755f9b7f185855754438392",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang6/O3/libmldsa.so",
+          "size_bytes": 292928,
+          "sha256": "8beb509a06f14a92a7b0e200478f1fbec2814bf8afde0a1d64cee5f7a98a841e",
+          "debug": {
+            "path": "binaries/multilevel/clang6/O3/libmldsa.so.dwp",
+            "size_bytes": 124504,
+            "sha256": "b17a7c349b535823f933d774710135705344b5cbdfdaf2ccb690c4e80287ad2b",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang12": {
+        "O0": {
+          "path": "binaries/multilevel/clang12/O0/libmldsa.so",
+          "size_bytes": 228984,
+          "sha256": "df9d0bd75bbae2ae4ded21e7196435c98e35746bf63fe8770a0c751b61d8c957",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O0/libmldsa.so.dwp",
+            "size_bytes": 65984,
+            "sha256": "1633af5deda42e5c95925b1dfb141b4501ec31d59aea1c856cb9a1d8758d35ef",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang12/O2/libmldsa.so",
+          "size_bytes": 235240,
+          "sha256": "cef19524d8e5ad064ce941300c624d77ae18c7846f294e9bb9b01c8a68c16815",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O2/libmldsa.so.dwp",
+            "size_bytes": 151120,
+            "sha256": "f9ba4ad60f3f384017062f7d86e4263e5e9778ccd912bfb0134cc7a1fce1fa27",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang12/O3/libmldsa.so",
+          "size_bytes": 259168,
+          "sha256": "3c4d1e7426b4316a60f82d558b1587ec723dae47ae32c0fdb91341ef46a5b83e",
+          "debug": {
+            "path": "binaries/multilevel/clang12/O3/libmldsa.so.dwp",
+            "size_bytes": 162880,
+            "sha256": "fccd3c6255823e281f182dab113a9ebf6a9192c4fb298d725cf1c26f21a972d3",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang17": {
+        "O0": {
+          "path": "binaries/multilevel/clang17/O0/libmldsa.so",
+          "size_bytes": 231656,
+          "sha256": "0a55144d4c34a62adcd192b018a8743c1e009e49563d7a0a72ae1d80e7a98a1a",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O0/libmldsa.so.dwp",
+            "size_bytes": 65976,
+            "sha256": "aa7ac941bed8d05eb698e3d83f29a412e2a0d2347c8548867abfecdcc6246331",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang17/O2/libmldsa.so",
+          "size_bytes": 247048,
+          "sha256": "aa081781aa9bf6ad3e5c20d132d7e524d55dca53cade2902a6e43954db8bc4cc",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O2/libmldsa.so.dwp",
+            "size_bytes": 159800,
+            "sha256": "9c9b0f28bd96fc41c02314cc7e2b05ce6b1542318ae4e5d689c89269dc643f2e",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang17/O3/libmldsa.so",
+          "size_bytes": 269128,
+          "sha256": "e5dde7e2a1c0708b2681e9f87f5541626dbb1499b20bbc1eb8ba76023054d392",
+          "debug": {
+            "path": "binaries/multilevel/clang17/O3/libmldsa.so.dwp",
+            "size_bytes": 178632,
+            "sha256": "4b4756cba96193bb18c118cb0dbcece3d5c5fe5b0a7f85274dd9f8e3ab4dfc18",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang23": {
+        "O0": {
+          "path": "binaries/multilevel/clang23/O0/libmldsa.so",
+          "size_bytes": 231024,
+          "sha256": "13cc8eb7098470df316b6b99964f090eb583e86e50558cd6f90a2b914089f044",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O0/libmldsa.so.dwp",
+            "size_bytes": 66000,
+            "sha256": "ad04ae10f7b00d8308e4c5713c2371487574b37471c0c06ec8c8e17ac12b829d",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel/clang23/O2/libmldsa.so",
+          "size_bytes": 249240,
+          "sha256": "49e7913fd7a725dda21eb4361def889aaad62e659cb888120b3260f9e32054c0",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O2/libmldsa.so.dwp",
+            "size_bytes": 160304,
+            "sha256": "237069e68abad202f5dd60bec8c6a95666000b541cc058ac540c2274bf7084ca",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 41,
+            "relative_count": 36,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel/clang23/O3/libmldsa.so",
+          "size_bytes": 269688,
+          "sha256": "f3a2bce22e2b61bab61b364197c830d55542ae909d4d05dd896445a5566a383c",
+          "debug": {
+            "path": "binaries/multilevel/clang23/O3/libmldsa.so.dwp",
+            "size_bytes": 175568,
+            "sha256": "27a0c919314744b3a8cf5a2a2535c78964f68130738388264d98fc8ec8f09339",
+            "source_dwo_count": 33,
+            "packaged_unit_count": 19
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 41,
+            "relative_count": 36,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      }
+    },
+    "multilevel-mono": {
+      "gcc49": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc49/O0/libmldsa.so",
+          "size_bytes": 186656,
+          "sha256": "82c1622f739122d1e7ac89fe2446fc2174bcbb529b43b2fa642b986549c4cbbd",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O0/libmldsa.so.dwp",
+            "size_bytes": 49728,
+            "sha256": "6139cf3e87f387143c8595b2e6a45545e8ebedec835dad78327abf8362ceb954",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc49/O2/libmldsa.so",
+          "size_bytes": 165808,
+          "sha256": "676262c3bb77b41151810a7671a276c652375940b7ee624716808a9cfbde9bfa",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O2/libmldsa.so.dwp",
+            "size_bytes": 205232,
+            "sha256": "3e3155e71d71322d5bc97d62f4c6c3219a15bf588fb3b6f4a64ae8e449d31c89",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc49/O3/libmldsa.so",
+          "size_bytes": 276400,
+          "sha256": "daea9c8c27ca2ff1bca6b7a43c997f91199e62898e942c802fd5801de3716255",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc49/O3/libmldsa.so.dwp",
+            "size_bytes": 259136,
+            "sha256": "dfbf50766545901f36b87e66c042170ae6dd96acbb5be3c4ec03efc3f2ac30d4",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc8": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc8/O0/libmldsa.so",
+          "size_bytes": 192040,
+          "sha256": "3ded98f14b772672e80fba59c1d704dbf7d5d6995e2a8bf990b794131404a3a8",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O0/libmldsa.so.dwp",
+            "size_bytes": 53272,
+            "sha256": "2b21769e3e324d18760bf2690119dc71ad1be4a5645ac5b5ae41a9f274d4acfd",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc8/O2/libmldsa.so",
+          "size_bytes": 241064,
+          "sha256": "d4979a4c3f4f2383cbede9269f0a171b8fa8f92e38276c5124a489bd6b005367",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O2/libmldsa.so.dwp",
+            "size_bytes": 235288,
+            "sha256": "99510921f3024d0d9ec82c1aedabd499fb2160110fcde7203d868a1c782f7472",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc8/O3/libmldsa.so",
+          "size_bytes": 415528,
+          "sha256": "84ec5c88c11dbc98d6b0877aab1aea255a0b49ba8d953cdb1d1e81b6ee1682b8",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc8/O3/libmldsa.so.dwp",
+            "size_bytes": 286312,
+            "sha256": "100b88b2bc0564c23feeafaec4de1e602bc266dc3113d20f161671ce2c6dfd07",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc12": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc12/O0/libmldsa.so",
+          "size_bytes": 192792,
+          "sha256": "9763d2b621ed3176d0b57704263e0d91bcad4cb0768dbc9461dc890cb37b84ae",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O0/libmldsa.so.dwp",
+            "size_bytes": 52992,
+            "sha256": "aedbc92e2ca7304b9295e4f0e2bb1bc757fcf250954c286a11e917e9d0f933ce",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc12/O2/libmldsa.so",
+          "size_bytes": 205432,
+          "sha256": "fd9d06fe8bee193bf097724c027034bf426acf0ba8c0564e5cfe35eb71217cab",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O2/libmldsa.so.dwp",
+            "size_bytes": 202512,
+            "sha256": "7e9dec30f3303b1b264475f454242fa9ad755fc0142871f37f60cac6b25c7b33",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc12/O3/libmldsa.so",
+          "size_bytes": 390432,
+          "sha256": "4b389909f10786e1fb62c5509f008c6558b5ea6c8d9ceb482fda6503e78e5ca3",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc12/O3/libmldsa.so.dwp",
+            "size_bytes": 287752,
+            "sha256": "ac24daf9c1a7e46804824b94456e12d1e35b45c2638d4eb851a5a1948665c709",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "gcc16": {
+        "O0": {
+          "path": "binaries/multilevel-mono/gcc16/O0/libmldsa.so",
+          "size_bytes": 186032,
+          "sha256": "7fa5cb5ef3f8bfd8a77006bb73c0d40394541bee53c06bc05fd0930c891d14d1",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O0/libmldsa.so.dwp",
+            "size_bytes": 53104,
+            "sha256": "47d86d46fac6b01007a7848f6dd1f4ac1a93eb8b83ccff6007ef8f9725a1349c",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/gcc16/O2/libmldsa.so",
+          "size_bytes": 212968,
+          "sha256": "012ed5c729ff021110cb97febc983563591c8d8e7ec0432b15d3cd802c53d760",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O2/libmldsa.so.dwp",
+            "size_bytes": 231752,
+            "sha256": "7a2b07fb75ac360160d9b7cee6604f5cdb02cc9264b7498f21d1c05ea18b9d82",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/gcc16/O3/libmldsa.so",
+          "size_bytes": 445040,
+          "sha256": "eec9037847049eb53c03e78bd70a07782b5432262d08301b20cf39ce28fdc88d",
+          "debug": {
+            "path": "binaries/multilevel-mono/gcc16/O3/libmldsa.so.dwp",
+            "size_bytes": 335856,
+            "sha256": "907d0781022f35e35abc1e38941926cbc49bb5d19d3fa86dac4368f5c165bb84",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang6": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang6/O0/libmldsa.so",
+          "size_bytes": 218632,
+          "sha256": "7ea0d09986dfa577d304150a9652bdf121ab4fade35134dfdcbba557cd4a9bae",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O0/libmldsa.so.dwp",
+            "size_bytes": 45848,
+            "sha256": "01e6f2ba995069681295a65a3ec93393f41dbf390d99bf38b2e4cc6eec99d7c4",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 4,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang6/O2/libmldsa.so",
+          "size_bytes": 342856,
+          "sha256": "17e6a98513b41f2e17fd2eb6a798efc6a5c4d9beab027a3cb29b446a4872fb53",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O2/libmldsa.so.dwp",
+            "size_bytes": 109664,
+            "sha256": "dd2ec7e903fdbd91a5e1e405187af0557b0c551af630369c671099a267747575",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang6/O3/libmldsa.so",
+          "size_bytes": 509464,
+          "sha256": "a32a14db8670b7482caa21a10e19f6ac67960a87acc7cfd8320a2302d7dab3cd",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang6/O3/libmldsa.so.dwp",
+            "size_bytes": 143368,
+            "sha256": "bf8a1f6f2bc9e6c00ded959d521f669697362cbab8fd8d3f8c5ed32a465dc603",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang12": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang12/O0/libmldsa.so",
+          "size_bytes": 203976,
+          "sha256": "85d64a1a591791c1c81c2d66808faca51f489c86cd261f7826d95e5e0de1a9cc",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O0/libmldsa.so.dwp",
+            "size_bytes": 45544,
+            "sha256": "9f9363603c2e9dedf1b344b8336cc428a38a41daabe454698e21e311b51ef8c1",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang12/O2/libmldsa.so",
+          "size_bytes": 280400,
+          "sha256": "5e7700bf1d85e5c7aa71c40b7eaf9c82f9dd55cedc3ec54db79395cda11c455b",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O2/libmldsa.so.dwp",
+            "size_bytes": 179192,
+            "sha256": "d247c52086c328a3dd82cf9e75b1f336afa2f3a20d532c49a299ae86c7147860",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang12/O3/libmldsa.so",
+          "size_bytes": 432064,
+          "sha256": "8d98ce80261da2c28dce30d2504ead338b174a5cb07f41ff200bf3fd936dbd12",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang12/O3/libmldsa.so.dwp",
+            "size_bytes": 228224,
+            "sha256": "f1fdc8efd88b2fb9e5962ee5aeb2d91a28e4f4291cd3cf9f46b9bde95944c664",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang17": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang17/O0/libmldsa.so",
+          "size_bytes": 206704,
+          "sha256": "21d903e4669bf800b92530db900bddc7477ae0d869665cbff8f33cfdcbcc7b89",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O0/libmldsa.so.dwp",
+            "size_bytes": 45536,
+            "sha256": "47ceb526e946469fa6e59093a198fe9f865d350a847645dac173fd17a78c4c84",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang17/O2/libmldsa.so",
+          "size_bytes": 450552,
+          "sha256": "4c1253c01e7e6a2a38b73a99a30366e88972d84079760bf729b8e3f12f9bac32",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O2/libmldsa.so.dwp",
+            "size_bytes": 209144,
+            "sha256": "a3e94ceb746e88e4cb24d02af14967e239f5d4e7952ce67f45370b61443257d4",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang17/O3/libmldsa.so",
+          "size_bytes": 591752,
+          "sha256": "8597e1c1f9eb2625c91edaad88b7b40c18de4d85db693c05af002877624f72b5",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang17/O3/libmldsa.so.dwp",
+            "size_bytes": 268688,
+            "sha256": "af3f4fea0d00a29cb758d7f53c3139d626b8b38b53fab74a1fc0bb21820ecc99",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      },
+      "clang23": {
+        "O0": {
+          "path": "binaries/multilevel-mono/clang23/O0/libmldsa.so",
+          "size_bytes": 205984,
+          "sha256": "ffb496a5a2e218b7a59faad614744f10ef707b7deb4bed6e76617f5957459dc1",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O0/libmldsa.so.dwp",
+            "size_bytes": 45520,
+            "sha256": "7efd635979f81409b4c2fb9836f0ac8513ad23e1ebd3dca2f6247cb7f3c97460",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 5,
+            "relative_count": 0,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O2": {
+          "path": "binaries/multilevel-mono/clang23/O2/libmldsa.so",
+          "size_bytes": 376256,
+          "sha256": "a8511fdef73ea2aa3f7d79121c25368726ff76dfb236ed7ccf2e65f496f255f4",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O2/libmldsa.so.dwp",
+            "size_bytes": 195992,
+            "sha256": "0e9bca39389bc96eae4edac9fa5d1c02ac1f9132b46336577457385faa698812",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 17,
+            "relative_count": 12,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        },
+        "O3": {
+          "path": "binaries/multilevel-mono/clang23/O3/libmldsa.so",
+          "size_bytes": 540336,
+          "sha256": "840bd8c9c2400ac6627475039a8da820f2aad863f68877517eecc719a0cfcfea",
+          "debug": {
+            "path": "binaries/multilevel-mono/clang23/O3/libmldsa.so.dwp",
+            "size_bytes": 241192,
+            "sha256": "d89d993e216ec2c4b102fdfb3fb3f39b8269eeedd0f0706ff13f811e6f6bfbbc",
+            "source_dwo_count": 1,
+            "packaged_unit_count": 1
+          },
+          "dynamic_exports": 42,
+          "dynamic_relocations": {
+            "count": 17,
+            "relative_count": 12,
+            "undefined_symbols": [
+              "__stack_chk_fail",
+              "__stack_chk_guard",
+              "memcpy",
+              "memset",
+              "randombytes"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "checks_per_artifact": [
+      "Shared object is AArch64 ET_DYN with SONAME libmldsa.so.",
+      "DF_SYMBOLIC is set and no dynamic TEXTREL is present.",
+      "No LOAD segment is both writable and executable.",
+      "Exactly the 42 public ML-DSA symbols are exported.",
+      "Every non-relative relocation targets an undefined symbol.",
+      "The DWP package has .debug_info.dwo and .debug_cu_index.",
+      "The matching example links and reports All tests passed!."
+    ]
+  }
+}
