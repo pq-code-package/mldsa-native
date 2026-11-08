@@ -155,6 +155,8 @@ EVERY_PROOF = (
     ".github/actions/setup-nix/",
     ".github/actions/setup-shell/",
     "scripts/check-binary",  # checks the proofs' object files
+    ".github/workflows/hol_trace.yml",
+    ".github/actions/hol-trace/",
 )
 HT = HL + "hol_trace/"
 ACC = HT + "accepted/"

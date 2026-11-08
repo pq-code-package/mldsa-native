@@ -45,6 +45,14 @@ Each accepted proof also fixes the routine's machine code as a byte list.
 `scripts/check-binary` compares those bytes with the functions found in ELF
 objects, archives, and executables.
 
+**Residual risk:** CI records and replays every proof that a change affects,
+but runs the trace capture and the trace analysis in the same workflow. To
+keep the trace capture, which runs the untrusted proof scripts, from
+tampering with the replay environment, it should run in a sandbox that
+exports only the captured trace. Until then, a reviewer must check that a
+proof script only drives HOL Light; see "What is trusted" in the HOLTrace
+README.
+
 ## Additional risks specific to mldsa-native
 
 ### Rejection sampling
