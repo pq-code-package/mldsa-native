@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794307760561,
+  "lastUpdate": 1794307781507,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -491924,6 +491924,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 263308,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "4cbbfadbcfd6fb8719b333ec23741575196c5bab",
+          "message": "scripts/tests: Align GitHub summary rows by benchmark name\n\nThe GitHub job summary combined the outputs of the three parameter sets\nline by line using zip(). This truncated the table to the shortest\noutput and misaligned rows whenever the parameter sets print different\nbenchmarks.\n\nMatch lines of the form `name = value` by name instead, and keep all\nlines.\n\nPorts pq-code-package/mlkem-native#1980.\nResolves #1535.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-10T08:43:13Z",
+          "tree_id": "cddcff39af7dafa02ee2cf7ac7e8d1e518d72da1",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/4cbbfadbcfd6fb8719b333ec23741575196c5bab"
+        },
+        "date": 1794307781043,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 91914,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 347200,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 99171,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 155362,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 569188,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 159685,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 258044,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 719663,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 263564,
             "unit": "cycles"
           }
         ]
