@@ -1,0 +1,549 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# WARNING: This file is auto-generated from scripts/autogen
+#          in the mldsa-native repository.
+#          Do not modify it directly.
+#
+# See proofs/hol_light/scripts/deps.
+aarch64/keccak_f1600_x1_scalar_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_scalar_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/keccak_f1600_x1_scalar_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+aarch64/keccak_f1600_x1_v84a_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/keccak_f1600_x1_v84a_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+aarch64/keccak_f1600_x2_v84a_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/keccak_f1600_x2_v84a_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+aarch64/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/keccak_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+aarch64/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/keccak_utils.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+aarch64/mldsa_intt_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_intt_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_intt_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_ntt_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_ntt_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_ntt_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_pointwise_montgomery_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_pointwise_montgomery_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_pointwise_montgomery_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_caddq_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_caddq_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_caddq_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_chknorm_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_chknorm_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_chknorm_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_decompose_32_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_decompose_32_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_decompose_32_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_decompose_88_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_decompose_88_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_decompose_88_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_use_hint_32_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_use_hint_32_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_use_hint_32_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_poly_use_hint_88_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_poly_use_hint_88_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_poly_use_hint_88_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_polyz_unpack_17_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_polyz_unpack_17_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_17_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_consts.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_polyz_unpack_19_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_polyz_unpack_19_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_19_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_consts.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_rej_uniform_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_rej_uniform_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_table.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_rej_uniform_eta2_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_rej_uniform_eta2_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta2_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+aarch64/mldsa_rej_uniform_eta4_aarch64_asm:
+  files:
+  - proofs/hol_light/aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.S
+  - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta4_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml
+  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  s2n_bignum:
+  - arm/proofs/base.ml
+  - arm/proofs/consttime.ml
+  - common/misc.ml
+riscv32/mldsa_intt_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_arithmetic.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_layout.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas_table.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+riscv32/mldsa_intt_rv32im_slowmul_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_intt_rv32im_slowmul_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_arithmetic.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_layout.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_rv32im_slowmul_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_intt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas_table.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+riscv32/mldsa_ntt_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_arithmetic.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_layout.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas_table.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+riscv32/mldsa_ntt_rv32im_slowmul_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_ntt_rv32im_slowmul_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_arithmetic.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_layout.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_rv32im_slowmul_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_ntt_shared.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_zetas_table.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+riscv32/mldsa_poly_pointwise_montgomery_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_poly_pointwise_montgomery_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+x86_64/keccak_f1600_x4_avx2_asm:
+  files:
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/keccak_f1600_x4_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_constants.ml
+  - proofs/hol_light/x86_64/proofs/keccak_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_intt_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_intt_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_intt_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_ntt_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_ntt_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_ntt_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_nttunpack_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_nttunpack_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_nttunpack_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_pointwise_acc_l4_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l4_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l4_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_pointwise_acc_l5_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l5_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l5_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_pointwise_acc_l7_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_pointwise_acc_l7_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_pointwise_acc_l7_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_pointwise_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_pointwise_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_pointwise_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_zetas.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_caddq_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_caddq_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_caddq_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_chknorm_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_chknorm_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_chknorm_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_decompose_32_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_decompose_32_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_decompose_32_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_decompose_88_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_decompose_88_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_decompose_88_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_use_hint_32_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_use_hint_32_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_use_hint_32_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_poly_use_hint_88_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_poly_use_hint_88_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_poly_use_hint_88_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_polyz_unpack_17_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_polyz_unpack_17_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_polyz_unpack_17_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_polyz_unpack_19_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_polyz_unpack_19_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_polyz_unpack_19_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_rej_uniform_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_rej_uniform_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_table.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_rej_uniform_eta2_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_rej_uniform_eta2_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_eta2_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_table.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/mldsa_rej_uniform_eta4_avx2_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/x86_64/mldsa/mldsa_rej_uniform_eta4_avx2_asm.S
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_eta4_avx2_asm.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_rej_uniform_table.ml
+  - proofs/hol_light/x86_64/proofs/mldsa_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
