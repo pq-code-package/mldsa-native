@@ -19,8 +19,12 @@ UNWINDSET +=
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly_kl.c $(SRCDIR)/mldsa/src/fips202/fips202.c
 
-# Only relevant for ML-DSA-65
+# mld_poly_uniform_gamma1 is only compiled for ML-DSA-65 and with
+# MLD_CONFIG_REDUCE_RAM here. poly_uniform_gamma1_serial covers
+# MLD_CONFIG_SERIAL_FIPS202_ONLY.
 ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
+CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1
+else ifdef MLD_CONFIG_REDUCE_RAM
 CHECK_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1
 else
 CHECK_FUNCTION_CONTRACTS=
