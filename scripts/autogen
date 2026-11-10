@@ -1072,6 +1072,117 @@ def gen_rv32im_zeta_file():
     update_file("dev/riscv32/src/rv32im_zetas.c", "\n".join(gen()))
 
 
+# RISC-V 64 (inverse) NTT twiddles
+#
+# The NTT and inverse NTT use the butterflies of the C reference: in layer
+# L = 1..8 (distance d = 256 >> L), the butterflies on coefficients j and
+# j + d belong to group s = j / (2 * d). The forward NTT multiplies by
+# zeta(2^(L-1) + s), the inverse NTT by -zeta(2^L - 1 - s), where
+# zeta(k) = root^bitrev8(k) mod q is the plain (non-Montgomery) twiddle.
+#
+# All twiddles are used with Barrett multiplication: multiplying x by a
+# known constant z computes
+#
+#   x * z - q * round(x * z' / 2^31)   with z' = round(z * 2^31 / q)
+#
+# using vmul, vsmul (with rounding mode rnu) and vnmsac. Tables store each
+# twiddle z as a signed canonical representative, together with z'.
+#
+# Layers 1-4 use scalar twiddles: the tables start with 16 pairs (z, z')
+# in order of use. Layers 5-8 operate on coefficients j = 16 * b + r, with
+# the block index b = 0..15 in the vector lanes and r = 0..15 in the
+# registers. Their twiddles depend on the block and on the high bits of r,
+# and are stored as groups of 16 twiddles z (one per block) followed by the
+# 16 twisted constants z', in order of use. A kernel with VL lanes per
+# register loads VL consecutive entries of each group.
+
+
+def riscv64_zeta(k):
+    return signed_reduce(pow(root_of_unity, bitreverse(k, 8), modulus))
+
+
+def riscv64_barrett_twist(z):
+    return round(z * 2**31 / modulus)
+
+
+def riscv64_ntt_twiddle(layer, s, inv):
+    if inv:
+        return signed_reduce(-riscv64_zeta(2**layer - 1 - s))
+    return riscv64_zeta(2 ** (layer - 1) + s)
+
+
+# INTT scaling: 2^32 / 256 mod q (Montgomery factor times 1/256)
+riscv64_intt_scale = signed_reduce(2**24)
+
+
+def riscv64_ntt_layout(inv):
+    out = []
+    # Layers 1-4: (layer, s) in order of use
+    if inv:
+        scalars = [(4, s) for s in range(8)]
+        scalars += [(3, s) for s in range(4)]
+        scalars += [(2, s) for s in range(2)]
+        zs = [riscv64_ntt_twiddle(layer, s, inv) for (layer, s) in scalars]
+        # Layer 1 includes the scaling, followed by the scaling itself
+        zs += [signed_reduce(riscv64_ntt_twiddle(1, 0, inv) * riscv64_intt_scale)]
+        zs += [riscv64_intt_scale]
+    else:
+        scalars = [(1, 0)]
+        scalars += [(2, s) for s in range(2)]
+        scalars += [(3, s) for s in range(4)]
+        scalars += [(4, s) for s in range(8)]
+        zs = [riscv64_ntt_twiddle(layer, s, inv) for (layer, s) in scalars]
+        zs += [0]
+    for z in zs:
+        out += [z, riscv64_barrett_twist(z)]
+    # Layers 5-8: groups g of 16 blocks; s = 2^(L-5) * b + g
+    layers = [8, 7, 6, 5] if inv else [5, 6, 7, 8]
+    for layer in layers:
+        for g in range(2 ** (layer - 5)):
+            zs = [
+                riscv64_ntt_twiddle(layer, 2 ** (layer - 5) * b + g, inv)
+                for b in range(16)
+            ]
+            out += zs + [riscv64_barrett_twist(z) for z in zs]
+    return out
+
+
+def gen_riscv64_zeta_file():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_ARITH_BACKEND_RISCV64) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "arith_native_riscv64.h"'
+        yield ""
+        yield "/*"
+        yield " * Table of twiddles used in the RISC-V forward NTT"
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const int32_t", "mld_rv64v_ntt_zetas", riscv64_ntt_layout(inv=False)
+        )
+        yield ""
+        yield "/*"
+        yield " * Table of twiddles used in the RISC-V inverse NTT"
+        yield " * See autogen for details."
+        yield " */"
+        yield from emit_c_array(
+            "const int32_t", "mld_rv64v_intt_zetas", riscv64_ntt_layout(inv=True)
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(rv64v_zetas)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("dev/riscv64/src/rv64v_zetas.c", "\n".join(gen()))
+
+
 def gen_rv32im_hol_light_zeta_file():
     def gen():
         yield from gen_hol_light_header()
@@ -1626,6 +1737,36 @@ def gen_aarch64_keccak_constants_c_file():
     )
 
 
+def gen_riscv64_keccak_constants_c_file():
+    def gen_c():
+        yield from gen_header()
+        yield '#include "../../../../common.h"'
+        yield ""
+        yield "#if defined(MLD_FIPS202_RISCV64_NEED_X1_ZBB) && \\"
+        yield "    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield ""
+        yield '#include "fips202_native_riscv64.h"'
+        yield ""
+        yield from print_c_uint64_array(
+            "mld_keccakf1600_round_constants",
+            gen_keccak_round_constants(),
+            entries_per_line=3,
+        )
+        yield ""
+        yield "#else"
+        yield ""
+        yield "MLD_EMPTY_CU(fips202_riscv64_round_constants)"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file(
+        "dev/fips202/riscv64/src/keccakf1600_round_constants.c",
+        "\n".join(gen_c()),
+        force_format=True,
+    )
+
+
 def gen_avx2_keccak_constants_c_file():
     def gen_c():
         yield from gen_header()
@@ -2095,12 +2236,17 @@ def native_fips202_armv81m(c):
     return native_fips202(c) and armv81m(c)
 
 
+def native_fips202_riscv64(c):
+    return native_fips202(c) and riscv64(c)
+
+
 def native_fips202_core(c):
     return (
         native_fips202(c)
         and not native_fips202_x86_64(c)
         and not native_fips202_aarch64(c)
         and not native_fips202_armv81m(c)
+        and not native_fips202_riscv64(c)
     )
 
 
@@ -2227,6 +2373,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_fips202_armv81m, desc="native code (FIPS202, Armv8.1-M)"
     )
     yield "#endif"
+    yield "#if defined(MLD_SYS_RISCV64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_riscv64, desc="native code (FIPS202, RISC-V 64)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
     yield from gen_monolithic_undef_all_core(filt=native_arith_core, desc="")
@@ -2238,6 +2389,11 @@ def gen_macro_undefs(extra_notes=None):
     yield "#if defined(MLD_SYS_X86_64)"
     yield from gen_monolithic_undef_all_core(
         filt=native_arith_x86_64, desc="native code (Arith, X86_64)"
+    )
+    yield "#endif"
+    yield "#if defined(MLD_SYS_RISCV64)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_riscv64, desc="native code (Arith, RISC-V 64)"
     )
     yield "#endif"
     yield "#if defined(MLD_SYS_RISCV32)"
@@ -2324,6 +2480,10 @@ def gen_monolithic_source_file():
         for c in filter(native_arith_x86_64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#if defined(MLD_SYS_RISCV32)"
         for c in filter(native_arith_rv32im, c_sources):
             yield f'#include "{c}"'
@@ -2341,6 +2501,10 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
         for c in filter(native_fips202_armv81m, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV64)"
+        for c in filter(native_fips202_riscv64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2411,6 +2575,10 @@ def gen_monolithic_asm_file():
         for c in filter(native_arith_x86_64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV64)"
+        for c in filter(native_arith_riscv64, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#if defined(MLD_SYS_RISCV32)"
         for c in filter(native_arith_rv32im, asm_sources):
             yield f'#include "{c}"'
@@ -2428,6 +2596,10 @@ def gen_monolithic_asm_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
         for c in filter(native_fips202_armv81m, asm_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_RISCV64)"
+        for c in filter(native_fips202_riscv64, asm_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#endif"
@@ -2793,7 +2965,7 @@ def normalize_asm_macro_syntax():
 
 # Architectures autogen knows how to (cross-)compile assembly for. Used to
 # expand a bare `--force-cross` (no value) into "force all architectures".
-FORCE_CROSS_ALL_ARCHES = {"aarch64", "x86_64", "armv81m", "riscv32"}
+FORCE_CROSS_ALL_ARCHES = {"aarch64", "x86_64", "armv81m", "riscv32", "riscv64"}
 
 
 def resolve_force_cross(value):
@@ -2847,6 +3019,8 @@ def update_via_simpasm(
         source_arch = "armv81m"
     elif "riscv32" in infile_full or "rv32im" in infile_full:
         source_arch = "riscv32"
+    elif "riscv64" in infile_full:
+        source_arch = "riscv64"
     else:
         raise Exception(f"Could not detect architecture of source file {infile_full}.")
     # Check native architecture
@@ -2891,6 +3065,8 @@ def update_via_simpasm(
                 arch = "armv81m"
             elif "riscv32" in infile_full or "rv32im" in infile_full:
                 arch = "riscv32"
+            elif "riscv64" in infile_full:
+                arch = "riscv64"
             else:
                 arch = "x86_64"
 
@@ -2903,7 +3079,9 @@ def update_via_simpasm(
                 "-o",
                 tmp.name,
             ]
-            cmd += ["--cfify"]
+            # TODO: Support CFI for riscv64
+            if arch != "riscv64":
+                cmd += ["--cfify"]
             if cross_prefix is not None:
                 # Stick with llvm-objdump for disassembly
                 cmd += ["--cc", cross_prefix + "gcc"]
@@ -2972,6 +3150,8 @@ def upstream_src_dir_for_dev_dir(dev_dir):
         return "mldsa/src/native/x86_64/src"
     if dev_dir.startswith("dev/riscv32/"):
         return "mldsa/src/native/rv32im/src"
+    if dev_dir.startswith("dev/riscv64/"):
+        return "mldsa/src/native/riscv64/src"
     raise ValueError(
         f"Unrecognised dev/ source directory {dev_dir!r}; "
         "extend upstream_src_dir_for_dev_dir() to map it to mldsa/src/..."
@@ -3271,7 +3451,43 @@ def hol_light_asm_joblist():
         ),
     ]
 
-    return joblist_aarch64 + joblist_x86_64 + joblist_riscv32
+    riscv64_flags = (
+        "-march=rv64gcv -mabi=lp64d -Idev/riscv64/src -Imldsa/src/native/riscv64/src"
+    )
+    joblist_riscv64 = [
+        (f"mldsa_{name}_riscv64_asm.S", "dev/riscv64/src", riscv64_flags, "riscv64")
+        for name in (
+            "intt_vlen128",
+            "intt_vlen256",
+            "ntt_vlen128",
+            "ntt_vlen256",
+            "poly_caddq",
+            "poly_chknorm",
+            "poly_decompose_32",
+            "poly_decompose_88",
+            "poly_pointwise_montgomery",
+            "poly_use_hint_32",
+            "poly_use_hint_88",
+            "polyvecl_pointwise_acc_montgomery_l4",
+            "polyvecl_pointwise_acc_montgomery_l5",
+            "polyvecl_pointwise_acc_montgomery_l7",
+            "polyz_unpack_17",
+            "polyz_unpack_19",
+            "rej_uniform",
+            "rej_uniform_eta2",
+            "rej_uniform_eta4",
+        )
+    ] + [
+        (
+            "keccak_f1600_x1_zbb_riscv64_asm.S",
+            "dev/fips202/riscv64/src",
+            "-march=rv64gc_zbb -mabi=lp64d -Idev/fips202/riscv64/src "
+            "-Imldsa/src/fips202/native/riscv64/src",
+            "riscv64",
+        )
+    ]
+
+    return joblist_aarch64 + joblist_x86_64 + joblist_riscv32 + joblist_riscv64
 
 
 def gen_hol_light_asm():
@@ -3286,7 +3502,7 @@ def check_hol_light_asm_autogenerated():
     }
     stray = sorted(
         os.path.join(d, fn)
-        for arch in ("aarch64", "x86_64", "riscv32")
+        for arch in ("aarch64", "x86_64", "riscv32", "riscv64")
         for d in [os.path.join("proofs/hol_light", arch, "mldsa")]
         if os.path.isdir(d)
         for fn in os.listdir(d)
@@ -3328,6 +3544,10 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
 
     if delete is True:
         return basename
+
+    # Skip .inc files when simplification is enabled (they get inlined by simpasm)
+    if no_simplify is False and f.endswith(".inc"):
+        return None
 
     if no_simplify is False and f.endswith(".S"):
         update_via_simpasm(f, out_dir, **kwargs)
@@ -3408,6 +3628,14 @@ def synchronize_backends(
             "mldsa/src/native/x86_64/meta.h",
             transform=lambda c: adjust_header_guard_for_filename(
                 c, "mldsa/src/native/x86_64/meta.h"
+            ),
+        )
+
+        update_via_copy(
+            "dev/riscv64/meta.h",
+            "mldsa/src/native/riscv64/meta.h",
+            transform=lambda c: adjust_header_guard_for_filename(
+                c, "mldsa/src/native/riscv64/meta.h"
             ),
         )
 
@@ -3508,6 +3736,30 @@ def synchronize_backends(
         force_cross=force_cross,
         no_simplify=no_simplify,
         cflags="-Idev/riscv32/src -Imldsa/src/native/rv32im/src -march=rv32im -mabi=ilp32",
+    )
+    synchronize_backend(
+        "dev/fips202/riscv64/src",
+        "mldsa/src/fips202/native/riscv64/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/fips202/riscv64/src -Imldsa/src/fips202/native/riscv64/src -march=rv64gc_zbb -mabi=lp64d",
+    )
+    synchronize_backend(
+        "dev/fips202/riscv64",
+        "mldsa/src/fips202/native/riscv64",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/fips202/riscv64 -Imldsa/src/fips202/native/riscv64 -march=rv64gc_zbb -mabi=lp64d",
+    )
+    synchronize_backend(
+        "dev/riscv64/src",
+        "mldsa/src/native/riscv64/src",
+        delete=delete,
+        force_cross=force_cross,
+        no_simplify=no_simplify,
+        cflags="-Idev/riscv64/src -Imldsa/src/native/riscv64/src -march=rv64gcv -mabi=lp64d",
     )
 
 
@@ -4602,11 +4854,29 @@ ABI_CAPS = {
             "test/abicheck/riscv32/selftest_riscv32.S",
         ],
     },
+    # The RISC-V backend has no runtime capability check; it is enabled
+    # purely at compile time.
+    "ZBB": {
+        "asm_subdir": "riscv64",
+        "guard": "__riscv_zbb",
+        "syscap": None,
+        "description": "RISC-V Zbb extension",
+        "cflags": ["-march=rv64gc_zbb"],
+        "aux_files": [],
+    },
+    "RVV": {
+        "asm_subdir": "riscv64",
+        "guard": "MLD_SYS_RISCV64_RVV",
+        "syscap": None,
+        "description": "RISC-V Vector extension 1.0",
+        "cflags": ["-march=rv64gcv"],
+        "aux_files": [],
+    },
 }
 
 
-# RISC-V integer-register ABI names and architectural indices.
-RISCV32_GPR_NUMBERS = {
+# RISC-V integer-register ABI names and architectural indices (RV32 and RV64).
+RISCV_GPR_NUMBERS = {
     "zero": 0,
     "ra": 1,
     "sp": 2,
@@ -4701,7 +4971,19 @@ ARCH_CALLINGS = {
         "init_func": "init_riscv32_register_state",
         "stub_func": "call_stub_riscv32",
         "check_func": "check_riscv32_ilp32_compliance",
-        "reg_to_field": lambda reg: f"gpr[{RISCV32_GPR_NUMBERS[reg]}]",
+        "reg_to_field": lambda reg: f"gpr[{RISCV_GPR_NUMBERS[reg]}]",
+    },
+    ("riscv64", "LP64D"): {
+        "arch_guard": "MLD_SYS_RISCV64",
+        "extra_guards": [],
+        "asm_subdir": "riscv64",
+        "state_type": "struct riscv64_register_state",
+        "gpr_int_type": "uint64_t",
+        "fn_qualifier": "",
+        "init_func": "init_riscv64_register_state",
+        "stub_func": "asm_call_stub_riscv64",
+        "check_func": "check_riscv64_lp64d_compliance",
+        "reg_to_field": lambda reg: f"gpr[{RISCV_GPR_NUMBERS[reg]}]",
     },
 }
 
@@ -5288,6 +5570,7 @@ def _main():
         gen_aarch64_zeta_file()
         gen_rv32im_zeta_file()
         gen_rv32im_hol_light_zeta_file()
+        gen_riscv64_zeta_file()
         gen_aarch64_hol_light_zeta_file()
         gen_aarch64_rej_uniform_table()
         gen_hol_light_rej_uniform_table()
@@ -5300,6 +5583,7 @@ def _main():
         gen_avx2_hol_light_rej_uniform_table()
         gen_hol_light_keccak_constants_file()
         gen_aarch64_keccak_constants_c_file()
+        gen_riscv64_keccak_constants_c_file()
         gen_avx2_keccak_constants_c_file()
         gen_avx2_keccak_hol_light_constants_file()
 
