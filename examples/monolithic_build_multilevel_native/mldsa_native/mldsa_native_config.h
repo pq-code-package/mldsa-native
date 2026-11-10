@@ -412,6 +412,29 @@
 #define MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202
 
 /**
+ * MLD_CONFIG_USE_X3
+ *
+ * If set, the AArch64 FIPS202 backend uses the 3-way (x3) hybrid
+ * Keccak-f1600 kernel (two states on Neon using the Armv8.4-A SHA3
+ * instructions, one state on scalar registers, single pass) instead of the
+ * default 4-way (x4) hybrid, and ExpandA, ExpandS and ExpandMask batch their
+ * XOF calls three at a time to match. The sampled values are identical to the
+ * default path; only the batching differs.
+ *
+ * This is intended for AArch64 cores that execute the SHA3 instructions on all
+ * SIMD pipes (e.g. Arm Neoverse V3). On Arm Neoverse V1 and V2, where it was
+ * tested, the default x4 hybrid is faster than x3.
+ *
+ * This can also be set using CFLAGS.
+ *
+ * @warning This option is experimental. Its scope, configuration and
+ *          function/macro signatures may change at any time.
+ */
+#if !defined(MLD_CONFIG_USE_X3)
+/* #define MLD_CONFIG_USE_X3 */
+#endif
+
+/**
  * MLD_CONFIG_FIPS202_BACKEND_FILE
  *
  * The FIPS-202 backend to use.
