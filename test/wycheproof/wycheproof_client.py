@@ -358,15 +358,17 @@ def run_verify_test(data_file):
                     f"pk={pk_hex}",
                 ]
             )
+            # _error: the binary failed, which is never an expected result
+            require("_error" not in out, f"binary error on tcId={tc['tcId']}")
             if tc["result"] == "invalid":
-                # _error: non-zero exit code; decode_error: explicit validation failure
+                # decode_error: explicit validation failure
                 require(
-                    "_error" in out or "decode_error" in out,
+                    "decode_error" in out or out.get("valid") == "0",
                     f"binary success on invalid tcId={tc['tcId']}",
                 )
             elif tc["result"] == "valid":
                 require(
-                    "_error" not in out and "decode_error" not in out,
+                    out.get("valid") == "1",
                     f"binary failure on valid tcId={tc['tcId']}",
                 )
             else:

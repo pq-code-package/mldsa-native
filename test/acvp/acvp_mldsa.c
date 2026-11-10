@@ -318,6 +318,19 @@ static MLD_NOINLINE void acvp_mldsa_sigGenInternalDeterministic_AFT(
 
 
 #if !defined(MLD_CONFIG_NO_VERIFY_API)
+/* Print valid=1 or valid=0 if verification accepted or rejected the
+ * signature. Any other result is an error of the test binary, so that the
+ * client does not mistake it for a rejected signature. */
+static int report_sigver(int rc)
+{
+  if (rc == 0 || rc == MLD_ERR_INVALID_SIGNATURE || rc == MLD_ERR_INVALID_ARG)
+  {
+    printf("valid=%d\n", rc == 0);
+    return 0;
+  }
+  return 1;
+}
+
 static MLD_NOINLINE int acvp_mldsa_sigVer_AFT(
     const unsigned char *message, size_t mlen, const unsigned char *context,
     size_t ctxlen, const unsigned char signature[MLDSA_SIG_BYTES],
@@ -854,8 +867,8 @@ int main(int argc, char *argv[])
 
 
       /* Call function under test */
-      return acvp_mldsa_sigVer_AFT(message, mlen, context, ctxlen, signature,
-                                   pk);
+      return report_sigver(
+          acvp_mldsa_sigVer_AFT(message, mlen, context, ctxlen, signature, pk));
     }
 
 
@@ -908,8 +921,8 @@ int main(int argc, char *argv[])
 
 
       /* Call function under test */
-      return acvp_mldsa_sigVerInternal_AFT(message, mlen, signature, pk,
-                                           externalMu);
+      return report_sigver(acvp_mldsa_sigVerInternal_AFT(
+          message, mlen, signature, pk, externalMu));
     }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -1040,8 +1053,8 @@ int main(int argc, char *argv[])
 
 
       /* Call function under test */
-      return acvp_mldsa_sigVerPreHash_AFT(ph, phlen, context, ctxlen, signature,
-                                          pk, hashAlg);
+      return report_sigver(acvp_mldsa_sigVerPreHash_AFT(
+          ph, phlen, context, ctxlen, signature, pk, hashAlg));
     }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
@@ -1253,8 +1266,8 @@ int main(int argc, char *argv[])
       argc--, argv++;
 
       /* Call function under test */
-      return acvp_mldsa_sigVerPreHashShake256_AFT(message, mlen, context,
-                                                  ctxlen, signature, pk);
+      return report_sigver(acvp_mldsa_sigVerPreHashShake256_AFT(
+          message, mlen, context, ctxlen, signature, pk));
     }
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
     default:
