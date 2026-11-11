@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794383629683,
+  "lastUpdate": 1794383805964,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -366446,6 +366446,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 120163,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "dd79120ac14a0e074477f7fb1e559bc13ed2afb5",
+          "message": "CI: Enable ABI checks in the Zig 0.17 jobs\n\nThe Zig 0.17 jobs skip ABI checks because the checker previously added\nAArch64 `-march` flags which Zig parses as CPU names. The checker now\nuses the platform's CPU flags, so that restriction no longer applies.\n\nRemove `--no-abicheck` from the Extended compiler matrix and the Linux\nand macOS legacy matrices. Drop the comments about the old `-march`\nflags.\n\nPorts pq-code-package/mlkem-native#1945.\nResolves #1488.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-11T05:47:34Z",
+          "tree_id": "f675756d426cb81a81efb6f6ed42cf26f133d496",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/dd79120ac14a0e074477f7fb1e559bc13ed2afb5"
+        },
+        "date": 1794383610825,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 43706,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 129893,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 45073,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 74722,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 212218,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 74626,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 123934,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 270568,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 119974,
             "unit": "cycles"
           }
         ]
