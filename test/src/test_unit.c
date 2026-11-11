@@ -80,34 +80,32 @@ static void mld_test_keccakf1600_extract_bytes_ref(const uint64_t *state,
   }
 }
 
-static void mld_test_print_keccak_state_bytes(const char *label,
-                                              const unsigned char *array,
-                                              size_t len)
+static void mld_test_print_bytes(const char *label, const unsigned char *array,
+                                 size_t len)
 {
   size_t i;
   fprintf(stderr, "%s:\n", label);
   for (i = 0; i < len; i++)
   {
-    if (i % sizeof(uint64_t) == 0)
+    if (i % (4 * sizeof(uint64_t)) == 0)
     {
       fprintf(stderr, "  ");
     }
     fprintf(stderr, "%02x", (unsigned)array[i]);
-    if (i % sizeof(uint64_t) == sizeof(uint64_t) - 1)
+    if (i % (4 * sizeof(uint64_t)) == 4 * sizeof(uint64_t) - 1)
     {
       fprintf(stderr, "\n");
     }
   }
-  if (len % sizeof(uint64_t) != 0)
+  if (len % (4 * sizeof(uint64_t)) != 0)
   {
     fprintf(stderr, "\n");
   }
 }
 
-static int mld_test_compare_keccak_state_bytes(const unsigned char *got,
-                                               const unsigned char *expected,
-                                               size_t len,
-                                               const char *test_name)
+static int mld_test_compare_bytes(const unsigned char *got,
+                                  const unsigned char *expected, size_t len,
+                                  const char *test_name)
 {
   size_t i;
   for (i = 0; i < len; i++)
@@ -118,8 +116,8 @@ static int mld_test_compare_keccak_state_bytes(const unsigned char *got,
       fprintf(stderr,
               "  First difference at byte %lu: got=0x%02x, expected=0x%02x\n",
               (unsigned long)i, (unsigned)got[i], (unsigned)expected[i]);
-      mld_test_print_keccak_state_bytes("Got", got, len);
-      mld_test_print_keccak_state_bytes("Expected", expected, len);
+      mld_test_print_bytes("Got", got, len);
+      mld_test_print_bytes("Expected", expected, len);
       return 0;
     }
   }
@@ -1031,6 +1029,11 @@ cleanup:
 #ifdef MLD_USE_NATIVE_FIPS202_X1
 static int mld_test_keccakf1600_x1_byte_boundaries(void)
 {
+  enum
+  {
+    INPUT_BYTES = MLD_KECCAK_LANES * sizeof(uint64_t),
+    OUTPUT_BYTES = INPUT_BYTES + 2
+  };
   static const struct
   {
     unsigned offset;
@@ -1058,19 +1061,20 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
   int ret = 1;
   size_t i;
   size_t num_cases = sizeof(cases) / sizeof(cases[0]);
-  unsigned char input[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  unsigned char input_ref[sizeof(input)];
-  unsigned char output[MLD_KECCAK_LANES * sizeof(uint64_t) + 2];
-  unsigned char output_ref[MLD_KECCAK_LANES * sizeof(uint64_t) + 2];
+  MLD_ALLOC(input, unsigned char, INPUT_BYTES, NULL);
+  MLD_ALLOC(input_ref, unsigned char, INPUT_BYTES, NULL);
+  MLD_ALLOC(output, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_ALLOC(output_ref, unsigned char, OUTPUT_BYTES, NULL);
   MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_ALLOC(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
 
-  if (state == NULL || state_ref == NULL)
+  if (input == NULL || input_ref == NULL || output == NULL ||
+      output_ref == NULL || state == NULL || state_ref == NULL)
   {
     goto cleanup;
   }
 
-  randombytes(input, sizeof(input));
+  randombytes(input, INPUT_BYTES);
   for (i = 0; i < 4 * num_cases; i++)
   {
     unsigned offset = cases[(i / 2) % num_cases].offset;
@@ -1085,21 +1089,21 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
     {
       size_t j;
       /* Seed every logical byte nonzero through the native interface. */
-      for (j = 0; j < sizeof(input); j++)
+      for (j = 0; j < INPUT_BYTES; j++)
       {
         input[j] = (unsigned char)(j + 1);
       }
-      memcpy(input_ref, input, sizeof(input));
-      mld_test_keccakf1600_xor_bytes_ref(state_ref, input_ref, 0,
-                                         sizeof(input));
-      mld_keccakf1600_xor_bytes(state, input, 0, sizeof(input));
-      if (!mld_test_compare_keccak_state_bytes(
-              input, input_ref, sizeof(input),
-              "keccakf1600_x1_xor_bytes_input"))
+      /* Keep the oracle independent and detect writes through the const input.
+       */
+      memcpy(input_ref, input, INPUT_BYTES);
+      mld_test_keccakf1600_xor_bytes_ref(state_ref, input_ref, 0, INPUT_BYTES);
+      mld_keccakf1600_xor_bytes(state, input, 0, INPUT_BYTES);
+      if (!mld_test_compare_bytes(input, input_ref, INPUT_BYTES,
+                                  "keccakf1600_x1_xor_bytes_input"))
       {
         goto cleanup;
       }
-      for (j = 0; j < sizeof(input); j++)
+      for (j = 0; j < INPUT_BYTES; j++)
       {
         input[j] = (unsigned char)(0xa5 ^ j);
       }
@@ -1108,12 +1112,13 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
     /* Repeating the overlapping XOR must restore the nonzero base state. */
     for (repeat = 0; repeat < num_repeats; repeat++)
     {
-      memcpy(input_ref, input, sizeof(input));
+      /* Keep the oracle independent and detect writes through the const input.
+       */
+      memcpy(input_ref, input, INPUT_BYTES);
       mld_test_keccakf1600_xor_bytes_ref(state_ref, input_ref, offset, length);
       mld_keccakf1600_xor_bytes(state, input, offset, length);
-      if (!mld_test_compare_keccak_state_bytes(
-              input, input_ref, sizeof(input),
-              "keccakf1600_x1_xor_bytes_input"))
+      if (!mld_test_compare_bytes(input, input_ref, INPUT_BYTES,
+                                  "keccakf1600_x1_xor_bytes_input"))
       {
         fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
                 length);
@@ -1122,13 +1127,13 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
 
       /* A full extraction checks the XOR range and all untouched state bytes.
        */
-      memset(output, canary, sizeof(output));
-      memset(output_ref, canary, sizeof(output_ref));
-      mld_keccakf1600_extract_bytes(state, output, 0, sizeof(input));
+      memset(output, canary, OUTPUT_BYTES);
+      memset(output_ref, canary, OUTPUT_BYTES);
+      mld_keccakf1600_extract_bytes(state, output, 0, INPUT_BYTES);
       mld_test_keccakf1600_extract_bytes_ref(state_ref, output_ref, 0,
-                                             sizeof(input));
-      if (!mld_test_compare_keccak_state_bytes(
-              output, output_ref, sizeof(output), "keccakf1600_x1_xor_bytes"))
+                                             INPUT_BYTES);
+      if (!mld_test_compare_bytes(output, output_ref, OUTPUT_BYTES,
+                                  "keccakf1600_x1_xor_bytes"))
       {
         fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
                 length);
@@ -1136,14 +1141,13 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
       }
 
       /* Complementary canaries expose constant out-of-range stores. */
-      memset(output, canary, sizeof(output));
-      memset(output_ref, canary, sizeof(output_ref));
+      memset(output, canary, OUTPUT_BYTES);
+      memset(output_ref, canary, OUTPUT_BYTES);
       mld_keccakf1600_extract_bytes(state, output, offset, length);
       mld_test_keccakf1600_extract_bytes_ref(state_ref, output_ref, offset,
                                              length);
-      if (!mld_test_compare_keccak_state_bytes(output, output_ref,
-                                               sizeof(output),
-                                               "keccakf1600_x1_extract_bytes"))
+      if (!mld_test_compare_bytes(output, output_ref, OUTPUT_BYTES,
+                                  "keccakf1600_x1_extract_bytes"))
       {
         fprintf(stderr, "  Boundary case: offset=%u, length=%u\n", offset,
                 length);
@@ -1157,21 +1161,31 @@ static int mld_test_keccakf1600_x1_byte_boundaries(void)
 cleanup:
   MLD_FREE(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_FREE(state, uint64_t, MLD_KECCAK_LANES, NULL);
+  MLD_FREE(output_ref, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_FREE(output, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_FREE(input_ref, unsigned char, INPUT_BYTES, NULL);
+  MLD_FREE(input, unsigned char, INPUT_BYTES, NULL);
   return ret;
 }
 
-static int test_keccakf1600_permute(void)
+static int test_keccakf1600x1_xor_permute_extract(void)
 {
+  enum
+  {
+    INPUT_BYTES = MLD_KECCAK_LANES * sizeof(uint64_t),
+    OUTPUT_BYTES = INPUT_BYTES
+  };
   int ret = 1;
   int i;
-  unsigned char input[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  unsigned char input_ref[sizeof(input)];
-  unsigned char output[MLD_KECCAK_LANES * sizeof(uint64_t)];
-  unsigned char output_ref[MLD_KECCAK_LANES * sizeof(uint64_t)];
+  MLD_ALLOC(input, unsigned char, INPUT_BYTES, NULL);
+  MLD_ALLOC(input_ref, unsigned char, INPUT_BYTES, NULL);
+  MLD_ALLOC(output, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_ALLOC(output_ref, unsigned char, OUTPUT_BYTES, NULL);
   MLD_ALLOC(state, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_ALLOC(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
 
-  if (state == NULL || state_ref == NULL)
+  if (input == NULL || input_ref == NULL || output == NULL ||
+      output_ref == NULL || state == NULL || state_ref == NULL)
   {
     goto cleanup;
   }
@@ -1179,14 +1193,16 @@ static int test_keccakf1600_permute(void)
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     size_t j;
-    randombytes(input, sizeof(input));
+    randombytes(input, INPUT_BYTES);
     memset(state, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
     memset(state_ref, 0, MLD_KECCAK_LANES * sizeof(uint64_t));
-    memcpy(input_ref, input, sizeof(input));
-    mld_test_keccakf1600_xor_bytes_ref(state_ref, input_ref, 0, sizeof(input));
-    mld_keccakf1600_xor_bytes(state, input, 0, sizeof(input));
-    if (!mld_test_compare_keccak_state_bytes(input, input_ref, sizeof(input),
-                                             "keccakf1600_x1_xor_bytes_input"))
+    /* XOR must preserve input; the snapshot also protects the reference oracle.
+     */
+    memcpy(input_ref, input, INPUT_BYTES);
+    mld_test_keccakf1600_xor_bytes_ref(state_ref, input_ref, 0, INPUT_BYTES);
+    mld_keccakf1600_xor_bytes(state, input, 0, INPUT_BYTES);
+    if (!mld_test_compare_bytes(input, input_ref, INPUT_BYTES,
+                                "keccakf1600_x1_xor_bytes_input"))
     {
       goto cleanup;
     }
@@ -1195,15 +1211,15 @@ static int test_keccakf1600_permute(void)
     mld_keccakf1600_permute_c(state_ref);
 
     mld_test_keccakf1600_extract_bytes_ref(state_ref, output_ref, 0,
-                                           sizeof(output_ref));
+                                           OUTPUT_BYTES);
     /* Ensure an omitted extraction write is always a mismatch. */
-    for (j = 0; j < sizeof(output); j++)
+    for (j = 0; j < OUTPUT_BYTES; j++)
     {
       output[j] = (unsigned char)(output_ref[j] ^ 0xff);
     }
-    mld_keccakf1600_extract_bytes(state, output, 0, sizeof(output));
-    if (!mld_test_compare_keccak_state_bytes(output, output_ref, sizeof(output),
-                                             "keccakf1600_permute"))
+    mld_keccakf1600_extract_bytes(state, output, 0, OUTPUT_BYTES);
+    if (!mld_test_compare_bytes(output, output_ref, OUTPUT_BYTES,
+                                "keccakf1600x1_xor_permute_extract"))
     {
       goto cleanup;
     }
@@ -1214,6 +1230,10 @@ static int test_keccakf1600_permute(void)
 cleanup:
   MLD_FREE(state_ref, uint64_t, MLD_KECCAK_LANES, NULL);
   MLD_FREE(state, uint64_t, MLD_KECCAK_LANES, NULL);
+  MLD_FREE(output_ref, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_FREE(output, unsigned char, OUTPUT_BYTES, NULL);
+  MLD_FREE(input_ref, unsigned char, INPUT_BYTES, NULL);
+  MLD_FREE(input, unsigned char, INPUT_BYTES, NULL);
   return ret;
 }
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
@@ -1364,7 +1384,7 @@ static int test_backend_units(void)
 
 #ifdef MLD_USE_NATIVE_FIPS202_X1
   CHECK(mld_test_keccakf1600_x1_byte_boundaries() == 0);
-  CHECK(test_keccakf1600_permute() == 0);
+  CHECK(test_keccakf1600x1_xor_permute_extract() == 0);
 #endif
 
 #ifdef MLD_USE_NATIVE_FIPS202_X4
