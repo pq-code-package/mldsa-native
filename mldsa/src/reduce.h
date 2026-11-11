@@ -111,6 +111,11 @@ __contract__(
 {
   int32_t t;
 
+  /*
+   * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
+   * implementation-defined for negative left argument. Here,
+   * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
+   */
   t = (a + ((int32_t)1 << 22)) >> 23;
   t = a - t * MLDSA_Q;
   mld_assert((t - a) % MLDSA_Q == 0);
