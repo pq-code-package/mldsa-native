@@ -191,6 +191,35 @@
 #endif
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 
+/*
+ * Batching factor of the batched Keccak-f1600 path (FIPS202 layer, samplers):
+ * the factor of the FIPS202 backend if it provides one batched Keccak of its
+ * own factor (MLD_USE_NATIVE_FIPS202_XN, see fips202/native/api.h), else 3
+ * with MLD_CONFIG_USE_X3, else 4.
+ */
+#if defined(MLD_USE_NATIVE_FIPS202_XN)
+#if defined(MLD_CONFIG_USE_X3) && MLD_FIPS202_NATIVE_XN_WAY != 3
+#error "MLD_CONFIG_USE_X3 requires a FIPS202 backend with batching factor 3"
+#endif
+#define MLD_KECCAK_WAY MLD_FIPS202_NATIVE_XN_WAY
+#elif defined(MLD_CONFIG_USE_X3)
+#define MLD_KECCAK_WAY 3
+#else
+#define MLD_KECCAK_WAY 4
+#endif
+
+/*
+ * MLD_XN_LANES(X) expands to X(0) X(1) ... X(MLD_KECCAK_WAY - 1), for code that
+ * is written once per state of a batch.
+ */
+#if MLD_KECCAK_WAY == 3
+#define MLD_XN_LANES(X) X(0) X(1) X(2)
+#elif MLD_KECCAK_WAY == 4
+#define MLD_XN_LANES(X) X(0) X(1) X(2) X(3)
+#else
+#error "MLD_KECCAK_WAY must be 3 or 4"
+#endif
+
 #if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLD_FIPS202_HEADER_FILE "fips202/fips202.h"
 #else
@@ -198,9 +227,9 @@
 #endif
 
 #if !defined(MLD_CONFIG_FIPS202X4_CUSTOM_HEADER)
-#define MLD_FIPS202X4_HEADER_FILE "fips202/fips202x4.h"
+#define MLD_FIPS202XN_HEADER_FILE "fips202/fips202xN.h"
 #else
-#define MLD_FIPS202X4_HEADER_FILE MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
+#define MLD_FIPS202XN_HEADER_FILE MLD_CONFIG_FIPS202X4_CUSTOM_HEADER
 #endif
 
 /* Standard library function replacements */

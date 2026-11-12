@@ -15,6 +15,10 @@
 #include "../../mldsa/src/randombytes.h"
 #include "hal.h"
 
+/* Batched Keccak permute declarations and lane/way constants for the
+ * keccakf1600x4_permute and keccakf1600x3_permute benchmarks. */
+#include "../../mldsa/src/fips202/keccakf1600.h"
+
 #ifndef MLD_BENCHMARK_NWARMUP
 #define MLD_BENCHMARK_NWARMUP 50
 #endif
@@ -96,19 +100,111 @@ static int bench(void)
     BENCH("poly_uniform", mld_poly_uniform(&poly_out, seed))
   }
 
+  /* poly_uniform_4x — the 4-way batched ExpandA (matrix) sampler; x4
+   * counterpart to poly_uniform_3x below. Only benchmarked in the x4 build:
+   * under MLD_CONFIG_USE_X3 its Keccak falls back to a non-native path, so the
+   * number would not reflect the real x4 kernel. Guard also matches its
+   * declaration in poly.h. */
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+  {
+    MLD_ALIGN mld_poly poly_a0, poly_a1, poly_a2, poly_a3;
+    MLD_ALIGN uint8_t seed_ext4[4][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+    CHECK(mld_randombytes((uint8_t *)seed_ext4, sizeof(seed_ext4)) == 0);
+    BENCH("poly_uniform_4x", mld_poly_uniform_xN(&poly_a0, &poly_a1, &poly_a2,
+                                                 &poly_a3, seed_ext4))
+  }
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
+
   BENCH("poly_caddq", mld_poly_caddq((mld_poly *)data0));
 
-  /* poly_uniform_eta_4x — exercises rej_uniform_eta{2,4}_avx2_asm on x86 */
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+  /* poly_uniform_eta_4x — exercises rej_uniform_eta{2,4}_avx2_asm on x86.
+   * Not benchmarked with MLD_CONFIG_USE_X3, where the AArch64 backend provides
+   * the x3 kernel instead and this row would measure a fallback. */
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
     !defined(MLD_CONFIG_NO_KEYPAIR_API)
   {
     MLD_ALIGN mld_poly poly_eta0, poly_eta1, poly_eta2, poly_eta3;
     BENCH(
         "poly_uniform_eta_4x",
-        mld_poly_uniform_eta_4x(&poly_eta0, &poly_eta1, &poly_eta2, &poly_eta3,
-                                (const uint8_t *)data0, 0, 1, 2, 3))
+        mld_poly_uniform_eta_xN(&poly_eta0, &poly_eta1, &poly_eta2, &poly_eta3,
+                                0, 1, 2, 3, (const uint8_t *)data0))
+  }
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+          !MLD_CONFIG_NO_KEYPAIR_API */
+
+  /* poly_uniform_gamma1_4x — ExpandMask x4 sampler. x4 build only (same reason
+   * as eta_4x above). Guard matches its declaration in poly_kl.h. */
+#if MLD_KECCAK_WAY == 4 && !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+  {
+    MLD_ALIGN mld_poly poly_g0, poly_g1, poly_g2, poly_g3;
+    BENCH("poly_uniform_gamma1_4x",
+          mld_poly_uniform_gamma1_xN(&poly_g0, &poly_g1, &poly_g2, &poly_g3, 0,
+                                     1, 2, 3, (const uint8_t *)data0))
+  }
+#endif /* MLD_KECCAK_WAY == 4 && !MLD_CONFIG_SERIAL_FIPS202_ONLY && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
+
+  /* Batched permutation, named after the batching factor (per state: x4 / 4
+   * vs x3 / 3). */
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) &&                                \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
+     defined(MLD_UNIT_TEST))
+  {
+#if MLD_KECCAK_WAY == 3
+#define MLD_BENCH_PERMUTE_NAME "keccakf1600x3_permute"
+#else
+#define MLD_BENCH_PERMUTE_NAME "keccakf1600x4_permute"
+#endif
+    MLD_ALIGN uint64_t xn_state[MLD_KECCAK_LANES * MLD_KECCAK_WAY];
+    CHECK(mld_randombytes((uint8_t *)xn_state, sizeof(xn_state)) == 0);
+    BENCH(MLD_BENCH_PERMUTE_NAME, mld_keccakf1600xN_permute(xn_state))
+  }
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_NO_KEYPAIR_API || \
+          !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) */
+
+#if MLD_KECCAK_WAY == 3
+  /*
+   * x3 (3-way) batched Keccak benchmarks, built with MLD_CONFIG_USE_X3: the raw
+   * permutation and the ExpandA, ExpandS and ExpandMask samplers, to compare
+   * with the x4 sampler rows above (per poly: x3 value / 3 vs x4 value / 4).
+   */
+
+  /* ExpandA x3 sampler (SHAKE128, three matrix entries per call). */
+  {
+    MLD_ALIGN mld_poly poly_a0, poly_a1, poly_a2;
+    MLD_ALIGN uint8_t seed_ext[3][MLD_ALIGN_UP(MLDSA_SEEDBYTES + 2)];
+    CHECK(mld_randombytes((uint8_t *)seed_ext, sizeof(seed_ext)) == 0);
+    BENCH("poly_uniform_3x",
+          mld_poly_uniform_xN(&poly_a0, &poly_a1, &poly_a2, seed_ext))
+  }
+
+  /* ExpandS x3 sampler (SHAKE256, three secret polynomials per call). */
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    !defined(MLD_CONFIG_NO_KEYPAIR_API)
+  {
+    MLD_ALIGN mld_poly poly_s0, poly_s1, poly_s2;
+    BENCH("poly_uniform_eta_3x",
+          mld_poly_uniform_eta_xN(&poly_s0, &poly_s1, &poly_s2, 0, 1, 2,
+                                  (const uint8_t *)data0))
   }
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && !MLD_CONFIG_NO_KEYPAIR_API */
+
+  /* ExpandMask x3 sampler (SHAKE256, three gamma1 mask polynomials per call).
+   */
+#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+  {
+    MLD_ALIGN mld_poly poly_g0, poly_g1, poly_g2;
+    BENCH("poly_uniform_gamma1_3x",
+          mld_poly_uniform_gamma1_xN(&poly_g0, &poly_g1, &poly_g2, 0, 1, 2,
+                                     (const uint8_t *)data0))
+  }
+#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
+          MLD_UNIT_TEST) */
+#endif /* MLD_KECCAK_WAY == 3 */
 
   BENCH("poly_chknorm",
         chknorm_acc ^=

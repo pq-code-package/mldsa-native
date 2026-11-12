@@ -10,7 +10,7 @@
 #include "fips202.h"
 
 #define MLD_KECCAK_LANES 25
-#define MLD_KECCAK_WAY 4
+/* The batching factor MLD_KECCAK_WAY is defined in common.h. */
 
 /*
  * WARNING:
@@ -46,52 +46,47 @@ __contract__(
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
      defined(MLD_UNIT_TEST)) &&                                                \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-#define mld_keccakf1600x4_extract_bytes \
-  MLD_NAMESPACE(keccakf1600x4_extract_bytes)
+/*
+ * Batched Keccak-f1600 state access for MLD_KECCAK_WAY states, stored one
+ * after another (MLD_KECCAK_LANES lanes each). The batching factor is chosen
+ * in common.h (default 4; the backend's factor with MLD_USE_NATIVE_FIPS202_XN).
+ *
+ * The data of all states lives in one buffer: the bytes for state i start at
+ * data + i * stride. For xor_bytes, stride 0 means the same bytes for every
+ * state (used for the padding byte).
+ */
+#define mld_keccakf1600xN_extract_bytes \
+  MLD_NAMESPACE(keccakf1600xN_extract_bytes)
 MLD_INTERNAL_API
-void mld_keccakf1600x4_extract_bytes(uint64_t *state, unsigned char *data0,
-                                     unsigned char *data1, unsigned char *data2,
-                                     unsigned char *data3, unsigned offset,
+void mld_keccakf1600xN_extract_bytes(uint64_t *state, unsigned char *data,
+                                     size_t stride, unsigned offset,
                                      unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires(length <= stride && stride <= MLD_MAX_BUFFER_SIZE)
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(data0, length))
-    requires(memory_no_alias(data1, length))
-    requires(memory_no_alias(data2, length))
-    requires(memory_no_alias(data3, length))
-    assigns(memory_slice(data0, length))
-    assigns(memory_slice(data1, length))
-    assigns(memory_slice(data2, length))
-    assigns(memory_slice(data3, length))
+    requires(memory_no_alias(data, (MLD_KECCAK_WAY - 1) * stride + length))
+    assigns(memory_slice(data, (MLD_KECCAK_WAY - 1) * stride + length))
 );
 
-#define mld_keccakf1600x4_xor_bytes MLD_NAMESPACE(keccakf1600x4_xor_bytes)
+#define mld_keccakf1600xN_xor_bytes MLD_NAMESPACE(keccakf1600xN_xor_bytes)
 MLD_INTERNAL_API
-void mld_keccakf1600x4_xor_bytes(uint64_t *state, const unsigned char *data0,
-                                 const unsigned char *data1,
-                                 const unsigned char *data2,
-                                 const unsigned char *data3, unsigned offset,
+void mld_keccakf1600xN_xor_bytes(uint64_t *state, const unsigned char *data,
+                                 size_t stride, unsigned offset,
                                  unsigned length)
 __contract__(
     requires(0 <= offset && offset <= MLD_KECCAK_LANES * sizeof(uint64_t) &&
          0 <= length && length <= MLD_KECCAK_LANES * sizeof(uint64_t) - offset)
+    requires((stride == 0 || length <= stride) && stride <= MLD_MAX_BUFFER_SIZE)
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
-    requires(memory_no_alias(data0, length))
-    /* Case 1: all input buffers are distinct; Case 2: All input buffers are the same */
-    requires((data0 == data1 &&
-              data0 == data2 &&
-              data0 == data3) ||
-         (memory_no_alias(data1, length) &&
-              memory_no_alias(data2, length) &&
-              memory_no_alias(data3, length)))
+    requires(memory_no_alias(data, (MLD_KECCAK_WAY - 1) * stride + length))
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
 );
 
-#define mld_keccakf1600x4_permute MLD_NAMESPACE(keccakf1600x4_permute)
+#define mld_keccakf1600xN_permute MLD_NAMESPACE(keccakf1600xN_permute)
 MLD_INTERNAL_API
-void mld_keccakf1600x4_permute(uint64_t *state)
+void mld_keccakf1600xN_permute(uint64_t *state)
 __contract__(
     requires(memory_no_alias(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))

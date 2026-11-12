@@ -120,7 +120,8 @@ static int compare_u64_arrays(const uint64_t *a, const uint64_t *b,
     defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
-    defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
+    defined(MLD_USE_NATIVE_FIPS202_X1) ||                           \
+    defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
 
 /* Backend unit test helper functions for arithmetic native backends */
 #if defined(MLD_USE_NATIVE_NTT) || defined(MLD_USE_NATIVE_INTT) ||  \
@@ -1040,24 +1041,25 @@ cleanup:
 #endif /* MLD_USE_NATIVE_FIPS202_X1 */
 
 /*
- * Test that x4 Keccak (xor_bytes, permute, extract_bytes) produces
- * the same results as the x1 C reference.
+ * Test that the batched Keccak (xor_bytes, permute, extract_bytes) produces
+ * the same results as the x1 C reference, for each of the MLD_KECCAK_WAY
+ * states.
  */
-#ifdef MLD_USE_NATIVE_FIPS202_X4
+#if defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
 #define MAX_RATE 136
 
-static int test_keccakf1600x4_xor_permute_extract(void)
+static int test_keccakf1600xN_xor_permute_extract(void)
 {
   int ret = 1;
   int i, j;
-  unsigned char output_x4[MLD_KECCAK_WAY][MAX_RATE];
+  unsigned char output_xN[MLD_KECCAK_WAY][MAX_RATE];
   unsigned char output_x1[MAX_RATE];
   unsigned char input[MLD_KECCAK_WAY][MAX_RATE];
   uint8_t xor_offset, xor_length, ext_offset, ext_length;
-  MLD_ALLOC(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_ALLOC(state_xN, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   MLD_ALLOC(state_x1, uint64_t, MLD_KECCAK_LANES, NULL);
 
-  if (state_x4 == NULL || state_x1 == NULL)
+  if (state_xN == NULL || state_x1 == NULL)
   {
     goto cleanup;
   }
@@ -1082,14 +1084,13 @@ static int test_keccakf1600x4_xor_permute_extract(void)
       randombytes(input[j], xor_length);
     }
 
-    /* Run x4 implementation */
-    memset(state_x4, 0, MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
-    mld_keccakf1600x4_xor_bytes(state_x4, input[0], input[1], input[2],
-                                input[3], xor_offset, xor_length);
-    mld_keccakf1600x4_permute(state_x4);
-    mld_keccakf1600x4_extract_bytes(state_x4, output_x4[0], output_x4[1],
-                                    output_x4[2], output_x4[3], ext_offset,
-                                    ext_length);
+    /* Run the batched implementation */
+    memset(state_xN, 0, MLD_KECCAK_LANES * MLD_KECCAK_WAY * sizeof(uint64_t));
+    mld_keccakf1600xN_xor_bytes(state_xN, input[0], MAX_RATE, xor_offset,
+                                xor_length);
+    mld_keccakf1600xN_permute(state_xN);
+    mld_keccakf1600xN_extract_bytes(state_xN, output_xN[0], MAX_RATE,
+                                    ext_offset, ext_length);
 
     /* Compare each lane against x1 C reference */
     for (j = 0; j < MLD_KECCAK_WAY; j++)
@@ -1100,7 +1101,7 @@ static int test_keccakf1600x4_xor_permute_extract(void)
       mld_keccakf1600_extract_bytes(state_x1, output_x1, ext_offset,
                                     ext_length);
 
-      CHECK(memcmp(output_x4[j], output_x1, ext_length) == 0);
+      CHECK(memcmp(output_xN[j], output_x1, ext_length) == 0);
     }
   }
 
@@ -1108,12 +1109,12 @@ static int test_keccakf1600x4_xor_permute_extract(void)
 
 cleanup:
   MLD_FREE(state_x1, uint64_t, MLD_KECCAK_LANES, NULL);
-  MLD_FREE(state_x4, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
+  MLD_FREE(state_xN, uint64_t, MLD_KECCAK_LANES *MLD_KECCAK_WAY, NULL);
   return ret;
 }
 
 #undef MAX_RATE
-#endif /* MLD_USE_NATIVE_FIPS202_X4 */
+#endif /* MLD_USE_NATIVE_FIPS202_X4 || MLD_USE_NATIVE_FIPS202_XN */
 
 static int test_backend_units(void)
 {
@@ -1187,8 +1188,8 @@ static int test_backend_units(void)
   CHECK(test_keccakf1600_permute() == 0);
 #endif
 
-#ifdef MLD_USE_NATIVE_FIPS202_X4
-  CHECK(test_keccakf1600x4_xor_permute_extract() == 0);
+#if defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
+  CHECK(test_keccakf1600xN_xor_permute_extract() == 0);
 #endif
 
   return 0;
@@ -1204,7 +1205,7 @@ static int test_backend_units(void)
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
           MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
           MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_NATIVE_FIPS202_X1 ||      \
-          MLD_USE_NATIVE_FIPS202_X4 */
+          MLD_USE_NATIVE_FIPS202_X4 || MLD_USE_NATIVE_FIPS202_XN */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 /* Test that eager and lazy polyvec init+get produce the same results */
@@ -1423,7 +1424,8 @@ int main(void)
     defined(MLD_USE_NATIVE_REJ_UNIFORM) ||                          \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA2) ||                     \
     defined(MLD_USE_NATIVE_REJ_UNIFORM_ETA4) ||                     \
-    defined(MLD_USE_NATIVE_FIPS202_X1) || defined(MLD_USE_NATIVE_FIPS202_X4)
+    defined(MLD_USE_NATIVE_FIPS202_X1) ||                           \
+    defined(MLD_USE_NATIVE_FIPS202_X4) || defined(MLD_USE_NATIVE_FIPS202_XN)
   CHECK(test_backend_units() == 0);
 #endif /* MLD_USE_NATIVE_NTT || MLD_USE_NATIVE_INTT ||                         \
           MLD_USE_NATIVE_POLY_DECOMPOSE_32 || MLD_USE_NATIVE_POLY_DECOMPOSE_88 \
@@ -1436,7 +1438,7 @@ int main(void)
           MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19 ||  \
           MLD_USE_NATIVE_REJ_UNIFORM || MLD_USE_NATIVE_REJ_UNIFORM_ETA2 ||     \
           MLD_USE_NATIVE_REJ_UNIFORM_ETA4 || MLD_USE_NATIVE_FIPS202_X1 ||      \
-          MLD_USE_NATIVE_FIPS202_X4 */
+          MLD_USE_NATIVE_FIPS202_X4 || MLD_USE_NATIVE_FIPS202_XN */
 
 
   return 0;

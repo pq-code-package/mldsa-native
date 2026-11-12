@@ -227,66 +227,58 @@ __contract__(
     mld_polyeta_pack(s1_packed + i * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[i]);
   }
 #else /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
-/* Batches keep the nonce grouping of the serial path; s2 and don't-care
- * outputs go to s1 slots that are yet to be sampled. */
-#if MLD_CONFIG_PARAMETER_SET == 44
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 4, 5, 6, 7);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-#elif MLD_CONFIG_PARAMETER_SET == 65
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 7, 8, 9, 10);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[0], &s1->vec[1],
-                          &s1->vec[2] /* irrelevant */, seed, 4, 5, 6,
-                          0xFF /* irrelevant */);
-  mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-#elif MLD_CONFIG_PARAMETER_SET == 87
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 11, 12, 13, 14);
-  mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 7 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 7, 8, 9, 10);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[5], &s1->vec[6],
-                          &s1->vec[0] /* irrelevant */, seed, 4, 5, 6,
-                          0xFF /* irrelevant */);
-  mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
-  mld_polyeta_pack(s1_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[5]);
-  mld_polyeta_pack(s1_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[6]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-#endif /* MLD_CONFIG_PARAMETER_SET == 87 */
+  /*
+   * Batched: s2 then s1 as one run of L + K polynomials, MLD_KECCAK_WAY at a
+   * time. If L + K is not a multiple of the factor, the first batch starts at
+   * a negative position and its extra lanes are thrown away. s2 (and thrown
+   * away) lanes use spare s1 slots as scratch and are packed right away.
+   * CBMC unrolls these short loops (UNWINDSET).
+   *
+   * Example, ML-DSA-65 (L = 5, K = 6) at factor 3, first batch at p = -1:
+   *   p = -1: throwaway, s2[0], s2[1]   nonces 0xFF, 5, 6   slots 0, 1, 2
+   *   p =  2: s2[2], s2[3], s2[4]       nonces 7, 8, 9      slots 0, 1, 2
+   *   p =  5: s2[5], s1[0], s1[1]       nonces 10, 0, 1     slots 2, 0, 1
+   *   p =  8: s1[2], s1[3], s1[4]       nonces 2, 3, 4      slots 2, 3, 4
+   */
+#define MLD_EXPANDS_T (MLDSA_L + MLDSA_K)
+#define MLD_EXPANDS_REM (MLD_EXPANDS_T % MLD_KECCAK_WAY)
+#define MLD_EXPANDS_START \
+  (MLD_EXPANDS_REM == 0 ? 0 : MLD_EXPANDS_REM - MLD_KECCAK_WAY)
+#define MLD_EXPANDS_NONCE(q) ((q) < MLDSA_K ? MLDSA_L + (q) : (q) - MLDSA_K)
+#define MLD_EXPANDS_POLY(j) &s1->vec[slot[j]],
+#define MLD_EXPANDS_NONCE_ARG(j) nonce[j],
+  {
+    int p;
+    unsigned j;
+    unsigned slot[MLD_KECCAK_WAY];
+    uint8_t nonce[MLD_KECCAK_WAY];
+
+    for (p = MLD_EXPANDS_START; p < MLD_EXPANDS_T; p += MLD_KECCAK_WAY)
+    {
+      /* First s1 slot used by the s2 and throwaway lanes of this batch. */
+      const int base =
+          (p + MLD_KECCAK_WAY > MLDSA_K) ? p + MLD_KECCAK_WAY - MLDSA_K : 0;
+      for (j = 0; j < MLD_KECCAK_WAY; j++)
+      {
+        const int q = p + (int)j;
+        slot[j] = (unsigned)(q >= MLDSA_K ? q - MLDSA_K : base + (int)j);
+        nonce[j] = (uint8_t)(q < 0 ? 0xFF : MLD_EXPANDS_NONCE(q));
+      }
+      mld_poly_uniform_eta_xN(MLD_XN_LANES(MLD_EXPANDS_POLY)
+                                  MLD_XN_LANES(MLD_EXPANDS_NONCE_ARG) seed);
+      /* Pack the lanes at positions q >= 0 (the others are throwaway):
+       * position q is s2 polynomial q, or s1 polynomial q - K. */
+      for (j = (p < 0) ? (unsigned)(-p) : 0; j < MLD_KECCAK_WAY; j++)
+      {
+        const int q = p + (int)j;
+        uint8_t *dst =
+            (q < MLDSA_K)
+                ? s2_packed + q * MLDSA_POLYETA_PACKEDBYTES
+                : s1_packed + (q - MLDSA_K) * MLDSA_POLYETA_PACKEDBYTES;
+        mld_polyeta_pack(dst, &s1->vec[slot[j]]);
+      }
+    }
+  }
 #endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 }
 
@@ -1774,5 +1766,11 @@ cleanup:
 #undef mld_attempt_signature_generation
 #undef mld_compute_pack_t0_t1
 #undef mld_get_max_signing_attempts
+#undef MLD_EXPANDS_T
+#undef MLD_EXPANDS_REM
+#undef MLD_EXPANDS_START
+#undef MLD_EXPANDS_NONCE
+#undef MLD_EXPANDS_POLY
+#undef MLD_EXPANDS_NONCE_ARG
 #undef MLD_MAX_SIGNING_ATTEMPTS
 #undef MLD_PRE_HASH_OID_LEN

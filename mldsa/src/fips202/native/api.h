@@ -65,6 +65,38 @@ __contract__(
     ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * 4))
 );
 #endif /* MLD_USE_NATIVE_FIPS202_X4 */
+/*
+ * Batched Keccak-F1600 of any batching factor.
+ *
+ * Instead of MLD_USE_NATIVE_FIPS202_X4, a backend may provide one batched
+ * Keccak-F1600 of its own batching factor: set MLD_USE_NATIVE_FIPS202_XN and
+ * MLD_FIPS202_NATIVE_XN_WAY (the factor, 3 or 4) in the backend, and define
+ * the inline wrapper mld_keccak_f1600_xN_native() to forward to the
+ * implementation. It permutes MLD_FIPS202_NATIVE_XN_WAY Keccak states stored
+ * one after another (25 lanes each).
+ *
+ * Backends that set MLD_USE_NATIVE_FIPS202_X4 keep working unchanged.
+ */
+#if defined(MLD_USE_NATIVE_FIPS202_XN)
+#if defined(MLD_USE_NATIVE_FIPS202_X4)
+#error \
+    "A FIPS202 backend can set MLD_USE_NATIVE_FIPS202_X4 or MLD_USE_NATIVE_FIPS202_XN, not both"
+#endif
+#if !defined(MLD_FIPS202_NATIVE_XN_WAY)
+#error "MLD_USE_NATIVE_FIPS202_XN requires MLD_FIPS202_NATIVE_XN_WAY"
+#endif
+#if MLD_FIPS202_NATIVE_XN_WAY != 3 && MLD_FIPS202_NATIVE_XN_WAY != 4
+#error "MLD_FIPS202_NATIVE_XN_WAY must be 3 or 4"
+#endif
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_keccak_f1600_xN_native(uint64_t *state)
+__contract__(
+    requires(memory_no_alias(state, sizeof(uint64_t) * 25 * MLD_FIPS202_NATIVE_XN_WAY))
+    assigns(memory_slice(state, sizeof(uint64_t) * 25 * MLD_FIPS202_NATIVE_XN_WAY))
+    ensures(return_value == MLD_NATIVE_FUNC_FALLBACK || return_value == MLD_NATIVE_FUNC_SUCCESS)
+    ensures((return_value == MLD_NATIVE_FUNC_FALLBACK) ==> array_unchanged_u64(state, 25 * MLD_FIPS202_NATIVE_XN_WAY))
+);
+#endif /* MLD_USE_NATIVE_FIPS202_XN */
 
 /*
  * Native x4 XOR bytes and extract bytes interface.
