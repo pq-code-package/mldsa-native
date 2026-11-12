@@ -123,16 +123,19 @@ $(BIN44_FULL): $(APP_SOURCE) $(LIB44_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=44 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 $(BIN65_FULL): $(APP_SOURCE) $(LIB65_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=65 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 $(BIN87_FULL): $(APP_SOURCE) $(LIB87_FULL)
 	$(Q)echo "$@"
 	$(Q)[ -d $(@) ] || mkdir -p $(@D)
 	$(Q)$(CC) $(CFLAGS) -DMLD_CONFIG_PARAMETER_SET=87 $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 all: build
 
@@ -142,6 +145,13 @@ run: $(BIN44_FULL) $(BIN65_FULL) $(BIN87_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN44_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN65_FULL)
 	$(Q)$(EXEC_WRAPPER) ./$(BIN87_FULL)
+
+# With CHECK_BINARY=1, check each binary as it is built: the backend
+# kernels in it must match the bytecode that mldsa-native's HOL Light
+# proofs reason about. Needs a checkout of the mldsa-native repository;
+# see scripts/check-binary. A binary that fails is removed.
+CHECK_BINARY_SCRIPT ?= ../../scripts/check-binary
+CHECK = $(if $(filter 1,$(CHECK_BINARY)),echo "  CHECK   $@" && { CROSS_PREFIX="$(CROSS_PREFIX)" python3 $(CHECK_BINARY_SCRIPT) --quiet $(CHECK_BINARY_FLAGS) $@ >&2 || { rm -f $@; exit 1; }; },:)
 
 clean:
 	rm -rf $(BUILD_DIR)

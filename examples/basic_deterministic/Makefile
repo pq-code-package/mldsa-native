@@ -86,6 +86,7 @@ $(BINARIES_FULL): $(ALL_SOURCE)
 	echo "$@"
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(INC) $^ -o $@
+	$(Q)$(CHECK)
 
 all: build
 
@@ -95,6 +96,13 @@ run: $(BINARIES_FULL)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_44)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_65)
 	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL_87)
+
+# With CHECK_BINARY=1, check each binary as it is built: the backend
+# kernels in it must match the bytecode that mldsa-native's HOL Light
+# proofs reason about. Needs a checkout of the mldsa-native repository;
+# see scripts/check-binary. A binary that fails is removed.
+CHECK_BINARY_SCRIPT ?= ../../scripts/check-binary
+CHECK = $(if $(filter 1,$(CHECK_BINARY)),echo "  CHECK   $@" && { CROSS_PREFIX="$(CROSS_PREFIX)" python3 $(CHECK_BINARY_SCRIPT) --quiet $(CHECK_BINARY_FLAGS) $@ >&2 || { rm -f $@; exit 1; }; },:)
 
 clean:
 	rm -rf $(BUILD_DIR)
