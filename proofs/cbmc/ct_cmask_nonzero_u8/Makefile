@@ -21,7 +21,7 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/poly.c # Dummy because the Makefile wants _some_ project source
 
 CHECK_FUNCTION_CONTRACTS=mld_ct_cmask_nonzero_u8
-USE_FUNCTION_CONTRACTS=mld_value_barrier_u32
+USE_FUNCTION_CONTRACTS=mld_ct_cmask_nonzero_u32
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
 
