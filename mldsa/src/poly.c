@@ -851,6 +851,8 @@ void mld_polyt0_pack(uint8_t r[MLDSA_POLYT0_PACKEDBYTES], const mld_poly *a)
     r[13 * i + 11] |= (uint8_t)((t[7] << 3) & 0xFF);
     r[13 * i + 12] = (uint8_t)((t[7] >> 5) & 0xFF);
   }
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(t, sizeof(t));
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
