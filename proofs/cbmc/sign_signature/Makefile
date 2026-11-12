@@ -23,6 +23,7 @@ CHECK_FUNCTION_CONTRACTS=mld_signature
 USE_FUNCTION_CONTRACTS=mld_randombytes
 USE_FUNCTION_CONTRACTS+=mld_signature_internal
 USE_FUNCTION_CONTRACTS+=mld_zeroize
+USE_FUNCTION_CONTRACTS+=mld_prepare_domain_separation_prefix
 
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
