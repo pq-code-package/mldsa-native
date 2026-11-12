@@ -690,6 +690,9 @@ void mld_polyeta_pack(uint8_t r[MLDSA_POLYETA_PACKEDBYTES], const mld_poly *a)
 #else /* MLDSA_ETA == 4 */
 #error "Invalid value of MLDSA_ETA"
 #endif /* MLDSA_ETA != 2 && MLDSA_ETA != 4 */
+
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(t, sizeof(t));
 }
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
@@ -797,6 +800,8 @@ void mld_polyz_pack(uint8_t r[MLDSA_POLYZ_PACKEDBYTES], const mld_poly *a)
     r[5 * i + 4] = (uint8_t)((t[1] >> 12) & 0xFF);
   }
 #endif /* MLD_CONFIG_PARAMETER_SET != 44 */
+  /* @[FIPS204, Section 3.6.3] Destruction of intermediate values. */
+  mld_zeroize(t, sizeof(t));
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
