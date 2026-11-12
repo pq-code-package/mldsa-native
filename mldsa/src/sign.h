@@ -805,6 +805,7 @@ __contract__(
   assigns(memory_slice(prefix, MLD_DOMAIN_SEPARATION_MAX_BYTES))
   ensures(return_value <= MLD_DOMAIN_SEPARATION_MAX_BYTES)
   ensures(ctxlen > 255 ==> return_value == 0)
+  ensures((hashalg == MLD_PREHASH_NONE && ctxlen <= 255) ==> return_value != 0)
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API */
 
