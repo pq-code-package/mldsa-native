@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+"""Lint the dependency lists of the HOL-Light CI jobs.
+
+Each HOL-Light proof job in .github/workflows/hol_light.yml only runs when
+the proof's .S or .ml file, or one of the files in its `needs` list, has
+changed. Check that every `needs` list names exactly the local files that
+the proof loads, directly or transitively.
+"""
+
+import pathlib
+import re
+import sys
+
+import yaml
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+WORKFLOW = ROOT / ".github" / "workflows" / "hol_light.yml"
+PROOF_ROOT = ROOT / "proofs" / "hol_light"
+
+DIRECTIVE = re.compile(r'^\s*(?:needs|loadt|loads)\s+"mldsa_native/([^"]+)"', re.M)
+
+
+def imports(path):
+    """Return the local files loaded by path, directly or transitively."""
+    seen = set()
+    todo = [path]
+    while todo:
+        p = todo.pop()
+        for target in DIRECTIVE.findall(p.read_text()):
+            dep = PROOF_ROOT / target
+            if dep not in seen:
+                seen.add(dep)
+                todo.append(dep)
+    return seen
+
+
+def main():
+    workflow = yaml.safe_load(WORKFLOW.read_text())
+    errors = []
+
+    for job_name, job in workflow["jobs"].items():
+        proofs = job.get("strategy", {}).get("matrix", {}).get("proof", [])
+        for proof in proofs:
+            name = proof["name"]
+            candidates = list(PROOF_ROOT.glob(f"*/proofs/{name}.ml"))
+            if len(candidates) != 1:
+                errors.append(f"{job_name}: no unique proof file for {name}")
+                continue
+            ml = candidates[0]
+            expected = {p.name for p in imports(ml)} - {ml.name}
+            listed = set(proof.get("needs", []))
+            for missing in sorted(expected - listed):
+                errors.append(f"{job_name}: {name} loads {missing}, not in needs")
+            for extra in sorted(listed - expected):
+                errors.append(f"{job_name}: {name} lists {extra}, not loaded")
+
+    for e in errors:
+        print(e, file=sys.stderr)
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

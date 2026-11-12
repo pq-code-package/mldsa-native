@@ -93,15 +93,15 @@ jobs:
           - name: mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_poly_caddq_aarch64_asm
-            needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_poly_chknorm_aarch64_asm
-            needs: ["aarch64_utils.ml", "subroutine_signatures.ml"]
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_poly_use_hint_32_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_poly_use_hint_88_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_rej_uniform_eta2_aarch64_asm
-            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
+            needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml"]
           - name: mldsa_rej_uniform_eta4_aarch64_asm
             needs: ["mldsa_specs.ml", "aarch64_utils.ml", "mldsa_rej_uniform_eta_table.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x1_scalar_aarch64_asm
@@ -231,9 +231,9 @@ jobs:
           - name: mldsa_rej_uniform_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_rej_uniform_table.ml"]
           - name: mldsa_nttunpack_avx2_asm
-            needs: ["mldsa_specs.ml", "subroutine_signatures.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml"]
           - name: mldsa_pointwise_avx2_asm
-            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: mldsa_pointwise_acc_l4_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: mldsa_pointwise_acc_l5_avx2_asm
@@ -241,7 +241,7 @@ jobs:
           - name: mldsa_pointwise_acc_l7_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_zetas.ml", "subroutine_signatures.ml"]
           - name: keccak_f1600_x4_avx2_asm
-            needs: ["keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
+            needs: ["mldsa_specs.ml", "mldsa_utils.ml", "subroutine_signatures.ml", "keccak_utils.ml", "keccak_spec.ml", "keccak_f1600_x4_avx2_constants.ml", "keccak_constants.ml"]
           - name: mldsa_rej_uniform_eta2_avx2_asm
             needs: ["mldsa_specs.ml", "mldsa_utils.ml", "mldsa_rej_uniform_table.ml", "subroutine_signatures.ml"]
           - name: mldsa_rej_uniform_eta4_avx2_asm

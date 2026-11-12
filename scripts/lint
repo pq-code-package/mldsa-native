@@ -436,6 +436,22 @@ gh_group_start "Check HOL-Light imports"
 check-hol-light-imports
 gh_group_end
 
+check-hol-light-ci-deps()
+{
+  if python3 "$ROOT"/scripts/check-hol-light-ci-deps; then
+    info "Check HOL-Light CI dependencies"
+    gh_summary_success "Check HOL-Light CI dependencies"
+  else
+    error "Check HOL-Light CI dependencies"
+    gh_summary_failure "Check HOL-Light CI dependencies"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check HOL-Light CI dependencies"
+check-hol-light-ci-deps
+gh_group_end
+
 # Derive the theorem-name prefix from a proof routine's basename:
 #   - strip the platform suffix
 #   - uppercase
