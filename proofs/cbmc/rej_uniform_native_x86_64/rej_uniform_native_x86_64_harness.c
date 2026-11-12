@@ -1,19 +1,20 @@
 // Copyright (c) The mldsa-native project authors
 // SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-#include "poly.h"
+#include <stdint.h>
+#include "cbmc.h"
+#include "params.h"
 
-static unsigned int mld_rej_uniform(int32_t *a, unsigned int target,
-                                    unsigned int offset, const uint8_t *buf,
-                                    unsigned int buflen);
+
+int mld_rej_uniform_native(int32_t *r, unsigned len, const uint8_t *buf,
+                           unsigned buflen);
 
 void harness(void)
 {
-  int32_t *a;
-  unsigned int target;
-  unsigned int offset;
+  int32_t *r;
+  unsigned len;
   const uint8_t *buf;
-  unsigned int buflen;
+  unsigned buflen;
 
-  mld_rej_uniform(a, target, offset, buf, buflen);
+  mld_rej_uniform_native(r, len, buf, buflen);
 }
