@@ -91,7 +91,17 @@ jobs:
           nix-shell: 'hol_light'
           script: |
             make -C proofs/hol_light/aarch64 mldsa/mldsa_poly_caddq_aarch64_asm.o
-            echo 'needs "aarch64/proofs/mldsa_poly_caddq_aarch64_asm.ml";;' | hol.sh
+            # The proof reads its object file relative to proofs/hol_light.
+            cd proofs/hol_light
+            set -o pipefail
+            printf '%s\n' \
+              'try use_file_raise_failure := true;' \
+              '    needs "mldsa_native/aarch64/proofs/mldsa_poly_caddq_aarch64_asm.ml";' \
+              '    print_endline "HOL_LIGHT_SMOKE_OK"' \
+              'with e -> prerr_endline (Printexc.to_string e);;' \
+              '#quit;;' |
+              hol.sh 2>&1 |
+              awk '{ print } $0 == "HOL_LIGHT_SMOKE_OK" { ok = 1 } END { if (!ok) exit 1 }'
   hol_light_proofs:
     needs: [ check_modified_files, hol_light_bytecode ]
     if: needs.check_modified_files.outputs.aarch64 != '[]'
@@ -145,7 +155,16 @@ jobs:
             # TODO: Enable when we have a cheaper proof
             # make -C proofs/hol_light/x86_64 mldsa/mldsa_ntt_avx2_asm.o
             # echo 'needs "x86_64/proofs/mldsa_ntt_avx2_asm.ml";;' | hol.sh
-            echo 'needs "x86/proofs/base.ml";; needs "common/mldsa_specs.ml";; #quit;;' | hol.sh
+            set -o pipefail
+            printf '%s\n' \
+              'try use_file_raise_failure := true;' \
+              '    needs "s2n_bignum/x86/proofs/base.ml";' \
+              '    needs "mldsa_native/common/mldsa_specs.ml";' \
+              '    print_endline "HOL_LIGHT_SMOKE_OK"' \
+              'with e -> prerr_endline (Printexc.to_string e);;' \
+              '#quit;;' |
+              hol.sh 2>&1 |
+              awk '{ print } $0 == "HOL_LIGHT_SMOKE_OK" { ok = 1 } END { if (!ok) exit 1 }'
   hol_light_proofs_x86_64:
     needs: [ check_modified_files, hol_light_bytecode_x86_64 ]
     if: needs.check_modified_files.outputs.x86_64 != '[]'
@@ -197,7 +216,15 @@ jobs:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light-cross-riscv32'
           script: |
-            echo 'needs "mldsa_native/riscv32/proofs/mldsa_specs_aux.ml";; #quit;;' | hol.sh
+            set -o pipefail
+            printf '%s\n' \
+              'try use_file_raise_failure := true;' \
+              '    needs "mldsa_native/riscv32/proofs/mldsa_specs_aux.ml";' \
+              '    print_endline "HOL_LIGHT_SMOKE_OK"' \
+              'with e -> prerr_endline (Printexc.to_string e);;' \
+              '#quit;;' |
+              hol.sh 2>&1 |
+              awk '{ print } $0 == "HOL_LIGHT_SMOKE_OK" { ok = 1 } END { if (!ok) exit 1 }'
   hol_light_proofs_riscv32:
     needs: [ check_modified_files, hol_light_bytecode_riscv32 ]
     if: needs.check_modified_files.outputs.riscv32 != '[]'
