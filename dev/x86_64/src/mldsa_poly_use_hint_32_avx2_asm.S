@@ -72,7 +72,8 @@
 // See mld_poly_decompose_32_avx2() for the detailed argument.
 vpaddd  \a, %ymm5, \temp1
 vpsrld  $7, \temp1, \temp1
-vpmulhuw    %ymm8, \temp1, \temp1
+// Put the high register second so GNU as and LLVM agree on the encoding.
+vpmulhuw    \temp1, %ymm8, \temp1
 vpmulhrsw   %ymm7, \temp1, \temp1
 
 // If a1 = 16, i.e. a > 31*GAMMA2, proceed as if a' = a - Q was
@@ -90,7 +91,7 @@ vpslld  $9, \temp1, \temp1
 vpsubd  \temp1, \a, \a
 
 // If wrap-around is required, adjust a0 by -1
-vpaddd  \temp2, \a, \a
+vpaddd  \a, \temp2, \a
 .endm
 
 /* We follow the specification and the reference C implementation and check
@@ -110,7 +111,7 @@ vpslld  $1, \a, \a
 vpsubd  \a, \h, \h
 
 // b = (b + delta * h) % 16
-vpaddd  \a1, \h, \b
+vpaddd  \h, \a1, \b
 vpand   %ymm3, \b, \b
 .endm
 

@@ -54,12 +54,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
   0xc4; 0x42; 0x7d; 0x58; 0xf6;
                            (* VPBROADCASTD (%_% ymm14) (%_% xmm14) *)
   0xc5; 0xfd; 0x6f; 0x06;  (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,0))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -73,12 +71,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
   0xc5; 0xfd; 0x7f; 0x16;  (* VMOVDQA (Memop Word256 (%% (rsi,0))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x46; 0x20;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,32))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -94,12 +90,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,32))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x46; 0x40;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,64))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -115,12 +109,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,64))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x46; 0x60;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,96))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -136,12 +128,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,96))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x80; 0x00; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,128))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -157,12 +147,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,128))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xa0; 0x00; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,160))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -178,12 +166,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,160))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xc0; 0x00; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,192))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -199,12 +185,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,192))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xe0; 0x00; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,224))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -220,12 +204,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,224))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x00; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,256))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -241,12 +223,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,256))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x20; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,288))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -262,12 +242,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,288))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x40; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,320))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -283,12 +261,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,320))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x60; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,352))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -304,12 +280,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,352))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x80; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,384))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -325,12 +299,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,384))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xa0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,416))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -346,12 +318,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,416))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xc0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,448))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -367,12 +337,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,448))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xe0; 0x01; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,480))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -388,12 +356,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,480))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x00; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,512))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -409,12 +375,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,512))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x20; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,544))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -430,12 +394,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,544))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x40; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,576))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -451,12 +413,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,576))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x60; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,608))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -472,12 +432,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,608))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x80; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,640))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -493,12 +451,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,640))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xa0; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,672))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -514,12 +470,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,672))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xc0; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,704))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -535,12 +489,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,704))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xe0; 0x02; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,736))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -556,12 +508,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,736))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x00; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,768))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -577,12 +527,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,768))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x20; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,800))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -598,12 +546,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,800))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x40; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,832))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -619,12 +565,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,832))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x60; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,864))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -640,12 +584,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,864))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0x80; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,896))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -661,12 +603,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,896))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xa0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,928))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -682,12 +622,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,928))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xc0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,960))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -703,12 +641,10 @@ let mldsa_decompose88_mc = define_assert_from_elf "mldsa_decompose88_mc" "x86_64
                            (* VMOVDQA (Memop Word256 (%% (rsi,960))) (%_% ymm2) *)
   0xc5; 0xfd; 0x6f; 0x86; 0xe0; 0x03; 0x00; 0x00;
                            (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rsi,992))) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xca;
-                           (* VPADDD (%_% ymm1) (%_% ymm0) (%_% ymm10) *)
+  0xc5; 0xad; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm10) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xcb;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm11) *)
+  0xc5; 0xa5; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm11) (%_% ymm1) *)
   0xc4; 0xc2; 0x75; 0x0b; 0xcc;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm12) *)
   0xc4; 0xc1; 0x7d; 0x66; 0xdd;
@@ -787,6 +723,13 @@ let decompose88_a0 = define
  `decompose88_a0 (y:int32) : int32 =
    word_add (word_sub y (word_mul (decompose88_h y) (word 190464)))
             (if word_igt y (word 8285184) then word 4294967295 else word 0)`;;
+
+(* Normalize the commutative AVX operands before folding the lane model. *)
+let DECOMPOSE88_OPERAND_ORDER = prove
+ (`(!x:int32. word_add (word 127) x = word_add x (word 127)) /\
+   (!x:int32. word_mul (word 0) x = word_mul x (word 0)) /\
+   (!x:int32. word_mul (word 11275) x = word_mul x (word 11275))`,
+  REWRITE_TAC[WORD_ADD_SYM; WORD_MUL_SYM]);;
 
 (* The unsigned high-16 multiply (VPMULHUW) on a sub-2^16 lane, specialized
    to the Barrett magic constant 11275 from the shared MULHI_LANE_GEN. *)
@@ -1153,7 +1096,9 @@ let MLDSA_POLY_DECOMPOSE_88_CORRECT = prove(
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_NOT_JOIN_256; WORD_NOT_JOIN_128; WORD_NOT_JOIN_64]) THEN
   REPEAT(FIRST_X_ASSUM(STRIP_ASSUME_TAC o
-     CONV_RULE(SIMD_SIMPLIFY_CONV[decompose88_h; decompose88_a1; decompose88_a0]) o
+     CONV_RULE(REWRITE_CONV(map GSYM [decompose88_h; decompose88_a1; decompose88_a0])) o
+     CONV_RULE(REWRITE_CONV[DECOMPOSE88_OPERAND_ORDER]) o
+     CONV_RULE(SIMD_SIMPLIFY_CONV[]) o
      CONV_RULE(READ_MEMORY_SPLIT_CONV 3) o
      check (can (term_match [] `read (memory :> bytes256 zzz) s399 = xxx`) o concl))) THEN
   CONV_TAC(ONCE_DEPTH_CONV EXPAND_CASES_CONV THENC ONCE_DEPTH_CONV NUM_MULT_CONV) THEN

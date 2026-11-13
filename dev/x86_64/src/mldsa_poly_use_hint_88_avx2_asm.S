@@ -90,7 +90,8 @@ vpslld  $11, \temp1, \temp1
 vpsubd  \temp1, \a, \a
 
 // If wrap-around is required, adjust a0 by -1
-vpaddd  \temp2, \a, \a
+// Put the high register second so GNU as and LLVM agree on the encoding.
+vpaddd  \a, \temp2, \a
 .endm
 
 /* We follow the specification and the reference C implementation and check
@@ -110,7 +111,7 @@ vpslld  $1, \a, \a
 vpsubd  \a, \h, \a
 
 // b = (b + delta * h) % 44
-vpaddd  \a1, \a, \b
+vpaddd  \a, \a1, \b
 // If b wrapped below 0 (a1 == 0, delta == -1), set b = 43.
 // b is in [-1, 44], so the per-dword sign bit and the per-byte
 // blend mask of vpblendvb coincide.

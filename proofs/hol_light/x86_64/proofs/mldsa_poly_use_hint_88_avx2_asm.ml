@@ -75,15 +75,13 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
                            (* VPSLLD (%_% ymm10) (%_% ymm10) (Imm8 (word 11)) *)
   0xc4; 0xc1; 0x7d; 0xfa; 0xc2;
                            (* VPSUBD (%_% ymm0) (%_% ymm0) (%_% ymm10) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xc3;
-                           (* VPADDD (%_% ymm0) (%_% ymm0) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xc0;  (* VPADDD (%_% ymm0) (%_% ymm11) (%_% ymm0) *)
   0xc5; 0xfd; 0x66; 0xc5;  (* VPCMPGTD (%_% ymm0) (%_% ymm0) (%_% ymm5) *)
   0xc5; 0xfd; 0xdf; 0xc1;  (* VPANDN (%_% ymm0) (%_% ymm0) (%_% ymm1) *)
   0xc5; 0xfd; 0x72; 0xf0; 0x01;
                            (* VPSLLD (%_% ymm0) (%_% ymm0) (Imm8 (word 1)) *)
   0xc5; 0xf5; 0xfa; 0xc0;  (* VPSUBD (%_% ymm0) (%_% ymm1) (%_% ymm0) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xc1;
-                           (* VPADDD (%_% ymm0) (%_% ymm0) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xc0;  (* VPADDD (%_% ymm0) (%_% ymm9) (%_% ymm0) *)
   0xc4; 0xe3; 0x7d; 0x4c; 0xc6; 0x00;
                            (* VPBLENDVB (%_% ymm0) (%_% ymm0) (%_% ymm6) (%_% ymm0) *)
   0xc5; 0xfd; 0x66; 0xce;  (* VPCMPGTD (%_% ymm1) (%_% ymm0) (%_% ymm6) *)
@@ -94,8 +92,8 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
   0x48; 0x83; 0xc0; 0x20;  (* ADD (% rax) (Imm8 (word 32)) *)
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
-  0x0f; 0x85; 0x75; 0xff; 0xff; 0xff;
-                           (* JNE (Imm32 (word 4294967157)) *)
+  0x0f; 0x85; 0x77; 0xff; 0xff; 0xff;
+                           (* JNE (Imm32 (word 4294967159)) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
@@ -1033,6 +1031,19 @@ let LANE_AC_CLOSE_88 = prove
                    word_add (word_and a (word_not m)) (word_mul d y)`,
   REPEAT GEN_TAC THEN CONV_TAC WORD_BLAST);;
 
+(* Restore the lane model's operand order after the AVX encoding swaps. *)
+let UH88_ADD_IF_SWAP = prove
+ (`!p (x:int32).
+     word_add (if p then word 4294967295 else word 0) x =
+     word_add x (if p then word 4294967295 else word 0)`,
+  REWRITE_TAC[WORD_ADD_SYM]);;
+
+let UH88_ADD_DELTA_SWAP = prove
+ (`!m a y d:int32.
+     word_add (word_and (word_not m) a) (word_sub y (word_shl d 1)) =
+     word_add (word_sub y (word_shl d 1)) (word_and (word_not m) a)`,
+  REWRITE_TAC[WORD_ADD_SYM]);;
+
 let WORD_ILT_45 = BITBLAST_RULE `!V:int32. val V <= 45 ==> ~(word_ilt V (word 0))`;;
 
 (* word_subword distributes through word_not on each 32-bit lane. *)
@@ -1164,7 +1175,9 @@ let UH88_STORE_DISCHARGE_TAC : tactic =
     let bndk k = CONV_RULE(ONCE_DEPTH_CONV NUM_REDUCE_CONV)
        (MP (SPEC (mk_small_numeral k) bound_hyp) (EQT_ELIM(NUM_REDUCE_CONV(mk_binop `(<):num->num->bool` (mk_small_numeral k) `8`)))) in
     let vk k = mk_comb(mk_comb(`word_subword:int256->num#num->int32`,prevar),mk_pair(mk_small_numeral(32*k),`32`)) in
-    let vcollk k = lane_collapse (vk k) in
+    let vcollk k =
+      CONV_RULE (RAND_CONV (REWRITE_CONV[UH88_ADD_IF_SWAP; UH88_ADD_DELTA_SWAP]))
+        (lane_collapse (vk k)) in
     let surfaceT0 = rand(concl(vcollk 0)) in
     let surfaceTxy = subst [`x:int32`, xk 0; `y:int32`, yk 0] surfaceT0 in
     let luh_lhs = subst [surfaceTxy,`tt:int32`]
@@ -1324,7 +1337,7 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN REWRITE_TAC[SOME_FLAGS] THEN
-  ENSURES_WHILE_PUP_TAC `32` `pc + 0x52` `pc + 0xd7`
+  ENSURES_WHILE_PUP_TAC `32` `pc + 0x52` `pc + 0xd5`
    `\i s.
       (read RDI s = word_add a (word(32 * i)) /\
        read RSI s = word_add h (word(32 * i)) /\

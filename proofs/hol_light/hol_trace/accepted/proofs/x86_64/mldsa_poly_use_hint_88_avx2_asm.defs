@@ -9,8 +9,8 @@
 # with functions in binaries, through proofs/hol_light/bind.yml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 
-# poly_use_hint_88_avx2_asm_mc: 229 bytes
-# sha256 b8543785250829ad43c5d893772b5d9a9fea81ea9ae6f4bb48191463cfe7ad81
+# poly_use_hint_88_avx2_asm_mc: 227 bytes
+# sha256 a7b4bab72cd0a4a324e919b4619495e5942ec555ca32aeb98829bfaf11a82754
 definition poly_use_hint_88_avx2_asm_mc
   |- poly_use_hint_88_avx2_asm_mc
      = #x[f3 0f 1e fa b9 7f 00 00 00 31 c0 c5 d1 ef ed 41 b8 0b 2c 00 00 c4 41 79 6e c0 c4 42 7d 58
@@ -18,9 +18,9 @@ definition poly_use_hint_88_avx2_asm_mc
           00 00 c4 c1 79 6e f2 c4 e2 7d 58 f6 c5 f9 6e d9 c4 e2 7d 58 e4 c4 e2 7d 58 db c5 fd 6f 07
           c5 fd 6f 0e c5 5d fe d0 c4 c1 2d 72 d2 07 c4 41 2d e4 d0 c4 62 2d 0b d7 c5 7d 66 db c4 41
           25 df ca c4 c1 1d 72 f2 01 c4 41 1d fe e2 c4 c1 2d 72 f4 05 c4 41 2d fa d4 c4 c1 2d 72 f2
-          0b c4 c1 7d fa c2 c4 c1 7d fe c3 c5 fd 66 c5 c5 fd df c1 c5 fd 72 f0 01 c5 f5 fa c0 c4 c1
-          7d fe c1 c4 e3 7d 4c c6 00 c5 fd 66 ce c5 f5 df c0 c5 fd 7f 07 48 83 c7 20 48 83 c6 20 48
-          83 c0 20 48 3d 00 04 00 00 0f 85 75 ff ff ff c5 f8 77 c3]
+          0b c4 c1 7d fa c2 c5 a5 fe c0 c5 fd 66 c5 c5 fd df c1 c5 fd 72 f0 01 c5 f5 fa c0 c5 b5 fe
+          c0 c4 e3 7d 4c c6 00 c5 fd 66 ce c5 f5 df c0 c5 fd 7f 07 48 83 c7 20 48 83 c6 20 48 83 c0
+          20 48 3d 00 04 00 00 0f 85 77 ff ff ff c5 f8 77 c3]
 
 definition poly_use_hint_88_avx2_asm_tmc
   |- poly_use_hint_88_avx2_asm_tmc = TRIM_LIST (4, 0) poly_use_hint_88_avx2_asm_mc

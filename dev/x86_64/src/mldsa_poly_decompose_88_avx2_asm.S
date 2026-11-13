@@ -98,9 +98,10 @@
  */
 .macro decompose88_block off_in, off_out_a1, f, f1, f0, t
         vmovdqa  \off_in(%rsi), \f
-        vpaddd   off, \f, \f1
+        /* Put the high constant register second so GNU as and LLVM agree. */
+        vpaddd   \f, off, \f1
         vpsrld   $7, \f1, \f1
-        vpmulhuw v, \f1, \f1
+        vpmulhuw \f1, v, \f1
         vpmulhrsw shift, \f1, \f1
         vpcmpgtd q_bound, \f, \t
         vpmulld  alpha, \f1, \f0
