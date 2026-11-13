@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794595870258,
+  "lastUpdate": 1794595877639,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -283507,6 +283507,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 172310,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": true,
+          "id": "939e6966ecb39b58fbc075396c300a4920151b3b",
+          "message": "CI: Select HOL-Light proofs from deps.yml\n\nHOL-Light CI chooses proofs from hand-written dependency lists in\nhol_light.yml. Those lists can omit files that HOL Light's loader\nloads, so a change to a shared specification can leave its proofs\nunchecked.\n\nReplace the hand-written matrices and their per-job dependency checks:\nthe gate job selects proofs with `deps rev` from deps.yml and the proof\njobs build their matrix from its JSON output. Install python3-yaml\nthrough setup-apt and run the selector with /usr/bin/python3, so it uses\nthe parser installed by apt. Manual dispatch and changes to\nhol_light.yml select every proof.\n\nPorts https://github.com/pq-code-package/mlkem-native/pull/1992\nFixes #1546\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-13T16:03:37Z",
+          "tree_id": "ab326cd5fd757714718a01b53222d37aa205bdf2",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/939e6966ecb39b58fbc075396c300a4920151b3b"
+        },
+        "date": 1794595563097,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 63451,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 191182,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 67644,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 110841,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 318031,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 112293,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 175339,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 383164,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 175273,
             "unit": "cycles"
           }
         ]
