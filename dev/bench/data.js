@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794557757357,
+  "lastUpdate": 1794558158800,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -985399,6 +985399,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/ea97cc798b85dad1662bbe9aea4e7e3ec9c4bbbb"
         },
         "date": 1794483227663,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2336136,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17794119,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2398868,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 4025445,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15025043,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4012806,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6904187,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25024669,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6864405,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "e3682dd65f65ef3172c9ee576f2298ddceb25e6c",
+          "message": "CBMC: Use contracts of callees instead of inlining them\n\nSome proofs did not list all callees with a contract in\nUSE_FUNCTION_CONTRACTS. CBMC then inlines the callee, and a contract\ntoo weak for its call site goes unnoticed.\n\nUse the callee contracts in the affected proofs:\n\n- ct_cmask_nonzero_u8: mld_ct_cmask_nonzero_u32\n- keccakf1600x4_permute_native: mld_keccakf1600_permute\n- poly_invntt_tomont_c: mld_fqscale\n- shake{128,256}_init: keccak_init\n- sign_signature, sign_signature_pre_hash_internal, sign_verify,\n  sign_verify_pre_hash_internal:\n  mld_prepare_domain_separation_prefix\n\nThe ct_cmask_nonzero_u8 proof listed mld_value_barrier_u32, which the\nfunction does not call.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-13T05:07:10Z",
+          "tree_id": "d13b26fbc43eda97e61c5c0c3d56c07699c875f5",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/e3682dd65f65ef3172c9ee576f2298ddceb25e6c"
+        },
+        "date": 1794558155386,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
