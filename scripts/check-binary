@@ -104,7 +104,8 @@ def parse_headers(text):
     global, or local of type FUNC, in an executable section; and
     relocations record their target section, offset, info, type, remaining
     fields, and whether they refer to the unique .symtab. Local symbols are
-    kept separately for relocation validation."""
+    kept separately for relocation validation; local labels are not callable
+    functions."""
     relocatable = re.search(r"^\s*Type:\s+REL\b", text, flags=re.M) is not None
     riscv32 = relocatable and all(
         re.search(pattern, text, flags=re.M)
@@ -155,11 +156,11 @@ def parse_headers(text):
             if binding == "LOCAL":
                 local_symbols[int(idx)] = (int(value, 16), ndx, name)
             if ndx.isdigit() and int(ndx) in sections:
-                is_function = (
-                    sections[int(ndx)][3]
-                    and kind in ("NOTYPE", "FUNC")
-                    and (binding != "LOCAL" or kind == "FUNC")
-                )
+                # Local non-function symbols are labels, not callable
+                # kernels. Their names may contain a kernel's name.
+                if binding == "LOCAL" and kind != "FUNC":
+                    continue
+                is_function = sections[int(ndx)][3] and kind in ("NOTYPE", "FUNC")
                 symbols.append(
                     (name, int(ndx), int(value, 16), int(size, 0), is_function)
                 )

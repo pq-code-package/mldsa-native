@@ -21,6 +21,26 @@ spec = importlib.util.spec_from_loader(loader.name, loader)
 check_binary = importlib.util.module_from_spec(spec)
 loader.exec_module(check_binary)
 
+HEADERS = """\
+  Type:                              REL (Relocatable file)
+  [ 1] .text PROGBITS 0000000000000000 000040 000004 00 AX 0 0 1
+  [ 2] .data PROGBITS 0000000000000000 000044 000004 00 WA 0 0 1
+Symbol table '.symtab' contains 4 entries:
+   1: 0000000000000000 0 NOTYPE LOCAL DEFAULT 1 LLmld_kernel
+   2: 0000000000000000 4 FUNC GLOBAL DEFAULT 1 mld_kernel
+   3: 0000000000000000 4 OBJECT GLOBAL DEFAULT 2 bad_kernel
+"""
+DUMP = """\
+Hex dump of section '.text':
+  0x00000000 01020304 ....
+"""
+BIND = {
+    "kernel": {
+        "arch": "aarch64",
+        "function": "kernel",
+        "sha256": {"kernel_mc": hashlib.sha256(b"\x01\x02\x03\x04").hexdigest()},
+    }
+}
 RV_CODE = bytes(0x48) + bytes.fromhex("e31c55fc") + bytes(0x10)
 RV_HEADERS = """\
   Class:                             ELF32
@@ -52,7 +72,7 @@ RV_BIND = {
 
 
 class CheckBinaryTests(unittest.TestCase):
-    def check(self, headers, bind=RV_BIND, dump=RV_DUMP):
+    def check(self, headers, bind=BIND, dump=DUMP):
         def readelf(path, *args):
             return [(path, headers if "-h" in args else dump)]
 
@@ -63,8 +83,25 @@ class CheckBinaryTests(unittest.TestCase):
                 )
         return result, output.getvalue()
 
+    def test_local_label_does_not_shadow_function(self):
+        result, output = self.check(HEADERS.replace("bad_kernel", "other"))
+        self.assertEqual(result, 0, output)
+        self.assertIn("mld_kernel", output)
+        self.assertNotIn("LLmld_kernel", output)
+
+    def test_global_non_function_matching_kernel_is_rejected(self):
+        result, output = self.check(HEADERS)
+        self.assertEqual(result, 1, output)
+        self.assertIn("bad_kernel: not a function", output)
+
+    def test_wrong_code_is_rejected(self):
+        bind = {"kernel": {**BIND["kernel"], "sha256": {"kernel_mc": "0" * 64}}}
+        result, output = self.check(HEADERS.replace("bad_kernel", "other"), bind)
+        self.assertEqual(result, 1, output)
+        self.assertIn("not kernel_mc", output)
+
     def test_riscv_local_branch_with_matching_displacement(self):
-        result, output = self.check(RV_HEADERS)
+        result, output = self.check(RV_HEADERS, RV_BIND, RV_DUMP)
         self.assertEqual(result, 0, output)
 
     def test_unsafe_riscv_relocations_are_rejected(self):
@@ -114,7 +151,7 @@ class CheckBinaryTests(unittest.TestCase):
         }
         for name, headers in cases.items():
             with self.subTest(name=name):
-                result, output = self.check(headers)
+                result, output = self.check(headers, RV_BIND, RV_DUMP)
                 self.assertEqual(result, 1, output)
                 self.assertIn("relocations apply", output)
 
@@ -125,7 +162,7 @@ class CheckBinaryTests(unittest.TestCase):
         }.items():
             with self.subTest(name=name):
                 dump = RV_DUMP.replace("e31c55fc", replacement)
-                result, output = self.check(RV_HEADERS, dump=dump)
+                result, output = self.check(RV_HEADERS, RV_BIND, dump)
                 self.assertEqual(result, 1, output)
                 self.assertIn("relocations apply", output)
 
