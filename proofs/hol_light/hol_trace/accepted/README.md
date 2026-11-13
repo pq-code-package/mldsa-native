@@ -38,8 +38,10 @@ An entry is a header line, the object indented by two spaces, and a
 blank line:
 
 ```
-definition MLDSA_Q
-  |- MLDSA_Q = 3329
+definition mldsa_avx2_ntt_order'
+  |- mldsa_avx2_ntt_order'
+     = (specification "mldsa_avx2_ntt_order'" mldsa_avx2_ntt_order':(num -> num).
+         mldsa_avx2_ntt_order' = bitmap [4; 3; 2; 7; 6; 5; 1; 0])
 ```
 
 Objects are printed as HOL Light prints them: its binders, `let`, infix
