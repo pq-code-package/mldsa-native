@@ -18,9 +18,10 @@
 # - s2n_bignum_hashtt: s2n-bignum rewritten for hashtt's constructors,
 #   with a fix (0005) for code that breaks while HOLTrace records.
 # - bin/holtrace-hashtt-rewrite: the same rewrite, for our proofs.
-# - bin/holtrace-prune: shrinks a trace to what named theorems need.
+# - bin/holtrace-prune: shrinks a trace to what named theorems need,
+#   using compact record storage for large proofs.
 #
-# All changes to HOLTrace are the patches in this directory.
+# HOLTrace changes are the patches and compact-pruning helper here.
 { lib
 , stdenv
 , stdenvNoCC
@@ -65,6 +66,14 @@ let
   src_record = mkSrc "record" (commonPatches ++ [
     ./0004-holtrace-save-no-per-line-syscalls.patch
   ]);
+  # Pruner-only changes do not rebuild the recording or replay kernels.
+  src_prune = (mkSrc "prune" (commonPatches ++ [
+    ./0006-holtrace-prune-compact-storage.patch
+  ])).overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      cp ${./compact_prune.py} compact_prune.py
+    '';
+  });
 
   # mode: "install" or "install+hashtt"
   #
@@ -131,7 +140,7 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$out/bin"
     ln -s ${hashtt_rewrite}/bin/holtrace-hashtt-rewrite "$out/bin/"
     makeWrapper ${python_prune} "$out/bin/holtrace-prune" \
-      --add-flags ${src_record}/holtrace-prune
+      --add-flags ${src_prune}/holtrace-prune
   '';
   # HOLTRACE_REPLAY_HOL is exported by every HOL Light shell instead; see
   # flake.nix.
@@ -140,11 +149,12 @@ stdenvNoCC.mkDerivation {
     export HOLTRACE_S2N_BIGNUM=${s2n_bignum_hashtt}
   '';
   passthru = {
-    inherit hol_light_record hol_light_replay s2n_bignum_hashtt src_record src_replay;
+    inherit hol_light_record hol_light_replay s2n_bignum_hashtt src_record src_replay src_prune;
   };
   meta = {
     description = "HOLTrace with mldsa-native patches, for recording and replaying HOL Light proofs";
     homepage = "https://holtrace.cr.yp.to/";
-    license = lib.licenses.publicDomain;
+    # HOLTrace is public domain; the compact helper is available under ISC.
+    license = with lib.licenses; [ publicDomain isc ];
   };
 }

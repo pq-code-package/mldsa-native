@@ -1,0 +1,113 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+
+holtrace-prune: Store trace records in compact arrays
+
+The upstream pruner retains a Python tuple for each trace record and a
+Python list slot for every input line. Large proof traces can exhaust
+the memory of the runner before pruning completes. Store record fields
+and ID maps in packed arrays, and store tags and marks as bytes.
+
+The traversal and output order remain unchanged. The compact storage
+rejects invalid fields and references to IDs that have not been mapped.
+The pruner is outside the trusted base: replay and accepted-file
+comparison still check the resulting trace.
+
+--- a/holtrace-prune
++++ b/holtrace-prune
+@@ -1,6 +1,8 @@
+ #!/usr/bin/env pypy3
+-
++
+ import sys
++from array import array
++from compact_prune import Records, id_map, mapped
+ sys.setrecursionlimit(1000000)
+-
++
+ def parse_nonneg(s):
+@@ -110,9 +112,9 @@
+-  types = []
+-  terms = []
+-  thms = []
+-  infs = []
++  types = Records()
++  terms = Records()
++  thms = Records()
++  infs = Records()
+   typedefs = []
+-  thm2inf = {}
++  thm2inf = array('Q')
+   thm2name = {}
+   const2inf = {}
+   app2inf = {}
+@@ -126,1 +128,1 @@
+-  todo = []
++  todo = bytearray()
+@@ -145,5 +147,5 @@
+-
++
+     tag,s = line[:1],line[1:]
+-    todo += [tag]
++    todo.extend(tag)
+-
++
+     if tag == b'a':
+@@ -172,7 +174,7 @@
+     elif tag == b't':
+       if len(infs) == 0:
+         raise Exception('must have inference before first t line')
+-      thm2inf[len(thms)] = len(infs)-1
++      thm2inf.append(len(infs)-1)
+       result = tag,
+       while len(s) > 0:
+         arg,s = parse_subid(s,len(terms))
+@@ -248,5 +250,5 @@
+-  wanttype = [False]*len(types)
+-  wantterm = [False]*len(terms)
+-  wantthm = [False]*len(thms)
+-  wantinf = [False]*len(infs)
+-  wanttypedef = [False]*len(typedefs)
++  wanttype = bytearray(len(types))
++  wantterm = bytearray(len(terms))
++  wantthm = bytearray(len(thms))
++  wantinf = bytearray(len(infs))
++  wanttypedef = bytearray(len(typedefs))
+@@ -348,21 +350,21 @@
+-  type2newid = [None]*len(types)
++  type2newid = id_map(len(types))
+   oldtypeid = 0
+   newtypeid = 0
+-  term2newid = [None]*len(terms)
++  term2newid = id_map(len(terms))
+   oldtermid = 0
+   newtermid = 0
+-  thm2newid = [None]*len(thms)
++  thm2newid = id_map(len(thms))
+   oldthmid = 0
+   newthmid = 0
+-  inf2newid = [None]*len(infs)
++  inf2newid = id_map(len(infs))
+   oldinfid = 0
+   newinfid = 0
+-  typedef2newid = [None]*len(typedefs)
++  typedef2newid = id_map(len(typedefs))
+   oldtypedefid = 0
+   newtypedefid = 0
+-
++
+-  def typeout(t): return compress(type2newid[t],newtypeid)
+-  def termout(t): return compress(term2newid[t],newtermid)
+-  def thmout(t): return compress(thm2newid[t],newthmid)
+-  def infout(t): return compress(inf2newid[t],newinfid)
+-  def typedefout(t): return compress(typedef2newid[t],newtypedefid)
++  def typeout(t): return compress(mapped(type2newid,t),newtypeid)
++  def termout(t): return compress(mapped(term2newid,t),newtermid)
++  def thmout(t): return compress(mapped(thm2newid,t),newthmid)
++  def infout(t): return compress(mapped(inf2newid,t),newinfid)
++  def typedefout(t): return compress(mapped(typedef2newid,t),newtypedefid)
+@@ -414,2 +416,3 @@
+-  for tag in todo:
++  for tagbyte in todo:
++    tag = bytes((tagbyte,))
+     if tag in (b'a',b'b'):

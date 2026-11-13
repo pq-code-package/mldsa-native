@@ -436,6 +436,22 @@ gh_group_start "Check HOL-Light imports"
 check-hol-light-imports
 gh_group_end
 
+check-holtrace-pruner()
+{
+  if python3 "$ROOT"/test/test_compact_prune.py; then
+    info "Check HOLTrace pruner"
+    gh_summary_success "Check HOLTrace pruner"
+  else
+    error "Check HOLTrace pruner"
+    gh_summary_failure "Check HOLTrace pruner"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check HOLTrace pruner"
+check-holtrace-pruner
+gh_group_end
+
 check-theorems()
 {
   local success=true
