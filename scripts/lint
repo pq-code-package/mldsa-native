@@ -452,6 +452,22 @@ gh_group_start "Check HOLTrace pruner"
 check-holtrace-pruner
 gh_group_end
 
+check-binary-tests()
+{
+  if python3 "$ROOT"/test/test_check_binary.py; then
+    info "Check binary binding tests"
+    gh_summary_success "Check binary binding tests"
+  else
+    error "Check binary binding tests"
+    gh_summary_failure "Check binary binding tests"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check binary binding tests"
+check-binary-tests
+gh_group_end
+
 check-theorems()
 {
   local success=true

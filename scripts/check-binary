@@ -64,14 +64,15 @@ def read_bind(path):
 # of an archive, and the bytes of each function.
 
 SECTION = re.compile(
-    r"^\s*\[\s*(\d+)\]\s+(\S+)\s+\S+\s+([0-9a-f]+)\s+[0-9a-f]+\s+([0-9a-f]+)"
-    r"\s+[0-9a-f]+\s+(\S*)\s+\d+\s+(\d+)\s+\d+\s*$"
+    r"^\s*\[\s*(\d+)\]\s+(\S+)\s+(\S+)\s+([0-9a-f]+)\s+[0-9a-f]+\s+([0-9a-f]+)"
+    r"\s+[0-9a-f]+\s+(?:(\S+)\s+)?(\d+)\s+(\d+)\s+\d+\s*$"
 )  # [Nr] Name Type Address Off Size ES Flg Lk Inf Al
 SYMBOL = re.compile(
-    r"^\s*\d+:\s+([0-9a-f]+)\s+(\S+)\s+(\w+)\s+(\w+)\s+\w+(?:\s+\[[^\]]*\])?"
+    r"^\s*(\d+):\s+([0-9a-f]+)\s+(\S+)\s+(\w+)\s+(\w+)\s+\w+(?:\s+\[[^\]]*\])?"
     r"\s+(\S+)\s+(\S+)\s*$"
 )  # Num: Value Size Type Bind Vis Ndx Name
 RELOCATIONS = re.compile(r"^Relocation section '(\S+)' at offset")
+RELOCATION = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+(\S+)(?:\s+(.*))?$")
 DUMP = re.compile(r"^Hex dump of section '(\S+)':")
 DUMP_LINE = re.compile(r"^\s*0x([0-9a-f]+)\s+(.*)$")
 
@@ -101,29 +102,58 @@ def parse_headers(text):
     size, executable); symbols are (name, section, value, size,
     is_function) of the defined symbols in .symtab, where a function is
     global, or local of type FUNC, in an executable section; and
-    relocations are (target section, offset) pairs."""
+    relocations record their target section, offset, info, type, remaining
+    fields, and whether they refer to the unique .symtab. Local symbols are
+    kept separately for relocation validation."""
     relocatable = re.search(r"^\s*Type:\s+REL\b", text, flags=re.M) is not None
-    sections, targets = {}, {}
+    riscv32 = relocatable and all(
+        re.search(pattern, text, flags=re.M)
+        for pattern in (
+            r"^\s*Class:\s+ELF32\s*$",
+            r"^\s*Data:\s+2's complement, little endian\s*$",
+            r"^\s*Machine:\s+RISC-V\s*$",
+        )
+    )
+    sections, types, targets = {}, {}, {}
     for m in map(SECTION.match, text.split("\n")):
         if m:
-            idx, name, addr, size, flags, info = m.groups()
-            sections[int(idx)] = (name, int(addr, 16), int(size, 16), "X" in flags)
-            targets[name] = int(info)
-    symbols, relocations, table, target = [], [], None, None
+            idx, name, kind, addr, size, flags, link, info = m.groups()
+            sections[int(idx)] = (
+                name,
+                int(addr, 16),
+                int(size, 16),
+                "X" in (flags or ""),
+            )
+            types[int(idx)] = kind
+            targets[name] = None if name in targets else (int(info), int(link))
+    symbols, local_symbols, relocations, table, target = [], {}, [], None, None
+    symtab_valid = False
     for line in text.split("\n"):
         if line.startswith("Symbol table "):
             table = line.split("'")[1]
             continue
         m = RELOCATIONS.match(line)
         if m:
-            target = targets[m.group(1)]
+            if m.group(1) not in targets:
+                raise Failed(f"missing relocation section {m.group(1)}")
+            if targets[m.group(1)] is None:
+                raise Failed(f"duplicate relocation section {m.group(1)}")
+            target, link = targets[m.group(1)]
+            symtab_valid = (
+                link in sections
+                and sections[link][0] == ".symtab"
+                and types[link] == "SYMTAB"
+                and sum(sec[0] == ".symtab" for sec in sections.values()) == 1
+            )
             continue
         if not line.strip():
             table = target = None
             continue
         m = SYMBOL.match(line)
         if m and table == ".symtab":
-            value, size, kind, binding, ndx, name = m.groups()
+            idx, value, size, kind, binding, ndx, name = m.groups()
+            if binding == "LOCAL":
+                local_symbols[int(idx)] = (int(value, 16), ndx, name)
             if ndx.isdigit() and int(ndx) in sections:
                 is_function = (
                     sections[int(ndx)][3]
@@ -134,10 +164,53 @@ def parse_headers(text):
                     (name, int(ndx), int(value, 16), int(size, 0), is_function)
                 )
             continue
-        m = re.match(r"^([0-9a-f]+)\s+[0-9a-f]+\s+\S", line)
+        m = RELOCATION.match(line)
         if m and target is not None:
-            relocations.append((target, int(m.group(1), 16)))
-    return relocatable, sections, symbols, relocations
+            off, info, kind, fields = m.groups()
+            relocations.append(
+                (target, int(off, 16), int(info, 16), kind, fields, symtab_valid)
+            )
+        elif target is not None and re.match(r"^\s*[0-9a-fA-F]+\s+", line):
+            raise Failed(f"cannot parse relocation: {line.strip()}")
+    return relocatable, riscv32, sections, symbols, local_symbols, relocations
+
+
+def riscv32_branches_unchanged(relocations, local_symbols, ndx, start, data):
+    """Accept only local R_RISCV_BRANCH relocations already encoded exactly.
+
+    Reject all other relocations in the section, including relaxation and
+    alignment markers, so linking cannot change distances within the section.
+    """
+    end = start + len(data)
+    for target, off, info, kind, fields, symtab_valid in relocations:
+        if target != ndx:
+            continue
+        if not symtab_valid or kind != "R_RISCV_BRANCH" or info & 0xFF != 16:
+            return False
+        if off < start or off + 4 > end:
+            return False
+        symbol = local_symbols.get(info >> 8)
+        if symbol is None:
+            return False
+        value, symbol_ndx, name = symbol
+        if symbol_ndx != str(ndx) or not start <= value < end:
+            return False
+        if fields is None or not re.fullmatch(
+            rf"{value:08x}\s+{re.escape(name)}\s+\+\s+0", fields
+        ):
+            return False
+        word = int.from_bytes(data[off - start : off - start + 4], "little")
+        if word & 0x7F != 0x63:
+            return False
+        imm = (
+            ((word >> 31) & 1) << 12
+            | ((word >> 7) & 1) << 11
+            | ((word >> 25) & 0x3F) << 5
+            | ((word >> 8) & 0xF) << 1
+        )
+        if (imm ^ 0x1000) - 0x1000 != value - off:
+            return False
+    return True
 
 
 def parse_dumps(text, sections):
@@ -175,7 +248,12 @@ def functions(path):
     headers = readelf(path, "-h", "-S", "-s", "-r")
     parsed = [(label, parse_headers(text)) for label, text in headers]
     code = sorted(
-        {sec[n][0] for _, (_, sec, syms, _) in parsed for _, n, _, _, f in syms if f}
+        {
+            sec[n][0]
+            for _, (_, _, sec, syms, _, _) in parsed
+            for _, n, _, _, f in syms
+            if f
+        }
     )
     if code:
         dumps = readelf(path, *[a for n in code for a in ("-x", n)])
@@ -184,9 +262,10 @@ def functions(path):
     if len(dumps) != len(parsed):
         raise Failed(f"{path}: readelf listed the members differently")
     out = []
-    for (label, (relocatable, sections, symbols, relocations)), (_, text) in zip(
-        parsed, dumps
-    ):
+    for (
+        label,
+        (relocatable, riscv32, sections, symbols, local_symbols, relocations),
+    ), (_, text) in zip(parsed, dumps):
         contents = parse_dumps(text, sections)
         names = [sec[0] for sec in sections.values()]
         funcs = []
@@ -205,13 +284,20 @@ def functions(path):
             start = value if relocatable else value - addr
             data = contents.get(name, b"")[start : start + size]
             problem = None
-            if any(
+            applies = any(
                 start <= off < start + size
                 if relocatable
                 else value <= off < value + size
-                for t, off in relocations
+                for t, off, _, _, _, _ in relocations
                 if not relocatable or t == ndx
-            ):
+            )
+            if riscv32:
+                applies = any(t == ndx for t, _, _, _, _, _ in relocations) and not (
+                    riscv32_branches_unchanged(
+                        relocations, local_symbols, ndx, start, data
+                    )
+                )
+            if applies:
                 problem = "relocations apply"
             elif names.count(name) != 1:
                 problem = f"its section {name} is not the only one of that name"
