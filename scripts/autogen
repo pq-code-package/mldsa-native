@@ -4282,7 +4282,7 @@ def gen_hol_light_bind():
             text=True,
         ).stdout
     header = [
-        "# Copyright (c) The mlkem-native project authors",
+        "# Copyright (c) The mldsa-native project authors",
         "# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT",
         "#",
         "# WARNING: This file is auto-generated from scripts/autogen",

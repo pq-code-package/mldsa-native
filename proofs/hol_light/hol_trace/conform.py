@@ -1,4 +1,5 @@
 # Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
 """Check a replay result against the accepted definitions and statements.
@@ -1438,7 +1439,7 @@ def short(path):
 
 
 LICENSE_COMMENT = """\
-# Copyright (c) The mlkem-native project authors
+# Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 #
 """
