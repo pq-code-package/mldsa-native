@@ -19,6 +19,25 @@
 #include "common.h"
 #include "poly.h"
 
+/*
+ * Keep the serial-only configuration check behind a function contract so
+ * CBMC can replace it with a nondeterministic Boolean and cover both sampling
+ * schedules in one proof. The function is always inlined in regular builds,
+ * leaving only the configured branch.
+ */
+static MLD_ALWAYS_INLINE int mld_serial_fips202_only(void)
+__contract__(
+  assigns()
+  ensures(return_value == 0 || return_value == 1)
+)
+{
+#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 #if !defined(MLD_CONFIG_NO_SIGN_API)
 #define mld_poly_decompose MLD_NAMESPACE_KL(poly_decompose)
 /**
@@ -71,7 +90,6 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API)
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_eta_4x MLD_NAMESPACE_KL(poly_uniform_eta_4x)
 /**
  * Sample four polynomials with uniformly random coefficients in
@@ -111,9 +129,7 @@ __contract__(
   ensures(array_abs_bound(r2->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
   ensures(array_abs_bound(r3->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
-#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_poly_uniform_eta MLD_NAMESPACE_KL(poly_uniform_eta)
 /**
  * Sample polynomial with uniformly random coefficients in
@@ -135,13 +151,9 @@ __contract__(
   assigns(memory_slice(r, sizeof(mld_poly)))
   ensures(array_abs_bound(r->coeffs, 0, MLDSA_N, MLDSA_ETA + 1))
 );
-#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API)
-#if MLD_CONFIG_PARAMETER_SET == 65 ||          \
-    defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) || \
-    defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1 MLD_NAMESPACE_KL(poly_uniform_gamma1)
 /**
  * Sample polynomial with uniformly random coefficients in
@@ -164,11 +176,8 @@ __contract__(
   assigns(memory_slice(a, sizeof(mld_poly)))
   ensures(array_bound(a->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_SERIAL_FIPS202_ONLY || \
-          MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) && \
-    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST))
+#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #define mld_poly_uniform_gamma1_4x MLD_NAMESPACE_KL(poly_uniform_gamma1_4x)
 /**
  * Sample four polynomials with uniformly random coefficients in
@@ -209,8 +218,7 @@ __contract__(
   ensures(array_bound(r2->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
   ensures(array_bound(r3->coeffs, 0, MLDSA_N, -(MLDSA_GAMMA1 - 1), MLDSA_GAMMA1 + 1))
 );
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY && (!MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST) */
+#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #if !defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API)
