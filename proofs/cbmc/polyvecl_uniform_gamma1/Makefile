@@ -24,10 +24,10 @@ CHECK_FUNCTION_CONTRACTS=
 USE_FUNCTION_CONTRACTS=
 else
 CHECK_FUNCTION_CONTRACTS=mld_polyvecl_uniform_gamma1
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_gamma1_4x
-ifeq ($(MLD_CONFIG_PARAMETER_SET),65)
+UNWINDSET += mld_polyvecl_uniform_gamma1.0:7 # Largest value of MLDSA_L
+USE_FUNCTION_CONTRACTS=mld_serial_fips202_only
 USE_FUNCTION_CONTRACTS+=mld_poly_uniform_gamma1
-endif
+USE_FUNCTION_CONTRACTS+=mld_poly_uniform_gamma1_4x
 endif
 
 APPLY_LOOP_CONTRACTS=on
@@ -48,7 +48,7 @@ FUNCTION_NAME = polyvecl_uniform_gamma1
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 9
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file
