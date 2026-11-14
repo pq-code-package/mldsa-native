@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794680939975,
+  "lastUpdate": 1794681064165,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -79287,6 +79287,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 853559,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "bbbb8bc4a2795654250acaea24b03d72c0bb3f20",
+          "message": "sign: Order rejection checks by rejection rate\n\nCheck ||w0 - cs2||_inf < GAMMA2 - BETA before ||z||_inf < GAMMA1 -\nBETA, and compute ct0 along with its norm check in a separate loop\nafter the check on z.\n\nBoth loops and mld_compute_pack_z stop at the first polynomial that\nfails their check, so an attempt is cheapest when the check that\nrejects most often per polynomial runs first.\n\nThanks to Georg Land for pointing out that this is faster.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-14T14:42:30Z",
+          "tree_id": "70921cf15e23fe6399ec393e515bacfc38ad5b8a",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/bbbb8bc4a2795654250acaea24b03d72c0bb3f20"
+        },
+        "date": 1794681060816,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 294698,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 1069648,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 322337,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 536048,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 1693355,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 517848,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 828301,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 2173888,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 853639,
             "unit": "cycles"
           }
         ]
