@@ -8,7 +8,15 @@
 
 { pkgs }:
 
-pkgs.hol_light
+pkgs.hol_light.overrideAttrs (old: {
+  # OCaml 5.5 requires locations on both parts of a dotted identifier.
+  # HOL Light generates this theorem-search helper during its build.
+  postInstall = (old.postInstall or "") + ''
+    substituteInPlace "$out/lib/hol_light/update_database.ml" \
+      --replace-fail "Longident.Ldot(li, id)" \
+        "Longident.Ldot(Location.mknoloc li, Location.mknoloc id)"
+  '';
+})
 
 # pkgs.hol_light.overrideAttrs (old: rec {
 #   version = "unstable-2026-09-19";

@@ -1,0 +1,51 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_polyz_unpack_17_aarch64_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_polyz_unpack_17_aarch64_asm MLDSA_POLYZ_UNPACK_17_SUBROUTINE_CORRECT
+  |- !r:int64 b:int64 t:int64 l:((18 word) list) pc:num returnaddress:int64.
+       LENGTH l = 256
+       /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool) [r, 1024]
+            [(word pc : int64), LENGTH mldsa_polyz_unpack_17_mc; b, 576; t, 64]
+       ==> ensures arm
+             (\s:armstate.
+               aligned_bytes_loaded s (word pc : int64) mldsa_polyz_unpack_17_mc
+               /\ read PC s = (word pc : int64)
+               /\ read X30 s = returnaddress
+               /\ C_ARGUMENTS [r; b; t] s
+               /\ read (memory :> bytes (t, 64)) s = num_of_wordlist mldsa_polyz_unpack_17_indices
+               /\ read (memory :> bytes (b, 576)) s = num_of_wordlist l)
+             (\s:armstate.
+               read PC s = returnaddress
+               /\ read (memory :> bytes (r, 1024)) s = num_of_wordlist (MAP zunpack17 l)
+               /\ (!i:num.
+                    i < 256
+                    ==> -(int_of_num (2 EXP 17) - &1) <= ival (EL i (MAP zunpack17 l))
+                        /\ ival (EL i (MAP zunpack17 l)) <= int_of_num (2 EXP 17)))
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (r, 1024)])
+
+theorem mldsa_polyz_unpack_17_aarch64_asm MLDSA_POLYZ_UNPACK_17_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> int64 -> num -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) r:int64 b:int64 t:int64 l:((18 word) list) pc:num
+        returnaddress:int64.
+         LENGTH l = 256
+         /\ ALLPAIRS (nonoverlapping : int64 # num -> int64 # num -> bool) [r, 1024]
+              [(word pc : int64), LENGTH mldsa_polyz_unpack_17_mc; b, 576; t, 64]
+         ==> ensures arm
+               (\s:armstate.
+                 aligned_bytes_loaded s (word pc : int64) mldsa_polyz_unpack_17_mc
+                 /\ read PC s = (word pc : int64)
+                 /\ read X30 s = returnaddress
+                 /\ C_ARGUMENTS [r; b; t] s
+                 /\ read events s = e)
+               (\s:armstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events b t r pc returnaddress
+                      /\ memaccess_inbounds e2 [b, 576; t, 64; r, 1024] [r, 1024]))
+               (\s:armstate s':armstate. T)

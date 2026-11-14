@@ -436,73 +436,62 @@ gh_group_start "Check HOL-Light imports"
 check-hol-light-imports
 gh_group_end
 
-# Derive the theorem-name prefix from a proof routine's basename:
-#   - strip the platform suffix
-#   - uppercase
-# The routine basename already carries the namespace (`mldsa_` for arithmetic,
-# `keccak_` for the namespace-agnostic keccak proofs), so no fixup is needed.
-theorem-prefix()
+check-holtrace-pruner()
 {
-  local routine="$1"
-  local platform_suffix="$2"
-  local base
-  case "$routine" in
-    mldsa_ntt_rv32im_slowmul_asm)
-      base="mldsa_ntt_slow"
-      ;;
-    mldsa_intt_rv32im_slowmul_asm)
-      base="mldsa_intt_slow"
-      ;;
-    mldsa_poly_pointwise_montgomery_rv32im_asm)
-      base="mldsa_pointwise_montgomery"
-      ;;
-    *)
-      base="${routine%${platform_suffix}}"
-      ;;
-  esac
-  echo "$base" | tr '[:lower:]' '[:upper:]'
+  if python3 "$ROOT"/test/test_compact_prune.py; then
+    info "Check HOLTrace pruner"
+    gh_summary_success "Check HOLTrace pruner"
+  else
+    error "Check HOLTrace pruner"
+    gh_summary_failure "Check HOLTrace pruner"
+    SUCCESS=false
+  fi
 }
+
+gh_group_start "Check HOLTrace pruner"
+check-holtrace-pruner
+gh_group_end
+
+check-binary-tests()
+{
+  if python3 "$ROOT"/test/test_check_binary.py; then
+    info "Check binary binding tests"
+    gh_summary_success "Check binary binding tests"
+  else
+    error "Check binary binding tests"
+    gh_summary_failure "Check binary binding tests"
+    SUCCESS=false
+  fi
+}
+
+gh_group_start "Check binary binding tests"
+check-binary-tests
+gh_group_end
 
 check-theorems()
 {
   local success=true
   for arch in aarch64 x86_64 riscv32; do
     local proofs_dir="$ROOT/proofs/hol_light/$arch/proofs"
-    local platform_suffix="_aarch64_asm"
-    [[ $arch == "x86_64" ]] && platform_suffix="_avx2_asm"
-    [[ $arch == "riscv32" ]] && platform_suffix="_rv32im_asm"
     local proofs
-    proofs=$("$ROOT/proofs/hol_light/$arch/list_proofs.sh")
+    if ! proofs=$("$ROOT/proofs/hol_light/$arch/list_proofs.sh"); then
+      gh_error_simple "list_proofs.sh failed" "cannot list the $arch proofs"
+      success=false
+      continue
+    fi
 
     for routine in $proofs; do
       local file="$proofs_dir/${routine}.ml"
-      local prefix
-      local theorems
-      prefix=$(theorem-prefix "$routine" "$platform_suffix")
-      theorems=$("$ROOT/proofs/hol_light/$arch/list_thms.sh" "$file")
+      local theorem
 
-      # rej_uniform uses MEMSAFE in place of SAFE because no constant-time proof exists
-      local safe="SAFE"
-      [[ ${routine} == mldsa_rej_uniform_* ]] && safe="MEMSAFE"
-
-      local core_correct="${prefix}_CORRECT"
-      [[ $arch == "riscv32" ]] &&
-        core_correct="${prefix}_CORE_CORRECT"
-      local expected=(
-        "$core_correct"
-        "${prefix}_SUBROUTINE_CORRECT"
-        "${prefix}_SUBROUTINE_${safe}"
-      )
-      if [[ $arch == "x86_64" ]]; then
-        expected+=(
-          "${prefix}_${safe}"
-          "${prefix}_NOIBT_SUBROUTINE_CORRECT"
-          "${prefix}_NOIBT_SUBROUTINE_${safe}"
-        )
-      fi
-
-      for theorem in "${expected[@]}"; do
-        if ! grep -qx "$theorem" <<<"$theorems"; then
+      # The main theorems of each proof are defined in list_thms.sh
+      for theorem in $("$ROOT/proofs/hol_light/$arch/list_thms.sh" "$routine"); do
+        local theorem_pattern="^[[:space:]]*let[[:space:]]+${theorem}[[:space:]]+=[[:space:]]+(time[[:space:]]+)?prove"
+        # The eta safety theorems wrap a local proof or use ADD_IBT_RULE.
+        if [[ $arch == "x86_64" && $routine == mldsa_rej_uniform_eta[24]_avx2_asm && $theorem == *_SUBROUTINE_SAFE ]]; then
+          theorem_pattern="^[[:space:]]*let[[:space:]]+${theorem}[[:space:]]*="
+        fi
+        if ! grep -qE "$theorem_pattern" "$file"; then
           gh_error "$file" "" "Missing theorem" "${file}: ${theorem} not found"
           success=false
         fi

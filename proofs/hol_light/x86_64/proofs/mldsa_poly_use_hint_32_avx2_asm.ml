@@ -55,8 +55,7 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0xc5; 0xd5; 0xfe; 0xc8;  (* VPADDD (%_% ymm1) (%_% ymm5) (%_% ymm0) *)
   0xc5; 0xf5; 0x72; 0xd1; 0x07;
                            (* VPSRLD (%_% ymm1) (%_% ymm1) (Imm8 (word 7)) *)
-  0xc4; 0xc1; 0x75; 0xe4; 0xc8;
-                           (* VPMULHUW (%_% ymm1) (%_% ymm1) (%_% ymm8) *)
+  0xc5; 0xbd; 0xe4; 0xc9;  (* VPMULHUW (%_% ymm1) (%_% ymm8) (%_% ymm1) *)
   0xc4; 0xe2; 0x75; 0x0b; 0xcf;
                            (* VPMULHRSW (%_% ymm1) (%_% ymm1) (%_% ymm7) *)
   0xc5; 0x7d; 0x66; 0xdc;  (* VPCMPGTD (%_% ymm11) (%_% ymm0) (%_% ymm4) *)
@@ -67,15 +66,13 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0xc5; 0xf5; 0x72; 0xf1; 0x09;
                            (* VPSLLD (%_% ymm1) (%_% ymm1) (Imm8 (word 9)) *)
   0xc5; 0xfd; 0xfa; 0xc1;  (* VPSUBD (%_% ymm0) (%_% ymm0) (%_% ymm1) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xc3;
-                           (* VPADDD (%_% ymm0) (%_% ymm0) (%_% ymm11) *)
+  0xc5; 0xa5; 0xfe; 0xc0;  (* VPADDD (%_% ymm0) (%_% ymm11) (%_% ymm0) *)
   0xc5; 0xfd; 0x66; 0xc6;  (* VPCMPGTD (%_% ymm0) (%_% ymm0) (%_% ymm6) *)
   0xc5; 0xfd; 0xdf; 0xc2;  (* VPANDN (%_% ymm0) (%_% ymm0) (%_% ymm2) *)
   0xc5; 0xfd; 0x72; 0xf0; 0x01;
                            (* VPSLLD (%_% ymm0) (%_% ymm0) (Imm8 (word 1)) *)
   0xc5; 0xed; 0xfa; 0xd0;  (* VPSUBD (%_% ymm2) (%_% ymm2) (%_% ymm0) *)
-  0xc4; 0xc1; 0x6d; 0xfe; 0xd1;
-                           (* VPADDD (%_% ymm2) (%_% ymm2) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xd2;  (* VPADDD (%_% ymm2) (%_% ymm9) (%_% ymm2) *)
   0xc5; 0xed; 0xdb; 0xd3;  (* VPAND (%_% ymm2) (%_% ymm2) (%_% ymm3) *)
   0xc5; 0xfd; 0x7f; 0x17;  (* VMOVDQA (Memop Word256 (%% (rdi,0))) (%_% ymm2) *)
   0x48; 0x83; 0xc7; 0x20;  (* ADD (% rdi) (Imm8 (word 32)) *)
@@ -83,7 +80,7 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0x48; 0x83; 0xc0; 0x20;  (* ADD (% rax) (Imm8 (word 32)) *)
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
-  0x75; 0x94;              (* JNE (Imm8 (word 148)) *)
+  0x75; 0x97;              (* JNE (Imm8 (word 151)) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
@@ -853,6 +850,23 @@ let LANE_AC_CLOSE = prove
                  word_and (word_add (word_and a m) d) (word 15)`,
   REPEAT GEN_TAC THEN CONV_TAC WORD_BLAST);;
 
+(* The AVX operands are ordered to give the same bytes with GNU and LLVM. *)
+let UH32_MUL_CONST_SWAP = prove
+ (`(!x:int32. word_mul (word 0) x = word_mul x (word 0)) /\
+   (!x:int32. word_mul (word 1025) x = word_mul x (word 1025))`,
+  REWRITE_TAC[WORD_MUL_SYM]);;
+
+let UH32_ADD_IF_SWAP = prove
+ (`!p (x:int32).
+     word_add (if p then word 4294967295 else word 0) x =
+     word_add x (if p then word 4294967295 else word 0)`,
+  REWRITE_TAC[WORD_ADD_SYM]);;
+
+let LANE_AC_CLOSE_SWAPPED = prove
+ (`!d m a:int32. word_and (word_add (word_and m a) d) (word 15) =
+                 word_and (word_add (word_and a m) d) (word 15)`,
+  REPEAT GEN_TAC THEN CONV_TAC WORD_BLAST);;
+
 (* Distribution of the final vpand-by-15 (a 256-bit broadcast) over the SIMD
    word_join tree, pushing the &15 mask down to each 32-bit lane.  Used to line
    up the assembly's whole-vector mask with the per-lane &15 of the lane model. *)
@@ -916,10 +930,13 @@ let UH32_STORE_DISCHARGE_TAC : tactic =
       let luh = prove(
         mk_imp(`val(y:int32) <= 1`, mk_eq(lane0_fn, list_mk_comb(`mldsa_use_hint_32_x86_asm`,[`x:int32`;`y:int32`]))),
         DISCH_TAC THEN REWRITE_TAC[mldsa_use_hint_32_x86_asm] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
+        REWRITE_TAC[UH32_MUL_CONST_SWAP; UH32_ADD_IF_SWAP] THEN
         REWRITE_TAC[SHL_523776] THEN REWRITE_TAC[A1HI_ZERO; JOIN_ZERO_ZX] THEN
         ABBREV_TAC (mk_eq(`A:int32`, mk_comb(`word_zx:(16)word->int32`, a1lane_x))) THEN
         MP_TAC(SPECL [a0term; `y:int32`] DELTA_EQ_BOUNDED) THEN ASM_REWRITE_TAC[] THEN
-        DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN MATCH_ACCEPT_TAC LANE_AC_CLOSE) in
+        DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
+        FIRST [MATCH_ACCEPT_TAC LANE_AC_CLOSE;
+               MATCH_ACCEPT_TAC LANE_AC_CLOSE_SWAPPED]) in
       let lane_gen = GENL [`x:int32`;`y:int32`] luh in
       let bound_hyp = snd(find (fun (_,th) -> try concl th = `!k. k < 8 ==> val(word_subword (hv:int256) (32*k,32):int32) <= 1` with _->false) asl2) in
       let bridges = map (fun k ->
@@ -1034,7 +1051,7 @@ let MLDSA_POLY_USE_HINT_32_BLOCK_CORRECT = prove
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_32_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN REWRITE_TAC[SOME_FLAGS] THEN
-  ENSURES_WHILE_PUP_TAC `32` `pc + 0x50` `pc + 0xba`
+  ENSURES_WHILE_PUP_TAC `32` `pc + 0x50` `pc + 0xb7`
    `\i s.
       (read RDI s = word_add a (word(32 * i)) /\
        read RSI s = word_add h (word(32 * i)) /\

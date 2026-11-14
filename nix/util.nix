@@ -2,7 +2,7 @@
 # Copyright (c) The mldsa-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-{ pkgs, cbmc, bitwuzla, cvc5, z3 }:
+{ pkgs, pkgs-unstable, cbmc, bitwuzla, cvc5, z3 }:
 rec {
   glibc-join = p: p.buildPackages.symlinkJoin {
     name = "glibc-join";
@@ -81,12 +81,12 @@ rec {
 
   mkShellWithCC' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ];
+      packages = [ (pkgs.python3.withPackages (ps: [ ps.pyyaml ])) ];
       hardeningDisable = [ "fortify" ];
     };
   mkShellWithCC_valgrind' = cc:
     mkShellWithCC cc {
-      packages = [ pkgs.python3 ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
+      packages = [ (pkgs.python3.withPackages (ps: [ ps.pyyaml ])) ] ++ pkgs.lib.optionals (!pkgs.stdenv.isDarwin) [ valgrind_varlat ];
       hardeningDisable = [ "fortify" ];
     };
 
@@ -118,6 +118,10 @@ rec {
   hol_light' = pkgs.callPackage ./hol_light { };
   hol_server = pkgs.callPackage ./hol_light/hol_server.nix { inherit hol_light'; };
   s2n_bignum = pkgs.callPackage ./s2n_bignum { };
+  hol_trace = pkgs.callPackage ./hol_trace { inherit hol_light' s2n_bignum; };
+  # HolLean pins Lean 4.35.0, which nixpkgs-unstable provides. It links
+  # against Lean's runtime, so it is built with the same (unstable) stdenv.
+  hol_lean = pkgs-unstable.callPackage ./hol_lean { };
   slothy = pkgs.callPackage ./slothy { };
   openocd = pkgs.callPackage ./openocd { };
   zephyr = pkgs.callPackage ./zephyr { };

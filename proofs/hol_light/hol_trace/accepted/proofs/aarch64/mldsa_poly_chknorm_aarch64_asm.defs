@@ -1,0 +1,19 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_chknorm_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_poly_chknorm_mc: 100 bytes
+# sha256 4a77b989a6062e3f44403cc992629db181ee10ff2e3c52f487fc309174bde648
+definition mldsa_poly_chknorm_mc
+  |- mldsa_poly_chknorm_mc
+     = #x[34 0c 04 4e b5 1e 35 6e 02 02 80 d2 01 04 c0 3d 02 08 c0 3d 03 0c c0 3d 00 04 c4 3c 21 b8
+          a0 4e 21 3c b4 4e b5 1e a1 4e 42 b8 a0 4e 42 3c b4 4e b5 1e a2 4e 63 b8 a0 4e 63 3c b4 4e
+          b5 1e a3 4e 00 b8 a0 4e 00 3c b4 4e b5 1e a0 4e 42 04 00 f1 e1 fd ff 54 b5 aa b0 6e a0 02
+          26 1e 00 00 00 12 c0 03 5f d6]

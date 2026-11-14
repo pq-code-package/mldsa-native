@@ -1,0 +1,19 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_pointwise_montgomery_rv32im_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_pointwise_montgomery_mc: 92 bytes
+# sha256 e8be361b9c2b79d832d4f857efed835a88c7cb32c6358370ed2ae78b460b7049
+definition mldsa_pointwise_montgomery_mc
+  |- mldsa_pointwise_montgomery_mc
+     = #x[13 01 01 ff 23 20 81 00 23 22 91 00 37 e4 7f 00 13 04 14 00 b7 24 80 03 93 84 14 00 93 02
+          05 40 03 26 05 00 83 a6 05 00 33 07 d6 02 b3 17 d6 02 33 08 97 02 b3 18 88 02 33 86 17 41
+          23 20 c5 00 13 05 45 00 93 85 45 00 e3 1c 55 fc 03 24 01 00 83 24 41 00 13 01 01 01 67 80
+          00 00]

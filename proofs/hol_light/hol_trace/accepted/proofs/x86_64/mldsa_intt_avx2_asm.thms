@@ -1,0 +1,137 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_intt_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_intt_avx2_asm MLDSA_INTT_NOIBT_SUBROUTINE_CORRECT
+  |- !a:int64 zetas:int64 zetas_list:(int32 list) x:(num -> int32) pc:num stackpointer:int64
+      returnaddress:int64.
+       aligned 32 a
+       /\ aligned 32 zetas
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_tmc) (a, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_tmc) (zetas, 2496)
+       /\ nonoverlapping (a, 1024) (zetas, 2496)
+       /\ nonoverlapping (stackpointer, 8) (a, 1024)
+       /\ nonoverlapping (stackpointer, 8) (zetas, 2496)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_intt_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [a; zetas] s
+               /\ (wordlist_from_memory (zetas, 624) s : int32 list)
+                  = MAP (iword : int -> int32) mldsa_complete_qdata
+               /\ (!i:num. i < 256 ==> abs (ival (x i)) <= &8380416)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s in
+                        (ival zi == mldsa_inverse_ntt ((ival : int32 -> int) o x) i) (mod &8380417)
+                        /\ abs (ival zi) <= &6285312)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 1024)])
+
+theorem mldsa_intt_avx2_asm MLDSA_INTT_NOIBT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 zetas:int64 pc:num stackpointer:int64
+        returnaddress:int64.
+         aligned 32 a
+         /\ aligned 32 zetas
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_tmc) (a, 1024)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_tmc) (zetas, 2496)
+         /\ nonoverlapping (a, 1024) (zetas, 2496)
+         /\ nonoverlapping (stackpointer, 8) (a, 1024)
+         /\ nonoverlapping (stackpointer, 8) (zetas, 2496)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mldsa_intt_tmc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [a; zetas] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events zetas a pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 1024; zetas, 2496; stackpointer, 8]
+                           [a, 1024; stackpointer, 8]))
+               (\s:x86state s':x86state. T)
+
+theorem mldsa_intt_avx2_asm MLDSA_INTT_SUBROUTINE_CORRECT
+  |- !a:int64 zetas:int64 zetas_list:(int32 list) x:(num -> int32) pc:num stackpointer:int64
+      returnaddress:int64.
+       aligned 32 a
+       /\ aligned 32 zetas
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_mc) (a, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_mc) (zetas, 2496)
+       /\ nonoverlapping (a, 1024) (zetas, 2496)
+       /\ nonoverlapping (stackpointer, 8) (a, 1024)
+       /\ nonoverlapping (stackpointer, 8) (zetas, 2496)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_intt_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [a; zetas] s
+               /\ (wordlist_from_memory (zetas, 624) s : int32 list)
+                  = MAP (iword : int -> int32) mldsa_complete_qdata
+               /\ (!i:num. i < 256 ==> abs (ival (x i)) <= &8380416)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s = x i))
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add a (word (4 * i) : int64))) s in
+                        (ival zi == mldsa_inverse_ntt ((ival : int32 -> int) o x) i) (mod &8380417)
+                        /\ abs (ival zi) <= &6285312)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 1024)])
+
+theorem mldsa_intt_avx2_asm MLDSA_INTT_SUBROUTINE_SAFE
+  |- ?f_events:(int64 -> int64 -> num -> int64 -> int64 -> (64 address_uarch_event) list).
+       !e:((64 address_uarch_event) list) a:int64 zetas:int64 pc:num stackpointer:int64
+        returnaddress:int64.
+         aligned 32 a
+         /\ aligned 32 zetas
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_mc) (a, 1024)
+         /\ nonoverlapping ((word pc : int64), LENGTH mldsa_intt_mc) (zetas, 2496)
+         /\ nonoverlapping (a, 1024) (zetas, 2496)
+         /\ nonoverlapping (stackpointer, 8) (a, 1024)
+         /\ nonoverlapping (stackpointer, 8) (zetas, 2496)
+         ==> ensures x86
+               (\s:x86state.
+                 bytes_loaded s (word pc : int64) mldsa_intt_mc
+                 /\ read RIP s = (word pc : int64)
+                 /\ read RSP s = stackpointer
+                 /\ read (memory :> bytes64 stackpointer) s = returnaddress
+                 /\ C_ARGUMENTS [a; zetas] s
+                 /\ read events s = e)
+               (\s:x86state.
+                 read RIP s = returnaddress
+                 /\ read RSP s = word_add stackpointer (word 8 : int64)
+                 /\ (?e2:((64 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events zetas a pc stackpointer returnaddress
+                      /\ memaccess_inbounds e2 [a, 1024; zetas, 2496; stackpointer, 8]
+                           [a, 1024; stackpointer, 8]))
+               (\s:x86state s':x86state. T)

@@ -78,8 +78,9 @@ $(OBJ): %.o : %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
 	# MacOS may generate relocations in non-text sections that break
-	# the object file parser in HOL-Light
-	strip $@
+	# the object file parser in HOL-Light. Keep the function's symbol,
+	# which check-binary looks for; strips without --keep-symbol drop it.
+	strip $(patsubst %,--keep-symbol=%,$(shell sed -n 's/^\.global //p' $<)) $@ 2>/dev/null || strip $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
@@ -97,6 +98,12 @@ clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
 HOLDIR?=$(HOLLIGHTDIR)
 HOLLIGHT:=$(HOLDIR)/hol.sh
+
+# The proofs run on stock HOL Light. A build with HOLTrace installed (see
+# ../hol_trace) changes the library and is for `hol-trace` only.
+ifneq ($(wildcard $(HOLDIR)/INSTALLED-HOLTrace),)
+$(error HOLDIR=$(HOLDIR) has HOLTrace installed; use stock HOL Light)
+endif
 
 BASE?=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 

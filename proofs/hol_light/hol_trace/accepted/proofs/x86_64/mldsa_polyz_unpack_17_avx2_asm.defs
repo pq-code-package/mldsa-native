@@ -1,0 +1,72 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_polyz_unpack_17_avx2_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_polyz_unpack_17_mc: 1618 bytes
+# sha256 9630cec50471ee603eaf9cc14295aec560c3586e81dc34678145973e8d074390
+definition mldsa_polyz_unpack_17_mc
+  |- mldsa_polyz_unpack_17_mc
+     = #x[f3 0f 1e fa 48 b8 00 01 02 ff 02 03 04 ff c4 e1 f9 6e c8 48 b8 04 05 06 ff 06 07 08 ff c4
+          e3 f1 22 c8 01 48 b8 17 18 19 ff 19 1a 1b ff c4 e1 f9 6e e8 48 b8 1b 1c 1d ff 1d 1e 1f ff
+          c4 e3 d1 22 e8 01 c4 e3 75 38 cd 01 48 b8 00 00 00 00 02 00 00 00 c4 e1 f9 6e d0 48 b8 04
+          00 00 00 06 00 00 00 c4 e3 e9 22 d0 01 c4 e3 6d 38 d2 01 b8 ff ff 03 00 c5 f9 6e d8 c4 e2
+          7d 58 db b8 00 00 02 00 c5 f9 6e e0 c4 e2 7d 58 e4 c5 fa 6f 06 c5 fa 6f 6e 02 c4 e3 7d 38
+          c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 07 c5 fa 6f 46 12 c5
+          fa 6f 6e 14 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 47 20 c5 fa 6f 46 24 c5 fa 6f 6e 26 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5
+          fd db c3 c5 dd fa c0 c5 fd 7f 47 40 c5 fa 6f 46 36 c5 fa 6f 6e 38 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 47 60 c5 fa 6f 46 48 c5 fa 6f 6e
+          4a c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 80
+          00 00 00 c5 fa 6f 46 5a c5 fa 6f 6e 5c c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5
+          fd db c3 c5 dd fa c0 c5 fd 7f 87 a0 00 00 00 c5 fa 6f 46 6c c5 fa 6f 6e 6e c4 e3 7d 38 c5
+          01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 c0 00 00 00 c5 fa 6f
+          46 7e c5 fa 6f ae 80 00 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3
+          c5 dd fa c0 c5 fd 7f 87 e0 00 00 00 c5 fa 6f 86 90 00 00 00 c5 fa 6f ae 92 00 00 00 c4 e3
+          7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 00 01 00 00
+          c5 fa 6f 86 a2 00 00 00 c5 fa 6f ae a4 00 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d
+          45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 20 01 00 00 c5 fa 6f 86 b4 00 00 00 c5 fa 6f ae
+          b6 00 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 87 40 01 00 00 c5 fa 6f 86 c6 00 00 00 c5 fa 6f ae c8 00 00 00 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 60 01 00 00 c5 fa 6f 86 d8 00
+          00 00 c5 fa 6f ae da 00 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3
+          c5 dd fa c0 c5 fd 7f 87 80 01 00 00 c5 fa 6f 86 ea 00 00 00 c5 fa 6f ae ec 00 00 00 c4 e3
+          7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 a0 01 00 00
+          c5 fa 6f 86 fc 00 00 00 c5 fa 6f ae fe 00 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d
+          45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 c0 01 00 00 c5 fa 6f 86 0e 01 00 00 c5 fa 6f ae
+          10 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 87 e0 01 00 00 c5 fa 6f 86 20 01 00 00 c5 fa 6f ae 22 01 00 00 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 00 02 00 00 c5 fa 6f 86 32 01
+          00 00 c5 fa 6f ae 34 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3
+          c5 dd fa c0 c5 fd 7f 87 20 02 00 00 c5 fa 6f 86 44 01 00 00 c5 fa 6f ae 46 01 00 00 c4 e3
+          7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 40 02 00 00
+          c5 fa 6f 86 56 01 00 00 c5 fa 6f ae 58 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d
+          45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 60 02 00 00 c5 fa 6f 86 68 01 00 00 c5 fa 6f ae
+          6a 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 87 80 02 00 00 c5 fa 6f 86 7a 01 00 00 c5 fa 6f ae 7c 01 00 00 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 a0 02 00 00 c5 fa 6f 86 8c 01
+          00 00 c5 fa 6f ae 8e 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3
+          c5 dd fa c0 c5 fd 7f 87 c0 02 00 00 c5 fa 6f 86 9e 01 00 00 c5 fa 6f ae a0 01 00 00 c4 e3
+          7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 e0 02 00 00
+          c5 fa 6f 86 b0 01 00 00 c5 fa 6f ae b2 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d
+          45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 00 03 00 00 c5 fa 6f 86 c2 01 00 00 c5 fa 6f ae
+          c4 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 87 20 03 00 00 c5 fa 6f 86 d4 01 00 00 c5 fa 6f ae d6 01 00 00 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 40 03 00 00 c5 fa 6f 86 e6 01
+          00 00 c5 fa 6f ae e8 01 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3
+          c5 dd fa c0 c5 fd 7f 87 60 03 00 00 c5 fa 6f 86 f8 01 00 00 c5 fa 6f ae fa 01 00 00 c4 e3
+          7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 80 03 00 00
+          c5 fa 6f 86 0a 02 00 00 c5 fa 6f ae 0c 02 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d
+          45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 a0 03 00 00 c5 fa 6f 86 1c 02 00 00 c5 fa 6f ae
+          1e 02 00 00 c4 e3 7d 38 c5 01 c4 e2 7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd
+          7f 87 c0 03 00 00 c5 fa 6f 86 2e 02 00 00 c5 fa 6f ae 30 02 00 00 c4 e3 7d 38 c5 01 c4 e2
+          7d 00 c1 c4 e2 7d 45 c2 c5 fd db c3 c5 dd fa c0 c5 fd 7f 87 e0 03 00 00 c5 f8 77 c3]
+
+definition mldsa_polyz_unpack_17_tmc
+  |- mldsa_polyz_unpack_17_tmc = TRIM_LIST (4, 0) mldsa_polyz_unpack_17_mc

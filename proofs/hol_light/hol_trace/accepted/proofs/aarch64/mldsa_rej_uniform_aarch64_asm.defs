@@ -1,0 +1,35 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_rej_uniform_aarch64_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_rej_uniform_mc: 580 bytes
+# sha256 edccca831a7a96a28d33b8629ae057355aa9e24290e1c7cf5838c6fc2c58e8e7
+definition mldsa_rej_uniform_mc
+  |- mldsa_rej_uniform_mc
+     = #x[ff 03 11 d1 27 00 80 d2 47 00 c0 f2 ff 1c 08 4e 87 00 80 d2 07 01 c0 f2 ff 1c 18 4e 27 00
+          9c 52 e7 0f a0 72 fe 0c 04 4e e8 03 00 91 e7 03 08 aa 0b 00 80 d2 10 1e 30 6e f0 04 84 3c
+          f0 00 9d 3c f0 00 9e 3c f0 00 9f 3c 6b 41 00 91 7f 01 04 f1 4b ff ff 54 e7 03 08 aa 09 00
+          80 d2 04 20 80 d2 5f c0 00 f1 23 08 00 54 3f 01 04 eb 62 0c 00 54 42 c0 00 d1 20 40 df 4c
+          04 e4 04 4f 42 1c 64 4e 04 38 01 4e 05 78 01 4e 46 a4 08 2f 47 a4 08 6f 90 38 46 4e 91 78
+          46 4e b2 38 47 4e b3 78 47 4e c4 37 b0 6e c5 37 b1 6e c6 37 b2 6e c7 37 b3 6e 84 1c 3f 4e
+          a5 1c 3f 4e c6 1c 3f 4e e7 1c 3f 4e 94 38 b0 6e b5 38 b0 6e d6 38 b0 6e f7 38 b0 6e 8c 02
+          66 9e ad 02 66 9e ce 02 66 9e ef 02 66 9e 78 78 ec 3c 79 78 ed 3c 7a 78 ee 3c 7b 78 ef 3c
+          84 58 20 4e a5 58 20 4e c6 58 20 4e e7 58 20 4e 94 38 b0 6e b5 38 b0 6e d6 38 b0 6e f7 38
+          b0 6e 8c 02 66 9e ad 02 66 9e ce 02 66 9e ef 02 66 9e 10 02 18 4e 31 02 19 4e 52 02 1a 4e
+          73 02 1b 4e f0 78 00 4c e7 08 0c 8b f1 78 00 4c e7 08 0d 8b f2 78 00 4c e7 08 0e 8b f3 78
+          00 4c e7 08 0f 8b 8c 01 0d 8b ce 01 0f 8b 29 01 0c 8b 29 01 0e 8b 5f c0 00 f1 22 f8 ff 54
+          3f 01 04 eb 62 04 00 54 5f 60 00 f1 23 04 00 54 42 60 00 d1 20 40 df 0c 04 e4 04 4f 42 1c
+          64 4e 04 38 01 4e 46 a4 08 2f 90 38 46 4e 91 78 46 4e c4 37 b0 6e c5 37 b1 6e 84 1c 3f 4e
+          a5 1c 3f 4e 94 38 b0 6e b5 38 b0 6e 8c 02 66 9e ad 02 66 9e 78 78 ec 3c 79 78 ed 3c 84 58
+          20 4e a5 58 20 4e 94 38 b0 6e b5 38 b0 6e 8c 02 66 9e ad 02 66 9e 10 02 18 4e 31 02 19 4e
+          f0 78 00 4c e7 08 0c 8b f1 78 00 4c e7 08 0d 8b 29 01 0c 8b 29 01 0d 8b 3f 01 04 eb 29 31
+          84 9a 0b 00 80 d2 e7 03 08 aa f0 04 c4 3c f1 00 dd 3c f2 00 de 3c f3 00 df 3c 10 04 84 3c
+          11 00 9d 3c 12 00 9e 3c 13 00 9f 3c 6b 41 00 91 7f 01 04 f1 cb fe ff 54 e0 03 09 aa 01 00
+          00 14 ff 03 11 91 c0 03 5f d6]

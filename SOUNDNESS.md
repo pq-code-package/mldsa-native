@@ -26,6 +26,44 @@ FIPS 203 vs. FIPS 204 specifications and the differing modular arithmetic consta
 analysis applies to mldsa-native unchanged: the same proof tools, the same ISA models, the
 same TCB, and therefore the same shared mitigations and residual risks.
 
+### HOLTrace replay and binary binding
+
+HOL Light proof scripts are OCaml programs and therefore run in the same
+process as the trusted kernel. To remove the scripts from the replay's
+trusted computing base, mldsa-native records each proof's primitive kernel
+inferences and replays them in separate HOL Light and HolLean processes.
+Neither process loads s2n-bignum or the proof scripts. HolLean is a
+re-implementation of the HOL Light kernel in Lean.
+
+The replay must reproduce reviewed definitions and theorem statements in
+[`proofs/hol_light/hol_trace/accepted/`](proofs/hol_light/hol_trace/accepted/).
+The accepted base layer is generated from the pinned HOL Light and s2n-bignum
+sources, while the specification and proof layers record the definitions and
+claims that reviewers must inspect. See the
+[HOLTrace documentation](proofs/hol_light/hol_trace/README.md).
+
+Each accepted proof also fixes the routine's machine code as a byte list.
+`scripts/check-binary` compares those bytes with the functions found in ELF
+objects, archives, and executables.
+
+**Reassembly risk.** Every build reassembles the `.S` files: mldsa-native's own build, a
+downstream consumer such as AWS-LC, or a cross toolchain. The result can differ from the
+bytes the proofs are about. Assemblers do emit different code (for example, some x86
+assemblers swap the operands of AVX2 `VPADD` to shorten the encoding).
+
+Building with `make CHECK_BINARY=1` (see [BUILDING.md](BUILDING.md)) compares the backend
+kernels in a build with the proved bytes.
+Consumers should run `scripts/check-binary` on their own binaries. Kernels are found by
+symbol name, so stripped binaries cannot be checked.
+
+**Residual risk:** CI records and replays every proof that a change affects,
+but runs the trace capture and the trace analysis in the same workflow. To
+keep the trace capture, which runs the untrusted proof scripts, from
+tampering with the replay environment, it should run in a sandbox that
+exports only the captured trace. Until then, a reviewer must check that a
+proof script only drives HOL Light; see "What is trusted" in the HOLTrace
+README.
+
 ## Additional risks specific to mldsa-native
 
 ### Rejection sampling

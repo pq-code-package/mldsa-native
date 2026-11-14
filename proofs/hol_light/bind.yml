@@ -1,0 +1,269 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# WARNING: This file is auto-generated from scripts/autogen
+#          in the mldsa-native repository.
+#          Do not modify it directly.
+#
+# Hashes of the assembled kernels that HOL Light proofs reason about.
+# Use scripts/check-binary to check if a given binary contains matching
+# function symbols and machine code.
+#
+# Each entry is keyed by a kernel's symbol without the `mld_` prefix,
+# and names the architecture and function of its proof,
+# proofs/hol_light/ARCH/proofs/FUNC.ml. `sha256` maps each byte list in
+# the proof's accepted FUNC.defs to its hash:
+# - FUNC_mc is the kernel's code as the proof assembles it. On x86_64,
+#   it starts with ENDBR64, which builds emit only with CET enabled.
+# - FUNC_tmc, on x86_64 only, is that code without ENDBR64. The proofs'
+#   NOIBT theorems are about it, and builds without CET contain it.
+# A kernel matches if its code has either hash.
+intt_aarch64_asm:
+  arch: aarch64
+  function: mldsa_intt_aarch64_asm
+  sha256:
+    mldsa_intt_mc: 6dcf9100ace60dc47a15609b904c4ee43db01f519c8d73f51fc4c54eef9a2e81
+intt_rv32im_fastmul_asm:
+  arch: riscv32
+  function: mldsa_intt_rv32im_asm
+  sha256:
+    mldsa_intt_mc: 243e779ac428664fa99f488fa7d87c79a7bd7be102c1d80fa6344bb261f2342a
+intt_rv32im_slowmul_asm:
+  arch: riscv32
+  function: mldsa_intt_rv32im_slowmul_asm
+  sha256:
+    mldsa_intt_slowmul_mc: 32342e6dc30f7346b17b1c61f2f55a72d137c725e6a173bb10b5a832f7f44b97
+invntt_avx2_asm:
+  arch: x86_64
+  function: mldsa_intt_avx2_asm
+  sha256:
+    mldsa_intt_mc: a0d8ff6f8ba8e801018047f4a8dcdf28bf242c1be0a0ff88139098fdc68c8764
+    mldsa_intt_tmc: c72d9b8bb5d89dda5db4df978d724b6d40949c6b8069fd54f88c4c27026a01a2
+keccak_f1600_x1_scalar_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x1_scalar_aarch64_asm
+  sha256:
+    keccak_f1600_x1_scalar_mc: d45ed9162249bf1d687fd21eacabfaa52916ec434c24e5afc44655b53f67f1e9
+keccak_f1600_x1_v84a_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x1_v84a_aarch64_asm
+  sha256:
+    keccak_f1600_x1_v84a_mc: e8843038318618ac3a19018d3611112d4ad70b74ad9c23d6fad63be9825d1e5c
+keccak_f1600_x2_v84a_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x2_v84a_aarch64_asm
+  sha256:
+    keccak_f1600_x2_v84a_mc: 9083fb5acd83da5c9aefb341d38af9653418d24974f55ada6f97815c4949d966
+keccak_f1600_x4_avx2_asm:
+  arch: x86_64
+  function: keccak_f1600_x4_avx2_asm
+  sha256:
+    keccak_f1600_x4_avx2_mc: 2bd09e9e4371ed5b6d497e4ed38c0b421d4b4cc6d922705969234f4ef5877c20
+    keccak_f1600_x4_avx2_tmc: 104052a6386f98adeb204ea627900283570d40550f22c3c71bfc9b3b83b5ef57
+keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x4_v8a_scalar_hybrid_aarch64_asm
+  sha256:
+    keccak_f1600_x4_v8a_scalar_mc: 37f341dc88063ac70a03797b63d860910077e80ce858e3a570aa9174f09fb4ef
+keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm:
+  arch: aarch64
+  function: keccak_f1600_x4_v8a_v84a_scalar_hybrid_aarch64_asm
+  sha256:
+    keccak_f1600_x4_v8a_v84a_scalar_mc: 82b65b521af101118eeabaf1fda5bed7dfb5179d38fb132d24daa2d3873356e4
+ntt_aarch64_asm:
+  arch: aarch64
+  function: mldsa_ntt_aarch64_asm
+  sha256:
+    mldsa_ntt_mc: 640401811d4126fa4910ae57fbec5cd44fa04eb568777ea21bea5ff35e8f50d9
+ntt_avx2_asm:
+  arch: x86_64
+  function: mldsa_ntt_avx2_asm
+  sha256:
+    mldsa_ntt_mc: b4b6e76f13c7b59fe3af512349d84e675352153db5f8d3c1927c24db7c8bfade
+    mldsa_ntt_tmc: a009bd2694a4769bd63b209c699eb2cc9bcc01257b5cb006b9730409a03884a5
+ntt_rv32im_fastmul_asm:
+  arch: riscv32
+  function: mldsa_ntt_rv32im_asm
+  sha256:
+    mldsa_ntt_mc: 32bf0377910d4b687410f95b94aa8f42c09954c10d84088a8e6f2fc8a5bc114e
+ntt_rv32im_slowmul_asm:
+  arch: riscv32
+  function: mldsa_ntt_rv32im_slowmul_asm
+  sha256:
+    mldsa_ntt_slowmul_mc: 8ee3551850b0d7c4d9b59542dd060c2c7630d525149bd2a74a1a81fecf2534be
+nttunpack_avx2_asm:
+  arch: x86_64
+  function: mldsa_nttunpack_avx2_asm
+  sha256:
+    mldsa_nttunpack_mc: 04846fed21883cedf4b731aa1265ad2718bab596c39d0e465a3aaf8ace78da9e
+    mldsa_nttunpack_tmc: e7056d3f6e2364c5cebf1b03f101812ddbb927c67a3a78c62c909993f9d33b57
+pointwise_acc_l4_avx2_asm:
+  arch: x86_64
+  function: mldsa_pointwise_acc_l4_avx2_asm
+  sha256:
+    mldsa_pointwise_acc_l4_mc: c4853e5808e388b6ef3fdc485cc125ea7aca4cb7ea9d361849f072f7abe1aebd
+    mldsa_pointwise_acc_l4_tmc: 937e274ef79b038a68366f98e6ccee078f925ed8c4abb8cd7a6143f2a6e0e616
+pointwise_acc_l5_avx2_asm:
+  arch: x86_64
+  function: mldsa_pointwise_acc_l5_avx2_asm
+  sha256:
+    mldsa_pointwise_acc_l5_mc: 32b52bc1961d085b54c79441d5642651a5d54c6b18a2dbf2f13adbf20bb8db1c
+    mldsa_pointwise_acc_l5_tmc: 3f590fd2a105be295c8f1202f98e1dbeae8893ba02c7a1e23a1db66809f36f76
+pointwise_acc_l7_avx2_asm:
+  arch: x86_64
+  function: mldsa_pointwise_acc_l7_avx2_asm
+  sha256:
+    mldsa_pointwise_acc_l7_mc: 1b89800b5dfdf558865744b42ac7b71b310fc3afab9a8cc5329a501dd57e12ee
+    mldsa_pointwise_acc_l7_tmc: 12fd6c53b25a357f67b7c10d2a21904ab3944c0c477b55b60c294b2e54d5035e
+pointwise_avx2_asm:
+  arch: x86_64
+  function: mldsa_pointwise_avx2_asm
+  sha256:
+    mldsa_pointwise_mc: 2bf030029c6af98328fec336e785a2a5c29dfbf89d300f1bf6a9f4f2b1516494
+    mldsa_pointwise_tmc: cbe10b37b01ec59bb061e9530b54514d7fa2be2480b80cfcb1f25ac78177d712
+poly_caddq_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_caddq_aarch64_asm
+  sha256:
+    mldsa_poly_caddq_mc: f4b0d7c6cf3806fe6d5ab7e94b7c135302ad450eeae48bb2a4d7c4c8224b699d
+poly_caddq_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_caddq_avx2_asm
+  sha256:
+    mldsa_caddq_mc: d818db2ba5e45b6db5616e9f82de7d71badf774dfe0ea72d8ca3f86c89293018
+    mldsa_caddq_tmc: cd0bdd953cd1ef37656d0c27b996a5954f7364c32fa68954718eaf13446fb6ce
+poly_chknorm_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_chknorm_aarch64_asm
+  sha256:
+    mldsa_poly_chknorm_mc: 4a77b989a6062e3f44403cc992629db181ee10ff2e3c52f487fc309174bde648
+poly_chknorm_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_chknorm_avx2_asm
+  sha256:
+    mldsa_poly_chknorm_mc: e9119f95df71a772d3ce0523a652d385a849e044caad592805d9fe949875cd60
+    mldsa_poly_chknorm_tmc: b8993e3813a94a2f97b5be22dd2a1d1028625aee86d36542f45db6e824e5bcf1
+poly_decompose_32_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_decompose_32_aarch64_asm
+  sha256:
+    poly_decompose_32_aarch64_asm_mc: d6d7079e7192d9442b49a81652163f1879e996f1fbe86f3d56b805bcf423a67d
+poly_decompose_32_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_decompose_32_avx2_asm
+  sha256:
+    mldsa_decompose32_mc: f4fb2fecf340caa17743442666a93716d84f3405afa6063e5d8cdf1e099bd378
+    mldsa_decompose32_tmc: 515992c0382305d66adbdf398e3e6632f2c13e534a83025c250bac16edcba40a
+poly_decompose_88_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_decompose_88_aarch64_asm
+  sha256:
+    poly_decompose_88_aarch64_asm_mc: 391f21da7b8ac21429fb56ac1ac939028f764c11f53c59202325b10a95e55535
+poly_decompose_88_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_decompose_88_avx2_asm
+  sha256:
+    mldsa_decompose88_mc: adaa0615a4a68f976694b73e9b35708547b162c8156e8d0c7b501aef613b82c5
+    mldsa_decompose88_tmc: bda98dd502107540aabf4d3d8f3e56c549986506f76e91ef00a673c18855d696
+poly_pointwise_montgomery_aarch64_asm:
+  arch: aarch64
+  function: mldsa_pointwise_montgomery_aarch64_asm
+  sha256:
+    mldsa_pointwise_mc: cdb1222f5f8912a953a99b11ad18c5572d1dd439fee7c6024796d60cfd84381e
+poly_pointwise_montgomery_rv32im_asm:
+  arch: riscv32
+  function: mldsa_poly_pointwise_montgomery_rv32im_asm
+  sha256:
+    mldsa_pointwise_montgomery_mc: e8be361b9c2b79d832d4f857efed835a88c7cb32c6358370ed2ae78b460b7049
+poly_use_hint_32_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_use_hint_32_aarch64_asm
+  sha256:
+    poly_use_hint_32_aarch64_asm_mc: d6961ba61dc57a3b20a549a82acfe1b6d13352c2bc92fb7058e986715c13f27d
+poly_use_hint_32_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_use_hint_32_avx2_asm
+  sha256:
+    poly_use_hint_32_avx2_asm_mc: f48fecdfaeda0786978d28394ef27e6fb4d9fdbf2f20c44e8e058dacadf5fa02
+    poly_use_hint_32_avx2_asm_tmc: 632ab130d4df86380ba9e43cea5c8540b2661ed02752e30e823ac39d149d6111
+poly_use_hint_88_aarch64_asm:
+  arch: aarch64
+  function: mldsa_poly_use_hint_88_aarch64_asm
+  sha256:
+    poly_use_hint_88_aarch64_asm_mc: 5c29615045d43530b38781d964a5727fb325f7d0853c9c3901a3e877d772afaf
+poly_use_hint_88_avx2_asm:
+  arch: x86_64
+  function: mldsa_poly_use_hint_88_avx2_asm
+  sha256:
+    poly_use_hint_88_avx2_asm_mc: a7b4bab72cd0a4a324e919b4619495e5942ec555ca32aeb98829bfaf11a82754
+    poly_use_hint_88_avx2_asm_tmc: 415b4228f948c21e3d8d6edfa3d78d6b703f4d5ad0ed23c0c6ae374ef0279afa
+polyvecl_pointwise_acc_montgomery_l4_aarch64_asm:
+  arch: aarch64
+  function: mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
+  sha256:
+    mldsa_pointwise_acc_l4_mc: e6f619d4700c1047c49f79238aae54dced7dbc7471e2adc2c63c47ee2d6c7b9d
+polyvecl_pointwise_acc_montgomery_l5_aarch64_asm:
+  arch: aarch64
+  function: mldsa_polyvecl_pointwise_acc_montgomery_l5_aarch64_asm
+  sha256:
+    mldsa_pointwise_acc_l5_mc: ab2113ffd6168f76276c6db017fa26b71461a0d52b2ae3e05e4dfaf69451f65b
+polyvecl_pointwise_acc_montgomery_l7_aarch64_asm:
+  arch: aarch64
+  function: mldsa_polyvecl_pointwise_acc_montgomery_l7_aarch64_asm
+  sha256:
+    mldsa_pointwise_acc_l7_mc: e8a84bb24548c860f90426e3dd674983b33642fc60d5add1ff1e4094ea81ac89
+polyz_unpack_17_aarch64_asm:
+  arch: aarch64
+  function: mldsa_polyz_unpack_17_aarch64_asm
+  sha256:
+    mldsa_polyz_unpack_17_mc: 9a850ecbd913fcde8cc1574399a6ada1256e44a63122af04e5be1373c37ed75f
+polyz_unpack_17_avx2_asm:
+  arch: x86_64
+  function: mldsa_polyz_unpack_17_avx2_asm
+  sha256:
+    mldsa_polyz_unpack_17_mc: 9630cec50471ee603eaf9cc14295aec560c3586e81dc34678145973e8d074390
+    mldsa_polyz_unpack_17_tmc: b44426f09702cd9327339d175decf160302cb685b1706247fc1c198113639034
+polyz_unpack_19_aarch64_asm:
+  arch: aarch64
+  function: mldsa_polyz_unpack_19_aarch64_asm
+  sha256:
+    mldsa_polyz_unpack_19_mc: f62993fef8a4ba95fd064214a560443451efb0b94804293b53edf57de743014f
+polyz_unpack_19_avx2_asm:
+  arch: x86_64
+  function: mldsa_polyz_unpack_19_avx2_asm
+  sha256:
+    mldsa_polyz_unpack_19_mc: 29e8c2f677f64b68c63ff3b2c5e5545503fc1dff67195485b6f58417aa24f31b
+    mldsa_polyz_unpack_19_tmc: 08b33b4d10fb6e4d1f5f48c43dbe014ce40a5ae534811bdd6a6eff557fa43e8c
+rej_uniform_aarch64_asm:
+  arch: aarch64
+  function: mldsa_rej_uniform_aarch64_asm
+  sha256:
+    mldsa_rej_uniform_mc: edccca831a7a96a28d33b8629ae057355aa9e24290e1c7cf5838c6fc2c58e8e7
+rej_uniform_avx2_asm:
+  arch: x86_64
+  function: mldsa_rej_uniform_avx2_asm
+  sha256:
+    mldsa_rej_uniform_mc: 4546d4a6301a32a67a6d01ccb8eae346b8d44a14796b695cd28d022ea0e6415b
+    mldsa_rej_uniform_tmc: 20b93e6e4cfa29a933252333e10a716c19ba3e997f974d788d3c16bb1eebc114
+rej_uniform_eta2_aarch64_asm:
+  arch: aarch64
+  function: mldsa_rej_uniform_eta2_aarch64_asm
+  sha256:
+    mldsa_rej_uniform_eta2_mc: 7954c78876d8583d09ebfd70fa6606477182b72d29c531bfbff59d72e74803cd
+rej_uniform_eta2_avx2_asm:
+  arch: x86_64
+  function: mldsa_rej_uniform_eta2_avx2_asm
+  sha256:
+    mldsa_rej_uniform_eta2_mc: 735d081f1de94bf5dcc2232cc78f6407b216505a2bb9c2450522f3aa28498ff1
+    mldsa_rej_uniform_eta2_tmc: ec0a6ec3dc6a8ade18a85729d159bbb231bcbaccded931378159459f8d2a07fa
+rej_uniform_eta4_aarch64_asm:
+  arch: aarch64
+  function: mldsa_rej_uniform_eta4_aarch64_asm
+  sha256:
+    mldsa_rej_uniform_eta4_mc: 37b8e65fff09707fcab0cb2a19336f64ce3d69c66f45b6886d24d5f3c6531414
+rej_uniform_eta4_avx2_asm:
+  arch: x86_64
+  function: mldsa_rej_uniform_eta4_avx2_asm
+  sha256:
+    mldsa_rej_uniform_eta4_mc: 6ff057e70fc95db6b2a1f699f26abfe518b71b241f13b1f27b760343a26cf844
+    mldsa_rej_uniform_eta4_tmc: 6e7a0807747d08d7c084f7c33f2fc69be197adda8f5e12d2603deaf5d188920b

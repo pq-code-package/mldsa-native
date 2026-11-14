@@ -1,0 +1,79 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_pointwise_montgomery_rv32im_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_poly_pointwise_montgomery_rv32im_asm MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_CORRECT
+  |- !a:int32 b:int32 x:(num -> int32) y:(num -> int32) pc:num stackpointer:int32
+      returnaddress:int32.
+       aligned 4 a
+       /\ aligned 4 b
+       /\ aligned 16 stackpointer
+       /\ aligned 4 returnaddress
+       /\ ALLPAIRS (nonoverlapping : int32 # num -> int32 # num -> bool)
+            [a, 1024; word_sub stackpointer (word 16 : int32), 16]
+            [(word pc : int32), LENGTH mldsa_pointwise_montgomery_mc; b, 1024]
+       /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 16 : int32), 16)
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_pointwise_montgomery_mc
+               /\ read PC s = (word pc : int32)
+               /\ read SP s = stackpointer
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [a; b] s
+               /\ (!i:num. i < 256 ==> abs (ival (x i)) < &94279698)
+               /\ (!i:num. i < 256 ==> abs (ival (y i)) < &94279698)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int32))) s = x i)
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add b (word (4 * i) : int32))) s = y i))
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ read SP s = stackpointer
+               /\ (!i:num.
+                    i < 256
+                    ==> (let zi:int32 =
+                            read (memory :> bytes32 (word_add a (word (4 * i) : int32))) s in
+                        (ival zi
+                        == mldsa_pointwise ((ival : int32 -> int) o x) ((ival : int32 -> int) o y)
+                             i) (mod &8380417)
+                        /\ abs (ival zi) < &8380417)))
+             (MAYCHANGE_REGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (a, 1024);
+                           memory :> bytes (word_sub stackpointer (word 16 : int32), 16)])
+
+theorem mldsa_poly_pointwise_montgomery_rv32im_asm MLDSA_POINTWISE_MONTGOMERY_SUBROUTINE_SAFE
+  |- ?f_events:(int32 -> int32 -> num -> int32 -> int32 -> (32 address_uarch_event) list).
+       !e:((32 address_uarch_event) list) a:int32 b:int32 pc:num stackpointer:int32
+        returnaddress:int32.
+         aligned 4 a
+         /\ aligned 4 b
+         /\ aligned 16 stackpointer
+         /\ aligned 4 returnaddress
+         /\ ALLPAIRS (nonoverlapping : int32 # num -> int32 # num -> bool)
+              [a, 1024; word_sub stackpointer (word 16 : int32), 16]
+              [(word pc : int32), LENGTH mldsa_pointwise_montgomery_mc; b, 1024]
+         /\ nonoverlapping (a, 1024) (word_sub stackpointer (word 16 : int32), 16)
+         ==> ensures riscv
+               (\s:riscvstate.
+                 aligned_bytes_loaded s (word pc : int32) mldsa_pointwise_montgomery_mc
+                 /\ read PC s = (word pc : int32)
+                 /\ read SP s = stackpointer
+                 /\ read RA s = returnaddress
+                 /\ C_ARGUMENTS [a; b] s
+                 /\ read events s = e)
+               (\s:riscvstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((32 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2
+                         = f_events b a pc (word_sub stackpointer (word 16 : int32)) returnaddress
+                      /\ memaccess_inbounds e2
+                           [a, 1024; b, 1024; word_sub stackpointer (word 16 : int32), 16]
+                           [a, 1024; word_sub stackpointer (word 16 : int32), 16]))
+               (\s:riscvstate s':riscvstate. T)

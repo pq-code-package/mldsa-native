@@ -41,12 +41,20 @@ $(OBJ): %.o : %.S
 	@echo "OBJDUMP: `$(OBJDUMP) --version`"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	cat $< | $(PREPROCESS) | $(SPLIT) | $(ASSEMBLE) -o $@ -
-	$(STRIP) $@
+	# Keep function symbols: check-binary matches each symbol's code against
+	# the proof's accepted byte list (proofs/hol_light/bind.yml).
+	$(STRIP) --strip-debug $@
 
 clean:; rm -f */*.o */*/*.o */*.correct */*.native
 
 HOLDIR ?= $(HOLLIGHTDIR)
 HOLLIGHT := $(HOLDIR)/hol.sh
+
+# The proofs run on stock HOL Light. A build with HOLTrace installed (see
+# ../hol_trace) changes the library and is for `hol-trace` only.
+ifneq ($(wildcard $(HOLDIR)/INSTALLED-HOLTrace),)
+$(error HOLDIR=$(HOLDIR) has HOLTrace installed; use stock HOL Light)
+endif
 
 BASE ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 

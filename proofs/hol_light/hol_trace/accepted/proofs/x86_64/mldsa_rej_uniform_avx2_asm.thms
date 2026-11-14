@@ -1,0 +1,147 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_rej_uniform_avx2_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_rej_uniform_avx2_asm MLDSA_REJ_UNIFORM_NOIBT_SUBROUTINE_CORRECT
+  |- !res:int64 buf:int64 table:int64 inlist:((24 word) list) pc:num stackpointer:int64
+      returnaddress:int64.
+       LENGTH inlist = 280
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (res, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (buf, 840)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (table, 2048)
+       /\ nonoverlapping (res, 1024) (buf, 840)
+       /\ nonoverlapping (res, 1024) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) (res, 1024)
+       /\ nonoverlapping (stackpointer, 8) (buf, 840)
+       /\ nonoverlapping (stackpointer, 8) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) ((word pc : int64), LENGTH mldsa_rej_uniform_tmc)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_rej_uniform_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [res; buf; table] s
+               /\ read (memory :> bytes (buf, 840)) s = num_of_wordlist inlist
+               /\ read (memory :> bytes (table, 2048)) s = num_of_wordlist mldsa_rej_uniform_table)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (let outlist:(int32 list) = SUB_LIST (0, 256) (REJ_SAMPLE inlist) in
+                  let outlen:num = LENGTH outlist in
+                  C_RETURN s = (word outlen : int64)
+                  /\ read (memory :> bytes (res, 4 * outlen)) s = num_of_wordlist outlist
+                  /\ (!i:num.
+                       i < outlen
+                       ==> val (read (memory :> bytes32 (word_add res (word (4 * i) : int64))) s)
+                           < 8380417)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (res, 1024)])
+
+theorem mldsa_rej_uniform_avx2_asm MLDSA_REJ_UNIFORM_NOIBT_SUBROUTINE_MEMSAFE
+  |- !res:int64 buf:int64 table:int64 inlist:((24 word) list) e:((64 address_uarch_event) list)
+      pc:num stackpointer:int64 returnaddress:int64.
+       LENGTH inlist = 280
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (res, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (buf, 840)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_tmc) (table, 2048)
+       /\ nonoverlapping (res, 1024) (buf, 840)
+       /\ nonoverlapping (res, 1024) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) (res, 1024)
+       /\ nonoverlapping (stackpointer, 8) (buf, 840)
+       /\ nonoverlapping (stackpointer, 8) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) ((word pc : int64), LENGTH mldsa_rej_uniform_tmc)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_rej_uniform_tmc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [res; buf; table] s
+               /\ read (memory :> bytes (buf, 840)) s = num_of_wordlist inlist
+               /\ read (memory :> bytes (table, 2048)) s = num_of_wordlist mldsa_rej_uniform_table
+               /\ read events s = e)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (?e2:((64 address_uarch_event) list).
+                    read events s = APPEND e2 e
+                    /\ memaccess_inbounds e2 [buf, 840; table, 2048; stackpointer, 8] [res, 1024]))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (res, 1024)])
+
+theorem mldsa_rej_uniform_avx2_asm MLDSA_REJ_UNIFORM_SUBROUTINE_CORRECT
+  |- !res:int64 buf:int64 table:int64 inlist:((24 word) list) pc:num stackpointer:int64
+      returnaddress:int64.
+       LENGTH inlist = 280
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (res, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (buf, 840)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (table, 2048)
+       /\ nonoverlapping (res, 1024) (buf, 840)
+       /\ nonoverlapping (res, 1024) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) (res, 1024)
+       /\ nonoverlapping (stackpointer, 8) (buf, 840)
+       /\ nonoverlapping (stackpointer, 8) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) ((word pc : int64), LENGTH mldsa_rej_uniform_mc)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_rej_uniform_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [res; buf; table] s
+               /\ read (memory :> bytes (buf, 840)) s = num_of_wordlist inlist
+               /\ read (memory :> bytes (table, 2048)) s = num_of_wordlist mldsa_rej_uniform_table)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (let outlist:(int32 list) = SUB_LIST (0, 256) (REJ_SAMPLE inlist) in
+                  let outlen:num = LENGTH outlist in
+                  C_RETURN s = (word outlen : int64)
+                  /\ read (memory :> bytes (res, 4 * outlen)) s = num_of_wordlist outlist
+                  /\ (!i:num.
+                       i < outlen
+                       ==> val (read (memory :> bytes32 (word_add res (word (4 * i) : int64))) s)
+                           < 8380417)))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (res, 1024)])
+
+theorem mldsa_rej_uniform_avx2_asm MLDSA_REJ_UNIFORM_SUBROUTINE_MEMSAFE
+  |- !res:int64 buf:int64 table:int64 inlist:((24 word) list) e:((64 address_uarch_event) list)
+      pc:num stackpointer:int64 returnaddress:int64.
+       LENGTH inlist = 280
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (res, 1024)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (buf, 840)
+       /\ nonoverlapping ((word pc : int64), LENGTH mldsa_rej_uniform_mc) (table, 2048)
+       /\ nonoverlapping (res, 1024) (buf, 840)
+       /\ nonoverlapping (res, 1024) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) (res, 1024)
+       /\ nonoverlapping (stackpointer, 8) (buf, 840)
+       /\ nonoverlapping (stackpointer, 8) (table, 2048)
+       /\ nonoverlapping (stackpointer, 8) ((word pc : int64), LENGTH mldsa_rej_uniform_mc)
+       ==> ensures x86
+             (\s:x86state.
+               bytes_loaded s (word pc : int64) mldsa_rej_uniform_mc
+               /\ read RIP s = (word pc : int64)
+               /\ read RSP s = stackpointer
+               /\ read (memory :> bytes64 stackpointer) s = returnaddress
+               /\ C_ARGUMENTS [res; buf; table] s
+               /\ read (memory :> bytes (buf, 840)) s = num_of_wordlist inlist
+               /\ read (memory :> bytes (table, 2048)) s = num_of_wordlist mldsa_rej_uniform_table
+               /\ read events s = e)
+             (\s:x86state.
+               read RIP s = returnaddress
+               /\ read RSP s = word_add stackpointer (word 8 : int64)
+               /\ (?e2:((64 address_uarch_event) list).
+                    read events s = APPEND e2 e
+                    /\ memaccess_inbounds e2 [buf, 840; table, 2048; stackpointer, 8] [res, 1024]))
+             (MAYCHANGE [RSP]
+             ,, MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (res, 1024)])
