@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794768662773,
+  "lastUpdate": 1794768685748,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -715521,6 +715521,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 204499,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "f4b62fa9d171b7671c676490e0133616283ded4d",
+          "message": "CI: Switch AArch64 runners to ubuntu-26.04-arm\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-15T15:54:18Z",
+          "tree_id": "d572d49e142dddaa588850470bdaa867f65894f6",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/f4b62fa9d171b7671c676490e0133616283ded4d"
+        },
+        "date": 1794768309308,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 72430,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 201845,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 74856,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 126688,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 324321,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 124041,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 207948,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 418903,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 204466,
             "unit": "cycles"
           }
         ]
