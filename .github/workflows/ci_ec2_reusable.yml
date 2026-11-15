@@ -74,6 +74,9 @@ on:
       cbmc_reduce_ram:
         type: boolean
         default: false
+      cbmc_all_configs:
+        type: boolean
+        default: true
     secrets:
       AWS_GITHUB_TOKEN:
         description: Token for registering EC2 runners and reading the nix cache
@@ -221,6 +224,7 @@ jobs:
           nix-verbose: ${{ inputs.verbose }}
           mldsa_parameter_set: ${{ inputs.cbmc_mldsa_parameter_set }}
           reduce_ram: ${{ inputs.cbmc_reduce_ram }}
+          all_configs: ${{ inputs.cbmc_all_configs }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
         if: ${{ inputs.slothy }}

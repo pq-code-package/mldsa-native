@@ -11,6 +11,10 @@ on:
     types: [ "opened", "synchronize" ]
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   base:
     name: Base

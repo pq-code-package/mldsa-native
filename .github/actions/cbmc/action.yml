@@ -24,6 +24,9 @@ inputs:
   reduce_ram:
     description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled"
     default: "false"
+  all_configs:
+    description: "Run all supported (data model, solver) configurations instead of only the default one"
+    default: "true"
   gh_token:
     description: Github access token to use
     required: true
@@ -61,10 +64,15 @@ runs:
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mldsa_parameter_set }}
           REDUCE_RAM: ${{ inputs.reduce_ram }}
+          ALL_CONFIGS: ${{ inputs.all_configs }}
           RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
           echo "::group::cbmc_$PARAMETER_SET"
           reduce_ram_flag=""
+          config_flags=""
+          if [ "$ALL_CONFIGS" = "true" ]; then
+            config_flags="--dm all --solver all"
+          fi
           data_dir="dev/cbmc"
           variant=""
           if [ "$REDUCE_RAM" = "true" ]; then
@@ -75,7 +83,7 @@ runs:
           # Write the results at their gh-pages path; see cbmc_publish.yml.
           result="$RESULTS_DIR/$data_dir/mldsa-$PARAMETER_SET.json"
           mkdir -p "$(dirname "$result")"
-          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$result" $reduce_ram_flag || cbmc_failed=true
+          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" $config_flags --per-proof-timeout 1800 --output-result-json "$result" $reduce_ram_flag || cbmc_failed=true
           echo "::endgroup::"
           python3 "$ACTION_PATH/report.py" \
             --results-json "$result" \
