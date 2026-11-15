@@ -6,8 +6,8 @@
 
 The coordinator stages the complete binaries directory, runs one worker in
 each selected Nix compiler shell, validates every shared object and split
-DWARF package, generates the manifest, and replaces binaries/ only after the
-whole staged tree passes.
+DWARF package for the default and reduced-RAM configurations, generates the
+manifest, and replaces binaries/ only after the whole staged tree passes.
 """
 
 import argparse
@@ -36,6 +36,12 @@ TOOLCHAINS = {
 
 LAYOUTS = ("multilevel", "multilevel-mono")
 OPTIMIZATIONS = (0, 2, 3)
+CONFIGURATIONS = {
+    "default": (),
+    "reduced-ram": ("-DMLD_CONFIG_REDUCE_RAM",),
+}
+ARTIFACTS_PER_TOOLCHAIN = len(CONFIGURATIONS) * len(LAYOUTS) * len(OPTIMIZATIONS)
+ARTIFACT_COUNT = len(TOOLCHAINS) * ARTIFACTS_PER_TOOLCHAIN
 PUBLIC_FUNCTIONS = (
     "keypair",
     "keypair_internal",
@@ -300,16 +306,30 @@ def compile_test_program(
     (work_dir / "run.log").write_text(output, encoding="utf-8")
 
 
+def artifact_relative_dir(configuration, layout, compiler_id, optimization):
+    path = Path(layout) / compiler_id / f"O{optimization}"
+    if configuration != "default":
+        path = Path(configuration) / path
+    return path
+
+
 def build_layout(
     *,
     root,
     stage,
     compiler_id,
     cc_name,
+    configuration,
     layout,
     optimization,
 ):
-    artifact_dir = stage / layout / compiler_id / f"O{optimization}"
+    relative_dir = artifact_relative_dir(
+        configuration,
+        layout,
+        compiler_id,
+        optimization,
+    )
+    artifact_dir = stage / relative_dir
     work_dir = artifact_dir / ".work"
     objects_dir = work_dir / "objects"
     intermediate_archive = work_dir / "libmldsa.a"
@@ -331,6 +351,7 @@ def build_layout(
         "-fPIC",
         *debug_prefix_flags,
     )
+    configuration_flags = CONFIGURATIONS[configuration]
 
     if layout == "multilevel":
         objects_dir.mkdir(parents=True, exist_ok=True)
@@ -338,7 +359,13 @@ def build_layout(
         build_dir = os.path.relpath(objects_dir, example)
         environment = os.environ.copy()
         environment["CC"] = cc_name
-        environment["CFLAGS"] = " ".join((f"-O{optimization}", *split_debug_flags))
+        environment["CFLAGS"] = " ".join(
+            (
+                f"-O{optimization}",
+                *split_debug_flags,
+                *configuration_flags,
+            )
+        )
         run(
             [
                 "make",
@@ -364,6 +391,7 @@ def build_layout(
                 *COMMON_FLAGS,
                 f"-O{optimization}",
                 *split_debug_flags,
+                *configuration_flags,
                 f"-I{example / 'mldsa_native'}",
                 "-c",
                 str(example / "mldsa_native_all.c"),
@@ -378,7 +406,7 @@ def build_layout(
 
     if not object_files or len(dwo_files) != len(object_files):
         raise BuildError(
-            f"{layout}/{compiler_id}/O{optimization} produced "
+            f"{configuration}/{layout}/{compiler_id}/O{optimization} produced "
             f"{len(object_files)} objects and {len(dwo_files)} DWO files"
         )
     if not all(path.is_file() for path in dwo_files):
@@ -436,9 +464,11 @@ def build_layout(
         work_dir=work_dir,
     )
 
-    output_prefix = Path("binaries") / layout / compiler_id / f"O{optimization}"
+    output_prefix = Path("binaries") / relative_dir
     return {
         "path": str(output_prefix / "libmldsa.so"),
+        "configuration": configuration,
+        "compile_defines": list(configuration_flags),
         "size_bytes": shared_object.stat().st_size,
         "sha256": sha256(shared_object),
         "debug": {
@@ -459,20 +489,27 @@ def build_layout(
 def worker(root, stage, compiler_id, cc_name):
     metadata_dir = stage / ".metadata"
     metadata_dir.mkdir(parents=True, exist_ok=True)
-    artifacts = {}
+    artifacts = {configuration: {} for configuration in CONFIGURATIONS}
 
     print(f"{compiler_id}: {first_line([cc_name, '--version'], cwd=root)}")
-    for optimization in OPTIMIZATIONS:
-        print(f"{compiler_id}: building O{optimization}", flush=True)
-        for layout in LAYOUTS:
-            artifacts.setdefault(layout, {})[f"O{optimization}"] = build_layout(
-                root=root,
-                stage=stage,
-                compiler_id=compiler_id,
-                cc_name=cc_name,
-                layout=layout,
-                optimization=optimization,
+    for configuration in CONFIGURATIONS:
+        for optimization in OPTIMIZATIONS:
+            print(
+                f"{compiler_id}: building {configuration} O{optimization}",
+                flush=True,
             )
+            for layout in LAYOUTS:
+                artifacts[configuration].setdefault(layout, {})[f"O{optimization}"] = (
+                    build_layout(
+                        root=root,
+                        stage=stage,
+                        compiler_id=compiler_id,
+                        cc_name=cc_name,
+                        configuration=configuration,
+                        layout=layout,
+                        optimization=optimization,
+                    )
+                )
 
     metadata = {
         "toolchain": {
@@ -490,7 +527,10 @@ def worker(root, stage, compiler_id, cc_name):
         json.dumps(metadata, indent=2) + "\n",
         encoding="utf-8",
     )
-    print(f"{compiler_id}: all six artifacts passed", flush=True)
+    print(
+        f"{compiler_id}: all {ARTIFACTS_PER_TOOLCHAIN} artifacts passed",
+        flush=True,
+    )
 
 
 def source_commit(root):
@@ -499,14 +539,20 @@ def source_commit(root):
 
 def build_manifest(root, stage):
     toolchains = {}
-    artifacts = {layout: {} for layout in LAYOUTS}
+    artifacts = {
+        configuration: {layout: {} for layout in LAYOUTS}
+        for configuration in CONFIGURATIONS
+    }
 
     for compiler_id in TOOLCHAINS:
         metadata_path = stage / ".metadata" / f"{compiler_id}.json"
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         toolchains[compiler_id] = metadata["toolchain"]
-        for layout in LAYOUTS:
-            artifacts[layout][compiler_id] = metadata["artifacts"][layout]
+        for configuration in CONFIGURATIONS:
+            for layout in LAYOUTS:
+                artifacts[configuration][layout][compiler_id] = metadata["artifacts"][
+                    configuration
+                ][layout]
 
     generated_at = (
         datetime.datetime.now(datetime.timezone.utc)
@@ -515,7 +561,7 @@ def build_manifest(root, stage):
         .replace("+00:00", "Z")
     )
     manifest = {
-        "schema_version": 3,
+        "schema_version": 4,
         "generated_at": generated_at,
         "source": {
             "commit": source_commit(root),
@@ -551,6 +597,21 @@ def build_manifest(root, stage):
         "matrix": {
             "layouts": list(LAYOUTS),
             "optimizations": [f"O{value}" for value in OPTIMIZATIONS],
+            "configurations": {
+                "default": {
+                    "path_prefix": "",
+                    "compile_defines": [],
+                    "description": "Default mldsa-native configuration.",
+                },
+                "reduced-ram": {
+                    "path_prefix": "reduced-ram",
+                    "compile_defines": ["-DMLD_CONFIG_REDUCE_RAM"],
+                    "description": (
+                        "Reduce RAM usage at the cost of signing and key "
+                        "generation performance."
+                    ),
+                },
+            },
             "compile_flags": [
                 "-g",
                 "-gdwarf-4",
@@ -559,8 +620,8 @@ def build_manifest(root, stage):
             ],
             "primary_artifact": "libmldsa.so",
             "debug_artifact": "libmldsa.so.dwp",
-            "artifact_count": 48,
-            "debug_artifact_count": 48,
+            "artifact_count": ARTIFACT_COUNT,
+            "debug_artifact_count": ARTIFACT_COUNT,
         },
         "link": {
             "intermediate_archive_command": (
@@ -612,7 +673,8 @@ def build_manifest(root, stage):
                 ),
                 "compile_command": (
                     "env CC=<cc> CFLAGS='-O<level> -g -gdwarf-4 "
-                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=.' "
+                    "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. "
+                    "<configuration-defines>' "
                     "make -C examples/multilevel_build "
                     "BUILD_DIR=<work>/objects AUTO=0 mldsa_objs -j2"
                 ),
@@ -628,6 +690,7 @@ def build_manifest(root, stage):
                 "compile_command": (
                     "<cc> <warning-flags> -O<level> -g -gdwarf-4 "
                     "-gsplit-dwarf -fPIC -fdebug-prefix-map=<root>=. "
+                    "<configuration-defines> "
                     "-Iexamples/monolithic_build_multilevel/mldsa_native "
                     "-c examples/monolithic_build_multilevel/"
                     "mldsa_native_all.c -o <work>/mldsa_native.o"
@@ -635,7 +698,10 @@ def build_manifest(root, stage):
                 "automatic_host_isa_flags": False,
             },
         },
-        "artifacts": artifacts,
+        "artifacts": artifacts["default"],
+        "additional_artifacts": {
+            "reduced-ram": artifacts["reduced-ram"],
+        },
         "validation": {
             "status": "passed",
             "checks_per_artifact": [
@@ -657,10 +723,15 @@ def build_manifest(root, stage):
 
 
 def iter_manifest_artifacts(manifest):
-    for layout in LAYOUTS:
-        for compiler_id in TOOLCHAINS:
-            for optimization in (f"O{value}" for value in OPTIMIZATIONS):
-                yield manifest["artifacts"][layout][compiler_id][optimization]
+    for configuration in CONFIGURATIONS:
+        if configuration == "default":
+            artifacts = manifest["artifacts"]
+        else:
+            artifacts = manifest["additional_artifacts"][configuration]
+        for layout in LAYOUTS:
+            for compiler_id in TOOLCHAINS:
+                for optimization in (f"O{value}" for value in OPTIMIZATIONS):
+                    yield artifacts[layout][compiler_id][optimization]
 
 
 def validate_tree(tree, manifest):
@@ -671,9 +742,10 @@ def validate_tree(tree, manifest):
         *tree.rglob("*.o"),
         *tree.rglob("*.dwo"),
     ]
-    if len(primary_files) != 48 or len(debug_files) != 48:
+    if len(primary_files) != ARTIFACT_COUNT or len(debug_files) != ARTIFACT_COUNT:
         raise BuildError(
-            f"expected 48 shared objects and 48 DWP files, found "
+            f"expected {ARTIFACT_COUNT} shared objects and "
+            f"{ARTIFACT_COUNT} DWP files, found "
             f"{len(primary_files)} and {len(debug_files)}"
         )
     if forbidden:
@@ -792,7 +864,10 @@ def coordinator(root):
         )
         raise
 
-    print("Rebuilt binaries/ from scratch: 48 shared objects and 48 DWP files.")
+    print(
+        f"Rebuilt binaries/ from scratch: {ARTIFACT_COUNT} shared objects "
+        f"and {ARTIFACT_COUNT} DWP files."
+    )
 
 
 def parse_args():
