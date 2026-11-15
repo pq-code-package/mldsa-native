@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794699922016,
+  "lastUpdate": 1794702258078,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -988364,6 +988364,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/bda8367b5adfc864e4a3d65dfe74a9a01050956b"
         },
         "date": 1794687711071,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2138686,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 16458776,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2399448,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732096,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 13911312,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4013872,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6525222,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 23678534,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6867004,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "c09daaa9239fc27b084443b4e0c93a2176fda36c",
+          "message": "bench: Enable Zbb for the Banana Pi F3\n\nThe SpacemiT X60 cores of the Banana Pi F3 implement the Zbb bit\nmanipulation extension (RV64GCVB), but the benchmark built for\nrv64imafdcv only. Add _zbb to -march, so that the compiler can use\nZbb instructions such as rori and andn, for example in the C Keccak.\n\nSo far, the -march given in archflags had no effect, because auto.mk\nappended -march=rv64gcv after it. With the previous commit, the\narchflags are respected, and the benchmark should describe the actual\nhardware.\n\nPorts pq-code-package/mlkem-native#1989.\nResolves #1540.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-14T21:23:28Z",
+          "tree_id": "1529014f4c14658b2ca1fff3075db79730eab3d2",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/c09daaa9239fc27b084443b4e0c93a2176fda36c"
+        },
+        "date": 1794700670914,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
