@@ -211,83 +211,86 @@ __contract__(
   ensures(forall(l0, 0, MLDSA_L, array_abs_bound(s1->vec[l0].coeffs, 0, MLDSA_N, MLDSA_ETA + 1)))
 )
 {
-/* Polynomial i of s1 || s2 uses nonce i.
- * Safety: The nonces are at most 14 (MLDSA_L + MLDSA_K - 1), and, hence, the
- * casts are safe. */
-#if defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-  unsigned int i;
-  for (i = 0; i < MLDSA_K; i++)
+  /* Polynomial i of s1 || s2 uses nonce i.
+   * Safety: The nonces are at most 14 (MLDSA_L + MLDSA_K - 1), and, hence, the
+   * casts are safe. */
+  if (mld_serial_fips202_only())
   {
-    mld_poly_uniform_eta(&s1->vec[0], seed, (uint8_t)(MLDSA_L + i));
-    mld_polyeta_pack(s2_packed + i * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    unsigned int i;
+    for (i = 0; i < MLDSA_K; i++)
+    {
+      mld_poly_uniform_eta(&s1->vec[0], seed, (uint8_t)(MLDSA_L + i));
+      mld_polyeta_pack(s2_packed + i * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    }
+    for (i = 0; i < MLDSA_L; i++)
+    {
+      mld_poly_uniform_eta(&s1->vec[i], seed, (uint8_t)i);
+      mld_polyeta_pack(s1_packed + i * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[i]);
+    }
   }
-  for (i = 0; i < MLDSA_L; i++)
+  else
   {
-    mld_poly_uniform_eta(&s1->vec[i], seed, (uint8_t)i);
-    mld_polyeta_pack(s1_packed + i * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[i]);
-  }
-#else /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
-/* Batches keep the nonce grouping of the serial path; s2 and don't-care
- * outputs go to s1 slots that are yet to be sampled. */
+    /* Batches keep the nonce grouping of the serial path; s2 and don't-care
+     * outputs go to s1 slots that are yet to be sampled. */
 #if MLD_CONFIG_PARAMETER_SET == 44
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 4, 5, 6, 7);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 4, 5, 6, 7);
+    mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 0, 1, 2, 3);
+    mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
 #elif MLD_CONFIG_PARAMETER_SET == 65
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 7, 8, 9, 10);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[0], &s1->vec[1],
-                          &s1->vec[2] /* irrelevant */, seed, 4, 5, 6,
-                          0xFF /* irrelevant */);
-  mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 7, 8, 9, 10);
+    mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[0], &s1->vec[1],
+                            &s1->vec[2] /* irrelevant */, seed, 4, 5, 6,
+                            0xFF /* irrelevant */);
+    mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
+    mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 0, 1, 2, 3);
+    mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
 #elif MLD_CONFIG_PARAMETER_SET == 87
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 11, 12, 13, 14);
-  mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 7 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 7, 8, 9, 10);
-  mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
-  mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[5], &s1->vec[6],
-                          &s1->vec[0] /* irrelevant */, seed, 4, 5, 6,
-                          0xFF /* irrelevant */);
-  mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
-  mld_polyeta_pack(s1_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[5]);
-  mld_polyeta_pack(s1_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[6]);
-  mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
-                          seed, 0, 1, 2, 3);
-  mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
-  mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
-  mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
-  mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 11, 12, 13, 14);
+    mld_polyeta_pack(s2_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s2_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s2_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s2_packed + 7 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 7, 8, 9, 10);
+    mld_polyeta_pack(s2_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s2_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s2_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s2_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
+    mld_poly_uniform_eta_4x(&s1->vec[4], &s1->vec[5], &s1->vec[6],
+                            &s1->vec[0] /* irrelevant */, seed, 4, 5, 6,
+                            0xFF /* irrelevant */);
+    mld_polyeta_pack(s1_packed + 4 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[4]);
+    mld_polyeta_pack(s1_packed + 5 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[5]);
+    mld_polyeta_pack(s1_packed + 6 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[6]);
+    mld_poly_uniform_eta_4x(&s1->vec[0], &s1->vec[1], &s1->vec[2], &s1->vec[3],
+                            seed, 0, 1, 2, 3);
+    mld_polyeta_pack(s1_packed + 0 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[0]);
+    mld_polyeta_pack(s1_packed + 1 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[1]);
+    mld_polyeta_pack(s1_packed + 2 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[2]);
+    mld_polyeta_pack(s1_packed + 3 * MLDSA_POLYETA_PACKEDBYTES, &s1->vec[3]);
 #endif /* MLD_CONFIG_PARAMETER_SET == 87 */
-#endif /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+  }
 }
 
 /**

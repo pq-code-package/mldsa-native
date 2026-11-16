@@ -23,7 +23,8 @@ CHECK_FUNCTION_CONTRACTS=mld_polyvec_matrix_expand
 ifdef MLD_CONFIG_REDUCE_RAM
 USE_FUNCTION_CONTRACTS=
 else
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_4x
+USE_FUNCTION_CONTRACTS=mld_serial_fips202_only
+USE_FUNCTION_CONTRACTS+=mld_poly_uniform_4x
 USE_FUNCTION_CONTRACTS+=mld_poly_permute_bitrev_to_custom_optional
 USE_FUNCTION_CONTRACTS+=mld_polymat_expand_entry
 USE_FUNCTION_CONTRACTS+=mld_zeroize

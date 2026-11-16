@@ -14,13 +14,16 @@ DEFINES +=
 INCLUDES +=
 
 REMOVE_FUNCTION_BODY +=
-UNWINDSET +=
+UNWINDSET += mld_sample_pack_s1_s2.0:8 # Largest value of MLDSA_K
+UNWINDSET += mld_sample_pack_s1_s2.1:7 # Largest value of MLDSA_L
 
 PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_sample_pack_s1_s2
-USE_FUNCTION_CONTRACTS=mld_poly_uniform_eta_4x
+USE_FUNCTION_CONTRACTS=mld_serial_fips202_only
+USE_FUNCTION_CONTRACTS+=mld_poly_uniform_eta
+USE_FUNCTION_CONTRACTS+=mld_poly_uniform_eta_4x
 USE_FUNCTION_CONTRACTS+=mld_polyeta_pack
 APPLY_LOOP_CONTRACTS=on
 USE_DYNAMIC_FRAMES=1
@@ -40,7 +43,7 @@ FUNCTION_NAME = mld_sample_pack_s1_s2
 # EXPENSIVE = true
 
 # This function is large enough to need...
-CBMC_OBJECT_BITS = 8
+CBMC_OBJECT_BITS = 10
 
 # If you require access to a file-local ("static") function or object to conduct
 # your proof, set the following (and do not include the original source file

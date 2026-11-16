@@ -74,52 +74,55 @@ void mld_polyvec_matrix_expand_eager(mld_polymat_eager *mat,
     mld_memcpy(seed_ext[j], rho, MLDSA_SEEDBYTES);
   }
 
-#if !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
-  /* Sample 4 matrix entries a time. */
-  for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
-  __loop__(
-    assigns(i, j, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
-    invariant(i <= (MLDSA_K * MLDSA_L / 4) * 4 && i % 4 == 0)
-    /* vectors 0 .. i / MLDSA_L are completely sampled */
-    invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
-      array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    /* last vector is sampled up to i % MLDSA_L */
-    invariant(forall(k2, i / MLDSA_L, i / MLDSA_L + 1, forall(l2, 0, i % MLDSA_L,
-      array_bound(mat->vec[k2].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
-    decreases((MLDSA_K * MLDSA_L / 4) * 4 - i)
-  )
+  if (!mld_serial_fips202_only())
   {
-    for (j = 0; j < 4; j++)
+    /* Sample 4 matrix entries a time. */
+    for (i = 0; i < (MLDSA_K * MLDSA_L / 4) * 4; i += 4)
     __loop__(
-      assigns(j, object_whole(seed_ext))
-      invariant(j <= 4)
-      decreases(4 - j)
+      assigns(i, j, object_whole(seed_ext), memory_slice(mat, sizeof(mld_polymat_eager)))
+      invariant(i <= (MLDSA_K * MLDSA_L / 4) * 4 && i % 4 == 0)
+      /* vectors 0 .. i / MLDSA_L are completely sampled */
+      invariant(forall(k1, 0, i / MLDSA_L, forall(l1, 0, MLDSA_L,
+        array_bound(mat->vec[k1].vec[l1].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+      /* last vector is sampled up to i % MLDSA_L */
+      invariant(forall(k2, i / MLDSA_L, i / MLDSA_L + 1, forall(l2, 0, i % MLDSA_L,
+        array_bound(mat->vec[k2].vec[l2].coeffs, 0, MLDSA_N, 0, MLDSA_Q))))
+      decreases((MLDSA_K * MLDSA_L / 4) * 4 - i)
     )
     {
-      uint8_t x = (uint8_t)((i + j) / MLDSA_L);
-      uint8_t y = (uint8_t)((i + j) % MLDSA_L);
+      for (j = 0; j < 4; j++)
+      __loop__(
+        assigns(j, object_whole(seed_ext))
+        invariant(j <= 4)
+        decreases(4 - j)
+      )
+      {
+        uint8_t x = (uint8_t)((i + j) / MLDSA_L);
+        uint8_t y = (uint8_t)((i + j) % MLDSA_L);
 
-      seed_ext[j][MLDSA_SEEDBYTES + 0] = y;
-      seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
+        seed_ext[j][MLDSA_SEEDBYTES + 0] = y;
+        seed_ext[j][MLDSA_SEEDBYTES + 1] = x;
+      }
+
+      mld_poly_uniform_4x(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
+                          &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
+                          &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
+                          &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L],
+                          seed_ext);
+      mld_poly_permute_bitrev_to_custom_optional(
+          &mat->vec[i / MLDSA_L].vec[i % MLDSA_L]);
+      mld_poly_permute_bitrev_to_custom_optional(
+          &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L]);
+      mld_poly_permute_bitrev_to_custom_optional(
+          &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L]);
+      mld_poly_permute_bitrev_to_custom_optional(
+          &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L]);
     }
-
-    mld_poly_uniform_4x(&mat->vec[i / MLDSA_L].vec[i % MLDSA_L],
-                        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L],
-                        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L],
-                        &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L],
-                        seed_ext);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[i / MLDSA_L].vec[i % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 1) / MLDSA_L].vec[(i + 1) % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 2) / MLDSA_L].vec[(i + 2) % MLDSA_L]);
-    mld_poly_permute_bitrev_to_custom_optional(
-        &mat->vec[(i + 3) / MLDSA_L].vec[(i + 3) % MLDSA_L]);
   }
-#else  /* !MLD_CONFIG_SERIAL_FIPS202_ONLY */
-  i = 0;
-#endif /* MLD_CONFIG_SERIAL_FIPS202_ONLY */
+  else
+  {
+    i = 0;
+  }
 
   /* Entries omitted by the batch-sampling are sampled individually. */
   while (i < MLDSA_K * MLDSA_L)
