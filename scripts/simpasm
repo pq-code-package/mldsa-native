@@ -14,7 +14,7 @@ import os
 import re
 
 
-def patchup_disasm(asm, cfify=False):
+def patchup_disasm(asm, cfify=False, label_prefix="L"):
     asm = asm.split("\n")
     indentation = 8
 
@@ -26,7 +26,7 @@ def patchup_disasm(asm, cfify=False):
 
     def make_label(lbl):
         if cfify:
-            return "L" + lbl + ":"
+            return label_prefix + lbl + ":"
         return lbl + ":"
 
     # Find first label
@@ -53,7 +53,7 @@ def patchup_disasm(asm, cfify=False):
             if cfify:
                 line = re.sub(
                     r"(0x)?[0-9a-fA-F]+\s+<(?P<label>[a-zA-Z0-9_]+)>",
-                    r"L\g<label>",
+                    label_prefix + r"\g<label>",
                     line,
                 )
             else:
@@ -270,7 +270,11 @@ def simplify(logger, args, asm_input, asm_output=None):
         disasm = run_cmd(cmd).stdout
 
         logger.debug("Patching up disassembly ...")
-        simplified = patchup_disasm(disasm, cfify=args.cfify)
+        # ELF assemblers treat only .L labels as temporary. For a branch to
+        # any other label, GNU as keeps an RV32 relocation even with
+        # `.option norelax`, and check-binary rejects relocated kernels.
+        label_prefix = ".L" if args.arch == "riscv32" else "L"
+        simplified = patchup_disasm(disasm, cfify=args.cfify, label_prefix=label_prefix)
 
         # Mark stack as non-executable for ELF targets.
         # This must be outside any preprocessor guards to ensure the

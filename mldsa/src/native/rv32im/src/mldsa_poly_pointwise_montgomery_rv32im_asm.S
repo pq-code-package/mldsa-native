@@ -73,6 +73,11 @@
     (!defined(MLD_CONFIG_NO_SIGN_API) || !defined(MLD_CONFIG_NO_VERIFY_API) || \
      defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)) &&              \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+        /* Without linker relaxation, GNU as resolves the branches to .L
+         * labels and leaves no relocations in the kernel. It uses the
+         * setting in force at the end of the file, so keep this outside
+         * the push/pop below. */
+        .option norelax
         /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
         .option push
         .option norvc
@@ -100,7 +105,7 @@ MLD_ASM_FN_SYMBOL(poly_pointwise_montgomery_rv32im_asm)
         addi s1, s1, 0x1
         addi t0, a0, 0x400
 
-Lmld_poly_pointwise_montgomery_rv32im_loop:
+.Lmld_poly_pointwise_montgomery_rv32im_loop:
         lw a2, 0x0(a0)
         lw a3, 0x0(a1)
         mul a4, a2, a3
@@ -111,7 +116,7 @@ Lmld_poly_pointwise_montgomery_rv32im_loop:
         sw a2, 0x0(a0)
         addi a0, a0, 0x4
         addi a1, a1, 0x4
-        bne a0, t0, Lmld_poly_pointwise_montgomery_rv32im_loop
+        bne a0, t0, .Lmld_poly_pointwise_montgomery_rv32im_loop
         lw s0, 0x0(sp)
         .cfi_restore s0
         lw s1, 0x4(sp)

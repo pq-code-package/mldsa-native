@@ -51,6 +51,11 @@
     defined(MLD_ARITH_BACKEND_RV32IM) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     defined(MLD_RV32IM_NEED_SLOWMUL)
+        /* Without linker relaxation, GNU as resolves the branches to .L
+         * labels and leaves no relocations in the kernel. It uses the
+         * setting in force at the end of the file, so keep this outside
+         * the push/pop below. */
+        .option norelax
         /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
         .option push
         .option norvc
@@ -90,7 +95,7 @@ MLD_ASM_FN_SYMBOL(ntt_rv32im_slowmul_asm)
         mv t2, a0
         addi t4, a0, 0x100
 
-Lmld_ntt_rv32im_p1_loop:
+.Lmld_ntt_rv32im_p1_loop:
         lw a2, 0x0(t2)
         lw a3, 0x100(t2)
         lw a4, 0x200(t2)
@@ -136,11 +141,11 @@ Lmld_ntt_rv32im_p1_loop:
         sw a4, 0x200(t2)
         sw a5, 0x300(t2)
         addi t2, t2, 0x4
-        bne t2, t4, Lmld_ntt_rv32im_p1_loop
+        bne t2, t4, .Lmld_ntt_rv32im_p1_loop
         mv t2, a0
         addi t3, a0, 0x400
 
-Lmld_ntt_rv32im_p2_outer:
+.Lmld_ntt_rv32im_p2_outer:
         lw s0, 0x0(a1)
         lw s1, 0x4(a1)
         lw s2, 0x8(a1)
@@ -150,7 +155,7 @@ Lmld_ntt_rv32im_p2_outer:
         addi a1, a1, 0x18
         addi t4, t2, 0x40
 
-Lmld_ntt_rv32im_p2_inner:
+.Lmld_ntt_rv32im_p2_inner:
         lw a2, 0x0(t2)
         lw a3, 0x40(t2)
         lw a4, 0x80(t2)
@@ -196,13 +201,13 @@ Lmld_ntt_rv32im_p2_inner:
         sw a4, 0x80(t2)
         sw a5, 0xc0(t2)
         addi t2, t2, 0x4
-        bne t2, t4, Lmld_ntt_rv32im_p2_inner
+        bne t2, t4, .Lmld_ntt_rv32im_p2_inner
         addi t2, t2, 0xc0
-        bne t2, t3, Lmld_ntt_rv32im_p2_outer
+        bne t2, t3, .Lmld_ntt_rv32im_p2_outer
         mv t2, a0
         addi t3, a0, 0x400
 
-Lmld_ntt_rv32im_p3_outer:
+.Lmld_ntt_rv32im_p3_outer:
         lw s0, 0x0(a1)
         lw s1, 0x4(a1)
         lw s2, 0x8(a1)
@@ -212,7 +217,7 @@ Lmld_ntt_rv32im_p3_outer:
         addi a1, a1, 0x18
         addi t4, t2, 0x10
 
-Lmld_ntt_rv32im_p3_inner:
+.Lmld_ntt_rv32im_p3_inner:
         lw a2, 0x0(t2)
         lw a3, 0x10(t2)
         lw a4, 0x20(t2)
@@ -258,13 +263,13 @@ Lmld_ntt_rv32im_p3_inner:
         sw a4, 0x20(t2)
         sw a5, 0x30(t2)
         addi t2, t2, 0x4
-        bne t2, t4, Lmld_ntt_rv32im_p3_inner
+        bne t2, t4, .Lmld_ntt_rv32im_p3_inner
         addi t2, t2, 0x30
-        bne t2, t3, Lmld_ntt_rv32im_p3_outer
+        bne t2, t3, .Lmld_ntt_rv32im_p3_outer
         mv t2, a0
         addi t3, a0, 0x400
 
-Lmld_ntt_rv32im_p4_outer:
+.Lmld_ntt_rv32im_p4_outer:
         lw s0, 0x0(a1)
         lw s1, 0x4(a1)
         lw s2, 0x8(a1)
@@ -317,7 +322,7 @@ Lmld_ntt_rv32im_p4_outer:
         sw a4, 0x8(t2)
         sw a5, 0xc(t2)
         addi t2, t2, 0x10
-        bne t2, t3, Lmld_ntt_rv32im_p4_outer
+        bne t2, t3, .Lmld_ntt_rv32im_p4_outer
         lw s0, 0x0(sp)
         .cfi_restore s0
         lw s1, 0x4(sp)
