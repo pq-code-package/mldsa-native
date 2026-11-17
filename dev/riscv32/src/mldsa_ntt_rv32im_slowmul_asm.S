@@ -51,6 +51,11 @@
     defined(MLD_ARITH_BACKEND_RV32IM) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     defined(MLD_RV32IM_NEED_SLOWMUL)
+        /* Without linker relaxation, GNU as resolves the branches to .L
+         * labels and leaves no relocations in the kernel. It uses the
+         * setting in force at the end of the file, so keep this outside
+         * the push/pop below. */
+        .option norelax
         /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
         .option push
         .option norvc
