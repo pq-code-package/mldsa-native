@@ -10,6 +10,8 @@ HARNESS_FILE = sample_pack_s1_s2_harness
 # Litani dashboard. It can be human-readable and contain spaces if you wish.
 PROOF_UID = mld_sample_pack_s1_s2_serial
 
+# This harness checks the serial-only path, which cannot use x4 batching.
+override undefine MLD_CONFIG_REDUCE_RAM_X4
 DEFINES += -DMLD_CONFIG_SERIAL_FIPS202_ONLY
 INCLUDES +=
 

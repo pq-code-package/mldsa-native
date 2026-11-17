@@ -612,41 +612,10 @@ class Tests:
         )
         return "Cross" if is_cross else "Native"
 
-    def _compile_schemes(self, test_type, opt):
-        """compile or cross compile with some extra environment variables and makefile arguments"""
+    def _build_flags(self, test_type, opt):
+        """Return the same compiler and linker flags for build and run targets."""
 
-        if opt is None:
-            opt_label = ""
-        elif opt is True:
-            opt_label = " opt"
-        else:
-            opt_label = " no_opt"
-
-        github_log(
-            f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
-        )
-
-        log = logger(test_type, "Compile", None, self.compile_mode(), opt)
-
-        extra_make_args = []
-        # Examples do not use OPT, but must honor explicit AUTO=0.
-        if test_type.is_example() is False:
-            extra_make_args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
-        elif self.args.auto is False:
-            extra_make_args += ["AUTO=0"]
-        if test_type.is_benchmark() is True:
-            extra_make_args += [f"CYCLES={self.args.cycles}"]
-        if self.args.extra_makefile and self.args.cross_prefix:
-            extra_make_args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
-        if test_type.make_dir() != "":
-            extra_make_args += ["-C", test_type.make_dir()]
-        extra_make_args += self.make_j()
-
-        target = test_type.make_target()
-        target = [target] if target != "" else []
-        args = ["make"] + target + extra_make_args
-
-        # Force static compilation for cross builds
+        # Run targets may rebuild a cached binary when its configuration changes.
         cflags = self.args.cflags
         if cflags is None:
             cflags = ""
@@ -683,6 +652,44 @@ class Tests:
 
             # Specify the backend file
             cflags += f' -DMLD_CONFIG_ARITH_BACKEND_FILE=\\"native/rv32im/{self.args.arith_riscv32_backend}.h\\"'
+
+        return cflags, ldflags
+
+    def _compile_schemes(self, test_type, opt):
+        """compile or cross compile with some extra environment variables and makefile arguments"""
+
+        if opt is None:
+            opt_label = ""
+        elif opt is True:
+            opt_label = " opt"
+        else:
+            opt_label = " no_opt"
+
+        github_log(
+            f"::group::compile {self.compile_mode()}{opt_label} {test_type.desc()}"
+        )
+
+        log = logger(test_type, "Compile", None, self.compile_mode(), opt)
+
+        extra_make_args = []
+        # Examples do not use OPT, but must honor explicit AUTO=0.
+        if test_type.is_example() is False:
+            extra_make_args += [f"OPT={int(opt)}", f"AUTO={int(self.args.auto)}"]
+        elif self.args.auto is False:
+            extra_make_args += ["AUTO=0"]
+        if test_type.is_benchmark() is True:
+            extra_make_args += [f"CYCLES={self.args.cycles}"]
+        if self.args.extra_makefile and self.args.cross_prefix:
+            extra_make_args += [f"CROSS_PREFIX={self.args.cross_prefix}"]
+        if test_type.make_dir() != "":
+            extra_make_args += ["-C", test_type.make_dir()]
+        extra_make_args += self.make_j()
+
+        target = test_type.make_target()
+        target = [target] if target != "" else []
+        args = ["make"] + target + extra_make_args
+
+        cflags, ldflags = self._build_flags(test_type, opt)
 
         env_update = {}
         if self.args.extra_makefile:
@@ -754,6 +761,11 @@ class Tests:
         env_update = {}
         if self.args.extra_makefile:
             env_update["EXTRA_MAKEFILE"] = self.args.extra_makefile
+        cflags, ldflags = self._build_flags(test_type, opt)
+        if cflags != "":
+            env_update["CFLAGS"] = cflags
+        if ldflags != "":
+            env_update["LDFLAGS"] = ldflags
         if self.args.cross_prefix:
             env_update["CROSS_PREFIX"] = self.args.cross_prefix
         cmd_prefix = self.cmd_prefix()
@@ -1176,6 +1188,9 @@ class Tests:
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
+            if self.args.reduce_ram_x4:
+                envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
+                envvars["MLD_CONFIG_REDUCE_RAM_X4"] = "1"
             scheme = SCHEME.from_mode(mldsa_parameter_set)
             num_proofs = len(proofs)
             for i, func in enumerate(proofs):
@@ -1252,6 +1267,9 @@ class Tests:
             envvars = {"MLD_CONFIG_PARAMETER_SET": mldsa_parameter_set}
             if self.args.reduce_ram:
                 envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
+            if self.args.reduce_ram_x4:
+                envvars["MLD_CONFIG_REDUCE_RAM"] = "1"
+                envvars["MLD_CONFIG_REDUCE_RAM_X4"] = "1"
             cmd = (
                 [
                     "python3",
@@ -1810,6 +1828,13 @@ def cli():
     cbmc_parser.add_argument(
         "--reduce-ram",
         help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled",
+        action="store_true",
+        default=False,
+    )
+
+    cbmc_parser.add_argument(
+        "--reduce-ram-x4",
+        help="Run CBMC proofs with MLD_CONFIG_REDUCE_RAM and MLD_CONFIG_REDUCE_RAM_X4 enabled",
         action="store_true",
         default=False,
     )

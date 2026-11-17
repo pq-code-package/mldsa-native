@@ -14,7 +14,7 @@ on:
 
 jobs:
   cbmc:
-    name: CBMC (ML-DSA-${{ matrix.parameter_set }}${{ matrix.reduce_ram && ', REDUCE_RAM' || '' }})
+    name: CBMC (ML-DSA-${{ matrix.parameter_set }}, ${{ matrix.variant }})
     if: ${{ github.repository_owner == 'pq-code-package' && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: 'read'
@@ -24,10 +24,10 @@ jobs:
       fail-fast: false
       matrix:
         parameter_set: [44, 65, 87]
-        reduce_ram: [false, true]
+        variant: [default, reduce-ram, reduce-ram-x4]
     uses: ./.github/workflows/ci_ec2_reusable.yml
     with:
-      name: CBMC (ML-DSA-${{ matrix.parameter_set }}${{ matrix.reduce_ram && ', REDUCE_RAM' || '' }})
+      name: CBMC (ML-DSA-${{ matrix.parameter_set }}, ${{ matrix.variant }})
       ec2_instance_type: c9g.4xlarge
       ec2_ami: ubuntu (aarch64)
       ec2_volume_size: 20
@@ -40,6 +40,7 @@ jobs:
       acvptest: false
       cbmc: true
       cbmc_mldsa_parameter_set: ${{ matrix.parameter_set }}
-      cbmc_reduce_ram: ${{ matrix.reduce_ram }}
+      cbmc_reduce_ram: ${{ matrix.variant == 'reduce-ram' }}
+      cbmc_reduce_ram_x4: ${{ matrix.variant == 'reduce-ram-x4' }}
     secrets:
       AWS_GITHUB_TOKEN: ${{ secrets.AWS_GITHUB_TOKEN }}

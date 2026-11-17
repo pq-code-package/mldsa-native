@@ -44,7 +44,7 @@ __contract__(
 );
 
 #if (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
-     defined(MLD_UNIT_TEST)) &&                                                \
+     defined(MLD_CONFIG_REDUCE_RAM_X4) || defined(MLD_UNIT_TEST)) &&           \
     !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY)
 #define mld_keccakf1600x4_extract_bytes \
   MLD_NAMESPACE(keccakf1600x4_extract_bytes)
@@ -97,7 +97,8 @@ __contract__(
     assigns(memory_slice(state, sizeof(uint64_t) * MLD_KECCAK_LANES * MLD_KECCAK_WAY))
 );
 #endif /* (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM || \
-          MLD_UNIT_TEST) && !MLD_CONFIG_SERIAL_FIPS202_ONLY */
+          MLD_CONFIG_REDUCE_RAM_X4 || MLD_UNIT_TEST) &&            \
+          !MLD_CONFIG_SERIAL_FIPS202_ONLY */
 
 #define mld_keccakf1600_permute MLD_NAMESPACE(keccakf1600_permute)
 MLD_INTERNAL_API

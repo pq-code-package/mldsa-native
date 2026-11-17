@@ -99,6 +99,7 @@ static int test_sign_extmu(void)
   uint8_t sk[MLDSA_SK_BYTES];
   uint8_t sig[MLDSA_SIG_BYTES];
   uint8_t mu[MLDSA_CRHBYTES];
+  uint8_t hint_count;
 
   CHECK_ERR(mld_sign_keypair(pk, sk), 0);
   CHECK(randombytes(mu, MLDSA_CRHBYTES) == 0);
@@ -106,6 +107,15 @@ static int test_sign_extmu(void)
 
   CHECK_SIGN_RC(mld_sign_signature_extmu(sig, mu, sk));
   CHECK(mld_sign_verify_extmu(sig, mu, pk) == 0);
+
+  /* Reject malformed hints in the first and last rows. The latter exercises
+   * the partial final matrix batch in ML-DSA-65 x4 mode. */
+  hint_count = sig[MLDSA_SIG_H_OFFSET + MLDSA_OMEGA];
+  sig[MLDSA_SIG_H_OFFSET + MLDSA_OMEGA] = MLDSA_OMEGA + 1;
+  CHECK(mld_sign_verify_extmu(sig, mu, pk) == MLD_ERR_INVALID_SIGNATURE);
+  sig[MLDSA_SIG_H_OFFSET + MLDSA_OMEGA] = hint_count;
+  sig[MLDSA_SIG_H_OFFSET + MLDSA_OMEGA + MLDSA_K - 1] = MLDSA_OMEGA + 1;
+  CHECK(mld_sign_verify_extmu(sig, mu, pk) == MLD_ERR_INVALID_SIGNATURE);
 
   return 0;
 }

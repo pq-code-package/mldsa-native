@@ -20,24 +20,15 @@ PROOF_SOURCES += $(PROOFDIR)/$(HARNESS_FILE).c
 PROJECT_SOURCES += $(SRCDIR)/mldsa/src/sign.c
 
 CHECK_FUNCTION_CONTRACTS=mld_verify_internal
-USE_FUNCTION_CONTRACTS=mld_unpack_pk_t1
-USE_FUNCTION_CONTRACTS+=mld_sig_unpack_hints
+USE_FUNCTION_CONTRACTS=mld_reconstruct_w1_row
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_unpack_z
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_chknorm
 USE_FUNCTION_CONTRACTS+=mld_H
 USE_FUNCTION_CONTRACTS+=mld_poly_challenge
 USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_expand
-USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_row
+USE_FUNCTION_CONTRACTS+=mld_polyvec_matrix_pointwise_montgomery_rows
 USE_FUNCTION_CONTRACTS+=mld_polyvecl_ntt
 USE_FUNCTION_CONTRACTS+=mld_poly_ntt
-USE_FUNCTION_CONTRACTS+=mld_poly_shiftl
-USE_FUNCTION_CONTRACTS+=mld_poly_pointwise_montgomery
-USE_FUNCTION_CONTRACTS+=mld_poly_sub
-USE_FUNCTION_CONTRACTS+=mld_poly_reduce
-USE_FUNCTION_CONTRACTS+=mld_poly_invntt_tomont
-USE_FUNCTION_CONTRACTS+=mld_poly_caddq
-USE_FUNCTION_CONTRACTS+=mld_poly_use_hint
-USE_FUNCTION_CONTRACTS+=mld_polyw1_pack
 USE_FUNCTION_CONTRACTS+=mld_zeroize
 USE_FUNCTION_CONTRACTS+=mld_ct_memcmp
 

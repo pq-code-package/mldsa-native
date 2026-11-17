@@ -30,7 +30,8 @@ typedef struct
                MLD_KECCAK_WAY]; /**< Interleaved 4-way Keccak state. */
 } mld_shake256x4ctx;
 
-#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
+#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_CONFIG_REDUCE_RAM_X4) || \
+    defined(MLD_UNIT_TEST)
 #define mld_shake128x4_absorb_once MLD_NAMESPACE(shake128x4_absorb_once)
 MLD_INTERNAL_API
 void mld_shake128x4_absorb_once(mld_shake128x4ctx *state, const uint8_t *in0,
@@ -72,7 +73,8 @@ void mld_shake128x4_init(mld_shake128x4ctx *state);
 #define mld_shake128x4_release MLD_NAMESPACE(shake128x4_release)
 MLD_INTERNAL_API
 void mld_shake128x4_release(mld_shake128x4ctx *state);
-#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_CONFIG_REDUCE_RAM_X4 || MLD_UNIT_TEST \
+        */
 
 #if !defined(MLD_CONFIG_NO_KEYPAIR_API) || \
     (!defined(MLD_CONFIG_NO_SIGN_API) &&   \

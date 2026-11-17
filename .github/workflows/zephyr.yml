@@ -39,11 +39,36 @@ jobs:
           acvp: true
           wycheproof: false
           examples: false
-          unit: false
+          unit: true
           stack: false
           alloc: false
           rng_fail: false
           check_namespace: false
+      - name: Armv8.1-M reduced-RAM x4 tests
+        if: matrix.target.board == 'mps3-an547'
+        uses: ./.github/actions/functest
+        env:
+          EXTRA_MAKEFILE: test/zephyr/platform.mk
+          ZEPHYR_TARGET: mps3-an547
+          ZEPHYR_FIPS202_BACKEND: fips202/native/armv81m/mve.h
+        with:
+          platform: zephyr
+          nix-shell: zephyr
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          cflags: -DMLD_CONFIG_REDUCE_RAM -DMLD_CONFIG_REDUCE_RAM_X4
+          opt: opt
+          func: true
+          kat: true
+          acvp: true
+          wycheproof: false
+          examples: false
+          unit: true
+          stack: false
+          alloc: true
+          rng_fail: false
+          check_namespace: false
+          extra_env: NUM_RANDOM_TESTS=1 NUM_RANDOM_TESTS_SLOW=1 QEMU_TIMEOUT=900
+          extra_args: --no-auto
       # Smoke only: QEMU doesn't model cycle counts (real numbers come from the
       # FPGA); this just exercises the bench build + run.
       - name: bench (smoke)
