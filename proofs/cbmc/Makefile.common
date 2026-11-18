@@ -715,6 +715,13 @@ ifdef MLD_CONFIG_REDUCE_RAM
 DEFINES += -DMLD_CONFIG_REDUCE_RAM
 endif
 
+# Proofs can set CBMC_NO_SKOLEM to keep CBMC from skolemizing asserted
+# quantifiers; see mldsa/src/cbmc.h.
+# TODO: Remove once https://github.com/diffblue/cbmc/issues/9387 is fixed.
+ifneq ($(strip $(CBMC_NO_SKOLEM)),)
+DEFINES += -DCBMC_NO_SKOLEM
+endif
+
 # Give visibility to all static functions
 DEFINES += -Dstatic=
 

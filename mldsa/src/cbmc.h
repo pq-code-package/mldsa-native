@@ -131,12 +131,34 @@
  * Prevent clang-format from corrupting CBMC's special ==> operator
  */
 /* clang-format off */
+/*
+ * TODO: Remove CBMC_NO_SKOLEM once CBMC no longer skolemizes asserted
+ * quantifiers that the SAT back end can expand; see
+ * https://github.com/diffblue/cbmc/issues/9387.
+ *
+ * With CBMC_NO_SKOLEM, every quantifier below is wrapped in a single-value
+ * exists, which CBMC does not skolemize when asserted. This keeps the SAT
+ * encoding of some proofs much smaller.
+ */
+#if defined(CBMC_NO_SKOLEM)
+#define CBMC_NO_SKOLEM_CORE(wvar, ...)                                         \
+  __CPROVER_exists                                                             \
+  {                                                                            \
+    uint32_t wvar;                                                             \
+    ((wvar) < 1u) && (__VA_ARGS__)                                             \
+  }
+#define CBMC_NO_SKOLEM_WRAP(...)                                               \
+  CBMC_NO_SKOLEM_CORE(CBMC_CONCAT(_cbmc_no_skolem, __COUNTER__), __VA_ARGS__)
+#else /* CBMC_NO_SKOLEM */
+#define CBMC_NO_SKOLEM_WRAP(...) (__VA_ARGS__)
+#endif /* !CBMC_NO_SKOLEM */
+
 #define CBMC_FORALL(qvar, qvar_lb, qvar_ub, predicate)                         \
-  __CPROVER_forall                                                             \
+  CBMC_NO_SKOLEM_WRAP(__CPROVER_forall                                         \
   {                                                                            \
     uint32_t qvar;                                                             \
     ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> (predicate) \
-  }
+  })
 
 #define CBMC_FORALL_BOUNDED(qvar, qvar_lb, qvar_ub, qvar_max, predicate)       \
   CBMC_FORALL(qvar, 0, qvar_max,                                               \
@@ -167,23 +189,38 @@
 #define CBMC_CONCAT_(left, right) left##right
 #define CBMC_CONCAT(left, right) CBMC_CONCAT_(left, right)
 
+/*
+ * CBMC_EAGER_AND(A, B) is equivalent to (A && B) for side-effect-free
+ * operands, but evaluates B unconditionally. With (A && B), CBMC guards the
+ * checks it generates for memory accesses in B by A, so they appear a second
+ * time with a guard that reads memory.
+ *
+ * With CBMC_NO_SKOLEM, array_bound uses CBMC_EAGER_AND, which keeps the SAT
+ * encoding much smaller. Otherwise, it uses (A && B): the eager form makes
+ * many proofs slower without CBMC_NO_SKOLEM.
+ */
+#define CBMC_EAGER_AND(A, B) ((((A) & (B))) != 0)
+#if defined(CBMC_NO_SKOLEM)
+#define CBMC_BOUND_AND(A, B) CBMC_EAGER_AND(A, B)
+#else
+#define CBMC_BOUND_AND(A, B) ((A) && (B))
+#endif
+
 #define array_bound_core(qvar, qvar_lb, qvar_ub, array_var,            \
                          value_lb, value_ub)                           \
-  __CPROVER_forall                                                     \
-  {                                                                    \
-    uint32_t qvar;                                                     \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==> \
-        (((int)(value_lb) <= ((array_var)[(qvar)])) &&                 \
-         (((array_var)[(qvar)]) < (int)(value_ub)))                    \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub,                                  \
+              CBMC_BOUND_AND(                                          \
+                  ((int)(value_lb) <= ((array_var)[(qvar)])),          \
+                  (((array_var)[(qvar)]) < (int)(value_ub))))
 
 #define array_bound_bounded_core(qvar, qvar_lb, qvar_ub, qvar_max,       \
                                  array_var, value_lb, value_ub)          \
   CBMC_FORALL(qvar, 0, qvar_max,                                         \
               ((uint32_t)(qvar_lb) <= (qvar) &&                          \
                (qvar) < (uint32_t)(qvar_ub)) ==>                         \
-                  (((int)(value_lb) <= ((array_var)[(qvar)])) &&         \
-                   (((array_var)[(qvar)]) < (int)(value_ub))))
+                  CBMC_BOUND_AND(                                        \
+                      ((int)(value_lb) <= ((array_var)[(qvar)])),        \
+                      (((array_var)[(qvar)]) < (int)(value_ub))))
 
 /*
  * array_bound(array_var, qvar_lb, qvar_ub, value_lb, value_ub) and
@@ -205,45 +242,28 @@
                           CBMC_ARRAY_BOUND, unused)(__VA_ARGS__)
 
 #define array_unchanged_core(qvar, qvar_lb, qvar_ub, array_var)                   \
-  __CPROVER_forall                                                                \
-  {                                                                               \
-    uint32_t qvar;                                                                \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>         \
-    ((array_var)[(qvar)]) == (old(* (int32_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                    \
+              (old(* (int32_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged(array_var, N) \
     array_unchanged_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_unchanged_u64_core(qvar, qvar_lb, qvar_ub, array_var)                \
-  __CPROVER_forall                                                                 \
-  {                                                                                \
-    uint32_t qvar;                                                                 \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>          \
-    ((array_var)[(qvar)]) == (old(* (uint64_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                     \
+              (old(* (uint64_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged_u64(array_var, N) \
     array_unchanged_u64_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_unchanged_u8_core(qvar, qvar_lb, qvar_ub, array_var)                \
-  __CPROVER_forall                                                                \
-  {                                                                               \
-    uint32_t qvar;                                                                \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>         \
-    ((array_var)[(qvar)]) == (old(* (uint8_t (*)[(qvar_ub)])(array_var)))[(qvar)] \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) ==                    \
+              (old(* (uint8_t (*)[(qvar_ub)])(array_var)))[(qvar)])
 
 #define array_unchanged_u8(array_var, N) \
     array_unchanged_u8_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
 
 #define array_zeroized_u8_core(qvar, qvar_lb, qvar_ub, array_var)              \
-  __CPROVER_forall                                                            \
-  {                                                                           \
-    uint32_t qvar;                                                            \
-    ((uint32_t) (qvar_lb) <= (qvar) && (qvar) < (uint32_t) (qvar_ub)) ==>     \
-    ((array_var)[(qvar)]) == 0                                                \
-  }
+  CBMC_FORALL(qvar, qvar_lb, qvar_ub, ((array_var)[(qvar)]) == 0)
 
 #define array_zeroized_u8(array_var, N) \
     array_zeroized_u8_core(CBMC_CONCAT(_cbmc_idx, __COUNTER__), 0, (N), (array_var))
