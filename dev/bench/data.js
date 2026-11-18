@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794775150948,
+  "lastUpdate": 1794983828633,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -965657,6 +965657,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 134286,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "187df7a6adc857319752d7af197f54ac9c14c60a",
+          "message": "RV32: Assemble kernels without relocations\n\nGNU as leaves an `R_RISCV_BRANCH` relocation on every branch in the\nRV32IM kernels. RISC-V linkers can relax code, which changes distances\nwithin a section, so the assembler leaves the final branch offsets to\nthe linker. Here every branch targets a loop label inside the same\nkernel and the assembled offset is already correct, but the relocation\nstill marks the kernel's bytes as something the linker may rewrite.\ncheck-binary, which the HOLTrace port adds, rejects any proved function\nthat a relocation applies to, and therefore every RV32 kernel.\n\nGNU as resolves such a branch itself only if relaxation is off and the\ntarget is an assembler-temporary label. On ELF these are `.L` labels.\nThe `L` labels that simpasm writes follow the Mach-O convention used for\nAArch64 and x86_64, and are ordinary local symbols on ELF. GNU as also\nuses the relaxation setting in force at the end of the file, not at the\nbranch: a `.option norelax` that a later `.option pop` undoes has no\neffect. With GNU as 2.46, any of these alone still leaves the\nrelocation in the pointwise kernel.\n\nAdd `.option norelax` to the five RV32 kernels, before their existing\n`.option push`, and make simpasm write `.L` labels for `--arch riscv32`.\nRelaxation then stays off to the end of the file. In the single-file\nbuild, mldsa_native_asm.S, only the other RV32 kernels follow on RV32.\nThe kernels contain no relaxable sequences. Their machine code is\nunchanged, and their `.text` has no relocations.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-18T03:33:07Z",
+          "tree_id": "bcc64f17e9119072e39f17c6cf01256ae9fd27af",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/187df7a6adc857319752d7af197f54ac9c14c60a"
+        },
+        "date": 1794983734955,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 46880,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 126217,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 47312,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 81622,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 203647,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 79321,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 133053,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 265593,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 134290,
             "unit": "cycles"
           }
         ]
