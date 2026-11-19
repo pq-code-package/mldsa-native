@@ -161,6 +161,8 @@ def affected(path, deps, proofs):
     """The proofs that a change to path can affect."""
     if path.endswith(".md") or path == HL + "s2n_bignum_allowlist.txt":
         return set()  # documentation; the allowlist is read by `check` only
+    if path == HL + "deps.yml":
+        return set()  # generated map; Extended CI checks it independently
     if path.startswith(EVERY_PROOF):
         return set(proofs)
     users = {p for p, d in deps.items() if path in d["files"]}
@@ -170,8 +172,7 @@ def affected(path, deps, proofs):
     for arch in ARCHS:
         if path.startswith(f"{HL}{arch}/"):
             return {p for p in proofs if p.startswith(arch + "/")}
-    # Anything else under proofs/hol_light, including deps.yml and these
-    # scripts, can affect every proof; files elsewhere none.
+    # Other files under proofs/hol_light can affect every proof.
     return set(proofs) if path.startswith(HL) else set()
 
 
