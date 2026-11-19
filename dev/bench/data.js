@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795120840607,
+  "lastUpdate": 1795121016217,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -886371,6 +886371,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 771642,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "468bec5325a157b01df46a6ce5c63c5dda4b5015",
+          "message": "CI: Merge partial CBMC results into complete baselines\n\nMerge queues previously ran every proof and uploaded six complete result\nartifacts:\n\n- `cbmc-results-mldsa-44` contained `dev/cbmc/mldsa-44.json`.\n- `cbmc-results-mldsa-65` contained `dev/cbmc/mldsa-65.json`.\n- `cbmc-results-mldsa-87` contained `dev/cbmc/mldsa-87.json`.\n- Each reduced-RAM artifact had the suffix `-reduce-ram` and stored\n  its corresponding JSON under `dev/cbmc-reduce-ram`.\n\nPublication copied these files directly onto gh-pages, where PR reports\nread them as the baseline.\n\nUse the changed-file selector from the preceding commit for merge\ngroups. Compare each group with its target branch, not with\n`merge_group.base_sha`. That SHA is the group's parent commit, which for\na queued pull request is the group ahead of it. GitHub can land several\ngroups in one push, and the publisher then reads only the last group's\nrun, so that run must cover every pull request it lands.\n\nKeep the artifact names and file layout. A parameter set without\nselected proofs now has no artifact, and the JSON in the others may\ncontain results for fewer proofs.\n\nMove publication from inline workflow shell into\n`.github/actions/cbmc/publish`, and check out the landed commit with\nfull history beside gh-pages. Add `merge PUBLISHED CURRENT`, which\nupdates the first JSON in place. Proof names in `CURRENT` identify the\nruntime and failure records to replace. Retain other current proofs,\nremove records for proof directories no longer present, and recompute\nthe summary. Add the landed commit to each new record as\n`source_commit`; retain it on old records.\n\nPublication must not get stuck, because the baseline only feeds the\nruntime comparisons in PR reports:\n\n- A delayed publisher, such as a re-run of a failed job, finds records\n  from a later commit. It leaves those proofs unchanged. It also keeps\n  records for proofs that its older tree lacks, so it cannot drop\n  proofs that later commits added. It may re-add a proof that a later\n  commit deleted; the next in-order publisher removes it again.\n- Records without `source_commit`, including the whole current\n  baseline, count as older than any new result. The first partial\n  result therefore merges like any other.\n- Records from a commit that is neither an ancestor nor a descendant\n  of the landed commit, for example after `main` was rewritten, are\n  replaced with a warning.\n- A missing baseline file is recreated from the current result.\n\nFetch the latest gh-pages snapshot before merging. If another publisher\nwins the push race, discard the local merge, fetch the new snapshot,\nrecompute, and try again, up to five attempts. Do not rebase a JSON diff\ncalculated from an older snapshot.\n\nQueue publish runs with `concurrency.queue: max`. The default keeps one\npending run and cancels older pending ones, which would lose that\ncommit's partial results. actionlint 1.7.12 does not know the `queue`\nkey yet, so ignore that error for `cbmc_publish.yml`.\n\nA publication can still fail for good: when the landed commit has no\nmerge-queue run, which previously only warned, or when it loses all five\npush attempts. Later publishers do not repair this, because they rerun\nonly their own affected proofs. Re-run the failed job while the\nmerge-queue artifacts still exist (7 days).\n\n`echo-proof-uid` passed `PROOF_UID` to the shell unquoted. For the two\nUIDs with parentheses, such as `mld_keccakf1600_extract_bytes (big\nendian)`, the shell reported a syntax error and make failed, so `merge`\ncould not list the current proofs. Print the UID with `printf` and\ndouble quotes instead.\n\nFormat and lint `merge` with ruff.\n\nPorts https://github.com/pq-code-package/mlkem-native/pull/2004\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-19T17:19:23Z",
+          "tree_id": "56b613fd5c2cffb7dce41668f1471e3a36b04040",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/468bec5325a157b01df46a6ce5c63c5dda4b5015"
+        },
+        "date": 1795121012602,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 269769,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 769314,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 268660,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 462391,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 1230711,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 447695,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 792816,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1695252,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 768373,
             "unit": "cycles"
           }
         ]
