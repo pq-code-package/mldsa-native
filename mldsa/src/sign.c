@@ -27,6 +27,12 @@
  *   National Institute of Standards and Technology
  *   https://csrc.nist.gov/files/pubs/fips/204/final/docs/fips-204-potential-updates.xlsx
  *
+ * - [KLS17]
+ *   A Concrete Treatment of Fiat-Shamir Signatures in the Quantum Random-Oracle
+ *   Model
+ *   Kiltz, Lyubashevsky, Schaffner
+ *   https://eprint.iacr.org/2017/916
+ *
  * - [Round3_Spec]
  *   CRYSTALS-Dilithium Algorithm Specifications and Supporting Documentation
  *   (Version 3.1)
@@ -845,7 +851,13 @@ __contract__(
   /* @[FIPS204, Algorithm 7, lines 18+20] cs1 <- invNTT(c_hat o s1_hat) and
    * z <- y + cs1, followed by the line-23 norm check ||z||_inf >= GAMMA1 -
    * BETA. mld_compute_pack_z fuses all three per polynomial and, on success,
-   * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z. */
+   * packs z into sig; it returns MLD_ERR_FAIL if the norm check rejects z.
+   *
+   * Order: z is checked before the remaining checks. Once z is accepted,
+   * w - cs2 = Az - ct is a function of public data, so the results of the
+   * remaining checks can be revealed @[KLS17, Lemma 4.3]
+   * @[Round3_Spec, Appendix B]. That argument does not cover revealing them
+   * for attempts whose z is rejected. */
   ret = mld_compute_pack_z(sig, cp, s1hat, y, t, scratch_w);
   if (ret != 0)
   {
@@ -910,7 +922,8 @@ __contract__(
     /* Low-bits norm check (see block comment above): the line-23 check on
      * r0 = LowBits(w - cs2) holds via ||w0 - cs2||_inf < GAMMA2 - BETA. */
     w0_invalid = mld_poly_chknorm(&w0->vec[k], MLDSA_GAMMA2 - MLDSA_BETA);
-    /* Constant time: w0_invalid may be leaked - see comment for z_invalid. */
+    /* Constant time: w0_invalid may be leaked, as z has been accepted (see
+     * the ordering comment above). */
     MLD_CT_TESTING_DECLASSIFY(&w0_invalid, sizeof(uint32_t));
     if (w0_invalid)
     {
@@ -927,7 +940,8 @@ __contract__(
     /* @[FIPS204, Algorithm 7, line 28] reject when ||ct0||_inf >= GAMMA2 (the
      * second part, the OMEGA weight bound, is enforced by mld_pack_sig_h). */
     h_invalid = mld_poly_chknorm(scratch_w, MLDSA_GAMMA2);
-    /* Constant time: h_invalid may be leaked - see comment for z_invalid. */
+    /* Constant time: h_invalid may be leaked, as z has been accepted (see
+     * the ordering comment above). */
     MLD_CT_TESTING_DECLASSIFY(&h_invalid, sizeof(uint32_t));
     if (h_invalid)
     {

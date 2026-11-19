@@ -244,6 +244,17 @@ source code and documentation.
   - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x1_v84a_aarch64_asm.S)
   - [proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S](proofs/hol_light/aarch64/mldsa/keccak_f1600_x2_v84a_aarch64_asm.S)
 
+### `KLS17`
+
+* A Concrete Treatment of Fiat-Shamir Signatures in the Quantum Random-Oracle Model
+* Author(s):
+  - Eike Kiltz
+  - Vadim Lyubashevsky
+  - Christian Schaffner
+* URL: https://eprint.iacr.org/2017/916
+* Referenced from:
+  - [mldsa/src/sign.c](mldsa/src/sign.c)
+
 ### `KyberSlash`
 
 * KyberSlash: Exploiting secret-dependent division timings in Kyber implementations
