@@ -113,6 +113,14 @@
   - Stehlé, Damien
   url: https://pq-crystals.org/dilithium/data/dilithium-specification-round3-20210208.pdf
 
+- id: KLS17
+  name: "A Concrete Treatment of Fiat-Shamir Signatures in the Quantum Random-Oracle Model"
+  author:
+  - Kiltz, Eike
+  - Lyubashevsky, Vadim
+  - Schaffner, Christian
+  url: https://eprint.iacr.org/2017/916
+
 - id: SLOTHY_Paper
   name: "Fast and Clean: Auditable high-performance assembly via constraint solving"
   short: SLOTHY paper
