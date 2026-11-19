@@ -21,6 +21,9 @@ inputs:
   mldsa_parameter_set:
     description: "Security level for ML-DSA (2,3,5)"
     default: "2"
+  proofs:
+    description: Space-separated CBMC proof directories, or empty for all proofs
+    default: ""
   reduce_ram:
     description: "Run CBMC proofs with MLD_CONFIG_REDUCE_RAM enabled"
     default: "false"
@@ -60,6 +63,7 @@ runs:
           ACTION_PATH: ${{ github.action_path }}
           GH_TOKEN: ${{ inputs.gh_token }}
           PARAMETER_SET: ${{ inputs.mldsa_parameter_set }}
+          CBMC_PROOFS: ${{ inputs.proofs }}
           REDUCE_RAM: ${{ inputs.reduce_ram }}
           RESULTS_DIR: ${{ runner.temp }}/cbmc-results
         run: |
@@ -72,10 +76,25 @@ runs:
             data_dir="dev/cbmc-reduce-ram"
             variant="reduce-ram"
           fi
+          read -r -a proofs <<<"$CBMC_PROOFS"
+          proof_args=()
+          if [[ ${#proofs[@]} -gt 0 ]]; then
+            proof_args=(-p)
+          fi
+          for proof in "${proofs[@]}"; do
+            if ! [[ "$proof" =~ ^[a-zA-Z0-9_]+$ ]]; then
+              echo "::error::Invalid CBMC proof name: $proof"
+              exit 1
+            fi
+            proof_args+=("^${proof}$")
+          done
           # Write the results at their gh-pages path; see cbmc_publish.yml.
           result="$RESULTS_DIR/$data_dir/mldsa-$PARAMETER_SET.json"
           mkdir -p "$(dirname "$result")"
-          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" --dm all --solver all --per-proof-timeout 1800 --output-result-json "$result" $reduce_ram_flag || cbmc_failed=true
+          tests cbmc --mldsa-parameter-set "$PARAMETER_SET" \
+            --dm all --solver all --per-proof-timeout 1800 \
+            --output-result-json "$result" $reduce_ram_flag "${proof_args[@]}" \
+            || cbmc_failed=true
           echo "::endgroup::"
           python3 "$ACTION_PATH/report.py" \
             --results-json "$result" \

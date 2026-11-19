@@ -28,7 +28,16 @@ ProofResult = namedtuple(
 
 def get_args():
     parser = argparse.ArgumentParser(description="CBMC proof results reporter")
-    parser.add_argument("--results-json", required=True)
+    results = parser.add_mutually_exclusive_group(required=True)
+    results.add_argument("--results-json")
+    results.add_argument(
+        "--no-affected-proofs",
+        action="store_true",
+        help=(
+            "the pull request affects no proof for this parameter set; "
+            "replace an existing report instead of leaving stale results"
+        ),
+    )
     parser.add_argument(
         "--mldsa-parameter-set", required=True, choices=["44", "65", "87"]
     )
@@ -197,7 +206,7 @@ def is_default_result(result):
     return "dm" not in result and "solver" not in result
 
 
-def compute_total_runtime(data):
+def compute_total_runtime(data, selected_names=None):
     """Compute total runtime from successful default configurations."""
     if not data:
         return None
@@ -207,6 +216,7 @@ def compute_total_runtime(data):
         if r.get("status") not in ("failed", "omitted", "inconclusive")
         and "value" in r
         and is_default_result(r)
+        and (selected_names is None or r["name"] in selected_names)
     )
 
 
@@ -229,8 +239,9 @@ def build_comment(current, baseline, cfg):
     alerts.sort(key=sort_key)
 
     # Compute total runtimes and add as first row
-    cur_total = compute_total_runtime(current)
-    base_total = compute_total_runtime(baseline)
+    selected_names = {r["name"] for r in executed}
+    cur_total = compute_total_runtime(current, selected_names)
+    base_total = compute_total_runtime(baseline, selected_names)
     if base_total and base_total > 0:
         total_ratio = cur_total / base_total
         total_change = f"{(total_ratio - 1) * 100:+.1f}%"
@@ -281,8 +292,23 @@ def build_comment(current, baseline, cfg):
     return "\n".join(lines)
 
 
-def post_or_update_comment(pr_number, body, cfg):
-    """Post or update PR comment."""
+def build_no_proofs_comment(cfg):
+    """Build the PR comment for a parameter set without affected proofs."""
+    return "\n".join(
+        [
+            f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set}{cfg.tag_suffix} -->",
+            f"## CBMC Results (ML-DSA-{cfg.param_set}{cfg.title_suffix})",
+            "",
+            f"This pull request no longer affects any ML-DSA-{cfg.param_set} "
+            "CBMC proof.",
+            "",
+            f"<!-- {COMMENT_TAG}(end): mldsa-{cfg.param_set}{cfg.tag_suffix} -->",
+        ]
+    )
+
+
+def post_or_update_comment(pr_number, body, cfg, create=True):
+    """Post or update PR comment. Without `create`, only update."""
     tag = f"<!-- {COMMENT_TAG}(start): mldsa-{cfg.param_set}{cfg.tag_suffix} -->"
     result = subprocess.run(
         [
@@ -300,6 +326,9 @@ def post_or_update_comment(pr_number, body, cfg):
         if result.returncode == 0 and result.stdout.strip()
         else None
     )
+    if not existing_id and not create:
+        print("No existing comment to update")
+        return
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
         f.write(body)
@@ -343,12 +372,21 @@ def main():
     args.param_set = args.mldsa_parameter_set
     args.tag_suffix = f"-{args.variant}" if args.variant else ""
     args.title_suffix = f", {args.variant.upper()}" if args.variant else ""
+    pr_number = get_pr_number()
+
+    if args.no_affected_proofs:
+        if pr_number:
+            post_or_update_comment(
+                pr_number, build_no_proofs_comment(args), args, create=False
+            )
+        else:
+            print("Not a PR, skipping")
+        return
 
     with open(args.results_json) as f:
         current = json.load(f)
     baseline = fetch_baseline(args)
 
-    pr_number = get_pr_number()
     if pr_number:
         post_or_update_comment(pr_number, build_comment(current, baseline, args), args)
     else:

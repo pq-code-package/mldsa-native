@@ -71,6 +71,10 @@ on:
       cbmc_mldsa_parameter_set:
         type: string
         default: 44
+      cbmc_proofs:
+        type: string
+        description: Space-separated CBMC proof directories, or empty for all proofs
+        default: ''
       cbmc_reduce_ram:
         type: boolean
         default: false
@@ -220,6 +224,7 @@ jobs:
           nix-shell: cbmc
           nix-verbose: ${{ inputs.verbose }}
           mldsa_parameter_set: ${{ inputs.cbmc_mldsa_parameter_set }}
+          proofs: ${{ inputs.cbmc_proofs }}
           reduce_ram: ${{ inputs.cbmc_reduce_ram }}
           gh_token: ${{ secrets.AWS_GITHUB_TOKEN }}
       - name: SLOTHY
