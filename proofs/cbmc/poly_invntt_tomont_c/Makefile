@@ -27,7 +27,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3_smt_only \
-  LP64:bitwuzla
+  LP64:bitwuzla \
+  ILP32:z3_smt_only
 CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = mld_poly_invntt_tomont_c

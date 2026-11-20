@@ -35,6 +35,11 @@ USE_DYNAMIC_FRAMES=1
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3_no_bv_extract \
   LP64:cadical
+ifeq ($(MLD_CONFIG_PARAMETER_SET),87)
+CBMC_SUPPORTED_CONFIGS += ILP32:cadical
+else
+CBMC_SUPPORTED_CONFIGS += ILP32:z3_no_bv_extract
+endif
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = sign_keypair_internal

@@ -35,7 +35,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3_no_bv_extract \
-  LP64:cadical
+  LP64:cadical \
+  ILP32:z3_no_bv_extract
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = polyvec_matrix_pointwise_montgomery_row

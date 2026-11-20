@@ -36,6 +36,9 @@ USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+ifdef MLD_CONFIG_REDUCE_RAM
+CBMC_SUPPORTED_CONFIGS += ILP32:z3_no_bv_extract
+endif
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = compute_pack_t0_t1

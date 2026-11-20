@@ -46,6 +46,11 @@ USE_DYNAMIC_FRAMES=1
 
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = LP64:z3_no_bv_extract
+ifeq ($(MLD_CONFIG_PARAMETER_SET),44)
+ifdef MLD_CONFIG_REDUCE_RAM
+CBMC_SUPPORTED_CONFIGS += ILP32:cadical
+endif
+endif
 CBMC_DEFAULT_CONFIG = LP64:z3_no_bv_extract
 
 FUNCTION_NAME = sign_verify_internal
