@@ -11,6 +11,9 @@
       "pattern": "^https://holtrace\\.cr\\.yp\\.to"
     },
     {
+      "pattern": "^https?://cakeml\\.org([/:?#]|$)"
+    },
+    {
       "pattern": "^https://lib\\.mceliece\\.org"
     },
     {
