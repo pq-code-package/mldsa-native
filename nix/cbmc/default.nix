@@ -15,8 +15,9 @@ buildEnv {
   name = "pqcp-cbmc";
   paths =
     builtins.attrValues {
-      cbmc = cbmc.overrideAttrs (_: {
+      cbmc = cbmc.overrideAttrs (old: {
         version = "6.11.0";
+        patches = (old.patches or [ ]) ++ [ ./no-forall-skolemization.patch ];
         src = fetchFromGitHub {
           owner = "diffblue";
           repo = "cbmc";
