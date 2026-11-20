@@ -32,8 +32,6 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
   0xc4; 0x42; 0x7d; 0x58; 0xc0;
                            (* VPBROADCASTD (%_% ymm8) (%_% xmm8) *)
   0xc5; 0xf9; 0x6e; 0xe1;  (* VMOVD (%_% xmm4) (% ecx) *)
-  0xb9; 0x00; 0x6c; 0x7e; 0x00;
-                           (* MOV (% ecx) (Imm32 (word 8285184)) *)
   0x41; 0xb9; 0x80; 0x00; 0x00; 0x00;
                            (* MOV (% r9d) (Imm32 (word 128)) *)
   0xc4; 0xc1; 0x79; 0x6e; 0xf9;
@@ -46,37 +44,29 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
                            (* VMOVD (%_% xmm6) (% r10d) *)
   0xc4; 0xe2; 0x7d; 0x58; 0xf6;
                            (* VPBROADCASTD (%_% ymm6) (%_% xmm6) *)
-  0xc5; 0xf9; 0x6e; 0xd9;  (* VMOVD (%_% xmm3) (% ecx) *)
   0xc4; 0xe2; 0x7d; 0x58; 0xe4;
                            (* VPBROADCASTD (%_% ymm4) (%_% xmm4) *)
-  0xc4; 0xe2; 0x7d; 0x58; 0xdb;
-                           (* VPBROADCASTD (%_% ymm3) (%_% xmm3) *)
   0xc5; 0xfd; 0x6f; 0x07;  (* VMOVDQA (%_% ymm0) (Memop Word256 (%% (rdi,0))) *)
   0xc5; 0xfd; 0x6f; 0x0e;  (* VMOVDQA (%_% ymm1) (Memop Word256 (%% (rsi,0))) *)
-  0xc5; 0x5d; 0xfe; 0xd0;  (* VPADDD (%_% ymm10) (%_% ymm4) (%_% ymm0) *)
-  0xc4; 0xc1; 0x2d; 0x72; 0xd2; 0x07;
-                           (* VPSRLD (%_% ymm10) (%_% ymm10) (Imm8 (word 7)) *)
-  0xc4; 0x41; 0x2d; 0xe4; 0xd0;
-                           (* VPMULHUW (%_% ymm10) (%_% ymm10) (%_% ymm8) *)
-  0xc4; 0x62; 0x2d; 0x0b; 0xd7;
-                           (* VPMULHRSW (%_% ymm10) (%_% ymm10) (%_% ymm7) *)
-  0xc5; 0x7d; 0x66; 0xdb;  (* VPCMPGTD (%_% ymm11) (%_% ymm0) (%_% ymm3) *)
-  0xc4; 0x41; 0x25; 0xdf; 0xca;
-                           (* VPANDN (%_% ymm9) (%_% ymm11) (%_% ymm10) *)
-  0xc4; 0xc1; 0x1d; 0x72; 0xf2; 0x01;
-                           (* VPSLLD (%_% ymm12) (%_% ymm10) (Imm8 (word 1)) *)
-  0xc4; 0x41; 0x1d; 0xfe; 0xe2;
-                           (* VPADDD (%_% ymm12) (%_% ymm12) (%_% ymm10) *)
-  0xc4; 0xc1; 0x2d; 0x72; 0xf4; 0x05;
-                           (* VPSLLD (%_% ymm10) (%_% ymm12) (Imm8 (word 5)) *)
-  0xc4; 0x41; 0x2d; 0xfa; 0xd4;
-                           (* VPSUBD (%_% ymm10) (%_% ymm10) (%_% ymm12) *)
+  0xc5; 0x5d; 0xfe; 0xc8;  (* VPADDD (%_% ymm9) (%_% ymm4) (%_% ymm0) *)
+  0xc4; 0xc1; 0x35; 0x72; 0xd1; 0x07;
+                           (* VPSRLD (%_% ymm9) (%_% ymm9) (Imm8 (word 7)) *)
+  0xc4; 0x41; 0x35; 0xe4; 0xc8;
+                           (* VPMULHUW (%_% ymm9) (%_% ymm9) (%_% ymm8) *)
+  0xc4; 0x62; 0x35; 0x0b; 0xcf;
+                           (* VPMULHRSW (%_% ymm9) (%_% ymm9) (%_% ymm7) *)
+  0xc4; 0xc1; 0x25; 0x72; 0xf1; 0x01;
+                           (* VPSLLD (%_% ymm11) (%_% ymm9) (Imm8 (word 1)) *)
+  0xc4; 0x41; 0x25; 0xfe; 0xd9;
+                           (* VPADDD (%_% ymm11) (%_% ymm11) (%_% ymm9) *)
+  0xc4; 0xc1; 0x2d; 0x72; 0xf3; 0x05;
+                           (* VPSLLD (%_% ymm10) (%_% ymm11) (Imm8 (word 5)) *)
+  0xc4; 0x41; 0x2d; 0xfa; 0xd3;
+                           (* VPSUBD (%_% ymm10) (%_% ymm10) (%_% ymm11) *)
   0xc4; 0xc1; 0x2d; 0x72; 0xf2; 0x0b;
                            (* VPSLLD (%_% ymm10) (%_% ymm10) (Imm8 (word 11)) *)
   0xc4; 0xc1; 0x7d; 0xfa; 0xc2;
                            (* VPSUBD (%_% ymm0) (%_% ymm0) (%_% ymm10) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xc3;
-                           (* VPADDD (%_% ymm0) (%_% ymm0) (%_% ymm11) *)
   0xc5; 0xfd; 0x66; 0xc5;  (* VPCMPGTD (%_% ymm0) (%_% ymm0) (%_% ymm5) *)
   0xc5; 0xfd; 0xdf; 0xc1;  (* VPANDN (%_% ymm0) (%_% ymm0) (%_% ymm1) *)
   0xc5; 0xfd; 0x72; 0xf0; 0x01;
@@ -94,8 +84,7 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
   0x48; 0x83; 0xc0; 0x20;  (* ADD (% rax) (Imm8 (word 32)) *)
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
-  0x0f; 0x85; 0x75; 0xff; 0xff; 0xff;
-                           (* JNE (Imm32 (word 4294967157)) *)
+  0x75; 0x87;              (* JNE (Imm8 (word 135)) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
@@ -391,18 +380,15 @@ let A1_LANE_VAL_88 = prove(
    [MATCH_MP_TAC A1_LANE_88 THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
   MATCH_MP_TAC MOD_LT THEN MP_TAC(SPEC `val(a:int32)` A1_BOUND_88) THEN ASM_REWRITE_TAC[] THEN ARITH_TAC);;
 
-let WORD_IGT_THRESHOLD_88 = BITBLAST_RULE
-  `!a:int32. val a < 8380417 ==> (word_igt a (word 8285184:int32) <=> val a > 8285184)`;;
-
-let WRAP_A0_NEGATIVE_88 = BITBLAST_RULE
+let WRAP_A0_NONPOS_88 = BITBLAST_RULE
   `!a:int32. val a < 8380417 /\ val a > 8285184
-   ==> bit 31 (word_add (word_sub a (word 8380416:int32)) (word 4294967295:int32))`;;
+   ==> word_ile (word_sub a (word 8380416:int32)) (word 0)`;;
 
 let WORD_SUB_SIGN_BARE_88 = BITBLAST_RULE
   `!a:int32 b:int32. val b <= 8189952 /\ val a <= 8285184 ==>
    ((bit 31 (word_sub a b) \/ word_sub a b = word 0) <=> val a <= val b)`;;
 
-(* Sign / threshold helpers for tmp = a1' + delta*h (delta in {+1,-1}). *)
+(* Sign / threshold helpers for tmp = a1 + delta*h (delta in {+1,-1}). *)
 let WORD_ILT_0_SMALL = BITBLAST_RULE
   `!x:int32. val x <= 43 ==> ~(word_ilt x (word 0))`;;
 let WORD_IGT_43_BOUND = BITBLAST_RULE
@@ -544,11 +530,9 @@ let H1_RHS = prove(
 (*   m16    = high16(t * 11275)                                  (vpmulhuw)  *)
 (*   a1lane = ((m16 * 128) >> 14 + 1) >> 1   [bits (1,16)]       (vpmulhrsw) *)
 (*   a1     = zx a1lane                                                      *)
-(*   m      = (a > 8285184 ? -1 : 0)                            (vpcmpgtd)   *)
-(*   a1'    = a1 & ~m                                           (vpandn)     *)
-(*   a0     = a - a1*190464 + m   (190464 via the 3*/31*/2048 shift chain)   *)
+(*   a0     = a - a1*190464       (190464 via the 3*/31*/2048 shift chain)   *)
 (*   delta  = (a0 <= 0 ? -1 : +1)                                            *)
-(*   tmp    = a1' + delta*h                                                  *)
+(*   tmp    = a1 + delta*h                                                   *)
 (*   tmp2   = (tmp < 0 ? 43 : tmp)     (vpblendvb against 43; only tmp=-1    *)
 (*                                      reaches the negative selection)      *)
 (*   result = (tmp2 > 43 ? 0 : tmp2)            (vpcmpgtd 43, vpandn)        *)
@@ -564,13 +548,10 @@ let mldsa_use_hint_88_x86_asm = new_definition
                     (word_ushr (word_mul (word_sx m16 :int32) (word 128)) 14)
                     (word 1)) (1,16) :16 word in
    let a1 = word_zx a1lane :int32 in
-   let m:int32 = (if word_igt a (word 8285184) then word 4294967295
-                  else word 0) in
-   let a1' = word_and a1 (word_not m) in
-   let a0 = word_add (word_sub a (word_mul a1 (word 190464))) m in
+   let a0 = word_sub a (word_mul a1 (word 190464)) in
    let delta:int32 = word_or (word_neg(word(bitval(word_ile a0 (word 0)))))
                              (word 1) in
-   let tmp = word_add a1' (word_mul delta h) in
+   let tmp = word_add a1 (word_mul delta h) in
    let tmp2:int32 = if word_ilt tmp (word 0) then word 43 else tmp in
    let neg_mask:int32 = word_neg(word(bitval(word_igt tmp2 (word 43)))) in
    word_and tmp2 (word_not neg_mask)`;;
@@ -578,7 +559,8 @@ let mldsa_use_hint_88_x86_asm = new_definition
 (* ------------------------------------------------------------------------- *)
 (* Element correctness (value form): the per-lane x86 word model equals the  *)
 (* scalar code form for one coefficient, for val a < Q and val h <= 1.       *)
-(* Case split is wrap (a > 8285184 => a1 lane = 44, masked to 0) vs no-wrap; *)
+(* Case split is wrap (a > 8285184 => a1 lane = 44, clamped to 0, a0 <= 0)  *)
+(* vs no-wrap;                                                               *)
 (* the no-wrap case further splits on h and on the a0-sign delta.            *)
 (* ------------------------------------------------------------------------- *)
 let ELEMENT_CORRECT_88 = prove(
@@ -602,12 +584,9 @@ let ELEMENT_CORRECT_88 = prove(
     MATCH_MP_TAC A1_LANE_VAL_88 THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
   SUBGOAL_THEN `nv <= 44` ASSUME_TAC THENL
    [MP_TAC(SPEC `val(a:int32)` A1_BOUND_88) THEN ASM_MESON_TAC[]; ALL_TAC] THEN
-  SUBGOAL_THEN `word_igt (a:int32) (word 8285184:int32) <=> val a > 8285184`
-    SUBST1_TAC THENL
-   [MP_TAC(SPEC `a:int32` WORD_IGT_THRESHOLD_88) THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
   ASM_CASES_TAC `val(a:int32) > 8285184` THEN ASM_REWRITE_TAC[] THENL
   [
-    (* WRAP ZONE: nv = 44, a1 lane masked to 0. *)
+    (* WRAP ZONE: nv = 44, a0 = a - 8380416 <= 0. *)
     SUBGOAL_THEN `nv = 44` SUBST_ALL_TAC THENL
      [MP_TAC(SPEC `val(a:int32)` A1_WRAP_88) THEN
       ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN ASM_MESON_TAC[]; ALL_TAC] THEN
@@ -615,13 +594,10 @@ let ELEMENT_CORRECT_88 = prove(
      [REWRITE_TAC[GSYM VAL_EQ] THEN ASM_REWRITE_TAC[] THEN CONV_TAC WORD_REDUCE_CONV; ALL_TAC] THEN
     FIRST_X_ASSUM(fun th -> if concl th = `a1w:int32 = word 44` then SUBST_ALL_TAC th else failwith "no") THEN
     CONV_TAC NUM_REDUCE_CONV THEN
-    SUBGOAL_THEN `word_and (word 44:int32) (word_not (word 4294967295)) = word 0` SUBST1_TAC THENL
-     [CONV_TAC WORD_REDUCE_CONV; ALL_TAC] THEN
     SUBGOAL_THEN `word_mul (word 44:int32) (word 190464) = word 8380416` SUBST1_TAC THENL
      [CONV_TAC WORD_REDUCE_CONV; ALL_TAC] THEN
-    SUBGOAL_THEN `word_ile (word_add (word_sub (a:int32) (word 8380416)) (word 4294967295)) (word 0)` ASSUME_TAC THENL
-     [REWRITE_TAC[WORD_ILE_ZERO_32] THEN DISJ1_TAC THEN
-      MP_TAC(SPEC `a:int32` WRAP_A0_NEGATIVE_88) THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+    SUBGOAL_THEN `word_ile (word_sub (a:int32) (word 8380416)) (word 0)` ASSUME_TAC THENL
+     [MATCH_MP_TAC WRAP_A0_NONPOS_88 THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
     ASM_REWRITE_TAC[bitval] THEN CONV_TAC WORD_REDUCE_CONV THEN
     ASM_CASES_TAC `val(h:int32) = 0` THEN ASM_REWRITE_TAC[] THENL
      [SUBGOAL_THEN `h:int32 = word 0` SUBST1_TAC THENL
@@ -638,7 +614,7 @@ let ELEMENT_CORRECT_88 = prove(
        [MP_TAC(REWRITE_RULE[GSYM INT_OF_NUM_LT](ASSUME `val(a:int32) < 8380417`)) THEN INT_ARITH_TAC; ALL_TAC] THEN
       ASM_REWRITE_TAC[]]
   ;
-    (* NO-WRAP ZONE: mask = 0, a1' = a1 lane = nv <= 43. *)
+    (* NO-WRAP ZONE: a1 lane = nv <= 43. *)
     SUBGOAL_THEN `nv <= 43` ASSUME_TAC THENL
      [MP_TAC(SPEC `val(a:int32)` A1_BOUND_NOWRAP_88) THEN
       ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN ASM_MESON_TAC[]; ALL_TAC] THEN
@@ -998,7 +974,7 @@ let MLDSA_USE_HINT_88_EQUIV = prove(
 (* 88 framework + store-discharge + correctness chain.                       *)
 (* Loaded on top of the 88 program defs and the per-element scalar chain.    *)
 (* The YMM constant map is {ymm8=11275, ymm4=127, ymm7=128, ymm6=43,         *)
-(* ymm3=8285184, ymm5=0}; the a1<=43 reduction and the VPBLENDVB clamp are   *)
+(* ymm5=0}; the a1<=43 reduction and the VPBLENDVB clamp are                *)
 (* handled by UH88_STORE_DISCHARGE_TAC.                                      *)
 (* ========================================================================= *)
 
@@ -1029,9 +1005,9 @@ let TAIL_CLOSE_88 = prove
 
 (* Commutativity closer used after the surface rewrites line up the lane. *)
 let LANE_AC_CLOSE_88 = prove
- (`!d y m a:int32. word_add (word_mul d y) (word_and (word_not m) a) =
-                   word_add (word_and a (word_not m)) (word_mul d y)`,
-  REPEAT GEN_TAC THEN CONV_TAC WORD_BLAST);;
+ (`!d y a:16 word. word_add (word_mul d y) (word_zx a:int32) =
+                   word_add (word_zx a) (word_mul d y)`,
+  REWRITE_TAC[WORD_ADD_SYM]);;
 
 let WORD_ILT_45 = BITBLAST_RULE `!V:int32. val V <= 45 ==> ~(word_ilt V (word 0))`;;
 
@@ -1138,12 +1114,20 @@ let uh88_byte_relabel pre k m c =
                      c, `cc:byte`; pre, `pp:int256` ] tmpl in
   BITBLAST_RULE inst;;
 
+let UH88_ISU t = is_var t && (let v=fst(dest_var t) in String.length v>0 && v.[0]='_');;
+
+let UH88_IS_READ t = try fst(dest_const(fst(strip_comb t)))="read" with _->false;;
+
+let UH88_CHAINDEFS asl =
+  List.filter_map (fun (_,th)-> let c=concl th in
+    if is_eq c && UH88_ISU(rand c) && not(UH88_IS_READ(lhs c)) then Some th else None) asl;;
+
 let UH88_STORE_DISCHARGE_TAC : tactic =
   fun (asl,w) ->
     if not(is_eq w) || not(can(find_term(fun t->try fst(dest_const(fst(strip_comb t)))="simd8" with _->false)) w)
     then failwith "not store goal" else
-    let isu t = is_var t && (let v=fst(dest_var t) in String.length v>0 && v.[0]='_') in
-    let chaindefs = List.filter_map (fun (_,th)-> let c=concl th in if is_eq c && isu(rand c) then Some th else None) asl in
+    let isu = UH88_ISU in
+    let chaindefs = UH88_CHAINDEFS asl in
     let chain_syms = map SYM chaindefs in
     let collapse = TOP_DEPTH_CONV (WORD_SIMPLE_SUBWORD_CONV ORELSEC
                      GEN_REWRITE_CONV I [WORD_SUBWORD_AND] ORELSEC
@@ -1235,12 +1219,18 @@ let DUPLITS_88 = map (fun (n,c) -> prove(mk_eq(mk_comb(`word:num->int256`, mk_nu
   ["3423913227525323174502430081042878883520180111764122672559515536195711", `word 127:int32`;
    "303973398742897785767833851683137475682598667402680969552035729689816075", `word 11275:int32`;
    "3450873174198750916033945278531405488902228774061477969193842430181504", `word 128:int32`;
-   "1159277706957392885855153492006644031428092478786277755276056441389099", `word 43:int32`;
-   "223368118819536749293045209988780814485663464087451345989979032820788390912", `word 8285184:int32`];;
+   "1159277706957392885855153492006644031428092478786277755276056441389099", `word 43:int32`];;
 
 (* ------------------------------------------------------------------------- *)
 (* Loop body (one iteration).                                                *)
 (* ------------------------------------------------------------------------- *)
+
+(* Abbreviate the pre-blend YMM0 (after the VPADDD at body step 17), which
+   UH88_STORE_DISCHARGE_TAC expects as a single abbreviation variable. *)
+let ABBREV_YMM0_TAC : tactic = fun (asl,w) ->
+  let th = snd(find (fun (_,th) -> let c = concl th in
+    is_eq c && can (term_match [] `read YMM0 s`) (lhs c) && not(is_var(rand c))) asl) in
+  AUTO_ABBREV_TAC (rand(concl th)) (asl,w);;
 
 let MLDSA_POLY_USE_HINT_88_BODY_BLOCK_TAC : tactic =
   REPEAT STRIP_TAC THEN
@@ -1275,19 +1265,20 @@ let MLDSA_POLY_USE_HINT_88_BODY_BLOCK_TAC : tactic =
     ANTS_TAC THENL [ASM_ARITH_TAC; DISCH_THEN ACCEPT_TAC]; ALL_TAC] THEN
   (let step = X86_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC
    and simplify = SIMD_SIMPLIFY_TAC[] in
-   EVERY (map (fun n -> step [n] THEN simplify THEN ABBREV_BIG_TAC) (1--28))) THEN
+   EVERY (map (fun n -> step [n] THEN simplify THEN ABBREV_BIG_TAC THEN
+                        (if n = 17 then ABBREV_YMM0_TAC else ALL_TAC)) (1--25))) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
   REPEAT CONJ_TAC THEN
   TRY(REWRITE_TAC[ARITH_RULE `32 * (i + 1) = 32 * i + 32`] THEN CONV_TAC WORD_RULE) THEN
   TRY(X_GEN_TAC `b:num` THEN DISCH_TAC THEN ASM_CASES_TAC `b < i` THENL
        [UNDISCH_TAC `b:num < i` THEN
-        UNDISCH_TAC `!b. b < i ==> read (memory :> bytes256 (word_add a (word (32 * b)))) s28 = simd8 mldsa_use_hint_88_x86_asm (xb b) (yb b)` THEN
+        UNDISCH_TAC `!b. b < i ==> read (memory :> bytes256 (word_add a (word (32 * b)))) s25 = simd8 mldsa_use_hint_88_x86_asm (xb b) (yb b)` THEN
         MESON_TAC[];
         SUBGOAL_THEN `b:num = i` SUBST_ALL_TAC THENL
          [UNDISCH_TAC `b:num < i + 1` THEN UNDISCH_TAC `~(b:num < i)` THEN ARITH_TAC; ALL_TAC] THEN
         FIRST_X_ASSUM(fun th ->
           try let l,_ = dest_eq (concl th) in
-              if l = `read (memory :> bytes256 (word_add a (word (32 * i)))) s28`
+              if l = `read (memory :> bytes256 (word_add a (word (32 * i)))) s25`
               then SUBST1_TAC th else failwith "no"
           with _ -> failwith "no") THEN
         ABBREV_TAC `av:int256 = (xb:num->int256) i` THEN
@@ -1324,7 +1315,7 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN REWRITE_TAC[SOME_FLAGS] THEN
-  ENSURES_WHILE_PUP_TAC `32` `pc + 0x52` `pc + 0xd7`
+  ENSURES_WHILE_PUP_TAC `32` `pc + 0x44` `pc + 0xbb`
    `\i s.
       (read RDI s = word_add a (word(32 * i)) /\
        read RSI s = word_add h (word(32 * i)) /\
@@ -1333,7 +1324,6 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
        read YMM4 s = (word_duplicate (word 127:int32):int256) /\
        read YMM7 s = (word_duplicate (word 128:int32):int256) /\
        read YMM6 s = (word_duplicate (word 43:int32):int256) /\
-       read YMM3 s = (word_duplicate (word 8285184:int32):int256) /\
        read YMM5 s = (word 0:int256) /\
        (!b. b < 32 ==> read(memory :> bytes256(word_add h (word(32 * b)))) s = yb b) /\
        (!b. i <= b /\ b < 32
@@ -1348,7 +1338,7 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
   [
    REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0] THEN
    ENSURES_INIT_TAC "s0" THEN
-   X86_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC (1--17) THEN
+   X86_STEPS_TAC MLDSA_POLY_USE_HINT_88_EXEC (1--14) THEN
    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
    REWRITE_TAC DUPLITS_88 THEN
    REWRITE_TAC[ARITH_RULE `b < 0 <=> F`; LE_0] THEN ASM_REWRITE_TAC[]
