@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795172522581,
+  "lastUpdate": 1795172701163,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -374312,6 +374312,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 120126,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "george.steed@arm.com",
+            "name": "George Steed",
+            "username": "georges-arm"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "19cbd4261d72de5b34b8f1b6c2a0a28858feb20e",
+          "message": "AArch64: Pack rejection masks in rej_uniform_aarch64_asm\n\nThe main loop computes rejection masks for four vectors. Pack these\nmasks into byte lanes with TRN1 so that one UADDLV computes all four\nlookup indices and one CNT/UADDLV computes all four valid counts.\nExtract the results with UBFX. The sums fit within each byte, so\ncarries cannot cross byte boundaries.\n\nPropagate the updated assembly and update the HOL Light model to match.\n\nReduction in cycle counts for the rej_uniform_aarch64_asm kernel:\n\n    Neoverse V2:   -14.30%\n    Neoverse V3AE: -28.47%\n    Neoverse V3:   -18.74%\n    Neoverse N3:   -24.33%\n\nReduction in cycle counts for full benchmarks running on Neoverse V3:\n\n               Keypair    Sign  Verify\n    ML-DSA-44:  -2.46%  -0.26%  -1.33%\n    ML-DSA-65:  -2.47%  -0.59%  -1.55%\n    ML-DSA-87:  -2.25%  -0.79%  -2.24%\n\nSigned-off-by: George Steed <george.steed@arm.com>",
+          "timestamp": "2026-11-20T09:01:25Z",
+          "tree_id": "825330610ec5fd66f9ca89c5cab8d50c82a2ca0d",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/19cbd4261d72de5b34b8f1b6c2a0a28858feb20e"
+        },
+        "date": 1795172483021,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 43733,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 124644,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 45127,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 74807,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 199127,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 74607,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 123489,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 255536,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 119956,
             "unit": "cycles"
           }
         ]
