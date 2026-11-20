@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795149013008,
+  "lastUpdate": 1795149043643,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -675742,6 +675742,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 379642,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "cbc5ee29715007d05ac3d3584395d4b65ee193a8",
+          "message": "HOL-Light: Validate dependency map structure and paths\n\nLint reads the generated proof dependency map. Match the checks CBMC\nuses for proof coverage, ordering, list contents and local paths.\nRequire the proof source and assembly for each entry and continue to\ncheck the recorded s2n-bignum imports against the allowlist.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-20T00:14:57Z",
+          "tree_id": "b2f0e9ec4aa3a82309716aac860a4f778637c7ad",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/cbc5ee29715007d05ac3d3584395d4b65ee193a8"
+        },
+        "date": 1795149043083,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 131403,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 442428,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 141874,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 231973,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 694463,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 228786,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 372784,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 900049,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 379560,
             "unit": "cycles"
           }
         ]
