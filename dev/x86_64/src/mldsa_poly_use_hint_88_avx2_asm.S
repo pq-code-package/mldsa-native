@@ -59,38 +59,30 @@
  */
 
 // a aliased with a0
-.macro decompose88_avx2 a1, a, temp1, temp2, temp3
+.macro decompose88_avx2 a1, a, temp1, temp2
 // Compute a1 = round-(a / 190464), where 190464 = 2*GAMMA2 = 128*B
 // with B = 1488, and round-() denotes "round half down". This is
 // exact for 0 <= a < Q. It is computed as round-(ceil(a / 128) / B)
 // ≈ round(ceil(a / 128) * 11275 / 2^24), with 11275 = floor(2^24 / B):
-//   temp1 = ceil(a / 128) = floor((a + 127) / 2^7)   (vpaddd 127; vpsrld 7)
-//   temp1 = floor(temp1 * 11275 / 2^16)               (vpmulhuw by 11275)
-//   temp1 = round(temp1 / 2^8) via mulhrs(temp1, 2^7) (vpmulhrsw)
+//   a1 = ceil(a / 128) = floor((a + 127) / 2^7)   (vpaddd 127; vpsrld 7)
+//   a1 = floor(a1 * 11275 / 2^16)                 (vpmulhuw by 11275)
+//   a1 = round(a1 / 2^8) via mulhrs(a1, 2^7)      (vpmulhrsw)
 // See mld_poly_decompose_88_avx2() for the detailed argument.
-vpaddd  \a, %ymm4, \temp1
-vpsrld  $7, \temp1, \temp1
-vpmulhuw    %ymm8, \temp1, \temp1
-vpmulhrsw   %ymm7, \temp1, \temp1
+vpaddd  \a, %ymm4, \a1
+vpsrld  $7, \a1, \a1
+vpmulhuw    %ymm8, \a1, \a1
+vpmulhrsw   %ymm7, \a1, \a1
 
-// If a1 = 44, i.e. a > 87*GAMMA2, proceed as if a' = a - Q was
-// given instead. (For a = 87*GAMMA2 + 1 thus a' = -GAMMA2, we
-// still round it to 0 like other "wrapped around" cases.)
-
-// Check for wrap-around
-vpcmpgtd    %ymm3, \a, \temp2
-vpandn  \temp1, \temp2, \a1
+// No wrap-around correction: for a > 87*GAMMA2, a1 = 44 is reduced
+// to 0 below, and a0 <= 0 holds with or without it.
 
 // Compute remainder a0 = a - a1 * 2 * GAMMA2 = a - a1 * 190464
-vpslld  $1, \temp1, \temp3
-vpaddd  \temp1, \temp3, \temp3
-vpslld  $5, \temp3, \temp1
-vpsubd  \temp3, \temp1, \temp1
+vpslld  $1, \a1, \temp2
+vpaddd  \a1, \temp2, \temp2
+vpslld  $5, \temp2, \temp1
+vpsubd  \temp2, \temp1, \temp1
 vpslld  $11, \temp1, \temp1
 vpsubd  \temp1, \a, \a
-
-// If wrap-around is required, adjust a0 by -1
-vpaddd  \temp2, \a, \a
 .endm
 
 /* We follow the specification and the reference C implementation and check
@@ -100,8 +92,8 @@ vpaddd  \temp2, \a, \a
  */
 
 // a aliased with delta
-.macro use_hint88_avx2 b, a, h, a1, temp1, temp2, temp3
-decompose88_avx2 \a1, \a, \temp1, \temp2, \temp3
+.macro use_hint88_avx2 b, a, h, a1, temp1, temp2
+decompose88_avx2 \a1, \a, \temp1, \temp2
 
 // delta = (a0 <= 0) ? -1 : 1
 vpcmpgtd    %ymm5, \a, \a
@@ -115,7 +107,8 @@ vpaddd  \a1, \a, \b
 // b is in [-1, 44], so the per-dword sign bit and the per-byte
 // blend mask of vpblendvb coincide.
 vpblendvb   \b, %ymm6, \b, \b
-// If b overflowed above 43 (a1 == 43, delta == +1), set b = 0.
+// If b overflowed above 43 (a1 == 43, delta == +1, or a1 == 44,
+// delta == 0), set b = 0.
 vpcmpgtd    %ymm6, \b, \h
 vpandn  \b, \h, \b
 .endm
@@ -137,9 +130,6 @@ vpbroadcastd    %xmm8, %ymm8
 
 vmovd   %ecx, %xmm4
 
-/* 87 * ((Q-1) / 88) == 87 * GAMMA2, wrap-around threshold */
-movl    $8285184, %ecx
-
 /* round(x * 2^7 / 2^15) => round(x / 2^8), for f1 = round(f1'' / 2^8) */
 movl    $128, %r9d
 vmovd   %r9d, %xmm7
@@ -150,15 +140,13 @@ movl    $43, %r10d
 vmovd   %r10d, %xmm6
 vpbroadcastd    %xmm6, %ymm6
 
-vmovd   %ecx, %xmm3
 vpbroadcastd    %xmm4, %ymm4
-vpbroadcastd    %xmm3, %ymm3
 
 mld_poly_use_hint_88_avx2_asm_loop:
 vmovdqa (%rdi), %ymm0
 vmovdqa (%rsi), %ymm1
 
-use_hint88_avx2 %ymm0, %ymm0, %ymm1, %ymm9, %ymm10, %ymm11, %ymm12
+use_hint88_avx2 %ymm0, %ymm0, %ymm1, %ymm9, %ymm10, %ymm11
 
 vmovdqa %ymm0, (%rdi)
 addq    $32, %rdi

@@ -184,8 +184,8 @@ poly_use_hint_32_avx2_asm:
   arch: x86_64
   function: mldsa_poly_use_hint_32_avx2_asm
   sha256:
-    poly_use_hint_32_avx2_asm_mc: 4b6bea8f1608c85e2ca1ae7278f9f8d4c0193d339f4c2b4285501a91d5dba835
-    poly_use_hint_32_avx2_asm_tmc: 922d59038123f0994c9cc9f059cf0d48118a50daae270e27055c1a0658a9428e
+    poly_use_hint_32_avx2_asm_mc: b1e31ef9b6fa06b0ee84e5760efe69067d73cb043a5aee94dc79e0f45b52ad77
+    poly_use_hint_32_avx2_asm_tmc: 351ce32a0d828b2b1fc26c4f036be7f277639a2c5480dc64353738a4b88ffd99
 poly_use_hint_88_aarch64_asm:
   arch: aarch64
   function: mldsa_poly_use_hint_88_aarch64_asm
@@ -195,8 +195,8 @@ poly_use_hint_88_avx2_asm:
   arch: x86_64
   function: mldsa_poly_use_hint_88_avx2_asm
   sha256:
-    poly_use_hint_88_avx2_asm_mc: b8543785250829ad43c5d893772b5d9a9fea81ea9ae6f4bb48191463cfe7ad81
-    poly_use_hint_88_avx2_asm_tmc: caff5f2430bb7364a1700d294293d75d6e891ae9803078b63bed034b027abd56
+    poly_use_hint_88_avx2_asm_mc: 886b63c3b511e08a165b5495e4ea32d8e0d08a0371318bf11580264016552109
+    poly_use_hint_88_avx2_asm_tmc: 2ceed3f51b1d879b822274553d3c90b9adcdbc3145d44ed2769b4717a07ce8ae
 polyvecl_pointwise_acc_montgomery_l4_aarch64_asm:
   arch: aarch64
   function: mldsa_polyvecl_pointwise_acc_montgomery_l4_aarch64_asm
