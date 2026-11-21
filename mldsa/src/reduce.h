@@ -33,13 +33,11 @@
  *
  * @spec{Implements @[FIPS204, Algorithm 49, MontgomeryReduce].}
  *
- * @param a Input integer to be reduced, of absolute value smaller or equal
- *          to INT64_MAX - 2^31 * MLDSA_Q.
+ * @param a Input integer to be reduced, of absolute value smaller than
+ *          2^31 * MLDSA_Q.
  *
  * @return Integer congruent to a * R^-1 modulo MLDSA_Q, with absolute value
- *         <= |a| / 2^32 + MLDSA_Q / 2.
- *         In particular, if |a| < 2^31 * MLDSA_Q, the absolute value of the
- *         return value is < MLDSA_Q.
+ *         <= |a| / 2^32 + MLDSA_Q / 2, and in particular < MLDSA_Q.
  */
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int32_t mld_montgomery_reduce(int64_t a)

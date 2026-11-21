@@ -530,7 +530,7 @@ __contract__(
 /* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
    {
        ... your implementation ...
@@ -564,10 +564,13 @@ __contract__(
  * will be run on, you must use this option.
  */
 /* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+   #if !defined(__ASSEMBLER__)
+   #include "src/sys.h"
    static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    {
        ... your implementation ...
    }
+   #endif
 */
 
 /**
@@ -590,6 +593,11 @@ __contract__(
  * - T* v: Target pointer to free. May be NULL.
  * - T: Type of structure to be freed.
  * - N: Number of elements to be freed.
+ *
+ * If MLD_CONFIG_CONTEXT_PARAMETER is set, both macros receive the
+ * context as a fourth parameter, e.g. MLD_CUSTOM_ALLOC(v, T, N, context):
+ * - context: The context passed to the public API function, of type
+ *   MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @note Even if this option is set, some allocations further down
  * the call stack will still be made from the stack. Those will
@@ -622,7 +630,7 @@ __contract__(
 /* #define MLD_CONFIG_CUSTOM_MEMCPY
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
    {
        ... your implementation ...
@@ -644,7 +652,7 @@ __contract__(
 /* #define MLD_CONFIG_CUSTOM_MEMSET
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
    {
        ... your implementation ...
