@@ -707,6 +707,17 @@ class Tests:
             # Specify the backend file
             cflags += f' -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/aarch64/{self.args.fips202_aarch64_backend}.h\\"'
 
+        if self.args.fips202_x86_64_backend != "auto" and use_backend_selection:
+            # Make sure we're forcing x86_64 architecture
+            if " -DMLD_FORCE_X86_64" not in cflags:
+                cflags += " -DMLD_FORCE_X86_64"
+
+            # Enable native backend for FIPS202
+            cflags += " -DMLD_CONFIG_USE_NATIVE_BACKEND_FIPS202"
+
+            # Specify the backend file
+            cflags += f' -DMLD_CONFIG_FIPS202_BACKEND_FILE=\\"fips202/native/x86_64/{self.args.fips202_x86_64_backend}.h\\"'
+
         # Add RV32 arithmetic backend selection if specified and this is an OPT build
         if self.args.arith_riscv32_backend is not None and use_backend_selection:
             # Make sure we're forcing RV32 architecture
@@ -1458,7 +1469,23 @@ def cli():
         default="ALL",
     )
 
-    common_parser.add_argument(
+    # Each backend option selects MLD_CONFIG_FIPS202_BACKEND_FILE, so at most
+    # one of them can be given.
+    fips202_backend_group = common_parser.add_mutually_exclusive_group()
+    fips202_backend_group.add_argument(
+        "--fips202-x86_64-backend",
+        help="Select FIPS202 x86_64 backend",
+        choices=[
+            "auto",
+            "keccak_f1600_x1_avx512",
+            "keccak_f1600_x4_avx2",
+            "keccak_f1600_x4_avx512",
+        ],
+        default="auto",
+        type=str,
+    )
+
+    fips202_backend_group.add_argument(
         "--fips202-aarch64-backend",
         help="Select FIPS202 AArch64 backend",
         choices=[
