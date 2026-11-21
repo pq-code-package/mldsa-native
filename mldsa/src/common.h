@@ -29,11 +29,23 @@
 #endif
 
 #if defined(MLD_CONFIG_CT_TESTING_ENABLED) && !defined(__ASSEMBLER__)
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#define MLD_CT_USE_MSAN
+#endif
+#endif
+
+#if defined(MLD_CT_USE_MSAN)
+#include <sanitizer/msan_interface.h>
+#define MLD_CT_TESTING_SECRET(ptr, len) __msan_poison((ptr), (len))
+#define MLD_CT_TESTING_DECLASSIFY(ptr, len) __msan_unpoison((ptr), (len))
+#else
 #include <valgrind/memcheck.h>
 #define MLD_CT_TESTING_SECRET(ptr, len) \
   VALGRIND_MAKE_MEM_UNDEFINED((ptr), (len))
 #define MLD_CT_TESTING_DECLASSIFY(ptr, len) \
   VALGRIND_MAKE_MEM_DEFINED((ptr), (len))
+#endif
 #else /* MLD_CONFIG_CT_TESTING_ENABLED && !__ASSEMBLER__ */
 #define MLD_CT_TESTING_SECRET(ptr, len) \
   do                                    \
