@@ -496,7 +496,7 @@
 /* #define MLD_CONFIG_CUSTOM_ZEROIZE
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE void mld_zeroize(void *ptr, size_t len)
    {
        ... your implementation ...
@@ -521,7 +521,7 @@
 /* #define MLD_CONFIG_CUSTOM_RANDOMBYTES
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE int mld_randombytes(uint8_t *ptr, size_t len)
    {
        ... your implementation ...
@@ -555,10 +555,13 @@
  * will be run on, you must use this option.
  */
 /* #define MLD_CONFIG_CUSTOM_CAPABILITY_FUNC
+   #if !defined(__ASSEMBLER__)
+   #include "src/sys.h"
    static MLD_INLINE int mld_sys_check_capability(mld_sys_cap cap)
    {
        ... your implementation ...
    }
+   #endif
 */
 
 /**
@@ -581,6 +584,11 @@
  * - T* v: Target pointer to free. May be NULL.
  * - T: Type of structure to be freed.
  * - N: Number of elements to be freed.
+ *
+ * If MLD_CONFIG_CONTEXT_PARAMETER is set, both macros receive the
+ * context as a fourth parameter, e.g. MLD_CUSTOM_ALLOC(v, T, N, context):
+ * - context: The context passed to the public API function, of type
+ *   MLD_CONFIG_CONTEXT_PARAMETER_TYPE.
  *
  * @note Even if this option is set, some allocations further down
  * the call stack will still be made from the stack. Those will
@@ -615,7 +623,7 @@
 /* #define MLD_CONFIG_CUSTOM_MEMCPY
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE void *mld_memcpy(void *dest, const void *src, size_t n)
    {
        ... your implementation ...
@@ -637,7 +645,7 @@
 /* #define MLD_CONFIG_CUSTOM_MEMSET
    #if !defined(__ASSEMBLER__)
    #include <stdint.h>
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE void *mld_memset(void *s, int c, size_t n)
    {
        ... your implementation ...
@@ -713,7 +721,7 @@
  */
 /* #define MLD_CONFIG_KEYGEN_PCT_BREAKAGE_TEST
    #if !defined(__ASSEMBLER__)
-   #include "src/src.h"
+   #include "src/sys.h"
    static MLD_INLINE int mld_break_pct(void)
    {
        ... return 0/1 depending on whether PCT should be broken ...
@@ -772,8 +780,9 @@
  * Three optional, independent hooks into the ML-DSA signing rejection-sampling
  * loop. Each is enabled by defining the matching option, in which case the
  * integration must provide the corresponding function. If a hook needs
- * per-operation state, enable MLD_CONFIG_CONTEXT_PARAMETER; the context is then
- * appended as the last argument.
+ * per-operation state, enable MLD_CONFIG_CONTEXT_PARAMETER; each hook then
+ * receives the context passed to the public API function, of type
+ * MLD_CONFIG_CONTEXT_PARAMETER_TYPE, as its last argument (`ctxt` below).
  *
  * @warning This feature is experimental. Its scope, configuration and
  *          function signatures may change at any time, including after v2.
