@@ -14,16 +14,6 @@ needs "Library/isum.ml";;
 needs "s2n_bignum/common/misc.ml";;
 
 (* ------------------------------------------------------------------------- *)
-(* The pure forms of forward and inverse NTT with no reordering.             *)
-(* ------------------------------------------------------------------------- *)
-
-let pure_forward_ntt_mldsa = define
- `pure_forward_ntt_mldsa f k =
-    isum (0..127) (\j. f(2 * j + k MOD 2) *
-                       &1753 pow ((2 * k DIV 2 + 1) * j))
-    rem &8380417`;;
-
-(* ------------------------------------------------------------------------- *)
 (* Bit-reversing order as used in the standard/default order.                *)
 (* ------------------------------------------------------------------------- *)
 

@@ -6,15 +6,7 @@
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
 # pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
-# source: proofs/hol_light/common/mldsa_specs.ml 0307a710adc8117c459b7d23842d1e59edb4b6ffdc75e2423264f7c97f058dfc
-
-definition pure_forward_ntt_mldsa
-  |- pure_forward_ntt_mldsa
-     = (specification "pure_forward_ntt_mldsa" pure_forward_ntt_mldsa:((num -> int) -> num -> int).
-         !f:(num -> int) k:num.
-           pure_forward_ntt_mldsa f k
-           = isum (0..127) (\j:num. f (2 * j + k MOD 2) * &1753 pow ((2 * k DIV 2 + 1) * j))
-             rem &8380417)
+# source: proofs/hol_light/common/mldsa_specs.ml 29e55d80e671b31be6aa0a40a111373ee35031f28bdd4c3a74ec7443ab783c16
 
 definition bitreverse8
   |- bitreverse8
