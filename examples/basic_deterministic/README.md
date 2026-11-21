@@ -21,7 +21,7 @@ No `randombytes()` implementation is required.
 
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
 - `MLD_CONFIG_NO_RANDOMIZED_API`: Disables `mldsa_keypair`, `mldsa_signature`, etc. 
-- `MLD_CONFIG_PARAMETER_SET`: Security level (default 65)
+- `MLD_CONFIG_PARAMETER_SET`: Security level (default 44)
 - `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix (set to `mldsa`)
 
 ## Notes
