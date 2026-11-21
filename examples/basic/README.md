@@ -20,7 +20,7 @@ Use this approach when:
 ## Configuration
 
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
-- `MLD_CONFIG_PARAMETER_SET`: Security level (44, 65, or 87). Default is 65.
+- `MLD_CONFIG_PARAMETER_SET`: Security level (44, 65, or 87). Default is 44.
 - `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix for the API. Set to `mldsa` in this example.
 
 To change the security level, modify `MLD_CONFIG_PARAMETER_SET` in the config file or pass it via CFLAGS.
