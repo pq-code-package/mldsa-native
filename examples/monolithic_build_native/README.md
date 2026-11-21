@@ -23,7 +23,7 @@ Use this approach when:
 ## Configuration
 
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
-- `MLD_CONFIG_PARAMETER_SET`: Security level (default 65)
+- `MLD_CONFIG_PARAMETER_SET`: Security level (default 44)
 - `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix (set to `mldsa`)
 - `MLD_CONFIG_USE_NATIVE_BACKEND_ARITH`: Enables native arithmetic backend
 - `MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202`: Enables native FIPS-202 backend

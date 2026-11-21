@@ -26,7 +26,7 @@ The `MLD_CONFIG_REDUCE_RAM` option enables optimizations that reduce RAM usage:
 ## Configuration
 
 The configuration file [mldsa_native_config.h](mldsa_native/mldsa_native_config.h) sets:
-- `MLD_CONFIG_PARAMETER_SET`: Security level (44, 65, or 87). Default is 65.
+- `MLD_CONFIG_PARAMETER_SET`: Security level (44, 65, or 87). Default is 44.
 - `MLD_CONFIG_NAMESPACE_PREFIX`: Symbol prefix for the API. Set to `mldsa` in this example.
 - `MLD_CONFIG_REDUCE_RAM`: Enables reduced RAM usage optimizations.
 
