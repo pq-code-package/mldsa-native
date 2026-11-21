@@ -481,8 +481,14 @@ def run_sigVer_test(tg, tc):
         ]
 
     result = subprocess.run(acvp_call, encoding="utf-8", capture_output=True)
+    if result.returncode != 0:
+        err("FAIL!")
+        err(f"{acvp_call} failed with error code {result.returncode}")
+        err(result.stderr)
+        exit(1)
     # Extract results
-    results["testPassed"] = result.returncode == 0
+    out = dict(line.split("=") for line in result.stdout.splitlines())
+    results["testPassed"] = out["valid"] == "1"
     return results
 
 

@@ -123,6 +123,21 @@ static void print_hex(const char *name, const unsigned char *raw, size_t len)
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_KEYPAIR_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+/* Print valid=1 or valid=0 if verification accepted or rejected the
+ * signature. Any other result is an error of the test binary, so that the
+ * client does not mistake it for a rejected signature. */
+static int report_sigver(int rc)
+{
+  if (rc == 0 || rc == MLD_ERR_INVALID_SIGNATURE || rc == MLD_ERR_INVALID_ARG)
+  {
+    printf("valid=%d\n", rc == 0);
+    return 0;
+  }
+  return 1;
+}
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
 /* Prototype for a re-#define'd main, to satisfy -Wmissing-prototypes. */
 #if defined(main)
 int main(int argc, char *argv[]);
@@ -378,7 +393,8 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    return mld_sign_verify(signature, message, mlen, context, ctxlen, pk);
+    return report_sigver(
+        mld_sign_verify(signature, message, mlen, context, ctxlen, pk));
   }
   else
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
