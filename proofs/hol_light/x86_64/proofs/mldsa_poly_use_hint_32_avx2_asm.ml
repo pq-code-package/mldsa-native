@@ -66,8 +66,7 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0xc5; 0xfd; 0x72; 0xf0; 0x01;
                            (* VPSLLD (%_% ymm0) (%_% ymm0) (Imm8 (word 1)) *)
   0xc5; 0xed; 0xfa; 0xd0;  (* VPSUBD (%_% ymm2) (%_% ymm2) (%_% ymm0) *)
-  0xc4; 0xc1; 0x6d; 0xfe; 0xd1;
-                           (* VPADDD (%_% ymm2) (%_% ymm2) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xd2;  (* VPADDD (%_% ymm2) (%_% ymm9) (%_% ymm2) *)
   0xc5; 0xed; 0xdb; 0xd3;  (* VPAND (%_% ymm2) (%_% ymm2) (%_% ymm3) *)
   0xc5; 0xfd; 0x7f; 0x17;  (* VMOVDQA (Memop Word256 (%% (rdi,0))) (%_% ymm2) *)
   0x48; 0x83; 0xc7; 0x20;  (* ADD (% rdi) (Imm8 (word 32)) *)
@@ -75,7 +74,7 @@ let poly_use_hint_32_avx2_asm_mc = define_assert_from_elf
   0x48; 0x83; 0xc0; 0x20;  (* ADD (% rax) (Imm8 (word 32)) *)
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
-  0x75; 0x9e;              (* JNE (Imm8 (word 158)) *)
+  0x75; 0x9f;              (* JNE (Imm8 (word 159)) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
@@ -1013,7 +1012,7 @@ let MLDSA_POLY_USE_HINT_32_BLOCK_CORRECT = prove
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_32_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN REWRITE_TAC[SOME_FLAGS] THEN
-  ENSURES_WHILE_PUP_TAC `32` `pc + 0x42` `pc + 0xa2`
+  ENSURES_WHILE_PUP_TAC `32` `pc + 0x42` `pc + 0xa1`
    `\i s.
       (read RDI s = word_add a (word(32 * i)) /\
        read RSI s = word_add h (word(32 * i)) /\

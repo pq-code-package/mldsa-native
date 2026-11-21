@@ -58,6 +58,15 @@
  *   @[REF_AVX2]. See poly_decompose_88_avx2.c for more information.
  */
 
+/*
+ * Note on operand order: if a commutative VEX instruction such as vpaddd
+ * has one source register in ymm8-15 and the other in ymm0-7, the one in
+ * ymm8-15 comes second. Only then do all assemblers emit the same bytes:
+ * clang's assembler would swap the operands itself to use the 2-byte VEX
+ * prefix, while GNU as keeps the order. The HOL Light proofs are about
+ * these bytes.
+ */
+
 // a aliased with a0
 .macro decompose88_avx2 a1, a, temp1, temp2
 // Compute a1 = round-(a / 190464), where 190464 = 2*GAMMA2 = 128*B
@@ -102,7 +111,7 @@ vpslld  $1, \a, \a
 vpsubd  \a, \h, \a
 
 // b = (b + delta * h) % 44
-vpaddd  \a1, \a, \b
+vpaddd  \a, \a1, \b
 // If b wrapped below 0 (a1 == 0, delta == -1), set b = 43.
 // b is in [-1, 44], so the per-dword sign bit and the per-byte
 // blend mask of vpblendvb coincide.

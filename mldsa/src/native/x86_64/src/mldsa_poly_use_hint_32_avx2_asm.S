@@ -94,7 +94,7 @@ Lmld_poly_use_hint_32_avx2_asm_loop:
         vpandn %ymm2, %ymm0, %ymm0
         vpslld $0x1, %ymm0, %ymm0
         vpsubd %ymm0, %ymm2, %ymm2
-        vpaddd %ymm9, %ymm2, %ymm2
+        vpaddd %ymm2, %ymm9, %ymm2
         vpand %ymm3, %ymm2, %ymm2
         vmovdqa %ymm2, (%rdi)
         addq $0x20, %rdi
