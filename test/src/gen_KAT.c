@@ -73,6 +73,7 @@ int main(void)
       80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
   };
   uint8_t coins[MLDSA_SEEDBYTES + MLDSA_RNDBYTES + MAXMLEN];
+  uint8_t next_coins[MLDSA_SEEDBYTES + MLDSA_RNDBYTES + MAXMLEN];
 
 #if defined(MLD_SYS_WINDOWS)
   /* Disable automatic CRLF conversion on Windows to match testvector hashes */
@@ -91,7 +92,9 @@ int main(void)
 
   for (i = 0; i < MAXMLEN; i = (i == 0) ? i + 1 : i << 2)
   {
-    mld_shake256(coins, sizeof(coins), coins, sizeof(coins));
+    /* mld_shake256 does not allow its input and output to overlap. */
+    mld_shake256(next_coins, sizeof(next_coins), coins, sizeof(coins));
+    memcpy(coins, next_coins, sizeof(coins));
     m = coins + MLDSA_SEEDBYTES + MLDSA_RNDBYTES;
 
     CHECK(mld_sign_keypair_internal(pk, sk, coins) == 0);
