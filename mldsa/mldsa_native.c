@@ -85,6 +85,14 @@
 #include "src/native/x86_64/src/consts.c"
 #include "src/native/x86_64/src/rej_uniform_table.c"
 #endif
+#if defined(MLD_SYS_PPC64LE)
+#include "src/native/ppc64le/src/ntt_ppc64le_p10.c"
+#include "src/native/ppc64le/src/ntt_ppc64le_p8p9.c"
+#include "src/native/ppc64le/src/poly_pointwise_montgomery_p10_ppc64le.c"
+#include "src/native/ppc64le/src/poly_pointwise_montgomery_p8p9_ppc64le.c"
+#include "src/native/ppc64le/src/polyvecl_pointwise_acc_montgomery_ppc64le.c"
+#include "src/native/ppc64le/src/zetas.c"
+#endif /* MLD_SYS_PPC64LE */
 #if defined(MLD_SYS_RISCV32)
 #include "src/native/rv32im/src/rv32im_zetas.c"
 #endif
@@ -96,6 +104,10 @@
 #endif
 #if defined(MLD_SYS_X86_64)
 #include "src/fips202/native/x86_64/src/keccakf1600_constants.c"
+#endif
+#if defined(MLD_SYS_PPC64LE)
+#include "src/fips202/native/ppc64le/src/keccakf1600_ppc64le.c"
+#include "src/fips202/native/ppc64le/src/keccakf1600_round_constants.c"
 #endif
 #if defined(MLD_SYS_ARMV81M_MVE)
 #include "src/fips202/native/armv81m/src/keccak_f1600_x4_mve.c"
@@ -588,6 +600,94 @@
 #undef MLD_NATIVE_FUNC_SUCCESS
 /* mldsa/src/fips202/native/auto.h */
 #undef MLD_FIPS202_NATIVE_AUTO_H
+/* mldsa/src/fips202/native/ppc64le/auto.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_AUTO_H
+#undef MLD_FIPS202_PPC64LE
+#undef MLD_USE_FIPS202_X4_NATIVE
+/* mldsa/src/fips202/native/ppc64le/src/keccakf1600_ppc64le.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_KECCAKF1600_PPC64LE_H
+#undef mld_keccakf1600x4_permute24_ppc64le
+/* mldsa/src/fips202/native/ppc64le/src/macros.h */
+#undef MLD_ADD
+#undef MLD_AND
+#undef MLD_CHI
+#undef MLD_CTHETA
+#undef MLD_DTHETA
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_MACROS_H
+#undef MLD_KECCAKF_CHI
+#undef MLD_KECCAKF_IOTA
+#undef MLD_KECCAKF_RHOPI
+#undef MLD_KECCAKF_ROUND
+#undef MLD_KECCAKF_THETA_INIT
+#undef MLD_KECCAKF_THETA_PROCESS
+#undef MLD_LSL
+#undef MLD_OR
+#undef MLD_RHO0
+#undef MLD_RHO1
+#undef MLD_RHO10
+#undef MLD_RHO11
+#undef MLD_RHO12
+#undef MLD_RHO13
+#undef MLD_RHO14
+#undef MLD_RHO15
+#undef MLD_RHO16
+#undef MLD_RHO17
+#undef MLD_RHO18
+#undef MLD_RHO19
+#undef MLD_RHO2
+#undef MLD_RHO20
+#undef MLD_RHO21
+#undef MLD_RHO22
+#undef MLD_RHO23
+#undef MLD_RHO3
+#undef MLD_RHO4
+#undef MLD_RHO5
+#undef MLD_RHO6
+#undef MLD_RHO7
+#undef MLD_RHO8
+#undef MLD_RHO9
+#undef MLD_RHOPI
+#undef MLD_SET_R0_TO_R4
+#undef MLD_SET_R10_TO_R14
+#undef MLD_SET_R15_TO_R19
+#undef MLD_SET_R20_TO_R24
+#undef MLD_SET_R5_TO_R9
+#undef MLD_VINT32_WIDTH
+#undef MLD_VINT64_0
+#undef MLD_VINT64_1
+#undef MLD_VINT64_CONST
+#undef MLD_VPERM
+#undef MLD_VRL
+#undef MLD_VROTL64
+#undef MLD_XKECCAKF_ROUND24
+#undef MLD_XLOADST_MULT
+#undef MLD_XOR
+#undef MLD_XRhoPIChiVARS
+#undef MLD_XSTATEVARS
+#undef MLD_XSTOREST_MULT
+#undef MLD_XTHETAVARS
+#undef mld_keccakf_1600_2x_ppc64le
+/* mldsa/src/fips202/native/ppc64le/src/util.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_UTIL_H
+#undef MLD_KECCAK_BITS_TOTAL
+#undef MLD_KECCAK_DOM
+#undef MLD_KECCAK_STATE_BYTES
+#undef MLD_KECCAKl
+#undef MLD_LANE_BYTES
+#undef MLD_NROUNDS
+#undef MLD_NUM_OF_ROUNDS
+#undef MLD_SHA3_224_DIGEST
+#undef MLD_SHA3_256_DIGEST
+#undef MLD_SHA3_384_DIGEST
+#undef MLD_SHA3_512_DIGEST
+#undef MLD_SHA3_SUFFIX
+#undef MLD_SHAKE128_DIGEST
+#undef MLD_SHAKE256_DIGEST
+#undef MLD_SHAKE_SUFFIX
+#undef MLD_SLICE
+#undef MLD_STATE_SIZE
+#undef MLD_WORDSZ
+#undef mld_keccakf1600_round_constants_ppc64le
 #if defined(MLD_SYS_AARCH64)
 /*
  * Undefine macros from native code (FIPS202, AArch64)
@@ -657,6 +757,99 @@
 #undef mld_keccak_f1600_x4_state_xor_bytes_asm
 #undef mld_keccakf1600_round_constants
 #endif /* MLD_SYS_ARMV81M_MVE */
+#if defined(MLD_SYS_PPC64LE)
+/*
+ * Undefine macros from native code (FIPS202, PPC64LE)
+ */
+/* mldsa/src/fips202/native/ppc64le/auto.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_AUTO_H
+#undef MLD_FIPS202_PPC64LE
+#undef MLD_USE_FIPS202_X4_NATIVE
+/* mldsa/src/fips202/native/ppc64le/src/keccakf1600_ppc64le.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_KECCAKF1600_PPC64LE_H
+#undef mld_keccakf1600x4_permute24_ppc64le
+/* mldsa/src/fips202/native/ppc64le/src/macros.h */
+#undef MLD_ADD
+#undef MLD_AND
+#undef MLD_CHI
+#undef MLD_CTHETA
+#undef MLD_DTHETA
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_MACROS_H
+#undef MLD_KECCAKF_CHI
+#undef MLD_KECCAKF_IOTA
+#undef MLD_KECCAKF_RHOPI
+#undef MLD_KECCAKF_ROUND
+#undef MLD_KECCAKF_THETA_INIT
+#undef MLD_KECCAKF_THETA_PROCESS
+#undef MLD_LSL
+#undef MLD_OR
+#undef MLD_RHO0
+#undef MLD_RHO1
+#undef MLD_RHO10
+#undef MLD_RHO11
+#undef MLD_RHO12
+#undef MLD_RHO13
+#undef MLD_RHO14
+#undef MLD_RHO15
+#undef MLD_RHO16
+#undef MLD_RHO17
+#undef MLD_RHO18
+#undef MLD_RHO19
+#undef MLD_RHO2
+#undef MLD_RHO20
+#undef MLD_RHO21
+#undef MLD_RHO22
+#undef MLD_RHO23
+#undef MLD_RHO3
+#undef MLD_RHO4
+#undef MLD_RHO5
+#undef MLD_RHO6
+#undef MLD_RHO7
+#undef MLD_RHO8
+#undef MLD_RHO9
+#undef MLD_RHOPI
+#undef MLD_SET_R0_TO_R4
+#undef MLD_SET_R10_TO_R14
+#undef MLD_SET_R15_TO_R19
+#undef MLD_SET_R20_TO_R24
+#undef MLD_SET_R5_TO_R9
+#undef MLD_VINT32_WIDTH
+#undef MLD_VINT64_0
+#undef MLD_VINT64_1
+#undef MLD_VINT64_CONST
+#undef MLD_VPERM
+#undef MLD_VRL
+#undef MLD_VROTL64
+#undef MLD_XKECCAKF_ROUND24
+#undef MLD_XLOADST_MULT
+#undef MLD_XOR
+#undef MLD_XRhoPIChiVARS
+#undef MLD_XSTATEVARS
+#undef MLD_XSTOREST_MULT
+#undef MLD_XTHETAVARS
+#undef mld_keccakf_1600_2x_ppc64le
+/* mldsa/src/fips202/native/ppc64le/src/util.h */
+#undef MLD_FIPS202_NATIVE_PPC64LE_SRC_UTIL_H
+#undef MLD_KECCAK_BITS_TOTAL
+#undef MLD_KECCAK_DOM
+#undef MLD_KECCAK_STATE_BYTES
+#undef MLD_KECCAKl
+#undef MLD_LANE_BYTES
+#undef MLD_NROUNDS
+#undef MLD_NUM_OF_ROUNDS
+#undef MLD_SHA3_224_DIGEST
+#undef MLD_SHA3_256_DIGEST
+#undef MLD_SHA3_384_DIGEST
+#undef MLD_SHA3_512_DIGEST
+#undef MLD_SHA3_SUFFIX
+#undef MLD_SHAKE128_DIGEST
+#undef MLD_SHAKE256_DIGEST
+#undef MLD_SHAKE_SUFFIX
+#undef MLD_SLICE
+#undef MLD_STATE_SIZE
+#undef MLD_WORDSZ
+#undef mld_keccakf1600_round_constants_ppc64le
+#endif /* MLD_SYS_PPC64LE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_FIPS202 */
 #if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)
 /* mldsa/src/native/api.h */
@@ -809,6 +1002,56 @@
 #undef mld_poly_pointwise_montgomery_rv32im_asm
 #undef mld_rv32im_ntt_zetas
 #endif /* MLD_SYS_RISCV32 */
+#if defined(MLD_SYS_PPC64LE)
+/*
+ * Undefine macros from native code (Arith, PPC64LE)
+ */
+/* mldsa/src/native/ppc64le/meta.h */
+#undef MLD_ARITH_BACKEND_PPC64LE
+#undef MLD_NATIVE_PPC64LE_META_H
+#undef MLD_USE_NATIVE_INTT
+#undef MLD_USE_NATIVE_NTT
+#undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L4
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L5
+#undef MLD_USE_NATIVE_POLYVECL_POINTWISE_ACC_MONTGOMERY_L7
+/* mldsa/src/native/ppc64le/src/arith_native_ppc64le.h */
+#undef MLD_NATIVE_PPC64LE_SRC_ARITH_NATIVE_PPC64LE_H
+#undef mld_intt_p10_ppc64le
+#undef mld_intt_p8p9_ppc64le
+#undef mld_ntt_p10_ppc64le
+#undef mld_ntt_p8p9_ppc64le
+#undef mld_poly_pointwise_montgomery_p10_ppc64le
+#undef mld_poly_pointwise_montgomery_p8p9_ppc64le
+#undef mld_polyvecl_pointwise_acc_montgomery_l4_ppc64le
+#undef mld_polyvecl_pointwise_acc_montgomery_l5_ppc64le
+#undef mld_polyvecl_pointwise_acc_montgomery_l7_ppc64le
+/* mldsa/src/native/ppc64le/src/macros.h */
+#undef MLD_NATIVE_PPC64LE_SRC_MACROS_H
+#undef MLD_QINV
+#undef MLD_V0
+#undef MLD_V1
+#undef MLD_VCONST
+#undef MLD_VINT32_WIDTH
+#undef MLD_VPERM
+#undef MLD_VQ4
+#undef MLD_VQINV4
+#undef mld_butterfly_inv_p10
+#undef mld_butterfly_inv_p8p9
+#undef mld_butterfly_p10
+#undef mld_butterfly_p8p9
+#undef mld_monty_red_f_star_p10
+#undef mld_monty_red_f_star_p8p9
+#undef mld_point_mul_p10
+#undef mld_point_mul_p8p9
+#undef mld_vec_mul
+#undef mld_vec_mulh_p10
+#undef mld_vec_mulh_p8p9
+/* mldsa/src/native/ppc64le/src/zetas.h */
+#undef MLD_NATIVE_PPC64LE_SRC_ZETAS_H
+#undef mld_zetas_
+#undef mld_zetas_inv_al
+#endif /* MLD_SYS_PPC64LE */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 /* mldsa/src/sys.h */
 #undef MLD_ALIGN

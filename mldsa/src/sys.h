@@ -287,8 +287,12 @@ typedef enum
   MLD_SYS_CAP_AARCH64_NEON,
   MLD_SYS_CAP_AARCH64_SHA3,
   /* Armv8.1-M */
-  MLD_SYS_CAP_ARMV81M_MVE
+  MLD_SYS_CAP_ARMV81M_MVE,
+  /* PPC64LE */
+  MLD_SYS_CAP_POWER8,
+  MLD_SYS_CAP_POWER10
 } mld_sys_cap;
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLD_SYS_H */

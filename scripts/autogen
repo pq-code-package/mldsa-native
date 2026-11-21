@@ -777,6 +777,39 @@ def gen_c_zeta_file():
     update_file("mldsa/src/zetas.inc", "\n".join(gen()), force_format=True)
 
 
+def gen_ppc64le_zetas():
+    """Generate forward NTT zeta values for PPC64LE (same as reference C)."""
+    yield from gen_c_zetas()
+
+
+def gen_ppc64le_zetas_inv():
+    """Generate inverse NTT zeta values for PPC64LE."""
+    zetas = list(gen_c_zetas())
+    for k in range(256):
+        yield -zetas[255 - k]
+
+
+def gen_ppc64le_zeta_file():
+    def gen():
+        yield from gen_header()
+        yield '#include "../../../common.h"'
+        yield "#if defined(MLD_ARITH_BACKEND_PPC64LE) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)"
+        yield '#include "zetas.h"'
+        yield ""
+        yield "const MLD_ALIGN int32_t mld_zetas_[MLDSA_N] = {"
+        yield from map(lambda t: str(t) + ",", gen_ppc64le_zetas())
+        yield "};"
+        yield ""
+        yield "/* Inverse NTT zeta constants (precomputed as -mld_zetas_[255-k]) */"
+        yield "const MLD_ALIGN int32_t mld_zetas_inv_al[MLDSA_N] = {"
+        yield from map(lambda t: str(t) + ",", gen_ppc64le_zetas_inv())
+        yield "};"
+        yield ""
+        yield "#endif"
+        yield ""
+
+    update_file("mldsa/src/native/ppc64le/src/zetas.c", "\n".join(gen()))
+
 def prepare_root_for_barrett(root, sqrdmulh=False):
     """Takes a constant that the code needs to Barrett-multiply with, and
     returns the pair (z, w): z the signed canonical form of `root`, and w the
@@ -2077,6 +2110,10 @@ def armv81m(c):
     return "/armv81m/" in c
 
 
+def ppc64le(c):
+    return "/ppc64le/" in c
+
+
 def native_fips202(c):
     return native(c) and fips202(c)
 
@@ -2095,6 +2132,10 @@ def native_fips202_x86_64(c):
 
 def native_fips202_armv81m(c):
     return native_fips202(c) and armv81m(c)
+
+
+def native_fips202_ppc64le(c):
+    return native_fips202(c) and ppc64le(c)
 
 
 def native_fips202_core(c):
@@ -2122,6 +2163,10 @@ def native_arith_rv32im(c):
     return native_arith(c) and rv32im(c)
 
 
+def native_arith_ppc64le(c):
+    return native_arith(c) and ppc64le(c)
+
+
 def native_arith_core(c):
     return (
         native_arith(c)
@@ -2129,6 +2174,7 @@ def native_arith_core(c):
         and not native_arith_aarch64(c)
         and not native_arith_riscv64(c)
         and not native_arith_rv32im(c)
+        and not native_arith_ppc64le(c)
     )
 
 
@@ -2229,6 +2275,11 @@ def gen_macro_undefs(extra_notes=None):
         filt=native_fips202_armv81m, desc="native code (FIPS202, Armv8.1-M)"
     )
     yield "#endif"
+    yield "#if defined(MLD_SYS_PPC64LE)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_fips202_ppc64le, desc="native code (FIPS202, PPC64LE)"
+    )
+    yield "#endif"
     yield "#endif"
     yield "#if defined(MLD_CONFIG_USE_NATIVE_BACKEND_ARITH)"
     yield from gen_monolithic_undef_all_core(filt=native_arith_core, desc="")
@@ -2245,6 +2296,11 @@ def gen_macro_undefs(extra_notes=None):
     yield "#if defined(MLD_SYS_RISCV32)"
     yield from gen_monolithic_undef_all_core(
         filt=native_arith_rv32im, desc="native code (Arith, RV32IM)"
+    )
+    yield "#endif"
+    yield "#if defined(MLD_SYS_PPC64LE)"
+    yield from gen_monolithic_undef_all_core(
+        filt=native_arith_ppc64le, desc="native code (Arith, PPC64LE)"
     )
     yield "#endif"
     yield "#endif"
@@ -2326,6 +2382,10 @@ def gen_monolithic_source_file():
         for c in filter(native_arith_x86_64, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
+        yield "#if defined(MLD_SYS_PPC64LE)"
+        for c in filter(native_arith_ppc64le, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
         yield "#if defined(MLD_SYS_RISCV32)"
         for c in filter(native_arith_rv32im, c_sources):
             yield f'#include "{c}"'
@@ -2339,6 +2399,10 @@ def gen_monolithic_source_file():
         yield "#endif"
         yield "#if defined(MLD_SYS_X86_64)"
         for c in filter(native_fips202_x86_64, c_sources):
+            yield f'#include "{c}"'
+        yield "#endif"
+        yield "#if defined(MLD_SYS_PPC64LE)"
+        for c in filter(native_fips202_ppc64le, c_sources):
             yield f'#include "{c}"'
         yield "#endif"
         yield "#if defined(MLD_SYS_ARMV81M_MVE)"
@@ -2527,14 +2591,23 @@ def get_syscaps():
         "MLD_SYS_CAP_AARCH64_NEON",
         "MLD_SYS_CAP_AARCH64_SHA3",
         "MLD_SYS_CAP_ARMV81M_MVE",
+        "MLD_SYS_CAP_POWER8",
+        "MLD_SYS_CAP_POWER10",
     ]
-
 
 def check_macro_typos():
     files = get_all_files()
     syscaps = get_syscaps()
 
     macros = set(map(lambda t: t[1], get_defines(all=True)))
+
+    inc_files = [
+        f for f in files
+        if f.startswith("mldsa/src/native/ppc64le/") and f.endswith(".inc")
+    ]
+
+    for results in run_parallel(inc_files, get_defines_from_file):
+        macros.update(name for _, name in results)
 
     # Add configuration options to the list of allows macro names
     macros.update(get_config_options())
@@ -5385,6 +5458,7 @@ def _main():
     def gen_zeta_tables():
         gen_c_zeta_file()
         gen_aarch64_zeta_file()
+        gen_ppc64le_zeta_file()
         gen_rv32im_zeta_file()
         gen_rv32im_hol_light_zeta_file()
         gen_aarch64_hol_light_zeta_file()

@@ -32,4 +32,8 @@
 /* #include "armv81m/mve.h" */
 /* #endif */
 
+#if defined(MLD_SYS_PPC64LE)
+#include "ppc64le/auto.h"
+#endif
+
 #endif /* !MLD_FIPS202_NATIVE_AUTO_H */

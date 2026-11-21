@@ -25,4 +25,8 @@
 #include "rv32im/fastmul.h"
 #endif
 
+#if defined(MLD_SYS_PPC64LE)
+#include "ppc64le/meta.h"
+#endif
+
 #endif /* !MLD_NATIVE_META_H */
