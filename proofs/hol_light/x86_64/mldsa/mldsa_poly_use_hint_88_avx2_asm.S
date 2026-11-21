@@ -93,7 +93,7 @@ Lmld_poly_use_hint_88_avx2_asm_loop:
         vpandn %ymm1, %ymm0, %ymm0
         vpslld $0x1, %ymm0, %ymm0
         vpsubd %ymm0, %ymm1, %ymm0
-        vpaddd %ymm9, %ymm0, %ymm0
+        vpaddd %ymm0, %ymm9, %ymm0
         vpblendvb %ymm0, %ymm6, %ymm0, %ymm0
         vpcmpgtd %ymm6, %ymm0, %ymm1
         vpandn %ymm0, %ymm1, %ymm0

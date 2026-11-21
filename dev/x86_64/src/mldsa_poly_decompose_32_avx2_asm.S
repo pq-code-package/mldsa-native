@@ -94,6 +94,15 @@
 .endm
 
 /*
+ * Note on operand order: if a commutative VEX instruction such as vpaddd
+ * has one source register in ymm8-15 and the other in ymm0-7, the one in
+ * ymm8-15 comes second. Only then do all assemblers emit the same bytes:
+ * clang's assembler would swap the operands itself to use the 2-byte VEX
+ * prefix, while GNU as keeps the order. The HOL Light proofs are about
+ * these bytes.
+ */
+
+/*
  * Per-block decompose.
  *
  *   f   - loaded coefficient block (clobbered)
@@ -106,9 +115,9 @@
  */
 .macro decompose32_block off_in, off_out_a1, f, f1, f0, t
         vmovdqa  \off_in(%rsi), \f
-        vpaddd   off, \f, \f1                   /* f1 = f + 127 */
+        vpaddd   \f, off, \f1                   /* f1 = f + 127 */
         vpsrld   $7, \f1, \f1                   /* f1 = (f + 127) >> 7 */
-        vpmulhuw v, \f1, \f1                    /* f1'' = mulhi_u16(f1, 1025) */
+        vpmulhuw \f1, v, \f1                    /* f1'' = mulhi_u16(f1, 1025) */
         vpmulhrsw shift, \f1, \f1               /* f1 = mulhrs_i16(f1'', 512) */
         vpcmpgtd q_bound, \f, \t                /* t = (f > 31*GAMMA2) */
         vpmulld  alpha, \f1, \f0                /* f0 = f1 * (2*GAMMA2) */
