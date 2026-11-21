@@ -326,6 +326,19 @@ riscv32/mldsa_poly_pointwise_montgomery_rv32im_asm:
   - common/misc.ml
   - riscv/proofs/base.ml
   - riscv/proofs/consttime.ml
+x86_64/keccak_f1600_x1_avx512_asm:
+  files:
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  - proofs/hol_light/x86_64/mldsa/keccak_f1600_x1_avx512_asm.S
+  - proofs/hol_light/x86_64/proofs/keccak_avx512_utils.ml
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x1_avx512_asm.ml
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_constants.ml
+  - proofs/hol_light/x86_64/proofs/keccak_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
 x86_64/keccak_f1600_x4_avx2_asm:
   files:
   - proofs/hol_light/common/keccak_constants.ml
@@ -339,6 +352,19 @@ x86_64/keccak_f1600_x4_avx2_asm:
   - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
   s2n_bignum:
   - common/misc.ml
+  - x86/proofs/base.ml
+  - x86/proofs/consttime.ml
+x86_64/keccak_f1600_x4_avx512_asm:
+  files:
+  - proofs/hol_light/common/keccak_constants.ml
+  - proofs/hol_light/common/keccak_spec.ml
+  - proofs/hol_light/x86_64/mldsa/keccak_f1600_x4_avx512_asm.S
+  - proofs/hol_light/x86_64/proofs/keccak_avx512_utils.ml
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx2_constants.ml
+  - proofs/hol_light/x86_64/proofs/keccak_f1600_x4_avx512_asm.ml
+  - proofs/hol_light/x86_64/proofs/keccak_utils.ml
+  - proofs/hol_light/x86_64/proofs/subroutine_signatures.ml
+  s2n_bignum:
   - x86/proofs/base.ml
   - x86/proofs/consttime.ml
 x86_64/mldsa_intt_avx2_asm:

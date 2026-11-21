@@ -10,7 +10,9 @@
  */
 
 #include "../../../../common.h"
-#if defined(MLD_FIPS202_X86_64_NEED_X4_AVX2) && \
+#if (defined(MLD_FIPS202_X86_64_NEED_X4_AVX2) ||    \
+     defined(MLD_FIPS202_X86_64_NEED_X1_AVX512) ||  \
+     defined(MLD_FIPS202_X86_64_NEED_X4_AVX512)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 
 #include <stdint.h>
@@ -29,6 +31,8 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint64_t
         0x8000000000008080, 0x0000000080000001, 0x8000000080008008,
 };
 
+#if defined(MLD_FIPS202_X86_64_NEED_X4_AVX2)
+
 MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint64_t mld_keccak_rho8[4] = {
     0x0605040302010007,
     0x0e0d0c0b0a09080f,
@@ -43,10 +47,15 @@ MLD_ALIGN MLD_INTERNAL_DATA_DEFINITION const uint64_t mld_keccak_rho56[4] = {
     0x181f1e1d1c1b1a19,
 };
 
-#else /* MLD_FIPS202_X86_64_NEED_X4_AVX2 && !MLD_CONFIG_MULTILEVEL_NO_SHARED \
-       */
+#endif /* MLD_FIPS202_X86_64_NEED_X4_AVX2 */
+
+#else /* (MLD_FIPS202_X86_64_NEED_X4_AVX2 || MLD_FIPS202_X86_64_NEED_X1_AVX512 \
+         || MLD_FIPS202_X86_64_NEED_X4_AVX512) &&                              \
+         !MLD_CONFIG_MULTILEVEL_NO_SHARED */
 
 MLD_EMPTY_CU(fips202_x86_64_constants)
 
-#endif /* !(MLD_FIPS202_X86_64_NEED_X4_AVX2 && \
+#endif /* !((MLD_FIPS202_X86_64_NEED_X4_AVX2 || \
+          MLD_FIPS202_X86_64_NEED_X1_AVX512 ||  \
+          MLD_FIPS202_X86_64_NEED_X4_AVX512) && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED) */
