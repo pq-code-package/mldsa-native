@@ -40,7 +40,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3 \
-  LP64:cadical
+  LP64:cadical \
+  ILP32:z3
 CBMC_DEFAULT_CONFIG = LP64:z3
 # --arrays-uf-always is only passed to the SMT backend: with CaDiCaL it
 # triggers an invariant violation in arrayst::collect_arrays

@@ -34,7 +34,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:bitwuzla \
-  LP64:z3_smt_only
+  LP64:z3_smt_only \
+  ILP32:z3_smt_only
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = mld_rej_eta_native

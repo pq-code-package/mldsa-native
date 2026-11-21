@@ -29,7 +29,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:bitwuzla \
-  LP64:cvc5_arrays_exp
+  LP64:cvc5_arrays_exp \
+  ILP32:bitwuzla
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = mld_keccak_absorb_once_x4
