@@ -41,6 +41,14 @@ print_string "=== bytecode start: x86_64/mldsa/keccak_f1600_x4_avx2_asm.o ======
 print_literal_from_elf "x86_64/mldsa/keccak_f1600_x4_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
 
+print_string "=== bytecode start: x86_64/mldsa/keccak_f1600_x1_avx512_asm.o ===\n";;
+print_literal_from_elf "x86_64/mldsa/keccak_f1600_x1_avx512_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
+print_string "=== bytecode start: x86_64/mldsa/keccak_f1600_x4_avx512_asm.o ===\n";;
+print_literal_from_elf "x86_64/mldsa/keccak_f1600_x4_avx512_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
+
 print_string "=== bytecode start: x86_64/mldsa/mldsa_poly_caddq_avx2_asm.o ================\n";;
 print_literal_from_elf "x86_64/mldsa/mldsa_poly_caddq_avx2_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;

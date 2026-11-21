@@ -259,6 +259,8 @@ All routines listed below have been proven correct, memory-safe, and secret-inde
   * x86_64 rejection sampling (eta=4): [mldsa_rej_uniform_eta4_avx2_asm.S](x86_64/mldsa/mldsa_rej_uniform_eta4_avx2_asm.S)
 - FIPS202:
   * 4-fold Keccak-F1600 using AVX2: [keccak_f1600_x4_avx2_asm.S](x86_64/mldsa/keccak_f1600_x4_avx2_asm.S)
+  * Keccak-F1600 using AVX-512: [keccak_f1600_x1_avx512_asm.S](x86_64/mldsa/keccak_f1600_x1_avx512_asm.S)
+  * 4-fold Keccak-F1600 using AVX-512: [keccak_f1600_x4_avx512_asm.S](x86_64/mldsa/keccak_f1600_x4_avx512_asm.S)
 
 ### RV32IM
 

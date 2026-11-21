@@ -67,6 +67,8 @@ OBJ = mldsa/mldsa_ntt_avx2_asm.o \
       mldsa/mldsa_pointwise_acc_l5_avx2_asm.o \
       mldsa/mldsa_pointwise_acc_l7_avx2_asm.o \
       mldsa/keccak_f1600_x4_avx2_asm.o \
+      mldsa/keccak_f1600_x1_avx512_asm.o \
+      mldsa/keccak_f1600_x4_avx512_asm.o \
       mldsa/mldsa_rej_uniform_eta4_avx2_asm.o \
       mldsa/mldsa_rej_uniform_eta2_avx2_asm.o
 
