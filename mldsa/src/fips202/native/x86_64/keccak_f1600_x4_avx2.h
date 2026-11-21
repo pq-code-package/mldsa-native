@@ -9,6 +9,11 @@
 
 #include "../../../common.h"
 
+/* Only needed if the built-in FIPS202-x4 code is used. */
+#if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER) &&                              \
+    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) &&                                \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
+     defined(MLD_UNIT_TEST))
 #define MLD_FIPS202_X86_64_NEED_X4_AVX2
 
 /* Part of backend API */
@@ -31,4 +36,7 @@ static MLD_INLINE int mld_keccak_f1600_x4_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
+#endif /* !MLD_CONFIG_FIPS202_CUSTOM_HEADER && !MLD_CONFIG_SERIAL_FIPS202_ONLY \
+          && (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM ||          \
+          MLD_UNIT_TEST) */
 #endif /* !MLD_FIPS202_NATIVE_X86_64_KECCAK_F1600_X4_AVX2_H */

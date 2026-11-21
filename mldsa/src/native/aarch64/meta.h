@@ -265,6 +265,7 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
+#if !defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)
 #if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 4
 MLD_MUST_CHECK_RETURN_VALUE
 static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l4_native(
@@ -309,6 +310,7 @@ static MLD_INLINE int mld_polyvecl_pointwise_acc_montgomery_l7_native(
   return MLD_NATIVE_FUNC_SUCCESS;
 }
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7 */
+#endif /* !MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
 #endif /* !__ASSEMBLER__ */
 #endif /* !MLD_NATIVE_AARCH64_META_H */

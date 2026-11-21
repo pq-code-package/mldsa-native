@@ -14,6 +14,11 @@
 #define MLD_USE_NATIVE_FIPS202_X4_XOR_BYTES
 #define MLD_USE_NATIVE_FIPS202_X4_EXTRACT_BYTES
 /* Guard for assembly file */
+/* Only needed if the built-in FIPS202-x4 code is used. */
+#if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER) &&                              \
+    !defined(MLD_CONFIG_SERIAL_FIPS202_ONLY) &&                                \
+    (!defined(MLD_CONFIG_NO_KEYPAIR_API) || !defined(MLD_CONFIG_REDUCE_RAM) || \
+     defined(MLD_UNIT_TEST))
 #define MLD_FIPS202_ARMV81M_NEED_X4
 
 #if !defined(__ASSEMBLER__)
@@ -76,4 +81,7 @@ static MLD_INLINE int mld_keccakf1600_extract_bytes_x4_native(
 
 #endif /* !__ASSEMBLER__ */
 
+#endif /* !MLD_CONFIG_FIPS202_CUSTOM_HEADER && !MLD_CONFIG_SERIAL_FIPS202_ONLY \
+          && (!MLD_CONFIG_NO_KEYPAIR_API || !MLD_CONFIG_REDUCE_RAM ||          \
+          MLD_UNIT_TEST) */
 #endif /* !MLD_FIPS202_NATIVE_ARMV81M_MVE_H */

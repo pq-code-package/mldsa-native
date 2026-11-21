@@ -54,6 +54,7 @@
 #include "../../../common.h"
 #if defined(MLD_SYS_X86_64_AVX2) && \
     defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
+    (!defined(MLD_CONFIG_REDUCE_RAM) || defined(MLD_UNIT_TEST)) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
     (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_L == 7)
 
@@ -216,6 +217,7 @@ Lmld_pointwise_acc_l7_avx2_looptop2:
 MLD_ASM_FN_SIZE(pointwise_acc_l7_avx2_asm)
 
 #endif /* MLD_SYS_X86_64_AVX2 && MLD_ARITH_BACKEND_X86_64_DEFAULT && \
+          (!MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST) && \
           !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
           (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_L == 7) */
 

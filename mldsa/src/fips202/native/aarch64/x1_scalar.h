@@ -10,6 +10,8 @@
 /* Part of backend API */
 #define MLD_USE_NATIVE_FIPS202_X1
 /* Guard for assembly file */
+/* Only needed if the built-in FIPS202 code is used. */
+#if !defined(MLD_CONFIG_FIPS202_CUSTOM_HEADER)
 #define MLD_FIPS202_AARCH64_NEED_X1_SCALAR
 
 #if !defined(__ASSEMBLER__)
@@ -24,4 +26,5 @@ static MLD_INLINE int mld_keccak_f1600_x1_native(uint64_t *state)
 }
 #endif /* !__ASSEMBLER__ */
 
+#endif /* !MLD_CONFIG_FIPS202_CUSTOM_HEADER */
 #endif /* !MLD_FIPS202_NATIVE_AARCH64_X1_SCALAR_H */
