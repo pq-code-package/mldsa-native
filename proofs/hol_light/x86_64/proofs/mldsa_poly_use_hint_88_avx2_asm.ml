@@ -72,8 +72,7 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
   0xc5; 0xfd; 0x72; 0xf0; 0x01;
                            (* VPSLLD (%_% ymm0) (%_% ymm0) (Imm8 (word 1)) *)
   0xc5; 0xf5; 0xfa; 0xc0;  (* VPSUBD (%_% ymm0) (%_% ymm1) (%_% ymm0) *)
-  0xc4; 0xc1; 0x7d; 0xfe; 0xc1;
-                           (* VPADDD (%_% ymm0) (%_% ymm0) (%_% ymm9) *)
+  0xc5; 0xb5; 0xfe; 0xc0;  (* VPADDD (%_% ymm0) (%_% ymm9) (%_% ymm0) *)
   0xc4; 0xe3; 0x7d; 0x4c; 0xc6; 0x00;
                            (* VPBLENDVB (%_% ymm0) (%_% ymm0) (%_% ymm6) (%_% ymm0) *)
   0xc5; 0xfd; 0x66; 0xce;  (* VPCMPGTD (%_% ymm1) (%_% ymm0) (%_% ymm6) *)
@@ -84,7 +83,7 @@ let poly_use_hint_88_avx2_asm_mc = define_assert_from_elf
   0x48; 0x83; 0xc0; 0x20;  (* ADD (% rax) (Imm8 (word 32)) *)
   0x48; 0x3d; 0x00; 0x04; 0x00; 0x00;
                            (* CMP (% rax) (Imm32 (word 1024)) *)
-  0x75; 0x87;              (* JNE (Imm8 (word 135)) *)
+  0x75; 0x88;              (* JNE (Imm8 (word 136)) *)
   0xc5; 0xf8; 0x77;        (* VZEROUPPER *)
   0xc3                     (* RET *)
 ];;
@@ -1160,14 +1159,14 @@ let UH88_STORE_DISCHARGE_TAC : tactic =
       REWRITE_TAC[A1HI_ZERO_88; JOIN_ZERO_ZX] THEN ASM_SIMP_TAC[DELTA_EQ_BOUNDED] THEN
       REWRITE_TAC[LANE_AC_CLOSE_88] THEN REWRITE_TAC[TAIL_CLOSE_88]) in
     let LUH_GEN = GENL [`x:int32`;`y:int32`] LUH0 in
-    let a1p_term = (match snd(strip_comb surfaceTxy) with [_;a]->a|_->failwith "T") in
-    let dsh_term = (match snd(strip_comb surfaceTxy) with [s0;_]->rand s0|_->failwith "T") in
+    let a1p_term = (match snd(strip_comb surfaceTxy) with [a;_]->a|_->failwith "T") in
+    let dsh_term = (match snd(strip_comb surfaceTxy) with [_;s0]->rand s0|_->failwith "T") in
     let A1P_BOUND = BITBLAST_RULE (mk_binop `(<=):num->num->bool` (mk_comb(`val:int32->num`,a1p_term)) `44`) in
     let RANGE_FINAL_BB = BITBLAST_RULE
       `!A1P:int32 DSH:int32. val A1P <= 44 /\ (DSH = word 0 \/ DSH = word 2)
-         ==> (val(word_add (word_sub (word 1) DSH) A1P) <= 45 \/
-              word_add (word_sub (word 1) DSH) A1P = word 4294967295)` in
-    let Y0_BB = BITBLAST_RULE `!A1P:int32. val A1P <= 44 ==> val(word_add (word_sub (word 0) (word 0)) A1P) <= 45` in
+         ==> (val(word_add A1P (word_sub (word 1) DSH)) <= 45 \/
+              word_add A1P (word_sub (word 1) DSH) = word 4294967295)` in
+    let Y0_BB = BITBLAST_RULE `!A1P:int32. val A1P <= 44 ==> val(word_add A1P (word_sub (word 0) (word 0))) <= 45` in
     let DSH_VALS = BITBLAST_RULE (mk_imp(`val(y:int32) <= 1`,
                      mk_disj(mk_eq(dsh_term,`word 0:int32`), mk_eq(dsh_term,`word 2:int32`)))) in
     let range_goal = mk_imp(`val(y:int32) <= 1`,
@@ -1315,7 +1314,7 @@ let MLDSA_POLY_USE_HINT_88_BLOCK_CORRECT = prove
   REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS; NONOVERLAPPING_CLAUSES; ALL;
               fst MLDSA_POLY_USE_HINT_88_EXEC] THEN
   DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN REWRITE_TAC[SOME_FLAGS] THEN
-  ENSURES_WHILE_PUP_TAC `32` `pc + 0x44` `pc + 0xbb`
+  ENSURES_WHILE_PUP_TAC `32` `pc + 0x44` `pc + 0xba`
    `\i s.
       (read RDI s = word_add a (word(32 * i)) /\
        read RSI s = word_add h (word(32 * i)) /\
