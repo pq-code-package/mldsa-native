@@ -19,16 +19,8 @@
 #if defined(MLD_SYS_X86_64)
 
 #if defined(MLD_SYSV_ABI_SUPPORTED)
-#if defined(MLD_SYS_X86_64_AVX512)
-int check_keccak_f1600_x1_avx512_asm(void);
-#endif
 #if defined(MLD_SYS_X86_64_AVX2)
 int check_keccak_f1600_x4_avx2_asm(void);
-#endif
-#if defined(MLD_SYS_X86_64_AVX512)
-int check_keccak_f1600_x4_avx512_asm(void);
-#endif
-#if defined(MLD_SYS_X86_64_AVX2)
 int check_invntt_avx2_asm(void);
 int check_ntt_avx2_asm(void);
 int check_nttunpack_avx2_asm(void);
@@ -48,20 +40,16 @@ int check_rej_uniform_avx2_asm(void);
 int check_rej_uniform_eta2_avx2_asm(void);
 int check_rej_uniform_eta4_avx2_asm(void);
 #endif /* MLD_SYS_X86_64_AVX2 */
+#if defined(MLD_SYS_X86_64_AVX512)
+int check_keccak_f1600_x1_avx512_asm(void);
+int check_keccak_f1600_x4_avx512_asm(void);
+#endif
 #endif /* MLD_SYSV_ABI_SUPPORTED */
 
 static const abicheck_entry_t all_checks[] = {
 #if defined(MLD_SYSV_ABI_SUPPORTED)
-#if defined(MLD_SYS_X86_64_AVX512)
-    {"keccak_f1600_x1_avx512_asm", check_keccak_f1600_x1_avx512_asm},
-#endif
 #if defined(MLD_SYS_X86_64_AVX2)
     {"keccak_f1600_x4_avx2_asm", check_keccak_f1600_x4_avx2_asm},
-#endif
-#if defined(MLD_SYS_X86_64_AVX512)
-    {"keccak_f1600_x4_avx512_asm", check_keccak_f1600_x4_avx512_asm},
-#endif
-#if defined(MLD_SYS_X86_64_AVX2)
     {"invntt_avx2_asm", check_invntt_avx2_asm},
     {"ntt_avx2_asm", check_ntt_avx2_asm},
     {"nttunpack_avx2_asm", check_nttunpack_avx2_asm},
@@ -80,7 +68,11 @@ static const abicheck_entry_t all_checks[] = {
     {"rej_uniform_avx2_asm", check_rej_uniform_avx2_asm},
     {"rej_uniform_eta2_avx2_asm", check_rej_uniform_eta2_avx2_asm},
     {"rej_uniform_eta4_avx2_asm", check_rej_uniform_eta4_avx2_asm},
-#endif           /* MLD_SYS_X86_64_AVX2 */
+#endif /* MLD_SYS_X86_64_AVX2 */
+#if defined(MLD_SYS_X86_64_AVX512)
+    {"keccak_f1600_x1_avx512_asm", check_keccak_f1600_x1_avx512_asm},
+    {"keccak_f1600_x4_avx512_asm", check_keccak_f1600_x4_avx512_asm},
+#endif
 #endif           /* MLD_SYSV_ABI_SUPPORTED */
     {NULL, NULL} /* Sentinel */
 };
