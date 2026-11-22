@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795358174889,
+  "lastUpdate": 1795358184771,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -636584,6 +636584,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 189303,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "a75971e3df336312c4032733c1d6069e0d6da08e",
+          "message": "bench: Add C8a and C8i to the EC2 benchmark matrix\n\nThe x86 EC2 benchmarks cover AMD and Intel instances through C7.\nAdd C8a and C8i so the same jobs also measure AMD EPYC Turin and\nIntel Xeon Granite Rapids.\n\nUse c8a.medium with -march=znver5, matching the single-core C7a\nsetup. Use c8i.metal-48xl with -march=graniterapids. This is the\nsmallest bare-metal C8i size and follows the C7i setup, which moved\nto bare metal after measurements varied on c7i.large.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-22T13:07:09Z",
+          "tree_id": "8b52829f9b4fd292002a9f20e415b36b68d3bdda",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/a75971e3df336312c4032733c1d6069e0d6da08e"
+        },
+        "date": 1795357838138,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 67300,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 199420,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 69407,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 118626,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 325050,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 115123,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 195606,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 418868,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 189326,
             "unit": "cycles"
           }
         ]
