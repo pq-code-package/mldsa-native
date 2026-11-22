@@ -28,6 +28,9 @@ USE_DYNAMIC_FRAMES=1
 CBMC_SUPPORTED_CONFIGS = \
   LP64:bitwuzla \
   LP64:z3_no_bv_extract
+ifndef MLD_CONFIG_REDUCE_RAM
+CBMC_SUPPORTED_CONFIGS += ILP32:z3
+endif
 CBMC_DEFAULT_CONFIG = LP64:bitwuzla
 
 FUNCTION_NAME = mld_ntt_butterfly_block
