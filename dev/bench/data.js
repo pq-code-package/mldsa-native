@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795366440639,
+  "lastUpdate": 1795366462026,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -1009736,6 +1009736,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 236764,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "18547d59651b9dd105c2ce6074dfa6b433c98348",
+          "message": "tests: Check binaries against HOL Light proofs by default\n\nscripts/tests can compare the kernels in each library and binary it\nbuilds with the bytes covered by the HOL Light proofs. This check was\nopt-in because clang and zig encoded some x86_64 instructions with\nswapped operands. The assembly now orders those operands so that GNU\nas and clang agree on the encoding.\n\nDefault check_binary to True in argument parsing and in\ncheck_binary_supported(). Keep the Linux, readelf and PyYAML\nrequirements and --no-check-binary as the opt-out. Update the build\nand proof documentation to describe the default.\n\nPort of pq-code-package/mlkem-native@39ef73d06bd0e9749e0009c92f848882cdb1fea8.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-22T14:33:09Z",
+          "tree_id": "98fbf49b2f33b1d536970d108859969c3e6d4424",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/18547d59651b9dd105c2ce6074dfa6b433c98348"
+        },
+        "date": 1795366461646,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 81918,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 293540,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 87997,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 136501,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 475453,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 142465,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 231223,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 609941,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 236344,
             "unit": "cycles"
           }
         ]
