@@ -5,7 +5,7 @@
 # Definitions added by loading s2n_bignum/riscv/proofs/base.ml, s2n_bignum/common/misc.ml, s2n_bignum/riscv/proofs/consttime.ml, and the HOL Light libraries that these load.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bf75b6c61dae86bbb383785987bc316e20b7ebbf
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
 
 definition ITER
   |- (ITER : num -> ('?1 -> '?1) -> '?1 -> '?1)
@@ -1052,6 +1052,11 @@ definition bytes256
      = (specification "bytes256" bytes256:('A word -> ('A word -> byte, 256 word) component).
          !addr:('A word). bytes256 addr = bytes (addr, 32) :> (asword : (num, 256 word) component))
 
+definition bytes512
+  |- (bytes512 : 'A word -> ('A word -> byte, 512 word) component)
+     = (specification "bytes512" bytes512:('A word -> ('A word -> byte, 512 word) component).
+         !addr:('A word). bytes512 addr = bytes (addr, 64) :> (asword : (num, 512 word) component))
+
 definition top
   |- (top : ('?1 list, '?1) component)
      = component ((\l:('?1 list). HD l), (\h:'?1 l:('?1 list). CONS h (TL l)))
@@ -1155,40 +1160,46 @@ definition _<EventLoad>
      = (\a:('A word # num).
          _mk_address_uarch_event ((\a:('A word # num).
            CONSTR 0
-             (a, (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             (a
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventStore>
   |- (_<EventStore> : 'A word # num -> 'A address_uarch_event)
      = (\a:('A word # num).
          _mk_address_uarch_event ((\a:('A word # num).
            CONSTR (SUC 0)
-             (a, (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             (a
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventJump>
   |- (_<EventJump> : 'A word # 'A word -> 'A address_uarch_event)
      = (\a:('A word # 'A word).
          _mk_address_uarch_event ((\a:('A word # 'A word).
            CONSTR (SUC (SUC 0))
-             ((@v:('A word # num). T), a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+             ((@v:('A word # num). T)
+             , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86PEXT>
   |- (_<EventX86PEXT> : int64 # int64 # num -> 'A address_uarch_event)
      = (\a:(int64 # int64 # num).
          _mk_address_uarch_event ((\a:(int64 # int64 # num).
            CONSTR (SUC (SUC (SUC 0)))
-             ((@v:('A word # num). T), (@v:('A word # 'A word). T), a, (@v:(int64 # num). T))
+             ((@v:('A word # num). T)
+             , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86POPCNT>
   |- (_<EventX86POPCNT> : int64 # num -> 'A address_uarch_event)
@@ -1196,10 +1207,21 @@ definition _<EventX86POPCNT>
          _mk_address_uarch_event ((\a:(int64 # num).
            CONSTR (SUC (SUC (SUC (SUC 0))))
              ((@v:('A word # num). T)
-             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a)
+             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a, (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 #
-                   num) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
+
+definition _<EventX86Opmask>
+  |- (_<EventX86Opmask> : int64 -> 'A address_uarch_event)
+     = (\a:int64.
+         _mk_address_uarch_event ((\a:int64.
+           CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
+             ((@v:('A word # num). T)
+             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+             (\n:num.
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                   (int64 # num) # int64) recspace))) a))
 
 definition EventLoad
   |- (EventLoad : 'A word # num -> 'A address_uarch_event)
@@ -1220,6 +1242,10 @@ definition EventX86PEXT
 definition EventX86POPCNT
   |- (EventX86POPCNT : int64 # num -> 'A address_uarch_event)
      = (_<EventX86POPCNT> : int64 # num -> 'A address_uarch_event)
+
+definition EventX86Opmask
+  |- (EventX86Opmask : int64 -> 'A address_uarch_event)
+     = (_<EventX86Opmask> : int64 -> 'A address_uarch_event)
 
 definition memaccess_inbounds
   |- (memaccess_inbounds : ('A address_uarch_event) list -> ('A word # num) list ->
@@ -2249,73 +2275,87 @@ typedef component
        = {r:('S -> 'V) # ('V -> 'S -> 'S)})
 
 typedef address_uarch_event
-  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace).
+  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+         recspace).
        !address_uarch_event':((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                int64 # num) recspace -> bool).
-         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-             recspace).
+                (int64 # num) # int64) recspace -> bool).
+         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+               int64) recspace).
            (?a:('A word # num).
-             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-               recspace}
+             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                 int64) recspace}
              = (\a:('A word # num).
                  CONSTR 0
                    (a
                    , (@v:('A word # 'A word). T)
-                     , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                     , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                    (\n:num.
                      (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                         int64 # num) recspace))) a)
+                         (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:('A word # num).
                     CONSTR (SUC 0)
                       (a
                       , (@v:('A word # 'A word). T)
-                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # 'A word).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:('A word # 'A word).
                     CONSTR (SUC (SUC 0))
                       ((@v:('A word # num). T)
-                      , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T))
+                      , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:(int64 # int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:(int64 # int64 # num).
                     CONSTR (SUC (SUC (SUC 0)))
                       ((@v:('A word # num). T)
-                      , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T))
+                      , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
            \/ (?a:(int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-                  recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
                 = (\a:(int64 # num).
                     CONSTR (SUC (SUC (SUC (SUC 0))))
                       ((@v:('A word # num). T)
-                      , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a)
+                      , (@v:('A word # 'A word). T)
+                        , (@v:(int64 # int64 # num). T), a, (@v:int64. T))
                       (\n:num.
                         (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            int64 # num) recspace))) a)
+                            (int64 # num) # int64) recspace))) a)
+           \/ (?a:int64.
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
+                    int64) recspace}
+                = (\a:int64.
+                    CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
+                      ((@v:('A word # num). T)
+                      , (@v:('A word # 'A word). T)
+                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+                      (\n:num.
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
+                            (int64 # num) # int64) recspace))) a)
            ==> address_uarch_event' a)
          ==> address_uarch_event' a) {r:(('A word # num) # ('A word # 'A word) #
-         (int64 # int64 # num) # int64 # num) recspace}
+         (int64 # int64 # num) # (int64 # num) # int64) recspace}
      = ((_dest_address_uarch_event : 'A address_uarch_event ->
-           (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace)
-         ((_mk_address_uarch_event : (('A word # num) # ('A word # 'A word) #
-                 (int64 # int64 # num) # int64 # num) recspace -> 'A address_uarch_event)
-           {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num)
-             recspace})
-       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # int64 # num) recspace})
+           (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+             recspace) ((_mk_address_uarch_event : (('A word # num) # ('A word # 'A word) #
+               (int64 # int64 # num) # (int64 # num) # int64) recspace -> 'A address_uarch_event)
+         {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+           recspace})
+       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
+           recspace})
 
 typedef riscvstate
   |- (\a:((int32 # (5 word -> int32) # (int32 -> byte) # (32 address_uarch_event) list) recspace).
