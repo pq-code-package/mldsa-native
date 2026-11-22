@@ -3337,6 +3337,10 @@ def synchronize_file(f, in_dir, out_dir, delete=False, no_simplify=False, **kwar
     if delete is True:
         return basename
 
+    # Skip .inc files when simplification is enabled (they get inlined by simpasm)
+    if no_simplify is False and f.endswith(".inc"):
+        return None
+
     if no_simplify is False and f.endswith(".S"):
         update_via_simpasm(f, out_dir, **kwargs)
     else:
