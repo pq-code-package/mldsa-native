@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795380032017,
+  "lastUpdate": 1795380058249,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -289096,6 +289096,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 172432,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "87dca234c9db761b71067bb1c9cbbc3676f35138",
+          "message": "HOL-Light: Remove unused pure_forward_ntt_mldsa\n\npure_forward_ntt_mldsa is ML-KEM's incomplete 128-term NTT with\nML-DSA's constants, and does not compute the ML-DSA NTT of FIPS 204\nAlgorithm 41. No proof uses it: the theorems are stated with\nmldsa_forward_ntt and arm_mldsa_forward_ntt, and the full NTT is\narm_mldsa_pure_forward_ntt.\n\nRemove it from mldsa_specs.ml.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-22T15:07:06Z",
+          "tree_id": "b27836b6897a54a07f871b6fa3086ebcc12a81b2",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/87dca234c9db761b71067bb1c9cbbc3676f35138"
+        },
+        "date": 1795379702735,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 63073,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 190819,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 67285,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 110779,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 319734,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 111862,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 177061,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 385889,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 175337,
             "unit": "cycles"
           }
         ]
