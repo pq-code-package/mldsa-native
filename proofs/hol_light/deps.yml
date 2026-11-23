@@ -236,7 +236,6 @@ aarch64/mldsa_rej_uniform_eta2_aarch64_asm:
   - proofs/hol_light/common/mldsa_specs.ml
   s2n_bignum:
   - arm/proofs/base.ml
-  - arm/proofs/consttime.ml
   - common/misc.ml
 aarch64/mldsa_rej_uniform_eta4_aarch64_asm:
   files:
