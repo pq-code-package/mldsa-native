@@ -13,7 +13,7 @@
 (* ========================================================================= *)
 needs "s2n_bignum/arm/proofs/base.ml";;
 needs "mldsa_native/aarch64/proofs/aarch64_utils.ml";;
-needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_eta_table.ml";;
+needs "mldsa_native/aarch64/proofs/mldsa_rej_uniform_eta_common.ml";;
 
 (**** print_literal_from_elf "aarch64/mldsa/mldsa_rej_uniform_eta2_aarch64_asm.o";;
  ****)
@@ -151,17 +151,6 @@ let ETA2_LOAD_NIBBLES = prove
    CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
    REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST);;
 
-(* The packed halfword sum contains the eight-bit mask and its population count. *)
-let ETA2_PACKET_MASK = new_definition
- `ETA2_PACKET_MASK p =
-    bitval(p 0) + 2 * bitval(p 1) + 4 * bitval(p 2) + 8 * bitval(p 3) +
-    16 * bitval(p 4) + 32 * bitval(p 5) + 64 * bitval(p 6) + 128 * bitval(p 7)`;;
-
-let ETA2_PACKET_COUNT = new_definition
- `ETA2_PACKET_COUNT p =
-    bitval(p 0) + bitval(p 1) + bitval(p 2) + bitval(p 3) +
-    bitval(p 4) + bitval(p 5) + bitval(p 6) + bitval(p 7)`;;
-
 let ETA2_PACKET_LANES = new_definition
  `ETA2_PACKET_LANES (v:int128) g i =
      word_ult (word_subword v (8 * (8*g+i),8):byte) (word 15)`;;
@@ -173,16 +162,16 @@ let ETA2_PACKET_REGISTERS = prove
          read Q31 s = word 0x01800140012001100108010401020101 /\
          read Q30 s = word 0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f)
     (\s. read PC s = word(pc+0xa4) /\
-         read X14 s = word (ETA2_PACKET_MASK (ETA2_PACKET_LANES v 0)) /\
-         read X15 s = word (ETA2_PACKET_MASK (ETA2_PACKET_LANES v 1)) /\
-         read X12 s = word (ETA2_PACKET_COUNT (ETA2_PACKET_LANES v 0)) /\
-         read X13 s = word (ETA2_PACKET_COUNT (ETA2_PACKET_LANES v 1)))
+         read X14 s = word (MLDSA_ETA_PACKET_MASK (ETA2_PACKET_LANES v 0)) /\
+         read X15 s = word (MLDSA_ETA_PACKET_MASK (ETA2_PACKET_LANES v 1)) /\
+         read X12 s = word (MLDSA_ETA_PACKET_COUNT (ETA2_PACKET_LANES v 0)) /\
+         read X13 s = word (MLDSA_ETA_PACKET_COUNT (ETA2_PACKET_LANES v 1)))
     (MAYCHANGE [PC; X12; X13; X14; X15] ,, MAYCHANGE [Q4; Q5; Q20; Q21])`,
   REPEAT GEN_TAC THEN ENSURES_INIT_TAC "s0" THEN
   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC (1--13) THEN
   RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
   ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-  REWRITE_TAC[ETA2_PACKET_MASK; ETA2_PACKET_COUNT; ETA2_PACKET_LANES] THEN
+  REWRITE_TAC[MLDSA_ETA_PACKET_MASK; MLDSA_ETA_PACKET_COUNT; ETA2_PACKET_LANES] THEN
   CONV_TAC NUM_REDUCE_CONV THEN
   REWRITE_TAC[word_ugt;word_ult;relational2;GT;WORD_SHL_ZERO] THEN
   CONV_TAC WORD_REDUCE_CONV THEN
@@ -221,24 +210,16 @@ let ETA2_REDUCE_REGISTER = prove
   FIRST_X_ASSUM(MP_TAC o CONV_RULE EXPAND_CASES_CONV) THEN
   CONV_TAC NUM_REDUCE_CONV THEN STRIP_TAC THEN ASM_SIMP_TAC[ETA2_TBL_NIBBLE]);;
 
-(* TBL gathers both bytes of each selected halfword. *)
-let ETA2_HALFWORD_GATHER = define
- `ETA2_HALFWORD_GATHER (row:int128) (src:int128) (dst:int128) <=>
-    !i. i < 8 ==> !j. j < 8 ==>
-        word_subword row (16*i,8):byte = word(2*j) /\
-        word_subword row (16*i+8,8):byte = word(2*j+1)
-        ==> word_subword dst (16*i,16):int16 = word_subword src (16*j,16)`;;
-
 let ETA2_GATHER = prove
  (`!pc x y a b. ensures arm
     (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_eta2_mc /\
          read PC s = word(pc+0xb8) /\ read Q16 s = x /\ read Q18 s = y /\
          read Q24 s = a /\ read Q25 s = b)
-    (\s. read PC s = word(pc+0xc0) /\ ETA2_HALFWORD_GATHER a x (read Q16 s) /\
-         ETA2_HALFWORD_GATHER b y (read Q18 s))
+    (\s. read PC s = word(pc+0xc0) /\ MLDSA_ETA_HALFWORD_GATHER a x (read Q16 s) /\
+         MLDSA_ETA_HALFWORD_GATHER b y (read Q18 s))
     (MAYCHANGE [PC] ,, MAYCHANGE [Q16;Q18])`,
   REPEAT GEN_TAC THEN ARM_SIM_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC [1;2] THEN
-  REWRITE_TAC[ETA2_HALFWORD_GATHER] THEN CONJ_TAC THEN CONV_TAC EXPAND_CASES_CONV THEN
+  REWRITE_TAC[MLDSA_ETA_HALFWORD_GATHER] THEN CONJ_TAC THEN CONV_TAC EXPAND_CASES_CONV THEN
   REPEAT CONJ_TAC THEN CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
   REPEAT CONJ_TAC THEN STRIP_TAC THEN ASM_REWRITE_TAC[] THEN
   CONV_TAC(DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
@@ -304,28 +285,8 @@ let ETA2_SETUP = prove
    CONV_TAC(DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
    CONV_TAC WORD_REDUCE_CONV THEN CONV_TAC WORD_BLAST);;
 
-(* Each row gathers the low and high bytes of the accepted halfwords. *)
-let ETA2_INDICES = define
- `ETA2_INDICES (m:byte) = FILTER (\i. bit i m) [0;1;2;3;4;5;6;7]`;;
-
-let ETA2_MASK_INDICES = prove
- (`!p. ETA2_PACKET_MASK p < 256 /\ ETA2_PACKET_COUNT p <= 8 /\
-       ETA2_INDICES(word(ETA2_PACKET_MASK p)) = FILTER p [0;1;2;3;4;5;6;7] /\
-       LENGTH(ETA2_INDICES(word(ETA2_PACKET_MASK p))) = ETA2_PACKET_COUNT p`,
-  GEN_TAC THEN REWRITE_TAC[ETA2_PACKET_MASK; ETA2_PACKET_COUNT; ETA2_INDICES; FILTER] THEN
-  MAP_EVERY BOOL_CASES_TAC (map (fun i -> mk_comb(`p:num->bool`,mk_small_numeral i)) (0--7)) THEN
-  REWRITE_TAC[BITVAL_CLAUSES] THEN CONV_TAC NUM_REDUCE_CONV THEN
-  CONV_TAC WORD_REDUCE_CONV THEN REWRITE_TAC[LENGTH] THEN CONV_TAC NUM_REDUCE_CONV);;
-
-
-let ETA2_NIBBLE = define
- `ETA2_NIBBLE (d:int64) i = word_zx(word_subword d (4*i,4):4 word):byte`;;
-
-let ETA2_LANES = define
- `ETA2_LANES (d:int64) g = MAP (\i. ETA2_NIBBLE d (8*g+i)) [0;1;2;3;4;5;6;7]`;;
-
 let ETA2_GROUP = define
- `ETA2_GROUP d g = MAP ETA2_SAMPLE32 (FILTER (\n:byte. val n < 15) (ETA2_LANES d g))`;;
+ `ETA2_GROUP d g = MAP ETA2_SAMPLE32 (FILTER (\n:byte. val n < 15) (MLDSA_ETA_LANES d g))`;;
 
 let ETA2_BYTE_SPEC = prove
  (`!x:byte. val x < 16 ==>
@@ -334,25 +295,22 @@ let ETA2_BYTE_SPEC = prove
   ASM_REWRITE_TAC[WORD_VAL;word_zx]);;
 
 let ETA2_GROUP_FILTER = prove
- (`!d g. ETA2_GROUP d g = MAP (\j. ETA2_SAMPLE32 (ETA2_NIBBLE d (8*g+j)))
-       (FILTER (\j. val(ETA2_NIBBLE d (8*g+j)) < 15) [0;1;2;3;4;5;6;7])`,
-  REPEAT GEN_TAC THEN REWRITE_TAC[ETA2_GROUP;ETA2_LANES;FILTER_MAP;GSYM MAP_o;o_DEF]);;
+ (`!d g. ETA2_GROUP d g = MAP (\j. ETA2_SAMPLE32 (MLDSA_ETA_NIBBLE d (8*g+j)))
+       (FILTER (\j. val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15) [0;1;2;3;4;5;6;7])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ETA2_GROUP;MLDSA_ETA_LANES;FILTER_MAP;GSYM MAP_o;o_DEF]);;
 
 let ETA2_GROUP_MASK = prove
- (`!d g p. (!j. j < 8 ==> (p j <=> val(ETA2_NIBBLE d (8*g+j)) < 15)) ==>
-      ETA2_GROUP d g = MAP (\j. ETA2_SAMPLE32(ETA2_NIBBLE d (8*g+j)))
-                            (ETA2_INDICES(word(ETA2_PACKET_MASK p)))`,
-  REPEAT GEN_TAC THEN DISCH_TAC THEN MP_TAC(SPEC `p:num->bool` ETA2_MASK_INDICES) THEN
+ (`!d g p. (!j. j < 8 ==> (p j <=> val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15)) ==>
+      ETA2_GROUP d g = MAP (\j. ETA2_SAMPLE32(MLDSA_ETA_NIBBLE d (8*g+j)))
+                            (MLDSA_ETA_INDICES(word(MLDSA_ETA_PACKET_MASK p)))`,
+  REPEAT GEN_TAC THEN DISCH_TAC THEN MP_TAC(SPEC `p:num->bool` MLDSA_ETA_MASK_INDICES) THEN
   STRIP_TAC THEN ASM_REWRITE_TAC[ETA2_GROUP_FILTER;FILTER] THEN
   REPEAT AP_TERM_TAC THEN ASM_SIMP_TAC[ARITH_RULE `0<8 /\ 1<8 /\ 2<8 /\ 3<8 /\ 4<8 /\ 5<8 /\ 6<8 /\ 7<8`]);;
 
-let ETA2_NIBBLE4 = define
- `ETA2_NIBBLE4 (d:int64) g = MAP (\i. word_subword d (4*(8*g+i),4):4 word) [0;1;2;3;4;5;6;7]`;;
-
 let ETA2_GROUP_SPEC = prove
- (`!d g. ETA2_GROUP d g = REJ_SAMPLE_ETA2(ETA2_NIBBLE4 d g)`,
-  REPEAT GEN_TAC THEN REWRITE_TAC[ETA2_GROUP_FILTER; ETA2_NIBBLE4; REJ_SAMPLE_ETA2;
-                    ETA2_NIBBLE;FILTER_MAP;o_DEF;GSYM MAP_o] THEN
+ (`!d g. ETA2_GROUP d g = REJ_SAMPLE_ETA2(MLDSA_ETA_NIBBLE4 d g)`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ETA2_GROUP_FILTER; MLDSA_ETA_NIBBLE4; REJ_SAMPLE_ETA2;
+                    MLDSA_ETA_NIBBLE;FILTER_MAP;o_DEF;GSYM MAP_o] THEN
   SUBGOAL_THEN `!x:4 word. val(word_zx x:byte) = val x` ASSUME_TAC THENL
    [GEN_TAC THEN MATCH_MP_TAC VAL_WORD_ZX THEN REWRITE_TAC[DIMINDEX_4;DIMINDEX_8] THEN ARITH_TAC; ALL_TAC] THEN
   ASM_REWRITE_TAC[o_DEF] THEN
@@ -362,98 +320,30 @@ let ETA2_GROUP_SPEC = prove
    [MP_TAC(INST_TYPE[`:4`,`:N`] VAL_BOUND) THEN REWRITE_TAC[DIMINDEX_4] THEN CONV_TAC NUM_REDUCE_CONV;
     ASM_REWRITE_TAC[WORD_VAL;word_zx]]);;
 
-let ETA2_NIBBLES_CHUNK = prove
- (`!d:int64. BYTES_TO_NIBBLES (MAP (\i. word_subword d (8*i,8):byte) [0;1;2;3;4;5;6;7]) =
-            APPEND (ETA2_NIBBLE4 d 0) (ETA2_NIBBLE4 d 1)`,
-  GEN_TAC THEN REWRITE_TAC[ETA2_NIBBLE4;MAP;BYTES_TO_NIBBLES;APPEND;CONS_11] THEN
-  CONV_TAC NUM_REDUCE_CONV THEN
-  REWRITE_TAC[GSYM BYTE_AND_15_MOD;GSYM BYTE_USHR4_DIV;GSYM word_zx] THEN
-  REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST);;
-
 let ETA2_SAMPLE_APPEND = prove
  (`!xs ys. REJ_SAMPLE_ETA2(APPEND xs ys) = APPEND(REJ_SAMPLE_ETA2 xs)(REJ_SAMPLE_ETA2 ys)`,
   REWRITE_TAC[REJ_SAMPLE_ETA2; FILTER_APPEND; MAP_APPEND]);;
 
-let ETA2_TABLE_ROW = define
- `ETA2_TABLE_ROW m = SUB_LIST(16*m,16) mldsa_rej_uniform_eta_table`;;
-
-let ETA2_BYTES_OF_INDICES = prove
- (`!l:num list. !i. i < LENGTH l ==>
-    let bytes = ITLIST (\j t. CONS (word(2*j)) (CONS (word(2*j+1):byte) t)) l [] in
-    EL (2*i) bytes = word(2 * EL i l) /\ EL (2*i+1) bytes = word(2 * EL i l+1)`,
-  REWRITE_TAC[LET_DEF;LET_END_DEF] THEN LIST_INDUCT_TAC THENL
-   [REWRITE_TAC[LENGTH;LT]; ALL_TAC] THEN
-  X_GEN_TAC `i:num` THEN STRUCT_CASES_TAC (SPEC `i:num` num_CASES) THEN
-  REWRITE_TAC[LENGTH;ITLIST;ARITH_RULE `2*0 = 0`;ARITH_RULE `0+1 = SUC 0`;
-              ARITH_RULE `2 * SUC i + 1 = SUC(SUC(2*i+1))`;
-              ARITH_RULE `2 * SUC i = SUC(SUC(2*i))`;
-              EL;HD;TL;ARITH_RULE `SUC i < SUC n <=> i < n`] THEN
-  ASM_REWRITE_TAC[]);;
-
-let ETA2_TABLE_PREFIX = prove
- (`!m. m < 256 ==>
-    SUB_LIST(0,2 * LENGTH(ETA2_INDICES(word m))) (ETA2_TABLE_ROW m) =
-    ITLIST (\i tl. CONS (word(2*i)) (CONS (word(2*i+1):byte) tl)) (ETA2_INDICES(word m)) []`,
-  CONV_TAC EXPAND_CASES_CONV THEN REWRITE_TAC[ETA2_INDICES; ETA2_TABLE_ROW; FILTER] THEN
-  CONV_TAC(DEPTH_CONV WORD_RED_CONV) THEN
-  REWRITE_TAC[LENGTH; ITLIST] THEN CONV_TAC NUM_REDUCE_CONV THEN
-  REWRITE_TAC[mldsa_rej_uniform_eta_table] THEN
-  CONV_TAC(DEPTH_CONV SUB_LIST_CONV) THEN CONV_TAC(DEPTH_CONV WORD_RED_CONV));;
-
-(* Convert the byte-pair table prefix into the lane facts used by TBL. *)
-let ETA2_ROW_LANES = prove
- (`!m i. m < 256 /\ i < LENGTH(ETA2_INDICES(word m)) ==>
-    let row = word(num_of_wordlist(ETA2_TABLE_ROW m)):int128 in
-    let j = EL i (ETA2_INDICES(word m)) in
-    word_subword row (16*i,8):byte = word(2*j) /\
-    word_subword row (16*i+8,8):byte = word(2*j+1)`,
-  REPEAT GEN_TAC THEN STRIP_TAC THEN REWRITE_TAC[LET_DEF; LET_END_DEF] THEN
-  ABBREV_TAC `idx = ETA2_INDICES(word m)` THEN ABBREV_TAC `row = ETA2_TABLE_ROW m` THEN
-  SUBGOAL_THEN `LENGTH(row:byte list) = 16` ASSUME_TAC THENL
-   [EXPAND_TAC "row" THEN REWRITE_TAC[ETA2_TABLE_ROW; LENGTH_SUB_LIST] THEN
-    SUBGOAL_THEN `LENGTH mldsa_rej_uniform_eta_table = 4096` SUBST1_TAC THENL
-     [REWRITE_TAC[mldsa_rej_uniform_eta_table;LENGTH] THEN CONV_TAC NUM_REDUCE_CONV; ASM_ARITH_TAC]; ALL_TAC] THEN
-  SUBGOAL_THEN `LENGTH(idx:num list) <= 8` ASSUME_TAC THENL
-   [EXPAND_TAC "idx" THEN REWRITE_TAC[ETA2_INDICES] THEN
-    MP_TAC(ISPECL [`\j. bit j (word m:byte)`; `[0;1;2;3;4;5;6;7]`] LENGTH_FILTER) THEN
-    REWRITE_TAC[LENGTH] THEN ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `!k. k < 16 ==> word_subword (word(num_of_wordlist row):int128) (8*k,8):byte = EL k row` ASSUME_TAC THENL
-   [GEN_TAC THEN DISCH_TAC THEN
-    MP_TAC(ISPECL [`row:byte list`; `k:num`] (INST_TYPE [`:128`,`:KL`;`:8`,`:L`] WORD_SUBWORD_NUM_OF_WORDLIST)) THEN
-    ASM_REWRITE_TAC[DIMINDEX_128;DIMINDEX_8] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
-  REWRITE_TAC[ARITH_RULE `16*i = 8*(2*i)`;ARITH_RULE `16*i+8 = 8*(2*i+1)`] THEN
-  SUBGOAL_THEN `2*i < 16 /\ 2*i+1 < 16` STRIP_ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  ASM_REWRITE_TAC[] THEN
-  MP_TAC(SPECL [`idx:num list`; `i:num`] ETA2_BYTES_OF_INDICES) THEN
-  ASM_REWRITE_TAC[LET_DEF;LET_END_DEF] THEN
-  MP_TAC(SPEC `m:num` ETA2_TABLE_PREFIX) THEN ASM_REWRITE_TAC[] THEN
-  DISCH_THEN(SUBST1_TAC o SYM) THEN
-  SUBGOAL_THEN `!k. k < 2 * LENGTH(idx:num list) ==> EL k (SUB_LIST(0,2*LENGTH idx) (row:byte list)) = EL k row` ASSUME_TAC THENL
-   [REPEAT STRIP_TAC THEN MP_TAC(ISPECL [`row:byte list`;`0`;`2*LENGTH(idx:num list)`;`k:num`] EL_SUB_LIST) THEN
-    ASM_REWRITE_TAC[ADD_CLAUSES] THEN ANTS_TAC THENL [ASM_ARITH_TAC; REWRITE_TAC[]]; ALL_TAC] THEN
-  SUBGOAL_THEN `2*i < 2*LENGTH(idx:num list) /\ 2*i+1 < 2*LENGTH idx` STRIP_ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  ASM_SIMP_TAC[]);;
-
 (* A proved gather, followed by USUBL, produces the selected sample at lane i. *)
 let ETA2_GROUP_RESULT = prove
  (`!m row src dst out (nib:num->byte).
-    m < 256 /\ (row:int128) = word(num_of_wordlist(ETA2_TABLE_ROW m)) /\
+    m < 256 /\ (row:int128) = word(num_of_wordlist(MLDSA_ETA_TABLE_ROW m)) /\
     (!j. j < 8 ==> word_subword (src:int128) (16*j,16):int16 = word_zx(word_umod (nib j) (word 5))) /\
-    ETA2_HALFWORD_GATHER row src dst /\
+    MLDSA_ETA_HALFWORD_GATHER row src dst /\
     (!i. i < 8 ==> word_subword (out:int256) (32*i,32):int32 = word_sub (word 2) (word_zx(word_subword dst (16*i,16):int16)))
-    ==> !i. i < LENGTH(ETA2_INDICES(word m)) ==>
-         word_subword out (32*i,32):int32 = ETA2_SAMPLE32(nib(EL i (ETA2_INDICES(word m))))`,
+    ==> !i. i < LENGTH(MLDSA_ETA_INDICES(word m)) ==>
+         word_subword out (32*i,32):int32 = ETA2_SAMPLE32(nib(EL i (MLDSA_ETA_INDICES(word m))))`,
    REPEAT GEN_TAC THEN STRIP_TAC THEN X_GEN_TAC `i:num` THEN DISCH_TAC THEN
-   ABBREV_TAC `idx = ETA2_INDICES(word m)` THEN
+   ABBREV_TAC `idx = MLDSA_ETA_INDICES(word m)` THEN
    SUBGOAL_THEN `LENGTH(idx:num list) <= 8 /\ EL i idx < 8` STRIP_ASSUME_TAC THENL
-    [EXPAND_TAC "idx" THEN REWRITE_TAC[ETA2_INDICES] THEN CONJ_TAC THENL
+    [EXPAND_TAC "idx" THEN REWRITE_TAC[MLDSA_ETA_INDICES] THEN CONJ_TAC THENL
       [MP_TAC(ISPECL [`\j. bit j (word m:byte)`;`[0;1;2;3;4;5;6;7]`] LENGTH_FILTER) THEN REWRITE_TAC[LENGTH] THEN ARITH_TAC;
-       UNDISCH_TAC `i < LENGTH(idx:num list)` THEN EXPAND_TAC "idx" THEN REWRITE_TAC[ETA2_INDICES] THEN DISCH_TAC THEN
+       UNDISCH_TAC `i < LENGTH(idx:num list)` THEN EXPAND_TAC "idx" THEN REWRITE_TAC[MLDSA_ETA_INDICES] THEN DISCH_TAC THEN
        SUBGOAL_THEN `MEM (EL i (FILTER (\j. bit j (word m:byte)) [0;1;2;3;4;5;6;7])) [0;1;2;3;4;5;6;7]` MP_TAC THENL
         [ASM_MESON_TAC[MEM_EL;MEM_FILTER];REWRITE_TAC[MEM] THEN ARITH_TAC]]; ALL_TAC] THEN
    SUBGOAL_THEN `i < 8` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-   MP_TAC(SPECL [`m:num`;`i:num`] ETA2_ROW_LANES) THEN ASM_REWRITE_TAC[LET_DEF;LET_END_DEF] THEN STRIP_TAC THEN
-   UNDISCH_TAC `ETA2_HALFWORD_GATHER row src dst` THEN REWRITE_TAC[ETA2_HALFWORD_GATHER] THEN
+   MP_TAC(SPECL [`m:num`;`i:num`] MLDSA_ETA_ROW_LANES) THEN ASM_REWRITE_TAC[LET_DEF;LET_END_DEF] THEN STRIP_TAC THEN
+   UNDISCH_TAC `MLDSA_ETA_HALFWORD_GATHER row src dst` THEN REWRITE_TAC[MLDSA_ETA_HALFWORD_GATHER] THEN
    DISCH_THEN(MP_TAC o SPEC `i:num`) THEN ASM_REWRITE_TAC[] THEN
    DISCH_THEN(MP_TAC o SPEC `EL i (idx:num list)`) THEN ASM_REWRITE_TAC[] THEN
    DISCH_TAC THEN ASM_SIMP_TAC[ETA2_SAMPLE32] THEN
@@ -461,53 +351,24 @@ let ETA2_GROUP_RESULT = prove
 
 let ETA2_GROUP_MACHINE = prove
  (`!d g p m (src:int128) dst (out:int256).
-    (!j. j < 8 ==> (p j <=> val(ETA2_NIBBLE d (8*g+j)) < 15)) /\
-    m = ETA2_PACKET_MASK p /\
-    (!j. j < 8 ==> word_subword src (16*j,16):int16 = word_zx(word_umod (ETA2_NIBBLE d (8*g+j)) (word 5))) /\
-    ETA2_HALFWORD_GATHER (word(num_of_wordlist(ETA2_TABLE_ROW m))) src dst /\
+    (!j. j < 8 ==> (p j <=> val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15)) /\
+    m = MLDSA_ETA_PACKET_MASK p /\
+    (!j. j < 8 ==> word_subword src (16*j,16):int16 = word_zx(word_umod (MLDSA_ETA_NIBBLE d (8*g+j)) (word 5))) /\
+    MLDSA_ETA_HALFWORD_GATHER (word(num_of_wordlist(MLDSA_ETA_TABLE_ROW m))) src dst /\
     (!i. i < 8 ==> word_subword out (32*i,32):int32 = word_sub (word 2) (word_zx(word_subword dst (16*i,16):int16)))
-    ==> (LENGTH(ETA2_GROUP d g) = ETA2_PACKET_COUNT p /\
+    ==> (LENGTH(ETA2_GROUP d g) = MLDSA_ETA_PACKET_COUNT p /\
         (!i. i < LENGTH(ETA2_GROUP d g) ==> word_subword out (32*i,32):int32 = EL i (ETA2_GROUP d g)) /\
-        ETA2_PACKET_MASK (\j. val(ETA2_NIBBLE d (8*g+j)) < 15) = m)`,
+        MLDSA_ETA_PACKET_MASK (\j. val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15) = m)`,
   REPEAT GEN_TAC THEN STRIP_TAC THEN
   MP_TAC(SPECL [`d:int64`;`g:num`;`p:num->bool`] ETA2_GROUP_MASK) THEN
   ASM_REWRITE_TAC[] THEN DISCH_THEN SUBST1_TAC THEN
-  MP_TAC(SPEC `p:num->bool` ETA2_MASK_INDICES) THEN STRIP_TAC THEN
-  MP_TAC(SPECL [`m:num`;`word(num_of_wordlist(ETA2_TABLE_ROW m)):int128`;`src:int128`;`dst:int128`;`out:int256`;`\j. ETA2_NIBBLE d (8*g+j)`] ETA2_GROUP_RESULT) THEN
+  MP_TAC(SPEC `p:num->bool` MLDSA_ETA_MASK_INDICES) THEN STRIP_TAC THEN
+  MP_TAC(SPECL [`m:num`;`word(num_of_wordlist(MLDSA_ETA_TABLE_ROW m)):int128`;`src:int128`;`dst:int128`;`out:int256`;`\j. MLDSA_ETA_NIBBLE d (8*g+j)`] ETA2_GROUP_RESULT) THEN
   ASM_REWRITE_TAC[LENGTH_MAP] THEN STRIP_TAC THEN CONJ_TAC THENL
    [X_GEN_TAC `i:num` THEN DISCH_TAC THEN
     SUBGOAL_THEN `i < LENGTH(FILTER p [0;1;2;3;4;5;6;7])` ASSUME_TAC THENL
      [ASM_MESON_TAC[];ASM_SIMP_TAC[EL_MAP]];
-    REWRITE_TAC[ETA2_PACKET_MASK] THEN ASM_SIMP_TAC[ARITH_RULE `0<8 /\ 1<8 /\ 2<8 /\ 3<8 /\ 4<8 /\ 5<8 /\ 6<8 /\ 7<8`]]);;
-
-let ETA2_READ_BYTES_SLICE = prove
- (`!(a:int64) k n (L:byte list) (s:armstate).
-      read(memory:>bytes(a,LENGTH L)) s = num_of_wordlist L /\ k + n <= LENGTH L
-      ==> read(memory:>bytes(word_add a (word k), n)) s = num_of_wordlist(SUB_LIST(k,n) L)`,
-  REPEAT STRIP_TAC THEN
-  SUBGOAL_THEN `k + (LENGTH(L:byte list) - k) = LENGTH L` ASSUME_TAC THENL
-   [ASM_ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `n + (LENGTH(L:byte list) - (k+n)) = LENGTH L - k` ASSUME_TAC THENL
-   [ASM_ARITH_TAC; ALL_TAC] THEN
-  SUBGOAL_THEN `read(memory:>bytes(word_add a (word k), LENGTH(L:byte list) - k)) s =
-                num_of_wordlist(SUB_LIST(k, LENGTH L - k) L)` ASSUME_TAC THENL
-   [MP_TAC(ISPECL [`memory:(armstate,int64->byte)component`; `a:int64`; `s:armstate`;
-       `SUB_LIST(0,k) (L:byte list)`; `SUB_LIST(k, LENGTH(L:byte list) - k) L`;
-       `k:num`; `LENGTH(L:byte list) - k`] BYTES_EQ_NUM_OF_WORDLIST_APPEND) THEN
-    REWRITE_TAC[DIMINDEX_8; LENGTH_SUB_LIST; SUB_0] THEN
-    ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-    ASM_REWRITE_TAC[SUB_LIST_TOPSPLIT] THEN
-    DISCH_THEN(fun th -> REWRITE_TAC[th]);
-    ALL_TAC] THEN
-  MP_TAC(ISPECL [`memory:(armstate,int64->byte)component`; `word_add a (word k):int64`; `s:armstate`;
-     `SUB_LIST(k,n) (L:byte list)`; `SUB_LIST(k+n, LENGTH(L:byte list) - (k+n)) L`;
-     `n:num`; `LENGTH(L:byte list) - (k + n)`] BYTES_EQ_NUM_OF_WORDLIST_APPEND) THEN
-  REWRITE_TAC[DIMINDEX_8; LENGTH_SUB_LIST] THEN
-  ANTS_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
-  MP_TAC(ISPECL [`L:byte list`; `n:num`; `LENGTH(L:byte list) - (k+n)`; `k:num`] SUB_LIST_SPLIT) THEN
-  ASM_REWRITE_TAC[] THEN
-  DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN ASM_REWRITE_TAC[] THEN
-  DISCH_THEN(fun th -> REWRITE_TAC[th]));;
+    REWRITE_TAC[MLDSA_ETA_PACKET_MASK] THEN ASM_SIMP_TAC[ARITH_RULE `0<8 /\ 1<8 /\ 2<8 /\ 3<8 /\ 4<8 /\ 5<8 /\ 6<8 /\ 7<8`]]);;
 
 let ETA2_LOAD_TABLE = prove
  (`!pc table a b e. a < 256 /\ b < 256 ==>
@@ -517,8 +378,8 @@ let ETA2_LOAD_TABLE = prove
          read X14 s = word a /\ read X15 s = word b /\ read events s = e /\
          read(memory :> bytes(table,4096)) s = num_of_wordlist mldsa_rej_uniform_eta_table)
     (\s. read PC s = word(pc+0xac) /\
-         read Q24 s = word(num_of_wordlist(ETA2_TABLE_ROW a)) /\
-         read Q25 s = word(num_of_wordlist(ETA2_TABLE_ROW b)) /\
+         read Q24 s = word(num_of_wordlist(MLDSA_ETA_TABLE_ROW a)) /\
+         read Q25 s = word(num_of_wordlist(MLDSA_ETA_TABLE_ROW b)) /\
          read events s = APPEND [EventLoad(word_add table (word(16*b)),16);
                                  EventLoad(word_add table (word(16*a)),16)] e)
     (MAYCHANGE [PC] ,, MAYCHANGE [Q24;Q25] ,, MAYCHANGE [events])`,
@@ -529,12 +390,12 @@ let ETA2_LOAD_TABLE = prove
   SUBGOAL_THEN `LENGTH mldsa_rej_uniform_eta_table = 4096` ASSUME_TAC THENL
    [REWRITE_TAC[mldsa_rej_uniform_eta_table; LENGTH] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
   SUBGOAL_THEN `!r. r < 256 ==> read(memory :> bytes128(word_add table (word(16*r)))) s0 =
-                  word(num_of_wordlist(ETA2_TABLE_ROW r))`
+                  word(num_of_wordlist(MLDSA_ETA_TABLE_ROW r))`
     (fun th -> MAP_EVERY (fun r -> ASSUME_TAC(MATCH_MP (SPEC r th) (ASSUME(vsubst [r,`r:num`] `r < 256`))) ) [`a:num`; `b:num`]) THENL
-   [X_GEN_TAC `r:num` THEN DISCH_TAC THEN REWRITE_TAC[ETA2_TABLE_ROW; bytes128;READ_COMPONENT_COMPOSE;asword;through;read] THEN
+   [X_GEN_TAC `r:num` THEN DISCH_TAC THEN REWRITE_TAC[MLDSA_ETA_TABLE_ROW; bytes128;READ_COMPONENT_COMPOSE;asword;through;read] THEN
     AP_TERM_TAC THEN
     MP_TAC(ISPECL [`table:int64`; `16*r`; `16`; `mldsa_rej_uniform_eta_table`; `s0:armstate`]
-                  ETA2_READ_BYTES_SLICE) THEN ASM_REWRITE_TAC[] THEN ANTS_TAC THENL
+                  MLDSA_ETA_READ_BYTES_SLICE) THEN ASM_REWRITE_TAC[] THEN ANTS_TAC THENL
      [ASM_ARITH_TAC; REWRITE_TAC[READ_COMPONENT_COMPOSE]];
     ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC [1;2] THEN ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[APPEND]]);;
 
@@ -554,8 +415,8 @@ let ETA2_BATCH_REGISTERS = prove
          read X12 s = word(LENGTH(ETA2_GROUP d 0)) /\ read X13 s = word(LENGTH(ETA2_GROUP d 1)) /\
          (!i. i < LENGTH(ETA2_GROUP d 0) ==> word_subword (word_join (read Q17 s) (read Q16 s):int256) (32*i,32):int32 = EL i (ETA2_GROUP d 0)) /\
          (!i. i < LENGTH(ETA2_GROUP d 1) ==> word_subword (word_join (read Q19 s) (read Q18 s):int256) (32*i,32):int32 = EL i (ETA2_GROUP d 1)) /\
-         read events s = APPEND [EventLoad(word_add table (word(16*ETA2_PACKET_MASK (\i. val(ETA2_NIBBLE d (8+i)) < 15))),16);
-                                 EventLoad(word_add table (word(16*ETA2_PACKET_MASK (\i. val(ETA2_NIBBLE d i) < 15))),16);
+         read events s = APPEND [EventLoad(word_add table (word(16*MLDSA_ETA_PACKET_MASK (\i. val(MLDSA_ETA_NIBBLE d (8+i)) < 15))),16);
+                                 EventLoad(word_add table (word(16*MLDSA_ETA_PACKET_MASK (\i. val(MLDSA_ETA_NIBBLE d i) < 15))),16);
                                  EventLoad(buf,8)] e)
     (MAYCHANGE [PC;X1;X12;X13;X14;X15] ,,
      MAYCHANGE [Q0;Q2;Q3;Q4;Q5;Q6;Q16;Q17;Q18;Q19;Q20;Q21;Q24;Q25] ,, MAYCHANGE [events])`,
@@ -565,10 +426,10 @@ let ETA2_BATCH_REGISTERS = prove
   REABBREV_TAC `nibbles:int128 = read Q6 s1` THEN
   MP_TAC(ISPECL [`nibbles:int128`;`pc:num`] ETA2_PACKET_REGISTERS) THEN
   ARM_BIGSTEP_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC "s2" THEN
-  ABBREV_TAC `a = ETA2_PACKET_MASK (ETA2_PACKET_LANES nibbles 0)` THEN
-  ABBREV_TAC `b = ETA2_PACKET_MASK (ETA2_PACKET_LANES nibbles 1)` THEN
+  ABBREV_TAC `a = MLDSA_ETA_PACKET_MASK (ETA2_PACKET_LANES nibbles 0)` THEN
+  ABBREV_TAC `b = MLDSA_ETA_PACKET_MASK (ETA2_PACKET_LANES nibbles 1)` THEN
   SUBGOAL_THEN `a < 256 /\ b < 256` STRIP_ASSUME_TAC THENL
-   [EXPAND_TAC "a" THEN EXPAND_TAC "b" THEN REWRITE_TAC[ETA2_MASK_INDICES]; ALL_TAC] THEN
+   [EXPAND_TAC "a" THEN EXPAND_TAC "b" THEN REWRITE_TAC[MLDSA_ETA_MASK_INDICES]; ALL_TAC] THEN
   MP_TAC(ISPECL [`pc:num`;`table:int64`;`a:num`;`b:num`;`CONS(EventLoad(buf,8)) e`] ETA2_LOAD_TABLE) THEN
   ASM_REWRITE_TAC[] THEN ARM_BIGSTEP_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC "s3" THEN
   SUBGOAL_THEN `!i. i < 16 ==> val(word_subword (nibbles:int128) (8*i,8):byte) < 16` ASSUME_TAC THENL
@@ -582,7 +443,7 @@ let ETA2_BATCH_REGISTERS = prove
   MP_TAC(ISPECL [`pc:num`;`reduced:int128`] ETA2_WIDEN_NIBBLES) THEN
   ARM_BIGSTEP_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC "s5" THEN
   MAP_EVERY REABBREV_TAC [`leftsrc:int128 = read Q16 s5`; `rightsrc:int128 = read Q18 s5`] THEN
-  MP_TAC(ISPECL [`pc:num`;`leftsrc:int128`;`rightsrc:int128`;`word(num_of_wordlist(ETA2_TABLE_ROW a)):int128`;`word(num_of_wordlist(ETA2_TABLE_ROW b)):int128`] ETA2_GATHER) THEN
+  MP_TAC(ISPECL [`pc:num`;`leftsrc:int128`;`rightsrc:int128`;`word(num_of_wordlist(MLDSA_ETA_TABLE_ROW a)):int128`;`word(num_of_wordlist(MLDSA_ETA_TABLE_ROW b)):int128`] ETA2_GATHER) THEN
   ARM_BIGSTEP_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC "s6" THEN
   MAP_EVERY REABBREV_TAC [`cx:int128 = read Q16 s6`; `cy:int128 = read Q18 s6`] THEN
   MP_TAC(ISPECL [`pc:num`;`cx:int128`;`cy:int128`] ETA2_WIDEN) THEN
@@ -592,7 +453,7 @@ let ETA2_BATCH_REGISTERS = prove
      let pred = mk_icomb(mk_icomb(`ETA2_PACKET_LANES`, `nibbles:int128`),idx) in
      MP_TAC(SPECL [`d:int64`;idx;pred;m;src;dst;out] ETA2_GROUP_MACHINE) THEN
      ANTS_TAC THENL
-      [ASM_REWRITE_TAC[ETA2_PACKET_LANES;ETA2_NIBBLE;word_ult;relational2] THEN
+      [ASM_REWRITE_TAC[ETA2_PACKET_LANES;MLDSA_ETA_NIBBLE;word_ult;relational2] THEN
        CONV_TAC NUM_REDUCE_CONV THEN REWRITE_TAC[ADD_CLAUSES;MULT_CLAUSES] THEN
        REPEAT CONJ_TAC THEN X_GEN_TAC `j:num` THEN DISCH_TAC THEN
        ASSUME_TAC(MATCH_MP (ARITH_RULE `j < 8 ==> j < 16 /\ 8+j < 16 /\ j+8 < 16`) (ASSUME `j < 8`)) THEN
@@ -618,24 +479,6 @@ let ETA2_SHORT_EVENTS = new_definition
     let e = CONS (EventJump(word(pc+0x12c),word(pc+(if w then 0x130 else 0x134)))) e in
     if w then CONS (EventStore(dst2,4)) e else e`;;
 
-let eta2_split_store =
-  let split = CONJUNCTS READ_MEMORY_BYTESIZED_UNSPLIT in
-  fun th -> CONV_RULE(TOP_DEPTH_CONV (GEN_REWRITE_CONV I [el 1 split;el 2 split])) th;;
-
-let ETA2_STP_PREFIX = prove
- (`!dst (s:armstate) lo hi.
-    read(memory :> bytes128 dst) s = lo /\
-    read(memory :> bytes128(word_add dst (word 16))) s = hi ==>
-    !i. i < 8 ==> read(memory :> bytes32(word_add dst (word(4*i)))) s =
-                  word_subword (word_join hi lo:int256) (32*i,32)`,
-  REPEAT GEN_TAC THEN STRIP_TAC THEN
-  RULE_ASSUM_TAC eta2_split_store THEN
-  RULE_ASSUM_TAC(REWRITE_RULE[GSYM WORD_ADD_ASSOC]) THEN
-  RULE_ASSUM_TAC(CONV_RULE(DEPTH_CONV WORD_ADD_CONV)) THEN
-  CONV_TAC EXPAND_CASES_CONV THEN CONV_TAC NUM_REDUCE_CONV THEN
-  ASM_REWRITE_TAC[WORD_ADD_0] THEN CONV_TAC(DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-  REPEAT CONJ_TAC THEN CONV_TAC WORD_BLAST);;
-
 let ETA2_STORE_SHORT = prove
  (`!k. k < 8 ==> !dst pc (lo:int128) (hi:int128) e.
     nonoverlapping (word pc,360) (dst,4*k) ==>
@@ -656,7 +499,7 @@ let ETA2_STORE_SHORT = prove
     ENSURES_INIT_TAC "s0" THEN
     ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC
       (1--(4 + (if k land 4 = 0 then 0 else 2) + (if k land 2 = 0 then 0 else 2) + k mod 2)) THEN
-    RULE_ASSUM_TAC eta2_split_store THEN
+    RULE_ASSUM_TAC mldsa_eta_split_store THEN
     RULE_ASSUM_TAC(CONV_RULE(DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
     RULE_ASSUM_TAC(REWRITE_RULE[GSYM WORD_ADD_ASSOC; WORD_ADD_0; WORD_ADD]) THEN
     RULE_ASSUM_TAC(CONV_RULE(DEPTH_CONV WORD_ADD_CONV)) THEN
@@ -704,14 +547,14 @@ let ETA2_FAST_STORE = prove
   SUBGOAL_THEN `!i. i < a ==> read(memory :> bytes32(word_add dst (word(4*i)))) s4 =
                              word_subword (word_join (u1:int128) (u0:int128):int256) (32*i,32)` ASSUME_TAC THENL
    [X_GEN_TAC `i:num` THEN DISCH_TAC THEN
-    MP_TAC(ISPECL [`dst:int64`; `s4:armstate`; `u0:int128`; `u1:int128`] ETA2_STP_PREFIX) THEN
+    MP_TAC(ISPECL [`dst:int64`; `s4:armstate`; `u0:int128`; `u1:int128`] MLDSA_ETA_STP_PREFIX) THEN
     ASM_REWRITE_TAC[] THEN DISCH_THEN(MP_TAC o SPEC `i:num`) THEN
     ANTS_TAC THENL [ASM_ARITH_TAC; REWRITE_TAC[]]; ALL_TAC] THEN
   ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC (5--8) THEN
   SUBGOAL_THEN `!i. i < b ==> read(memory :> bytes32(word_add dst (word(4*(a+i))))) s8 =
                              word_subword (word_join (v1:int128) (v0:int128):int256) (32*i,32)` ASSUME_TAC THENL
    [X_GEN_TAC `i:num` THEN DISCH_TAC THEN
-    MP_TAC(ISPECL [`word_add dst (word(4*a)):int64`; `s8:armstate`; `v0:int128`; `v1:int128`] ETA2_STP_PREFIX) THEN
+    MP_TAC(ISPECL [`word_add dst (word(4*a)):int64`; `s8:armstate`; `v0:int128`; `v1:int128`] MLDSA_ETA_STP_PREFIX) THEN
     REWRITE_TAC[GSYM WORD_ADD_ASSOC; GSYM WORD_ADD] THEN ASM_REWRITE_TAC[] THEN
     DISCH_THEN(MP_TAC o SPEC `i:num`) THEN ANTS_TAC THENL [ASM_ARITH_TAC; REWRITE_TAC[LEFT_ADD_DISTRIB]]; ALL_TAC] THEN
   RULE_ASSUM_TAC(CONV_RULE NUM_REDUCE_CONV) THEN ENSURES_FINAL_STATE_TAC THEN
@@ -759,7 +602,7 @@ let ETA2_STORE_GROUP = prove
      [ASM_ARITH_TAC; ALL_TAC] THEN
     ARM_STEPS_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC (1--4) THEN ENSURES_FINAL_STATE_TAC THEN
     ASM_SIMP_TAC[ETA2_GROUP_EVENTS; APPEND; ARITH_RULE `8 <= k ==> MIN k 8 = 8`] THEN
-    MATCH_MP_TAC ETA2_STP_PREFIX THEN ASM_REWRITE_TAC[]]);;
+    MATCH_MP_TAC MLDSA_ETA_STP_PREFIX THEN ASM_REWRITE_TAC[]]);;
 (* After each store, test whether the group fills the polynomial. *)
 let ETA2_AFTER_GROUP_EVENTS = new_definition
  `ETA2_AFTER_GROUP_EVENTS pc last k a e =
@@ -941,10 +784,10 @@ let ETA2_RUN_EVENTS = new_recursive_definition num_RECURSION
  `(ETA2_RUN_EVENTS res buf table pc ra mask 0 i k e = e) /\
   (ETA2_RUN_EVENTS res buf table pc ra mask (SUC n) i k e =
     let p = \g j. EL (16*i+8*g+j) mask in
-    let a = ETA2_PACKET_COUNT (p 0) in
-    let b = ETA2_PACKET_COUNT (p 1) in
+    let a = MLDSA_ETA_PACKET_COUNT (p 0) in
+    let b = MLDSA_ETA_PACKET_COUNT (p 1) in
     let e = ETA2_BLOCK_EVENTS res buf table pc i k
-              (ETA2_PACKET_MASK (p 0)) (ETA2_PACKET_MASK (p 1)) a b e in
+              (MLDSA_ETA_PACKET_MASK (p 0)) (MLDSA_ETA_PACKET_MASK (p 1)) a b e in
     if k <= a+b then CONS (EventJump(word(pc+0x164),ra)) e
     else if n = 0 then
       APPEND [EventJump(word(pc+0x164),ra);
@@ -1013,11 +856,6 @@ let ETA2_BLOCK_INBOUNDS = prove
     MATCH_MP_TAC ETA2_TAIL_INBOUNDS THEN CONJ_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
     ONCE_REWRITE_TAC[MEMACCESS_INBOUNDS_CONS] THEN ASM_REWRITE_TAC[memaccess_inbounds; ALL]]);;
 
-let ETA2_PACKET_BOUNDS = prove
- (`!p. ETA2_PACKET_MASK p < 256 /\ ETA2_PACKET_COUNT p <= 8`,
-  GEN_TAC THEN REWRITE_TAC[ETA2_PACKET_MASK; ETA2_PACKET_COUNT] THEN
-  MAP_EVERY (fun i -> MP_TAC(SPEC (mk_comb(`p:num->bool`,mk_small_numeral i)) BITVAL_BOUND)) (0--7) THEN ARITH_TAC);;
-
 let ETA2_RUN_INBOUNDS = prove
  (`!blocks i k e res buf table pc ra mask len.
     8*(i+blocks) <= len /\ k <= 256 /\
@@ -1028,9 +866,9 @@ let ETA2_RUN_INBOUNDS = prove
   REWRITE_TAC[LET_DEF; LET_END_DEF] THEN BETA_TAC THEN
   ABBREV_TAC `lo = \j. EL (16*i+8*0+j) (mask:bool list)` THEN
   ABBREV_TAC `hi = \j. EL (16*i+8*1+j) (mask:bool list)` THEN
-  MAP_EVERY (STRIP_ASSUME_TAC o C SPEC ETA2_PACKET_BOUNDS) [`lo:num->bool`;`hi:num->bool`] THEN
+  MAP_EVERY (STRIP_ASSUME_TAC o C SPEC MLDSA_ETA_PACKET_BOUNDS) [`lo:num->bool`;`hi:num->bool`] THEN
   ABBREV_TAC `blocktrace = ETA2_BLOCK_EVENTS res buf table pc i k
-    (ETA2_PACKET_MASK lo) (ETA2_PACKET_MASK hi) (ETA2_PACKET_COUNT lo) (ETA2_PACKET_COUNT hi) e` THEN
+    (MLDSA_ETA_PACKET_MASK lo) (MLDSA_ETA_PACKET_MASK hi) (MLDSA_ETA_PACKET_COUNT lo) (MLDSA_ETA_PACKET_COUNT hi) e` THEN
   SUBGOAL_THEN `memaccess_inbounds (blocktrace:uarch_event list) [buf,len;table,4096] [res,1024]` ASSUME_TAC THENL
    [EXPAND_TAC "blocktrace" THEN MATCH_MP_TAC ETA2_BLOCK_INBOUNDS THEN ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC; ALL_TAC] THEN
   REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THENL
@@ -1067,25 +905,9 @@ let REJ_MASK_ETA2 = define
   `REJ_MASK_ETA2 (l:byte list) : bool list =
    MAP (\x:int16. val x < 15) (NIBBLES_OF_BYTES l)`;;
 
-let NIBBLES_OF_BYTES_SUB_LIST = prove
- (`!l a b. NIBBLES_OF_BYTES(SUB_LIST(a,b) l) =
-           SUB_LIST(2*a,2*b)(NIBBLES_OF_BYTES l)`,
-  LIST_INDUCT_TAC THEN REPEAT GEN_TAC THEN
-  MAP_EVERY (fun v -> STRUCT_CASES_TAC(SPEC v num_CASES)) [`a:num`;`b:num`] THEN
-  ASM_REWRITE_TAC[NIBBLES_OF_BYTES; NIBBLE_PAIR; SUB_LIST_CLAUSES; APPEND;
-              MULT_CLAUSES; ADD_CLAUSES; ARITH_RULE `2 * SUC n = SUC(SUC(2*n))`] THEN
-  ASM_REWRITE_TAC[SUB_LIST_CLAUSES; APPEND]);;
-
-let SUB_LIST_MAP_GEN = prove
- (`!(f:A->B) l a b. SUB_LIST(a,b)(MAP f l) = MAP f (SUB_LIST(a,b) l)`,
-  GEN_TAC THEN LIST_INDUCT_TAC THEN REPEAT GEN_TAC THEN
-  MAP_EVERY (fun v -> STRUCT_CASES_TAC(SPEC v num_CASES)) [`a:num`;`b:num`] THEN
-  ASM_REWRITE_TAC[MAP; SUB_LIST_CLAUSES]);;
-
 let REJ_MASK_ETA2_SUB_LIST = prove
  (`!l a b. REJ_MASK_ETA2(SUB_LIST(a,b) l) = SUB_LIST(2*a,2*b)(REJ_MASK_ETA2 l)`,
   REWRITE_TAC[REJ_MASK_ETA2; NIBBLES_OF_BYTES_SUB_LIST; SUB_LIST_MAP_GEN]);;
-
 
 let ETA2_REJ_MASK_NIBBLES = prove
  (`!bs. REJ_MASK_ETA2 bs = MAP (\n:4 word. val n < 15) (BYTES_TO_NIBBLES bs)`,
@@ -1093,12 +915,11 @@ let ETA2_REJ_MASK_NIBBLES = prove
   SIMP_TAC[VAL_WORD_ZX; DIMINDEX_4; DIMINDEX_16; ARITH_RULE `4 <= 16`]);;
 
 let ETA2_INPUT_GROUP_MASK = prove
- (`!d g j. j < 8 ==> EL j (MAP (\n:4 word. val n < 15) (ETA2_NIBBLE4 d g)) =
-                         (val(ETA2_NIBBLE d (8*g+j)) < 15)`,
+ (`!d g j. j < 8 ==> EL j (MAP (\n:4 word. val n < 15) (MLDSA_ETA_NIBBLE4 d g)) =
+                         (val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15)`,
   GEN_TAC THEN GEN_TAC THEN CONV_TAC EXPAND_CASES_CONV THEN
-  REWRITE_TAC[ETA2_NIBBLE4;ETA2_NIBBLE;MAP;EL_CONS] THEN CONV_TAC NUM_REDUCE_CONV THEN
+  REWRITE_TAC[MLDSA_ETA_NIBBLE4;MLDSA_ETA_NIBBLE;MAP;EL_CONS] THEN CONV_TAC NUM_REDUCE_CONV THEN
   SIMP_TAC[VAL_WORD_ZX;DIMINDEX_4;DIMINDEX_8;ARITH_RULE `4 <= 8`]);;
-
 
 let ETA2_INPUT_CHUNK = prove
  (`!buf len bs i s (d:int64).
@@ -1106,66 +927,39 @@ let ETA2_INPUT_CHUNK = prove
     read(memory:>bytes(buf,len)) s = num_of_wordlist bs /\
     read(memory:>bytes64(word_add buf (word(8*i)))) s = d
     ==> REJ_SAMPLE_ETA2(BYTES_TO_NIBBLES(SUB_LIST(8*i,8)bs)) = APPEND(ETA2_GROUP d 0)(ETA2_GROUP d 1) /\
-        (!g j. g<2 /\ j<8 ==> (EL(16*i+8*g+j)(REJ_MASK_ETA2 bs) <=> val(ETA2_NIBBLE d (8*g+j)) < 15))`,
+        (!g j. g<2 /\ j<8 ==> (EL(16*i+8*g+j)(REJ_MASK_ETA2 bs) <=> val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15))`,
   REPEAT GEN_TAC THEN STRIP_TAC THEN
   SUBGOAL_THEN `SUB_LIST(8*i,8) bs = MAP (\j. word_subword (d:int64) (8*j,8):byte) [0;1;2;3;4;5;6;7]` ASSUME_TAC THENL
    [MP_TAC(ISPECL [`buf:int64`;`len:num`;`bs:byte list`;`i:num`;`s:armstate`] SUB_LIST_8_BYTES_FROM_INT64) THEN
     ASM_REWRITE_TAC[MAP] THEN CONV_TAC NUM_REDUCE_CONV; ALL_TAC] THEN
-  CONJ_TAC THENL [ASM_REWRITE_TAC[ETA2_NIBBLES_CHUNK;ETA2_SAMPLE_APPEND;ETA2_GROUP_SPEC];ALL_TAC] THEN
+  CONJ_TAC THENL [ASM_REWRITE_TAC[MLDSA_ETA_NIBBLES_CHUNK;ETA2_SAMPLE_APPEND;ETA2_GROUP_SPEC];ALL_TAC] THEN
   REPEAT STRIP_TAC THEN
   MP_TAC(ISPECL [`bs:byte list`;`8*i`;`8`] REJ_MASK_ETA2_SUB_LIST) THEN
   DISCH_THEN(MP_TAC o AP_TERM `EL(8*g+j) : bool list->bool`) THEN
   SUBGOAL_THEN `8*g+j < 16 /\ 2*(8*i)+8*g+j < LENGTH(REJ_MASK_ETA2 bs)` STRIP_ASSUME_TAC THENL
    [ASM_REWRITE_TAC[ETA2_REJ_MASK_NIBBLES;LENGTH_MAP;LENGTH_BYTES_TO_NIBBLES] THEN ASM_ARITH_TAC;ALL_TAC] THEN
-  ASM_SIMP_TAC[EL_SUB_LIST;ARITH_RULE `2*8=16`; ARITH_RULE `2*(8*i)+(8*g+j)=16*i+8*g+j`;ETA2_REJ_MASK_NIBBLES;ETA2_NIBBLES_CHUNK;MAP_APPEND] THEN
-  SUBGOAL_THEN `LENGTH(MAP (\n:4 word. val n < 15) (ETA2_NIBBLE4 d 0)) = 8` ASSUME_TAC THENL
-   [REWRITE_TAC[ETA2_NIBBLE4;LENGTH_MAP;LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;ALL_TAC] THEN
+  ASM_SIMP_TAC[EL_SUB_LIST;ARITH_RULE `2*8=16`; ARITH_RULE `2*(8*i)+(8*g+j)=16*i+8*g+j`;ETA2_REJ_MASK_NIBBLES;MLDSA_ETA_NIBBLES_CHUNK;MAP_APPEND] THEN
+  SUBGOAL_THEN `LENGTH(MAP (\n:4 word. val n < 15) (MLDSA_ETA_NIBBLE4 d 0)) = 8` ASSUME_TAC THENL
+   [REWRITE_TAC[MLDSA_ETA_NIBBLE4;LENGTH_MAP;LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;ALL_TAC] THEN
   MP_TAC(ISPECL [`d:int64`;`g:num`;`j:num`] ETA2_INPUT_GROUP_MASK) THEN ASM_REWRITE_TAC[] THEN
   SUBGOAL_THEN `g=0 \/ g=1` STRIP_ASSUME_TAC THENL [ASM_ARITH_TAC;ALL_TAC;ALL_TAC] THEN
   ASM_REWRITE_TAC[EL_APPEND;MULT_CLAUSES;ADD_CLAUSES;ARITH_RULE `~(8+j<8) /\ (8+j)-8=j`] THEN
   ASM_MESON_TAC[ETA2_REJ_MASK_NIBBLES]);;
 
 let ETA2_INPUT_MASK_COUNTS = prove
- (`!d g p. (!j. j<8 ==> (p j <=> val(ETA2_NIBBLE d (8*g+j)) < 15)) ==>
-    LENGTH(ETA2_GROUP d g) = ETA2_PACKET_COUNT p /\ LENGTH(ETA2_GROUP d g) <= 8 /\
-    ETA2_PACKET_MASK (\j. val(ETA2_NIBBLE d(8*g+j)) < 15) = ETA2_PACKET_MASK p`,
+ (`!d g p. (!j. j<8 ==> (p j <=> val(MLDSA_ETA_NIBBLE d (8*g+j)) < 15)) ==>
+    LENGTH(ETA2_GROUP d g) = MLDSA_ETA_PACKET_COUNT p /\ LENGTH(ETA2_GROUP d g) <= 8 /\
+    MLDSA_ETA_PACKET_MASK (\j. val(MLDSA_ETA_NIBBLE d(8*g+j)) < 15) = MLDSA_ETA_PACKET_MASK p`,
   REPEAT GEN_TAC THEN DISCH_TAC THEN
   MP_TAC(ISPECL [`d:int64`;`g:num`;`p:num->bool`] ETA2_GROUP_MASK) THEN ASM_REWRITE_TAC[] THEN
-  DISCH_THEN SUBST1_TAC THEN MP_TAC(SPEC `p:num->bool` ETA2_MASK_INDICES) THEN
-  SIMP_TAC[LENGTH_MAP] THEN STRIP_TAC THEN ASM_REWRITE_TAC[ETA2_PACKET_MASK] THEN
+  DISCH_THEN SUBST1_TAC THEN MP_TAC(SPEC `p:num->bool` MLDSA_ETA_MASK_INDICES) THEN
+  SIMP_TAC[LENGTH_MAP] THEN STRIP_TAC THEN ASM_REWRITE_TAC[MLDSA_ETA_PACKET_MASK] THEN
   ASM_SIMP_TAC[ARITH_RULE `0<8 /\ 1<8 /\ 2<8 /\ 3<8 /\ 4<8 /\ 5<8 /\ 6<8 /\ 7<8`]);;
-
-let ETA2_OUTPUT_WORDLIST = prove
- (`!xs:int32 list. !a s:armstate.
-    (!i. i < LENGTH xs ==> read(memory :> bytes32(word_add a (word(4*i)))) s = EL i xs) ==>
-    read(memory :> bytes(a,4*LENGTH xs)) s = num_of_wordlist xs`,
-  REPEAT GEN_TAC THEN DISCH_TAC THEN
-  MP_TAC(ISPECL [`a:int64`;`LENGTH(xs:int32 list)`;`4*LENGTH(xs:int32 list)`;`xs:int32 list`;`s:armstate`]
-    WORDLIST_FROM_MEMORY_EQ_ALT) THEN
-  REWRITE_TAC[DIMINDEX_32;ARITH_RULE `32*n = 8*(4*n)`] THEN DISCH_THEN(SUBST1_TAC o SYM) THEN
-  GEN_REWRITE_TAC I [LIST_EQ] THEN REWRITE_TAC[LENGTH_WORDLIST_FROM_MEMORY] THEN
-  X_GEN_TAC `i:num` THEN DISCH_TAC THEN
-  ASM_SIMP_TAC[EL_WORDLIST_FROM_MEMORY; DIMINDEX_4; GSYM BYTES32_WBYTES]);;
-
 
 let ETA2_VCONSTS = define
  `ETA2_VCONSTS s <=> read Q1 s = word 0x00040302010004030201000403020100 /\
    read Q7 s = word 0x00020002000200020002000200020002 /\ read Q29 s = word 0x0f0f0f0f0f0f0f0f /\
    read Q30 s = word 0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f /\ read Q31 s = word 0x01800140012001100108010401020101`;;
-
-let ETA2_OUTPUT_GROUPS = prove
- (`!xs ys:int32 list. !k dst s.
-    (!j. j < MIN (LENGTH xs) k ==> read(memory:>bytes32(word_add dst (word(4*j)))) s = EL j xs) /\
-    (!j. j < MIN (LENGTH ys) (k - LENGTH xs) ==>
-       read(memory:>bytes32(word_add dst (word(4*(LENGTH xs+j))))) s = EL j ys) ==>
-    read(memory:>bytes(dst,4*LENGTH(SUB_LIST(0,k)(APPEND xs ys))))s = num_of_wordlist(SUB_LIST(0,k)(APPEND xs ys))`,
-  REPEAT GEN_TAC THEN STRIP_TAC THEN MATCH_MP_TAC ETA2_OUTPUT_WORDLIST THEN
-  X_GEN_TAC `j:num` THEN REWRITE_TAC[LENGTH_SUB_LIST;LENGTH_APPEND;SUB_0] THEN DISCH_TAC THEN
-  SUBGOAL_THEN `j<k /\ j < LENGTH(xs:int32 list)+LENGTH(ys:int32 list)` STRIP_ASSUME_TAC THENL [ASM_ARITH_TAC;ALL_TAC] THEN
-  ASM_SIMP_TAC[EL_SUB_LIST;ADD_CLAUSES;LENGTH_APPEND;EL_APPEND] THEN COND_CASES_TAC THENL
-   [FIRST_X_ASSUM MATCH_MP_TAC THEN ASM_ARITH_TAC;
-    SUBGOAL_THEN `LENGTH(xs:int32 list)+(j-LENGTH xs)=j /\ j-LENGTH xs < MIN(LENGTH(ys:int32 list))(k-LENGTH xs)` STRIP_ASSUME_TAC THENL
-     [ASM_ARITH_TAC;FIRST_X_ASSUM(MP_TAC o SPEC `j-LENGTH(xs:int32 list)`) THEN ASM_REWRITE_TAC[]]]);;
 
 let ETA2_SINGLE_BLOCK = prove
  (`!pc res buf table len bs i k e.
@@ -1178,14 +972,14 @@ let ETA2_SINGLE_BLOCK = prove
           read(memory:>bytes(buf,len))s = num_of_wordlist bs /\
           read(memory:>bytes(table,4096))s = num_of_wordlist mldsa_rej_uniform_eta_table /\ read events s=e)
      (\s. let p = \g j. EL(16*i+8*g+j)(REJ_MASK_ETA2 bs) in
-          let a = ETA2_PACKET_COUNT(p 0) in let b = ETA2_PACKET_COUNT(p 1) in
+          let a = MLDSA_ETA_PACKET_COUNT(p 0) in let b = MLDSA_ETA_PACKET_COUNT(p 1) in
           let chunk = REJ_SAMPLE_ETA2(BYTES_TO_NIBBLES(SUB_LIST(8*i,8)bs)) in
           let dst = word_add res (word(4*(256-k))) in
           read PC s = word(pc+(if k<=a+b then 0x15c else 0xf0)) /\
           read X4 s = word(k-(a+b)) /\ (~(k<=a+b) ==> read X0 s = word_add dst (word(4*(a+b)))) /\
           read X1 s = word_add buf (word(8*(i+1))) /\ LENGTH chunk = a+b /\
           read(memory:>bytes(dst,4*LENGTH(SUB_LIST(0,k) chunk)))s = num_of_wordlist(SUB_LIST(0,k)chunk) /\
-          read events s = ETA2_BLOCK_EVENTS res buf table pc i k (ETA2_PACKET_MASK(p 0))(ETA2_PACKET_MASK(p 1)) a b e)
+          read events s = ETA2_BLOCK_EVENTS res buf table pc i k (MLDSA_ETA_PACKET_MASK(p 0))(MLDSA_ETA_PACKET_MASK(p 1)) a b e)
      (MAYCHANGE [PC;X0;X1;X4;X6;X7;X12;X13;X14;X15] ,,
       MAYCHANGE [Q0;Q2;Q3;Q4;Q5;Q6;Q16;Q17;Q18;Q19;Q20;Q21;Q24;Q25] ,,
       MAYCHANGE SOME_FLAGS ,, MAYCHANGE [events] ,, MAYCHANGE [memory:>bytes(word_add res (word(4*(256-k))),4*k)])`,
@@ -1221,9 +1015,9 @@ let ETA2_SINGLE_BLOCK = prove
   REPEAT CONJ_TAC THENL
    [ASM_MESON_TAC[];
     REWRITE_TAC[GSYM WORD_ADD_ASSOC;GSYM WORD_ADD;ARITH_RULE `8*(i+1)=8*i+8`];
-    MATCH_MP_TAC ETA2_OUTPUT_GROUPS THEN CONJ_TAC THEN FIRST_ASSUM ACCEPT_TAC;
+    MATCH_MP_TAC MLDSA_ETA_OUTPUT_GROUPS THEN CONJ_TAC THEN FIRST_ASSUM ACCEPT_TAC;
     REWRITE_TAC[ETA2_STORE_EVENTS;ETA2_BLOCK_EVENTS;LET_DEF;LET_END_DEF] THEN
-    SUBGOAL_THEN `reads = APPEND [EventLoad(word_add table (word(16*ETA2_PACKET_MASK(p 1))),16);EventLoad(word_add table (word(16*ETA2_PACKET_MASK(p 0))),16);EventLoad(word_add buf (word(8*i)),8)] e` SUBST1_TAC THENL
+    SUBGOAL_THEN `reads = APPEND [EventLoad(word_add table (word(16*MLDSA_ETA_PACKET_MASK(p 1))),16);EventLoad(word_add table (word(16*MLDSA_ETA_PACKET_MASK(p 0))),16);EventLoad(word_add buf (word(8*i)),8)] e` SUBST1_TAC THENL
      [FIRST_X_ASSUM(MP_TAC o SYM o check (fun th -> is_eq(concl th) && rand(concl th) = `reads:(uarch_event)list`)) THEN ASM_REWRITE_TAC[];ASM_REWRITE_TAC[]]]);;
 
 (* Accepted coefficients from consecutive eight-byte blocks. *)
@@ -1253,24 +1047,6 @@ let ETA2_SUFFIX_STEP = prove
   MP_TAC(ISPECL [`bs:byte list`;`8`;`8*n`;`8*i`] SUB_LIST_SPLIT) THEN
   DISCH_THEN SUBST1_TAC THEN ASM_REWRITE_TAC[ETA2_SAMPLE_APPEND]);;
 
-let ETA2_PREFIX_APPEND = prove
- (`!xs ys:A list. !k. SUB_LIST(0,k) (APPEND xs ys) =
-    APPEND (SUB_LIST(0,k) xs) (SUB_LIST(0,k-LENGTH xs) ys)`,
-  LIST_INDUCT_TAC THEN REWRITE_TAC[LENGTH;SUB_LIST_CLAUSES;APPEND;SUB_0] THEN
-  GEN_TAC THEN INDUCT_TAC THEN
-  ASM_REWRITE_TAC[SUB_LIST_CLAUSES;APPEND;ARITH_RULE `0-n=0`;ARITH_RULE `SUC k-SUC n=k-n`]);;
-
-let ETA2_OUTPUT_APPEND = prove
- (`!dst s xs ys:int32 list.
-    read(memory :> bytes(dst,4*LENGTH xs)) s = num_of_wordlist xs /\
-    read(memory :> bytes(word_add dst (word(4*LENGTH xs)),4*LENGTH ys)) s = num_of_wordlist ys ==>
-    read(memory :> bytes(dst,4*LENGTH(APPEND xs ys))) s = num_of_wordlist(APPEND xs ys)`,
-  REPEAT GEN_TAC THEN REWRITE_TAC[LENGTH_APPEND; LEFT_ADD_DISTRIB] THEN
-  MP_TAC(ISPECL [`memory:(armstate,int64->byte)component`;`dst:int64`;`s:armstate`;
-    `xs:int32 list`;`ys:int32 list`;`4*LENGTH(xs:int32 list)`;`4*LENGTH(ys:int32 list)`]
-    BYTES_EQ_NUM_OF_WORDLIST_APPEND) THEN
-  REWRITE_TAC[DIMINDEX_32; ARITH_RULE `32*n=8*(4*n)`] THEN MESON_TAC[]);;
-
 let ETA2_LOOP_RESULT = prove
  (`!n res buf table pc ra (bs:byte list) len i k e.
     0<n /\ len=8*(i+n) /\ len<2 EXP 64 /\ LENGTH bs=len /\ 1<=k /\ k<=256 /\
@@ -1293,12 +1069,12 @@ let ETA2_LOOP_RESULT = prove
   INDUCT_TAC THEN REPEAT GEN_TAC THEN REWRITE_TAC[LT_REFL] THEN
   REWRITE_TAC[ALL;LET_DEF;LET_END_DEF;ETA2_VCONSTS;MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN STRIP_TAC THEN
   ENSURES_INIT_TAC "s0" THEN
-  ABBREV_TAC `p = \g j. EL(16*i+8*g+j)(REJ_MASK_ETA2 bs)` THEN ABBREV_TAC `a = ETA2_PACKET_COUNT(p 0)` THEN
-  ABBREV_TAC `b = ETA2_PACKET_COUNT(p 1)` THEN
+  ABBREV_TAC `p = \g j. EL(16*i+8*g+j)(REJ_MASK_ETA2 bs)` THEN ABBREV_TAC `a = MLDSA_ETA_PACKET_COUNT(p 0)` THEN
+  ABBREV_TAC `b = MLDSA_ETA_PACKET_COUNT(p 1)` THEN
   ABBREV_TAC `dst = word_add res (word(4*(256-k))):int64` THEN
   ABBREV_TAC `chunk = ETA2_SUFFIX bs i 1` THEN
   ABBREV_TAC `rest = ETA2_SUFFIX bs (i+1) n` THEN
-  ABBREV_TAC `blocktrace = ETA2_BLOCK_EVENTS res buf table pc i k (ETA2_PACKET_MASK(p 0))(ETA2_PACKET_MASK(p 1)) a b e` THEN
+  ABBREV_TAC `blocktrace = ETA2_BLOCK_EVENTS res buf table pc i k (MLDSA_ETA_PACKET_MASK(p 0))(MLDSA_ETA_PACKET_MASK(p 1)) a b e` THEN
   SUBGOAL_THEN `nonoverlapping (word pc,360)(dst:int64,4*k) /\ nonoverlapping (buf,len)(dst,4*k) /\ nonoverlapping (table,4096)(dst,4*k)` STRIP_ASSUME_TAC THENL
    [EXPAND_TAC "dst" THEN REPEAT CONJ_TAC THEN NONOVERLAPPING_TAC; ALL_TAC] THEN
   MP_TAC(REWRITE_RULE[SOME_FLAGS;ETA2_VCONSTS;LET_DEF;LET_END_DEF;GSYM ETA2_SUFFIX_ONE]
@@ -1362,11 +1138,11 @@ let ETA2_LOOP_RESULT = prove
     ASSUME `ETA2_SUFFIX bs (i+1) n = rest:int32 list`; ASSUME `word_add res (word(4*(256-(k-(a+b)))))=nextdst:int64`] THEN
   ARM_BIGSTEP_TAC MLDSA_REJ_UNIFORM_ETA2_EXEC "s3" THEN
   SUBGOAL_THEN `read(memory:>bytes(dst,4*LENGTH(APPEND (chunk:int32 list) (SUB_LIST(0,k-(a+b)) rest))))s3 = num_of_wordlist(APPEND chunk (SUB_LIST(0,k-(a+b)) rest))` ASSUME_TAC THENL
-   [MATCH_MP_TAC ETA2_OUTPUT_APPEND THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+   [MATCH_MP_TAC MLDSA_ETA_OUTPUT_APPEND THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
   SUBGOAL_THEN `SUB_LIST(0,k)(ETA2_SUFFIX bs i (SUC n)) = APPEND(chunk:int32 list)(SUB_LIST(0,k-(a+b))rest)` ASSUME_TAC THENL
-   [ASM_REWRITE_TAC[ETA2_PREFIX_APPEND]; ALL_TAC] THEN
+   [ASM_REWRITE_TAC[MLDSA_ETA_PREFIX_APPEND]; ALL_TAC] THEN
   SUBGOAL_THEN `256-(k-(a+b))=256-k+(a+b)` ASSUME_TAC THENL [ASM_ARITH_TAC;ALL_TAC] THEN
-  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[ETA2_PREFIX_APPEND;LENGTH_APPEND;ADD_ASSOC] THEN CONJ_TAC THENL
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[MLDSA_ETA_PREFIX_APPEND;LENGTH_APPEND;ADD_ASSOC] THEN CONJ_TAC THENL
    [FIRST_X_ASSUM(MP_TAC o check (fun th -> is_eq(concl th) && can (find_term (fun t -> is_const t && name_of t="APPEND")) (rand(concl th)) && can (find_term (fun t -> t=`s3:armstate`)) (lhand(concl th)))) THEN ASM_REWRITE_TAC[LENGTH_APPEND];
     RULE_ASSUM_TAC (REWRITE_RULE[GSYM(ASSUME `word_add dst (word(4*(a+b)))=nextdst:int64`)]) THEN MONOTONE_MAYCHANGE_TAC]);;
 

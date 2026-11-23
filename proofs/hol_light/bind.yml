@@ -260,7 +260,7 @@ rej_uniform_eta4_aarch64_asm:
   arch: aarch64
   function: mldsa_rej_uniform_eta4_aarch64_asm
   sha256:
-    mldsa_rej_uniform_eta4_mc: 37b8e65fff09707fcab0cb2a19336f64ce3d69c66f45b6886d24d5f3c6531414
+    mldsa_rej_uniform_eta4_mc: 91bba2d6941e84987f3cfe58b9098fbc95289d760365bd354030e6a35c499437
 rej_uniform_eta4_avx2_asm:
   arch: x86_64
   function: mldsa_rej_uniform_eta4_avx2_asm

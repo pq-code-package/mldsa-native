@@ -7,20 +7,17 @@
 # compare --accept`. This is what the proof claims.
 
 theorem mldsa_rej_uniform_eta4_aarch64_asm MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_CORRECT
-  |- !res:int64 buf:int64 buflen:int64 table:int64 inlist:((4 word) list) pc:num stackpointer:int64
+  |- !res:int64 buf:int64 buflen:int64 table:int64 inlist:((4 word) list) pc:num
       returnaddress:int64.
        num_divides 8 (val buflen)
        /\ 8 <= val buflen
        /\ LENGTH inlist = 2 * val buflen
-       /\ ALL (nonoverlapping (word_sub stackpointer (word 576 : int64), 576))
-            [(word pc : int64), LENGTH mldsa_rej_uniform_eta4_mc; buf, val buflen; table, 4096]
        /\ ALL (nonoverlapping (res, 1024)) [(word pc : int64), LENGTH mldsa_rej_uniform_eta4_mc;
-                                            word_sub stackpointer (word 576 : int64), 576]
+                                            buf, val buflen; table, 4096]
        ==> ensures arm
              (\s:armstate.
                aligned_bytes_loaded s (word pc : int64) mldsa_rej_uniform_eta4_mc
                /\ read PC s = (word pc : int64)
-               /\ read SP s = stackpointer
                /\ read X30 s = returnaddress
                /\ C_ARGUMENTS [res; buf; buflen; table] s
                /\ read (memory :> bytes (table, 4096)) s
@@ -35,27 +32,22 @@ theorem mldsa_rej_uniform_eta4_aarch64_asm MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_COR
                   /\ read (memory :> bytes (res, 4 * outlen)) s = num_of_wordlist outlist
                   /\ (!i:num.
                        i < outlen ==> ival (EL i outlist) < &5 /\ -&5 < ival (EL i outlist))))
-             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI
-             ,, MAYCHANGE [memory :> bytes (res, 1024);
-                           memory :> bytes (word_sub stackpointer (word 576 : int64), 576)])
+             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (res, 1024)])
 
 theorem mldsa_rej_uniform_eta4_aarch64_asm MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_SAFE
-  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> int64 -> bool list ->
+  |- ?f_events:(int64 -> int64 -> int64 -> int64 -> num -> int64 -> bool list ->
           (64 address_uarch_event) list).
        !res:int64 buf:int64 buflen:int64 table:int64 inlist:(byte list) pc:num
-        e:((64 address_uarch_event) list) stackpointer:int64 returnaddress:int64.
+        e:((64 address_uarch_event) list) returnaddress:int64.
          num_divides 8 (val buflen)
          /\ 8 <= val buflen
          /\ LENGTH inlist = val buflen
-         /\ ALL (nonoverlapping (word_sub stackpointer (word 576 : int64), 576))
-              [(word pc : int64), LENGTH mldsa_rej_uniform_eta4_mc; buf, val buflen; table, 4096]
          /\ ALL (nonoverlapping (res, 1024)) [(word pc : int64), LENGTH mldsa_rej_uniform_eta4_mc;
-                                              word_sub stackpointer (word 576 : int64), 576]
+                                              buf, val buflen; table, 4096]
          ==> ensures arm
                (\s:armstate.
                  aligned_bytes_loaded s (word pc : int64) mldsa_rej_uniform_eta4_mc
                  /\ read PC s = (word pc : int64)
-                 /\ read SP s = stackpointer
                  /\ read X30 s = returnaddress
                  /\ C_ARGUMENTS [res; buf; buflen; table] s
                  /\ read (memory :> bytes (table, 4096)) s
@@ -66,11 +58,6 @@ theorem mldsa_rej_uniform_eta4_aarch64_asm MLDSA_REJ_UNIFORM_ETA4_SUBROUTINE_SAF
                  read PC s = returnaddress
                  /\ (?e2:((64 address_uarch_event) list).
                       read events s = APPEND e2 e
-                      /\ e2
-                         = f_events res buf buflen table pc stackpointer returnaddress
-                             (REJ_MASK_ETA4 inlist)
-                      /\ memaccess_inbounds e2
-                           [buf, val buflen; table, 4096;
-                            word_sub stackpointer (word 576 : int64), 576]
-                           [word_sub stackpointer (word 576 : int64), 576; res, 1024]))
+                      /\ e2 = f_events res buf buflen table pc returnaddress (REJ_MASK_ETA4 inlist)
+                      /\ memaccess_inbounds e2 [buf, val buflen; table, 4096] [res, 1024]))
                (\s:armstate s':armstate. T)

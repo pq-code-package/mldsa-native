@@ -1207,12 +1207,8 @@ def gen_aarch64_rej_uniform_eta_table():
     def gen_aarch64_hol_light_rej_uniform_eta_table():
         yield from gen_hol_light_header()
         yield "(*"
-        yield " * Constant table values used in the AArch64 eta rejection sampling."
-        yield " * Each entry is 16 bytes. There are 256 entries (one per 8-bit mask),"
-        yield " * for a total of 4096 bytes. Entries use 2-byte (16-bit) coefficient"
-        yield " * indices since ML-DSA eta samples are stored as 16-bit halfwords"
-        yield " * on the stack before being converted to 32-bit in the final copy."
-        yield " * See autogen for details."
+        yield " * Each 16-byte row corresponds to an eight-lane acceptance mask."
+        yield " * TBL gathers both bytes of each accepted halfword in input order."
         yield " *)"
         yield ""
         yield "let mldsa_rej_uniform_eta_table = (REWRITE_RULE[MAP] o define)"

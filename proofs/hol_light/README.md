@@ -73,11 +73,9 @@ entire trace. The AArch64 eta2 theorem has the following form.
           (\s s'. T)`
 ```
 
-where `REJ_MASK_ETA2 l = MAP (\x. val x < 15) (NIBBLES_OF_BYTES l)` is the reject pattern — one
-accept/reject bit per nibble, accepted values discarded. (Contrast `REJ_NIBBLES_ETA2`, which *keeps* the
-accepted values and is secret.) Because the whole trace factors through the reject pattern, two inputs with
-the same pattern are indistinguishable to a timing/cache adversary regardless of their coefficient
-values.
+where `REJ_MASK_ETA2` records one bit per input nibble `t`, indicating `t < 15`.
+The AArch64 eta4 theorem has the same form with `REJ_MASK_ETA4`, which records `t < 9`.
+For fixed public arguments, two inputs with the same mask produce the same branch and memory-access trace.
 
 The x86_64 AVX2 kernels prove the identical property (with `ensures x86`). Because the x86_64
 `rej_uniform_eta{2,4}` assembly processes a fixed-length input buffer (136 bytes for eta2, 272 for eta4)
