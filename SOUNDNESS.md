@@ -53,8 +53,8 @@ values.
 ### CBMC proofs discharged by a single solver
 
 In mlkem-native, every CBMC proof is discharged by at least two independently developed solvers.
-In mldsa-native, a few proofs, mostly of top-level functions, are currently only discharged by Z3;
-their Makefiles list a single entry in `CBMC_SUPPORTED_CONFIGS`.
+In mldsa-native, a few proofs, mostly of top-level functions, are currently only discharged by Z3.
+Selecting Z3 for both LP64 and ILP32 still leaves a proof dependent on one solver.
 
 For these proofs, solver-specific bugs or incompleteness could lead to unsound results going
 undetected. Adding a second solver for them is tracked in

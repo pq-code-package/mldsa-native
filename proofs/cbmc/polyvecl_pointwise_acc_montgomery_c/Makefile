@@ -32,7 +32,8 @@ USE_DYNAMIC_FRAMES=1
 # Supported CBMC configurations
 CBMC_SUPPORTED_CONFIGS = \
   LP64:z3_smt_only \
-  LP64:cadical
+  LP64:cadical \
+  ILP32:cadical
 CBMC_DEFAULT_CONFIG = LP64:z3_smt_only
 
 FUNCTION_NAME = mld_polyvecl_pointwise_acc_montgomery_c
