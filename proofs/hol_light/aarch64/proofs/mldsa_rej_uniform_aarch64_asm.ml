@@ -25,7 +25,6 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   "mldsa_rej_uniform_mc" "aarch64/mldsa/mldsa_rej_uniform_aarch64_asm.o"
 (*** BYTECODE START ***)
 [
-  0xd11103ff;       (* arm_SUB SP SP (rvalue (word 1088)) *)
   0xd2800027;       (* arm_MOV X7 (rvalue (word 1)) *)
   0xf2c00047;       (* arm_MOVK X7 (word 2) 32 *)
   0xd280008b;       (* arm_MOV X11 (rvalue (word 4)) *)
@@ -34,9 +33,9 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x4e181d7f;       (* arm_INS_GEN Q31 X11 64 64 *)
   0x4f00e43d;       (* arm_MOVI Q29 (word 72340172838076673) *)
   0x4ebd9ffd;       (* arm_MUL_VEC Q29 Q31 Q29 32 128 *)
-  0x529c0027;       (* arm_MOV W7 (rvalue (word 57345)) *)
-  0x72a00fe7;       (* arm_MOVK W7 (word 127) 16 *)
-  0x4e040cfe;       (* arm_DUP_GEN Q30 X7 32 128 *)
+  0x529c0024;       (* arm_MOV W4 (rvalue (word 57345)) *)
+  0x72a00fe4;       (* arm_MOVK W4 (word 127) 16 *)
+  0x4e040c9e;       (* arm_DUP_GEN Q30 X4 32 128 *)
   0xd2802007;       (* arm_MOV X7 (rvalue (word 256)) *)
   0xf2b00047;       (* arm_MOVK X7 (word 32770) 16 *)
   0xf2c08067;       (* arm_MOVK X7 (word 1027) 32 *)
@@ -54,24 +53,11 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x4e248695;       (* arm_ADD_VEC Q21 Q20 Q4 8 128 *)
   0x4e258696;       (* arm_ADD_VEC Q22 Q20 Q5 8 128 *)
   0x4e268697;       (* arm_ADD_VEC Q23 Q20 Q6 8 128 *)
-  0x910003e8;       (* arm_ADD X8 SP (rvalue (word 0)) *)
-  0xaa0803e7;       (* arm_MOV X7 X8 *)
-  0xd280000b;       (* arm_MOV X11 (rvalue (word 0)) *)
-  0x6e301e10;       (* arm_EOR_VEC Q16 Q16 Q16 128 *)
-  0x3c8404f0;       (* arm_STR Q16 X7 (Postimmediate_Offset (word 64)) *)
-  0x3c9d00f0;       (* arm_STR Q16 X7 (Immediate_Offset (word 18446744073709551568)) *)
-  0x3c9e00f0;       (* arm_STR Q16 X7 (Immediate_Offset (word 18446744073709551584)) *)
-  0x3c9f00f0;       (* arm_STR Q16 X7 (Immediate_Offset (word 18446744073709551600)) *)
-  0x9100416b;       (* arm_ADD X11 X11 (rvalue (word 16)) *)
-  0xf104017f;       (* arm_CMP X11 (rvalue (word 256)) *)
-  0x54ffff4b;       (* arm_BLT (word 2097128) *)
-  0xaa0803e7;       (* arm_MOV X7 X8 *)
   0xd2800009;       (* arm_MOV X9 (rvalue (word 0)) *)
-  0xd2802004;       (* arm_MOV X4 (rvalue (word 256)) *)
   0xf100c05f;       (* arm_CMP X2 (rvalue (word 48)) *)
   0x54000743;       (* arm_BCC (word 232) *)
-  0xeb04013f;       (* arm_CMP X9 X4 *)
-  0x54000b82;       (* arm_BCS (word 368) *)
+  0xf103c13f;       (* arm_CMP X9 (rvalue (word 240)) *)
+  0x54000708;       (* arm_BHI (word 224) *)
   0xd100c042;       (* arm_SUB X2 X2 (rvalue (word 48)) *)
   0xad400420;       (* arm_LDP Q0 Q1 X1 (Immediate_Offset (iword (&0))) *)
   0x3dc00822;       (* arm_LDR Q2 X1 (Immediate_Offset (word 32)) *)
@@ -113,24 +99,24 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x4e190231;       (* arm_TBL Q17 [Q17] Q25 128 *)
   0x4e1a0252;       (* arm_TBL Q18 [Q18] Q26 128 *)
   0x4e1b0273;       (* arm_TBL Q19 [Q19] Q27 128 *)
-  0x4c0078f0;       (* arm_STR Q16 X7 No_Offset *)
-  0x8b0c08e7;       (* arm_ADD X7 X7 (Shiftedreg X12 LSL 2) *)
-  0x4c0078f1;       (* arm_STR Q17 X7 No_Offset *)
-  0x8b0d08e7;       (* arm_ADD X7 X7 (Shiftedreg X13 LSL 2) *)
-  0x4c0078f2;       (* arm_STR Q18 X7 No_Offset *)
-  0x8b0e08e7;       (* arm_ADD X7 X7 (Shiftedreg X14 LSL 2) *)
-  0x4c0078f3;       (* arm_STR Q19 X7 No_Offset *)
-  0x8b0f08e7;       (* arm_ADD X7 X7 (Shiftedreg X15 LSL 2) *)
+  0x4c007810;       (* arm_STR Q16 X0 No_Offset *)
+  0x8b0c0800;       (* arm_ADD X0 X0 (Shiftedreg X12 LSL 2) *)
+  0x4c007811;       (* arm_STR Q17 X0 No_Offset *)
+  0x8b0d0800;       (* arm_ADD X0 X0 (Shiftedreg X13 LSL 2) *)
+  0x4c007812;       (* arm_STR Q18 X0 No_Offset *)
+  0x8b0e0800;       (* arm_ADD X0 X0 (Shiftedreg X14 LSL 2) *)
+  0x4c007813;       (* arm_STR Q19 X0 No_Offset *)
+  0x8b0f0800;       (* arm_ADD X0 X0 (Shiftedreg X15 LSL 2) *)
   0x8b0d018c;       (* arm_ADD X12 X12 X13 *)
   0x8b0f01ce;       (* arm_ADD X14 X14 X15 *)
   0x8b0c0129;       (* arm_ADD X9 X9 X12 *)
   0x8b0e0129;       (* arm_ADD X9 X9 X14 *)
   0xf100c05f;       (* arm_CMP X2 (rvalue (word 48)) *)
   0x54fff902;       (* arm_BCS (word 2096928) *)
-  0xeb04013f;       (* arm_CMP X9 X4 *)
-  0x54000462;       (* arm_BCS (word 140) *)
   0xf100605f;       (* arm_CMP X2 (rvalue (word 24)) *)
-  0x54000423;       (* arm_BCC (word 132) *)
+  0x54000603;       (* arm_BCC (word 192) *)
+  0xf103e13f;       (* arm_CMP X9 (rvalue (word 248)) *)
+  0x54000428;       (* arm_BHI (word 132) *)
   0xd1006042;       (* arm_SUB X2 X2 (rvalue (word 24)) *)
   0x3dc00020;       (* arm_LDR Q0 X1 (Immediate_Offset (word 0)) *)
   0xfd400821;       (* arm_LDR D1 X1 (Immediate_Offset (word 16)) *)
@@ -157,30 +143,26 @@ let mldsa_rej_uniform_mc = define_assert_from_elf
   0x9e66002d;       (* arm_FMOV_FtoI X13 Q1 0 64 *)
   0x4e180210;       (* arm_TBL Q16 [Q16] Q24 128 *)
   0x4e190231;       (* arm_TBL Q17 [Q17] Q25 128 *)
-  0x4c0078f0;       (* arm_STR Q16 X7 No_Offset *)
-  0x8b0c08e7;       (* arm_ADD X7 X7 (Shiftedreg X12 LSL 2) *)
-  0x4c0078f1;       (* arm_STR Q17 X7 No_Offset *)
-  0x8b0d08e7;       (* arm_ADD X7 X7 (Shiftedreg X13 LSL 2) *)
+  0x4c007810;       (* arm_STR Q16 X0 No_Offset *)
+  0x8b0c0800;       (* arm_ADD X0 X0 (Shiftedreg X12 LSL 2) *)
+  0x4c007811;       (* arm_STR Q17 X0 No_Offset *)
+  0x8b0d0800;       (* arm_ADD X0 X0 (Shiftedreg X13 LSL 2) *)
   0x8b0c0129;       (* arm_ADD X9 X9 X12 *)
   0x8b0d0129;       (* arm_ADD X9 X9 X13 *)
-  0xeb04013f;       (* arm_CMP X9 X4 *)
-  0x9a843129;       (* arm_CSEL X9 X9 X4 Condition_CC *)
-  0xd280000b;       (* arm_MOV X11 (rvalue (word 0)) *)
-  0xaa0803e7;       (* arm_MOV X7 X8 *)
-  0x3cc404f0;       (* arm_LDR Q16 X7 (Postimmediate_Offset (word 64)) *)
-  0x3cdd00f1;       (* arm_LDR Q17 X7 (Immediate_Offset (word 18446744073709551568)) *)
-  0x3cde00f2;       (* arm_LDR Q18 X7 (Immediate_Offset (word 18446744073709551584)) *)
-  0x3cdf00f3;       (* arm_LDR Q19 X7 (Immediate_Offset (word 18446744073709551600)) *)
-  0x3c840410;       (* arm_STR Q16 X0 (Postimmediate_Offset (word 64)) *)
-  0x3c9d0011;       (* arm_STR Q17 X0 (Immediate_Offset (word 18446744073709551568)) *)
-  0x3c9e0012;       (* arm_STR Q18 X0 (Immediate_Offset (word 18446744073709551584)) *)
-  0x3c9f0013;       (* arm_STR Q19 X0 (Immediate_Offset (word 18446744073709551600)) *)
-  0x9100416b;       (* arm_ADD X11 X11 (rvalue (word 16)) *)
-  0xf104017f;       (* arm_CMP X11 (rvalue (word 256)) *)
-  0x54fffecb;       (* arm_BLT (word 2097112) *)
+  0xf104013f;       (* arm_CMP X9 (rvalue (word 256)) *)
+  0x54000182;       (* arm_BCS (word 48) *)
+  0xb4000162;       (* arm_CBZ X2 (word 44) *)
+  0x78402425;       (* arm_LDRH W5 X1 (Postimmediate_Offset (word 2)) *)
+  0x38401426;       (* arm_LDRB W6 X1 (Postimmediate_Offset (word 1)) *)
+  0xd1000c42;       (* arm_SUB X2 X2 (rvalue (word 3)) *)
+  0x120018c6;       (* arm_AND W6 W6 (rvalue (word 127)) *)
+  0x2a0640a5;       (* arm_ORR W5 W5 (Shiftedreg W6 LSL 16) *)
+  0x6b0400bf;       (* arm_CMP W5 W4 *)
+  0x54fffee2;       (* arm_BCS (word 2097116) *)
+  0xb8004405;       (* arm_STR W5 X0 (Postimmediate_Offset (word 4)) *)
+  0x91000529;       (* arm_ADD X9 X9 (rvalue (word 1)) *)
+  0x17fffff4;       (* arm_B (word 268435408) *)
   0xaa0903e0;       (* arm_MOV X0 X9 *)
-  0x14000001;       (* arm_B (word 4) *)
-  0x911103ff;       (* arm_ADD SP SP (rvalue (word 1088)) *)
   0xd65f03c0        (* arm_RET X30 *)
 ];;
 (*** BYTECODE END ***)
@@ -195,292 +177,11 @@ let LENGTH_MLDSA_REJ_UNIFORM_MC =
   REWRITE_CONV[mldsa_rej_uniform_mc] `LENGTH mldsa_rej_uniform_mc`
   |> CONV_RULE (RAND_CONV LENGTH_CONV);;
 
-let MLDSA_REJ_UNIFORM_PREAMBLE_LENGTH = new_definition
-  `MLDSA_REJ_UNIFORM_PREAMBLE_LENGTH = 4`;;
-
-let MLDSA_REJ_UNIFORM_POSTAMBLE_LENGTH = new_definition
-  `MLDSA_REJ_UNIFORM_POSTAMBLE_LENGTH = 8`;;
-
-let MLDSA_REJ_UNIFORM_CORE_START = new_definition
-  `MLDSA_REJ_UNIFORM_CORE_START = MLDSA_REJ_UNIFORM_PREAMBLE_LENGTH`;;
-
-let MLDSA_REJ_UNIFORM_CORE_END = new_definition
-  `MLDSA_REJ_UNIFORM_CORE_END = LENGTH mldsa_rej_uniform_mc - MLDSA_REJ_UNIFORM_POSTAMBLE_LENGTH`;;
-
-let LENGTH_SIMPLIFY_CONV =
-  REWRITE_CONV[LENGTH_MLDSA_REJ_UNIFORM_MC;
-              MLDSA_REJ_UNIFORM_CORE_START; MLDSA_REJ_UNIFORM_CORE_END;
-              MLDSA_REJ_UNIFORM_PREAMBLE_LENGTH; MLDSA_REJ_UNIFORM_POSTAMBLE_LENGTH] THENC
-  NUM_REDUCE_CONV THENC REWRITE_CONV [ADD_0];;
-
-(* ------------------------------------------------------------------------- *)
-(* General wordlist helpers (same as ML-KEM proof)                           *)
-(* ------------------------------------------------------------------------- *)
-
-let num_of_wordlist = define
- `num_of_wordlist [] = 0 /\
-  num_of_wordlist (CONS (h:N word) t) =
-     val h + 2 EXP dimindex(:N) * num_of_wordlist t`;;
-
-let NUM_OF_WORDLIST_SING = prove
- (`!h:N word. num_of_wordlist [h] = val h`,
-  REWRITE_TAC[num_of_wordlist; MULT_CLAUSES; ADD_CLAUSES]);;
-
-let NUM_OF_WORDLIST_APPEND = prove
- (`!lis1 lis2:(N word)list.
-        num_of_wordlist(APPEND lis1 lis2) =
-        num_of_wordlist lis1 +
-        2 EXP (dimindex(:N) * LENGTH lis1) * num_of_wordlist lis2`,
-  LIST_INDUCT_TAC THEN
-  ASM_REWRITE_TAC[APPEND; LENGTH; num_of_wordlist] THEN
-  ASM_REWRITE_TAC[MULT_CLAUSES; EXP; ADD_CLAUSES] THEN
-  REWRITE_TAC[EXP_ADD] THEN ARITH_TAC);;
-
-let NUM_OF_WORDLIST_BOUND_LENGTH = prove
- (`!l:(N word)list. num_of_wordlist l < 2 EXP (dimindex(:N) * LENGTH l)`,
-  LIST_INDUCT_TAC THEN REWRITE_TAC[LENGTH; num_of_wordlist] THEN
-  REWRITE_TAC[MULT_CLAUSES; EXP; EXP_ADD; ARITH] THEN
-  W(MP_TAC o PART_MATCH lhand VAL_BOUND o lhand o lhand o snd) THEN
-  MATCH_MP_TAC(ARITH_RULE
-   `n * (x + 1) <= y ==> h < n ==> h + n * x < y`) THEN
-  ASM_REWRITE_TAC[LE_MULT_LCANCEL] THEN ASM_ARITH_TAC);;
-
-let NUM_OF_WORDLIST_BOUND = prove
- (`!l:(N word)list n.
-        LENGTH l <= n ==> num_of_wordlist l < 2 EXP (dimindex(:N) * n)`,
-  REPEAT STRIP_TAC THEN
-  TRANS_TAC LTE_TRANS `2 EXP (dimindex(:N) * LENGTH(l:(N word)list))` THEN
-  ASM_REWRITE_TAC[NUM_OF_WORDLIST_BOUND_LENGTH; LE_EXP; LE_MULT_LCANCEL] THEN
-  ASM_ARITH_TAC);;
-
-let NUM_OF_WORDLIST_BOUND_GEN = prove
- (`!l:((N word)list) n.
-        dimindex(:N) * LENGTH l <= n ==> num_of_wordlist l < 2 EXP n`,
-  REPEAT STRIP_TAC THEN
-  W(MP_TAC o PART_MATCH lhand NUM_OF_WORDLIST_BOUND_LENGTH o
-    lhand o snd) THEN
-  MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] LTE_TRANS) THEN
-  ASM_REWRITE_TAC[LE_EXP] THEN ARITH_TAC);;
-
-let NUM_OF_WORDLIST_SUB_LIST_0 = prove
- (`!(l:(N word)list) n.
-        num_of_wordlist(SUB_LIST(0,n) l) =
-        num_of_wordlist l MOD 2 EXP (dimindex(:N) * n)`,
-  MATCH_MP_TAC list_INDUCT THEN
-  REWRITE_TAC[SUB_LIST_CLAUSES; num_of_wordlist; DIV_0; MOD_0] THEN
-  MAP_EVERY X_GEN_TAC [`h:N word`; `t:(N word)list`] THEN
-  DISCH_TAC THEN MATCH_MP_TAC num_INDUCTION THEN
-  ASM_REWRITE_TAC[SUB_LIST_CLAUSES; num_of_wordlist] THEN
-  REWRITE_TAC[MULT_CLAUSES; EXP; MOD_1] THEN
-  X_GEN_TAC `n:num` THEN DISCH_THEN(K ALL_TAC) THEN
-  CONV_TAC SYM_CONV THEN REWRITE_TAC[MOD_UNIQUE] THEN
-  REWRITE_TAC[EXP_ADD] THEN CONJ_TAC THENL
-   [DISJ2_TAC THEN MATCH_MP_TAC(ARITH_RULE
-     `h < n /\ n * (t + 1) <= n * e
-      ==> h + n * t < n * e`) THEN
-    REWRITE_TAC[VAL_BOUND; LE_MULT_LCANCEL] THEN DISJ2_TAC THEN
-    REWRITE_TAC[ARITH_RULE `n + 1 <= m <=> n < m`; MOD_LT_EQ] THEN
-    REWRITE_TAC[EXP_EQ_0; ARITH_EQ];
-    MATCH_MP_TAC(NUMBER_RULE
-     `(t == t') (mod d)
-      ==> (h + e * t == h + e * t') (mod (e * d))`) THEN
-    REWRITE_TAC[CONG_RMOD; CONG_REFL]]);;
-
-let NUM_OF_WORDLIST_SUB_LIST = prove
- (`!(l:(N word)list) m n.
-        num_of_wordlist (SUB_LIST(m,n) l) =
-        (num_of_wordlist l DIV 2 EXP (dimindex(:N) * m)) MOD
-        2 EXP (dimindex(:N) * n)`,
-  MATCH_MP_TAC list_INDUCT THEN
-  REWRITE_TAC[SUB_LIST_CLAUSES; num_of_wordlist; DIV_0; MOD_0] THEN
-  MAP_EVERY X_GEN_TAC [`h:N word`; `t:(N word)list`] THEN
-  DISCH_TAC THEN MATCH_MP_TAC num_INDUCTION THEN
-  REWRITE_TAC[NUM_OF_WORDLIST_SUB_LIST_0; GSYM(CONJUNCT2 num_of_wordlist);
-              EXP; DIV_1; MULT_CLAUSES] THEN
-  ASM_REWRITE_TAC[SUB_LIST_CLAUSES; num_of_wordlist] THEN
-  X_GEN_TAC `m:num` THEN DISCH_THEN(K ALL_TAC) THEN X_GEN_TAC `n:num` THEN
-  SIMP_TAC[EXP_ADD; GSYM DIV_DIV; DIV_MULT_ADD; EXP_EQ_0; ARITH_EQ] THEN
-  SIMP_TAC[DIV_LT; VAL_BOUND; ADD_CLAUSES]);;
-
-let SUB_LIST_REFL = prove
- (`!(l:A list) n. LENGTH l <= n ==> SUB_LIST(0,n) l = l`,
-  LIST_INDUCT_TAC THEN ASM_REWRITE_TAC[SUB_LIST_CLAUSES] THEN
-  INDUCT_TAC THEN ASM_SIMP_TAC[SUB_LIST_CLAUSES; LE_SUC; LENGTH] THEN
-  ARITH_TAC);;
-
-let SUB_LIST_1 = prove
- (`!(l:A list) n. SUB_LIST(n,1) l = if n < LENGTH l then [EL n l] else []`,
-  MATCH_MP_TAC list_INDUCT THEN
-  REWRITE_TAC[LENGTH; CONJUNCT1 LT; SUB_LIST_CLAUSES] THEN
-  MAP_EVERY X_GEN_TAC [`h:A`; `t:A list`] THEN DISCH_TAC THEN
-  MATCH_MP_TAC num_INDUCTION THEN
-  REWRITE_TAC[SUB_LIST_CLAUSES; LT_0; num_CONV `1`; EL; TL] THEN
-  ASM_REWRITE_TAC[GSYM(num_CONV `1`); LT_SUC; HD]);;
-
-let SUB_LIST_APPEND_LEFT = prove
- (`!(l:A list) m n.
-        n <= LENGTH l ==> SUB_LIST(0,n) (APPEND l m) = SUB_LIST(0,n) l`,
-  LIST_INDUCT_TAC THEN
-  SIMP_TAC[LENGTH; CONJUNCT1 LE; SUB_LIST_CLAUSES] THEN
-  ONCE_REWRITE_TAC[SWAP_FORALL_THM] THEN
-  INDUCT_TAC THEN ASM_SIMP_TAC[SUB_LIST_CLAUSES; APPEND; LE_SUC]);;
-
-let NUM_OF_WORDLIST_EL = prove
- (`!(l:(N word)list) m.
-        (num_of_wordlist l DIV 2 EXP (dimindex(:N) * m)) MOD
-        2 EXP (dimindex(:N)) =
-        if m < LENGTH l then val(EL m l) else 0`,
-  REPEAT GEN_TAC THEN
-  MP_TAC(SPECL [`l:(N word)list`; `m:num`; `1`]
-   NUM_OF_WORDLIST_SUB_LIST) THEN
-  REWRITE_TAC[SUB_LIST_1; MULT_CLAUSES] THEN
-  DISCH_THEN(SUBST1_TAC o SYM) THEN COND_CASES_TAC THEN
-  REWRITE_TAC[NUM_OF_WORDLIST_SING; num_of_wordlist]);;
-
-let pair_wordlist = define
- `(!hi (lo:N word) rest.
-     pair_wordlist (CONS lo (CONS hi rest)) =
-     CONS (word_join hi lo:((N)tybit0)word) (pair_wordlist rest)) /\
-  (!w. pair_wordlist [w] = [word_join (word 0:N word) w]) /\
-  pair_wordlist [] = []`;;
-
-let NUM_OF_PAIR_WORDLIST = prove
- (`!l:(N word)list. num_of_wordlist (pair_wordlist l) = num_of_wordlist l`,
-  GEN_TAC THEN WF_INDUCT_TAC `LENGTH(l:(N word)list)` THEN
-  POP_ASSUM MP_TAC THEN SPEC_TAC(`l:(N word)list`,`l:(N word)list`) THEN
-  MATCH_MP_TAC list_INDUCT THEN
-  REWRITE_TAC[pair_wordlist; num_of_wordlist] THEN
-  MAP_EVERY X_GEN_TAC [`lo:N word`; `med:(N word)list`] THEN
-  DISCH_THEN(K ALL_TAC) THEN
-  SPEC_TAC(`med:(N word)list`,`med:(N word)list`) THEN
-  MATCH_MP_TAC list_INDUCT THEN
-  REWRITE_TAC[pair_wordlist; num_of_wordlist] THEN
-  SIMP_TAC[MULT_CLAUSES; ADD_CLAUSES; VAL_WORD_JOIN_SIMPLE; DIMINDEX_TYBIT0;
-           VAL_WORD_0; GSYM MULT_2; LENGTH; ARITH_RULE `n < SUC(SUC n)`] THEN
-  REWRITE_TAC[MULT_2; EXP_ADD] THEN ARITH_TAC);;
-
-let BYTES_EQ_NUM_OF_WORDLIST_EXPAND = prove
- (`!m (a:int64) len (s:S) (h:((((N)tybit0)tybit0)tybit0) word) t.
-    dimindex(:N) <= len
-    ==> (read (m :> bytes(a,len)) s = num_of_wordlist (CONS h t) <=>
-         read (m :> wbytes a) s = h /\
-         read (m :> bytes(word_add a (word(dimindex(:N))),len-dimindex(:N))) s =
-         num_of_wordlist t)`,
-  REPEAT STRIP_TAC THEN
-  REWRITE_TAC[GSYM VAL_EQ; VAL_READ_WBYTES; READ_COMPONENT_COMPOSE] THEN
-  REWRITE_TAC[num_of_wordlist; DIMINDEX_TYBIT0] THEN
-  REWRITE_TAC[ARITH_RULE `2 * 2 * 2 * n = 8 * n`] THEN
-  REWRITE_TAC[ARITH_RULE `(8 * n) DIV 8 = n`] THEN
-  FIRST_ASSUM(SUBST1_TAC o MATCH_MP (ARITH_RULE
-   `d:num <= l ==> l = d + (l - d)`)) THEN
-  REWRITE_TAC[READ_BYTES_COMBINE; ADD_SUB2] THEN
-  ONCE_REWRITE_TAC[ADD_SYM] THEN ONCE_REWRITE_TAC[CONJ_SYM] THEN
-  MATCH_MP_TAC LEXICOGRAPHIC_EQ THEN REWRITE_TAC[READ_BYTES_BOUND] THEN
-  W(MP_TAC o PART_MATCH lhand VAL_BOUND o lhand o snd) THEN
-  REWRITE_TAC[DIMINDEX_TYBIT0; ARITH_RULE `2 * 2 * 2 * n = 8 * n`]);;
-
-let BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV =
-  let pth = prove
-   (`!m (a:int64) len (s:S) (h:((((N)tybit0)tybit0)tybit0) word).
-        dimindex(:N) = len
-        ==> (read (m :> bytes(a,len)) s = num_of_wordlist [h] <=>
-             read (m :> wbytes a) s = h)`,
-    SIMP_TAC[BYTES_EQ_NUM_OF_WORDLIST_EXPAND; LE_REFL] THEN
-    REWRITE_TAC[READ_COMPONENT_COMPOSE; SUB_REFL; READ_BYTES_TRIVIAL] THEN
-    REWRITE_TAC[num_of_wordlist]) in
-  let frule = PART_MATCH (lhand o rand) pth
-  and brule = PART_MATCH (lhand o rand) BYTES_EQ_NUM_OF_WORDLIST_EXPAND in
-  let baseconv tm =
-    let ith = frule tm in
-    let sth = (LAND_CONV DIMINDEX_CONV THENC NUM_EQ_CONV)
-              (lhand(concl ith)) in
-    MP ith (EQT_ELIM sth) in
-  let rec conv tm =
-    try baseconv tm with Failure _ ->
-    let ith = brule tm in
-    let dth = DIMINDEX_CONV(lhand(lhand(concl ith))) in
-    let ith' = SUBS[dth] ith in
-    let ath = MP ith' (EQT_ELIM(NUM_LE_CONV(lhand(concl ith')))) in
-    let bth = CONV_RULE(RAND_CONV(RAND_CONV(LAND_CONV(LAND_CONV(RAND_CONV
-               (RAND_CONV
-                 (BINOP2_CONV (TRY_CONV NORMALIZE_RELATIVE_ADDRESS_CONV)
-                              NUM_SUB_CONV))))))) ath in
-    CONV_RULE(RAND_CONV(RAND_CONV conv)) bth in
-  conv;;
-
-let BYTES_EQ_NUM_OF_WORDLIST_APPEND = prove
- (`!m (a:int64) (s:S) lis1 (lis2:(N word)list) len1 len2.
-        dimindex(:N) * LENGTH lis1 = 8 * len1
-        ==>  (read (m :> bytes(a,len1+len2)) s =
-              num_of_wordlist(APPEND lis1 lis2) <=>
-              read (m :> bytes(a,len1)) s = num_of_wordlist lis1 /\
-              read (m :> bytes(word_add a (word len1),len2)) s =
-              num_of_wordlist lis2)`,
-  REPEAT STRIP_TAC THEN
-  REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_COMBINE] THEN
-  ASM_REWRITE_TAC[NUM_OF_WORDLIST_APPEND] THEN
-  ONCE_REWRITE_TAC[ADD_SYM] THEN ONCE_REWRITE_TAC[CONJ_SYM] THEN
-  MATCH_MP_TAC LEXICOGRAPHIC_EQ THEN REWRITE_TAC[READ_BYTES_BOUND] THEN
-  MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN ASM_REWRITE_TAC[LE_REFL]);;
-
-(* ------------------------------------------------------------------------- *)
-(* Memory read merging and splitting conversions                             *)
-(* ------------------------------------------------------------------------- *)
-
-let READ_MEMORY_MERGE_CONV =
-  let baseconv =
-    GEN_REWRITE_CONV I [READ_MEMORY_BYTESIZED_SPLIT] THENC
-    LAND_CONV(LAND_CONV(RAND_CONV(RAND_CONV
-     (TRY_CONV(GEN_REWRITE_CONV I [GSYM WORD_ADD_ASSOC] THENC
-               RAND_CONV WORD_ADD_CONV))))) in
-  let rec conv n tm =
-    if n = 0 then REFL tm else
-    (baseconv THENC BINOP_CONV (conv(n - 1))) tm in
-  conv;;
-
-let MEMORY_128_FROM_64_TAC =
-  let a_tm = `a:int64` and n_tm = `n:num` and i64_ty = `:int64`
-  and pat = `read (memory :> bytes128(word_add a (word n))) s0` in
-  fun v boff n ->
-    let pat' = subst[mk_var(v,i64_ty),a_tm] pat in
-    let f i =
-      let itm = mk_small_numeral(boff + 16*i) in
-      READ_MEMORY_MERGE_CONV 1 (subst[itm,n_tm] pat') in
-    MP_TAC(end_itlist CONJ (map f (0--(n-1))));;
-
-let READ_MEMORY_SPLIT_CONV =
-  let baseconv =
-    GEN_REWRITE_CONV I [READ_MEMORY_BYTESIZED_UNSPLIT] THENC
-    BINOP_CONV(LAND_CONV(LAND_CONV(RAND_CONV(RAND_CONV
-     (TRY_CONV(GEN_REWRITE_CONV I [GSYM WORD_ADD_ASSOC] THENC
-               RAND_CONV WORD_ADD_CONV)))))) in
-  let rec conv n tm =
-    if n = 0 then REFL tm else
-    (baseconv THENC BINOP_CONV (conv(n - 1))) tm in
-  conv;;
-
-(* ------------------------------------------------------------------------- *)
-(* Filter length bound                                                       *)
-(* ------------------------------------------------------------------------- *)
-
-let LENGTH_FILTER = prove
- (`!P l:A list. LENGTH(FILTER P l) <= LENGTH l`,
-  GEN_TAC THEN LIST_INDUCT_TAC THEN ASM_REWRITE_TAC[FILTER; LE_REFL] THEN
-  COND_CASES_TAC THEN REWRITE_TAC[LENGTH] THEN ASM_ARITH_TAC);;
-
-(* ------------------------------------------------------------------------- *)
-(* Helper: val(w:24 word) MOD 2^23 as pure word operation                   *)
-(* ------------------------------------------------------------------------- *)
-
 let VAL_MOD_23_EQ_AND = prove
  (`!w:24 word. (word(val w MOD 2 EXP 23):int32) =
                word_and (word_zx w:int32) (word 8388607)`,
   GEN_TAC THEN CONV_TAC WORD_BLAST);;
 
-(* ------------------------------------------------------------------------- *)
-(* REJ_SAMPLE and friends are defined in common/mldsa_specs.ml so they can   *)
-(* be reused by the x86 proof.                                               *)
-(* ------------------------------------------------------------------------- *)
 
 let DIMINDEX_24 = DIMINDEX_CONV `dimindex(:24)`;;
 let DIMINDEX_192 = DIMINDEX_CONV `dimindex(:192)`;;
@@ -494,1285 +195,6 @@ let LENGTH_FILTER_FOUR = prove
   REPEAT GEN_TAC THEN REWRITE_TAC[FILTER] THEN
   REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
   ASM_REWRITE_TAC[LENGTH; bitval] THEN ARITH_TAC);;
-
-(* ------------------------------------------------------------------------- *)
-(* The main correctness theorem.                                             *)
-(* ------------------------------------------------------------------------- *)
-
-let MLDSA_REJ_UNIFORM_CORRECT = prove
- (`!res buf buflen table (inlist:(24 word)list) pc stackpointer.
-        24 divides val buflen /\
-        8 * val buflen = 24 * LENGTH inlist /\
-        ALL (nonoverlapping (stackpointer,1088))
-            [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)] /\
-        ALL (nonoverlapping (res,1024))
-            [(word pc,LENGTH mldsa_rej_uniform_mc); (stackpointer,1088)]
-        ==> ensures arm
-             (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-                  read PC s = word(pc + MLDSA_REJ_UNIFORM_CORE_START) /\
-                  read SP s = stackpointer /\
-                  C_ARGUMENTS [res;buf;buflen;table] s /\
-                  read(memory :> bytes(table,256)) s =
-                  num_of_wordlist mldsa_rej_uniform_table /\
-                  read(memory :> bytes(buf,val buflen)) s =
-                  num_of_wordlist inlist)
-             (\s. read PC s = word(pc + MLDSA_REJ_UNIFORM_CORE_END) /\
-                  let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
-                  let outlen = LENGTH outlist in
-                  C_RETURN s = word outlen /\
-                  read(memory :> bytes(res,4 * outlen)) s =
-                  num_of_wordlist outlist)
-             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(res,1024);
-                         memory :> bytes(stackpointer,1088)])`,
-  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
-  MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN
-  W64_GEN_TAC `buflen:num` THEN
-  MAP_EVERY X_GEN_TAC
-   [`table:int64`; `inlist:(24 word)list`; `pc:num`; `stackpointer:int64`] THEN
-  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
-              ALL; C_RETURN; NONOVERLAPPING_CLAUSES] THEN
-  DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
-
-  (*** First split off and handle the writeback tail once and for all ***)
-
-  ENSURES_SEQUENCE_TAC `pc + 0x228`
-   `\s. read X0 s = res /\
-        read X4 s = word 256 /\
-        read X8 s = stackpointer /\
-        ?n. let outlist = REJ_SAMPLE (SUB_LIST (0,8 * n) inlist) in
-            let outlen = LENGTH outlist in
-            outlen < 272 /\
-            read X9 s = word outlen /\
-            (buflen < 24 * (n + 1) \/ 256 <= outlen) /\
-            read (memory :> bytes (stackpointer,4 * outlen)) s =
-            num_of_wordlist outlist` THEN
-  CONJ_TAC THENL
-   [ALL_TAC;
-
-    (*** Writeback: unroll the copy loop ***)
-
-    ENSURES_INIT_TAC "s0" THEN
-    FIRST_X_ASSUM(X_CHOOSE_THEN `n:num` MP_TAC) THEN
-    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-    ABBREV_TAC `outlist = REJ_SAMPLE (SUB_LIST (0,8 * n) inlist)` THEN
-    ABBREV_TAC `outlen = LENGTH(outlist:int32 list)` THEN
-    DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
-    VAL_INT64_TAC `outlen:num` THEN
-    BIGNUM_LDIGITIZE_TAC "b_"
-      `read (memory :> bytes(stackpointer,8 * 128)) s0` THEN
-    MEMORY_128_FROM_64_TAC "stackpointer" 0 64 THEN
-    ASM_REWRITE_TAC[WORD_ADD_0] THEN STRIP_TAC THEN
-    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--182) THEN
-    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    SUBGOAL_THEN
-     `read (memory :> bytes (res,4 * MIN 256 outlen)) s182 =
-      num_of_wordlist (SUB_LIST (0,256) outlist:int32 list)`
-    ASSUME_TAC THENL
-     [REWRITE_TAC[NUM_OF_WORDLIST_SUB_LIST_0; DIMINDEX_32] THEN
-      FIRST_X_ASSUM(fun th ->
-        GEN_REWRITE_TAC (RAND_CONV o LAND_CONV) [SYM th]) THEN
-      REWRITE_TAC[ARITH_RULE `4 * MIN 256 l = MIN (4 * l) 1024`] THEN
-      REWRITE_TAC[ARITH_RULE `32 * 256 = 8 * 1024`] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_MOD] THEN
-      ONCE_REWRITE_TAC[ARITH_RULE `MIN a b = MIN b a`] THEN
-      REWRITE_TAC[GSYM READ_BYTES_MOD] THEN
-      AP_THM_TAC THEN AP_TERM_TAC THEN
-      REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE] THEN
-      REWRITE_TAC[ARITH_RULE `1024 = 8 * 128`] THEN
-      CONV_TAC(ONCE_DEPTH_CONV BIGNUM_LEXPAND_CONV) THEN
-      RULE_ASSUM_TAC(CONV_RULE(ONCE_DEPTH_CONV(READ_MEMORY_SPLIT_CONV 1))) THEN
-      ASM_REWRITE_TAC[];
-      ALL_TAC] THEN
-    FIRST_X_ASSUM DISJ_CASES_TAC THENL
-     [SUBGOAL_THEN `SUB_LIST (0,8 * n) (inlist:(24 word)list) = inlist`
-      SUBST_ALL_TAC THENL
-       [MATCH_MP_TAC SUB_LIST_REFL THEN FIRST_X_ASSUM(MATCH_MP_TAC o
-        MATCH_MP
-         (ARITH_RULE `8 * b = 24 * l ==> b <= 24 * n ==> l <= 8 * n`)) THEN
-        UNDISCH_TAC `buflen < 24 * (n + 1)` THEN
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE I [divides]) THEN
-        SIMP_TAC[LEFT_IMP_EXISTS_THM; LE_MULT_LCANCEL; LT_MULT_LCANCEL] THEN
-        ARITH_TAC;
-        ASM_REWRITE_TAC[LENGTH_SUB_LIST; SUB_0]] THEN
-      GEN_REWRITE_TAC LAND_CONV [GSYM COND_RAND] THEN
-      REWRITE_TAC[ARITH_RULE `(if l < p then l else p) = MIN p l`];
-      ASM_REWRITE_TAC[GSYM NOT_LE; LENGTH_SUB_LIST; SUB_0] THEN
-      MATCH_MP_TAC(MESON[]
-       `y = x /\ (y = x ==> P) ==> word x = word y /\ P`) THEN
-      CONJ_TAC THENL
-       [REWRITE_TAC[ARITH_RULE `MIN a b = a <=> a <= b`] THEN
-        TRANS_TAC LE_TRANS `outlen:num` THEN ASM_REWRITE_TAC[] THEN
-        SUBST1_TAC(SYM(ASSUME `LENGTH(outlist:int32 list) = outlen`)) THEN
-        EXPAND_TAC "outlist" THEN
-        MP_TAC(ISPECL [`inlist:(24 word)list`; `8 * n`]
-          SUB_LIST_TOPSPLIT) THEN
-        DISCH_THEN(fun th ->
-          GEN_REWRITE_TAC (funpow 3 RAND_CONV) [SYM th]) THEN
-        REWRITE_TAC[REJ_SAMPLE_APPEND; LENGTH_APPEND; LE_ADD];
-        DISCH_THEN SUBST1_TAC] THEN
-      SUBGOAL_THEN
-       `SUB_LIST (0,256) (REJ_SAMPLE inlist) = SUB_LIST (0,256) outlist`
-      SUBST1_TAC THENL
-       [MP_TAC(ISPECL [`inlist:(24 word)list`; `8 * n`]
-          SUB_LIST_TOPSPLIT) THEN
-        DISCH_THEN(fun th -> ONCE_REWRITE_TAC[SYM th]) THEN
-        ASM_SIMP_TAC[REJ_SAMPLE_APPEND; SUB_LIST_APPEND_LEFT];
-        ALL_TAC] THEN
-      FIRST_ASSUM(SUBST1_TAC o MATCH_MP (ARITH_RULE
-       `256 <= l ==> 4 * 256 = 4 * MIN 256 l`)) THEN
-      FIRST_ASSUM ACCEPT_TAC]] THEN
-
-  (*** The computation half: main loop + tail ***)
-
-  (*** Characterize the number of times round the main loop ***)
-  (*** ML-DSA processes 16 coefficients (48 bytes) per iteration ***)
-
-  SUBGOAL_THEN
-   `?i. buflen < 48 * (i + 1) \/
-        256 <= LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist))`
-  MP_TAC THENL
-   [EXISTS_TAC `buflen:num` THEN ARITH_TAC;
-    GEN_REWRITE_TAC LAND_CONV [num_WOP]] THEN
-
-  DISCH_THEN(X_CHOOSE_THEN `N:num` (CONJUNCTS_THEN2 ASSUME_TAC MP_TAC)) THEN
-  REWRITE_TAC[DE_MORGAN_THM; NOT_LE] THEN STRIP_TAC THEN
-
-  (*** Slightly elaborated sequencing to handle N = 0 case as well ***)
-  (*** Intermediate state P' at pc + 0x198 (loop48_end: CMP X9,X4) ***)
-
-  MATCH_MP_TAC(MESON[]
-   `!P'. (ensures arm P' Q R ==> ensures arm P Q R) /\ ensures arm P' Q R
-        ==> ensures arm P Q R`) THEN
-  EXISTS_TAC
-   `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-        read PC s = word (pc + 0x198) /\
-        read (memory :> bytes (table,256)) s =
-        num_of_wordlist mldsa_rej_uniform_table /\
-        read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-        read Q20 s = word 0x800b0a09800807068005040380020100 /\
-        read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
-        read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
-        read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
-        read Q28 s = word 0x00800000008000000080000000800000 /\
-        read Q29 s = word 0x08080808040404040202020201010101 /\
-        read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
-        read Q31 s = word 0x00000008000000040000000200000001 /\
-        let outlist = REJ_SAMPLE (SUB_LIST (0,16 * N) inlist) in
-        let outlen = LENGTH outlist in
-        read X0 s = res /\
-        read X1 s = word_add buf (word (48 * N)) /\
-        read X2 s = word_sub (word buflen) (word (48 * N)) /\
-        read X3 s = table /\
-        read X4 s = word 256 /\
-        read X7 s = word_add stackpointer (word (4 * outlen)) /\
-        read X8 s = stackpointer /\
-        read X9 s = word outlen /\
-        read (memory :> bytes (stackpointer,4 * outlen)) s =
-        num_of_wordlist outlist` THEN
-  CONJ_TAC THENL
-   [ASM_CASES_TAC `N = 0` THENL
-     [(*** N = 0 case: execute preamble + init loop to reach P' ***)
-      MATCH_MP_TAC(ONCE_REWRITE_RULE[IMP_CONJ]
-       (REWRITE_RULE[CONJ_ASSOC] ENSURES_TRANS_SIMPLE)) THEN
-      CONJ_TAC THENL [MAYCHANGE_IDEMPOT_TAC; ALL_TAC] THEN
-      FIRST_X_ASSUM(DISJ_CASES_THEN MP_TAC) THENL
-       [ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN DISCH_TAC;
-        ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES] THEN
-        REWRITE_TAC[REJ_SAMPLE_EMPTY; LENGTH] THEN
-        CONV_TAC NUM_REDUCE_CONV] THEN
-      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
-      GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
-      ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--149) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
-      REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
-      REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_TRIVIAL; num_of_wordlist];
-
-      FIRST_ASSUM(ASSUME_TAC o MATCH_MP (ARITH_RULE `~(N = 0) ==> 0 < N`)) THEN
-      DISCH_TAC] THEN
-
-    (*** Set up the loop invariant ***)
-
-    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x0bc` `pc + 0x190`
-     `\i s. read (memory :> bytes (table,256)) s =
-            num_of_wordlist mldsa_rej_uniform_table /\
-            read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-            read Q20 s = word 0x800b0a09800807068005040380020100 /\
-            read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
-            read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
-            read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
-            read Q28 s = word 0x00800000008000000080000000800000 /\
-            read Q29 s = word 0x08080808040404040202020201010101 /\
-            read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
-            read Q31 s = word 0x00000008000000040000000200000001 /\
-            let outlist = REJ_SAMPLE(SUB_LIST(0,16 * i) inlist) in
-            let outlen = LENGTH outlist in
-            read X0 s = res /\
-            read X1 s = word_add buf (word(48 * i)) /\
-            read X2 s = word_sub (word buflen) (word(48 * i)) /\
-            read X3 s = table /\
-            read X4 s = word 256 /\
-            read X7 s = word_add stackpointer (word(4 * outlen)) /\
-            read X8 s = stackpointer /\
-            read X9 s = word outlen /\
-            read (memory :> bytes (stackpointer,4*outlen)) s =
-            num_of_wordlist outlist` THEN
-    REPEAT CONJ_TAC THENL
-     [(*** 0 < N ***)
-      ASM_ARITH_TAC;
-
-      (*** Pre-loop initialization: reach invariant at i=0 ***)
-      FIRST_X_ASSUM(MP_TAC o SPEC `0`) THEN
-      ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN STRIP_TAC THEN
-      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
-      GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
-      ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--151) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
-      REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
-      REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_TRIVIAL; num_of_wordlist];
-
-      (*** Main loop body preservation: invariant i ==> invariant i+1 ***)
-
-      X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-      ABBREV_TAC `cur:int64 = word_add buf (word (48 * i))` THEN
-      ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * i) inlist)` THEN
-      ABBREV_TAC `curlen = LENGTH(curlist:int32 list)` THEN
-      CONV_TAC(RATOR_CONV(LAND_CONV(TOP_DEPTH_CONV let_CONV))) THEN
-      ASM_REWRITE_TAC[] THEN ENSURES_INIT_TAC "s0" THEN
-      MAP_EVERY ABBREV_TAC
-       [`q0 = read (memory :> bytes128 cur) s0`;
-        `q1 = read (memory :> bytes128 (word_add cur (word 16))) s0`;
-        `q2 = read (memory :> bytes128 (word_add cur (word 32))) s0`] THEN
-
-      (*** Abbreviate the 16 coefficients as 32-bit words ***)
-
-      ABBREV_TAC
-       `(x:num->int32) j =
-        word_and (word_zx(word_subword
-          (read (memory :> wbytes cur) s0:384 word)
-          (24 * j,24):24 word):int32) (word 8388607)` THEN
-
-      FIRST_X_ASSUM(MP_TAC o C MATCH_MP (ASSUME `i:num < N`)) THEN
-      ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
-
-      (*** Steps 1-12: LDP + LDR + ADD + TBL + BIC byte extraction ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--12) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-
-      (*** Prove Q16-Q19 contain the correct coefficients ***)
-
-      SUBGOAL_THEN
-       `read Q16 s12 =
-            word_join (word_join ((x:num->int32) 3) (x 2):int64)
-                      (word_join (x 1) (x 0):int64) /\
-        read Q17 s12 =
-            word_join (word_join ((x:num->int32) 7) (x 6):int64)
-                      (word_join (x 5) (x 4):int64) /\
-        read Q18 s12 =
-            word_join (word_join ((x:num->int32) 11) (x 10):int64)
-                      (word_join (x 9) (x 8):int64) /\
-        read Q19 s12 =
-            word_join (word_join ((x:num->int32) 15) (x 14):int64)
-                      (word_join (x 13) (x 12):int64)`
-      MP_TAC THENL
-       [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
-        DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
-        CONV_TAC NUM_REDUCE_CONV THEN
-        CONV_TAC WORD_BLAST;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Connect x to EL of SUB_LIST (needed for postcondition) ***)
-
-      SUBGOAL_THEN
-       `!j. j < 16
-            ==> EL j (MAP (\x:24 word. word(val x MOD 2 EXP 23):int32)
-                      (SUB_LIST(16 * i,16) inlist)) = (x:num->int32) j`
-      ASSUME_TAC THENL
-       [UNDISCH_THEN
-         `read (memory :> bytes (buf,buflen)) s12 =
-          num_of_wordlist(inlist:(24 word)list)`
-         (MP_TAC o AP_TERM
-           `\x. x DIV 2 EXP (8 * 48 * i) MOD 2 EXP (8 * 48)`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_DIV] THEN
-        REWRITE_TAC[READ_BYTES_MOD] THEN
-        REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE] THEN
-        REWRITE_TAC[ARITH_RULE `8 * 48 = 24 * 16 * 1`] THEN
-        REWRITE_TAC[ARITH_RULE `8 * 48 * x = 24 * 16 * x`] THEN
-        REWRITE_TAC[GSYM DIMINDEX_24; GSYM NUM_OF_WORDLIST_SUB_LIST] THEN
-        SUBGOAL_THEN
-         `MIN (buflen - 48 * i) 48 = dimindex(:384) DIV 8`
-        SUBST1_TAC THENL
-         [REWRITE_TAC[DIMINDEX_384] THEN CONV_TAC NUM_REDUCE_CONV THEN
-          MATCH_MP_TAC(ARITH_RULE
-           `~(b < 48 * (i + 1)) ==> MIN (b - 48 * i) 48 = 48`) THEN
-          ASM_REWRITE_TAC[];
-          REWRITE_TAC[MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
-          REWRITE_TAC[READ_COMPONENT_COMPOSE; GSYM VAL_READ_WBYTES] THEN
-          ASM_REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE]] THEN
-        DISCH_TAC THEN X_GEN_TAC `j:num` THEN DISCH_TAC THEN
-        SUBGOAL_THEN
-         `j < LENGTH(SUB_LIST(16 * i,16) (inlist:(24 word)list))`
-        ASSUME_TAC THENL
-         [REWRITE_TAC[LENGTH_SUB_LIST] THEN
-          MAP_EVERY UNDISCH_TAC
-           [`j:num < 16`; `~(buflen < 48 * (i + 1))`;
-            `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-          ARITH_TAC;
-          ALL_TAC] THEN
-        ASM_SIMP_TAC[EL_MAP] THEN REWRITE_TAC[VAL_MOD_23_EQ_AND] THEN
-        FIRST_X_ASSUM(fun th ->
-          GEN_REWRITE_TAC RAND_CONV [SYM(SPEC `j:num` th)]) THEN
-        AP_THM_TAC THEN AP_TERM_TAC THEN AP_TERM_TAC THEN
-        REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; DIMINDEX_24;
-                    ARITH_RULE `MIN 24 24 = 24`] THEN
-        ASM_REWRITE_TAC[GSYM DIMINDEX_24; NUM_OF_WORDLIST_EL;
-                        LENGTH_SUB_LIST] THEN
-        COND_CASES_TAC THENL [REFL_TAC; ASM_MESON_TAC[]];
-        ALL_TAC] THEN
-
-      (*** Steps 13-26: CMHI + TRN1 + AND + UADDLV + FMOV + UBFX ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (13--26) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      RULE_ASSUM_TAC(REWRITE_RULE
-       [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-      RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-
-      (*** Each byte sums to at most 15, so the packed indices do not carry. ***)
-
-      SUBGOAL_THEN
-       `read X12 s26 =
-          word_add (word_add (if val ((x:num->int32) 0) < 8380417 then word 1 else word 0)
-                             (if val (x 1) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 2) < 8380417 then word 4 else word 0)
-                             (if val (x 3) < 8380417 then word 8 else word 0)) /\
-        read X13 s26 =
-          word_add (word_add (if val ((x:num->int32) 4) < 8380417 then word 1 else word 0)
-                             (if val (x 5) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 6) < 8380417 then word 4 else word 0)
-                             (if val (x 7) < 8380417 then word 8 else word 0)) /\
-        read X14 s26 =
-          word_add (word_add (if val ((x:num->int32) 8) < 8380417 then word 1 else word 0)
-                             (if val (x 9) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 10) < 8380417 then word 4 else word 0)
-                             (if val (x 11) < 8380417 then word 8 else word 0)) /\
-        read X15 s26 =
-          word_add (word_add (if val ((x:num->int32) 12) < 8380417 then word 1 else word 0)
-                             (if val (x 13) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 14) < 8380417 then word 4 else word 0)
-                             (if val (x 15) < 8380417 then word 8 else word 0))`
-      MP_TAC THENL
-       [ASM_REWRITE_TAC[] THEN REPEAT CONJ_TAC THEN CONV_TAC BITBLAST_RULE;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Abbreviate table indices and entries ***)
-
-      MAP_EVERY REABBREV_TAC
-       [`idx0 = read X12 s26`; `idx1 = read X13 s26`;
-        `idx2 = read X14 s26`; `idx3 = read X15 s26`] THEN
-      MAP_EVERY ABBREV_TAC
-       [`tab0 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx0:int64))))) s26`;
-        `tab1 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx1:int64))))) s26`;
-        `tab2 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx2:int64))))) s26`;
-        `tab3 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx3:int64))))) s26`] THEN
-
-      (*** Steps 27-41: table loads + packed counts + TBL ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (27--41) THEN
-      RULE_ASSUM_TAC(REWRITE_RULE[WORD_SUBWORD_AND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      RULE_ASSUM_TAC(REWRITE_RULE
-       [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-      RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-
-      (*** TBL correctness: Q16-Q19 = word(num_of_wordlist(FILTER ...)) ***)
-
-      SUBGOAL_THEN
-       `read Q16 s41 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-        read Q17 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7])) /\
-        read Q18 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 8; x 9; x 10; x 11])) /\
-        read Q19 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 12; x 13; x 14; x 15]))`
-      MP_TAC THENL
-       [UNDISCH_TAC
-         `read(memory :> bytes(table,256)) s41 =
-          num_of_wordlist mldsa_rej_uniform_table` THEN
-        REPLICATE_TAC 4
-         (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
-               [GSYM NUM_OF_PAIR_WORDLIST]) THEN
-        REWRITE_TAC[mldsa_rej_uniform_table; pair_wordlist] THEN
-        CONV_TAC WORD_REDUCE_CONV THEN
-        CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
-        REWRITE_TAC[GSYM BYTES128_WBYTES] THEN REPEAT STRIP_TAC THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q24 s = x`; `read Q25 s = x`;
-          `read Q26 s = x`; `read Q27 s = x`] THEN
-        REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-          (fun th -> is_var(rhs(concl th)) &&
-                     let n = fst(dest_var(rhs(concl th))) in
-                     n = "tab0" || n = "tab1" || n = "tab2" || n = "tab3"))) THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-          (fun th -> is_var(rhs(concl th)) &&
-                     let n = fst(dest_var(rhs(concl th))) in
-                     n = "idx0" || n = "idx1" || n = "idx2" || n = "idx3"))) THEN
-        ASM_REWRITE_TAC[] THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        ASM_REWRITE_TAC[FILTER] THEN
-        REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-        ASM_REWRITE_TAC[bitval] THEN
-        CONV_TAC WORD_REDUCE_CONV THEN
-        CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        ASM_REWRITE_TAC[WORD_ADD_0] THEN
-        CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        REPLICATE_TAC 2
-         (ONCE_REWRITE_TAC[GSYM NUM_OF_PAIR_WORDLIST]) THEN
-        REWRITE_TAC[pair_wordlist; NUM_OF_WORDLIST_SING; WORD_VAL] THEN
-        REWRITE_TAC[num_of_wordlist] THEN CONV_TAC WORD_BLAST;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Counting: X12-X15 = word(LENGTH(FILTER ...)) ***)
-
-      SUBGOAL_THEN
-       `read X12 s41 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-        read X13 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7])) /\
-        read X14 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 8; x 9; x 10; x 11])) /\
-        read X15 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 12; x 13; x 14; x 15]))`
-      MP_TAC THENL
-       [ASM_REWRITE_TAC[WORD_AND_0; WORD_POPCOUNT_0; BITBLAST_RULE
-         `word_popcount(word_and (word 1) x:byte) = bitval(bit 0 x) /\
-          word_popcount(word_and (word 2) x:byte) = bitval(bit 1 x) /\
-          word_popcount(word_and (word 4) x:byte) = bitval(bit 2 x) /\
-          word_popcount(word_and (word 8) x:byte) = bitval(bit 3 x) /\
-          word_popcount(word_and (word 16) x:byte) = bitval(bit 4 x) /\
-          word_popcount(word_and (word 32) x:byte) = bitval(bit 5 x) /\
-          word_popcount(word_and (word 64) x:byte) = bitval(bit 6 x) /\
-          word_popcount(word_and (word 128) x:byte) = bitval(bit 7 x)`] THEN
-        DISCARD_STATE_TAC "s41" THEN REPEAT CONJ_TAC THEN
-        REWRITE_TAC[BIT_WORD_MASK; DIMINDEX_8; LENGTH_FILTER_FOUR;
-                    GSYM WORD_ADD] THEN
-        CONV_TAC NUM_REDUCE_CONV THEN CONV_TAC BITBLAST_RULE;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Abbreviate filtered lists and their lengths ***)
-
-      MAP_EVERY ABBREV_TAC
-       [`lis0 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 0; x 1; x 2; x 3]`;
-        `lis1 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 4; x 5; x 6; x 7]`;
-        `lis2 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 8; x 9; x 10; x 11]`;
-        `lis3 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 12; x 13; x 14; x 15]`;
-        `len0 = LENGTH(lis0:int32 list)`;
-        `len1 = LENGTH(lis1:int32 list)`;
-        `len2 = LENGTH(lis2:int32 list)`;
-        `len3 = LENGTH(lis3:int32 list)`] THEN
-
-      SUBGOAL_THEN `len0 <= 4 /\ len1 <= 4 /\ len2 <= 4 /\ len3 <= 4`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["len0"; "len1"; "len2"; "len3"] THEN
-        MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
-        REPEAT CONJ_TAC THEN
-        W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-        REWRITE_TAC[LENGTH] THEN ARITH_TAC;
-        ALL_TAC] THEN
-
-      (*** First writeback: ST1 Q16 + ADD X7 ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (42--43) THEN
-      ABBREV_TAC `curlist1:int32 list = APPEND curlist lis0` THEN
-      ABBREV_TAC `curlen1:num = curlen + len0` THEN
-
-      SUBGOAL_THEN
-       `curlen1 < 260 /\
-        read (memory :> bytes (stackpointer,4*curlen1)) s43 =
-        num_of_wordlist(curlist1:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen1"; "curlist1"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen < 256`; `len0 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        SUBGOAL_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen)))) s43 =
-          word (num_of_wordlist(lis0:int32 list))`
-        MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
-        DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len0 = MIN 16 (4 * len0)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist1:int32 list) = curlen1` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist1"; "curlen1"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Second writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (44--45) THEN
-      ABBREV_TAC `curlist2:int32 list = APPEND curlist1 lis1` THEN
-      ABBREV_TAC `curlen2:num = curlen1 + len1` THEN
-      SUBGOAL_THEN
-       `curlen2 < 264 /\
-        read (memory :> bytes (stackpointer,4*curlen2)) s45 =
-        num_of_wordlist(curlist2:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen2"; "curlist2"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen1 < 260`; `len1 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen1)))) s45 =
-          word (num_of_wordlist(lis1:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len1 = MIN 16 (4 * len1)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist2:int32 list) = curlen2` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist2"; "curlen2"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Third writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (46--47) THEN
-      ABBREV_TAC `curlist3:int32 list = APPEND curlist2 lis2` THEN
-      ABBREV_TAC `curlen3:num = curlen2 + len2` THEN
-      SUBGOAL_THEN
-       `curlen3 < 268 /\
-        read (memory :> bytes (stackpointer,4*curlen3)) s47 =
-        num_of_wordlist(curlist3:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen3"; "curlist3"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen2 < 264`; `len2 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen2)))) s47 =
-          word (num_of_wordlist(lis2:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len2 = MIN 16 (4 * len2)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist3:int32 list) = curlen3` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist3"; "curlen3"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Fourth writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (48--49) THEN
-      ABBREV_TAC `curlist4:int32 list = APPEND curlist3 lis3` THEN
-      ABBREV_TAC `curlen4:num = curlen3 + len3` THEN
-      SUBGOAL_THEN
-       `curlen4 < 272 /\
-        read (memory :> bytes (stackpointer,4*curlen4)) s49 =
-        num_of_wordlist(curlist4:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen4"; "curlist4"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen3 < 268`; `len3 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen3)))) s49 =
-          word (num_of_wordlist(lis3:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len3 = MIN 16 (4 * len3)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist4:int32 list) = curlen4` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist4"; "curlen4"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Steps 50-53: accumulation (use MAP_UNTIL_TARGET_PC) ***)
-
-      MAP_UNTIL_TARGET_PC
-        (fun n -> ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC [n]) 50 THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-
-      (*** Postcondition: connect to loop invariant at i+1 ***)
-
-      REWRITE_TAC[ARITH_RULE `16 * (i + 1) = 16 * i + 16`] THEN
-      ASM_REWRITE_TAC[SUB_LIST_SPLIT; REJ_SAMPLE_APPEND; ADD_CLAUSES] THEN
-      SUBGOAL_THEN
-       `REJ_SAMPLE (SUB_LIST (16 * i,16) inlist) =
-        APPEND (APPEND (APPEND lis0 lis1) lis2) lis3`
-      SUBST1_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
-        REWRITE_TAC[GSYM APPEND_ASSOC; GSYM FILTER_APPEND] THEN
-        REWRITE_TAC[APPEND; REJ_SAMPLE] THEN AP_TERM_TAC THEN
-        REWRITE_TAC[LIST_EQ] THEN CONV_TAC(ONCE_DEPTH_CONV LENGTH_CONV) THEN
-        REWRITE_TAC[LENGTH_MAP] THEN
-        MATCH_MP_TAC(TAUT `p /\ (p ==> q) ==> p /\ q`) THEN CONJ_TAC THENL
-         [REWRITE_TAC[LENGTH_SUB_LIST] THEN MATCH_MP_TAC(ARITH_RULE
-           `16 * (i + 1) <= l ==> MIN 16 (l - 16 * i) = 16`) THEN
-          MAP_EVERY UNDISCH_TAC
-           [`~(buflen < 48 * (i + 1))`;
-            `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-          ARITH_TAC;
-          ASM_SIMP_TAC[EL_MAP] THEN DISCH_THEN(K ALL_TAC) THEN
-          CONV_TAC EXPAND_CASES_CONV THEN
-          CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[]];
-        ASM_REWRITE_TAC[APPEND_ASSOC] THEN
-        CONV_TAC(TOP_DEPTH_CONV let_CONV)] THEN
-      ASM_REWRITE_TAC[] THEN EXPAND_TAC "cur" THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE; ALL_TAC]) THEN
-      SUBST1_TAC(SYM(ASSUME `curlen3 + len3:num = curlen4`)) THEN
-      SUBST1_TAC(SYM(ASSUME `curlen2 + len2:num = curlen3`)) THEN
-      SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
-      SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
-      CONV_TAC WORD_RULE;
-
-      (*** Loop back: from end_pc (pc+0x190) to start_pc (pc+0x0bc) ***)
-      X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-      FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN
-      ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-      ENSURES_INIT_TAC "s0" THEN
-      SUBGOAL_THEN
-       `48 <= val(word_sub (word buflen:int64) (word (48 * i)))`
-      ASSUME_TAC THENL
-       [ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-        VAL_INT64_TAC `48 * i` THEN ASM_REWRITE_TAC[] THEN
-        UNDISCH_TAC `~(buflen < 48 * (i + 1))` THEN ARITH_TAC;
-        ALL_TAC] THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--4) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      MATCH_MP_TAC(MESON[] `~p ==> (if p then x else y) = y`) THEN
-      ASM_SIMP_TAC[NOT_LE; VAL_WORD_LT];
-
-      (*** Post-loop exit: from end_pc (invariant N) to split point ***)
-      (*** Handle cases: outlen >= 256 direct, or fall through to P' ***)
-      SUBGOAL_THEN
-       `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist)) < 272`
-      ASSUME_TAC THENL
-       [ASM_CASES_TAC `N = 0` THENL
-         [ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-          REWRITE_TAC[LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;
-          FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`)] THEN
-        ASM_REWRITE_TAC[ARITH_RULE `n - 1 < n <=> ~(n = 0)`] THEN
-        MATCH_MP_TAC(ARITH_RULE
-         `l' <= l + 16 ==> ~(b < x) /\ l < 256 ==> l' < 272`) THEN
-        MP_TAC(ISPECL [`inlist:(24 word)list`; `16 * (N - 1)`; `16`; `0`]
-            SUB_LIST_SPLIT) THEN
-        ASM_SIMP_TAC[ARITH_RULE `~(N = 0) ==> 16 * (N - 1) + 16 = 16 * N`] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[REJ_SAMPLE_APPEND] THEN
-        REWRITE_TAC[LENGTH_APPEND; LE_ADD_LCANCEL; ADD_CLAUSES] THEN
-        REWRITE_TAC[REJ_SAMPLE] THEN
-        W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-        MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] LE_TRANS) THEN
-        REWRITE_TAC[LENGTH_MAP; LENGTH_SUB_LIST] THEN ARITH_TAC;
-        ALL_TAC] THEN
-      VAL_INT64_TAC `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-      SUBGOAL_THEN
-       `48 <= val(word_sub (word buflen:int64) (word (48 * N))) <=>
-        48 * (N + 1) <= buflen`
-      ASSUME_TAC THENL
-       [SUBGOAL_THEN `48 * N < 2 EXP 64` ASSUME_TAC THENL
-         [FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-          MAP_EVERY VAL_INT64_TAC [`48 * N`; `buflen:num`]] THEN
-        ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-        FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-        ALL_TAC] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-      ASM_CASES_TAC `48 * (N + 1) <= buflen` THENL
-       [ENSURES_INIT_TAC "s0" THEN
-        ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THEN
-        FIRST_X_ASSUM(MP_TAC o check (is_disj o concl)) THEN
-        ASM_REWRITE_TAC[GSYM NOT_LE] THEN DISCH_TAC THEN
-        ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (3--4) THEN
-        ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-        EXISTS_TAC `2 * N` THEN
-        ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`];
-        ALL_TAC] THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV let_CONV)) THEN
-      FIRST_X_ASSUM(MATCH_MP_TAC o MATCH_MP
-        (ONCE_REWRITE_RULE[IMP_CONJ_ALT]
-          (REWRITE_RULE[CONJ_ASSOC] ENSURES_TRANS_SIMPLE))) THEN
-      CONJ_TAC THENL [MAYCHANGE_IDEMPOT_TAC; ALL_TAC] THEN
-      ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[]];
-
-    ALL_TAC] THEN
-
-  (*** The tail computation from P' at pc+0x198 to split at pc+0x228 ***)
-  (*** Handles: outlen >= 256 direct, or 24-byte tail body ***)
-
-  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-  SUBGOAL_THEN
-   `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist)) < 272`
-  ASSUME_TAC THENL
-   [ASM_CASES_TAC `N = 0` THENL
-     [ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      REWRITE_TAC[LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;
-      FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`)] THEN
-    ASM_REWRITE_TAC[ARITH_RULE `n - 1 < n <=> ~(n = 0)`] THEN
-    MATCH_MP_TAC(ARITH_RULE
-     `l' <= l + 16 ==> ~(b < x) /\ l < 256 ==> l' < 272`) THEN
-    MP_TAC(ISPECL [`inlist:(24 word)list`; `16 * (N - 1)`; `16`; `0`]
-        SUB_LIST_SPLIT) THEN
-    ASM_SIMP_TAC[ARITH_RULE `~(N = 0) ==> 16 * (N - 1) + 16 = 16 * N`] THEN
-    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[REJ_SAMPLE_APPEND] THEN
-    REWRITE_TAC[LENGTH_APPEND; LE_ADD_LCANCEL; ADD_CLAUSES] THEN
-    REWRITE_TAC[REJ_SAMPLE] THEN
-    W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-    MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] LE_TRANS) THEN
-    REWRITE_TAC[LENGTH_MAP; LENGTH_SUB_LIST] THEN ARITH_TAC;
-    ALL_TAC] THEN
-  VAL_INT64_TAC `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-  SUBGOAL_THEN
-   `24 <= val(word_sub (word buflen:int64) (word (48 * N))) <=>
-    48 * N + 24 <= buflen`
-  ASSUME_TAC THENL
-   [SUBGOAL_THEN `48 * N < 2 EXP 64` ASSUME_TAC THENL
-     [FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-      MAP_EVERY VAL_INT64_TAC [`48 * N`; `buflen:num`]] THEN
-    ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-    FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-    ALL_TAC] THEN
-  ENSURES_INIT_TAC "s0" THEN
-  ASM_CASES_TAC `256 <= LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THENL
-   [ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    EXISTS_TAC `2 * N` THEN
-    ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`];
-    FIRST_X_ASSUM(MP_TAC o check (is_disj o concl)) THEN
-    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-  ASM_CASES_TAC `48 * N + 24 <= buflen` THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (3--4) THENL
-   [RULE_ASSUM_TAC(REWRITE_RULE[NOT_LE]);
-    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    EXISTS_TAC `2 * N` THEN
-    ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`] THEN
-    UNDISCH_TAC `~(48 * N + 24 <= buflen)` THEN ARITH_TAC] THEN
-
-  (*** Because of divisibility, exactly 24 buffer elements left ***)
-
-  FIRST_X_ASSUM(K ALL_TAC o check (is_forall o concl)) THEN
-  SUBGOAL_THEN `48 * N + 24 = buflen` ASSUME_TAC THENL
-   [MAP_EVERY UNDISCH_TAC
-     [`48 * N + 24 <= buflen`; `buflen < 48 * (N + 1)`] THEN
-    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE I [divides]) THEN
-    SIMP_TAC[LEFT_IMP_EXISTS_THM; ARITH_RULE `48 = 24 * 2`] THEN
-    REWRITE_TAC[GSYM MULT_ASSOC; ARITH_RULE `24 * n + 24 = 24 * (n + 1)`] THEN
-    REWRITE_TAC[LE_MULT_LCANCEL; LT_MULT_LCANCEL] THEN ARITH_TAC;
-    ALL_TAC] THEN
-
-  (*** The tail computation body: 8 coefficients in 2 groups ***)
-  ABBREV_TAC `cur:int64 = word_add buf (word (48 * N))` THEN
-  ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * N) inlist)` THEN
-  ABBREV_TAC `curlen = LENGTH(curlist:int32 list)` THEN
-
-  MAP_EVERY ABBREV_TAC
-   [`q0 = read (memory :> bytes64 cur) s4`;
-    `q1 = read (memory :> bytes64 (word_add cur (word 8))) s4`;
-    `q2 = read (memory :> bytes64 (word_add cur (word 16))) s4`] THEN
-
-  ABBREV_TAC
-   `(x:num->int32) j =
-    word_and (word_zx(word_subword
-      (read (memory :> wbytes cur) s4:192 word)
-      (24 * j,24):24 word):int32) (word 8388607)` THEN
-
-  SUBGOAL_THEN
-   `read (memory :> bytes128 cur) s4 = word_join (q1:int64) (q0:int64)`
-  ASSUME_TAC THENL
-   [CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 1)) THEN
-    ASM_REWRITE_TAC[WORD_ADD_0];
-    ALL_TAC] THEN
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (5--12) THEN
-
-  SUBGOAL_THEN
-   `read Q16 s12 =
-        word_join (word_join ((x:num->int32) 3) (x 2):int64)
-                  (word_join (x 1) (x 0):int64) /\
-    read Q17 s12 =
-        word_join (word_join ((x:num->int32) 7) (x 6):int64)
-                  (word_join (x 5) (x 4):int64)`
-  MP_TAC THENL
-   [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
-    DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
-    CONV_TAC NUM_REDUCE_CONV THEN
-    CONV_TAC WORD_BLAST;
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read Q16 s = x`; `read Q17 s = x`] THEN
-    STRIP_TAC] THEN
-
-  SUBGOAL_THEN
-   `!j. j < 8
-        ==> EL j (MAP (\w:24 word. word(val w MOD 2 EXP 23):int32)
-                  (SUB_LIST(16 * N,8) inlist)) = (x:num->int32) j`
-  ASSUME_TAC THENL
-   [UNDISCH_THEN
-     `read (memory :> bytes (buf,buflen)) s12 =
-      num_of_wordlist(inlist:(24 word)list)`
-     (MP_TAC o AP_TERM
-       `\n:num. n DIV 2 EXP (8 * 48 * N) MOD 2 EXP (8 * 24)`) THEN
-    CONV_TAC(DEPTH_CONV BETA_CONV) THEN
-    REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_DIV; READ_BYTES_MOD] THEN
-    REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE] THEN
-    REWRITE_TAC[ARITH_RULE `8 * 24 = 24 * 8 * 1`;
-                ARITH_RULE `8 * 48 * n = 24 * 16 * n`] THEN
-    REWRITE_TAC[GSYM DIMINDEX_24; GSYM NUM_OF_WORDLIST_SUB_LIST] THEN
-    SUBGOAL_THEN `MIN (buflen - 48 * N) (dimindex(:24)) = dimindex(:192) DIV 8`
-    SUBST1_TAC THENL
-     [REWRITE_TAC[DIMINDEX_24; DIMINDEX_192] THEN
-      UNDISCH_TAC `48 * N + 24 = buflen` THEN ARITH_TAC;
-      REWRITE_TAC[MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; GSYM VAL_READ_WBYTES] THEN
-      ASM_REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE]] THEN
-    DISCH_TAC THEN X_GEN_TAC `j:num` THEN DISCH_TAC THEN
-    SUBGOAL_THEN `j < LENGTH(SUB_LIST(16 * N,8) (inlist:(24 word)list))`
-    ASSUME_TAC THENL
-     [REWRITE_TAC[LENGTH_SUB_LIST] THEN
-      MAP_EVERY UNDISCH_TAC [`j:num < 8`; `48 * N + 24 = buflen`;
-        `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-      ARITH_TAC; ALL_TAC] THEN
-    ASM_SIMP_TAC[EL_MAP] THEN REWRITE_TAC[VAL_MOD_23_EQ_AND] THEN
-    FIRST_X_ASSUM(fun th ->
-      GEN_REWRITE_TAC RAND_CONV [SYM(SPEC `j:num` th)]) THEN
-    AP_THM_TAC THEN AP_TERM_TAC THEN AP_TERM_TAC THEN
-    REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; DIMINDEX_24;
-                ARITH_RULE `MIN 24 24 = 24`] THEN
-    ASM_REWRITE_TAC[GSYM DIMINDEX_24; NUM_OF_WORDLIST_EL;
-                    LENGTH_SUB_LIST] THEN
-    COND_CASES_TAC THENL [REFL_TAC; ASM_MESON_TAC[]]; ALL_TAC] THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (13--20) THEN
-  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-  RULE_ASSUM_TAC(REWRITE_RULE[word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-  RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-  MAP_EVERY REABBREV_TAC
-   [`idx0 = read X12 s20`; `idx1 = read X13 s20`] THEN
-  MAP_EVERY ABBREV_TAC
-   [`tab0 = read(memory :> bytes128(word_add table
-                (word(16 * val(idx0:int64))))) s20`;
-    `tab1 = read(memory :> bytes128(word_add table
-                (word(16 * val(idx1:int64))))) s20`] THEN
-
-  (*** Steps 21-28: LDR Q24/Q25 + CNT + UADDLV + FMOV ***)
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (21--28) THEN
-
-  RULE_ASSUM_TAC(REWRITE_RULE[WORD_SUBWORD_AND]) THEN
-  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-  RULE_ASSUM_TAC(REWRITE_RULE[word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-  RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-
-  (*** Steps 29-30: TBL Q16/Q17 ***)
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (29--30) THEN
-
-  (*** TBL correctness: Q16/Q17 = word(num_of_wordlist(FILTER ...)) ***)
-
-  SUBGOAL_THEN
-   `read Q16 s30 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-    read Q17 s30 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7]))`
-  MP_TAC THENL
-   [UNDISCH_TAC
-     `read(memory :> bytes(table,256)) s30 =
-      num_of_wordlist mldsa_rej_uniform_table` THEN
-    REPLICATE_TAC 4
-     (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
-           [GSYM NUM_OF_PAIR_WORDLIST]) THEN
-    REWRITE_TAC[mldsa_rej_uniform_table; pair_wordlist] THEN
-    CONV_TAC WORD_REDUCE_CONV THEN
-    CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
-    REWRITE_TAC[GSYM BYTES128_WBYTES] THEN REPEAT STRIP_TAC THEN
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read Q24 s = x`; `read Q25 s = x`] THEN
-    REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-      (fun th -> is_var(rhs(concl th)) &&
-                 let n = fst(dest_var(rhs(concl th))) in
-                 n = "tab0" || n = "tab1"))) THEN
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read X12 s = x`; `read X13 s = x`] THEN
-    REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-      (fun th -> is_var(rhs(concl th)) &&
-                 let n = fst(dest_var(rhs(concl th))) in
-                 n = "idx0" || n = "idx1"))) THEN
-    ASM_REWRITE_TAC[] THEN
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read Q16 s = x`; `read Q17 s = x`] THEN
-    ASM_REWRITE_TAC[FILTER] THEN
-    REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-    ASM_REWRITE_TAC[bitval] THEN
-    CONV_TAC WORD_REDUCE_CONV THEN
-    CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-    ASM_REWRITE_TAC[WORD_ADD_0] THEN
-    CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-    REPLICATE_TAC 2
-     (ONCE_REWRITE_TAC[GSYM NUM_OF_PAIR_WORDLIST]) THEN
-    REWRITE_TAC[pair_wordlist; NUM_OF_WORDLIST_SING; WORD_VAL] THEN
-    REWRITE_TAC[num_of_wordlist] THEN CONV_TAC WORD_BLAST;
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read Q16 s = x`; `read Q17 s = x`] THEN
-    STRIP_TAC] THEN
-
-  (*** Counting: X12/X13 = word(LENGTH(FILTER ...)) ***)
-
-  SUBGOAL_THEN
-   `read X12 s30 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-    read X13 s30 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7]))`
-  MP_TAC THENL
-   [ASM_REWRITE_TAC[WORD_AND_0; WORD_POPCOUNT_0; BITBLAST_RULE
-     `word_popcount(word_and (word 1) x:byte) = bitval(bit 0 x) /\
-      word_popcount(word_and (word 2) x:byte) = bitval(bit 1 x) /\
-      word_popcount(word_and (word 4) x:byte) = bitval(bit 2 x) /\
-      word_popcount(word_and (word 8) x:byte) = bitval(bit 3 x) /\
-      word_popcount(word_and (word 16) x:byte) = bitval(bit 4 x) /\
-      word_popcount(word_and (word 32) x:byte) = bitval(bit 5 x) /\
-      word_popcount(word_and (word 64) x:byte) = bitval(bit 6 x) /\
-      word_popcount(word_and (word 128) x:byte) = bitval(bit 7 x)`] THEN
-    DISCARD_STATE_TAC "s30" THEN REPEAT CONJ_TAC THEN
-    REWRITE_TAC[WORD_MASK_ALT] THEN
-    REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-    ASM_REWRITE_TAC[FILTER] THEN CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-    REWRITE_TAC[LENGTH] THEN CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV);
-    DISCARD_MATCHING_ASSUMPTIONS
-     [`read X12 s = x`; `read X13 s = x`] THEN
-    STRIP_TAC] THEN
-
-  (*** Abbreviate filtered lists and their lengths ***)
-
-  MAP_EVERY ABBREV_TAC
-   [`lis0 = FILTER (\x:int32. val x < 8380417)
-                   [(x:num->int32) 0; x 1; x 2; x 3]`;
-    `lis1 = FILTER (\x:int32. val x < 8380417)
-                   [(x:num->int32) 4; x 5; x 6; x 7]`;
-    `len0 = LENGTH(lis0:int32 list)`;
-    `len1 = LENGTH(lis1:int32 list)`] THEN
-
-  SUBGOAL_THEN `len0 <= 4 /\ len1 <= 4`
-  STRIP_ASSUME_TAC THENL
-   [MAP_EVERY EXPAND_TAC ["len0"; "len1"] THEN
-    MAP_EVERY EXPAND_TAC ["lis0"; "lis1"] THEN
-    REPEAT CONJ_TAC THEN
-    W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-    REWRITE_TAC[LENGTH] THEN ARITH_TAC;
-    ALL_TAC] THEN
-
-  (*** First writeback: STR Q16 + ADD X7 ***)
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (31--32) THEN
-  ABBREV_TAC `curlist1:int32 list = APPEND curlist lis0` THEN
-  ABBREV_TAC `curlen1:num = curlen + len0` THEN
-
-  SUBGOAL_THEN
-   `curlen1 < 260 /\
-    read (memory :> bytes (stackpointer,4*curlen1)) s32 =
-    num_of_wordlist(curlist1:int32 list)`
-  STRIP_ASSUME_TAC THENL
-   [MAP_EVERY EXPAND_TAC ["curlen1"; "curlist1"] THEN CONJ_TAC THENL
-     [MAP_EVERY UNDISCH_TAC [`curlen < 256`; `len0 <= 4`] THEN ARITH_TAC;
-      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-    W(MP_TAC o PART_MATCH (lhand o rand)
-      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-    DISCH_THEN SUBST1_TAC THEN
-    SUBGOAL_THEN
-     `read (memory :> bytes128
-            (word_add stackpointer (word (4 * curlen)))) s32 =
-      word (num_of_wordlist(lis0:int32 list))`
-    MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
-    DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
-    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                VAL_READ_WBYTES;
-                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-    SUBGOAL_THEN `4 * len0 = MIN 16 (4 * len0)` SUBST1_TAC THENL
-     [UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-    MATCH_MP_TAC MOD_LT THEN
-    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-    ASM_REWRITE_TAC[DIMINDEX_32] THEN
-    UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-      [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                           (word_shl (word l1) 2) =
-                  word_add a (word(4 * (l0 + l1)))`]) THEN
-    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-  SUBGOAL_THEN `LENGTH(curlist1:int32 list) = curlen1` ASSUME_TAC THENL
-   [MAP_EVERY EXPAND_TAC ["curlist1"; "curlen1"] THEN
-    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-    ALL_TAC] THEN
-
-  (*** Second writeback: STR Q17 + ADD X7 ***)
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (33--34) THEN
-  ABBREV_TAC `curlist2:int32 list = APPEND curlist1 lis1` THEN
-  ABBREV_TAC `curlen2:num = curlen1 + len1` THEN
-
-  SUBGOAL_THEN
-   `curlen2 < 264 /\
-    read (memory :> bytes (stackpointer,4*curlen2)) s34 =
-    num_of_wordlist(curlist2:int32 list)`
-  STRIP_ASSUME_TAC THENL
-   [MAP_EVERY EXPAND_TAC ["curlen2"; "curlist2"] THEN CONJ_TAC THENL
-     [MAP_EVERY UNDISCH_TAC [`curlen1 < 260`; `len1 <= 4`] THEN ARITH_TAC;
-      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-    W(MP_TAC o PART_MATCH (lhand o rand)
-      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-    DISCH_THEN SUBST1_TAC THEN
-    SUBGOAL_THEN
-     `read (memory :> bytes128
-            (word_add stackpointer (word (4 * curlen1)))) s34 =
-      word (num_of_wordlist(lis1:int32 list))`
-    MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
-    DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
-    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                VAL_READ_WBYTES;
-                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-    SUBGOAL_THEN `4 * len1 = MIN 16 (4 * len1)` SUBST1_TAC THENL
-     [UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-    MATCH_MP_TAC MOD_LT THEN
-    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-    ASM_REWRITE_TAC[DIMINDEX_32] THEN
-    UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-      [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                           (word_shl (word l1) 2) =
-                  word_add a (word(4 * (l0 + l1)))`]) THEN
-    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-  SUBGOAL_THEN `LENGTH(curlist2:int32 list) = curlen2` ASSUME_TAC THENL
-   [MAP_EVERY EXPAND_TAC ["curlist2"; "curlen2"] THEN
-    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-    ALL_TAC] THEN
-
-  (*** REJ_SAMPLE connection ***)
-
-  SUBGOAL_THEN
-   `REJ_SAMPLE (SUB_LIST (0,16 * N + 8) inlist) = curlist2:int32 list`
-  ASSUME_TAC THENL
-   [ASM_REWRITE_TAC[SUB_LIST_SPLIT; REJ_SAMPLE_APPEND; ADD_CLAUSES] THEN
-    SUBGOAL_THEN
-     `REJ_SAMPLE (SUB_LIST (16 * N,8) inlist) = APPEND lis0 lis1`
-    SUBST1_TAC THENL
-     [MAP_EVERY EXPAND_TAC ["lis0"; "lis1"] THEN
-      REWRITE_TAC[GSYM FILTER_APPEND; APPEND; REJ_SAMPLE] THEN
-      AP_TERM_TAC THEN
-      REWRITE_TAC[LIST_EQ] THEN CONV_TAC(ONCE_DEPTH_CONV LENGTH_CONV) THEN
-      REWRITE_TAC[LENGTH_MAP] THEN
-      MATCH_MP_TAC(TAUT `p /\ (p ==> q) ==> p /\ q`) THEN CONJ_TAC THENL
-       [REWRITE_TAC[LENGTH_SUB_LIST] THEN MATCH_MP_TAC(ARITH_RULE
-         `16 * N + 8 <= l ==> MIN 8 (l - 16 * N) = 8`) THEN
-        MAP_EVERY UNDISCH_TAC
-         [`48 * N + 24 = buflen`;
-          `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-        ARITH_TAC;
-        ASM_SIMP_TAC[EL_MAP] THEN DISCH_THEN(K ALL_TAC) THEN
-        CONV_TAC EXPAND_CASES_CONV THEN
-        CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[]];
-      MAP_EVERY EXPAND_TAC ["curlist2"; "curlist1"] THEN
-      ASM_REWRITE_TAC[APPEND_ASSOC]];
-    ALL_TAC] THEN
-
-  (*** Steps 35-36: accumulation (ADD X9 + ADD X9) + final steps ***)
-
-  MAP_UNTIL_TARGET_PC
-    (fun n -> ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC [n]) 35 THEN
-  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-
-  (*** Postcondition: exists n with witness 2*N+1 ***)
-
-  EXISTS_TAC `2 * N + 1` THEN
-  REWRITE_TAC[ARITH_RULE `8 * (2 * N + 1) = 16 * N + 8`;
-              ARITH_RULE `24 * (2 * N + 1 + 1) = 48 * N + 48`] THEN
-  ASM_REWRITE_TAC[] THEN
-  CONJ_TAC THENL
-   [UNDISCH_TAC `curlen2 < 264` THEN ARITH_TAC; ALL_TAC] THEN
-  CONJ_TAC THENL
-   [SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
-    SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
-    CONV_TAC WORD_RULE; ALL_TAC] THEN
-  DISJ1_TAC THEN UNDISCH_TAC `48 * N + 24 = buflen` THEN ARITH_TAC);;
-
-(* NOTE: This must be kept in sync with the CBMC specification
- * in mldsa/src/native/aarch64/src/arith_native_aarch64.h *)
-
-let MLDSA_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
- (`!res buf buflen table (inlist:(24 word)list) pc stackpointer returnaddress.
-        24 divides val buflen /\
-        8 * val buflen = 24 * LENGTH inlist /\
-        ALL (nonoverlapping (word_sub stackpointer (word 1088),1088))
-            [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)] /\
-        ALL (nonoverlapping (res,1024))
-            [(word pc,LENGTH mldsa_rej_uniform_mc); (word_sub stackpointer (word 1088),1088)]
-        ==> ensures arm
-             (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-                  read PC s = word pc /\
-                  read SP s = stackpointer /\
-                  read X30 s = returnaddress /\
-                  C_ARGUMENTS [res;buf;buflen;table] s /\
-                  read(memory :> bytes(table,256)) s =
-                  num_of_wordlist mldsa_rej_uniform_table /\
-                  read(memory :> bytes(buf,val buflen)) s =
-                  num_of_wordlist inlist)
-             (\s. read PC s = returnaddress /\
-                  let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
-                  let outlen = LENGTH outlist in
-                  C_RETURN s = word outlen /\
-                  read(memory :> bytes(res,4 * outlen)) s =
-                  num_of_wordlist outlist)
-             (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-              MAYCHANGE [memory :> bytes(res,1024);
-                         memory :> bytes(word_sub stackpointer (word 1088),1088)])`,
-  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
-  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-  ARM_ADD_RETURN_STACK_TAC MLDSA_REJ_UNIFORM_EXEC
-   (CONV_RULE (TOP_DEPTH_CONV let_CONV) (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_REJ_UNIFORM_CORRECT))
-    `[]:int64 list` 1088);;
-
-(* ========================================================================= *)
-(* Memory safety for the non-constant-time rejection sampling (ARM).         *)
-(*                                                                           *)
-(* We prove memory safety alone, _not_ constant-time, for                    *)
-(* mldsa_rej_uniform_aarch64_asm. This function operates on public data     *)
-(* only, hence constant-time'ness is not a requirement. Allowing for         *)
-(* variable-time execution enables a faster implementation.                  *)
-(*                                                                           *)
-(* The standard _SAFE_ proof pattern                                         *)
-(* (exists f_events. forall ... e2 = f_events <public_params>) cannot        *)
-(* be used here because the microarchitectural events depend on private      *)
-(* data (which buffer elements pass the < Q filter).                         *)
-(* ========================================================================= *)
 
 needs "s2n_bignum/arm/proofs/consttime.ml";;
 
@@ -1843,960 +265,801 @@ let STRIP_EXISTS_ASSUM_TAC =
   FIRST_X_ASSUM(CHOOSE_THEN
    (CONJUNCTS_THEN2 ASSUME_TAC (ASSUME_TAC)));;
 
-(* ========================================================================= *)
-(* The main memory safety theorem.                                           *)
-(* ========================================================================= *)
+(* After n candidates, the output cursor follows the accepted prefix. *)
+let rej_uniform_prefix = new_definition
+ `rej_uniform_prefix res buf buflen table (inlist:(24 word)list) e n s <=>
+    let outlist = REJ_SAMPLE (SUB_LIST (0,n) inlist) in
+    let outlen = LENGTH outlist in
+    read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
+    read (memory :> bytes (table,256)) s =
+      num_of_wordlist mldsa_rej_uniform_table /\
+    read X0 s = word_add res (word (4 * outlen)) /\
+    read X1 s = word_add buf (word (3 * n)) /\
+    read X2 s = word_sub (word buflen) (word (3 * n)) /\
+    read X3 s = table /\ read X4 s = word 8380417 /\
+    read X9 s = word outlen /\
+    read (memory :> bytes (res,4 * outlen)) s = num_of_wordlist outlist /\
+    (?e2. read events s = APPEND e2 e /\
+          memaccess_inbounds e2 [buf,buflen; table,256] [res,1024])`;;
 
-let MLDSA_REJ_UNIFORM_MEMSAFE = prove
- (`!res buf buflen table (inlist:(24 word)list) pc e stackpointer.
-      24 divides val buflen /\
-      8 * val buflen = 24 * LENGTH inlist /\
-      ALL (nonoverlapping (stackpointer,1088))
-          [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)] /\
-      ALL (nonoverlapping (res,1024))
-          [(word pc,LENGTH mldsa_rej_uniform_mc); (stackpointer,1088)]
-      ==> ensures arm
-           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-                read PC s = word(pc + MLDSA_REJ_UNIFORM_CORE_START) /\
-                read SP s = stackpointer /\
-                C_ARGUMENTS [res;buf;buflen;table] s /\
-                wordlist_from_memory(table,256) s = mldsa_rej_uniform_table /\
-                wordlist_from_memory(buf,LENGTH inlist) s = inlist /\
-                read events s = e)
-           (\s. read PC s = word(pc + MLDSA_REJ_UNIFORM_CORE_END) /\
-                (exists e2.
-                     read events s = APPEND e2 e /\
-                     memaccess_inbounds e2
-                       [buf,val buflen; table,256; stackpointer,1088]
-                       [stackpointer,1088; res,1024]))
-           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-            MAYCHANGE [events] ,,
-            MAYCHANGE [memory :> bytes(res,1024);
-                       memory :> bytes(stackpointer,1088)])`,
+let rej_uniform_vectors = new_definition
+ `rej_uniform_vectors s <=>
+    read Q20 s = word 0x800b0a09800807068005040380020100 /\
+    read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
+    read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
+    read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
+    read Q28 s = word 0x00800000008000000080000000800000 /\
+    read Q29 s = word 0x08080808040404040202020201010101 /\
+    read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
+    read Q31 s = word 0x00000008000000040000000200000001`;;
 
-  (* === Phase 0: Initial setup (same as CORRECT with extra e variable) === *)
+let REJ_UNIFORM_LENGTH_STEP = prove
+ (`!inlist:(24 word)list. !n k.
+     LENGTH(REJ_SAMPLE(SUB_LIST(0,n+k) inlist)) <=
+     LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) + k`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[SUB_LIST_SPLIT; REJ_SAMPLE_APPEND;
+    ADD_CLAUSES; LENGTH_APPEND; LE_ADD_LCANCEL] THEN
+  REWRITE_TAC[REJ_SAMPLE] THEN MATCH_MP_TAC LE_TRANS THEN
+  EXISTS_TAC `LENGTH(MAP (\w:24 word. word (val w MOD 2 EXP 23):int32)
+    (SUB_LIST(n,k) inlist))` THEN REWRITE_TAC[LENGTH_FILTER; LENGTH_MAP;
+    LENGTH_SUB_LIST] THEN ARITH_TAC);;
 
-  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
-  MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN
-  W64_GEN_TAC `buflen:num` THEN
-  MAP_EVERY X_GEN_TAC
-   [`table:int64`; `inlist:(24 word)list`; `pc:num`;
-    `e:(uarch_event)list`; `stackpointer:int64`] THEN
-  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
-              ALL; C_RETURN; NONOVERLAPPING_CLAUSES] THEN
-  DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
-
-  (* Modify precondition style, same as CORRECT *)
-  MP_TAC(ISPECL
-   [`table:int64`; `256`; `256`; `mldsa_rej_uniform_table`]
-   (INST_TYPE [`:8`,`:N`] WORDLIST_FROM_MEMORY_EQ_ALT)) THEN
-  REWRITE_TAC[DIMINDEX_8] THEN DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
-  MP_TAC(ISPECL
-   [`buf:int64`; `LENGTH(inlist:(24 word)list)`;
-    `buflen:num`; `inlist:(24 word)list`]
-   (INST_TYPE [`:24`,`:N`] WORDLIST_FROM_MEMORY_EQ_ALT)) THEN
-  ASM_REWRITE_TAC[DIMINDEX_24] THEN DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
-  GLOBALIZE_PRECONDITION_TAC THEN
-
-  (* === Split computation from writeback at pc + 0x228 === *)
-  (* Intermediate state: same as CORRECT but with event accumulator *)
-
-  ENSURES_SEQUENCE_TAC `pc + 0x228`
-   `\s. read X0 s = res /\
-        read X4 s = word 256 /\
-        read X8 s = stackpointer /\
-        ?n. let outlist = REJ_SAMPLE (SUB_LIST (0,8 * n) inlist) in
-            let outlen = LENGTH outlist in
-            outlen < 272 /\
-            read X9 s = word outlen /\
-            (buflen < 24 * (n + 1) \/ 256 <= outlen) /\
-            read (memory :> bytes (stackpointer,4 * outlen)) s =
-            num_of_wordlist outlist /\
-            (exists e_acc.
-              read events s = APPEND e_acc e /\
-              memaccess_inbounds e_acc
-                [buf,buflen; table,256; stackpointer,1088]
-                [stackpointer,1088; res,1024])` THEN
-  CONJ_TAC THENL
-   [ALL_TAC;
-
-    (* === Writeback tail (same as CORRECT + memsafe discharge) === *)
-
-    ENSURES_INIT_TAC "s0" THEN
-    FIRST_X_ASSUM(X_CHOOSE_THEN `n:num` MP_TAC) THEN
-    CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-    ABBREV_TAC `outlist = REJ_SAMPLE (SUB_LIST (0,8 * n) inlist)` THEN
-    ABBREV_TAC `outlen = LENGTH(outlist:int32 list)` THEN
-    DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
-    (* Strip the event accumulator *)
-    STRIP_EXISTS_ASSUM_TAC THEN
-    VAL_INT64_TAC `outlen:num` THEN
-    BIGNUM_LDIGITIZE_TAC "b_"
-      `read (memory :> bytes(stackpointer,8 * 128)) s0` THEN
-    MEMORY_128_FROM_64_TAC "stackpointer" 0 64 THEN
-    ASM_REWRITE_TAC[WORD_ADD_0] THEN STRIP_TAC THEN
-    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--182) THEN
-    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    ASM_REWRITE_TAC[GSYM REJ_SAMPLE] THEN
-    (* Normalize val(word buflen) if needed *)
-    SUBGOAL_THEN `val(word buflen:int64) = buflen`
-      (fun th -> REWRITE_TAC[th]) THENL
-     [MATCH_MP_TAC VAL_WORD_EQ THEN
-      REWRITE_TAC[DIMINDEX_64] THEN MEMSAFE_ARITH_TAC;
-      ALL_TAC] THEN
-    DISCHARGE_MEMSAFE_ASM_TAC] THEN
-
-  (* === Main computation phase (before writeback) === *)
-  (* Structure follows the ARM CORRECT proof with event accumulator
-     added to the loop invariant and memsafe discharge at each endpoint. *)
-
-  (*** Characterize the number of times round the main loop. ***)
-
-  SUBGOAL_THEN
-   `?i. buflen < 48 * (i + 1) \/
-        256 <= LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist))`
-  MP_TAC THENL
-   [EXISTS_TAC `buflen:num` THEN ARITH_TAC;
-    GEN_REWRITE_TAC LAND_CONV [num_WOP]] THEN
-
-  DISCH_THEN(X_CHOOSE_THEN `N:num` (CONJUNCTS_THEN2 ASSUME_TAC MP_TAC)) THEN
-  REWRITE_TAC[DE_MORGAN_THM; NOT_LE] THEN STRIP_TAC THEN
-
-  (*** Slightly elaborated sequencing to handle N = 0 case as well ***)
-
-  MATCH_MP_TAC(MESON[]
-   `!P'. (ensures arm P' Q R ==> ensures arm P Q R) /\ ensures arm P' Q R
-        ==> ensures arm P Q R`) THEN
-  EXISTS_TAC
-   `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-        read PC s = word (pc + 0x198) /\
-        read (memory :> bytes (table,256)) s =
-        num_of_wordlist mldsa_rej_uniform_table /\
-        read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-        read Q20 s = word 0x800b0a09800807068005040380020100 /\
-        read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
-        read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
-        read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
-        read Q28 s = word 0x00800000008000000080000000800000 /\
-        read Q29 s = word 0x08080808040404040202020201010101 /\
-        read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
-        read Q31 s = word 0x00000008000000040000000200000001 /\
-        let outlist = REJ_SAMPLE (SUB_LIST (0,16 * N) inlist) in
-        let outlen = LENGTH outlist in
-        read X0 s = res /\
-        read X1 s = word_add buf (word (48 * N)) /\
-        read X2 s = word_sub (word buflen) (word (48 * N)) /\
-        read X3 s = table /\
-        read X4 s = word 256 /\
-        read X7 s = word_add stackpointer (word (4 * outlen)) /\
-        read X8 s = stackpointer /\
-        read X9 s = word outlen /\
-        read (memory :> bytes (stackpointer,4 * outlen)) s =
-        num_of_wordlist outlist /\
-        (exists e_acc.
-          read events s = APPEND e_acc e /\
-          memaccess_inbounds e_acc
-            [buf,buflen; table,256; stackpointer,1088]
-            [stackpointer,1088; res,1024])` THEN
-  CONJ_TAC THENL
-   [ASM_CASES_TAC `N = 0` THENL
-     [MATCH_MP_TAC(ONCE_REWRITE_RULE[IMP_CONJ]
-       (REWRITE_RULE[CONJ_ASSOC] ENSURES_TRANS_SIMPLE)) THEN
-      CONJ_TAC THENL [MAYCHANGE_IDEMPOT_TAC; ALL_TAC] THEN
-      FIRST_X_ASSUM(DISJ_CASES_THEN MP_TAC) THENL
-       [ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN DISCH_TAC;
-        ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES] THEN
-        REWRITE_TAC[REJ_SAMPLE_EMPTY; LENGTH] THEN
-        CONV_TAC NUM_REDUCE_CONV] THEN
-      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
-      GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
-      ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--149) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
-      REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
-      REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_TRIVIAL;
-                  num_of_wordlist] THEN
-      DISCHARGE_MEMSAFE_TAC;
-      FIRST_ASSUM(ASSUME_TAC o MATCH_MP (ARITH_RULE `~(N = 0) ==> 0 < N`)) THEN
-      DISCH_TAC] THEN
-
-    (*** Set up the loop invariant with event accumulator ***)
-
-    ENSURES_WHILE_UP_TAC `N:num` `pc + 0x0bc` `pc + 0x190`
-     `\i s. read (memory :> bytes (table,256)) s =
-            num_of_wordlist mldsa_rej_uniform_table /\
+let MLDSA_REJ_UNIFORM_INIT = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e.
+     nonoverlapping (res,1024) (word pc,LENGTH mldsa_rej_uniform_mc)
+     ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ C_ARGUMENTS [res;buf;word buflen;table] s /\
+            read (memory :> bytes (table,256)) s =
+              num_of_wordlist mldsa_rej_uniform_table /\
             read (memory :> bytes (buf,buflen)) s = num_of_wordlist inlist /\
-            read Q20 s = word 0x800b0a09800807068005040380020100 /\
-            read Q21 s = word 0x8c1716158c1413128c11100f8c0e0d0c /\
-            read Q22 s = word 0x8813121188100f0e880d0c0b880a0908 /\
-            read Q23 s = word 0x840f0e0d840c0b0a8409080784060504 /\
-            read Q28 s = word 0x00800000008000000080000000800000 /\
-            read Q29 s = word 0x08080808040404040202020201010101 /\
-            read Q30 s = word 0x007fe001007fe001007fe001007fe001 /\
-            read Q31 s = word 0x00000008000000040000000200000001 /\
-            let outlist = REJ_SAMPLE(SUB_LIST(0,16 * i) inlist) in
-            let outlen = LENGTH outlist in
-            read X0 s = res /\
-            read X1 s = word_add buf (word(48 * i)) /\
-            read X2 s = word_sub (word buflen) (word(48 * i)) /\
-            read X3 s = table /\
-            read X4 s = word 256 /\
-            read X7 s = word_add stackpointer (word(4 * outlen)) /\
-            read X8 s = stackpointer /\
-            read X9 s = word outlen /\
-            read (memory :> bytes (stackpointer,4*outlen)) s =
-            num_of_wordlist outlist /\
-            (exists e_acc.
-              read events s = APPEND e_acc e /\
-              memaccess_inbounds e_acc
-                [buf,buflen; table,256; stackpointer,1088]
-                [stackpointer,1088; res,1024])` THEN
-    REPEAT CONJ_TAC THENL
-     [ASM_ARITH_TAC;
+            read events s = e)
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word (pc + 0x74) /\ rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e 0 s)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[rej_uniform_vectors; rej_uniform_prefix;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; C_ARGUMENTS;
+    LENGTH_MLDSA_REJ_UNIFORM_MC] THEN DISCH_TAC THEN
+  GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
+  GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
+  ENSURES_INIT_TAC "s0" THEN ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--29) THEN
+  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
+  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
+  REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
+  REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0;
+    READ_COMPONENT_COMPOSE; READ_BYTES_TRIVIAL; num_of_wordlist] THEN
+  EXISTS_TAC `[]:uarch_event list` THEN REWRITE_TAC[APPEND;
+    memaccess_inbounds; ALL]);;
 
-      (*** Pre-loop initialization ***)
+(* Both loop tests branch on the remaining input and output capacity. *)
+let MLDSA_REJ_UNIFORM_TEST16 = prove
+ (`!res buf buflen table (inlist:(24 word)list) e i pc first take.
+     let len = LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist)) in
+     buflen < 2 EXP 64 /\ 48 * i <= buflen /\ len <= 256 /\
+     (take <=> 48 * i + 48 <= buflen /\ len <= 240) /\
+     nonoverlapping (res,1024) (word pc,LENGTH mldsa_rej_uniform_mc)
+     ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word (pc + (if first then 0x74 else 0x158)) /\
+            rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e (16 * i) s)
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word (pc + (if take then 0x84 else 0x160)) /\
+            rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e (16 * i) s)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[rej_uniform_vectors; rej_uniform_prefix;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC] THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN STRIP_TAC THEN
+  ABBREV_TAC `len = LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist))` THEN
+  SUBGOAL_THEN `val (word_sub (word buflen) (word (3 * 16 * i)):int64) =
+                buflen - 48 * i` ASSUME_TAC THENL
+   [REWRITE_TAC[ARITH_RULE `3 * 16 * i = 48 * i`] THEN
+    SUBGOAL_THEN `48 * i < 2 EXP 64` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+    MAP_EVERY VAL_INT64_TAC [`48 * i`; `buflen:num`] THEN
+    ASM_REWRITE_TAC[VAL_WORD_SUB_CASES]; ALL_TAC] THEN
+  VAL_INT64_TAC `len:num` THEN VAL_INT64_TAC `240` THEN
+  SUBGOAL_THEN `(240 <= len /\ ~(val(word_sub (word len) (word 240):int64) = 0))
+                <=> ~(len <= 240)` ASSUME_TAC THENL
+   [ASM_REWRITE_TAC[VAL_WORD_SUB_EQ_0] THEN ARITH_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `(48 <= buflen - 48 * i <=> 48 * i + 48 <= buflen)`
+    ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  ASM_CASES_TAC `first:bool` THEN (ASM_REWRITE_TAC[] THEN
+  ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+  ASM_CASES_TAC `48 * i + 48 <= buflen` THENL
+   [ASM_CASES_TAC `len <= 240` THEN ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--4);
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2)] THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[GSYM NOT_LE] THEN
+  DISCHARGE_MEMSAFE_ASM_TAC));;
 
-      FIRST_X_ASSUM(MP_TAC o SPEC `0`) THEN
-      ASM_REWRITE_TAC[ADD_CLAUSES; MULT_CLAUSES] THEN STRIP_TAC THEN
-      GHOST_INTRO_TAC `q20_init:int128` `read Q20` THEN
-      GHOST_INTRO_TAC `q31_init:int128` `read Q31` THEN
-      ENSURES_INIT_TAC "s0" THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--151) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_BLAST; ALL_TAC]) THEN
-      REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REWRITE_TAC[LENGTH] THEN
-      REWRITE_TAC[MULT_CLAUSES; WORD_ADD_0; WORD_SUB_0] THEN
-      REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_TRIVIAL;
-                  num_of_wordlist] THEN
-      DISCHARGE_MEMSAFE_TAC;
+let MLDSA_REJ_UNIFORM_TEST8 = prove
+ (`!res buf buflen table (inlist:(24 word)list) e i pc.
+     let len = LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist)) in
+     buflen < 2 EXP 64 /\ 48 * i <= buflen /\ len <= 256 /\
+     nonoverlapping (res,1024) (word pc,LENGTH mldsa_rej_uniform_mc)
+     ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word(pc + 0x160) /\ rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e (16 * i) s)
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word(pc + (if 48 * i + 24 <= buflen then
+              if len <= 248 then 0x170 else 0x1f0 else 0x224)) /\
+            rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e (16 * i) s)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[rej_uniform_vectors; rej_uniform_prefix;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC] THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN STRIP_TAC THEN
+  ABBREV_TAC `len = LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist))` THEN
+  SUBGOAL_THEN `val (word_sub (word buflen) (word (3 * 16 * i)):int64) =
+                buflen - 48 * i` ASSUME_TAC THENL
+   [REWRITE_TAC[ARITH_RULE `3 * 16 * i = 48 * i`] THEN
+    SUBGOAL_THEN `48 * i < 2 EXP 64` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+    MAP_EVERY VAL_INT64_TAC [`48 * i`; `buflen:num`] THEN
+    ASM_REWRITE_TAC[VAL_WORD_SUB_CASES]; ALL_TAC] THEN
+  VAL_INT64_TAC `len:num` THEN VAL_INT64_TAC `248` THEN
+  SUBGOAL_THEN `(248 <= len /\ ~(val(word_sub (word len) (word 248):int64) = 0))
+                <=> ~(len <= 248)` ASSUME_TAC THENL
+   [ASM_REWRITE_TAC[VAL_WORD_SUB_EQ_0] THEN ARITH_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `(24 <= buflen - 48 * i <=> 48 * i + 24 <= buflen)`
+    ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+  ASM_CASES_TAC `48 * i + 24 <= buflen` THENL
+   [ASM_CASES_TAC `len <= 248` THEN ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--4);
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2)] THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[GSYM NOT_LE] THEN
+  DISCHARGE_MEMSAFE_ASM_TAC);;
 
-      (*** Main invariant preservation proof for loop48 ***)
+let REJ_UNIFORM_FINAL_PREFIX = prove
+ (`!(inlist:(24 word)list) n.
+     LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) <= 256 /\
+     (n = LENGTH inlist \/ LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) = 256)
+     ==> SUB_LIST(0,256) (REJ_SAMPLE inlist) =
+         REJ_SAMPLE(SUB_LIST(0,n) inlist)`,
+  REPEAT GEN_TAC THEN STRIP_TAC THENL
+   [FIRST_X_ASSUM SUBST_ALL_TAC THEN
+    RULE_ASSUM_TAC(SIMP_RULE[SUB_LIST_REFL; LE_REFL]) THEN
+    ASM_SIMP_TAC[SUB_LIST_REFL; LE_REFL];
+    MP_TAC(ISPECL [`inlist:(24 word)list`; `n:num`] SUB_LIST_TOPSPLIT) THEN
+    DISCH_THEN(fun th -> GEN_REWRITE_TAC (LAND_CONV o RAND_CONV o RAND_CONV)
+      [SYM th]) THEN REWRITE_TAC[REJ_SAMPLE_APPEND] THEN
+    ASM_SIMP_TAC[SUB_LIST_APPEND_LEFT; SUB_LIST_REFL; LE_REFL]]);;
 
-      X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-      ABBREV_TAC `cur:int64 = word_add buf (word (48 * i))` THEN
-      ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * i) inlist)` THEN
-      ABBREV_TAC `curlen = LENGTH(curlist:int32 list)` THEN
-      CONV_TAC(RATOR_CONV(LAND_CONV(TOP_DEPTH_CONV let_CONV))) THEN
-      ASM_REWRITE_TAC[] THEN
-      ENSURES_INIT_TAC "s0" THEN
-      STRIP_EXISTS_ASSUM_TAC THEN
-      MAP_EVERY ABBREV_TAC
-       [`q0 = read (memory :> bytes128 cur) s0`;
-        `q1 = read (memory :> bytes128 (word_add cur (word 16))) s0`;
-        `q2 = read (memory :> bytes128 (word_add cur (word 32))) s0`] THEN
-
-      (*** Abbreviate the 16 coefficients as 32-bit words ***)
-
-      ABBREV_TAC
-       `(x:num->int32) j =
-        word_and (word_zx(word_subword
-          (read (memory :> wbytes cur) s0:384 word)
-          (24 * j,24):24 word):int32) (word 8388607)` THEN
-
-      FIRST_X_ASSUM(MP_TAC o C MATCH_MP (ASSUME `i:num < N`)) THEN
-      ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
-
-      (*** Steps 1-12: LDP + LDR + ADD + TBL + BIC byte extraction ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--12) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-
-      (*** Prove Q16-Q19 contain the correct coefficients ***)
-
-      SUBGOAL_THEN
-       `read Q16 s12 =
-            word_join (word_join ((x:num->int32) 3) (x 2):int64)
-                      (word_join (x 1) (x 0):int64) /\
-        read Q17 s12 =
-            word_join (word_join ((x:num->int32) 7) (x 6):int64)
-                      (word_join (x 5) (x 4):int64) /\
-        read Q18 s12 =
-            word_join (word_join ((x:num->int32) 11) (x 10):int64)
-                      (word_join (x 9) (x 8):int64) /\
-        read Q19 s12 =
-            word_join (word_join ((x:num->int32) 15) (x 14):int64)
-                      (word_join (x 13) (x 12):int64)`
-      MP_TAC THENL
-       [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
-        DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
-        ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
-        CONV_TAC NUM_REDUCE_CONV THEN
-        CONV_TAC WORD_BLAST;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Connect x to EL of SUB_LIST (needed for postcondition) ***)
-
-      SUBGOAL_THEN
-       `!j. j < 16
-            ==> EL j (MAP (\x:24 word. word(val x MOD 2 EXP 23):int32)
-                      (SUB_LIST(16 * i,16) inlist)) = (x:num->int32) j`
-      ASSUME_TAC THENL
-       [UNDISCH_THEN
-         `read (memory :> bytes (buf,buflen)) s12 =
-          num_of_wordlist(inlist:(24 word)list)`
-         (MP_TAC o AP_TERM
-           `\x. x DIV 2 EXP (8 * 48 * i) MOD 2 EXP (8 * 48)`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_DIV] THEN
-        REWRITE_TAC[READ_BYTES_MOD] THEN
-        REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE] THEN
-        REWRITE_TAC[ARITH_RULE `8 * 48 = 24 * 16 * 1`] THEN
-        REWRITE_TAC[ARITH_RULE `8 * 48 * x = 24 * 16 * x`] THEN
-        REWRITE_TAC[GSYM DIMINDEX_24; GSYM NUM_OF_WORDLIST_SUB_LIST] THEN
-        SUBGOAL_THEN
-         `MIN (buflen - 48 * i) 48 = dimindex(:384) DIV 8`
-        SUBST1_TAC THENL
-         [REWRITE_TAC[DIMINDEX_384] THEN CONV_TAC NUM_REDUCE_CONV THEN
-          MATCH_MP_TAC(ARITH_RULE
-           `~(b < 48 * (i + 1)) ==> MIN (b - 48 * i) 48 = 48`) THEN
-          ASM_REWRITE_TAC[];
-          REWRITE_TAC[MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
-          REWRITE_TAC[READ_COMPONENT_COMPOSE; GSYM VAL_READ_WBYTES] THEN
-          ASM_REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE]] THEN
-        DISCH_TAC THEN X_GEN_TAC `j:num` THEN DISCH_TAC THEN
-        SUBGOAL_THEN
-         `j < LENGTH(SUB_LIST(16 * i,16) (inlist:(24 word)list))`
-        ASSUME_TAC THENL
-         [REWRITE_TAC[LENGTH_SUB_LIST] THEN
-          MAP_EVERY UNDISCH_TAC
-           [`j:num < 16`; `~(buflen < 48 * (i + 1))`;
-            `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-          ARITH_TAC;
-          ALL_TAC] THEN
-        ASM_SIMP_TAC[EL_MAP] THEN REWRITE_TAC[VAL_MOD_23_EQ_AND] THEN
-        FIRST_X_ASSUM(fun th ->
-          GEN_REWRITE_TAC RAND_CONV [SYM(SPEC `j:num` th)]) THEN
-        AP_THM_TAC THEN AP_TERM_TAC THEN AP_TERM_TAC THEN
-        REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; DIMINDEX_24;
-                    ARITH_RULE `MIN 24 24 = 24`] THEN
-        ASM_REWRITE_TAC[GSYM DIMINDEX_24; NUM_OF_WORDLIST_EL;
-                        LENGTH_SUB_LIST] THEN
-        COND_CASES_TAC THENL [REFL_TAC; ASM_MESON_TAC[]];
-        ALL_TAC] THEN
-
-      (*** Steps 13-26: CMHI + TRN1 + AND + UADDLV + FMOV + UBFX ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (13--26) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      RULE_ASSUM_TAC(REWRITE_RULE
-       [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-      RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-
-      (*** Each byte sums to at most 15, so the packed indices do not carry. ***)
-
-      SUBGOAL_THEN
-       `read X12 s26 =
-          word_add (word_add (if val ((x:num->int32) 0) < 8380417 then word 1 else word 0)
-                             (if val (x 1) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 2) < 8380417 then word 4 else word 0)
-                             (if val (x 3) < 8380417 then word 8 else word 0)) /\
-        read X13 s26 =
-          word_add (word_add (if val ((x:num->int32) 4) < 8380417 then word 1 else word 0)
-                             (if val (x 5) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 6) < 8380417 then word 4 else word 0)
-                             (if val (x 7) < 8380417 then word 8 else word 0)) /\
-        read X14 s26 =
-          word_add (word_add (if val ((x:num->int32) 8) < 8380417 then word 1 else word 0)
-                             (if val (x 9) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 10) < 8380417 then word 4 else word 0)
-                             (if val (x 11) < 8380417 then word 8 else word 0)) /\
-        read X15 s26 =
-          word_add (word_add (if val ((x:num->int32) 12) < 8380417 then word 1 else word 0)
-                             (if val (x 13) < 8380417 then word 2 else word 0))
-                   (word_add (if val (x 14) < 8380417 then word 4 else word 0)
-                             (if val (x 15) < 8380417 then word 8 else word 0))`
-      MP_TAC THENL
-       [ASM_REWRITE_TAC[] THEN REPEAT CONJ_TAC THEN CONV_TAC BITBLAST_RULE;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Abbreviate table indices and entries ***)
-
-      MAP_EVERY REABBREV_TAC
-       [`idx0 = read X12 s26`; `idx1 = read X13 s26`;
-        `idx2 = read X14 s26`; `idx3 = read X15 s26`] THEN
-      MAP_EVERY ABBREV_TAC
-       [`tab0 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx0:int64))))) s26`;
-        `tab1 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx1:int64))))) s26`;
-        `tab2 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx2:int64))))) s26`;
-        `tab3 = read(memory :> bytes128(word_add table
-                    (word(16 * val(idx3:int64))))) s26`] THEN
-
-      (*** Steps 27-41: table loads + packed counts + TBL ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (27--41) THEN
-
-      (* Normalize shifted-register table addresses for event containment *)
-      RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
-        `word_shl (x:int64) 4 = word(16 * val x)`]) THEN
-
-      RULE_ASSUM_TAC(REWRITE_RULE[WORD_SUBWORD_AND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-      RULE_ASSUM_TAC(REWRITE_RULE
-       [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
-      RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
-      RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
-
-      (*** TBL correctness: Q16-Q19 = word(num_of_wordlist(FILTER ...)) ***)
-
-      SUBGOAL_THEN
-       `read Q16 s41 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-        read Q17 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7])) /\
-        read Q18 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 8; x 9; x 10; x 11])) /\
-        read Q19 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
-                         [x 12; x 13; x 14; x 15]))`
-      MP_TAC THENL
-       [UNDISCH_TAC
-         `read(memory :> bytes(table,256)) s41 =
-          num_of_wordlist mldsa_rej_uniform_table` THEN
-        REPLICATE_TAC 4
-         (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
-               [GSYM NUM_OF_PAIR_WORDLIST]) THEN
-        REWRITE_TAC[mldsa_rej_uniform_table; pair_wordlist] THEN
-        CONV_TAC WORD_REDUCE_CONV THEN
-        CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
-        REWRITE_TAC[GSYM BYTES128_WBYTES] THEN REPEAT STRIP_TAC THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q24 s = x`; `read Q25 s = x`;
-          `read Q26 s = x`; `read Q27 s = x`] THEN
-        REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-          (fun th -> is_var(rhs(concl th)) &&
-                     let n = fst(dest_var(rhs(concl th))) in
-                     n = "tab0" || n = "tab1" || n = "tab2" || n = "tab3"))) THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
-          (fun th -> is_var(rhs(concl th)) &&
-                     let n = fst(dest_var(rhs(concl th))) in
-                     n = "idx0" || n = "idx1" || n = "idx2" || n = "idx3"))) THEN
-        ASM_REWRITE_TAC[] THEN
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        ASM_REWRITE_TAC[FILTER] THEN
-        REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-        ASM_REWRITE_TAC[bitval] THEN
-        CONV_TAC WORD_REDUCE_CONV THEN
-        CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        ASM_REWRITE_TAC[WORD_ADD_0] THEN
-        CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
-        CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
-        REPLICATE_TAC 2
-         (ONCE_REWRITE_TAC[GSYM NUM_OF_PAIR_WORDLIST]) THEN
-        REWRITE_TAC[pair_wordlist; NUM_OF_WORDLIST_SING; WORD_VAL] THEN
-        REWRITE_TAC[num_of_wordlist] THEN CONV_TAC WORD_BLAST;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read Q16 s = x`; `read Q17 s = x`;
-          `read Q18 s = x`; `read Q19 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Counting: X12-X15 = word(LENGTH(FILTER ...)) ***)
-
-      SUBGOAL_THEN
-       `read X12 s41 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
-                         [(x:num->int32) 0; x 1; x 2; x 3])) /\
-        read X13 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 4; x 5; x 6; x 7])) /\
-        read X14 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 8; x 9; x 10; x 11])) /\
-        read X15 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
-                         [x 12; x 13; x 14; x 15]))`
-      MP_TAC THENL
-       [ASM_REWRITE_TAC[WORD_AND_0; WORD_POPCOUNT_0; BITBLAST_RULE
-         `word_popcount(word_and (word 1) x:byte) = bitval(bit 0 x) /\
-          word_popcount(word_and (word 2) x:byte) = bitval(bit 1 x) /\
-          word_popcount(word_and (word 4) x:byte) = bitval(bit 2 x) /\
-          word_popcount(word_and (word 8) x:byte) = bitval(bit 3 x) /\
-          word_popcount(word_and (word 16) x:byte) = bitval(bit 4 x) /\
-          word_popcount(word_and (word 32) x:byte) = bitval(bit 5 x) /\
-          word_popcount(word_and (word 64) x:byte) = bitval(bit 6 x) /\
-          word_popcount(word_and (word 128) x:byte) = bitval(bit 7 x)`] THEN
-        DISCARD_STATE_TAC "s41" THEN REPEAT CONJ_TAC THEN
-        REWRITE_TAC[BIT_WORD_MASK; DIMINDEX_8; LENGTH_FILTER_FOUR;
-                    GSYM WORD_ADD] THEN
-        CONV_TAC NUM_REDUCE_CONV THEN CONV_TAC BITBLAST_RULE;
-        DISCARD_MATCHING_ASSUMPTIONS
-         [`read X12 s = x`; `read X13 s = x`;
-          `read X14 s = x`; `read X15 s = x`] THEN
-        STRIP_TAC] THEN
-
-      (*** Abbreviate filtered lists and their lengths ***)
-
-      MAP_EVERY ABBREV_TAC
-       [`lis0 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 0; x 1; x 2; x 3]`;
-        `lis1 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 4; x 5; x 6; x 7]`;
-        `lis2 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 8; x 9; x 10; x 11]`;
-        `lis3 = FILTER (\x:int32. val x < 8380417)
-                       [(x:num->int32) 12; x 13; x 14; x 15]`;
-        `len0 = LENGTH(lis0:int32 list)`;
-        `len1 = LENGTH(lis1:int32 list)`;
-        `len2 = LENGTH(lis2:int32 list)`;
-        `len3 = LENGTH(lis3:int32 list)`] THEN
-
-      SUBGOAL_THEN `len0 <= 4 /\ len1 <= 4 /\ len2 <= 4 /\ len3 <= 4`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["len0"; "len1"; "len2"; "len3"] THEN
-        MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
-        REPEAT CONJ_TAC THEN
-        W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-        REWRITE_TAC[LENGTH] THEN ARITH_TAC;
-        ALL_TAC] THEN
-
-      (*** First writeback: ST1 Q16 + ADD X7 ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (42--43) THEN
-      ABBREV_TAC `curlist1:int32 list = APPEND curlist lis0` THEN
-      ABBREV_TAC `curlen1:num = curlen + len0` THEN
-
-      SUBGOAL_THEN
-       `curlen1 < 260 /\
-        read (memory :> bytes (stackpointer,4*curlen1)) s43 =
-        num_of_wordlist(curlist1:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen1"; "curlist1"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen < 256`; `len0 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        SUBGOAL_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen)))) s43 =
-          word (num_of_wordlist(lis0:int32 list))`
-        MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
-        DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len0 = MIN 16 (4 * len0)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist1:int32 list) = curlen1` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist1"; "curlen1"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Second writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (44--45) THEN
-      ABBREV_TAC `curlist2:int32 list = APPEND curlist1 lis1` THEN
-      ABBREV_TAC `curlen2:num = curlen1 + len1` THEN
-      SUBGOAL_THEN
-       `curlen2 < 264 /\
-        read (memory :> bytes (stackpointer,4*curlen2)) s45 =
-        num_of_wordlist(curlist2:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen2"; "curlist2"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen1 < 260`; `len1 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen1)))) s45 =
-          word (num_of_wordlist(lis1:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len1 = MIN 16 (4 * len1)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist2:int32 list) = curlen2` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist2"; "curlen2"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Third writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (46--47) THEN
-      ABBREV_TAC `curlist3:int32 list = APPEND curlist2 lis2` THEN
-      ABBREV_TAC `curlen3:num = curlen2 + len2` THEN
-      SUBGOAL_THEN
-       `curlen3 < 268 /\
-        read (memory :> bytes (stackpointer,4*curlen3)) s47 =
-        num_of_wordlist(curlist3:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen3"; "curlist3"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen2 < 264`; `len2 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen2)))) s47 =
-          word (num_of_wordlist(lis2:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len2 = MIN 16 (4 * len2)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist3:int32 list) = curlen3` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist3"; "curlen3"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** Fourth writeback ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (48--49) THEN
-      ABBREV_TAC `curlist4:int32 list = APPEND curlist3 lis3` THEN
-      ABBREV_TAC `curlen4:num = curlen3 + len3` THEN
-      SUBGOAL_THEN
-       `curlen4 < 272 /\
-        read (memory :> bytes (stackpointer,4*curlen4)) s49 =
-        num_of_wordlist(curlist4:int32 list)`
-      STRIP_ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlen4"; "curlist4"] THEN CONJ_TAC THENL
-         [MAP_EVERY UNDISCH_TAC [`curlen3 < 268`; `len3 <= 4`] THEN ARITH_TAC;
-          REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
-        W(MP_TAC o PART_MATCH (lhand o rand)
-          BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
-        ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
-        DISCH_THEN SUBST1_TAC THEN
-        UNDISCH_THEN
-         `read (memory :> bytes128
-                (word_add stackpointer (word (4 * curlen3)))) s49 =
-          word (num_of_wordlist(lis3:int32 list))`
-         (MP_TAC o AP_TERM `val:int128->num`) THEN
-        REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
-                    VAL_READ_WBYTES;
-                    DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
-        SUBGOAL_THEN `4 * len3 = MIN 16 (4 * len3)` SUBST1_TAC THENL
-         [UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
-          REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
-        REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
-        MATCH_MP_TAC MOD_LT THEN
-        MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
-        ASM_REWRITE_TAC[DIMINDEX_32] THEN
-        UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
-        FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
-          [WORD_RULE `word_add (word_add a (word (4 * l0)))
-                               (word_shl (word l1) 2) =
-                      word_add a (word(4 * (l0 + l1)))`]) THEN
-        ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-      SUBGOAL_THEN `LENGTH(curlist4:int32 list) = curlen4` ASSUME_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["curlist4"; "curlen4"] THEN
-        REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
-        ALL_TAC] THEN
-
-      (*** The end of the loop body: 4 ADDs accumulating counts ***)
-
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (50--53) THEN
-
-      (* Normalize store event addresses: word_shl from ADD Xn, Xn, Xm LSL #2 *)
-      RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
-        `word_add (word_add a (word(4 * n))) (word_shl (word m) 2):int64 =
-         word_add a (word(4 * (n + m)))`]) THEN
-
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-
-      REWRITE_TAC[ARITH_RULE `16 * (i + 1) = 16 * i + 16`] THEN
-      ASM_REWRITE_TAC[SUB_LIST_SPLIT; REJ_SAMPLE_APPEND; ADD_CLAUSES] THEN
-      SUBGOAL_THEN
-       `REJ_SAMPLE (SUB_LIST (16 * i,16) inlist) =
-        APPEND (APPEND (APPEND lis0 lis1) lis2) lis3`
-      SUBST1_TAC THENL
-       [MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
-        REWRITE_TAC[GSYM APPEND_ASSOC; GSYM FILTER_APPEND] THEN
-        REWRITE_TAC[APPEND; REJ_SAMPLE] THEN AP_TERM_TAC THEN
-        REWRITE_TAC[LIST_EQ] THEN CONV_TAC(ONCE_DEPTH_CONV LENGTH_CONV) THEN
-        REWRITE_TAC[LENGTH_MAP] THEN
-        MATCH_MP_TAC(TAUT `p /\ (p ==> q) ==> p /\ q`) THEN CONJ_TAC THENL
-         [REWRITE_TAC[LENGTH_SUB_LIST] THEN MATCH_MP_TAC(ARITH_RULE
-           `16 * (i + 1) <= l ==> MIN 16 (l - 16 * i) = 16`) THEN
-          MAP_EVERY UNDISCH_TAC
-           [`~(buflen < 48 * (i + 1))`;
-            `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
-          ARITH_TAC;
-          ASM_SIMP_TAC[EL_MAP] THEN DISCH_THEN(K ALL_TAC) THEN
-          CONV_TAC EXPAND_CASES_CONV THEN
-          CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[]];
-        ASM_REWRITE_TAC[APPEND_ASSOC] THEN
-        CONV_TAC(TOP_DEPTH_CONV let_CONV)] THEN
-      ASM_REWRITE_TAC[] THEN EXPAND_TAC "cur" THEN
-      REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE; ALL_TAC]) THEN
-      CONJ_TAC THENL
-       [SUBST1_TAC(SYM(ASSUME `curlen3 + len3:num = curlen4`)) THEN
-        SUBST1_TAC(SYM(ASSUME `curlen2 + len2:num = curlen3`)) THEN
-        SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
-        SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
-        CONV_TAC WORD_RULE;
-        (* Establish table index bounds for memory safety *)
-        SUBGOAL_THEN `val(idx0:int64) < 16` ASSUME_TAC THENL
-         [EXPAND_TAC "idx0" THEN
-          REWRITE_TAC[bitval] THEN
-          REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-          CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
-          CONV_TAC NUM_REDUCE_CONV THEN NO_TAC;
-          ALL_TAC] THEN
-        SUBGOAL_THEN `val(idx1:int64) < 16` ASSUME_TAC THENL
-         [EXPAND_TAC "idx1" THEN
-          REWRITE_TAC[bitval] THEN
-          REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-          CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
-          CONV_TAC NUM_REDUCE_CONV THEN NO_TAC;
-          ALL_TAC] THEN
-        SUBGOAL_THEN `val(idx2:int64) < 16` ASSUME_TAC THENL
-         [EXPAND_TAC "idx2" THEN
-          REWRITE_TAC[bitval] THEN
-          REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-          CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
-          CONV_TAC NUM_REDUCE_CONV THEN NO_TAC;
-          ALL_TAC] THEN
-        SUBGOAL_THEN `val(idx3:int64) < 16` ASSUME_TAC THENL
-         [EXPAND_TAC "idx3" THEN
-          REWRITE_TAC[bitval] THEN
-          REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
-          CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
-          CONV_TAC NUM_REDUCE_CONV THEN NO_TAC;
-          ALL_TAC] THEN
-        DISCHARGE_MEMSAFE_ASM_TAC];
-
-      (*** The (relatively) trivial loop-back goal ****)
-
-      X_GEN_TAC `i:num` THEN STRIP_TAC THEN
-      FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN
-      ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-      ENSURES_INIT_TAC "s0" THEN
-      STRIP_EXISTS_ASSUM_TAC THEN
-      SUBGOAL_THEN
-       `48 <= val(word_sub (word buflen:int64) (word (48 * i)))`
-      ASSUME_TAC THENL
-       [ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-        VAL_INT64_TAC `48 * i` THEN ASM_REWRITE_TAC[] THEN
-        UNDISCH_TAC `~(buflen < 48 * (i + 1))` THEN ARITH_TAC;
-        ALL_TAC] THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--4) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      CONJ_TAC THENL
-       [MATCH_MP_TAC(MESON[] `~p ==> (if p then x else y) = y`) THEN
-        ASM_SIMP_TAC[NOT_LE; VAL_WORD_LT];
-        DISCHARGE_MEMSAFE_ASM_TAC];
-
-      (*** Handling the cases possibly leading to the tail computation ***)
-
-      SUBGOAL_THEN
-       `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist)) < 272`
-      ASSUME_TAC THENL
-       [ASM_CASES_TAC `N = 0` THENL
-         [ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-          REWRITE_TAC[LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;
-          FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`)] THEN
-        ASM_REWRITE_TAC[ARITH_RULE `n - 1 < n <=> ~(n = 0)`] THEN
-        MATCH_MP_TAC(ARITH_RULE
-         `l' <= l + 16 ==> ~(b < x) /\ l < 256 ==> l' < 272`) THEN
-        MP_TAC(ISPECL [`inlist:(24 word)list`; `16 * (N - 1)`; `16`; `0`]
-            SUB_LIST_SPLIT) THEN
-        ASM_SIMP_TAC[ARITH_RULE `~(N = 0) ==> 16 * (N - 1) + 16 = 16 * N`] THEN
-        DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[REJ_SAMPLE_APPEND] THEN
-        REWRITE_TAC[LENGTH_APPEND; LE_ADD_LCANCEL; ADD_CLAUSES] THEN
-        REWRITE_TAC[REJ_SAMPLE] THEN
-        W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-        MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] LE_TRANS) THEN
-        REWRITE_TAC[LENGTH_MAP; LENGTH_SUB_LIST] THEN ARITH_TAC;
-        ALL_TAC] THEN
-      VAL_INT64_TAC `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-      SUBGOAL_THEN
-       `48 <= val(word_sub (word buflen:int64) (word (48 * N))) <=>
-        48 * (N + 1) <= buflen`
-      ASSUME_TAC THENL
-       [SUBGOAL_THEN `48 * N < 2 EXP 64` ASSUME_TAC THENL
-         [FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-          MAP_EVERY VAL_INT64_TAC [`48 * N`; `buflen:num`]] THEN
-        ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-        FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-        ALL_TAC] THEN
-      CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-      ASM_CASES_TAC `48 * (N + 1) <= buflen` THENL
-       [ENSURES_INIT_TAC "s0" THEN
-        STRIP_EXISTS_ASSUM_TAC THEN
-        ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THEN
-        FIRST_X_ASSUM(MP_TAC o check (is_disj o concl)) THEN
-        ASM_REWRITE_TAC[GSYM NOT_LE] THEN DISCH_TAC THEN
-        ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (3--4) THEN
-        ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-        EXISTS_TAC `2 * N` THEN
-        ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`] THEN
-        DISCHARGE_MEMSAFE_ASM_TAC;
-        ALL_TAC] THEN
-      RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV let_CONV)) THEN
-      FIRST_X_ASSUM(MATCH_MP_TAC o MATCH_MP
-        (ONCE_REWRITE_RULE[IMP_CONJ_ALT]
-          (REWRITE_RULE[CONJ_ASSOC] ENSURES_TRANS_SIMPLE))) THEN
-      CONJ_TAC THENL [MAYCHANGE_IDEMPOT_TAC; ALL_TAC] THEN
-      ENSURES_INIT_TAC "s0" THEN
-      STRIP_EXISTS_ASSUM_TAC THEN
-      ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THEN
-      ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-      DISCHARGE_MEMSAFE_ASM_TAC];
-
-    ALL_TAC] THEN
-
-  (*** The initial case splits before settling into tail computation ***)
-
-  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
-  SUBGOAL_THEN
-   `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist)) < 272`
-  ASSUME_TAC THENL
-   [ASM_CASES_TAC `N = 0` THENL
-     [ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY] THEN
-      REWRITE_TAC[LENGTH] THEN CONV_TAC NUM_REDUCE_CONV;
-      FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`)] THEN
-    ASM_REWRITE_TAC[ARITH_RULE `n - 1 < n <=> ~(n = 0)`] THEN
-    MATCH_MP_TAC(ARITH_RULE
-     `l' <= l + 16 ==> ~(b < x) /\ l < 256 ==> l' < 272`) THEN
-    MP_TAC(ISPECL [`inlist:(24 word)list`; `16 * (N - 1)`; `16`; `0`]
-        SUB_LIST_SPLIT) THEN
+let REJ_UNIFORM_BLOCK_COUNT = prove
+ (`!buflen (inlist:(24 word)list).
+     ?N. 48 * N <= buflen /\
+         LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * N) inlist)) <= 256 /\
+         ~(48 * N + 48 <= buflen /\
+           LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * N) inlist)) <= 240) /\
+         (!i. i < N ==> 48 * i + 48 <= buflen /\
+             LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist)) <= 240)`,
+  REPEAT GEN_TAC THEN SUBGOAL_THEN
+   `?i. ~(48 * i + 48 <= buflen /\
+          LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist)) <= 240)` MP_TAC THENL
+   [EXISTS_TAC `buflen:num` THEN ARITH_TAC;
+    GEN_REWRITE_TAC LAND_CONV [num_WOP] THEN REWRITE_TAC[NOT_CLAUSES]] THEN
+  DISCH_THEN(X_CHOOSE_THEN `N:num` STRIP_ASSUME_TAC) THEN
+  EXISTS_TAC `N:num` THEN ASM_REWRITE_TAC[] THEN
+  ASM_CASES_TAC `N = 0` THENL
+   [ASM_REWRITE_TAC[MULT_CLAUSES; SUB_LIST_CLAUSES; REJ_SAMPLE_EMPTY;
+                    LENGTH; LE_0] THEN ARITH_TAC;
+    FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN
+    ASM_SIMP_TAC[ARITH_RULE `~(N = 0) ==> N - 1 < N`] THEN STRIP_TAC THEN
+    MP_TAC(SPECL [`inlist:(24 word)list`; `16 * (N - 1)`; `16`]
+      REJ_UNIFORM_LENGTH_STEP) THEN
     ASM_SIMP_TAC[ARITH_RULE `~(N = 0) ==> 16 * (N - 1) + 16 = 16 * N`] THEN
-    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[REJ_SAMPLE_APPEND] THEN
-    REWRITE_TAC[LENGTH_APPEND; LE_ADD_LCANCEL; ADD_CLAUSES] THEN
-    REWRITE_TAC[REJ_SAMPLE] THEN
-    W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
-    MATCH_MP_TAC(REWRITE_RULE[IMP_CONJ_ALT] LE_TRANS) THEN
-    REWRITE_TAC[LENGTH_MAP; LENGTH_SUB_LIST] THEN ARITH_TAC;
-    ALL_TAC] THEN
-  VAL_INT64_TAC `LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-  SUBGOAL_THEN
-   `24 <= val(word_sub (word buflen:int64) (word (48 * N))) <=>
-    48 * N + 24 <= buflen`
-  ASSUME_TAC THENL
-   [SUBGOAL_THEN `48 * N < 2 EXP 64` ASSUME_TAC THENL
-     [FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-      MAP_EVERY VAL_INT64_TAC [`48 * N`; `buflen:num`]] THEN
-    ASM_REWRITE_TAC[VAL_WORD_SUB_CASES] THEN
-    FIRST_X_ASSUM(MP_TAC o SPEC `N - 1`) THEN SIMPLE_ARITH_TAC;
-    ALL_TAC] THEN
-  ENSURES_INIT_TAC "s0" THEN
-  STRIP_EXISTS_ASSUM_TAC THEN
-  ASM_CASES_TAC `256 <= LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist))` THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2) THENL
-   [ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    EXISTS_TAC `2 * N` THEN
-    ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`] THEN
-    DISCHARGE_MEMSAFE_ASM_TAC;
-    FIRST_X_ASSUM(MP_TAC o check (is_disj o concl)) THEN
-    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
-  ASM_CASES_TAC `48 * N + 24 <= buflen` THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (3--4) THENL
-   [RULE_ASSUM_TAC(REWRITE_RULE[NOT_LE]);
-    ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-    EXISTS_TAC `2 * N` THEN
-    ASM_REWRITE_TAC[ARITH_RULE `8 * 2 * n = 16 * n`] THEN
-    CONJ_TAC THENL
-     [UNDISCH_TAC `~(48 * N + 24 <= buflen)` THEN ARITH_TAC;
-      DISCHARGE_MEMSAFE_ASM_TAC]] THEN
+    ASM_ARITH_TAC]);;
 
-  (*** Because of divisibility, exactly 24 buffer elements left ***)
-
-  FIRST_X_ASSUM(K ALL_TAC o check (is_forall o concl)) THEN
-  SUBGOAL_THEN `48 * N + 24 = buflen` ASSUME_TAC THENL
-   [MAP_EVERY UNDISCH_TAC
-     [`48 * N + 24 <= buflen`; `buflen < 48 * (N + 1)`] THEN
-    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE I [divides]) THEN
-    SIMP_TAC[LEFT_IMP_EXISTS_THM; ARITH_RULE `48 = 24 * 2`] THEN
-    REWRITE_TAC[GSYM MULT_ASSOC; ARITH_RULE `24 * n + 24 = 24 * (n + 1)`] THEN
-    REWRITE_TAC[LE_MULT_LCANCEL; LT_MULT_LCANCEL] THEN ARITH_TAC;
-    ALL_TAC] THEN
-
-  (*** The tail computation, a half-sized version of the main loop ***)
-
-  ABBREV_TAC `cur:int64 = word_add buf (word (48 * N))` THEN
-  ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * N) inlist)` THEN
+let MLDSA_REJ_UNIFORM_BLOCK16 = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e i.
+     buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+     48 * i + 48 <= buflen /\
+     LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * i) inlist)) <= 240 /\
+     ALL (nonoverlapping (res,1024))
+       [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,buflen); (table,256)]
+     ==> ensures arm
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x84) /\ rej_uniform_vectors s /\
+                rej_uniform_prefix res buf buflen table inlist e (16 * i) s)
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x158) /\ rej_uniform_vectors s /\
+                rej_uniform_prefix res buf buflen table inlist e (16 * (i + 1)) s)
+           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ALL; NONOVERLAPPING_CLAUSES;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC;
+    rej_uniform_vectors; rej_uniform_prefix] THEN STRIP_TAC THEN
+  ABBREV_TAC `cur:int64 = word_add buf (word (48 * i))` THEN
+  ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * i) inlist)` THEN
   ABBREV_TAC `curlen = LENGTH(curlist:int32 list)` THEN
-
+  CONV_TAC(RATOR_CONV(LAND_CONV(TOP_DEPTH_CONV let_CONV))) THEN
+  ASM_REWRITE_TAC[ARITH_RULE `3 * 16 * n = 48 * n`] THEN
+  ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
   MAP_EVERY ABBREV_TAC
-   [`q0 = read (memory :> bytes64 cur) s4`;
-    `q1 = read (memory :> bytes64 (word_add cur (word 8))) s4`;
-    `q2 = read (memory :> bytes64 (word_add cur (word 16))) s4`] THEN
+   [`q0 = read (memory :> bytes128 cur) s0`;
+    `q1 = read (memory :> bytes128 (word_add cur (word 16))) s0`;
+    `q2 = read (memory :> bytes128 (word_add cur (word 32))) s0`] THEN
+
+  (*** Abbreviate the 16 coefficients as 32-bit words ***)
 
   ABBREV_TAC
    `(x:num->int32) j =
     word_and (word_zx(word_subword
-      (read (memory :> wbytes cur) s4:192 word)
+      (read (memory :> wbytes cur) s0:384 word)
       (24 * j,24):24 word):int32) (word 8388607)` THEN
 
-  SUBGOAL_THEN
-   `read (memory :> bytes128 cur) s4 = word_join (q1:int64) (q0:int64)`
-  ASSUME_TAC THENL
-   [CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 1)) THEN
-    ASM_REWRITE_TAC[WORD_ADD_0];
-    ALL_TAC] THEN
+  (*** Steps 1-12: LDP + LDR + ADD + TBL + BIC byte extraction ***)
 
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (5--12) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--12) THEN
+  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
+
+  (*** Prove Q16-Q19 contain the correct coefficients ***)
 
   SUBGOAL_THEN
    `read Q16 s12 =
         word_join (word_join ((x:num->int32) 3) (x 2):int64)
                   (word_join (x 1) (x 0):int64) /\
     read Q17 s12 =
+        word_join (word_join ((x:num->int32) 7) (x 6):int64)
+                  (word_join (x 5) (x 4):int64) /\
+    read Q18 s12 =
+        word_join (word_join ((x:num->int32) 11) (x 10):int64)
+                  (word_join (x 9) (x 8):int64) /\
+    read Q19 s12 =
+        word_join (word_join ((x:num->int32) 15) (x 14):int64)
+                  (word_join (x 13) (x 12):int64)`
+  MP_TAC THENL
+   [FIRST_X_ASSUM(MP_TAC o check (is_forall o concl)) THEN
+    DISCH_THEN(fun th -> REWRITE_TAC[GSYM th]) THEN
+    ASM_REWRITE_TAC[READ_MEMORY_TRIPLES_SPLIT] THEN
+    CONV_TAC NUM_REDUCE_CONV THEN
+    CONV_TAC WORD_BLAST;
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read Q16 s = x`; `read Q17 s = x`;
+      `read Q18 s = x`; `read Q19 s = x`] THEN
+    STRIP_TAC] THEN
+
+  (*** Connect x to EL of SUB_LIST (needed for postcondition) ***)
+
+  SUBGOAL_THEN
+   `!j. j < 16
+        ==> EL j (MAP (\x:24 word. word(val x MOD 2 EXP 23):int32)
+                  (SUB_LIST(16 * i,16) inlist)) = (x:num->int32) j`
+  ASSUME_TAC THENL
+   [UNDISCH_THEN
+     `read (memory :> bytes (buf,buflen)) s12 =
+      num_of_wordlist(inlist:(24 word)list)`
+     (MP_TAC o AP_TERM
+       `\x. x DIV 2 EXP (8 * 48 * i) MOD 2 EXP (8 * 48)`) THEN
+    REWRITE_TAC[READ_COMPONENT_COMPOSE; READ_BYTES_DIV] THEN
+    REWRITE_TAC[READ_BYTES_MOD] THEN
+    REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE] THEN
+    REWRITE_TAC[ARITH_RULE `8 * 48 = 24 * 16 * 1`] THEN
+    REWRITE_TAC[ARITH_RULE `8 * 48 * x = 24 * 16 * x`] THEN
+    REWRITE_TAC[GSYM DIMINDEX_24; GSYM NUM_OF_WORDLIST_SUB_LIST] THEN
+    SUBGOAL_THEN
+     `MIN (buflen - 48 * i) 48 = dimindex(:384) DIV 8`
+    SUBST1_TAC THENL
+     [REWRITE_TAC[DIMINDEX_384] THEN CONV_TAC NUM_REDUCE_CONV THEN
+      MATCH_MP_TAC(ARITH_RULE
+       `48 * i + 48 <= b ==> MIN (b - 48 * i) 48 = 48`) THEN
+      ASM_REWRITE_TAC[];
+      REWRITE_TAC[MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
+      REWRITE_TAC[READ_COMPONENT_COMPOSE; GSYM VAL_READ_WBYTES] THEN
+      ASM_REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE]] THEN
+    DISCH_TAC THEN X_GEN_TAC `j:num` THEN DISCH_TAC THEN
+    SUBGOAL_THEN
+     `j < LENGTH(SUB_LIST(16 * i,16) (inlist:(24 word)list))`
+    ASSUME_TAC THENL
+     [REWRITE_TAC[LENGTH_SUB_LIST] THEN
+      MAP_EVERY UNDISCH_TAC
+       [`j:num < 16`; `48 * i + 48 <= buflen`;
+        `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
+      ARITH_TAC;
+      ALL_TAC] THEN
+    ASM_SIMP_TAC[EL_MAP] THEN REWRITE_TAC[VAL_MOD_23_EQ_AND] THEN
+    FIRST_X_ASSUM(fun th ->
+      GEN_REWRITE_TAC RAND_CONV [SYM(SPEC `j:num` th)]) THEN
+    AP_THM_TAC THEN AP_TERM_TAC THEN AP_TERM_TAC THEN
+    REWRITE_TAC[GSYM VAL_EQ; VAL_WORD_SUBWORD; DIMINDEX_24;
+                ARITH_RULE `MIN 24 24 = 24`] THEN
+    ASM_REWRITE_TAC[GSYM DIMINDEX_24; NUM_OF_WORDLIST_EL;
+                    LENGTH_SUB_LIST] THEN
+    COND_CASES_TAC THENL [REFL_TAC; ASM_MESON_TAC[]];
+    ALL_TAC] THEN
+
+  (*** Steps 13-26: CMHI + TRN1 + AND + UADDLV + FMOV + UBFX ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (13--26) THEN
+  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
+  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
+  RULE_ASSUM_TAC(REWRITE_RULE
+   [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
+  RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
+  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
+
+  (*** Each byte sums to at most 15, so the packed indices do not carry. ***)
+
+  SUBGOAL_THEN
+   `read X12 s26 =
+      word_add (word_add (if val ((x:num->int32) 0) < 8380417 then word 1 else word 0)
+                         (if val (x 1) < 8380417 then word 2 else word 0))
+               (word_add (if val (x 2) < 8380417 then word 4 else word 0)
+                         (if val (x 3) < 8380417 then word 8 else word 0)) /\
+    read X13 s26 =
+      word_add (word_add (if val ((x:num->int32) 4) < 8380417 then word 1 else word 0)
+                         (if val (x 5) < 8380417 then word 2 else word 0))
+               (word_add (if val (x 6) < 8380417 then word 4 else word 0)
+                         (if val (x 7) < 8380417 then word 8 else word 0)) /\
+    read X14 s26 =
+      word_add (word_add (if val ((x:num->int32) 8) < 8380417 then word 1 else word 0)
+                         (if val (x 9) < 8380417 then word 2 else word 0))
+               (word_add (if val (x 10) < 8380417 then word 4 else word 0)
+                         (if val (x 11) < 8380417 then word 8 else word 0)) /\
+    read X15 s26 =
+      word_add (word_add (if val ((x:num->int32) 12) < 8380417 then word 1 else word 0)
+                         (if val (x 13) < 8380417 then word 2 else word 0))
+               (word_add (if val (x 14) < 8380417 then word 4 else word 0)
+                         (if val (x 15) < 8380417 then word 8 else word 0))`
+  MP_TAC THENL
+   [ASM_REWRITE_TAC[] THEN REPEAT CONJ_TAC THEN CONV_TAC BITBLAST_RULE;
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read X12 s = x`; `read X13 s = x`;
+      `read X14 s = x`; `read X15 s = x`] THEN
+    STRIP_TAC] THEN
+
+  (*** Abbreviate table indices and entries ***)
+
+  MAP_EVERY REABBREV_TAC
+   [`idx0 = read X12 s26`; `idx1 = read X13 s26`;
+    `idx2 = read X14 s26`; `idx3 = read X15 s26`] THEN
+  MAP_EVERY ABBREV_TAC
+   [`tab0 = read(memory :> bytes128(word_add table
+                (word(16 * val(idx0:int64))))) s26`;
+    `tab1 = read(memory :> bytes128(word_add table
+                (word(16 * val(idx1:int64))))) s26`;
+    `tab2 = read(memory :> bytes128(word_add table
+                (word(16 * val(idx2:int64))))) s26`;
+    `tab3 = read(memory :> bytes128(word_add table
+                (word(16 * val(idx3:int64))))) s26`] THEN
+
+  (*** Steps 27-41: table loads + packed counts + TBL ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (27--41) THEN
+
+  (* Normalize shifted-register table addresses for event containment *)
+  RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
+    `word_shl (x:int64) 4 = word(16 * val x)`]) THEN
+
+  RULE_ASSUM_TAC(REWRITE_RULE[WORD_SUBWORD_AND]) THEN
+  RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
+  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
+  RULE_ASSUM_TAC(REWRITE_RULE
+   [word_ugt; relational2; GT; WORD_AND_MASK]) THEN
+  RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
+  RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
+
+  (*** TBL correctness: Q16-Q19 = word(num_of_wordlist(FILTER ...)) ***)
+
+  SUBGOAL_THEN
+   `read Q16 s41 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
+                     [(x:num->int32) 0; x 1; x 2; x 3])) /\
+    read Q17 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
+                     [x 4; x 5; x 6; x 7])) /\
+    read Q18 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
+                     [x 8; x 9; x 10; x 11])) /\
+    read Q19 s41 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
+                     [x 12; x 13; x 14; x 15]))`
+  MP_TAC THENL
+   [UNDISCH_TAC
+     `read(memory :> bytes(table,256)) s41 =
+      num_of_wordlist mldsa_rej_uniform_table` THEN
+    REPLICATE_TAC 4
+     (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
+           [GSYM NUM_OF_PAIR_WORDLIST]) THEN
+    REWRITE_TAC[mldsa_rej_uniform_table; pair_wordlist] THEN
+    CONV_TAC WORD_REDUCE_CONV THEN
+    CONV_TAC(LAND_CONV BYTES_EQ_NUM_OF_WORDLIST_EXPAND_CONV) THEN
+    REWRITE_TAC[GSYM BYTES128_WBYTES] THEN REPEAT STRIP_TAC THEN
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read Q24 s = x`; `read Q25 s = x`;
+      `read Q26 s = x`; `read Q27 s = x`] THEN
+    REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
+      (fun th -> is_var(rhs(concl th)) &&
+                 let n = fst(dest_var(rhs(concl th))) in
+                 n = "tab0" || n = "tab1" || n = "tab2" || n = "tab3"))) THEN
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read X12 s = x`; `read X13 s = x`;
+      `read X14 s = x`; `read X15 s = x`] THEN
+    REPEAT(FIRST_X_ASSUM(SUBST_ALL_TAC o SYM o check
+      (fun th -> is_var(rhs(concl th)) &&
+                 let n = fst(dest_var(rhs(concl th))) in
+                 n = "idx0" || n = "idx1" || n = "idx2" || n = "idx3"))) THEN
+    ASM_REWRITE_TAC[] THEN
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read Q16 s = x`; `read Q17 s = x`;
+      `read Q18 s = x`; `read Q19 s = x`] THEN
+    ASM_REWRITE_TAC[FILTER] THEN
+    REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
+    ASM_REWRITE_TAC[bitval] THEN
+    CONV_TAC WORD_REDUCE_CONV THEN
+    CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
+    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
+    ASM_REWRITE_TAC[WORD_ADD_0] THEN
+    CONV_TAC(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV) THEN
+    CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
+    REPLICATE_TAC 2
+     (ONCE_REWRITE_TAC[GSYM NUM_OF_PAIR_WORDLIST]) THEN
+    REWRITE_TAC[pair_wordlist; NUM_OF_WORDLIST_SING; WORD_VAL] THEN
+    REWRITE_TAC[num_of_wordlist] THEN CONV_TAC WORD_BLAST;
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read Q16 s = x`; `read Q17 s = x`;
+      `read Q18 s = x`; `read Q19 s = x`] THEN
+    STRIP_TAC] THEN
+
+  (*** Counting: X12-X15 = word(LENGTH(FILTER ...)) ***)
+
+  SUBGOAL_THEN
+   `read X12 s41 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
+                     [(x:num->int32) 0; x 1; x 2; x 3])) /\
+    read X13 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
+                     [x 4; x 5; x 6; x 7])) /\
+    read X14 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
+                     [x 8; x 9; x 10; x 11])) /\
+    read X15 s41 = word(LENGTH (FILTER (\x. val x < 8380417)
+                     [x 12; x 13; x 14; x 15]))`
+  MP_TAC THENL
+   [ASM_REWRITE_TAC[WORD_AND_0; WORD_POPCOUNT_0; BITBLAST_RULE
+     `word_popcount(word_and (word 1) x:byte) = bitval(bit 0 x) /\
+      word_popcount(word_and (word 2) x:byte) = bitval(bit 1 x) /\
+      word_popcount(word_and (word 4) x:byte) = bitval(bit 2 x) /\
+      word_popcount(word_and (word 8) x:byte) = bitval(bit 3 x) /\
+      word_popcount(word_and (word 16) x:byte) = bitval(bit 4 x) /\
+      word_popcount(word_and (word 32) x:byte) = bitval(bit 5 x) /\
+      word_popcount(word_and (word 64) x:byte) = bitval(bit 6 x) /\
+      word_popcount(word_and (word 128) x:byte) = bitval(bit 7 x)`] THEN
+    DISCARD_STATE_TAC "s41" THEN REPEAT CONJ_TAC THEN
+    REWRITE_TAC[BIT_WORD_MASK; DIMINDEX_8; LENGTH_FILTER_FOUR;
+                GSYM WORD_ADD] THEN
+    CONV_TAC NUM_REDUCE_CONV THEN CONV_TAC BITBLAST_RULE;
+    DISCARD_MATCHING_ASSUMPTIONS
+     [`read X12 s = x`; `read X13 s = x`;
+      `read X14 s = x`; `read X15 s = x`] THEN
+    STRIP_TAC] THEN
+
+  (*** Abbreviate filtered lists and their lengths ***)
+
+  MAP_EVERY ABBREV_TAC
+   [`lis0 = FILTER (\x:int32. val x < 8380417)
+                   [(x:num->int32) 0; x 1; x 2; x 3]`;
+    `lis1 = FILTER (\x:int32. val x < 8380417)
+                   [(x:num->int32) 4; x 5; x 6; x 7]`;
+    `lis2 = FILTER (\x:int32. val x < 8380417)
+                   [(x:num->int32) 8; x 9; x 10; x 11]`;
+    `lis3 = FILTER (\x:int32. val x < 8380417)
+                   [(x:num->int32) 12; x 13; x 14; x 15]`;
+    `len0 = LENGTH(lis0:int32 list)`;
+    `len1 = LENGTH(lis1:int32 list)`;
+    `len2 = LENGTH(lis2:int32 list)`;
+    `len3 = LENGTH(lis3:int32 list)`] THEN
+
+  SUBGOAL_THEN `len0 <= 4 /\ len1 <= 4 /\ len2 <= 4 /\ len3 <= 4`
+  STRIP_ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["len0"; "len1"; "len2"; "len3"] THEN
+    MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
+    REPEAT CONJ_TAC THEN
+    W(MP_TAC o PART_MATCH lhand LENGTH_FILTER o lhand o snd) THEN
+    REWRITE_TAC[LENGTH] THEN ARITH_TAC;
+    ALL_TAC] THEN
+
+  (*** First output store: ST1 Q16 + ADD X0 ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (42--43) THEN
+  ABBREV_TAC `curlist1:int32 list = APPEND curlist lis0` THEN
+  ABBREV_TAC `curlen1:num = curlen + len0` THEN
+
+  SUBGOAL_THEN
+   `curlen1 <= 244 /\
+    read (memory :> bytes (res,4*curlen1)) s43 =
+    num_of_wordlist(curlist1:int32 list)`
+  STRIP_ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlen1"; "curlist1"] THEN CONJ_TAC THENL
+     [MAP_EVERY UNDISCH_TAC [`curlen <= 240`; `len0 <= 4`] THEN ARITH_TAC;
+      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
+    W(MP_TAC o PART_MATCH (lhand o rand)
+      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
+    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
+    DISCH_THEN SUBST1_TAC THEN
+    SUBGOAL_THEN
+     `read (memory :> bytes128
+            (word_add res (word (4 * curlen)))) s43 =
+      word (num_of_wordlist(lis0:int32 list))`
+    MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
+    DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
+    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
+                VAL_READ_WBYTES;
+                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
+    SUBGOAL_THEN `4 * len0 = MIN 16 (4 * len0)` SUBST1_TAC THENL
+     [UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
+      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
+    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
+    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
+    MATCH_MP_TAC MOD_LT THEN
+    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
+    ASM_REWRITE_TAC[DIMINDEX_32] THEN
+    UNDISCH_TAC `len0 <= 4` THEN ARITH_TAC;
+    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
+      [WORD_RULE `word_add (word_add a (word (4 * l0)))
+                           (word_shl (word l1) 2) =
+                  word_add a (word(4 * (l0 + l1)))`]) THEN
+    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
+  SUBGOAL_THEN `LENGTH(curlist1:int32 list) = curlen1` ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlist1"; "curlen1"] THEN
+    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+
+  (*** Second output store ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (44--45) THEN
+  ABBREV_TAC `curlist2:int32 list = APPEND curlist1 lis1` THEN
+  ABBREV_TAC `curlen2:num = curlen1 + len1` THEN
+  SUBGOAL_THEN
+   `curlen2 <= 248 /\
+    read (memory :> bytes (res,4*curlen2)) s45 =
+    num_of_wordlist(curlist2:int32 list)`
+  STRIP_ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlen2"; "curlist2"] THEN CONJ_TAC THENL
+     [MAP_EVERY UNDISCH_TAC [`curlen1 <= 244`; `len1 <= 4`] THEN ARITH_TAC;
+      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
+    W(MP_TAC o PART_MATCH (lhand o rand)
+      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
+    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
+    DISCH_THEN SUBST1_TAC THEN
+    UNDISCH_THEN
+     `read (memory :> bytes128
+            (word_add res (word (4 * curlen1)))) s45 =
+      word (num_of_wordlist(lis1:int32 list))`
+     (MP_TAC o AP_TERM `val:int128->num`) THEN
+    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
+                VAL_READ_WBYTES;
+                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
+    SUBGOAL_THEN `4 * len1 = MIN 16 (4 * len1)` SUBST1_TAC THENL
+     [UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
+      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
+    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
+    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
+    MATCH_MP_TAC MOD_LT THEN
+    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
+    ASM_REWRITE_TAC[DIMINDEX_32] THEN
+    UNDISCH_TAC `len1 <= 4` THEN ARITH_TAC;
+    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
+      [WORD_RULE `word_add (word_add a (word (4 * l0)))
+                           (word_shl (word l1) 2) =
+                  word_add a (word(4 * (l0 + l1)))`]) THEN
+    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
+  SUBGOAL_THEN `LENGTH(curlist2:int32 list) = curlen2` ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlist2"; "curlen2"] THEN
+    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+
+  (*** Third output store ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (46--47) THEN
+  ABBREV_TAC `curlist3:int32 list = APPEND curlist2 lis2` THEN
+  ABBREV_TAC `curlen3:num = curlen2 + len2` THEN
+  SUBGOAL_THEN
+   `curlen3 <= 252 /\
+    read (memory :> bytes (res,4*curlen3)) s47 =
+    num_of_wordlist(curlist3:int32 list)`
+  STRIP_ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlen3"; "curlist3"] THEN CONJ_TAC THENL
+     [MAP_EVERY UNDISCH_TAC [`curlen2 <= 248`; `len2 <= 4`] THEN ARITH_TAC;
+      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
+    W(MP_TAC o PART_MATCH (lhand o rand)
+      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
+    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
+    DISCH_THEN SUBST1_TAC THEN
+    UNDISCH_THEN
+     `read (memory :> bytes128
+            (word_add res (word (4 * curlen2)))) s47 =
+      word (num_of_wordlist(lis2:int32 list))`
+     (MP_TAC o AP_TERM `val:int128->num`) THEN
+    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
+                VAL_READ_WBYTES;
+                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
+    SUBGOAL_THEN `4 * len2 = MIN 16 (4 * len2)` SUBST1_TAC THENL
+     [UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
+      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
+    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
+    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
+    MATCH_MP_TAC MOD_LT THEN
+    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
+    ASM_REWRITE_TAC[DIMINDEX_32] THEN
+    UNDISCH_TAC `len2 <= 4` THEN ARITH_TAC;
+    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
+      [WORD_RULE `word_add (word_add a (word (4 * l0)))
+                           (word_shl (word l1) 2) =
+                  word_add a (word(4 * (l0 + l1)))`]) THEN
+    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
+  SUBGOAL_THEN `LENGTH(curlist3:int32 list) = curlen3` ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlist3"; "curlen3"] THEN
+    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+
+  (*** Fourth output store ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (48--49) THEN
+  ABBREV_TAC `curlist4:int32 list = APPEND curlist3 lis3` THEN
+  ABBREV_TAC `curlen4:num = curlen3 + len3` THEN
+  SUBGOAL_THEN
+   `curlen4 <= 256 /\
+    read (memory :> bytes (res,4*curlen4)) s49 =
+    num_of_wordlist(curlist4:int32 list)`
+  STRIP_ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlen4"; "curlist4"] THEN CONJ_TAC THENL
+     [MAP_EVERY UNDISCH_TAC [`curlen3 <= 252`; `len3 <= 4`] THEN ARITH_TAC;
+      REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
+    W(MP_TAC o PART_MATCH (lhand o rand)
+      BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
+    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * l = 32 * l`] THEN
+    DISCH_THEN SUBST1_TAC THEN
+    UNDISCH_THEN
+     `read (memory :> bytes128
+            (word_add res (word (4 * curlen3)))) s49 =
+      word (num_of_wordlist(lis3:int32 list))`
+     (MP_TAC o AP_TERM `val:int128->num`) THEN
+    REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES128_WBYTES;
+                VAL_READ_WBYTES;
+                DIMINDEX_128; ARITH_RULE `128 DIV 8 = 16`] THEN
+    SUBGOAL_THEN `4 * len3 = MIN 16 (4 * len3)` SUBST1_TAC THENL
+     [UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
+      REWRITE_TAC[GSYM READ_BYTES_MOD]] THEN
+    DISCH_THEN SUBST1_TAC THEN REWRITE_TAC[VAL_WORD] THEN
+    REWRITE_TAC[DIMINDEX_128; MOD_MOD_EXP_MIN] THEN
+    MATCH_MP_TAC MOD_LT THEN
+    MATCH_MP_TAC NUM_OF_WORDLIST_BOUND_GEN THEN
+    ASM_REWRITE_TAC[DIMINDEX_32] THEN
+    UNDISCH_TAC `len3 <= 4` THEN ARITH_TAC;
+    FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE RAND_CONV
+      [WORD_RULE `word_add (word_add a (word (4 * l0)))
+                           (word_shl (word l1) 2) =
+                  word_add a (word(4 * (l0 + l1)))`]) THEN
+    ASM_REWRITE_TAC[] THEN DISCH_TAC] THEN
+  SUBGOAL_THEN `LENGTH(curlist4:int32 list) = curlen4` ASSUME_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["curlist4"; "curlen4"] THEN
+    REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
+    ALL_TAC] THEN
+
+  (*** The end of the loop body: 4 ADDs accumulating counts ***)
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (50--53) THEN
+
+  (* Normalize store event addresses: word_shl from ADD Xn, Xn, Xm LSL #2 *)
+  RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
+    `word_add (word_add a (word(4 * n))) (word_shl (word m) 2):int64 =
+     word_add a (word(4 * (n + m)))`]) THEN
+
+    SUBGOAL_THEN `val(idx0:int64) < 16` ASSUME_TAC THENL
+     [EXPAND_TAC "idx0" THEN
+      REWRITE_TAC[bitval] THEN
+      REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
+      CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
+      CONV_TAC NUM_REDUCE_CONV;
+      ALL_TAC] THEN
+    SUBGOAL_THEN `val(idx1:int64) < 16` ASSUME_TAC THENL
+     [EXPAND_TAC "idx1" THEN
+      REWRITE_TAC[bitval] THEN
+      REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
+      CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
+      CONV_TAC NUM_REDUCE_CONV;
+      ALL_TAC] THEN
+    SUBGOAL_THEN `val(idx2:int64) < 16` ASSUME_TAC THENL
+     [EXPAND_TAC "idx2" THEN
+      REWRITE_TAC[bitval] THEN
+      REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
+      CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
+      CONV_TAC NUM_REDUCE_CONV;
+      ALL_TAC] THEN
+    SUBGOAL_THEN `val(idx3:int64) < 16` ASSUME_TAC THENL
+     [EXPAND_TAC "idx3" THEN
+      REWRITE_TAC[bitval] THEN
+      REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
+      CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
+      CONV_TAC NUM_REDUCE_CONV;
+      ALL_TAC] THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+
+  REWRITE_TAC[ARITH_RULE `16 * (i + 1) = 16 * i + 16`] THEN
+  ASM_REWRITE_TAC[SUB_LIST_SPLIT; REJ_SAMPLE_APPEND; ADD_CLAUSES] THEN
+  SUBGOAL_THEN
+   `REJ_SAMPLE (SUB_LIST (16 * i,16) inlist) =
+    APPEND (APPEND (APPEND lis0 lis1) lis2) lis3`
+  SUBST1_TAC THENL
+   [MAP_EVERY EXPAND_TAC ["lis0"; "lis1"; "lis2"; "lis3"] THEN
+    REWRITE_TAC[GSYM APPEND_ASSOC; GSYM FILTER_APPEND] THEN
+    REWRITE_TAC[APPEND; REJ_SAMPLE] THEN AP_TERM_TAC THEN
+    REWRITE_TAC[LIST_EQ] THEN CONV_TAC(ONCE_DEPTH_CONV LENGTH_CONV) THEN
+    REWRITE_TAC[LENGTH_MAP] THEN
+    MATCH_MP_TAC(TAUT `p /\ (p ==> q) ==> p /\ q`) THEN CONJ_TAC THENL
+     [REWRITE_TAC[LENGTH_SUB_LIST] THEN MATCH_MP_TAC(ARITH_RULE
+       `16 * (i + 1) <= l ==> MIN 16 (l - 16 * i) = 16`) THEN
+      MAP_EVERY UNDISCH_TAC
+       [`48 * i + 48 <= buflen`;
+        `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
+      ARITH_TAC;
+      ASM_SIMP_TAC[EL_MAP] THEN DISCH_THEN(K ALL_TAC) THEN
+      CONV_TAC EXPAND_CASES_CONV THEN
+      CONV_TAC(ONCE_DEPTH_CONV EL_CONV) THEN REWRITE_TAC[]];
+    ASM_REWRITE_TAC[APPEND_ASSOC] THEN
+    CONV_TAC(TOP_DEPTH_CONV let_CONV)] THEN
+  ASM_REWRITE_TAC[] THEN EXPAND_TAC "cur" THEN
+  REWRITE_TAC[ARITH_RULE `3 * (16 * i + 16) = 48 * i + 48`] THEN
+  REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE; ALL_TAC]) THEN
+  CONJ_TAC THENL
+   [SUBST1_TAC(SYM(ASSUME `curlen3 + len3:num = curlen4`)) THEN
+    SUBST1_TAC(SYM(ASSUME `curlen2 + len2:num = curlen3`)) THEN
+    SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
+    SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
+    CONV_TAC WORD_RULE;
+    DISCHARGE_MEMSAFE_ASM_TAC]);;
+
+let MLDSA_REJ_UNIFORM_BLOCK8 = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e N.
+     buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+     48 * N + 24 <= buflen /\
+     LENGTH (REJ_SAMPLE (SUB_LIST (0,16 * N) inlist)) <= 248 /\
+     ALL (nonoverlapping (res,1024))
+       [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,buflen); (table,256)]
+     ==> ensures arm
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x170) /\ rej_uniform_vectors s /\
+                rej_uniform_prefix res buf buflen table inlist e (16 * N) s)
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x1f0) /\ rej_uniform_vectors s /\
+                rej_uniform_prefix res buf buflen table inlist e (16 * N + 8) s)
+           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ALL; NONOVERLAPPING_CLAUSES;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC;
+    rej_uniform_vectors; rej_uniform_prefix] THEN STRIP_TAC THEN
+  ABBREV_TAC `cur:int64 = word_add buf (word (48 * N))` THEN
+  ABBREV_TAC `curlist = REJ_SAMPLE (SUB_LIST(0,16 * N) inlist)` THEN
+  ABBREV_TAC `curlen = LENGTH(curlist:int32 list)` THEN
+  CONV_TAC(RATOR_CONV(LAND_CONV(TOP_DEPTH_CONV let_CONV))) THEN
+  ASM_REWRITE_TAC[ARITH_RULE `3 * 16 * n = 48 * n`] THEN
+  ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+  MAP_EVERY ABBREV_TAC
+   [`q0 = read (memory :> bytes64 cur) s0`;
+    `q1 = read (memory :> bytes64 (word_add cur (word 8))) s0`;
+    `q2 = read (memory :> bytes64 (word_add cur (word 16))) s0`] THEN
+
+  ABBREV_TAC
+   `(x:num->int32) j =
+    word_and (word_zx(word_subword
+      (read (memory :> wbytes cur) s0:192 word)
+      (24 * j,24):24 word):int32) (word 8388607)` THEN
+
+  SUBGOAL_THEN
+   `read (memory :> bytes128 cur) s0 = word_join (q1:int64) (q0:int64)`
+  ASSUME_TAC THENL
+   [CONV_TAC(LAND_CONV(READ_MEMORY_MERGE_CONV 1)) THEN
+    ASM_REWRITE_TAC[WORD_ADD_0];
+    ALL_TAC] THEN
+
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--8) THEN
+
+  SUBGOAL_THEN
+   `read Q16 s8 =
+        word_join (word_join ((x:num->int32) 3) (x 2):int64)
+                  (word_join (x 1) (x 0):int64) /\
+    read Q17 s8 =
         word_join (word_join ((x:num->int32) 7) (x 6):int64)
                   (word_join (x 5) (x 4):int64)`
   MP_TAC THENL
@@ -2815,7 +1078,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
                   (SUB_LIST(16 * N,8) inlist)) = (x:num->int32) j`
   ASSUME_TAC THENL
    [UNDISCH_THEN
-     `read (memory :> bytes (buf,buflen)) s12 =
+     `read (memory :> bytes (buf,buflen)) s8 =
       num_of_wordlist(inlist:(24 word)list)`
      (MP_TAC o AP_TERM
        `\n:num. n DIV 2 EXP (8 * 48 * N) MOD 2 EXP (8 * 24)`) THEN
@@ -2828,7 +1091,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     SUBGOAL_THEN `MIN (buflen - 48 * N) (dimindex(:24)) = dimindex(:192) DIV 8`
     SUBST1_TAC THENL
      [REWRITE_TAC[DIMINDEX_24; DIMINDEX_192] THEN
-      UNDISCH_TAC `48 * N + 24 = buflen` THEN ARITH_TAC;
+      UNDISCH_TAC `48 * N + 24 <= buflen` THEN ARITH_TAC;
       REWRITE_TAC[MULT_CLAUSES] THEN ASM_REWRITE_TAC[] THEN
       REWRITE_TAC[READ_COMPONENT_COMPOSE; GSYM VAL_READ_WBYTES] THEN
       ASM_REWRITE_TAC[GSYM READ_COMPONENT_COMPOSE]] THEN
@@ -2836,7 +1099,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     SUBGOAL_THEN `j < LENGTH(SUB_LIST(16 * N,8) (inlist:(24 word)list))`
     ASSUME_TAC THENL
      [REWRITE_TAC[LENGTH_SUB_LIST] THEN
-      MAP_EVERY UNDISCH_TAC [`j:num < 8`; `48 * N + 24 = buflen`;
+      MAP_EVERY UNDISCH_TAC [`j:num < 8`; `48 * N + 24 <= buflen`;
         `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
       ARITH_TAC; ALL_TAC] THEN
     ASM_SIMP_TAC[EL_MAP] THEN REWRITE_TAC[VAL_MOD_23_EQ_AND] THEN
@@ -2848,23 +1111,23 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     ASM_REWRITE_TAC[GSYM DIMINDEX_24; NUM_OF_WORDLIST_EL;
                     LENGTH_SUB_LIST] THEN
     COND_CASES_TAC THENL [REFL_TAC; ASM_MESON_TAC[]]; ALL_TAC] THEN
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (13--20) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (9--16) THEN
   RULE_ASSUM_TAC(CONV_RULE(TOP_DEPTH_CONV WORD_SIMPLE_SUBWORD_CONV)) THEN
   RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
   RULE_ASSUM_TAC(REWRITE_RULE[word_ugt; relational2; GT; WORD_AND_MASK]) THEN
   RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
   RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
   MAP_EVERY REABBREV_TAC
-   [`idx0 = read X12 s20`; `idx1 = read X13 s20`] THEN
+   [`idx0 = read X12 s16`; `idx1 = read X13 s16`] THEN
   MAP_EVERY ABBREV_TAC
    [`tab0 = read(memory :> bytes128(word_add table
-                (word(16 * val(idx0:int64))))) s20`;
+                (word(16 * val(idx0:int64))))) s16`;
     `tab1 = read(memory :> bytes128(word_add table
-                (word(16 * val(idx1:int64))))) s20`] THEN
+                (word(16 * val(idx1:int64))))) s16`] THEN
 
-  (*** Steps 21-28: LDR Q24/Q25 + CNT + UADDLV + FMOV ***)
+  (*** Steps 17-24: LDR Q24/Q25 + CNT + UADDLV + FMOV ***)
 
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (21--28) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (17--24) THEN
 
   (* Normalize shifted-register table addresses for event containment *)
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
@@ -2877,20 +1140,20 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
   RULE_ASSUM_TAC(ONCE_REWRITE_RULE[COND_RAND]) THEN
   RULE_ASSUM_TAC(CONV_RULE WORD_REDUCE_CONV) THEN
 
-  (*** Steps 29-30: TBL Q16/Q17 ***)
+  (*** Steps 25-26: TBL Q16/Q17 ***)
 
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (29--30) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (25--26) THEN
 
   (*** TBL correctness: Q16/Q17 = word(num_of_wordlist(FILTER ...)) ***)
 
   SUBGOAL_THEN
-   `read Q16 s30 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
+   `read Q16 s26 = word(num_of_wordlist (FILTER (\x:int32. val x < 8380417)
                          [(x:num->int32) 0; x 1; x 2; x 3])) /\
-    read Q17 s30 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
+    read Q17 s26 = word(num_of_wordlist (FILTER (\x. val x < 8380417)
                          [x 4; x 5; x 6; x 7]))`
   MP_TAC THENL
    [UNDISCH_TAC
-     `read(memory :> bytes(table,256)) s30 =
+     `read(memory :> bytes(table,256)) s26 =
       num_of_wordlist mldsa_rej_uniform_table` THEN
     REPLICATE_TAC 4
      (GEN_REWRITE_TAC (LAND_CONV o ONCE_DEPTH_CONV)
@@ -2934,9 +1197,9 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
   (*** Counting: X12/X13 = word(LENGTH(FILTER ...)) ***)
 
   SUBGOAL_THEN
-   `read X12 s30 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
+   `read X12 s26 = word(LENGTH (FILTER (\x:int32. val x < 8380417)
                          [(x:num->int32) 0; x 1; x 2; x 3])) /\
-    read X13 s30 = word(LENGTH (FILTER (\x. val x < 8380417)
+    read X13 s26 = word(LENGTH (FILTER (\x. val x < 8380417)
                          [x 4; x 5; x 6; x 7]))`
   MP_TAC THENL
    [ASM_REWRITE_TAC[WORD_AND_0; WORD_POPCOUNT_0; BITBLAST_RULE
@@ -2948,7 +1211,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       word_popcount(word_and (word 32) x:byte) = bitval(bit 5 x) /\
       word_popcount(word_and (word 64) x:byte) = bitval(bit 6 x) /\
       word_popcount(word_and (word 128) x:byte) = bitval(bit 7 x)`] THEN
-    DISCARD_STATE_TAC "s30" THEN REPEAT CONJ_TAC THEN
+    DISCARD_STATE_TAC "s26" THEN REPEAT CONJ_TAC THEN
     REWRITE_TAC[WORD_MASK_ALT] THEN
     REPEAT(COND_CASES_TAC THEN ASM_REWRITE_TAC[]) THEN
     ASM_REWRITE_TAC[FILTER] THEN CONV_TAC(DEPTH_CONV WORD_NUM_RED_CONV) THEN
@@ -2976,19 +1239,19 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     REWRITE_TAC[LENGTH] THEN ARITH_TAC;
     ALL_TAC] THEN
 
-  (*** First writeback (tail): STR Q16 + ADD X7 ***)
+  (*** First output store: STR Q16 + ADD X0 ***)
 
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (31--32) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (27--28) THEN
   ABBREV_TAC `curlist1:int32 list = APPEND curlist lis0` THEN
   ABBREV_TAC `curlen1:num = curlen + len0` THEN
 
   SUBGOAL_THEN
-   `curlen1 < 260 /\
-    read (memory :> bytes (stackpointer,4*curlen1)) s32 =
+   `curlen1 <= 252 /\
+    read (memory :> bytes (res,4*curlen1)) s28 =
     num_of_wordlist(curlist1:int32 list)`
   STRIP_ASSUME_TAC THENL
    [MAP_EVERY EXPAND_TAC ["curlen1"; "curlist1"] THEN CONJ_TAC THENL
-     [MAP_EVERY UNDISCH_TAC [`curlen < 256`; `len0 <= 4`] THEN ARITH_TAC;
+     [MAP_EVERY UNDISCH_TAC [`curlen <= 248`; `len0 <= 4`] THEN ARITH_TAC;
       REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
     W(MP_TAC o PART_MATCH (lhand o rand)
       BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
@@ -2996,7 +1259,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     DISCH_THEN SUBST1_TAC THEN
     SUBGOAL_THEN
      `read (memory :> bytes128
-            (word_add stackpointer (word (4 * curlen)))) s32 =
+            (word_add res (word (4 * curlen)))) s28 =
       word (num_of_wordlist(lis0:int32 list))`
     MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
     DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
@@ -3022,19 +1285,19 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     REWRITE_TAC[LENGTH_APPEND] THEN ASM_REWRITE_TAC[];
     ALL_TAC] THEN
 
-  (*** Second writeback (tail): STR Q17 + ADD X7 ***)
+  (*** Second output store: STR Q17 + ADD X0 ***)
 
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (33--34) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (29--30) THEN
   ABBREV_TAC `curlist2:int32 list = APPEND curlist1 lis1` THEN
   ABBREV_TAC `curlen2:num = curlen1 + len1` THEN
 
   SUBGOAL_THEN
-   `curlen2 < 264 /\
-    read (memory :> bytes (stackpointer,4*curlen2)) s34 =
+   `curlen2 <= 256 /\
+    read (memory :> bytes (res,4*curlen2)) s30 =
     num_of_wordlist(curlist2:int32 list)`
   STRIP_ASSUME_TAC THENL
    [MAP_EVERY EXPAND_TAC ["curlen2"; "curlist2"] THEN CONJ_TAC THENL
-     [MAP_EVERY UNDISCH_TAC [`curlen1 < 260`; `len1 <= 4`] THEN ARITH_TAC;
+     [MAP_EVERY UNDISCH_TAC [`curlen1 <= 252`; `len1 <= 4`] THEN ARITH_TAC;
       REWRITE_TAC[LEFT_ADD_DISTRIB]] THEN
     W(MP_TAC o PART_MATCH (lhand o rand)
       BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
@@ -3042,7 +1305,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     DISCH_THEN SUBST1_TAC THEN
     SUBGOAL_THEN
      `read (memory :> bytes128
-            (word_add stackpointer (word (4 * curlen1)))) s34 =
+            (word_add res (word (4 * curlen1)))) s30 =
       word (num_of_wordlist(lis1:int32 list))`
     MP_TAC THENL [ASM_REWRITE_TAC[]; ALL_TAC] THEN
     DISCH_THEN(MP_TAC o AP_TERM `val:int128->num`) THEN
@@ -3086,7 +1349,7 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
        [REWRITE_TAC[LENGTH_SUB_LIST] THEN MATCH_MP_TAC(ARITH_RULE
          `16 * N + 8 <= l ==> MIN 8 (l - 16 * N) = 8`) THEN
         MAP_EVERY UNDISCH_TAC
-         [`48 * N + 24 = buflen`;
+         [`48 * N + 24 <= buflen`;
           `8 * buflen = 24 * LENGTH(inlist:(24 word)list)`] THEN
         ARITH_TAC;
         ASM_SIMP_TAC[EL_MAP] THEN DISCH_THEN(K ALL_TAC) THEN
@@ -3096,30 +1359,14 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
       ASM_REWRITE_TAC[APPEND_ASSOC]];
     ALL_TAC] THEN
 
-  (*** Steps 35-36: accumulation (ADD X9 + ADD X9) ***)
-
-  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (35--36) THEN
+  (*** Steps 31-32: accumulation (ADD X9 + ADD X9) ***)
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (31--32) THEN
 
   (* Normalize store event addresses: word_shl from ADD Xn, Xn, Xm LSL #2 *)
   RULE_ASSUM_TAC(REWRITE_RULE[WORD_RULE
     `word_add (word_add a (word(4 * n))) (word_shl (word m) 2):int64 =
      word_add a (word(4 * (n + m)))`]) THEN
 
-  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
-  EXISTS_TAC `2 * N + 1` THEN
-  REWRITE_TAC[ARITH_RULE `8 * (2 * N + 1) = 16 * N + 8`;
-              ARITH_RULE `24 * (2 * N + 1 + 1) = 48 * N + 48`] THEN
-  ASM_REWRITE_TAC[] THEN
-  CONJ_TAC THENL
-   [UNDISCH_TAC `curlen2 < 264` THEN ARITH_TAC; ALL_TAC] THEN
-  CONJ_TAC THENL
-   [SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
-    SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
-    CONV_TAC WORD_RULE; ALL_TAC] THEN
-  CONJ_TAC THENL
-   [DISJ1_TAC THEN UNDISCH_TAC `48 * N + 24 = buflen` THEN ARITH_TAC;
-    ALL_TAC] THEN
-  (* Establish table index bounds for memory safety *)
   SUBGOAL_THEN `val(idx0:int64) < 16` ASSUME_TAC THENL
    [EXPAND_TAC "idx0" THEN
     REWRITE_TAC[bitval] THEN
@@ -3134,47 +1381,481 @@ let MLDSA_REJ_UNIFORM_MEMSAFE = prove
     CONV_TAC(DEPTH_CONV(WORD_NUM_RED_CONV ORELSEC WORD_CONDENSE_CONV)) THEN
     CONV_TAC NUM_REDUCE_CONV;
     ALL_TAC] THEN
-  DISCHARGE_MEMSAFE_ASM_TAC THEN
-  DISJ1_TAC THEN EXPAND_TAC "cur" THEN CONTAINED_TAC);;
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
+  ASM_REWRITE_TAC[ARITH_RULE `3 * (16 * N + 8) = 48 * N + 24`] THEN
+  EXPAND_TAC "cur" THEN REPEAT(CONJ_TAC THENL [CONV_TAC WORD_RULE;ALL_TAC]) THEN
+  CONJ_TAC THENL
+   [SUBST1_TAC(SYM(ASSUME `curlen1 + len1:num = curlen2`)) THEN
+    SUBST1_TAC(SYM(ASSUME `curlen + len0:num = curlen1`)) THEN
+    CONV_TAC WORD_RULE;
+    DISCHARGE_MEMSAFE_ASM_TAC]);;
 
-(* ------------------------------------------------------------------------- *)
-(* Memory safety of the subroutine version.                                  *)
-(* ------------------------------------------------------------------------- *)
+(* The main loop exits at the first block with insufficient input or output. *)
+let MLDSA_REJ_UNIFORM_LOOP = prove
+ (`!res buf buflen table (inlist:(24 word)list) e pc N.
+    buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,buflen); (table,256)] /\
+    48 * N <= buflen /\ LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * N) inlist)) <= 256 /\
+    ~(48 * N + 48 <= buflen /\
+       LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * N) inlist)) <= 240) /\
+    (!i. i < N ==> 48 * i + 48 <= buflen /\
+       LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * i) inlist)) <= 240)
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word(pc + 0x74) /\ rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e 0 s)
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word(pc + 0x160) /\ rej_uniform_vectors s /\
+            rej_uniform_prefix res buf buflen table inlist e (16 * N) s)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  let normalize = REWRITE_RULE[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; ALL] in
+  let test i first take =
+    SPECL [`res:int64`; `buf:int64`; `buflen:num`; `table:int64`;
+           `inlist:(24 word)list`; `e:uarch_event list`; i; `pc:num`; first; take]
+      MLDSA_REJ_UNIFORM_TEST16 |>
+    CONV_RULE(TOP_DEPTH_CONV let_CONV) |>
+    REWRITE_RULE[COND_CLAUSES; MULT_CLAUSES] |> normalize in
+  REPEAT GEN_TAC THEN REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
+    ALL] THEN STRIP_TAC THEN ASM_CASES_TAC `N = 0` THENL
+   [FIRST_X_ASSUM SUBST_ALL_TAC THEN
+    RULE_ASSUM_TAC(REWRITE_RULE[MULT_CLAUSES; ADD_CLAUSES]) THEN
+    REWRITE_TAC[MULT_CLAUSES] THEN MATCH_MP_TAC(test `0` `T` `F`) THEN
+    ASM_REWRITE_TAC[MULT_CLAUSES; ADD_CLAUSES; LE_0];
+    ALL_TAC] THEN
+  ENSURES_WHILE_UP_TAC `N:num` `pc + 0x84` `pc + 0x158`
+   `\i s. rej_uniform_vectors s /\
+          rej_uniform_prefix res buf buflen table inlist e (16 * i) s` THEN
+  REPEAT CONJ_TAC THENL
+   [ASM_REWRITE_TAC[];
+    FIRST_X_ASSUM(MP_TAC o SPEC `0`) THEN ASM_SIMP_TAC[LT_NZ; MULT_CLAUSES] THEN
+    STRIP_TAC THEN MATCH_MP_TAC(test `0` `T` `T`) THEN
+    ASM_REWRITE_TAC[LE_0] THEN ASM_ARITH_TAC;
+    X_GEN_TAC `i:num` THEN STRIP_TAC THEN
+    MATCH_MP_TAC(normalize MLDSA_REJ_UNIFORM_BLOCK16) THEN ASM_SIMP_TAC[];
+    X_GEN_TAC `i:num` THEN STRIP_TAC THEN
+    FIRST_X_ASSUM(MP_TAC o SPEC `i:num`) THEN ASM_REWRITE_TAC[] THEN STRIP_TAC THEN
+    MATCH_MP_TAC(test `i:num` `F` `T`) THEN ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC;
+    MATCH_MP_TAC(test `N:num` `F` `F`) THEN ASM_REWRITE_TAC[]]);;
 
-let MLDSA_REJ_UNIFORM_SUBROUTINE_MEMSAFE = time prove
- (`!res buf buflen table (inlist:(24 word)list) pc e stackpointer returnaddress.
-      24 divides val buflen /\
-      8 * val buflen = 24 * LENGTH inlist /\
-      ALL (nonoverlapping (word_sub stackpointer (word 1088),1088))
-          [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)] /\
-      ALL (nonoverlapping (res,1024))
-          [(word pc,LENGTH mldsa_rej_uniform_mc); (word_sub stackpointer (word 1088),1088)]
-      ==> ensures arm
+let MLDSA_REJ_UNIFORM_FINAL = prove
+ (`!res buf buflen table (inlist:(24 word)list) e pc.
+    nonoverlapping (res,1024) (word pc,LENGTH mldsa_rej_uniform_mc)
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word(pc + 0x224) /\
+            ?k. k <= LENGTH inlist /\
+                LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) <= 256 /\
+                (k = LENGTH inlist \/
+                 LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) = 256) /\
+                rej_uniform_prefix res buf buflen table inlist e k s)
+       (\s. read PC s = word(pc + 0x228) /\
+            let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
+            C_RETURN s = word(LENGTH outlist) /\
+            read (memory :> bytes(res,4 * LENGTH outlist)) s =
+              num_of_wordlist outlist /\
+            ?e2. read events s = APPEND e2 e /\
+                 memaccess_inbounds e2 [buf,buflen;table,256] [res,1024])
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI;
+    LENGTH_MLDSA_REJ_UNIFORM_MC; C_RETURN; rej_uniform_prefix] THEN DISCH_TAC THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN ENSURES_INIT_TAC "s0" THEN
+  FIRST_X_ASSUM(X_CHOOSE_THEN `k:num` (REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC)) THEN
+  MP_TAC(SPECL [`inlist:(24 word)list`; `k:num`] REJ_UNIFORM_FINAL_PREFIX) THEN
+  ASM_REWRITE_TAC[] THEN DISCH_THEN SUBST1_TAC THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC [1] THEN ENSURES_FINAL_STATE_TAC THEN
+  ASM_REWRITE_TAC[]);;
+
+(* One more candidate either appends its low 23 bits or leaves the prefix intact. *)
+let REJ_UNIFORM_PREFIX_SUC = prove
+ (`!(l:(24 word)list) n. n < LENGTH l
+    ==> REJ_SAMPLE (SUB_LIST (0,n+1) l) =
+        let a:int32 = word (val (EL n l) MOD 2 EXP 23) in
+        if val a < 8380417 then APPEND (REJ_SAMPLE (SUB_LIST (0,n) l)) [a]
+        else REJ_SAMPLE (SUB_LIST (0,n) l)`,
+  REPEAT STRIP_TAC THEN ONCE_REWRITE_TAC[SUB_LIST_SPLIT] THEN
+  ASM_REWRITE_TAC[ADD_CLAUSES; SUB_LIST_1; REJ_SAMPLE_APPEND; LET_DEF; LET_END_DEF] THEN
+  GEN_REWRITE_TAC (LAND_CONV o RAND_CONV) [REJ_SAMPLE] THEN
+  REWRITE_TAC[MAP; FILTER] THEN COND_CASES_TAC THEN ASM_REWRITE_TAC[APPEND_NIL]);;
+
+let REJ_UNIFORM_READ_CANDIDATE = prove
+ (`!(l:(24 word)list) (buf:int64) s n len.
+      n < LENGTH l /\ len = 3 * LENGTH l /\
+      read (memory :> bytes(buf,len)) s = num_of_wordlist l
+      ==> read (memory :> bytes(word_add buf (word (3*n)),3)) s = val(EL n l)`,
+  REPEAT STRIP_TAC THEN
+  MP_TAC(ISPECL [`l:(24 word)list`; `n:num`] NUM_OF_WORDLIST_EL) THEN
+  ASM_REWRITE_TAC[DIMINDEX_24] THEN DISCH_THEN(SUBST1_TAC o SYM) THEN
+  FIRST_X_ASSUM(SUBST1_TAC o SYM o check (fun th -> is_eq(concl th) &&
+    rhs(concl th) = `num_of_wordlist(l:(24 word)list)`)) THEN
+  REWRITE_TAC[READ_COMPONENT_COMPOSE; ARITH_RULE `24 * n = 8 * (3 * n)`;
+              ARITH_RULE `24 = 8 * 3`; READ_BYTES_DIV; READ_BYTES_MOD] THEN
+  SUBGOAL_THEN `MIN (len - 3*n) 3 = 3` (fun th -> REWRITE_TAC[th]) THEN ASM_ARITH_TAC);;
+(* The two scalar loads read one little-endian 24-bit candidate. *)
+let REJ_UNIFORM_JOIN_BYTES = prove
+ (`!(a:int64) s.
+     val (word_join (read (memory :> bytes8 (word_add a (word 2))) s)
+                    (read (memory :> bytes16 a) s):24 word) =
+     read (memory :> bytes (a,3)) s`,
+  REPEAT GEN_TAC THEN
+  SIMP_TAC[VAL_WORD_JOIN_SIMPLE; DIMINDEX_8; DIMINDEX_16; DIMINDEX_24; ARITH] THEN
+  REWRITE_TAC[BYTES8_WBYTES; BYTES16_WBYTES; READ_COMPONENT_COMPOSE;
+              VAL_READ_WBYTES; DIMINDEX_8; DIMINDEX_16] THEN
+  CONV_TAC NUM_REDUCE_CONV THEN GEN_REWRITE_TAC (RAND_CONV o ONCE_DEPTH_CONV)
+    [ARITH_RULE `3 = 2 + 1`] THEN
+  REWRITE_TAC[READ_BYTES_COMBINE] THEN CONV_TAC NUM_REDUCE_CONV THEN ARITH_TAC);;
+
+let REJ_UNIFORM_JOIN_MASK = prove
+ (`!(lo:int16) (hi:byte).
+   word_or (word_zx lo) (word_shl (word_and (word_zx hi) (word 127)) 16):int32 =
+   word (val (word_join hi lo:24 word) MOD 2 EXP 23)`,
+  CONV_TAC WORD_BLAST);;
+(* At the scalar loop head, a full polynomial or an empty input stops sampling. *)
+let MLDSA_REJ_UNIFORM_SCALAR_DONE = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e n.
+     buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+     n <= LENGTH inlist /\ LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) <= 256 /\
+     (n = LENGTH inlist \/ LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) = 256) /\
+     nonoverlapping (res,1024) (word pc,LENGTH mldsa_rej_uniform_mc)
+     ==> ensures arm
            (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
-                read PC s = word pc /\
-                read SP s = stackpointer /\
-                read X30 s = returnaddress /\
-                C_ARGUMENTS [res;buf;buflen;table] s /\
-                wordlist_from_memory(table,256) s = mldsa_rej_uniform_table /\
-                wordlist_from_memory(buf,LENGTH inlist) s = inlist /\
-                read events s = e)
-           (\s. read PC s = returnaddress /\
-                (exists e2.
-                     read events s = APPEND e2 e /\
-                     memaccess_inbounds e2
-                       [buf,val buflen; table,256;
-                        word_sub stackpointer (word 1088),1088]
-                       [word_sub stackpointer (word 1088),1088; res,1024]))
+                read PC s = word (pc + 0x1f0) /\
+                rej_uniform_prefix res buf buflen table inlist e n s)
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x224) /\
+                rej_uniform_prefix res buf buflen table inlist e n s)
            (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
-            MAYCHANGE [events] ,,
-            MAYCHANGE [memory :> bytes(res,1024);
-                       memory :> bytes(word_sub stackpointer (word 1088),1088)])`,
-  let TWEAK_CONV =
-    TOP_DEPTH_CONV let_CONV THENC
-    REWRITE_CONV[wordlist_from_memory] in
-  CONV_TAC LENGTH_SIMPLIFY_CONV THEN
-  CONV_TAC TWEAK_CONV THEN
-  ARM_ADD_RETURN_STACK_TAC MLDSA_REJ_UNIFORM_EXEC
-   (CONV_RULE TWEAK_CONV (CONV_RULE LENGTH_SIMPLIFY_CONV MLDSA_REJ_UNIFORM_MEMSAFE))
-    `[]:int64 list` 1088 THEN
-  DISCHARGE_MEMSAFE_TAC);;
+            MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[rej_uniform_prefix;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC] THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN
+  DISCH_THEN(REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC) THEN
+  ABBREV_TAC `k = LENGTH(REJ_SAMPLE(SUB_LIST(0,n) (inlist:(24 word)list)))` THEN
+  SUBGOAL_THEN `val(word k:int64) = k` ASSUME_TAC THENL
+   [MATCH_MP_TAC VAL_WORD_EQ THEN REWRITE_TAC[DIMINDEX_64] THEN ASM_ARITH_TAC;
+    ALL_TAC] THEN
+  ASM_CASES_TAC `k = 256` THENL
+   [ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--2);
+    SUBGOAL_THEN `~(256 <= k)` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+    SUBGOAL_THEN `word_sub (word buflen) (word(3*n)):int64 = word 0`
+      ASSUME_TAC THENL
+     [SUBGOAL_THEN `buflen = 3 * n` SUBST1_TAC THENL
+       [ASM_ARITH_TAC; REWRITE_TAC[WORD_SUB_REFL]]; ALL_TAC] THEN
+    ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+    ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--3)] THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[] THEN
+  TRY(CONJ_TAC THENL [ASM_MESON_TAC[]; ALL_TAC]) THEN
+  DISCHARGE_MEMSAFE_ASM_TAC);;
+let MLDSA_REJ_UNIFORM_SCALAR_STEP = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e n.
+     buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+     n < LENGTH inlist /\ LENGTH (REJ_SAMPLE (SUB_LIST (0,n) inlist)) < 256 /\
+     ALL (nonoverlapping (res,1024))
+       [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,buflen); (table,256)]
+     ==> ensures arm
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x1f0) /\
+                rej_uniform_prefix res buf buflen table inlist e n s)
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x1f0) /\
+                rej_uniform_prefix res buf buflen table inlist e (n+1) s)
+           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes (res,1024)])`,
+  REPEAT GEN_TAC THEN REWRITE_TAC[ALL; NONOVERLAPPING_CLAUSES;
+    MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; LENGTH_MLDSA_REJ_UNIFORM_MC;
+    rej_uniform_prefix] THEN CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN STRIP_TAC THEN
+  ABBREV_TAC `out = REJ_SAMPLE(SUB_LIST(0,n) (inlist:(24 word)list))` THEN
+  ABBREV_TAC `k = LENGTH (out:int32 list)` THEN
+  ABBREV_TAC `(a:int32) = word(val (EL n (inlist:(24 word)list)) MOD 2 EXP 23)` THEN
+  SUBGOAL_THEN `REJ_SAMPLE(SUB_LIST(0,n+1) (inlist:(24 word)list)) =
+      if val(a:int32) < 8380417 then APPEND out [a] else out` ASSUME_TAC THENL
+   [ASM_SIMP_TAC[REJ_UNIFORM_PREFIX_SUC; LET_DEF; LET_END_DEF] THEN
+    MAP_EVERY EXPAND_TAC ["a"; "out"] THEN REFL_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `buflen = 3 * LENGTH(inlist:(24 word)list) /\
+                3*n + 3 <= buflen /\ 4*k+4 <= 1024`
+    STRIP_ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  VAL_INT64_TAC `k:num` THEN
+  SUBGOAL_THEN `~(word_sub (word buflen) (word(3*n)):int64 = word 0)`
+    ASSUME_TAC THENL
+   [REWRITE_TAC[WORD_SUB_EQ_0] THEN DISCH_THEN(MP_TAC o AP_TERM `val:int64->num`) THEN
+    SUBGOAL_THEN `val (word buflen:int64) = buflen /\ val(word(3*n):int64) = 3*n`
+      (fun th -> REWRITE_TAC[th]) THENL
+     [CONJ_TAC THEN MATCH_MP_TAC VAL_WORD_EQ THEN REWRITE_TAC[DIMINDEX_64] THEN ASM_ARITH_TAC;
+      ASM_ARITH_TAC]; ALL_TAC] THEN
+  SUBGOAL_THEN `~(256 <= k)` ASSUME_TAC THENL [ASM_ARITH_TAC; ALL_TAC] THEN
+  SUBGOAL_THEN `~(val(word_sub (word buflen) (word(3*n)):int64) = 0)`
+    ASSUME_TAC THENL [ASM_REWRITE_TAC[VAL_EQ_0] THEN ASM_MESON_TAC[]; ALL_TAC] THEN
+  ENSURES_INIT_TAC "s0" THEN STRIP_EXISTS_ASSUM_TAC THEN
+  ABBREV_TAC `p = word_add buf (word (3*n)):int64` THEN
+  ABBREV_TAC `lo:int16 = read (memory :> bytes16 p) s0` THEN
+  ABBREV_TAC `hi:byte = read (memory :> bytes8 (word_add p (word 2))) s0` THEN
+  SUBGOAL_THEN `word_or (word_zx (lo:int16)) (word_shl (word_and (word_zx (hi:byte)) (word 127)) 16):int32 = a` ASSUME_TAC THENL
+   [REWRITE_TAC[REJ_UNIFORM_JOIN_MASK] THEN MAP_EVERY EXPAND_TAC ["a"; "hi"; "lo"] THEN
+    REWRITE_TAC[REJ_UNIFORM_JOIN_BYTES] THEN EXPAND_TAC "p" THEN
+    MP_TAC(ISPECL [`inlist:(24 word)list`; `buf:int64`; `s0:armstate`; `n:num`;
+                   `buflen:num`] REJ_UNIFORM_READ_CANDIDATE) THEN
+    ANTS_TAC THENL [ASM_REWRITE_TAC[] THEN ASM_MESON_TAC[]; ALL_TAC] THEN
+    DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN REFL_TAC; ALL_TAC] THEN
+  UNDISCH_THEN `buflen = 3 * LENGTH(inlist:(24 word)list)` (K ALL_TAC) THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (1--8) THEN
+  SUBGOAL_THEN `read X5 s8 = word_zx (a:int32)` (LABEL_TAC "candidate") THENL
+   [ASM_REWRITE_TAC[] THEN
+    FIRST_ASSUM(fun th -> if is_eq(concl th) && rhs(concl th) = `a:int32` &&
+      is_comb(lhs(concl th)) && fst(dest_const(fst(strip_comb(lhs(concl th))))) = "word_or"
+      then GEN_REWRITE_TAC (RAND_CONV o RAND_CONV) [SYM th] else failwith "word_or") THEN
+    CONV_TAC WORD_BLAST; ALL_TAC] THEN
+  DISCARD_MATCHING_ASSUMPTIONS [`read X5 s8 = word_zx (word_or a b)`] THEN
+  ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC [9] THEN
+  RULE_ASSUM_TAC(REWRITE_RULE[WORD_BLAST
+    `word_zx (word_zx (w:int32):int64):int32 = w`]) THEN
+  RULE_ASSUM_TAC(REWRITE_RULE[CONV_RULE WORD_REDUCE_CONV
+    (ISPECL [`x:int32`; `word 8380417:int32`] NOCARRY_WORD_SUB)]) THEN
+  ASM_CASES_TAC `val(a:int32) < 8380417` THENL
+   [SUBGOAL_THEN `~(8380417 <= val(a:int32))` ASSUME_TAC THENL
+      [ASM_ARITH_TAC; ALL_TAC] THEN ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC (10--13);
+    SUBGOAL_THEN `8380417 <= val(a:int32)` ASSUME_TAC THENL
+      [ASM_ARITH_TAC; ALL_TAC] THEN ARM_STEPS_TAC MLDSA_REJ_UNIFORM_EXEC [10]] THEN
+  ENSURES_FINAL_STATE_TAC THEN ASM_REWRITE_TAC[LENGTH_APPEND; LENGTH; ARITH] THEN
+  EXPAND_TAC "p" THEN REWRITE_TAC[GSYM WORD_ADD_ASSOC; GSYM WORD_ADD;
+    ARITH_RULE `3 * (n + 1) = 3*n + 3 /\ 4*(n+1) = 4*n+4`;
+    WORD_RULE `word_sub (word_sub x (word n)) (word k) =
+               word_sub x (word(n + k))`] THEN
+  TRY(CONJ_TAC THENL
+   [W(MP_TAC o PART_MATCH (lhand o rand) BYTES_EQ_NUM_OF_WORDLIST_APPEND o snd) THEN
+    ASM_REWRITE_TAC[DIMINDEX_32; ARITH_RULE `8 * 4 * k = 32*k`] THEN
+    DISCH_THEN SUBST1_TAC THEN ASM_REWRITE_TAC[NUM_OF_WORDLIST_SING] THEN
+    SUBGOAL_THEN
+      `read (memory :> bytes32 (word_add res (word(4*k)))) s13 = (a:int32)`
+      MP_TAC THENL
+     [ASM_REWRITE_TAC[] THEN CONV_TAC WORD_BLAST;
+      DISCH_THEN(MP_TAC o AP_TERM `val:int32->num`) THEN
+      REWRITE_TAC[READ_COMPONENT_COMPOSE; BYTES32_WBYTES; VAL_READ_WBYTES;
+                  DIMINDEX_32; ARITH_RULE `32 DIV 8 = 4`]];
+    ALL_TAC]) THEN
+  DISCHARGE_MEMSAFE_ASM_TAC);;
+(* Each pass consumes exactly one candidate, including rejected candidates. *)
+let MLDSA_REJ_UNIFORM_SCALAR = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e n.
+     buflen < 2 EXP 64 /\ 8 * buflen = 24 * LENGTH inlist /\
+     ALL (nonoverlapping (res,1024))
+       [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,buflen); (table,256)] /\
+     n <= LENGTH inlist /\ LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) <= 256
+     ==> ensures arm
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x1f0) /\
+                rej_uniform_prefix res buf buflen table inlist e n s)
+           (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+                read PC s = word (pc + 0x224) /\
+                ?k. k <= LENGTH inlist /\
+                    LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) <= 256 /\
+                    (k = LENGTH inlist \/ LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) = 256) /\
+                    rej_uniform_prefix res buf buflen table inlist e k s)
+           (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+            MAYCHANGE [memory :> bytes (res,1024)])`,
+  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] THEN
+  REPEAT GEN_TAC THEN WF_INDUCT_TAC `LENGTH(inlist:(24 word)list) - n` THEN
+  STRIP_TAC THEN
+  ASM_CASES_TAC `n = LENGTH(inlist:(24 word)list) \/
+    LENGTH(REJ_SAMPLE(SUB_LIST(0,n) inlist)) = 256` THENL
+   [ENSURES_POSTCONDITION_TAC
+      `\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+           read PC s = word (pc+0x224) /\
+           rej_uniform_prefix res buf buflen table inlist e n s` THEN
+    CONJ_TAC THENL
+     [BETA_TAC THEN REPEAT STRIP_TAC THEN ASM_REWRITE_TAC[] THEN
+      EXISTS_TAC `n:num` THEN ASM_REWRITE_TAC[];
+      MATCH_MP_TAC(REWRITE_RULE[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI]
+        MLDSA_REJ_UNIFORM_SCALAR_DONE) THEN
+      ASM_REWRITE_TAC[] THEN ASM_MESON_TAC[ALL]];
+    ALL_TAC] THEN
+  ENSURES_SEQUENCE_TAC `pc+0x1f0`
+    `\s. rej_uniform_prefix res buf buflen table inlist e (n+1) s` THEN
+  CONJ_TAC THENL
+   [MATCH_MP_TAC(REWRITE_RULE[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI]
+      MLDSA_REJ_UNIFORM_SCALAR_STEP) THEN ASM_REWRITE_TAC[] THEN
+    ASM_ARITH_TAC;
+    FIRST_X_ASSUM(fun th -> MATCH_MP_TAC(REWRITE_RULE[IMP_IMP]
+      (SPECL [`inlist:(24 word)list`; `n+1`] th))) THEN REPEAT CONJ_TAC THEN
+    ASM_REWRITE_TAC[] THEN TRY ASM_ARITH_TAC THEN
+    MP_TAC(ISPECL [`inlist:(24 word)list`; `n:num`; `1`] REJ_UNIFORM_LENGTH_STEP) THEN
+    ASM_ARITH_TAC]);;
+
+let MLDSA_REJ_UNIFORM_CORRECT_MEMSAFE = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e.
+    24 divides val buflen /\ 8 * val buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)]
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ C_ARGUMENTS [res;buf;buflen;table] s /\
+            read (memory :> bytes(table,256)) s = num_of_wordlist mldsa_rej_uniform_table /\
+            read (memory :> bytes(buf,val buflen)) s = num_of_wordlist inlist /\
+            read events s = e)
+       (\s. read PC s = word(pc + 0x228) /\
+            let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
+            C_RETURN s = word(LENGTH outlist) /\
+            read (memory :> bytes(res,4 * LENGTH outlist)) s =
+              num_of_wordlist outlist /\
+            ?e2. read events s = APPEND e2 e /\
+                 memaccess_inbounds e2 [buf,val buflen;table,256] [res,1024])
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  let normalize = REWRITE_RULE[ALL; MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI] in
+  let state pc n =
+    let p = vsubst[n,`n:num`]
+     `\s. rej_uniform_vectors s /\ rej_uniform_prefix res buf buflen table inlist e n s` in
+    ENSURES_SEQUENCE_TAC pc p in
+  let scalar n =
+    let th = SPECL [`res:int64`; `buf:int64`; `buflen:num`; `table:int64`;
+                     `inlist:(24 word)list`; `pc:num`; `e:uarch_event list`; n]
+                    (normalize MLDSA_REJ_UNIFORM_SCALAR) in
+    let p = rand(rator(rator(snd(dest_imp(concl th))))) in
+    ENSURES_PRECONDITION_TAC p THEN CONJ_TAC THENL
+     [SIMP_TAC[]; MATCH_MP_TAC th THEN ASM_REWRITE_TAC[] THEN ASM_ARITH_TAC] in
+  MAP_EVERY X_GEN_TAC [`res:int64`; `buf:int64`] THEN W64_GEN_TAC `buflen:num` THEN
+  MAP_EVERY X_GEN_TAC [`table:int64`; `inlist:(24 word)list`; `pc:num`;
+                       `e:uarch_event list`] THEN
+  REWRITE_TAC[MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI; ALL] THEN STRIP_TAC THEN
+  state `pc + 0x74` `0` THEN CONJ_TAC THENL
+   [MATCH_MP_TAC(normalize MLDSA_REJ_UNIFORM_INIT) THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+  MP_TAC(SPECL [`buflen:num`; `inlist:(24 word)list`] REJ_UNIFORM_BLOCK_COUNT) THEN
+  DISCH_THEN(X_CHOOSE_THEN `N:num` (REPEAT_TCL CONJUNCTS_THEN ASSUME_TAC)) THEN
+  state `pc + 0x160` `16 * N` THEN CONJ_TAC THENL
+   [MATCH_MP_TAC(normalize MLDSA_REJ_UNIFORM_LOOP) THEN ASM_REWRITE_TAC[]; ALL_TAC] THEN
+  ENSURES_SEQUENCE_TAC `pc + 0x224`
+   `\s. ?k. k <= LENGTH inlist /\
+            LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) <= 256 /\
+            (k = LENGTH inlist \/ LENGTH(REJ_SAMPLE(SUB_LIST(0,k) inlist)) = 256) /\
+            rej_uniform_prefix res buf buflen table inlist e k s` THEN
+  CONJ_TAC THENL [ALL_TAC; MATCH_MP_TAC(normalize MLDSA_REJ_UNIFORM_FINAL) THEN
+                             ASM_REWRITE_TAC[]] THEN
+  MP_TAC(SPECL [`res:int64`; `buf:int64`; `buflen:num`; `table:int64`;
+    `inlist:(24 word)list`; `e:uarch_event list`; `N:num`; `pc:num`]
+     (normalize MLDSA_REJ_UNIFORM_TEST8)) THEN
+  CONV_TAC(LAND_CONV(TOP_DEPTH_CONV let_CONV)) THEN ASM_REWRITE_TAC[] THEN
+  ASM_CASES_TAC `48 * N + 24 <= buflen` THEN ASM_REWRITE_TAC[] THENL
+   [ASM_CASES_TAC `LENGTH(REJ_SAMPLE(SUB_LIST(0,16 * N) inlist)) <= 248` THEN
+    ASM_REWRITE_TAC[] THEN DISCH_TAC THENL
+     [state `pc + 0x170` `16 * N` THEN CONJ_TAC THENL
+       [FIRST_ASSUM ACCEPT_TAC; ALL_TAC] THEN
+      state `pc + 0x1f0` `16 * N + 8` THEN CONJ_TAC THENL
+       [MATCH_MP_TAC(normalize MLDSA_REJ_UNIFORM_BLOCK8) THEN ASM_REWRITE_TAC[];
+        MP_TAC(SPECL [`inlist:(24 word)list`; `16 * N`; `8`] REJ_UNIFORM_LENGTH_STEP) THEN
+        DISCH_TAC THEN scalar `16 * N + 8`];
+      state `pc + 0x1f0` `16 * N` THEN CONJ_TAC THENL
+       [FIRST_ASSUM ACCEPT_TAC; scalar `16 * N`]];
+    DISCH_TAC THEN SUBGOAL_THEN `16 * N = LENGTH(inlist:(24 word)list)` ASSUME_TAC THENL
+     [FIRST_X_ASSUM(MP_TAC o GEN_REWRITE_RULE I [divides]) THEN
+      DISCH_THEN(X_CHOOSE_TAC `d:num`) THEN
+      SUBGOAL_THEN `d = 2 * N` ASSUME_TAC THENL [ASM_ARITH_TAC; ASM_ARITH_TAC]; ALL_TAC] THEN
+    FIRST_ASSUM(fun th -> MATCH_MP_TAC(BETA_RULE(MATCH_MP
+      (ONCE_REWRITE_RULE[IMP_CONJ_ALT] ENSURES_POSTCONDITION_THM) th))) THEN
+    X_GEN_TAC `s:armstate` THEN STRIP_TAC THEN ASM_REWRITE_TAC[] THEN
+    EXISTS_TAC `16 * N` THEN ASM_REWRITE_TAC[LE_REFL]]);;
+
+(* Project the functional result and the bounds on memory accesses. *)
+let REJ_UNIFORM_PROJECT_TAC starting_events =
+  REWRITE_TAC[ensures] THEN X_GEN_TAC `s0:armstate` THEN STRIP_TAC THEN
+  MP_TAC(SPECL [`res:int64`; `buf:int64`; `buflen:int64`; `table:int64`;
+    `inlist:(24 word)list`; `pc:num`; starting_events]
+    MLDSA_REJ_UNIFORM_CORRECT_MEMSAFE) THEN
+  CONV_TAC(LAND_CONV(TOP_DEPTH_CONV let_CONV)) THEN
+  ASM_REWRITE_TAC[ensures] THEN DISCH_THEN(MP_TAC o SPEC `s0:armstate`) THEN
+  ASM_REWRITE_TAC[] THEN
+  MATCH_MP_TAC(REWRITE_RULE[RIGHT_IMP_FORALL_THM] EVENTUALLY_MONO) THEN
+  SIMP_TAC[];;
+
+let MLDSA_REJ_UNIFORM_CORRECT = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc.
+    24 divides val buflen /\ 8 * val buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)]
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ C_ARGUMENTS [res;buf;buflen;table] s /\
+            read (memory :> bytes(table,256)) s = num_of_wordlist mldsa_rej_uniform_table /\
+            read (memory :> bytes(buf,val buflen)) s = num_of_wordlist inlist)
+       (\s. read PC s = word(pc + 0x228) /\
+            let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
+            let outlen = LENGTH outlist in
+            C_RETURN s = word outlen /\
+            read (memory :> bytes(res,4 * outlen)) s = num_of_wordlist outlist)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REJ_UNIFORM_PROJECT_TAC `read events s0`);;
+
+let MLDSA_REJ_UNIFORM_SUBROUTINE_CORRECT = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc returnaddress.
+    24 divides val buflen /\ 8 * val buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)]
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ read X30 s = returnaddress /\
+            C_ARGUMENTS [res;buf;buflen;table] s /\
+            read (memory :> bytes(table,256)) s = num_of_wordlist mldsa_rej_uniform_table /\
+            read (memory :> bytes(buf,val buflen)) s = num_of_wordlist inlist)
+       (\s. read PC s = returnaddress /\
+            let outlist = SUB_LIST(0,256) (REJ_SAMPLE inlist) in
+            let outlen = LENGTH outlist in
+            C_RETURN s = word outlen /\
+            read (memory :> bytes(res,4 * outlen)) s = num_of_wordlist outlist)
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  let conv = TOP_DEPTH_CONV let_CONV THENC
+    REWRITE_CONV[wordlist_from_memory; LENGTH_MLDSA_REJ_UNIFORM_MC] in
+  CONV_TAC conv THEN ARM_ADD_RETURN_NOSTACK_TAC MLDSA_REJ_UNIFORM_EXEC
+    (CONV_RULE conv MLDSA_REJ_UNIFORM_CORRECT));;
+
+let MLDSA_REJ_UNIFORM_MEMSAFE = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e.
+    24 divides val buflen /\ 8 * val buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)]
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ C_ARGUMENTS [res;buf;buflen;table] s /\
+            wordlist_from_memory(table,256) s = mldsa_rej_uniform_table /\
+            wordlist_from_memory(buf,LENGTH inlist) s = inlist /\
+            read events s = e)
+       (\s. read PC s = word(pc + 0x228) /\
+            ?e2. read events s = APPEND e2 e /\
+                 memaccess_inbounds e2 [buf,val buflen;table,256] [res,1024])
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  REPEAT GEN_TAC THEN STRIP_TAC THEN
+  MP_TAC(ISPECL [`table:int64`; `256`; `256`; `mldsa_rej_uniform_table`]
+    (INST_TYPE [`:8`,`:N`] WORDLIST_FROM_MEMORY_EQ_ALT)) THEN
+  REWRITE_TAC[DIMINDEX_8] THEN DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
+  MP_TAC(ISPECL [`buf:int64`; `LENGTH(inlist:(24 word)list)`;
+    `val(buflen:int64)`; `inlist:(24 word)list`]
+    (INST_TYPE [`:24`,`:N`] WORDLIST_FROM_MEMORY_EQ_ALT)) THEN
+  ASM_REWRITE_TAC[DIMINDEX_24] THEN DISCH_THEN(fun th -> REWRITE_TAC[th]) THEN
+  CONV_TAC(TOP_DEPTH_CONV let_CONV) THEN REJ_UNIFORM_PROJECT_TAC `e:uarch_event list`);;
+
+let MLDSA_REJ_UNIFORM_SUBROUTINE_MEMSAFE = prove
+ (`!res buf buflen table (inlist:(24 word)list) pc e returnaddress.
+    24 divides val buflen /\ 8 * val buflen = 24 * LENGTH inlist /\
+    ALL (nonoverlapping (res,1024))
+      [(word pc,LENGTH mldsa_rej_uniform_mc); (buf,val buflen); (table,256)]
+    ==> ensures arm
+       (\s. aligned_bytes_loaded s (word pc) mldsa_rej_uniform_mc /\
+            read PC s = word pc /\ read X30 s = returnaddress /\
+            C_ARGUMENTS [res;buf;buflen;table] s /\
+            wordlist_from_memory(table,256) s = mldsa_rej_uniform_table /\
+            wordlist_from_memory(buf,LENGTH inlist) s = inlist /\
+            read events s = e)
+       (\s. read PC s = returnaddress /\
+            ?e2. read events s = APPEND e2 e /\
+                 memaccess_inbounds e2 [buf,val buflen;table,256] [res,1024])
+       (MAYCHANGE_REGS_AND_FLAGS_PERMITTED_BY_ABI ,,
+        MAYCHANGE [memory :> bytes(res,1024)])`,
+  let conv = TOP_DEPTH_CONV let_CONV THENC
+    REWRITE_CONV[wordlist_from_memory; LENGTH_MLDSA_REJ_UNIFORM_MC] in
+  CONV_TAC conv THEN ARM_ADD_RETURN_NOSTACK_TAC MLDSA_REJ_UNIFORM_EXEC
+    (CONV_RULE conv MLDSA_REJ_UNIFORM_MEMSAFE) THEN DISCHARGE_MEMSAFE_TAC);;
