@@ -71,15 +71,10 @@
     nibbles         .req v6
     eta             .req v7
     lo0             .req v16
-    lo0q            .req q16
-    lo0d            .req d16
     lo0s            .req s16
     hi0             .req v17
-    hi0q            .req q17
     lo1             .req v18
-    lo1q            .req q18
     hi1             .req v19
-    hi1q            .req q19
     sum0            .req s20
     sum0_d          .req d20
     sum1            .req s21
@@ -164,12 +159,13 @@ mld_rej_uniform_eta4_loop:
 
     // With more than 16 slots, even two full groups leave room for another
     // iteration. Store eight words per group and advance past the accepted
-    // words so the next store overwrites any padding.
+    // words so the next store overwrites any padding. Use 32-bit elements
+    // because output can be only word-aligned.
     cmp     remaining, #16
     b.ls    mld_rej_uniform_eta4_tail
-    stp     lo0q, hi0q, [output]
+    st1     {lo0.4s, hi0.4s}, [output]
     add     output, output, count0, lsl #2
-    stp     lo1q, hi1q, [output]
+    st1     {lo1.4s, hi1.4s}, [output]
     add     output, output, count1, lsl #2
     sub     remaining, remaining, count0
     sub     remaining, remaining, count1
@@ -184,7 +180,7 @@ mld_rej_uniform_eta4_tail:
 mld_rej_uniform_eta4_store_group:
     cmp     remaining, #8
     b.lo    mld_rej_uniform_eta4_store_partial
-    stp     lo0q, hi0q, [output]
+    st1     {lo0.4s, hi0.4s}, [output]
     b       mld_rej_uniform_eta4_stored
 
 mld_rej_uniform_eta4_store_partial:
@@ -192,12 +188,12 @@ mld_rej_uniform_eta4_store_partial:
     // With 1 to 7 slots left, a clear bit 2 means fewer than 4 words fit.
     // TBZ then skips the 4-word store. Bits 1 and 0 select the smaller stores.
     tbz     remaining, #2, mld_rej_uniform_eta4_store_two
-    str     lo0q, [dst], #16
+    st1     {lo0.4s}, [dst], #16
     // After a 4- or 2-word store, bring the next coefficient to lane 0.
     mov     lo0.16b, hi0.16b
 mld_rej_uniform_eta4_store_two:
     tbz     remaining, #1, mld_rej_uniform_eta4_store_one
-    str     lo0d, [dst], #8
+    st1     {lo0.2s}, [dst], #8
     ext     lo0.16b, lo0.16b, lo0.16b, #8
 mld_rej_uniform_eta4_store_one:
     tbz     remaining, #0, mld_rej_uniform_eta4_stored
@@ -243,15 +239,10 @@ mld_rej_uniform_eta4_return:
     .unreq nibbles
     .unreq eta
     .unreq lo0
-    .unreq lo0q
-    .unreq lo0d
     .unreq lo0s
     .unreq hi0
-    .unreq hi0q
     .unreq lo1
-    .unreq lo1q
     .unreq hi1
-    .unreq hi1q
     .unreq sum0
     .unreq sum0_d
     .unreq sum1

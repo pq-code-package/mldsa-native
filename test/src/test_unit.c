@@ -869,9 +869,9 @@ cleanup:
     int i;                                                               \
     MLD_ALLOC(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);            \
     MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);                            \
-    MLD_ALLOC(buf, uint8_t, (NBLOCKS) * 168, NULL);                      \
+    MLD_ALLOC(input, uint8_t, (NBLOCKS) * 168 + 1, NULL);                \
                                                                          \
-    if (r_test == NULL || r_ref == NULL || buf == NULL)                  \
+    if (r_test == NULL || r_ref == NULL || input == NULL)                \
     {                                                                    \
       goto cleanup;                                                      \
     }                                                                    \
@@ -881,6 +881,8 @@ cleanup:
     {                                                                    \
       int native_ret;                                                    \
       unsigned c_ret;                                                    \
+      /* Exercise both aligned and odd input addresses. */               \
+      uint8_t *buf = input + (i & 1);                                    \
       randombytes(buf, buflen);                                          \
                                                                          \
       native_ret = mld_rej_uniform_native(r_test, MLDSA_N, buf, buflen); \
@@ -901,7 +903,7 @@ cleanup:
     ret = 0;                                                             \
                                                                          \
   cleanup:                                                               \
-    MLD_FREE(buf, uint8_t, (NBLOCKS) * 168, NULL);                       \
+    MLD_FREE(input, uint8_t, (NBLOCKS) * 168 + 1, NULL);                 \
     MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);                             \
     MLD_FREE(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);             \
     return ret;                                                          \
