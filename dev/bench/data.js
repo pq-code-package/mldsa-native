@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795450743288,
+  "lastUpdate": 1795450782187,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -771170,6 +771170,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 408586,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "332f08895bf8d22985fcd1ade4e52777e71421eb",
+          "message": "CI: Drop the valgrind --vex-guest-max-insns workaround\n\nThe CT tests ran valgrind with --vex-guest-max-insns=55 to avoid \"VEX\ntemporary storage exhausted\" in the AVX2 poly_chknorm intrinsics. Those\nwere replaced by assembly in 3bf3db969, and the x86_64 backend has no\nintrinsics left. Use valgrind's default, as mlkem-native does.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-23T11:45:09Z",
+          "tree_id": "132913279c439506ac5cda6381fdc6d8409476ef",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/332f08895bf8d22985fcd1ade4e52777e71421eb"
+        },
+        "date": 1795450781541,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 140712,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 490178,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 151064,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 247783,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 797180,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 244564,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 400054,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1021254,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 408578,
             "unit": "cycles"
           }
         ]
