@@ -238,7 +238,7 @@ rej_uniform_aarch64_asm:
   arch: aarch64
   function: mldsa_rej_uniform_aarch64_asm
   sha256:
-    mldsa_rej_uniform_mc: 0f36da3d79df4c87428890a29f05e8c1bec0e317d55b590fc8cbba003e8df3d2
+    mldsa_rej_uniform_mc: 93c411571cddc58c06d02f89b09e657d01701d372dd168e701231ab598911a99
 rej_uniform_avx2_asm:
   arch: x86_64
   function: mldsa_rej_uniform_avx2_asm

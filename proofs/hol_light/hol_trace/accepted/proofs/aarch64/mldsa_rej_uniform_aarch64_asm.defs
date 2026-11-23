@@ -9,28 +9,26 @@
 # with functions in binaries, through proofs/hol_light/bind.yml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 
-# mldsa_rej_uniform_mc: 628 bytes
-# sha256 0f36da3d79df4c87428890a29f05e8c1bec0e317d55b590fc8cbba003e8df3d2
+# mldsa_rej_uniform_mc: 556 bytes
+# sha256 93c411571cddc58c06d02f89b09e657d01701d372dd168e701231ab598911a99
 definition mldsa_rej_uniform_mc
   |- mldsa_rej_uniform_mc
-     = #x[ff 03 11 d1 27 00 80 d2 47 00 c0 f2 8b 00 80 d2 0b 01 c0 f2 ff 00 67 9e 7f 1d 18 4e 3d e4
-          00 4f fd 9f bd 4e 27 00 9c 52 e7 0f a0 72 fe 0c 04 4e 07 20 80 d2 47 00 b0 f2 67 80 c0 f2
-          a7 00 f0 f2 cb e0 80 d2 0b 01 b0 f2 2b 41 c1 f2 6b 01 f0 f2 f4 00 67 9e 74 1d 18 4e 1c 44
-          04 4f 84 e5 00 4f 05 e5 00 4f 86 e4 00 4f 95 86 24 4e 96 86 25 4e 97 86 26 4e e8 03 00 91
-          e7 03 08 aa 0b 00 80 d2 10 1e 30 6e f0 04 84 3c f0 00 9d 3c f0 00 9e 3c f0 00 9f 3c 6b 41
-          00 91 7f 01 04 f1 4b ff ff 54 e7 03 08 aa 09 00 80 d2 04 20 80 d2 5f c0 00 f1 43 07 00 54
-          3f 01 04 eb 82 0b 00 54 42 c0 00 d1 20 04 40 ad 22 08 c0 3d 21 c0 00 91 10 00 14 4e 11 20
-          15 4e 32 20 16 4e 53 00 17 4e 10 1e 7c 4e 31 1e 7c 4e 52 1e 7c 4e 73 1e 7c 4e c4 37 b0 6e
-          c5 37 b1 6e c6 37 b2 6e c7 37 b3 6e 84 28 05 4e c5 28 07 4e 84 28 45 4e 84 1c 3d 4e 80 38
-          b0 6e 0f 00 66 9e ec 0d 40 d3 ed 2d 48 d3 ee 4d 50 d3 ef 6d 58 d3 78 78 ec 3c 79 78 ed 3c
-          7a 78 ee 3c 7b 78 ef 3c 84 58 20 4e 80 38 b0 6e 0f 00 66 9e ec 09 40 d3 ed 29 48 d3 ee 49
-          50 d3 ef 69 58 d3 10 02 18 4e 31 02 19 4e 52 02 1a 4e 73 02 1b 4e f0 78 00 4c e7 08 0c 8b
-          f1 78 00 4c e7 08 0d 8b f2 78 00 4c e7 08 0e 8b f3 78 00 4c e7 08 0f 8b 8c 01 0d 8b ce 01
-          0f 8b 29 01 0c 8b 29 01 0e 8b 5f c0 00 f1 02 f9 ff 54 3f 01 04 eb 62 04 00 54 5f 60 00 f1
-          23 04 00 54 42 60 00 d1 20 00 c0 3d 21 08 40 fd 21 60 00 91 10 00 14 4e 11 20 15 4e 10 1e
-          7c 4e 31 1e 7c 4e c4 37 b0 6e c5 37 b1 6e 84 1c 3f 4e a5 1c 3f 4e 80 38 b0 6e a1 38 b0 6e
-          0c 00 66 9e 2d 00 66 9e 78 78 ec 3c 79 78 ed 3c 84 58 20 4e a5 58 20 4e 80 38 b0 6e a1 38
-          b0 6e 0c 00 66 9e 2d 00 66 9e 10 02 18 4e 31 02 19 4e f0 78 00 4c e7 08 0c 8b f1 78 00 4c
-          e7 08 0d 8b 29 01 0c 8b 29 01 0d 8b 3f 01 04 eb 29 31 84 9a 0b 00 80 d2 e7 03 08 aa f0 04
-          c4 3c f1 00 dd 3c f2 00 de 3c f3 00 df 3c 10 04 84 3c 11 00 9d 3c 12 00 9e 3c 13 00 9f 3c
-          6b 41 00 91 7f 01 04 f1 cb fe ff 54 e0 03 09 aa 01 00 00 14 ff 03 11 91 c0 03 5f d6]
+     = #x[27 00 80 d2 47 00 c0 f2 8b 00 80 d2 0b 01 c0 f2 ff 00 67 9e 7f 1d 18 4e 3d e4 00 4f fd 9f
+          bd 4e 24 00 9c 52 e4 0f a0 72 9e 0c 04 4e 07 20 80 d2 47 00 b0 f2 67 80 c0 f2 a7 00 f0 f2
+          cb e0 80 d2 0b 01 b0 f2 2b 41 c1 f2 6b 01 f0 f2 f4 00 67 9e 74 1d 18 4e 1c 44 04 4f 84 e5
+          00 4f 05 e5 00 4f 86 e4 00 4f 95 86 24 4e 96 86 25 4e 97 86 26 4e 09 00 80 d2 5f c0 00 f1
+          43 07 00 54 3f c1 03 f1 08 07 00 54 42 c0 00 d1 20 04 40 ad 22 08 c0 3d 21 c0 00 91 10 00
+          14 4e 11 20 15 4e 32 20 16 4e 53 00 17 4e 10 1e 7c 4e 31 1e 7c 4e 52 1e 7c 4e 73 1e 7c 4e
+          c4 37 b0 6e c5 37 b1 6e c6 37 b2 6e c7 37 b3 6e 84 28 05 4e c5 28 07 4e 84 28 45 4e 84 1c
+          3d 4e 80 38 b0 6e 0f 00 66 9e ec 0d 40 d3 ed 2d 48 d3 ee 4d 50 d3 ef 6d 58 d3 78 78 ec 3c
+          79 78 ed 3c 7a 78 ee 3c 7b 78 ef 3c 84 58 20 4e 80 38 b0 6e 0f 00 66 9e ec 09 40 d3 ed 29
+          48 d3 ee 49 50 d3 ef 69 58 d3 10 02 18 4e 31 02 19 4e 52 02 1a 4e 73 02 1b 4e 10 78 00 4c
+          00 08 0c 8b 11 78 00 4c 00 08 0d 8b 12 78 00 4c 00 08 0e 8b 13 78 00 4c 00 08 0f 8b 8c 01
+          0d 8b ce 01 0f 8b 29 01 0c 8b 29 01 0e 8b 5f c0 00 f1 02 f9 ff 54 5f 60 00 f1 03 06 00 54
+          3f e1 03 f1 28 04 00 54 42 60 00 d1 20 00 c0 3d 21 08 40 fd 21 60 00 91 10 00 14 4e 11 20
+          15 4e 10 1e 7c 4e 31 1e 7c 4e c4 37 b0 6e c5 37 b1 6e 84 1c 3f 4e a5 1c 3f 4e 80 38 b0 6e
+          a1 38 b0 6e 0c 00 66 9e 2d 00 66 9e 78 78 ec 3c 79 78 ed 3c 84 58 20 4e a5 58 20 4e 80 38
+          b0 6e a1 38 b0 6e 0c 00 66 9e 2d 00 66 9e 10 02 18 4e 31 02 19 4e 10 78 00 4c 00 08 0c 8b
+          11 78 00 4c 00 08 0d 8b 29 01 0c 8b 29 01 0d 8b 3f 01 04 f1 82 01 00 54 62 01 00 b4 25 24
+          40 78 26 14 40 38 42 0c 00 d1 c6 18 00 12 a5 40 06 2a bf 00 04 6b e2 fe ff 54 05 44 00 b8
+          29 05 00 91 f4 ff ff 17 e0 03 09 aa c0 03 5f d6]
