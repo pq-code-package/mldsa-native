@@ -17,7 +17,7 @@
       size_bytes: 1024
       permissions: write-only
       c_parameter: int32_t r[256]
-      description: Output buffer (256 x int32_t)
+      description: Output buffer, disjoint from buf and table. The return value is its valid prefix length.
     x1:
       type: buffer
       size_bytes: x2
@@ -27,7 +27,7 @@
     x2:
       type: scalar
       c_parameter: uint64_t buflen
-      description: Length of input buffer (must be a multiple of 8)
+      description: Length of input buffer (must be a positive multiple of 8)
       test_with: 136  # MLD_AARCH64_REJ_UNIFORM_ETA2_BUFLEN
     x3:
       type: buffer
@@ -55,108 +55,115 @@
 MLD_ASM_FN_SYMBOL(rej_uniform_eta2_aarch64_asm)
 
         .cfi_startproc
-        sub sp, sp, #0x240
-        .cfi_adjust_cfa_offset 0x240
-        mov x7, #0x1                // =1
-        movk x7, #0x2, lsl #16
-        movk x7, #0x4, lsl #32
-        movk x7, #0x8, lsl #48
-        mov v31.d[0], x7
-        mov x7, #0x10               // =16
-        movk x7, #0x20, lsl #16
-        movk x7, #0x40, lsl #32
-        movk x7, #0x80, lsl #48
-        mov v31.d[1], x7
-        movi v30.8h, #0xf
-        mov x8, sp
-        mov x7, x8
-        mov x11, #0x0               // =0
-        eor v16.16b, v16.16b, v16.16b
-
-Lmld_rej_uniform_eta2_initial_zero:
-        str q16, [x7], #0x40
-        stur q16, [x7, #-0x30]
-        stur q16, [x7, #-0x20]
-        stur q16, [x7, #-0x10]
-        add x11, x11, #0x20
-        cmp x11, #0x100
-        b.lt Lmld_rej_uniform_eta2_initial_zero
-        mov x7, x8
-        mov x9, #0x0                // =0
+        mov x5, #0x101              // =257
+        movk x5, #0x102, lsl #16
+        movk x5, #0x104, lsl #32
+        movk x5, #0x108, lsl #48
+        mov v31.d[0], x5
+        mov x5, #0x110              // =272
+        movk x5, #0x120, lsl #16
+        movk x5, #0x140, lsl #32
+        movk x5, #0x180, lsl #48
+        mov v31.d[1], x5
+        mov x5, #0x100              // =256
+        movk x5, #0x302, lsl #16
+        movk x5, #0x4, lsl #32
+        movk x5, #0x201, lsl #48
+        mov v1.d[0], x5
+        mov x5, #0x403              // =1027
+        movk x5, #0x100, lsl #16
+        movk x5, #0x302, lsl #32
+        movk x5, #0x4, lsl #48
+        mov v1.d[1], x5
+        movi v30.16b, #0xf
+        movi v7.8h, #0x2
+        movi v29.8b, #0xf
         mov x4, #0x100              // =256
 
-Lmld_rej_uniform_eta2_loop8:
-        cmp x9, x4
-        b.hs Lmld_rej_uniform_eta2_memory_copy
-        sub x2, x2, #0x8
+Lmld_rej_uniform_eta2_loop:
         ld1 { v0.8b }, [x1], #8
-        movi v26.8b, #0xf
-        and v27.8b, v0.8b, v26.8b
-        ushr v28.8b, v0.8b, #0x4
-        zip1 v26.8b, v27.8b, v28.8b
-        zip2 v29.8b, v27.8b, v28.8b
-        ushll v16.8h, v26.8b, #0x0
-        ushll v17.8h, v29.8b, #0x0
-        cmhi v4.8h, v30.8h, v16.8h
-        cmhi v5.8h, v30.8h, v17.8h
+        and v2.8b, v0.8b, v29.8b
+        ushr v3.8b, v0.8b, #0x4
+        zip1 v6.16b, v2.16b, v3.16b
+        cmhi v4.16b, v30.16b, v6.16b
+        sshll2 v5.8h, v4.16b, #0x0
+        sshll v4.8h, v4.8b, #0x0
         and v4.16b, v4.16b, v31.16b
         and v5.16b, v5.16b, v31.16b
         uaddlv s20, v4.8h
         uaddlv s21, v5.8h
-        fmov w12, s20
-        fmov w13, s21
-        ldr q24, [x3, x12, lsl #4]
-        ldr q25, [x3, x13, lsl #4]
-        cnt v4.16b, v4.16b
-        cnt v5.16b, v5.16b
-        uaddlv s20, v4.8h
-        uaddlv s21, v5.8h
-        fmov w12, s20
-        fmov w13, s21
+        fmov x12, d20
+        fmov x13, d21
+        and x14, x12, #0xff
+        and x15, x13, #0xff
+        lsr x12, x12, #8
+        lsr x13, x13, #8
+        ldr q24, [x3, x14, lsl #4]
+        ldr q25, [x3, x15, lsl #4]
+        tbl v6.16b, { v1.16b }, v6.16b
+        ushll v16.8h, v6.8b, #0x0
+        ushll2 v18.8h, v6.16b, #0x0
         tbl v16.16b, { v16.16b }, v24.16b
-        tbl v17.16b, { v17.16b }, v25.16b
-        st1 { v16.8h }, [x7]
-        add x7, x7, x12, lsl #1
-        st1 { v17.8h }, [x7]
-        add x7, x7, x13, lsl #1
-        add x12, x12, x13
-        add x9, x9, x12
-        cmp x2, #0x8
-        b.hs Lmld_rej_uniform_eta2_loop8
+        tbl v18.16b, { v18.16b }, v25.16b
+        usubl2 v17.4s, v7.8h, v16.8h
+        usubl v16.4s, v7.4h, v16.4h
+        usubl2 v19.4s, v7.8h, v18.8h
+        usubl v18.4s, v7.4h, v18.4h
+        cmp x4, #0x10
+        b.ls Lmld_rej_uniform_eta2_tail
+        stp q16, q17, [x0]
+        add x0, x0, x12, lsl #2
+        stp q18, q19, [x0]
+        add x0, x0, x13, lsl #2
+        sub x4, x4, x12
+        sub x4, x4, x13
 
-Lmld_rej_uniform_eta2_memory_copy:
-        cmp x9, x4
-        csel x9, x9, x4, lo
-        mov w7, #0x199a             // =6554
-        dup v26.8h, w7
-        movi v27.8h, #0x5
-        movi v7.8h, #0x2
-        mov x11, #0x0               // =0
-        mov x7, x8
+Lmld_rej_uniform_eta2_next:
+        subs x2, x2, #0x8
+        b.ne Lmld_rej_uniform_eta2_loop
+        b Lmld_rej_uniform_eta2_return
 
-Lmld_rej_uniform_eta2_final_copy:
-        ldr q16, [x7], #0x20
-        ldur q18, [x7, #-0x10]
-        sqdmulh v28.8h, v16.8h, v26.8h
-        mls v16.8h, v28.8h, v27.8h
-        sqdmulh v28.8h, v18.8h, v26.8h
-        mls v18.8h, v28.8h, v27.8h
-        sub v16.8h, v7.8h, v16.8h
-        sub v18.8h, v7.8h, v18.8h
-        sshll2 v17.4s, v16.8h, #0x0
-        sshll v16.4s, v16.4h, #0x0
-        sshll2 v19.4s, v18.8h, #0x0
-        sshll v18.4s, v18.4h, #0x0
-        str q16, [x0], #0x40
-        stur q17, [x0, #-0x30]
-        stur q18, [x0, #-0x20]
-        stur q19, [x0, #-0x10]
-        add x11, x11, #0x10
-        cmp x11, #0x100
-        b.lt Lmld_rej_uniform_eta2_final_copy
-        mov x0, x9
-        add sp, sp, #0x240
-        .cfi_adjust_cfa_offset -0x240
+Lmld_rej_uniform_eta2_tail:
+        mov x6, #0x2                // =2
+
+Lmld_rej_uniform_eta2_store_group:
+        cmp x4, #0x8
+        b.lo Lmld_rej_uniform_eta2_store_partial
+        stp q16, q17, [x0]
+        b Lmld_rej_uniform_eta2_stored
+
+Lmld_rej_uniform_eta2_store_partial:
+        mov x7, x0
+        tbz w4, #0x2, Lmld_rej_uniform_eta2_store_two
+        str q16, [x7], #0x10
+        mov v16.16b, v17.16b
+
+Lmld_rej_uniform_eta2_store_two:
+        tbz w4, #0x1, Lmld_rej_uniform_eta2_store_one
+        str d16, [x7], #0x8
+        ext v16.16b, v16.16b, v16.16b, #0x8
+
+Lmld_rej_uniform_eta2_store_one:
+        tbz w4, #0x0, Lmld_rej_uniform_eta2_stored
+        str s16, [x7]
+
+Lmld_rej_uniform_eta2_stored:
+        subs x4, x4, x12
+        b.ls Lmld_rej_uniform_eta2_full
+        add x0, x0, x12, lsl #2
+        subs x6, x6, #0x1
+        b.eq Lmld_rej_uniform_eta2_next
+        mov v16.16b, v18.16b
+        mov v17.16b, v19.16b
+        mov x12, x13
+        b Lmld_rej_uniform_eta2_store_group
+
+Lmld_rej_uniform_eta2_full:
+        mov x4, #0x0                // =0
+
+Lmld_rej_uniform_eta2_return:
+        mov x0, #0x100              // =256
+        sub x0, x0, x4
         ret
         .cfi_endproc
 

@@ -857,6 +857,9 @@ cleanup:
 #endif /* (MLD_USE_NATIVE_POLYZ_UNPACK_17 || MLD_USE_NATIVE_POLYZ_UNPACK_19) \
           && (!MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API) */
 
+/* A full SIMD block holds up to 16 coefficients. Guard the first word
+ * past the output to catch a full-width store in a partial final block. */
+#define REJ_UNIFORM_TEST_WORDS (MLDSA_N + 16)
 #ifdef MLD_USE_NATIVE_REJ_UNIFORM
 #define DEFINE_REJ_UNIFORM_TEST(NBLOCKS)                                 \
   static int test_native_rej_uniform_nblocks_##NBLOCKS(void)             \
@@ -864,7 +867,7 @@ cleanup:
     const unsigned buflen = (NBLOCKS) * 168; /* SHAKE128_RATE */         \
     int ret = 1;                                                         \
     int i;                                                               \
-    MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);                           \
+    MLD_ALLOC(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);            \
     MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);                            \
     MLD_ALLOC(buf, uint8_t, (NBLOCKS) * 168, NULL);                      \
                                                                          \
@@ -873,6 +876,7 @@ cleanup:
       goto cleanup;                                                      \
     }                                                                    \
                                                                          \
+    r_test[MLDSA_N] = INT32_MIN;                                         \
     for (i = 0; i < NUM_RANDOM_TESTS; i++)                               \
     {                                                                    \
       int native_ret;                                                    \
@@ -888,6 +892,7 @@ cleanup:
                                                                          \
       c_ret = mld_rej_uniform_c(r_ref, MLDSA_N, 0, buf, buflen);         \
                                                                          \
+      CHECK(r_test[MLDSA_N] == INT32_MIN);                               \
       CHECK((unsigned)native_ret == c_ret);                              \
       CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,      \
                                "rej_uniform", NULL));                    \
@@ -898,7 +903,7 @@ cleanup:
   cleanup:                                                               \
     MLD_FREE(buf, uint8_t, (NBLOCKS) * 168, NULL);                       \
     MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);                             \
-    MLD_FREE(r_test, int32_t, MLDSA_N, NULL);                            \
+    MLD_FREE(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);             \
     return ret;                                                          \
   }
 
@@ -916,7 +921,7 @@ static int test_native_rej_uniform_eta2(void)
 {
   int ret = 1;
   int i;
-  MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);
   MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);
   MLD_ALLOC(buf, uint8_t, REJ_UNIFORM_ETA2_BUFLEN, NULL);
 
@@ -925,6 +930,7 @@ static int test_native_rej_uniform_eta2(void)
     goto cleanup;
   }
 
+  r_test[MLDSA_N] = INT32_MIN;
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     int native_ret;
@@ -941,6 +947,7 @@ static int test_native_rej_uniform_eta2(void)
 
     c_ret = mld_rej_eta_c(r_ref, MLDSA_N, 0, buf, REJ_UNIFORM_ETA2_BUFLEN);
 
+    CHECK(r_test[MLDSA_N] == INT32_MIN);
     CHECK((unsigned)native_ret == c_ret);
     CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,
                              "rej_uniform_eta2", NULL));
@@ -951,7 +958,7 @@ static int test_native_rej_uniform_eta2(void)
 cleanup:
   MLD_FREE(buf, uint8_t, REJ_UNIFORM_ETA2_BUFLEN, NULL);
   MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);
-  MLD_FREE(r_test, int32_t, MLDSA_N, NULL);
+  MLD_FREE(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);
   return ret;
 }
 #undef REJ_UNIFORM_ETA2_BUFLEN
@@ -963,7 +970,7 @@ static int test_native_rej_uniform_eta4(void)
 {
   int ret = 1;
   int i;
-  MLD_ALLOC(r_test, int32_t, MLDSA_N, NULL);
+  MLD_ALLOC(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);
   MLD_ALLOC(r_ref, int32_t, MLDSA_N, NULL);
   MLD_ALLOC(buf, uint8_t, REJ_UNIFORM_ETA4_BUFLEN, NULL);
 
@@ -972,6 +979,7 @@ static int test_native_rej_uniform_eta4(void)
     goto cleanup;
   }
 
+  r_test[MLDSA_N] = INT32_MIN;
   for (i = 0; i < NUM_RANDOM_TESTS; i++)
   {
     int native_ret;
@@ -988,6 +996,7 @@ static int test_native_rej_uniform_eta4(void)
 
     c_ret = mld_rej_eta_c(r_ref, MLDSA_N, 0, buf, REJ_UNIFORM_ETA4_BUFLEN);
 
+    CHECK(r_test[MLDSA_N] == INT32_MIN);
     CHECK((unsigned)native_ret == c_ret);
     CHECK(compare_i32_arrays(r_test, r_ref, (unsigned)native_ret,
                              "rej_uniform_eta4", NULL));
@@ -998,12 +1007,13 @@ static int test_native_rej_uniform_eta4(void)
 cleanup:
   MLD_FREE(buf, uint8_t, REJ_UNIFORM_ETA4_BUFLEN, NULL);
   MLD_FREE(r_ref, int32_t, MLDSA_N, NULL);
-  MLD_FREE(r_test, int32_t, MLDSA_N, NULL);
+  MLD_FREE(r_test, int32_t, REJ_UNIFORM_TEST_WORDS, NULL);
   return ret;
 }
 #undef REJ_UNIFORM_ETA4_BUFLEN
 #endif /* MLD_USE_NATIVE_REJ_UNIFORM_ETA4 && MLDSA_ETA == 4 */
 #endif /* !MLD_CONFIG_NO_KEYPAIR_API */
+#undef REJ_UNIFORM_TEST_WORDS
 
 
 #ifdef MLD_USE_NATIVE_FIPS202_X1

@@ -17,7 +17,7 @@
       size_bytes: 1024
       permissions: write-only
       c_parameter: int32_t r[256]
-      description: Output buffer (256 x int32_t)
+      description: Output buffer, disjoint from buf and table. The return value is its valid prefix length.
     x1:
       type: buffer
       size_bytes: x2
@@ -37,24 +37,11 @@
       description: Lookup table (256 x uint8_t)
 */
 
- #include "../../../common.h"
+#include "../../../common.h"
 #if defined(MLD_SYS_AARCH64_NEON) && \
     defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
 /* simpasm: header-end */
-
-// We save the output on the stack first, and copy to the actual
-// output buffer only in the end. This is because the main loop can overwrite
-// by up to 60 bytes, which we account for here (we use 64 bytes for alignment).
-#define MLD_STACK_SIZE (4*MLDSA_N + 64)
-
-.macro push_stack
-        sub sp, sp, #MLD_STACK_SIZE
-.endm
-
-.macro pop_stack
-        add sp, sp, #MLD_STACK_SIZE
-.endm
 
     /* Parameters */
     output                      .req x0
@@ -62,21 +49,14 @@
     buflen                      .req x2
     table_idx                   .req x3
 
-    len                         .req x4
-
-    /* Temporary output on the stack */
-    xtmp0                       .req x7
-    xtmp1                       .req x11
-    wtmp                        .req w7
-    output_tmp                  .req x7
-    output_tmp_base             .req x8
-
     /* Number of coefficients sampled so far */
     count                       .req x9
 
-    /* Temporary registers */
-    initial_zero_count          .req x11
-    final_copy_count            .req x11
+    xtmp0                       .req x7
+    xtmp1                       .req x11
+    q_scalar                    .req w4
+    sample                      .req w5
+    high_byte                   .req w6
 
     rec_idx_0                   .req x12
     rec_idx_1                   .req x13
@@ -111,13 +91,9 @@
     sign3                       .req v7
 
     val0                        .req v16
-    val0q                       .req q16
     val1                        .req v17
-    val1q                       .req q17
     val2                        .req v18
-    val2q                       .req q18
     val3                        .req v19
-    val3q                       .req q19
 
     t0                          .req d0
     t1                          .req d1
@@ -147,8 +123,6 @@
     .global MLD_ASM_NAMESPACE(rej_uniform_aarch64_asm)
     .balign 4
 MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
-    push_stack
-
     // [1, 2, 4, 8]
     movz xtmp0, 0x1
     movk xtmp0, 0x2, lsl 32
@@ -162,9 +136,9 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     mul packed_bits.4s, bits.4s, packed_bits.4s
 
     // load q = 8380417
-    movz wtmp, #57345
-    movk wtmp, #127, lsl #16
-    dup mldsa_q.4s, wtmp
+    movz q_scalar, #57345
+    movk q_scalar, #127, lsl #16
+    dup mldsa_q.4s, q_scalar
 
     // TBL indices for expanding 3-byte samples, 0x80 indices are set to 0.
     // [0, 1, 2, 0x80, 3, 4, 5, 0x80, 6, 7, 8, 0x80, 9, 10, 11, 0x80].
@@ -197,35 +171,15 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
     add unpack2.16b, unpack0.16b, tmp1.16b
     add unpack3.16b, unpack0.16b, tmp2.16b
 
-    mov output_tmp_base, sp
-    mov output_tmp, output_tmp_base
-
-    // The entire temporary stack buffer is copied to the output buffer
-    // at the end of this routine. To avoid leaking original stack contents
-    // in case not enough bytes have been sampled, zero the temporary buffer.
-    mov initial_zero_count, #0
-    eor val0.16b, val0.16b, val0.16b
-mld_rej_uniform_initial_zero:
-        str val0q, [output_tmp], #64
-        str val0q, [output_tmp, #-48]
-        str val0q, [output_tmp, #-32]
-        str val0q, [output_tmp, #-16]
-        add initial_zero_count, initial_zero_count, #16
-        cmp initial_zero_count, #MLDSA_N
-        b.lt mld_rej_uniform_initial_zero
-
-    mov output_tmp, output_tmp_base
-
     mov count, #0
-    mov len, #MLDSA_N
 
     cmp buflen, #48
-    b.lo mld_rej_uniform_loop48_end
+    b.lo mld_rej_uniform_block8
 
 mld_rej_uniform_loop48:
-        // Finish once we've generated sufficiently many coefficients
-        cmp     count, len
-        b.hs    mld_rej_uniform_memory_copy
+        // Four full vector stores need room for sixteen coefficients.
+        cmp     count, #(MLDSA_N - 16)
+        b.hi    mld_rej_uniform_block8
 
         sub     buflen, buflen, #48
 
@@ -296,17 +250,17 @@ mld_rej_uniform_loop48:
         tbl     val2.16b, {val2.16b}, table2.16b
         tbl     val3.16b, {val3.16b}, table3.16b
 
-        st1     {val0.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, lsl #2
+        st1     {val0.4s}, [output]
+        add     output, output, ctr0, lsl #2
 
-        st1     {val1.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, lsl #2
+        st1     {val1.4s}, [output]
+        add     output, output, ctr1, lsl #2
 
-        st1     {val2.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr2, lsl #2
+        st1     {val2.4s}, [output]
+        add     output, output, ctr2, lsl #2
 
-        st1     {val3.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr3, lsl #2
+        st1     {val3.4s}, [output]
+        add     output, output, ctr3, lsl #2
 
         add     ctr01, ctr0, ctr1
         add     ctr23, ctr2, ctr3
@@ -315,93 +269,80 @@ mld_rej_uniform_loop48:
 
         cmp buflen, #48
         b.hs mld_rej_uniform_loop48
-mld_rej_uniform_loop48_end:
+mld_rej_uniform_block8:
+    // The half block needs eight output slots and 24 input bytes.
+    cmp     buflen, #24
+    b.lo    mld_rej_uniform_return
+    cmp     count, #(MLDSA_N - 8)
+    b.hi    mld_rej_uniform_scalar_loop
 
-    // Finish once we've generated sufficiently many coefficients
-    cmp     count, len
-    b.hs    mld_rej_uniform_memory_copy
+    sub     buflen, buflen, #24
 
-    cmp buflen, #24
-    b.lo mld_rej_uniform_memory_copy
+    // Load eight packed 24-bit samples, mask out the top bit and expand
+    // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
+    ldr     buf0q, [buf]
+    ldr     buf1d, [buf, #16]
+    add     buf, buf, #24
 
-        sub     buflen, buflen, #24
+    tbl     val0.16b, {buf0.16b}, unpack0.16b
+    tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
+    bic     val0.16b, val0.16b, bit23.16b
+    bic     val1.16b, val1.16b, bit23.16b
 
-        // Load eight packed 24-bit samples, mask out the top bit and expand
-        // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
-        ldr     buf0q, [buf]
-        ldr     buf1d, [buf, #16]
-        add     buf, buf, #24
+    cmhi    sign0.4s, mldsa_q.4s, val0.4s
+    cmhi    sign1.4s, mldsa_q.4s, val1.4s
 
-        tbl     val0.16b, {buf0.16b}, unpack0.16b
-        tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
-        bic     val0.16b, val0.16b, bit23.16b
-        bic     val1.16b, val1.16b, bit23.16b
+    and     sign0.16b, sign0.16b, bits.16b
+    and     sign1.16b, sign1.16b, bits.16b
 
-        cmhi    sign0.4s, mldsa_q.4s, val0.4s
-        cmhi    sign1.4s, mldsa_q.4s, val1.4s
+    uaddlv  t0, sign0.4s
+    uaddlv  t1, sign1.4s
 
-        and     sign0.16b, sign0.16b, bits.16b
-        and     sign1.16b, sign1.16b, bits.16b
+    fmov    rec_idx_0, t0
+    fmov    rec_idx_1, t1
 
-        uaddlv  t0, sign0.4s
-        uaddlv  t1, sign1.4s
+    ldr     table0q, [table_idx, rec_idx_0, lsl #4]
+    ldr     table1q, [table_idx, rec_idx_1, lsl #4]
 
-        fmov    rec_idx_0, t0
-        fmov    rec_idx_1, t1
+    cnt     sign0.16b, sign0.16b
+    cnt     sign1.16b, sign1.16b
 
-        ldr     table0q, [table_idx, rec_idx_0, lsl #4]
-        ldr     table1q, [table_idx, rec_idx_1, lsl #4]
+    uaddlv  t0, sign0.4s
+    uaddlv  t1, sign1.4s
 
-        cnt     sign0.16b, sign0.16b
-        cnt     sign1.16b, sign1.16b
+    fmov    ctr0, t0
+    fmov    ctr1, t1
 
-        uaddlv  t0, sign0.4s
-        uaddlv  t1, sign1.4s
+    tbl     val0.16b, {val0.16b}, table0.16b
+    tbl     val1.16b, {val1.16b}, table1.16b
 
-        fmov    ctr0, t0
-        fmov    ctr1, t1
+    st1     {val0.4s}, [output]
+    add     output, output, ctr0, lsl #2
 
-        tbl     val0.16b, {val0.16b}, table0.16b
-        tbl     val1.16b, {val1.16b}, table1.16b
+    st1     {val1.4s}, [output]
+    add     output, output, ctr1, lsl #2
 
-        st1     {val0.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr0, lsl #2
+    add     count, count, ctr0
+    add     count, count, ctr1
 
-        st1     {val1.4s}, [output_tmp]
-        add     output_tmp, output_tmp, ctr1, lsl #2
-
-        add     count, count, ctr0
-        add     count, count, ctr1
-
-mld_rej_uniform_memory_copy:
-    // min = min(count,len)
-    cmp  count, len
-    csel count, count, len, lo
-
-    // Always copy MLDSA_N coefficients from the stack to the destination,
-    // even if not all of them may be valid. This simplifies the loop and
-    // allows us to stick to vectorized code.
-    mov final_copy_count, #0
-    mov output_tmp, output_tmp_base
-mld_rej_uniform_final_copy:
-        ldr val0q, [output_tmp], #64
-        ldr val1q, [output_tmp, #-48]
-        ldr val2q, [output_tmp, #-32]
-        ldr val3q, [output_tmp, #-16]
-        str val0q, [output], #64
-        str val1q, [output, #-48]
-        str val2q, [output, #-32]
-        str val3q, [output, #-16]
-        add final_copy_count, final_copy_count, #16
-        cmp final_copy_count, #MLDSA_N
-        b.lt mld_rej_uniform_final_copy
-
-    mov x0, count
-    b mld_rej_uniform_return
-
+mld_rej_uniform_scalar_loop:
+    // Read exactly three bytes per candidate until the output or input runs out.
+    cmp     count, #MLDSA_N
+    b.hs    mld_rej_uniform_return
+    cbz     buflen, mld_rej_uniform_return
+    ldrh    sample, [buf], #2
+    ldrb    high_byte, [buf], #1
+    sub     buflen, buflen, #3
+    and     high_byte, high_byte, #0x7f
+    orr     sample, sample, high_byte, lsl #16
+    cmp     sample, q_scalar
+    b.hs    mld_rej_uniform_scalar_loop
+    str     sample, [output], #4
+    add     count, count, #1
+    b       mld_rej_uniform_scalar_loop
 
 mld_rej_uniform_return:
-    pop_stack
+    mov     x0, count
     ret
 
 /****************** REGISTER DEALLOCATIONS *******************/
@@ -409,15 +350,12 @@ mld_rej_uniform_return:
     .unreq buf
     .unreq buflen
     .unreq table_idx
-    .unreq len
-    .unreq output_tmp
-    .unreq output_tmp_base
     .unreq count
     .unreq xtmp0
     .unreq xtmp1
-    .unreq wtmp
-    .unreq final_copy_count
-    .unreq initial_zero_count
+    .unreq q_scalar
+    .unreq sample
+    .unreq high_byte
     .unreq rec_idx_0
     .unreq rec_idx_1
     .unreq rec_idx_2
@@ -443,13 +381,9 @@ mld_rej_uniform_return:
     .unreq sign2
     .unreq sign3
     .unreq val0
-    .unreq val0q
     .unreq val1
-    .unreq val1q
     .unreq val2
-    .unreq val2q
     .unreq val3
-    .unreq val3q
     .unreq t0
     .unreq t1
     .unreq unpack0
@@ -470,11 +404,6 @@ mld_rej_uniform_return:
     .unreq mldsa_q
     .unreq bits
     .unreq bitsd
-
-
-/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
- * Don't modify by hand -- this is auto-generated by scripts/autogen. */
-#undef MLD_STACK_SIZE
 
 /* simpasm: footer-start */
 #endif /* MLD_SYS_AARCH64_NEON && MLD_ARITH_BACKEND_AARCH64 && \
