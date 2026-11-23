@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795461372549,
+  "lastUpdate": 1795461531598,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -120381,6 +120381,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 1368792,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "6797c557aabb3574915f2d6bfbb7b973ae988525",
+          "message": "AArch64: Fix alignment faults in rejection sampling\n\nThe eta2 and eta4 samplers advance the output by four bytes per\naccepted coefficient. On the no-MMU target, the next store can fault\nbecause a pair of Q registers requires 16-byte alignment. The uniform\nsampler can also fault on an odd input address. Even with an aligned\nbuffer, its three-byte scalar step puts every other read at an odd\naddress.\n\nUse ST1 with 32-bit elements for the eta vector stores and LD1 with\nbyte elements for the uniform vector loads. Read each scalar candidate\nwith three LDRB instructions. Exercise odd input addresses in the\nuniform sampler unit test and update the three HOL Light proofs and\ntheir machine-code bindings.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T15:24:03Z",
+          "tree_id": "9caa77203db5730f8b5197e18650ad3b3d3d10b0",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/6797c557aabb3574915f2d6bfbb7b973ae988525"
+        },
+        "date": 1795461528065,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 461436,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 2127689,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 552270,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 775783,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 3472251,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 858709,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 1254053,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 4296544,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 1379196,
             "unit": "cycles"
           }
         ]
