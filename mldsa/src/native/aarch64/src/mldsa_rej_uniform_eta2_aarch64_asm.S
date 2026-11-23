@@ -111,9 +111,9 @@ Lmld_rej_uniform_eta2_loop:
         usubl v18.4s, v7.4h, v18.4h
         cmp x4, #0x10
         b.ls Lmld_rej_uniform_eta2_tail
-        stp q16, q17, [x0]
+        st1 { v16.4s, v17.4s }, [x0]
         add x0, x0, x12, lsl #2
-        stp q18, q19, [x0]
+        st1 { v18.4s, v19.4s }, [x0]
         add x0, x0, x13, lsl #2
         sub x4, x4, x12
         sub x4, x4, x13
@@ -129,18 +129,18 @@ Lmld_rej_uniform_eta2_tail:
 Lmld_rej_uniform_eta2_store_group:
         cmp x4, #0x8
         b.lo Lmld_rej_uniform_eta2_store_partial
-        stp q16, q17, [x0]
+        st1 { v16.4s, v17.4s }, [x0]
         b Lmld_rej_uniform_eta2_stored
 
 Lmld_rej_uniform_eta2_store_partial:
         mov x7, x0
         tbz w4, #0x2, Lmld_rej_uniform_eta2_store_two
-        str q16, [x7], #0x10
+        st1 { v16.4s }, [x7], #16
         mov v16.16b, v17.16b
 
 Lmld_rej_uniform_eta2_store_two:
         tbz w4, #0x1, Lmld_rej_uniform_eta2_store_one
-        str d16, [x7], #0x8
+        st1 { v16.2s }, [x7], #8
         ext v16.16b, v16.16b, v16.16b, #0x8
 
 Lmld_rej_uniform_eta2_store_one:

@@ -238,7 +238,7 @@ rej_uniform_aarch64_asm:
   arch: aarch64
   function: mldsa_rej_uniform_aarch64_asm
   sha256:
-    mldsa_rej_uniform_mc: 93c411571cddc58c06d02f89b09e657d01701d372dd168e701231ab598911a99
+    mldsa_rej_uniform_mc: 4874694c98d63aa04a67b44438da52fefdcfcc8222331b96565c74db04452251
 rej_uniform_avx2_asm:
   arch: x86_64
   function: mldsa_rej_uniform_avx2_asm
@@ -249,7 +249,7 @@ rej_uniform_eta2_aarch64_asm:
   arch: aarch64
   function: mldsa_rej_uniform_eta2_aarch64_asm
   sha256:
-    mldsa_rej_uniform_eta2_mc: 9658c499d66382bcc740eacae107a8a89cb948d5d9a32468ac890dfc06aca236
+    mldsa_rej_uniform_eta2_mc: f8fa93c0f05789de12eaa3ec67cddd330bba30608239012dcca89c7acf8948e3
 rej_uniform_eta2_avx2_asm:
   arch: x86_64
   function: mldsa_rej_uniform_eta2_avx2_asm
@@ -260,7 +260,7 @@ rej_uniform_eta4_aarch64_asm:
   arch: aarch64
   function: mldsa_rej_uniform_eta4_aarch64_asm
   sha256:
-    mldsa_rej_uniform_eta4_mc: 91bba2d6941e84987f3cfe58b9098fbc95289d760365bd354030e6a35c499437
+    mldsa_rej_uniform_eta4_mc: ae457c052154bdbfb2061a8de0c5a93c8a65347297dc37242903b7f4d81f3a17
 rej_uniform_eta4_avx2_asm:
   arch: x86_64
   function: mldsa_rej_uniform_eta4_avx2_asm

@@ -57,6 +57,7 @@
     q_scalar                    .req w4
     sample                      .req w5
     high_byte                   .req w6
+    middle_byte                 .req w7
 
     rec_idx_0                   .req x12
     rec_idx_1                   .req x13
@@ -74,12 +75,8 @@
     /* Vector registers */
 
     buf0                        .req v0
-    buf0q                       .req q0
     buf1                        .req v1
-    buf1q                       .req q1
-    buf1d                       .req d1
     buf2                        .req v2
-    buf2q                       .req q2
 
     tmp0                        .req v4
     tmp1                        .req v5
@@ -185,9 +182,8 @@ mld_rej_uniform_loop48:
 
         // Load sixteen packed 24-bit samples, mask out the top bit and expand
         // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
-        ldp     buf0q, buf1q, [buf]
-        ldr     buf2q, [buf, #32]
-        add     buf, buf, #48
+        // buf can start at any byte address.
+        ld1     {buf0.16b, buf1.16b, buf2.16b}, [buf], #48
 
         tbl     val0.16b, {buf0.16b}, unpack0.16b
         tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
@@ -280,9 +276,8 @@ mld_rej_uniform_block8:
 
     // Load eight packed 24-bit samples, mask out the top bit and expand
     // to 32-bit elements: [a0, a1, a2 & 0x7f, 0, b0, b1, b2 & 0x7f, ...].
-    ldr     buf0q, [buf]
-    ldr     buf1d, [buf, #16]
-    add     buf, buf, #24
+    ld1     {buf0.16b}, [buf], #16
+    ld1     {buf1.8b}, [buf], #8
 
     tbl     val0.16b, {buf0.16b}, unpack0.16b
     tbl     val1.16b, {buf0.16b, buf1.16b}, unpack1.16b
@@ -330,10 +325,13 @@ mld_rej_uniform_scalar_loop:
     cmp     count, #MLDSA_N
     b.hs    mld_rej_uniform_return
     cbz     buflen, mld_rej_uniform_return
-    ldrh    sample, [buf], #2
-    ldrb    high_byte, [buf], #1
+    ldrb    sample, [buf]
+    ldrb    middle_byte, [buf, #1]
+    ldrb    high_byte, [buf, #2]
+    add     buf, buf, #3
     sub     buflen, buflen, #3
     and     high_byte, high_byte, #0x7f
+    orr     sample, sample, middle_byte, lsl #8
     orr     sample, sample, high_byte, lsl #16
     cmp     sample, q_scalar
     b.hs    mld_rej_uniform_scalar_loop
@@ -356,6 +354,7 @@ mld_rej_uniform_return:
     .unreq q_scalar
     .unreq sample
     .unreq high_byte
+    .unreq middle_byte
     .unreq rec_idx_0
     .unreq rec_idx_1
     .unreq rec_idx_2
@@ -367,12 +366,8 @@ mld_rej_uniform_return:
     .unreq ctr01
     .unreq ctr23
     .unreq buf0
-    .unreq buf0q
     .unreq buf1
-    .unreq buf1q
-    .unreq buf1d
     .unreq buf2
-    .unreq buf2q
     .unreq tmp0
     .unreq tmp1
     .unreq tmp2

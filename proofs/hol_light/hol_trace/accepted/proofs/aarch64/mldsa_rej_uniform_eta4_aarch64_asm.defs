@@ -15,7 +15,7 @@ definition REJ_MASK_ETA4
          !l:(byte list). REJ_MASK_ETA4 l = MAP (\x:int16. val x < 9) (NIBBLES_OF_BYTES l))
 
 # mldsa_rej_uniform_eta4_mc: 316 bytes
-# sha256 91bba2d6941e84987f3cfe58b9098fbc95289d760365bd354030e6a35c499437
+# sha256 ae457c052154bdbfb2061a8de0c5a93c8a65347297dc37242903b7f4d81f3a17
 definition mldsa_rej_uniform_eta4_mc
   |- mldsa_rej_uniform_eta4_mc
      = #x[25 20 80 d2 45 20 a0 f2 85 20 c0 f2 05 21 e0 f2 bf 1c 08 4e 05 22 80 d2 05 24 a0 f2 05 28
@@ -23,9 +23,9 @@ definition mldsa_rej_uniform_eta4_mc
           02 1c 3d 0e 03 04 0c 2f 46 38 03 4e c4 37 26 6e 85 a4 08 4f 84 a4 08 0f 84 1c 3f 4e a5 1c
           3f 4e 94 38 70 6e b5 38 70 6e 8c 02 66 9e ad 02 66 9e 8e 1d 40 92 af 1d 40 92 8c fd 48 d3
           ad fd 48 d3 78 78 ee 3c 79 78 ef 3c d0 a4 08 2f d2 a4 08 6f 10 02 18 4e 52 02 19 4e f1 20
-          70 6e f0 20 70 2e f3 20 72 6e f2 20 72 2e 9f 40 00 f1 49 01 00 54 10 44 00 ad 00 08 0c 8b
-          12 4c 00 ad 00 08 0d 8b 84 00 0c cb 84 00 0d cb 42 20 00 f1 81 fb ff 54 19 00 00 14 46 00
-          80 d2 9f 20 00 f1 63 00 00 54 10 44 00 ad 0a 00 00 14 e7 03 00 aa 64 00 10 36 f0 04 81 3c
-          30 1e b1 4e 64 00 08 36 f0 84 00 fc 10 42 10 6e 44 00 00 36 f0 00 00 bd 84 00 0c eb 09 01
+          70 6e f0 20 70 2e f3 20 72 6e f2 20 72 2e 9f 40 00 f1 49 01 00 54 10 a8 00 4c 00 08 0c 8b
+          12 a8 00 4c 00 08 0d 8b 84 00 0c cb 84 00 0d cb 42 20 00 f1 81 fb ff 54 19 00 00 14 46 00
+          80 d2 9f 20 00 f1 63 00 00 54 10 a8 00 4c 0a 00 00 14 e7 03 00 aa 64 00 10 36 f0 78 9f 4c
+          30 1e b1 4e 64 00 08 36 f0 78 9f 0c 10 42 10 6e 44 00 00 36 f0 00 00 bd 84 00 0c eb 09 01
           00 54 00 08 0c 8b c6 04 00 f1 60 fd ff 54 50 1e b2 4e 71 1e b3 4e ec 03 0d aa eb ff ff 17
           04 00 80 d2 00 20 80 d2 00 00 04 cb c0 03 5f d6]
