@@ -14,20 +14,19 @@ definition REJ_MASK_ETA2
      = (specification "REJ_MASK_ETA2" REJ_MASK_ETA2:(byte list -> bool list).
          !l:(byte list). REJ_MASK_ETA2 l = MAP (\x:int16. val x < 15) (NIBBLES_OF_BYTES l))
 
-# mldsa_rej_uniform_eta2_mc: 372 bytes
-# sha256 7954c78876d8583d09ebfd70fa6606477182b72d29c531bfbff59d72e74803cd
+# mldsa_rej_uniform_eta2_mc: 360 bytes
+# sha256 9658c499d66382bcc740eacae107a8a89cb948d5d9a32468ac890dfc06aca236
 definition mldsa_rej_uniform_eta2_mc
   |- mldsa_rej_uniform_eta2_mc
-     = #x[ff 03 09 d1 27 00 80 d2 47 00 a0 f2 87 00 c0 f2 07 01 e0 f2 ff 1c 08 4e 07 02 80 d2 07 04
-          a0 f2 07 08 c0 f2 07 10 e0 f2 ff 1c 18 4e fe 85 00 4f e8 03 00 91 e7 03 08 aa 0b 00 80 d2
-          10 1e 30 6e f0 04 84 3c f0 00 9d 3c f0 00 9e 3c f0 00 9f 3c 6b 81 00 91 7f 01 04 f1 4b ff
-          ff 54 e7 03 08 aa 09 00 80 d2 04 20 80 d2 3f 01 04 eb 82 04 00 54 42 20 00 d1 20 70 df 0c
-          fa e5 00 0f 1b 1c 3a 0e 1c 04 0c 2f 7a 3b 1c 0e 7d 7b 1c 0e 50 a7 08 2f b1 a7 08 2f c4 37
-          70 6e c5 37 71 6e 84 1c 3f 4e a5 1c 3f 4e 94 38 70 6e b5 38 70 6e 8c 02 26 1e ad 02 26 1e
-          78 78 ec 3c 79 78 ed 3c 84 58 20 4e a5 58 20 4e 94 38 70 6e b5 38 70 6e 8c 02 26 1e ad 02
-          26 1e 10 02 18 4e 31 02 19 4e f0 74 00 4c e7 04 0c 8b f1 74 00 4c e7 04 0d 8b 8c 01 0d 8b
-          29 01 0c 8b 5f 20 00 f1 82 fb ff 54 3f 01 04 eb 29 31 84 9a 47 33 83 52 fa 0c 02 4e bb 84
-          00 4f 47 84 00 4f 0b 00 80 d2 e7 03 08 aa f0 04 c2 3c f2 00 df 3c 1c b6 7a 4e 90 97 7b 6e
-          5c b6 7a 4e 92 97 7b 6e f0 84 70 6e f2 84 72 6e 11 a6 10 4f 10 a6 10 0f 53 a6 10 4f 52 a6
-          10 0f 10 04 84 3c 11 00 9d 3c 12 00 9e 3c 13 00 9f 3c 6b 41 00 91 7f 01 04 f1 cb fd ff 54
-          e0 03 09 aa ff 03 09 91 c0 03 5f d6]
+     = #x[25 20 80 d2 45 20 a0 f2 85 20 c0 f2 05 21 e0 f2 bf 1c 08 4e 05 22 80 d2 05 24 a0 f2 05 28
+          c0 f2 05 30 e0 f2 bf 1c 18 4e 05 20 80 d2 45 60 a0 f2 85 00 c0 f2 25 40 e0 f2 a1 1c 08 4e
+          65 80 80 d2 05 20 a0 f2 45 60 c0 f2 85 00 e0 f2 a1 1c 18 4e fe e5 00 4f 47 84 00 4f fd e5
+          00 0f 04 20 80 d2 20 70 df 0c 02 1c 3d 0e 03 04 0c 2f 46 38 03 4e c4 37 26 6e 85 a4 08 4f
+          84 a4 08 0f 84 1c 3f 4e a5 1c 3f 4e 94 38 70 6e b5 38 70 6e 8c 02 66 9e ad 02 66 9e 8e 1d
+          40 92 af 1d 40 92 8c fd 48 d3 ad fd 48 d3 78 78 ee 3c 79 78 ef 3c 26 00 06 4e d0 a4 08 2f
+          d2 a4 08 6f 10 02 18 4e 52 02 19 4e f1 20 70 6e f0 20 70 2e f3 20 72 6e f2 20 72 2e 9f 40
+          00 f1 49 01 00 54 10 44 00 ad 00 08 0c 8b 12 4c 00 ad 00 08 0d 8b 84 00 0c cb 84 00 0d cb
+          42 20 00 f1 61 fb ff 54 19 00 00 14 46 00 80 d2 9f 20 00 f1 63 00 00 54 10 44 00 ad 0a 00
+          00 14 e7 03 00 aa 64 00 10 36 f0 04 81 3c 30 1e b1 4e 64 00 08 36 f0 84 00 fc 10 42 10 6e
+          44 00 00 36 f0 00 00 bd 84 00 0c eb 09 01 00 54 00 08 0c 8b c6 04 00 f1 60 fd ff 54 50 1e
+          b2 4e 71 1e b3 4e ec 03 0d aa eb ff ff 17 04 00 80 d2 00 20 80 d2 00 00 04 cb c0 03 5f d6]

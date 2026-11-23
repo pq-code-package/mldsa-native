@@ -51,11 +51,11 @@ of [^Round3_Spec]).
 
 Concretely, the constant-time safety theorems for `rej_uniform_eta2` and `rej_uniform_eta4` state
 that some event-generating function `f_events`, depending only on public data, reproduces the
-entire trace (shown here for eta2; the eta4 statement is identical with `REJ_MASK_ETA4` and `val x < 9`):
+entire trace. The AArch64 eta2 theorem has the following form.
 
 ```ocaml
 `?f_events.
-   !res buf buflen table (inlist:byte list) pc e stackpointer returnaddress.
+   !res buf buflen table (inlist:byte list) pc e returnaddress.
      (* same alignment / non-overlap preconditions as _MEMSAFE *)
      ...
      ==> ensures arm
@@ -68,9 +68,8 @@ entire trace (shown here for eta2; the eta4 statement is identical with `REJ_MAS
                     (* the events of this call are EXACTLY f_events applied to the
                        public arguments and the reject pattern -- and not the
                        accepted coefficient values *)
-                    e2 = f_events res buf buflen table pc stackpointer
-                                  returnaddress (REJ_MASK_ETA2 inlist) /\
-                    memaccess_inbounds e2 (read set) (write set))
+                    e2 = f_events res buf buflen table pc returnaddress (REJ_MASK_ETA2 inlist) /\
+                    memaccess_inbounds e2 [buf,val buflen; table,4096] [res,1024])
           (\s s'. T)`
 ```
 
