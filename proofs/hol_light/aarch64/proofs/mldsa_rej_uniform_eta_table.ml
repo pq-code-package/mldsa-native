@@ -10,12 +10,8 @@
  *)
 
 (*
- * Constant table values used in the AArch64 eta rejection sampling.
- * Each entry is 16 bytes. There are 256 entries (one per 8-bit mask),
- * for a total of 4096 bytes. Entries use 2-byte (16-bit) coefficient
- * indices since ML-DSA eta samples are stored as 16-bit halfwords
- * on the stack before being converted to 32-bit in the final copy.
- * See autogen for details.
+ * Each 16-byte row corresponds to an eight-lane acceptance mask.
+ * TBL gathers both bytes of each accepted halfword in input order.
  *)
 
 let mldsa_rej_uniform_eta_table = (REWRITE_RULE[MAP] o define)

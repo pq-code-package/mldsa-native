@@ -232,6 +232,7 @@ aarch64/mldsa_rej_uniform_eta2_aarch64_asm:
   - proofs/hol_light/aarch64/mldsa/mldsa_rej_uniform_eta2_aarch64_asm.S
   - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
   - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta2_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_common.ml
   - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml
   - proofs/hol_light/common/mldsa_specs.ml
   s2n_bignum:
@@ -242,12 +243,11 @@ aarch64/mldsa_rej_uniform_eta4_aarch64_asm:
   - proofs/hol_light/aarch64/mldsa/mldsa_rej_uniform_eta4_aarch64_asm.S
   - proofs/hol_light/aarch64/proofs/aarch64_utils.ml
   - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta4_aarch64_asm.ml
+  - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_common.ml
   - proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml
-  - proofs/hol_light/aarch64/proofs/subroutine_signatures.ml
   - proofs/hol_light/common/mldsa_specs.ml
   s2n_bignum:
   - arm/proofs/base.ml
-  - arm/proofs/consttime.ml
   - common/misc.ml
 riscv32/mldsa_intt_rv32im_asm:
   files:
