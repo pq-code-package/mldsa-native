@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795454324122,
+  "lastUpdate": 1795454334662,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -1016224,6 +1016224,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 132853,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "91f838e7c3cd481fa010709394b8fc9a583ca76c",
+          "message": "CI: Report broken Markdown links in one PR comment\n\nThe Markdown link check failed whenever the checker marked a link\ndead. An unreachable external site could therefore block a pull\nrequest whose repository links all worked.\n\nRead the checker's JUnit report and fail the job for broken local\npaths and anchors. Report unreachable external links as warnings.\n\nFor a pull request from the same repository, write the report to\na temporary file and post it in a later step of the same job, even\nwhen the check found broken internal links. Verify the PR head and\nupdate the bot's marked comment on reruns. Fork pull requests run\nthe check and get a job summary.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T14:18:15Z",
+          "tree_id": "50c17e05571cd0dc6c1a14673143cacc79a27f7f",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/91f838e7c3cd481fa010709394b8fc9a583ca76c"
+        },
+        "date": 1795454109094,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 48068,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 143088,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 49772,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 82827,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 233019,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 82206,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 137306,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 296479,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 133036,
             "unit": "cycles"
           }
         ]
