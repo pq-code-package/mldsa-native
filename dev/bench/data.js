@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795428445074,
+  "lastUpdate": 1795428453963,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -289303,6 +289303,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 175337,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "7570af60d22583df38bdf930b8f4ab793d11b4f8",
+          "message": "HOL-Light/AArch64: Reuse bit rewrites in Keccak x4\n\nThe two AArch64 Keccak x4 hybrid proofs expand word equalities into\nbit equalities. Several output bits share subterms, so bit-blasting\ncan prove the same rewrites many times in one goal.\n\nUse s2n-bignum's `MEMOIZED_BITBLAST_THEN` in `KECCAK_BITBLAST_TAC`.\nThe conversion reuses the proofs of repeated bit rewrites before the\ntactic normalizes Boolean equalities.\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-23T06:20:22Z",
+          "tree_id": "3a68f4e116655d8f44814399f74560c7f2726ef0",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/7570af60d22583df38bdf930b8f4ab793d11b4f8"
+        },
+        "date": 1795428091102,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 63249,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 191014,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 67263,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 110430,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 317309,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 111572,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 174017,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 385474,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 173455,
             "unit": "cycles"
           }
         ]
