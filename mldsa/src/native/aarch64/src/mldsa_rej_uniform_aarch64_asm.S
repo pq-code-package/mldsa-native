@@ -17,7 +17,7 @@
       size_bytes: 1024
       permissions: write-only
       c_parameter: int32_t r[256]
-      description: Output buffer (256 x int32_t)
+      description: Output buffer, disjoint from buf and table. The return value is its valid prefix length.
     x1:
       type: buffer
       size_bytes: x2
@@ -37,7 +37,7 @@
       description: Lookup table (256 x uint8_t)
 */
 
- #include "../../../common.h"
+#include "../../../common.h"
 #if defined(MLD_SYS_AARCH64_NEON) && \
     defined(MLD_ARITH_BACKEND_AARCH64) && \
     !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
@@ -53,8 +53,6 @@
 MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
 
         .cfi_startproc
-        sub sp, sp, #0x440
-        .cfi_adjust_cfa_offset 0x440
         mov x7, #0x1                // =1
         movk x7, #0x2, lsl #32
         mov x11, #0x4               // =4
@@ -63,9 +61,9 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
         mov v31.d[1], x11
         movi v29.16b, #0x1
         mul v29.4s, v31.4s, v29.4s
-        mov w7, #0xe001             // =57345
-        movk w7, #0x7f, lsl #16
-        dup v30.4s, w7
+        mov w4, #0xe001             // =57345
+        movk w4, #0x7f, lsl #16
+        dup v30.4s, w4
         mov x7, #0x100              // =256
         movk x7, #0x8002, lsl #16
         movk x7, #0x403, lsl #32
@@ -83,28 +81,13 @@ MLD_ASM_FN_SYMBOL(rej_uniform_aarch64_asm)
         add v21.16b, v20.16b, v4.16b
         add v22.16b, v20.16b, v5.16b
         add v23.16b, v20.16b, v6.16b
-        mov x8, sp
-        mov x7, x8
-        mov x11, #0x0               // =0
-        eor v16.16b, v16.16b, v16.16b
-
-Lmld_rej_uniform_initial_zero:
-        str q16, [x7], #0x40
-        stur q16, [x7, #-0x30]
-        stur q16, [x7, #-0x20]
-        stur q16, [x7, #-0x10]
-        add x11, x11, #0x10
-        cmp x11, #0x100
-        b.lt Lmld_rej_uniform_initial_zero
-        mov x7, x8
         mov x9, #0x0                // =0
-        mov x4, #0x100              // =256
         cmp x2, #0x30
-        b.lo Lmld_rej_uniform_loop48_end
+        b.lo Lmld_rej_uniform_block8
 
 Lmld_rej_uniform_loop48:
-        cmp x9, x4
-        b.hs Lmld_rej_uniform_memory_copy
+        cmp x9, #0xf0
+        b.hi Lmld_rej_uniform_block8
         sub x2, x2, #0x30
         ldp q0, q1, [x1]
         ldr q2, [x1, #0x20]
@@ -146,14 +129,14 @@ Lmld_rej_uniform_loop48:
         tbl v17.16b, { v17.16b }, v25.16b
         tbl v18.16b, { v18.16b }, v26.16b
         tbl v19.16b, { v19.16b }, v27.16b
-        st1 { v16.4s }, [x7]
-        add x7, x7, x12, lsl #2
-        st1 { v17.4s }, [x7]
-        add x7, x7, x13, lsl #2
-        st1 { v18.4s }, [x7]
-        add x7, x7, x14, lsl #2
-        st1 { v19.4s }, [x7]
-        add x7, x7, x15, lsl #2
+        st1 { v16.4s }, [x0]
+        add x0, x0, x12, lsl #2
+        st1 { v17.4s }, [x0]
+        add x0, x0, x13, lsl #2
+        st1 { v18.4s }, [x0]
+        add x0, x0, x14, lsl #2
+        st1 { v19.4s }, [x0]
+        add x0, x0, x15, lsl #2
         add x12, x12, x13
         add x14, x14, x15
         add x9, x9, x12
@@ -161,11 +144,11 @@ Lmld_rej_uniform_loop48:
         cmp x2, #0x30
         b.hs Lmld_rej_uniform_loop48
 
-Lmld_rej_uniform_loop48_end:
-        cmp x9, x4
-        b.hs Lmld_rej_uniform_memory_copy
+Lmld_rej_uniform_block8:
         cmp x2, #0x18
-        b.lo Lmld_rej_uniform_memory_copy
+        b.lo Lmld_rej_uniform_return
+        cmp x9, #0xf8
+        b.hi Lmld_rej_uniform_scalar_loop
         sub x2, x2, #0x18
         ldr q0, [x1]
         ldr d1, [x1, #0x10]
@@ -192,37 +175,30 @@ Lmld_rej_uniform_loop48_end:
         fmov x13, d1
         tbl v16.16b, { v16.16b }, v24.16b
         tbl v17.16b, { v17.16b }, v25.16b
-        st1 { v16.4s }, [x7]
-        add x7, x7, x12, lsl #2
-        st1 { v17.4s }, [x7]
-        add x7, x7, x13, lsl #2
+        st1 { v16.4s }, [x0]
+        add x0, x0, x12, lsl #2
+        st1 { v17.4s }, [x0]
+        add x0, x0, x13, lsl #2
         add x9, x9, x12
         add x9, x9, x13
 
-Lmld_rej_uniform_memory_copy:
-        cmp x9, x4
-        csel x9, x9, x4, lo
-        mov x11, #0x0               // =0
-        mov x7, x8
-
-Lmld_rej_uniform_final_copy:
-        ldr q16, [x7], #0x40
-        ldur q17, [x7, #-0x30]
-        ldur q18, [x7, #-0x20]
-        ldur q19, [x7, #-0x10]
-        str q16, [x0], #0x40
-        stur q17, [x0, #-0x30]
-        stur q18, [x0, #-0x20]
-        stur q19, [x0, #-0x10]
-        add x11, x11, #0x10
-        cmp x11, #0x100
-        b.lt Lmld_rej_uniform_final_copy
-        mov x0, x9
-        b Lmld_rej_uniform_return
+Lmld_rej_uniform_scalar_loop:
+        cmp x9, #0x100
+        b.hs Lmld_rej_uniform_return
+        cbz x2, Lmld_rej_uniform_return
+        ldrh w5, [x1], #0x2
+        ldrb w6, [x1], #0x1
+        sub x2, x2, #0x3
+        and w6, w6, #0x7f
+        orr w5, w5, w6, lsl #16
+        cmp w5, w4
+        b.hs Lmld_rej_uniform_scalar_loop
+        str w5, [x0], #0x4
+        add x9, x9, #0x1
+        b Lmld_rej_uniform_scalar_loop
 
 Lmld_rej_uniform_return:
-        add sp, sp, #0x440
-        .cfi_adjust_cfa_offset -0x440
+        mov x0, x9
         ret
         .cfi_endproc
 

@@ -29,7 +29,9 @@ int check_rej_uniform_eta4_aarch64_asm(void)
   int test_iter;
   reg_state input_state, output_state;
   int violations;
-  MLD_ALIGN uint8_t buf_x0[1024]; /* Output buffer (256 x int32_t) */
+  MLD_ALIGN uint8_t
+      buf_x0[1024]; /* Output buffer, disjoint from buf and table. The return
+                       value is its valid prefix length. */
   MLD_ALIGN uint8_t buf_x1[272];  /* Input buffer */
   MLD_ALIGN uint8_t buf_x3[4096]; /* Lookup table (4096 x uint8_t) */
 
