@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795453910904,
+  "lastUpdate": 1795453919070,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -464772,6 +464772,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 128220,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "brendan.moran@arm.com",
+            "name": "Brendan Moran",
+            "username": "bremoran"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "c31fd7d169a105242a9c5a5c827cbb86df176b9b",
+          "message": "CI: Enable unit tests on every Zephyr target\n\nRun full unit suites on the existing Cortex-M3/M4/M7/M33/M55 matrix,\nretaining both portable and native AN547 configurations.\n\nSigned-off-by: Brendan Moran <brendan.moran@arm.com>",
+          "timestamp": "2026-11-23T14:16:47Z",
+          "tree_id": "cd570f0195808d32389a86c48f6e9cf4dcd0f02d",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/c31fd7d169a105242a9c5a5c827cbb86df176b9b"
+        },
+        "date": 1795453616545,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 48090,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 139600,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 49416,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 82414,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 227477,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 82720,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 132375,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 282393,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 128373,
             "unit": "cycles"
           }
         ]
