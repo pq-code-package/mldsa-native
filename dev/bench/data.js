@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795531029176,
+  "lastUpdate": 1795531155003,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -80667,6 +80667,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 851038,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rodchap@amazon.com",
+            "name": "Rod Chapman",
+            "username": "rod-chapman"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "35b71c771a5bd3cb845e19b2e1fa6be17f9e88bf",
+          "message": "Document alignment for `MLD_CUSTOM_ALLOC`\n\nCustom allocators supply storage for large local structures. The\nallocation macros require `MLD_DEFAULT_ALIGN` alignment for every\nnon-NULL pointer they return. Plain `malloc()` does not guarantee that\nalignment.\n\nState the requirement for non-NULL pointers in the allocation comment\nand point to the heap and bump allocator examples.\n\nPorts the ML-KEM allocation comment through 5c3cc56ba.\n\nSigned-off-by: Rod Chapman <rodchap@amazon.com>\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-24T11:13:11Z",
+          "tree_id": "21f58d2f590db16e35186060835002a7332e271c",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/35b71c771a5bd3cb845e19b2e1fa6be17f9e88bf"
+        },
+        "date": 1795531152014,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 294718,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 1111305,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 322289,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 535639,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 1826390,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 516933,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 824821,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 2295995,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 851117,
             "unit": "cycles"
           }
         ]
