@@ -11,13 +11,13 @@
 
 void mld_keccak_squeezeblocks_x4(uint8_t *out0, uint8_t *out1, uint8_t *out2,
                                  uint8_t *out3, size_t nblocks, uint64_t *s,
-                                 uint32_t r);
+                                 unsigned r);
 
 void harness(void)
 {
-  uint8_t *out0, out1, out2, out3;
+  uint8_t *out0, *out1, *out2, *out3;
   size_t nblocks;
   uint64_t *s;
-  uint32_t r;
+  unsigned r;
   mld_keccak_squeezeblocks_x4(out0, out1, out2, out3, nblocks, s, r);
 }

@@ -11,7 +11,7 @@
 void harness(void)
 {
 #if !defined(MLD_CONFIG_REDUCE_RAM)
-  uint8_t *output0, output1, output2, output3;
+  uint8_t *output0, *output1, *output2, *output3;
   size_t nblocks;
   mld_shake128x4ctx *state;
   mld_shake128x4_squeezeblocks(output0, output1, output2, output3, nblocks,

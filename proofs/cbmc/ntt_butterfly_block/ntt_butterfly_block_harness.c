@@ -5,12 +5,12 @@
 #include "params.h"
 
 void mld_ntt_butterfly_block(int32_t r[MLDSA_N], int32_t zeta, unsigned start,
-                             unsigned len, unsigned bound);
+                             unsigned len, uint32_t bound);
 
 void harness(void)
 {
   int32_t *r, zeta;
   unsigned start, len;
-  unsigned bound;
+  uint32_t bound;
   mld_ntt_butterfly_block(r, zeta, start, len, bound);
 }
