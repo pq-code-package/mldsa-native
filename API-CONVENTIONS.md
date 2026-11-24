@@ -18,6 +18,8 @@ All pointers to non-empty buffers are assumed to be valid and non-NULL, and ever
 
 The exception is a pointer paired with a length: it may be NULL when that length is `0` — for example, the message `m` when `mlen == 0`, or `ctx` when `ctxlen == 0`. Such cases are called out in the per-function documentation.
 
+The fixed-size public key and signature buffers represent the length checks required by FIPS 204, Section 3.6.2. C passes array parameters as pointers, so mldsa-native cannot determine the size of the caller's allocation and does not perform those checks at runtime.
+
 Buffers passed to the same function must not overlap.
 
 ## Output buffers on error
