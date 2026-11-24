@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795498260755,
+  "lastUpdate": 1795499817905,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -1014239,6 +1014239,75 @@ window.BENCHMARK_DATA = {
           "url": "https://github.com/pq-code-package/mldsa-native/commit/6797c557aabb3574915f2d6bfbb7b973ae988525"
         },
         "date": 1795463085927,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 2138707,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 17798263,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 2399358,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 3732495,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 15033100,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 4014318,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 6525511,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 25039779,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 6867210,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": true,
+          "id": "d38418ea3d4cc1c74dc015205bc853a9c8cb9d74",
+          "message": "FIPS202: Write the AVX-512 Keccak rounds as shared macros\n\nThe dev/ sources of keccak_f1600_x{1,4}_avx512_asm, from which\nautogen derives mldsa/src and proofs/hol_light, spelled out the 448\ninstructions of the loop body with raw register numbers, the same in\nboth files apart from xmm/ymm and {1to2}/{1to4}. The reader had to\nwork out which register held which lane after pi, and the vmovq of\nxmm16-xmm25 were hand-written `.byte`.\n\nMove the loop body into keccak_f1600_avx512.inc, which both include,\nas macros that take the register class and numbers:\n\n- xor5, theta_col and chi_row: theta and chi on a column or row.\n- keccak_round: one round. pi is a renaming: lane i of the result is\n  in the register that held lane sigma(i).\n- keccak_f1600_4rounds: four rounds, with the registers permuted by\n  the identity, sigma, sigma^2 and sigma^3, then moves that undo\n  sigma^4.\n\nThe x4 file gets transpose4, load4 and store4. Lane loads and stores\nare plain vmovq, which simpasm writes as GNU as bytes where needed.\nThe comments explain the register allocation, the renaming, and why\nthe moves use VEX vmovdqa below register 16: only GNU as -O2 turns\nvmovdqa64 of such registers into vmovdqa.\n\nThe machine code does not change: after autogen with GNU as,\nmldsa/src and proofs/ are byte-identical. clang 22 differs only in\nthe 22 vmovq between memory and xmm16-xmm31. As fq.inc, the .inc\nlives only in dev/.\n\nPorts https://github.com/pq-code-package/mlkem-native/pull/2018\n\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-24T02:44:57Z",
+          "tree_id": "1e693786c4f3b6e00aa3f6193ae5289b9c8daca4",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/d38418ea3d4cc1c74dc015205bc853a9c8cb9d74"
+        },
+        "date": 1795499814769,
         "tool": "customSmallerIsBetter",
         "benches": [
           {
