@@ -271,7 +271,7 @@ gh_group_end
 
 check-eol-dry-run()
 {
-  for file in $(git ls-files -- ":/" ":/!:*.png"); do
+  for file in $(git ls-files -- ":/" ":/!:binaries/**" ":/!:*.png"); do
     # Ignore symlinks
     if [[ ! -L $file && $(tail -c1 "$file" | wc -l) == 0 ]]; then
       l=$(wc -l <"$file")
@@ -286,7 +286,7 @@ gh_group_end
 check-spdx()
 {
   local success=true
-  for file in $(git ls-files -- ":/" ":/!:*.json" ":/!:*.png" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
+  for file in $(git ls-files -- ":/" ":/!:binaries/**" ":/!:*.json" ":/!:*.png" ":/!:*LICENSE*" ":/!:.git*" ":/!:flake.lock"); do
     # Ignore symlinks
     if [[ ! -L $file && $(grep "SPDX-License-Identifier:" "$file" | wc -l) == 0 ]]; then
       gh_error "$file" "${line:-1}" "Missing license header error" "$file is missing SPDX License header"
