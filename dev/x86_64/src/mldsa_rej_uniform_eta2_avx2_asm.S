@@ -50,7 +50,10 @@
 
 #include "../../../common.h"
 #if defined(MLD_SYS_X86_64_AVX2) && \
-    defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED)
+    defined(MLD_ARITH_BACKEND_X86_64_DEFAULT) && \
+    !defined(MLD_CONFIG_NO_KEYPAIR_API) && \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) && \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLDSA_ETA == 2)
 /* simpasm: header-end */
 
 #define out %rdi
@@ -314,4 +317,5 @@ mld_rej_uniform_eta2_avx2_asm_done:
 
 /* simpasm: footer-start */
 #endif /* MLD_SYS_X86_64_AVX2 && MLD_ARITH_BACKEND_X86_64_DEFAULT && \
-          !MLD_CONFIG_MULTILEVEL_NO_SHARED */
+          !MLD_CONFIG_NO_KEYPAIR_API && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLDSA_ETA == 2) */
