@@ -1,0 +1,116 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# Add --no-forall-skolemization to CBMC: pass asserted forall quantifiers
+# to the back end unchanged instead of skolemizing them, so that the
+# propositional back end instantiates them over their constant range like
+# assumed ones. Also treat an empty instantiation range as true (forall)
+# or false (exists) instead of leaving the quantifier unconstrained.
+diff --git a/src/cbmc/cbmc_parse_options.cpp b/src/cbmc/cbmc_parse_options.cpp
+index 680b0e75..bf642849 100644
+--- a/src/cbmc/cbmc_parse_options.cpp
++++ b/src/cbmc/cbmc_parse_options.cpp
+@@ -425,6 +425,9 @@ void cbmc_parse_optionst::get_command_line_options(optionst &options)
+   options.set_option(
+     "symex-cache-dereferences", cmdline.isset("symex-cache-dereferences"));
+
++  options.set_option(
++    "no-forall-skolemization", cmdline.isset("no-forall-skolemization"));
++
+   if(cmdline.isset("incremental-loop"))
+   {
+     options.set_option(
+diff --git a/src/goto-checker/bmc_util.h b/src/goto-checker/bmc_util.h
+index c604856d..31cb1a76 100644
+--- a/src/goto-checker/bmc_util.h
++++ b/src/goto-checker/bmc_util.h
+@@ -187,7 +187,8 @@ void run_property_decider(
+   "(unwind-min):"                                                              \
+   "(unwind-max):"                                                              \
+   "(ignore-properties-before-unwind-min)"                                      \
+-  "(symex-cache-dereferences)" OPT_UNWINDSET
++  "(symex-cache-dereferences)"                                                 \
++  "(no-forall-skolemization)" OPT_UNWINDSET
+
+ #define HELP_BMC                                                               \
+   " {y--paths} [strategy] \t explore paths one at a time\n"                    \
+@@ -233,6 +234,9 @@ void run_property_decider(
+   " {y--graphml-witness} {ufilename} \t write the witness in GraphML format "  \
+   "to {ufilename}\n"                                                           \
+   " {y--symex-cache-dereferences} \t enable caching of repeated "              \
+-  "dereferences\n"
++  "dereferences\n"                                                             \
++  " {y--no-forall-skolemization} \t do not replace universally quantified "   \
++  "variables in assertions by fresh symbols; pass the quantifier to the "      \
++  "back end instead\n"
+
+ #endif // CPROVER_GOTO_CHECKER_BMC_UTIL_H
+diff --git a/src/goto-symex/symex_config.h b/src/goto-symex/symex_config.h
+index d9f65c46..caf56154 100644
+--- a/src/goto-symex/symex_config.h
++++ b/src/goto-symex/symex_config.h
+@@ -61,6 +61,13 @@ struct symex_configt final
+   ///   Used in goto_symext::dereference_rec
+   bool cache_dereferences;
+
++  /// \brief Whether to replace the universally quantified variables of
++  ///   asserted `forall` expressions by fresh symbols ("skolemization").
++  ///   When false, asserted quantifiers are passed to the back end unchanged,
++  ///   so that the propositional back end instantiates them over their
++  ///   (constant) range just like assumed quantifiers.
++  bool skolemize_asserted_forall;
++
+   /// \brief Construct a symex_configt using options specified in an
+   /// \ref optionst
+   explicit symex_configt(const optionst &options);
+diff --git a/src/goto-symex/symex_main.cpp b/src/goto-symex/symex_main.cpp
+index 9e9e519a..d651c2dd 100644
+--- a/src/goto-symex/symex_main.cpp
++++ b/src/goto-symex/symex_main.cpp
+@@ -50,7 +50,9 @@ symex_configt::symex_configt(const optionst &options)
+             : DEFAULT_MAX_FIELD_SENSITIVITY_ARRAY_SIZE),
+     complexity_limits_active(
+       options.get_signed_int_option("symex-complexity-limit") > 0),
+-    cache_dereferences{options.get_bool_option("symex-cache-dereferences")}
++    cache_dereferences{options.get_bool_option("symex-cache-dereferences")},
++    skolemize_asserted_forall{
++      !options.get_bool_option("no-forall-skolemization")}
+ {
+ }
+
+@@ -159,8 +161,11 @@ void goto_symext::symex_assert(
+   if(has_subexpr(condition, ID_exists) || has_subexpr(condition, ID_forall))
+     do_simplify(condition, state.value_set);
+
+-  // Second, L2-rename universal quantifiers:
+-  if(has_subexpr(condition, ID_forall))
++  // Second, L2-rename universal quantifiers (unless disabled, in which case
++  // the quantifier is passed to the back end unchanged):
++  if(
++    symex_config.skolemize_asserted_forall &&
++    has_subexpr(condition, ID_forall))
+     rewrite_quantifiers(condition, state);
+
+   // now rename, enables propagation
+diff --git a/src/solvers/flattening/boolbv_quantifier.cpp b/src/solvers/flattening/boolbv_quantifier.cpp
+index e7c94c8c..5b10d6ba 100644
+--- a/src/solvers/flattening/boolbv_quantifier.cpp
++++ b/src/solvers/flattening/boolbv_quantifier.cpp
+@@ -218,7 +218,17 @@ static std::optional<exprt> eager_quantifier_instantiation(
+   mp_integer ub = numeric_cast_v<mp_integer>(max_i.value());
+
+   if(lb > ub)
++  {
++    // The bounds were taken from disjuncts "!(var >= lb)" and "var >= ub+1"
++    // (resp. conjuncts "var >= lb" and "!(var >= ub+1)"). If lb > ub, every
++    // value of var satisfies one of those disjuncts (resp. violates one of
++    // those conjuncts), so the quantifier is trivially true (resp. false).
++    if(expr.id() == ID_forall && where_simplified.id() == ID_or)
++      return true_exprt{};
++    if(expr.id() == ID_exists && where_simplified.id() == ID_and)
++      return false_exprt{};
+     return {};
++  }
+
+   auto expr_simplified =
+     quantifier_exprt(expr.id(), expr.variables(), where_simplified);
