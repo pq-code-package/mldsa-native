@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795542018226,
+  "lastUpdate": 1795542056855,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -779036,6 +779036,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 408775,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "beckphan@amazon.co.uk",
+            "name": "Hanno Becker",
+            "username": "hanno-becker"
+          },
+          "distinct": false,
+          "id": "4ff7a9c55a109ef9d3fc28635a5bc0e481dea09b",
+          "message": "Fix stale comments on rej_uniform_eta and montgomery_reduce\n\n- The comments on the rej_uniform_eta2/eta4 backends said that the\n  assembly must be checked manually for leaking more than which\n  coefficients are accepted. Their HOL Light proofs now show exactly\n  this, on AArch64 and x86_64.\n- The documented input range of mld_montgomery_reduce was wider than\n  the one its contract requires. Document the contract's range.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>",
+          "timestamp": "2026-11-24T15:25:04Z",
+          "tree_id": "9fda8cf98de061c9ad525a7cb13cee9969e495be",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/4ff7a9c55a109ef9d3fc28635a5bc0e481dea09b"
+        },
+        "date": 1795542055993,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 140634,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 489963,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 151030,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 247699,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 796861,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 244435,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 400054,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1021046,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 408517,
             "unit": "cycles"
           }
         ]
