@@ -11,7 +11,7 @@
 void harness(void)
 {
   mld_shake256x4ctx *state;
-  const uint8_t *in0, in1, in2, in3;
+  const uint8_t *in0, *in1, *in2, *in3;
   size_t inlen;
   mld_shake256x4_absorb_once(state, in0, in1, in2, in3, inlen);
 }

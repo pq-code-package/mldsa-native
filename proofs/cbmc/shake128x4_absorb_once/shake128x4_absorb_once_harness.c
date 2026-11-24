@@ -12,7 +12,7 @@ void harness(void)
 {
 #if !defined(MLD_CONFIG_REDUCE_RAM)
   mld_shake128x4ctx *state;
-  const uint8_t *in0, in1, in2, in3;
+  const uint8_t *in0, *in1, *in2, *in3;
   size_t inlen;
   mld_shake128x4_absorb_once(state, in0, in1, in2, in3, inlen);
 #endif /* !MLD_CONFIG_REDUCE_RAM */
