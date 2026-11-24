@@ -25,3 +25,7 @@ Buffers passed to the same function must not overlap.
 ## Output buffers on error
 
 When a function returns an error, each caller-owned output buffer is left either unchanged or fully zeroized. An output buffer is never left holding partially computed or otherwise stale data that could be mistaken for a valid result.
+
+## Secret data left on the stack
+
+In compliance with FIPS 204, Section 3.6.3, mldsa-native zeroizes intermediate buffers before returning from function calls. This reduces the likelihood of secret data leaking on the stack or custom allocators, but it does not eliminate it. For example, the C standard makes no guarantee about where a compiler allocates local structures and whether/where it makes copies of them. Also, in addition to entire structures, there may also be potentially exploitable leakage of individual values on the stack. If you need bullet-proof zeroization of the stack, you need to consider additional measures.
