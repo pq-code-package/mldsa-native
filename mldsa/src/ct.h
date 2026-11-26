@@ -61,7 +61,9 @@
 
 */
 
-#if defined(MLD_HAVE_INLINE_ASM) && !defined(MLD_CONFIG_NO_ASM_VALUE_BARRIER)
+#if defined(MLD_HAVE_INLINE_ASM) && \
+    !defined(MLD_CONFIG_NO_ASM_VALUE_BARRIER) && \
+    !defined(MLD_CT_USE_MSAN)
 #define MLD_USE_ASM_VALUE_BARRIER
 #endif
 
