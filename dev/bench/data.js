@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1795682760233,
+  "lastUpdate": 1795682778801,
   "repoUrl": "https://github.com/pq-code-package/mldsa-native",
   "entries": {
     "Arm Cortex-A72 (Raspberry Pi 4) benchmarks (opt)": [
@@ -869703,6 +869703,75 @@ window.BENCHMARK_DATA = {
           {
             "name": "ML-DSA-87 verify",
             "value": 610942,
+            "unit": "cycles"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "matthias@zerorisc.com",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "committer": {
+            "email": "matthias@kannwischer.eu",
+            "name": "Matthias J. Kannwischer",
+            "username": "mkannwischer"
+          },
+          "distinct": false,
+          "id": "0f192a4eb3c2bf1ccefafd7c8e1d53eea65dfa1c",
+          "message": "FIPS202: Zeroize Keccak assembly stack locals on return\n\nThe scalar and hybrid AArch64 Keccak routines and the x86_64 AVX2\nKeccak x4 routine use stack locals during the permutation. Those\nlocals retain their contents after the routines return.\n\nClear the 32 bytes of scalar AArch64 stack locals, the 48 bytes of\nlocals in each AArch64 hybrid, and the 768-byte aligned AVX2 frame\nafter writing back the state.\n\nSigned-off-by: Matthias J. Kannwischer <matthias@zerorisc.com>\nSigned-off-by: Hanno Becker <beckphan@amazon.co.uk>",
+          "timestamp": "2026-11-26T06:02:34Z",
+          "tree_id": "0749918dd43d74c3c3dbcf1bc97066155cbc7029",
+          "url": "https://github.com/pq-code-package/mldsa-native/commit/0f192a4eb3c2bf1ccefafd7c8e1d53eea65dfa1c"
+        },
+        "date": 1795682777258,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "ML-DSA-44 keypair",
+            "value": 210940,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 sign",
+            "value": 757456,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-44 verify",
+            "value": 228035,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 keypair",
+            "value": 373927,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 sign",
+            "value": 1242840,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-65 verify",
+            "value": 369413,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 keypair",
+            "value": 596530,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 sign",
+            "value": 1600537,
+            "unit": "cycles"
+          },
+          {
+            "name": "ML-DSA-87 verify",
+            "value": 610872,
             "unit": "cycles"
           }
         ]
