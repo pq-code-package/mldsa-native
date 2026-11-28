@@ -23,6 +23,7 @@ int check_intt_rv32im_fastmul_asm(void);
 int check_intt_rv32im_slowmul_asm(void);
 int check_ntt_rv32im_fastmul_asm(void);
 int check_ntt_rv32im_slowmul_asm(void);
+int check_poly_chknorm_rv32im_asm(void);
 int check_poly_decompose_32_rv32im_asm(void);
 int check_poly_decompose_88_rv32im_asm(void);
 int check_poly_pointwise_montgomery_rv32im_asm(void);
@@ -37,6 +38,7 @@ static const abicheck_entry_t all_checks[] = {
     {"intt_rv32im_slowmul_asm", check_intt_rv32im_slowmul_asm},
     {"ntt_rv32im_fastmul_asm", check_ntt_rv32im_fastmul_asm},
     {"ntt_rv32im_slowmul_asm", check_ntt_rv32im_slowmul_asm},
+    {"poly_chknorm_rv32im_asm", check_poly_chknorm_rv32im_asm},
     {"poly_decompose_32_rv32im_asm", check_poly_decompose_32_rv32im_asm},
     {"poly_decompose_88_rv32im_asm", check_poly_decompose_88_rv32im_asm},
     {"poly_pointwise_montgomery_rv32im_asm",

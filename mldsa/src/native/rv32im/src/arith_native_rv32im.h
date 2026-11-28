@@ -193,6 +193,18 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
 
+#define mld_poly_chknorm_rv32im_asm MLD_NAMESPACE(poly_chknorm_rv32im_asm)
+MLD_MUST_CHECK_RETURN_VALUE
+int mld_poly_chknorm_rv32im_asm(const int32_t a[MLDSA_N], int32_t B)
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/riscv32/proofs/mldsa_poly_chknorm_rv32im_asm.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(0 < B)
+  ensures(return_value == 0 || return_value == 1)
+  ensures((return_value == 0) == array_abs_bound(a, 0, MLDSA_N, B))
+);
+
 /*
  * `array_abs_bound` is exclusive, matching the strict bounds in the forward
  * NTT and pointwise HOL-Light theorems. Its MLDSA_Q form is equivalent to the

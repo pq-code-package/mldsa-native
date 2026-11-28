@@ -40,6 +40,7 @@
 #define MLD_USE_NATIVE_POLY_DECOMPOSE_88
 #define MLD_USE_NATIVE_POLY_USE_HINT_32
 #define MLD_USE_NATIVE_POLY_USE_HINT_88
+#define MLD_USE_NATIVE_POLY_CHKNORM
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -137,6 +138,16 @@ static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
 #endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
         */
 #endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
+{
+  if (B <= 0)
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+  return mld_poly_chknorm_rv32im_asm(a, B);
+}
 
 #endif /* !__ASSEMBLER__ */
 

@@ -805,6 +805,7 @@
 #undef MLD_USE_NATIVE_INTT
 #undef MLD_USE_NATIVE_NTT
 #undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLY_CHKNORM
 #undef MLD_USE_NATIVE_POLY_DECOMPOSE_32
 #undef MLD_USE_NATIVE_POLY_DECOMPOSE_88
 #undef MLD_USE_NATIVE_POLY_USE_HINT_32
@@ -817,6 +818,7 @@
 #undef MLD_USE_NATIVE_INTT
 #undef MLD_USE_NATIVE_NTT
 #undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLY_CHKNORM
 #undef MLD_USE_NATIVE_POLY_DECOMPOSE_32
 #undef MLD_USE_NATIVE_POLY_DECOMPOSE_88
 #undef MLD_USE_NATIVE_POLY_USE_HINT_32
@@ -828,6 +830,7 @@
 #undef mld_intt_rv32im_slowmul_asm
 #undef mld_ntt_rv32im_fastmul_asm
 #undef mld_ntt_rv32im_slowmul_asm
+#undef mld_poly_chknorm_rv32im_asm
 #undef mld_poly_decompose_32_rv32im_asm
 #undef mld_poly_decompose_88_rv32im_asm
 #undef mld_poly_pointwise_montgomery_rv32im_asm

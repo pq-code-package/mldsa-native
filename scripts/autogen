@@ -3284,6 +3284,12 @@ def hol_light_asm_joblist():
             "riscv32",
         ),
         (
+            "mldsa_poly_chknorm_rv32im_asm.S",
+            "dev/riscv32/src",
+            riscv32_flags,
+            "riscv32",
+        ),
+        (
             "mldsa_poly_decompose_32_rv32im_asm.S",
             "dev/riscv32/src",
             riscv32_flags,

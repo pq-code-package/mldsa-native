@@ -155,6 +155,11 @@ poly_chknorm_avx2_asm:
   sha256:
     mldsa_poly_chknorm_mc: e9119f95df71a772d3ce0523a652d385a849e044caad592805d9fe949875cd60
     mldsa_poly_chknorm_tmc: b8993e3813a94a2f97b5be22dd2a1d1028625aee86d36542f45db6e824e5bcf1
+poly_chknorm_rv32im_asm:
+  arch: riscv32
+  function: mldsa_poly_chknorm_rv32im_asm
+  sha256:
+    mldsa_poly_chknorm_mc: 89662c5aace7923fc47e6f2ec6d6d6f93db351bb18b3d1f951f83fc3617fa06f
 poly_decompose_32_aarch64_asm:
   arch: aarch64
   function: mldsa_poly_decompose_32_aarch64_asm
