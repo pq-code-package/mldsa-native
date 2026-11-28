@@ -35,6 +35,7 @@
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#define MLD_USE_NATIVE_REJ_UNIFORM
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -71,6 +72,21 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
+{
+  if (len != MLDSA_N || buflen == 0 || buflen % 12 != 0 ||
+      (uintptr_t)buf % 4 != 0)
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+
+  /* Safety: outlen is at most MLDSA_N, hence, this cast is safe. */
+  return (int)mld_rej_uniform_rv32im_asm(r, buf, buflen);
+}
 
 #endif /* !__ASSEMBLER__ */
 

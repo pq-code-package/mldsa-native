@@ -52,3 +52,6 @@ print_string
    "riscv32/mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.o ===\n");;
 print_literal_from_elf "riscv32/mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.o";;
 print_string "==== bytecode end =====================================\n\n";;
+print_string "=== bytecode start: riscv32/mldsa/mldsa_rej_uniform_rv32im_asm.o ===\n";;
+print_literal_from_elf "riscv32/mldsa/mldsa_rej_uniform_rv32im_asm.o";;
+print_string "==== bytecode end =====================================\n\n";;
