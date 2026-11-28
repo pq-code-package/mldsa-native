@@ -26,6 +26,8 @@ typedef int int32_t;
 typedef unsigned long long uint64_t;
 typedef long long int64_t;
 
+typedef unsigned int uintptr_t;
+
 /* size_t is 32-bit unsigned (see stddef.h), so SIZE_MAX is 2**32-1. */
 #define SIZE_MAX (4294967295U)
 

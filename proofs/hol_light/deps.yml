@@ -326,6 +326,16 @@ riscv32/mldsa_poly_pointwise_montgomery_rv32im_asm:
   - common/misc.ml
   - riscv/proofs/base.ml
   - riscv/proofs/consttime.ml
+riscv32/mldsa_rej_uniform_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_rej_uniform_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/mldsa_rej_uniform_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
 x86_64/keccak_f1600_x1_avx512_asm:
   files:
   - proofs/hol_light/common/keccak_constants.ml

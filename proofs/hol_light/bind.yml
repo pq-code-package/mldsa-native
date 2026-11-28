@@ -279,3 +279,8 @@ rej_uniform_eta4_avx2_asm:
   sha256:
     mldsa_rej_uniform_eta4_mc: 6ff057e70fc95db6b2a1f699f26abfe518b71b241f13b1f27b760343a26cf844
     mldsa_rej_uniform_eta4_tmc: 6e7a0807747d08d7c084f7c33f2fc69be197adda8f5e12d2603deaf5d188920b
+rej_uniform_rv32im_asm:
+  arch: riscv32
+  function: mldsa_rej_uniform_rv32im_asm
+  sha256:
+    mldsa_rej_uniform_mc: 2070afbac960725c4ce64ecf7c9f6f75a64f00504c4012c900088ca484a7b139

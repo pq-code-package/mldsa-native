@@ -5,7 +5,7 @@
 # Definitions added by loading proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bfd3ab6ed1eecae60fc74624872de62ea75e2791
 # source: proofs/hol_light/aarch64/proofs/mldsa_rej_uniform_eta_table.ml f6347665beef86fd6f31298d7352e357c72a118a19cb74b8c7193ea5407a2dd8
 
 definition mldsa_rej_uniform_eta_table

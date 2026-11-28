@@ -110,6 +110,21 @@ __contract__(
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
 
+#define mld_rej_uniform_rv32im_asm MLD_NAMESPACE(rej_uniform_rv32im_asm)
+MLD_MUST_CHECK_RETURN_VALUE
+unsigned mld_rej_uniform_rv32im_asm(int32_t r[MLDSA_N], const uint8_t *buf,
+                                    unsigned buflen)
+/* This must be kept in sync with the HOL-Light specification in
+ * proofs/hol_light/riscv32/proofs/mldsa_rej_uniform_rv32im_asm.ml. */
+__contract__(
+  requires(buflen > 0 && buflen % 12 == 0)
+  requires(memory_no_alias(buf, buflen))
+  requires(memory_no_alias(r, sizeof(int32_t) * MLDSA_N))
+  assigns(memory_slice(r, sizeof(int32_t) * MLDSA_N))
+  ensures(return_value <= MLDSA_N)
+  ensures(array_bound(r, 0, return_value, 0, MLDSA_Q))
+);
+
 /*
  * `array_abs_bound` is exclusive, matching the strict bounds in the forward
  * NTT and pointwise HOL-Light theorems. Its MLDSA_Q form is equivalent to the

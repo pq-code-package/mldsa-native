@@ -5,7 +5,7 @@
 # Definitions added by loading proofs/hol_light/common/keccak_constants.ml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bfd3ab6ed1eecae60fc74624872de62ea75e2791
 # source: proofs/hol_light/common/keccak_constants.ml 9df906c3835804ac13e3b4e365f4788aac385636adceb46b678c49ee57fbfd7d
 
 definition round_constants

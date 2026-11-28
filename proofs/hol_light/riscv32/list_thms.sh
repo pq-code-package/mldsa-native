@@ -13,6 +13,7 @@
 #   FOO_SUBROUTINE_CORRECT, FOO_SUBROUTINE_SAFE
 # The slow-multiplication NTTs and the pointwise multiplication name
 # their theorems differently from their routines.
+# rej_uniform has no constant-time proof and uses MEMSAFE instead of SAFE.
 #
 # Usage: list_thms.sh [ROUTINE...]  (default: all routines of list_proofs.sh)
 
@@ -30,6 +31,8 @@ for routine in "$@"; do
   [[ $routine == mldsa_intt_rv32im_slowmul_asm ]] && name=mldsa_intt_slow
   [[ $routine == mldsa_poly_pointwise_montgomery_rv32im_asm ]] && name=mldsa_pointwise_montgomery
   prefix=$(echo "$name" | tr '[:lower:]' '[:upper:]')
+  safe=SAFE
+  [[ $routine == mldsa_rej_uniform_rv32im_asm ]] && safe=MEMSAFE
   echo "${prefix}_SUBROUTINE_CORRECT"
-  echo "${prefix}_SUBROUTINE_SAFE"
+  echo "${prefix}_SUBROUTINE_${safe}"
 done
