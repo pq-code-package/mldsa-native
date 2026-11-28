@@ -199,6 +199,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light-cross-riscv32'
+          nix-cache: true
           script: |
             autogen --update-hol-light-bytecode --dry-run \
               --force-cross riscv32
@@ -215,6 +216,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light-cross-riscv32'
+          nix-cache: true
           script: |
             set -o pipefail
             printf '%s\n' \
@@ -242,6 +244,7 @@ jobs:
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           nix-shell: 'hol_light-cross-riscv32'
+          nix-cache: true
           script: |
             tests hol_light -a riscv32 \
               -p ${{ matrix.proof }} --verbose
