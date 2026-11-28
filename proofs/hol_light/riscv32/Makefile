@@ -33,7 +33,13 @@ OBJ = mldsa/mldsa_ntt_rv32im_asm.o \
       mldsa/mldsa_ntt_rv32im_slowmul_asm.o \
       mldsa/mldsa_intt_rv32im_asm.o \
       mldsa/mldsa_intt_rv32im_slowmul_asm.o \
-      mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.o
+      mldsa/mldsa_poly_pointwise_montgomery_rv32im_asm.o \
+      mldsa/mldsa_rej_uniform_rv32im_asm.o \
+      mldsa/mldsa_poly_chknorm_rv32im_asm.o \
+      mldsa/mldsa_poly_decompose_32_rv32im_asm.o \
+      mldsa/mldsa_poly_decompose_88_rv32im_asm.o \
+      mldsa/mldsa_poly_use_hint_32_rv32im_asm.o \
+      mldsa/mldsa_poly_use_hint_88_rv32im_asm.o
 
 $(OBJ): %.o : %.S
 	@echo "Preparing $@ ..."

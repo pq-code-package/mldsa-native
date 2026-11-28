@@ -35,6 +35,12 @@
 #define MLD_USE_NATIVE_NTT
 #define MLD_USE_NATIVE_INTT
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#define MLD_USE_NATIVE_REJ_UNIFORM
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#define MLD_USE_NATIVE_POLY_USE_HINT_32
+#define MLD_USE_NATIVE_POLY_USE_HINT_88
+#define MLD_USE_NATIVE_POLY_CHKNORM
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -71,6 +77,77 @@ static MLD_INLINE int mld_poly_pointwise_montgomery_native(
 }
 #endif /* !MLD_CONFIG_NO_SIGN_API || !MLD_CONFIG_NO_VERIFY_API || \
           MLD_CONFIG_REDUCE_RAM || MLD_UNIT_TEST */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
+                                             const uint8_t *buf,
+                                             unsigned buflen)
+{
+  if (len != MLDSA_N || buflen == 0 || buflen % 12 != 0 ||
+      (uintptr_t)buf % 4 != 0)
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+
+  /* Safety: outlen is at most MLDSA_N, hence, this cast is safe. */
+  return (int)mld_rej_uniform_rv32im_asm(r, buf, buflen);
+}
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_32_rv32im_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_88_rv32im_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
+
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_use_hint_32_native(int32_t *a, const int32_t *h)
+{
+  mld_poly_use_hint_32_rv32im_asm(a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_use_hint_88_native(int32_t *a, const int32_t *h)
+{
+  mld_poly_use_hint_88_rv32im_asm(a, h);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_chknorm_native(const int32_t *a, int32_t B)
+{
+  if (B <= 0)
+  {
+    return MLD_NATIVE_FUNC_FALLBACK;
+  }
+  return mld_poly_chknorm_rv32im_asm(a, B);
+}
 
 #endif /* !__ASSEMBLER__ */
 

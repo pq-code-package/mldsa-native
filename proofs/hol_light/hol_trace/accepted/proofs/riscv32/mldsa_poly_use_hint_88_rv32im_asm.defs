@@ -1,0 +1,23 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_use_hint_88_rv32im_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_poly_use_hint_88_mc: 220 bytes
+# sha256 2e13c8860e25a19b6eb5ce3b5674004e913c63a05e105213410ab1c0b477e373
+definition mldsa_poly_use_hint_88_mc
+  |- mldsa_poly_use_hint_88_mc
+     = #x[b7 32 00 00 93 82 b2 c0 37 03 80 00 b7 f3 02 00 93 83 03 80 37 fe 3f 00 13 06 05 40 83 26
+          05 00 03 a7 05 00 83 27 45 00 03 a8 45 00 93 8e f6 07 93 de 7e 00 b3 8e 5e 02 b3 8e 6e 00
+          93 de 8e 01 33 8f 7e 02 33 8f e6 41 13 0f ff ff 33 3f cf 01 33 7f ef 00 13 1f 1f 00 b3 8e
+          ee 40 b3 8e ee 01 13 df fe 41 13 7f cf 02 b3 8e ee 01 13 bf ce 02 33 0f e0 41 b3 f6 ee 01
+          93 8e f7 07 93 de 7e 00 b3 8e 5e 02 b3 8e 6e 00 93 de 8e 01 33 8f 7e 02 33 8f e7 41 13 0f
+          ff ff 33 3f cf 01 33 7f 0f 01 13 1f 1f 00 b3 8e 0e 41 b3 8e ee 01 13 df fe 41 13 7f cf 02
+          b3 8e ee 01 13 bf ce 02 33 0f e0 41 b3 f7 ee 01 23 20 d5 00 23 22 f5 00 13 05 85 00 93 85
+          85 00 e3 14 c5 f4 67 80 00 00]

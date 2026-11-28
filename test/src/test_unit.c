@@ -888,8 +888,7 @@ cleanup:
       native_ret = mld_rej_uniform_native(r_test, MLDSA_N, buf, buflen); \
       if (native_ret == MLD_NATIVE_FUNC_FALLBACK)                        \
       {                                                                  \
-        ret = 0;                                                         \
-        goto cleanup;                                                    \
+        continue;                                                        \
       }                                                                  \
                                                                          \
       c_ret = mld_rej_uniform_c(r_ref, MLDSA_N, 0, buf, buflen);         \

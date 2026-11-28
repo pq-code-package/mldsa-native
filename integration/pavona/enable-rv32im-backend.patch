@@ -49,7 +49,7 @@ index 0218bf5f7e..2e4df8600b 100644
          "mldsa/src/cbmc.h",
          "mldsa/src/common.h",
          "mldsa/src/context.h",
-@@ -18,6 +19,16 @@ cc_library(
+@@ -18,6 +19,22 @@ cc_library(
          "mldsa/src/debug.c",
          "mldsa/src/ct.c",
          "mldsa/src/ct.h",
@@ -61,7 +61,13 @@ index 0218bf5f7e..2e4df8600b 100644
 +        "mldsa/src/native/rv32im/src/mldsa_intt_rv32im_slowmul_asm.S",
 +        "mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_asm.S",
 +        "mldsa/src/native/rv32im/src/mldsa_ntt_rv32im_slowmul_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_chknorm_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_decompose_32_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_decompose_88_rv32im_asm.S",
 +        "mldsa/src/native/rv32im/src/mldsa_poly_pointwise_montgomery_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_use_hint_32_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_poly_use_hint_88_rv32im_asm.S",
++        "mldsa/src/native/rv32im/src/mldsa_rej_uniform_rv32im_asm.S",
 +        "mldsa/src/native/rv32im/src/rv32im_zetas.c",
          "mldsa/src/packing.c",
          "mldsa/src/packing.h",

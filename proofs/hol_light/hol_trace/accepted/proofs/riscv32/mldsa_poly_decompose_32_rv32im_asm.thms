@@ -1,0 +1,62 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_decompose_32_rv32im_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_poly_decompose_32_rv32im_asm MLDSA_POLY_DECOMPOSE_32_SUBROUTINE_CORRECT
+  |- !hi:int32 lo:int32 x:(num -> int32) pc:num returnaddress:int32.
+       aligned 4 hi
+       /\ aligned 4 lo
+       /\ aligned 4 returnaddress
+       /\ nonoverlapping (hi, 1024) (lo, 1024)
+       /\ nonoverlapping ((word pc : int32), LENGTH mldsa_poly_decompose_32_mc) (hi, 1024)
+       /\ nonoverlapping ((word pc : int32), LENGTH mldsa_poly_decompose_32_mc) (lo, 1024)
+       /\ (!i:num. i < 256 ==> val (x i) < 8380417)
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_poly_decompose_32_mc
+               /\ read PC s = (word pc : int32)
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [hi; lo] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add lo (word (4 * i) : int32))) s = x i))
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ (!i:num.
+                    i < 256
+                    ==> val (read (memory :> bytes32 (word_add hi (word (4 * i) : int32))) s)
+                        = FST (mldsa_decompose_32 (val (x i))))
+               /\ (!i:num.
+                    i < 256
+                    ==> ival (read (memory :> bytes32 (word_add lo (word (4 * i) : int32))) s)
+                        = SND (mldsa_decompose_32 (val (x i)))))
+             (MAYCHANGE_REGS_PERMITTED_BY_ABI
+             ,, MAYCHANGE [memory :> bytes (hi, 1024); memory :> bytes (lo, 1024)])
+
+theorem mldsa_poly_decompose_32_rv32im_asm MLDSA_POLY_DECOMPOSE_32_SUBROUTINE_SAFE
+  |- ?f_events:(int32 -> int32 -> num -> int32 -> (32 address_uarch_event) list).
+       !e:((32 address_uarch_event) list) hi:int32 lo:int32 pc:num returnaddress:int32.
+         aligned 4 hi
+         /\ aligned 4 lo
+         /\ aligned 4 returnaddress
+         /\ nonoverlapping (hi, 1024) (lo, 1024)
+         /\ nonoverlapping ((word pc : int32), LENGTH mldsa_poly_decompose_32_mc) (hi, 1024)
+         /\ nonoverlapping ((word pc : int32), LENGTH mldsa_poly_decompose_32_mc) (lo, 1024)
+         ==> ensures riscv
+               (\s:riscvstate.
+                 aligned_bytes_loaded s (word pc : int32) mldsa_poly_decompose_32_mc
+                 /\ read PC s = (word pc : int32)
+                 /\ read RA s = returnaddress
+                 /\ C_ARGUMENTS [hi; lo] s
+                 /\ read events s = e)
+               (\s:riscvstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((32 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events hi lo pc returnaddress
+                      /\ memaccess_inbounds e2 [lo, 1024; hi, 1024] [hi, 1024; lo, 1024]))
+               (\s:riscvstate s':riscvstate. T)

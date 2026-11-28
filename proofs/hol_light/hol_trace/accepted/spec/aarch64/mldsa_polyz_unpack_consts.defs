@@ -5,7 +5,7 @@
 # Definitions added by loading proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_consts.ml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bfd3ab6ed1eecae60fc74624872de62ea75e2791
 # source: proofs/hol_light/aarch64/proofs/mldsa_polyz_unpack_consts.ml f9d0b83f6d4f5ee81d18d7311bf352c8abb68cc89bcbc79b9efcec7ae70aa7e7
 
 definition mldsa_polyz_unpack_17_indices

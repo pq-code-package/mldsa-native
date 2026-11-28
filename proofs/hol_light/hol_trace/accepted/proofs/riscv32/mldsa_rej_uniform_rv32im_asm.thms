@@ -1,0 +1,62 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_rej_uniform_rv32im_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_rej_uniform_rv32im_asm MLDSA_REJ_UNIFORM_SUBROUTINE_CORRECT
+  |- !res:int32 buf:int32 buflen:int32 inlist:((24 word) list) pc:num returnaddress:int32.
+       aligned 4 res
+       /\ aligned 4 buf
+       /\ aligned 4 returnaddress
+       /\ val res + 1024 < 2 EXP 32
+       /\ val buf + val buflen < 2 EXP 32
+       /\ num_divides 12 (val buflen)
+       /\ 0 < val buflen
+       /\ 8 * val buflen = 24 * LENGTH inlist
+       /\ nonoverlapping (res, 1024) ((word pc : int32), LENGTH mldsa_rej_uniform_mc)
+       /\ nonoverlapping (res, 1024) (buf, val buflen)
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_rej_uniform_mc
+               /\ read PC s = (word pc : int32)
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [res; buf; buflen] s
+               /\ read (memory :> bytes (buf, val buflen)) s = num_of_wordlist inlist)
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ (let outlist:(int32 list) = SUB_LIST (0, 256) (REJ_SAMPLE inlist) in
+                  let outlen:num = LENGTH outlist in
+                  C_RETURN s = (word outlen : int32)
+                  /\ read (memory :> bytes (res, 4 * outlen)) s = num_of_wordlist outlist))
+             (MAYCHANGE_REGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (res, 1024)])
+
+theorem mldsa_rej_uniform_rv32im_asm MLDSA_REJ_UNIFORM_SUBROUTINE_MEMSAFE
+  |- !res:int32 buf:int32 buflen:int32 inlist:((24 word) list) pc:num
+      e:((32 address_uarch_event) list) returnaddress:int32.
+       aligned 4 res
+       /\ aligned 4 buf
+       /\ aligned 4 returnaddress
+       /\ val res + 1024 < 2 EXP 32
+       /\ val buf + val buflen < 2 EXP 32
+       /\ num_divides 12 (val buflen)
+       /\ 0 < val buflen
+       /\ 8 * val buflen = 24 * LENGTH inlist
+       /\ nonoverlapping (res, 1024) ((word pc : int32), LENGTH mldsa_rej_uniform_mc)
+       /\ nonoverlapping (res, 1024) (buf, val buflen)
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_rej_uniform_mc
+               /\ read PC s = (word pc : int32)
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [res; buf; buflen] s
+               /\ read (memory :> bytes (buf, val buflen)) s = num_of_wordlist inlist
+               /\ read events s = e)
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ (?e2:((32 address_uarch_event) list).
+                    read events s = APPEND e2 e
+                    /\ memaccess_inbounds e2 [buf, val buflen; res, 1024] [res, 1024]))
+             (MAYCHANGE_REGS_PERMITTED_BY_ABI ,, MAYCHANGE [memory :> bytes (res, 1024)])

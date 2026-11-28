@@ -103,7 +103,13 @@
 #include "src/native/rv32im/src/mldsa_intt_rv32im_slowmul_asm.S"
 #include "src/native/rv32im/src/mldsa_ntt_rv32im_asm.S"
 #include "src/native/rv32im/src/mldsa_ntt_rv32im_slowmul_asm.S"
+#include "src/native/rv32im/src/mldsa_poly_chknorm_rv32im_asm.S"
+#include "src/native/rv32im/src/mldsa_poly_decompose_32_rv32im_asm.S"
+#include "src/native/rv32im/src/mldsa_poly_decompose_88_rv32im_asm.S"
 #include "src/native/rv32im/src/mldsa_poly_pointwise_montgomery_rv32im_asm.S"
+#include "src/native/rv32im/src/mldsa_poly_use_hint_32_rv32im_asm.S"
+#include "src/native/rv32im/src/mldsa_poly_use_hint_88_rv32im_asm.S"
+#include "src/native/rv32im/src/mldsa_rej_uniform_rv32im_asm.S"
 #endif /* MLD_SYS_RISCV32 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */
 
@@ -845,6 +851,12 @@
 #undef MLD_USE_NATIVE_INTT
 #undef MLD_USE_NATIVE_NTT
 #undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLY_CHKNORM
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#undef MLD_USE_NATIVE_POLY_USE_HINT_32
+#undef MLD_USE_NATIVE_POLY_USE_HINT_88
+#undef MLD_USE_NATIVE_REJ_UNIFORM
 /* mldsa/src/native/rv32im/slowmul.h */
 #undef MLD_ARITH_BACKEND_RV32IM
 #undef MLD_NATIVE_RV32IM_SLOWMUL_H
@@ -852,13 +864,25 @@
 #undef MLD_USE_NATIVE_INTT
 #undef MLD_USE_NATIVE_NTT
 #undef MLD_USE_NATIVE_POINTWISE_MONTGOMERY
+#undef MLD_USE_NATIVE_POLY_CHKNORM
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#undef MLD_USE_NATIVE_POLY_DECOMPOSE_88
+#undef MLD_USE_NATIVE_POLY_USE_HINT_32
+#undef MLD_USE_NATIVE_POLY_USE_HINT_88
+#undef MLD_USE_NATIVE_REJ_UNIFORM
 /* mldsa/src/native/rv32im/src/arith_native_rv32im.h */
 #undef MLD_NATIVE_RV32IM_SRC_ARITH_NATIVE_RV32IM_H
 #undef mld_intt_rv32im_fastmul_asm
 #undef mld_intt_rv32im_slowmul_asm
 #undef mld_ntt_rv32im_fastmul_asm
 #undef mld_ntt_rv32im_slowmul_asm
+#undef mld_poly_chknorm_rv32im_asm
+#undef mld_poly_decompose_32_rv32im_asm
+#undef mld_poly_decompose_88_rv32im_asm
 #undef mld_poly_pointwise_montgomery_rv32im_asm
+#undef mld_poly_use_hint_32_rv32im_asm
+#undef mld_poly_use_hint_88_rv32im_asm
+#undef mld_rej_uniform_rv32im_asm
 #undef mld_rv32im_ntt_zetas
 #endif /* MLD_SYS_RISCV32 */
 #endif /* MLD_CONFIG_USE_NATIVE_BACKEND_ARITH */

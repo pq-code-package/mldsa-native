@@ -1,0 +1,44 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_chknorm_rv32im_asm
+#
+# The main theorems. Written by `hol-trace outline` or `hol-trace
+# compare --accept`. This is what the proof claims.
+
+theorem mldsa_poly_chknorm_rv32im_asm MLDSA_POLY_CHKNORM_SUBROUTINE_CORRECT
+  |- !a:int32 b:int32 x:(num -> int32) pc:num returnaddress:int32.
+       aligned 4 a /\ aligned 4 returnaddress /\ &0 < ival b
+       ==> ensures riscv
+             (\s:riscvstate.
+               aligned_bytes_loaded s (word pc : int32) mldsa_poly_chknorm_mc
+               /\ read PC s = (word pc : int32)
+               /\ read RA s = returnaddress
+               /\ C_ARGUMENTS [a; b] s
+               /\ (!i:num.
+                    i < 256
+                    ==> read (memory :> bytes32 (word_add a (word (4 * i) : int32))) s = x i))
+             (\s:riscvstate.
+               read PC s = returnaddress
+               /\ C_RETURN s
+                  = (word (bitval (?i:num. i < 256 /\ abs (ival (x i)) >= ival b)) : int32))
+             MAYCHANGE_REGS_PERMITTED_BY_ABI
+
+theorem mldsa_poly_chknorm_rv32im_asm MLDSA_POLY_CHKNORM_SUBROUTINE_SAFE
+  |- ?f_events:(int32 -> num -> int32 -> (32 address_uarch_event) list).
+       !e:((32 address_uarch_event) list) a:int32 b:int32 pc:num returnaddress:int32.
+         aligned 4 a /\ aligned 4 returnaddress /\ &0 < ival b
+         ==> ensures riscv
+               (\s:riscvstate.
+                 aligned_bytes_loaded s (word pc : int32) mldsa_poly_chknorm_mc
+                 /\ read PC s = (word pc : int32)
+                 /\ read RA s = returnaddress
+                 /\ C_ARGUMENTS [a; b] s
+                 /\ read events s = e)
+               (\s:riscvstate.
+                 read PC s = returnaddress
+                 /\ (?e2:((32 address_uarch_event) list).
+                      read events s = APPEND e2 e
+                      /\ e2 = f_events a pc returnaddress
+                      /\ memaccess_inbounds e2 [a, 1024] (NIL : (int32 # num) list)))
+               (\s:riscvstate s':riscvstate. T)
