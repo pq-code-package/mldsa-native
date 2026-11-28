@@ -26,6 +26,8 @@ int check_ntt_rv32im_slowmul_asm(void);
 int check_poly_decompose_32_rv32im_asm(void);
 int check_poly_decompose_88_rv32im_asm(void);
 int check_poly_pointwise_montgomery_rv32im_asm(void);
+int check_poly_use_hint_32_rv32im_asm(void);
+int check_poly_use_hint_88_rv32im_asm(void);
 int check_rej_uniform_rv32im_asm(void);
 #endif /* MLD_SYS_RISCV32_M */
 
@@ -39,6 +41,8 @@ static const abicheck_entry_t all_checks[] = {
     {"poly_decompose_88_rv32im_asm", check_poly_decompose_88_rv32im_asm},
     {"poly_pointwise_montgomery_rv32im_asm",
      check_poly_pointwise_montgomery_rv32im_asm},
+    {"poly_use_hint_32_rv32im_asm", check_poly_use_hint_32_rv32im_asm},
+    {"poly_use_hint_88_rv32im_asm", check_poly_use_hint_88_rv32im_asm},
     {"rej_uniform_rv32im_asm", check_rej_uniform_rv32im_asm},
 #endif           /* MLD_SYS_RISCV32_M */
     {NULL, NULL} /* Sentinel */

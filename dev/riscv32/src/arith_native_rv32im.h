@@ -161,6 +161,38 @@ __contract__(
 );
 #endif /* !MLD_CONFIG_NO_SIGN_API */
 
+#if !defined(MLD_CONFIG_NO_VERIFY_API)
+#define mld_poly_use_hint_32_rv32im_asm \
+  MLD_NAMESPACE(poly_use_hint_32_rv32im_asm)
+void mld_poly_use_hint_32_rv32im_asm(int32_t a[MLDSA_N],
+                                     const int32_t h[MLDSA_N])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/riscv32/proofs/mldsa_poly_use_hint_32_rv32im_asm.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(a, 0, MLDSA_N, 0, 16))
+);
+
+#define mld_poly_use_hint_88_rv32im_asm \
+  MLD_NAMESPACE(poly_use_hint_88_rv32im_asm)
+void mld_poly_use_hint_88_rv32im_asm(int32_t a[MLDSA_N],
+                                     const int32_t h[MLDSA_N])
+/* This must be kept in sync with the HOL-Light specification
+ * in proofs/hol_light/riscv32/proofs/mldsa_poly_use_hint_88_rv32im_asm.ml */
+__contract__(
+  requires(memory_no_alias(a, sizeof(int32_t) * MLDSA_N))
+  requires(memory_no_alias(h, sizeof(int32_t) * MLDSA_N))
+  requires(array_bound(a, 0, MLDSA_N, 0, MLDSA_Q))
+  requires(array_bound(h, 0, MLDSA_N, 0, 2))
+  assigns(memory_slice(a, sizeof(int32_t) * MLDSA_N))
+  ensures(array_bound(a, 0, MLDSA_N, 0, 44))
+);
+#endif /* !MLD_CONFIG_NO_VERIFY_API */
+
 /*
  * `array_abs_bound` is exclusive, matching the strict bounds in the forward
  * NTT and pointwise HOL-Light theorems. Its MLDSA_Q form is equivalent to the

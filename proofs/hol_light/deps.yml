@@ -348,6 +348,28 @@ riscv32/mldsa_poly_pointwise_montgomery_rv32im_asm:
   - common/misc.ml
   - riscv/proofs/base.ml
   - riscv/proofs/consttime.ml
+riscv32/mldsa_poly_use_hint_32_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_poly_use_hint_32_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_poly_use_hint_32_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
+riscv32/mldsa_poly_use_hint_88_rv32im_asm:
+  files:
+  - proofs/hol_light/common/mldsa_specs.ml
+  - proofs/hol_light/riscv32/mldsa/mldsa_poly_use_hint_88_rv32im_asm.S
+  - proofs/hol_light/riscv32/proofs/consttime_aux.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_poly_use_hint_88_rv32im_asm.ml
+  - proofs/hol_light/riscv32/proofs/mldsa_specs_aux.ml
+  s2n_bignum:
+  - common/misc.ml
+  - riscv/proofs/base.ml
+  - riscv/proofs/consttime.ml
 riscv32/mldsa_rej_uniform_rv32im_asm:
   files:
   - proofs/hol_light/common/mldsa_specs.ml
