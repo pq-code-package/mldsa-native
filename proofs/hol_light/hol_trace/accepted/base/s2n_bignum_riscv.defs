@@ -5,7 +5,7 @@
 # Definitions added by loading s2n_bignum/riscv/proofs/base.ml, s2n_bignum/common/misc.ml, s2n_bignum/riscv/proofs/consttime.ml, and the HOL Light libraries that these load.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bfd3ab6ed1eecae60fc74624872de62ea75e2791
 
 definition ITER
   |- (ITER : num -> ('?1 -> '?1) -> '?1 -> '?1)
@@ -1162,10 +1162,11 @@ definition _<EventLoad>
            CONSTR 0
              (a
              , (@v:('A word # 'A word). T)
-               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+               , (@v:(int64 # int64). T)
+                 , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition _<EventStore>
   |- (_<EventStore> : 'A word # num -> 'A address_uarch_event)
@@ -1174,10 +1175,11 @@ definition _<EventStore>
            CONSTR (SUC 0)
              (a
              , (@v:('A word # 'A word). T)
-               , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+               , (@v:(int64 # int64). T)
+                 , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition _<EventJump>
   |- (_<EventJump> : 'A word # 'A word -> 'A address_uarch_event)
@@ -1185,43 +1187,60 @@ definition _<EventJump>
          _mk_address_uarch_event ((\a:('A word # 'A word).
            CONSTR (SUC (SUC 0))
              ((@v:('A word # num). T)
-             , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+             , a
+               , (@v:(int64 # int64). T)
+                 , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
+
+definition _<EventDIV>
+  |- (_<EventDIV> : int64 # int64 -> 'A address_uarch_event)
+     = (\a:(int64 # int64).
+         _mk_address_uarch_event ((\a:(int64 # int64).
+           CONSTR (SUC (SUC (SUC 0)))
+             ((@v:('A word # num). T)
+             , (@v:('A word # 'A word). T)
+               , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+             (\n:num.
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86PEXT>
   |- (_<EventX86PEXT> : int64 # int64 # num -> 'A address_uarch_event)
      = (\a:(int64 # int64 # num).
          _mk_address_uarch_event ((\a:(int64 # int64 # num).
-           CONSTR (SUC (SUC (SUC 0)))
+           CONSTR (SUC (SUC (SUC (SUC 0))))
              ((@v:('A word # num). T)
-             , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64). T), a, (@v:(int64 # num). T), (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86POPCNT>
   |- (_<EventX86POPCNT> : int64 # num -> 'A address_uarch_event)
      = (\a:(int64 # num).
          _mk_address_uarch_event ((\a:(int64 # num).
-           CONSTR (SUC (SUC (SUC (SUC 0))))
+           CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
              ((@v:('A word # num). T)
-             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), a, (@v:int64. T))
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64). T), (@v:(int64 # int64 # num). T), a, (@v:int64. T))
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition _<EventX86Opmask>
   |- (_<EventX86Opmask> : int64 -> 'A address_uarch_event)
      = (\a:int64.
          _mk_address_uarch_event ((\a:int64.
-           CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
+           CONSTR (SUC (SUC (SUC (SUC (SUC (SUC 0))))))
              ((@v:('A word # num). T)
-             , (@v:('A word # 'A word). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+             , (@v:('A word # 'A word). T)
+               , (@v:(int64 # int64). T), (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
              (\n:num.
-               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                   (int64 # num) # int64) recspace))) a))
+               (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                   (int64 # int64 # num) # (int64 # num) # int64) recspace))) a))
 
 definition EventLoad
   |- (EventLoad : 'A word # num -> 'A address_uarch_event)
@@ -1234,6 +1253,10 @@ definition EventStore
 definition EventJump
   |- (EventJump : 'A word # 'A word -> 'A address_uarch_event)
      = (_<EventJump> : 'A word # 'A word -> 'A address_uarch_event)
+
+definition EventDIV
+  |- (EventDIV : int64 # int64 -> 'A address_uarch_event)
+     = (_<EventDIV> : int64 # int64 -> 'A address_uarch_event)
 
 definition EventX86PEXT
   |- (EventX86PEXT : int64 # int64 # num -> 'A address_uarch_event)
@@ -1586,6 +1609,16 @@ definition riscv_mulh
      = (\_1:int32 _2:int32.
          (word_subword (word_mul (word_sx _1 : int64) (word_sx _2 : int64)) (32, 32) : int32))
 
+definition riscv_mulhsu
+  |- riscv_mulhsu
+     = (\_1:int32 _2:int32.
+         (word_subword (word_mul (word_sx _1 : int64) (word_zx _2 : int64)) (32, 32) : int32))
+
+definition riscv_mulhu
+  |- riscv_mulhu
+     = (\_1:int32 _2:int32.
+         (word_subword (word_mul (word_zx _1 : int64) (word_zx _2 : int64)) (32, 32) : int32))
+
 definition riscv_event_load
   |- riscv_event_load
      = (\_1:int32 _2:num _3:riscvstate. := events (CONS (EventLoad (_1, _2)) (read events _3)))
@@ -1597,6 +1630,13 @@ definition riscv_event_store
 definition riscv_event_jump
   |- riscv_event_jump
      = (\_1:int32 _2:int32 _3:riscvstate. := events (CONS (EventJump (_1, _2)) (read events _3)))
+
+definition riscv_event_div
+  |- riscv_event_div
+     = (\_1:int32 _2:int32 _3:riscvstate.
+         := events (CONS
+           (EventDIV ((word_zx _1 : int64), (word_zx _2 : int64)) : 32 address_uarch_event)
+           (read events _3)))
 
 definition riscv_ADD
   |- riscv_ADD
@@ -1632,6 +1672,155 @@ definition riscv_SUB
                and n:int32 = read rs2 s in
                let d:int32 = word_sub m n in := rd d s))
 
+definition riscv_SLL
+  |- riscv_SLL
+     = (specification "riscv_SLL" riscv_SLL:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_SLL rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_shl m (val n MOD 32) in := rd d s))
+
+definition riscv_SLT
+  |- riscv_SLT
+     = (specification "riscv_SLT" riscv_SLT:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_SLT rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = COND (ival m < ival n) (word 1 : int32) (word 0 : int32) in := rd d s))
+
+definition riscv_SLTU
+  |- riscv_SLTU
+     = (specification "riscv_SLTU" riscv_SLTU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_SLTU rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = COND (val m < val n) (word 1 : int32) (word 0 : int32) in := rd d s))
+
+definition riscv_XOR
+  |- riscv_XOR
+     = (specification "riscv_XOR" riscv_XOR:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_XOR rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_xor m n in := rd d s))
+
+definition riscv_SRL
+  |- riscv_SRL
+     = (specification "riscv_SRL" riscv_SRL:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_SRL rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_ushr m (val n MOD 32) in := rd d s))
+
+definition riscv_SRA
+  |- riscv_SRA
+     = (specification "riscv_SRA" riscv_SRA:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_SRA rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_ishr m (val n MOD 32) in := rd d s))
+
+definition riscv_OR
+  |- riscv_OR
+     = (specification "riscv_OR" riscv_OR:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_OR rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_or m n in := rd d s))
+
+definition riscv_AND
+  |- riscv_AND
+     = (specification "riscv_AND" riscv_AND:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_AND rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = word_and m n in := rd d s))
+
+definition riscv_SLTI
+  |- riscv_SLTI
+     = (specification "riscv_SLTI" riscv_SLTI:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_SLTI rd rs1 imm
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s in
+               let d:int32 = COND (ival m < ival imm) (word 1 : int32) (word 0 : int32) in
+               := rd d s))
+
+definition riscv_SLTIU
+  |- riscv_SLTIU
+     = (specification "riscv_SLTIU" riscv_SLTIU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_SLTIU rd rs1 imm
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s in
+               let d:int32 = COND (val m < val imm) (word 1 : int32) (word 0 : int32) in := rd d s))
+
+definition riscv_XORI
+  |- riscv_XORI
+     = (specification "riscv_XORI" riscv_XORI:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_XORI rd rs1 imm
+           = (\s:riscvstate. let m:int32 = read rs1 s in let d:int32 = word_xor m imm in := rd d s))
+
+definition riscv_ORI
+  |- riscv_ORI
+     = (specification "riscv_ORI" riscv_ORI:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_ORI rd rs1 imm
+           = (\s:riscvstate. let m:int32 = read rs1 s in let d:int32 = word_or m imm in := rd d s))
+
+definition riscv_ANDI
+  |- riscv_ANDI
+     = (specification "riscv_ANDI" riscv_ANDI:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_ANDI rd rs1 imm
+           = (\s:riscvstate. let m:int32 = read rs1 s in let d:int32 = word_and m imm in := rd d s))
+
 definition riscv_SLLI
   |- riscv_SLLI
      = (specification "riscv_SLLI" riscv_SLLI:((riscvstate, int32) component ->
@@ -1640,6 +1829,15 @@ definition riscv_SLLI
            riscv_SLLI rd rs1 shamt
            = (\s:riscvstate.
                let m:int32 = read rs1 s in let d:int32 = word_shl m shamt in := rd d s))
+
+definition riscv_SRLI
+  |- riscv_SRLI
+     = (specification "riscv_SRLI" riscv_SRLI:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> num -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) shamt:num.
+           riscv_SRLI rd rs1 shamt
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s in let d:int32 = word_ushr m shamt in := rd d s))
 
 definition riscv_SRAI
   |- riscv_SRAI
@@ -1656,6 +1854,14 @@ definition riscv_LUI
            riscvstate -> bool).
          !rd:((riscvstate, int32) component) imm:int32.
            riscv_LUI rd imm = (\s:riscvstate. := rd imm s))
+
+definition riscv_AUIPC
+  |- riscv_AUIPC
+     = (specification "riscv_AUIPC" riscv_AUIPC:((riscvstate, int32) component -> int32 ->
+           riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) imm:int32.
+           riscv_AUIPC rd imm
+           = (\s:riscvstate. let d:int32 = word_add (riscv_instruction_pc s) imm in := rd d s))
 
 definition riscv_MUL
   |- riscv_MUL
@@ -1683,6 +1889,90 @@ definition riscv_MULH
                and n:int32 = read rs2 s in
                let d:int32 = riscv_mulh m n in := rd d s))
 
+definition riscv_MULHSU
+  |- riscv_MULHSU
+     = (specification "riscv_MULHSU" riscv_MULHSU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_MULHSU rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = riscv_mulhsu m n in := rd d s))
+
+definition riscv_MULHU
+  |- riscv_MULHU
+     = (specification "riscv_MULHU" riscv_MULHU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_MULHU rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = riscv_mulhu m n in := rd d s))
+
+definition riscv_DIV
+  |- riscv_DIV
+     = (specification "riscv_DIV" riscv_DIV:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_DIV rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 =
+                   COND (n = (word 0 : int32)) (word_not (word 0 : int32)) (word_jdiv m n) in
+               (,,) (:= rd d) (riscv_event_div m n s) s))
+
+definition riscv_DIVU
+  |- riscv_DIVU
+     = (specification "riscv_DIVU" riscv_DIVU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_DIVU rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 =
+                   COND (n = (word 0 : int32)) (word_not (word 0 : int32)) (word_udiv m n) in
+               (,,) (:= rd d) (riscv_event_div m n s) s))
+
+definition riscv_REM
+  |- riscv_REM
+     = (specification "riscv_REM" riscv_REM:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_REM rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = COND (n = (word 0 : int32)) m (word_jrem m n) in
+               (,,) (:= rd d) (riscv_event_div m n s) s))
+
+definition riscv_REMU
+  |- riscv_REMU
+     = (specification "riscv_REMU" riscv_REMU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> (riscvstate, int32) component -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component)
+          rs2:((riscvstate, int32) component).
+           riscv_REMU rd rs1 rs2
+           = (\s:riscvstate.
+               let m:int32 = read rs1 s
+               and n:int32 = read rs2 s in
+               let d:int32 = COND (n = (word 0 : int32)) m (word_umod m n) in
+               (,,) (:= rd d) (riscv_event_div m n s) s))
+
 definition riscv_LW
   |- riscv_LW
      = (specification "riscv_LW" riscv_LW:((riscvstate, int32) component ->
@@ -1696,6 +1986,58 @@ definition riscv_LW
                  (ASSIGNS (entirety : (riscvstate, riscvstate) component))
                  s))
 
+definition riscv_LB
+  |- riscv_LB
+     = (specification "riscv_LB" riscv_LB:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_LB rd rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               (,,) (:= rd (word_sx (read (memory :> bytes8 addr) s) : int32))
+                 (riscv_event_load addr 1 s)
+                 s))
+
+definition riscv_LH
+  |- riscv_LH
+     = (specification "riscv_LH" riscv_LH:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_LH rd rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               COND (aligned 2 addr)
+                 (:= rd (word_sx (read (memory :> bytes16 addr) s) : int32)
+                 ,, riscv_event_load addr 2 s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_LBU
+  |- riscv_LBU
+     = (specification "riscv_LBU" riscv_LBU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_LBU rd rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               (,,) (:= rd (word_zx (read (memory :> bytes8 addr) s) : int32))
+                 (riscv_event_load addr 1 s)
+                 s))
+
+definition riscv_LHU
+  |- riscv_LHU
+     = (specification "riscv_LHU" riscv_LHU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rd:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_LHU rd rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               COND (aligned 2 addr)
+                 (:= rd (word_zx (read (memory :> bytes16 addr) s) : int32)
+                 ,, riscv_event_load addr 2 s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
 definition riscv_SW
   |- riscv_SW
      = (specification "riscv_SW" riscv_SW:((riscvstate, int32) component ->
@@ -1706,6 +2048,32 @@ definition riscv_SW
                let addr:int32 = riscv_addr rs1 imm s in
                COND (aligned 4 addr)
                  (:= (memory :> bytes32 addr) (read rs2 s) ,, riscv_event_store addr 4 s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_SB
+  |- riscv_SB
+     = (specification "riscv_SB" riscv_SB:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs2:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_SB rs2 rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               (,,) (:= (memory :> bytes8 addr) (word_zx (read rs2 s) : byte))
+                 (riscv_event_store addr 1 s)
+                 s))
+
+definition riscv_SH
+  |- riscv_SH
+     = (specification "riscv_SH" riscv_SH:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs2:((riscvstate, int32) component) rs1:((riscvstate, int32) component) imm:int32.
+           riscv_SH rs2 rs1 imm
+           = (\s:riscvstate.
+               let addr:int32 = riscv_addr rs1 imm s in
+               COND (aligned 2 addr)
+                 (:= (memory :> bytes16 addr) (word_zx (read rs2 s) : int16)
+                 ,, riscv_event_store addr 2 s)
                  (ASSIGNS (entirety : (riscvstate, riscvstate) component))
                  s))
 
@@ -1724,6 +2092,95 @@ definition riscv_BNE
                  (ASSIGNS (entirety : (riscvstate, riscvstate) component))
                  s))
 
+definition riscv_BEQ
+  |- (riscv_BEQ : (riscvstate, '?1) component -> (riscvstate, '?1) component -> int32 ->
+         riscvstate -> riscvstate -> bool)
+     = (specification "riscv_BEQ" riscv_BEQ:((riscvstate, '?1) component ->
+           (riscvstate, '?1) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs1:((riscvstate, '?1) component) rs2:((riscvstate, '?1) component) imm:int32.
+           riscv_BEQ rs1 rs2 imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let dst:int32 =
+                   COND (read rs1 s = read rs2 s) (riscv_branch_target imm s) (read PC s) in
+               COND (aligned 4 dst) (:= PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_BLT
+  |- riscv_BLT
+     = (specification "riscv_BLT" riscv_BLT:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs1:((riscvstate, int32) component) rs2:((riscvstate, int32) component) imm:int32.
+           riscv_BLT rs1 rs2 imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let dst:int32 =
+                   COND (ival (read rs1 s) < ival (read rs2 s)) (riscv_branch_target imm s)
+                     (read PC s) in
+               COND (aligned 4 dst) (:= PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_BGE
+  |- riscv_BGE
+     = (specification "riscv_BGE" riscv_BGE:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs1:((riscvstate, int32) component) rs2:((riscvstate, int32) component) imm:int32.
+           riscv_BGE rs1 rs2 imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let dst:int32 =
+                   COND (ival (read rs1 s) >= ival (read rs2 s)) (riscv_branch_target imm s)
+                     (read PC s) in
+               COND (aligned 4 dst) (:= PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_BLTU
+  |- riscv_BLTU
+     = (specification "riscv_BLTU" riscv_BLTU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs1:((riscvstate, int32) component) rs2:((riscvstate, int32) component) imm:int32.
+           riscv_BLTU rs1 rs2 imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let dst:int32 =
+                   COND (val (read rs1 s) < val (read rs2 s)) (riscv_branch_target imm s)
+                     (read PC s) in
+               COND (aligned 4 dst) (:= PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_BGEU
+  |- riscv_BGEU
+     = (specification "riscv_BGEU" riscv_BGEU:((riscvstate, int32) component ->
+           (riscvstate, int32) component -> int32 -> riscvstate -> riscvstate -> bool).
+         !rs1:((riscvstate, int32) component) rs2:((riscvstate, int32) component) imm:int32.
+           riscv_BGEU rs1 rs2 imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let dst:int32 =
+                   COND (val (read rs1 s) >= val (read rs2 s)) (riscv_branch_target imm s)
+                     (read PC s) in
+               COND (aligned 4 dst) (:= PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
+definition riscv_JAL
+  |- riscv_JAL
+     = (specification "riscv_JAL" riscv_JAL:((riscvstate, int32) component -> int32 -> riscvstate ->
+           riscvstate -> bool).
+         !rd:((riscvstate, int32) component) imm:int32.
+           riscv_JAL rd imm
+           = (\s:riscvstate.
+               let src:int32 = riscv_instruction_pc s in
+               let link:int32 = read PC s in
+               let dst:int32 = riscv_branch_target imm s in
+               COND (aligned 4 dst) (:= rd link ,, := PC dst ,, riscv_event_jump src dst s)
+                 (ASSIGNS (entirety : (riscvstate, riscvstate) component))
+                 s))
+
 definition riscv_JALR
   |- riscv_JALR
      = (specification "riscv_JALR" riscv_JALR:((riscvstate, int32) component ->
@@ -1738,394 +2195,23 @@ definition riscv_JALR
                  (ASSIGNS (entirety : (riscvstate, riscvstate) component))
                  s))
 
+definition riscv_FENCE
+  |- riscv_FENCE = (\s:riscvstate s':riscvstate. s = s')
+
+definition riscv_ECALL
+  |- riscv_ECALL = ASSIGNS (entirety : (riscvstate, riscvstate) component)
+
+definition riscv_EBREAK
+  |- riscv_EBREAK = ASSIGNS (entirety : (riscvstate, riscvstate) component)
+
 definition riscv_xreg
   |- riscv_xreg = (\_1:(5 word). riscv_gpr _1)
 
 definition decode
-  |- decode
-     = (\_1:int32.
-         _BITMATCH _1 (_SEQPATTERN
-           (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-             ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-               _UNGUARDED_PATTERN
-                 (pat_set
-                   (CONSPAT
-                     (CONSPAT
-                       (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 0 : 7 word)) rs2) rs1)
-                         (word 0 : 3 word))
-                       rd)
-                     (word 51 : 7 word))
-                   "BM%PVAR%10")
-                 (SOME (riscv_ADD (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                 = "BM%PVAR%11"))
-           (_SEQPATTERN
-             (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-               ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                 _UNGUARDED_PATTERN
-                   (pat_set
-                     (CONSPAT
-                       (CONSPAT
-                         (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 32 : 7 word)) rs2) rs1)
-                           (word 0 : 3 word))
-                         rd)
-                       (word 51 : 7 word))
-                     "BM%PVAR%10")
-                   (SOME (riscv_SUB (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                   = "BM%PVAR%11"))
-             (_SEQPATTERN
-               (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                 ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                   _UNGUARDED_PATTERN
-                     (pat_set
-                       (CONSPAT
-                         (CONSPAT
-                           (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 1 : 7 word)) rs2) rs1)
-                             (word 0 : 3 word))
-                           rd)
-                         (word 51 : 7 word))
-                       "BM%PVAR%10")
-                     (SOME (riscv_MUL (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                     = "BM%PVAR%11"))
-               (_SEQPATTERN
-                 (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                   ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                     _UNGUARDED_PATTERN
-                       (pat_set
-                         (CONSPAT
-                           (CONSPAT
-                             (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 1 : 7 word)) rs2) rs1)
-                               (word 1 : 3 word))
-                             rd)
-                           (word 51 : 7 word))
-                         "BM%PVAR%10")
-                       (SOME (riscv_MULH (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                       = "BM%PVAR%11"))
-                 (_SEQPATTERN
-                   (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                     ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                       _UNGUARDED_PATTERN
-                         (pat_set
-                           (CONSPAT
-                             (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1) (word 0 : 3 word))
-                               rd)
-                             (word 19 : 7 word))
-                           "BM%PVAR%10")
-                         (SOME (riscv_ADDI (riscv_xreg rd) (riscv_xreg rs1) (word_sx imm : int32))
-                         = "BM%PVAR%11"))
-                   (_SEQPATTERN
-                     (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                       ?shamt:(5 word) rs1:(5 word) rd:(5 word).
-                         _UNGUARDED_PATTERN
-                           (pat_set
-                             (CONSPAT
-                               (CONSPAT
-                                 (CONSPAT
-                                   (CONSPAT (CONSPAT (CONSPAT NILPAT (word 0 : 7 word)) shamt) rs1)
-                                   (word 1 : 3 word))
-                                 rd)
-                               (word 19 : 7 word))
-                             "BM%PVAR%10")
-                           (SOME (riscv_SLLI (riscv_xreg rd) (riscv_xreg rs1) (val shamt))
-                           = "BM%PVAR%11"))
-                     (_SEQPATTERN
-                       (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                         ?shamt:(5 word) rs1:(5 word) rd:(5 word).
-                           _UNGUARDED_PATTERN
-                             (pat_set
-                               (CONSPAT
-                                 (CONSPAT
-                                   (CONSPAT
-                                     (CONSPAT (CONSPAT (CONSPAT NILPAT (word 32 : 7 word)) shamt)
-                                       rs1)
-                                     (word 5 : 3 word))
-                                   rd)
-                                 (word 19 : 7 word))
-                               "BM%PVAR%10")
-                             (SOME (riscv_SRAI (riscv_xreg rd) (riscv_xreg rs1) (val shamt))
-                             = "BM%PVAR%11"))
-                       (_SEQPATTERN
-                         (\"BM%PVAR%10":num
-                           "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                           ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                             _UNGUARDED_PATTERN
-                               (pat_set
-                                 (CONSPAT
-                                   (CONSPAT
-                                     (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1) (word 2 : 3 word))
-                                     rd)
-                                   (word 3 : 7 word))
-                                 "BM%PVAR%10")
-                               (SOME (riscv_LW (riscv_xreg rd) (riscv_xreg rs1)
-                                 (word_sx imm : int32))
-                               = "BM%PVAR%11"))
-                         (_SEQPATTERN
-                           (\"BM%PVAR%10":num
-                             "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                             ?immhi:(7 word) rs2:(5 word) rs1:(5 word) immlo:(5 word).
-                               _UNGUARDED_PATTERN
-                                 (pat_set
-                                   (CONSPAT
-                                     (CONSPAT
-                                       (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT immhi) rs2) rs1)
-                                         (word 2 : 3 word))
-                                       immlo)
-                                     (word 35 : 7 word))
-                                   "BM%PVAR%10")
-                                 (SOME (riscv_SW (riscv_xreg rs2) (riscv_xreg rs1)
-                                   (word_sx (word_join immhi immlo : 12 word) : int32))
-                                 = "BM%PVAR%11"))
-                           (_SEQPATTERN
-                             (\"BM%PVAR%10":num
-                               "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                               ?imm12:(1 word) imm10_5:(6 word) rs2:(5 word) rs1:(5 word)
-                                imm4_1:(4 word) imm11:(1 word).
-                                 _UNGUARDED_PATTERN
-                                   (pat_set
-                                     (CONSPAT
-                                       (CONSPAT
-                                         (CONSPAT
-                                           (CONSPAT
-                                             (CONSPAT
-                                               (CONSPAT (CONSPAT (CONSPAT NILPAT imm12) imm10_5)
-                                                 rs2)
-                                               rs1)
-                                             (word 1 : 3 word))
-                                           imm4_1)
-                                         imm11)
-                                       (word 99 : 7 word))
-                                     "BM%PVAR%10")
-                                   (SOME (riscv_BNE (riscv_xreg rs1) (riscv_xreg rs2)
-                                     (word_sx
-                                       (word_join
-                                         (word_join (word_join imm12 imm11 : 2 word) imm10_5 : byte)
-                                         (word_join imm4_1 (word 0 : 1 word) : 5 word)
-                                         : 13 word)
-                                       : int32))
-                                   = "BM%PVAR%11"))
-                             (_SEQPATTERN
-                               (\"BM%PVAR%10":num
-                                 "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                                 ?imm:(20 word) rd:(5 word).
-                                   _UNGUARDED_PATTERN
-                                     (pat_set
-                                       (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rd)
-                                         (word 55 : 7 word))
-                                       "BM%PVAR%10")
-                                     (SOME (riscv_LUI (riscv_xreg rd)
-                                       (word_join imm (word 0 : 12 word) : int32))
-                                     = "BM%PVAR%11"))
-                               (_SEQPATTERN
-                                 (\"BM%PVAR%10":num
-                                   "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                                   ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                                     _UNGUARDED_PATTERN
-                                       (pat_set
-                                         (CONSPAT
-                                           (CONSPAT
-                                             (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1)
-                                               (word 0 : 3 word))
-                                             rd)
-                                           (word 103 : 7 word))
-                                         "BM%PVAR%10")
-                                       (SOME (riscv_JALR (riscv_xreg rd) (riscv_xreg rs1)
-                                         (word_sx imm : int32))
-                                       = "BM%PVAR%11"))
-                                 (_ELSEPATTERN (NONE : (riscvstate -> riscvstate -> bool) option)
-                                   : num -> (riscvstate -> riscvstate -> bool) option ->
-                                       bool))))))))))))))
+  sha256 9675775bb454bb9730c7fbd7dffa69a25863fe7dc0023419f721308cb6332320 (137593 characters, not shown)
 
 definition __opaque_bitmatch_0
-  |- __opaque_bitmatch_0
-     = (\_1:int32.
-         _BITMATCH _1 (_SEQPATTERN
-           (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-             ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-               _UNGUARDED_PATTERN
-                 (pat_set
-                   (CONSPAT
-                     (CONSPAT
-                       (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 0 : 7 word)) rs2) rs1)
-                         (word 0 : 3 word))
-                       rd)
-                     (word 51 : 7 word))
-                   "BM%PVAR%10")
-                 (SOME (riscv_ADD (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                 = "BM%PVAR%11"))
-           (_SEQPATTERN
-             (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-               ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                 _UNGUARDED_PATTERN
-                   (pat_set
-                     (CONSPAT
-                       (CONSPAT
-                         (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 32 : 7 word)) rs2) rs1)
-                           (word 0 : 3 word))
-                         rd)
-                       (word 51 : 7 word))
-                     "BM%PVAR%10")
-                   (SOME (riscv_SUB (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                   = "BM%PVAR%11"))
-             (_SEQPATTERN
-               (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                 ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                   _UNGUARDED_PATTERN
-                     (pat_set
-                       (CONSPAT
-                         (CONSPAT
-                           (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 1 : 7 word)) rs2) rs1)
-                             (word 0 : 3 word))
-                           rd)
-                         (word 51 : 7 word))
-                       "BM%PVAR%10")
-                     (SOME (riscv_MUL (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                     = "BM%PVAR%11"))
-               (_SEQPATTERN
-                 (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                   ?rs2:(5 word) rs1:(5 word) rd:(5 word).
-                     _UNGUARDED_PATTERN
-                       (pat_set
-                         (CONSPAT
-                           (CONSPAT
-                             (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT (word 1 : 7 word)) rs2) rs1)
-                               (word 1 : 3 word))
-                             rd)
-                           (word 51 : 7 word))
-                         "BM%PVAR%10")
-                       (SOME (riscv_MULH (riscv_xreg rd) (riscv_xreg rs1) (riscv_xreg rs2))
-                       = "BM%PVAR%11"))
-                 (_SEQPATTERN
-                   (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                     ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                       _UNGUARDED_PATTERN
-                         (pat_set
-                           (CONSPAT
-                             (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1) (word 0 : 3 word))
-                               rd)
-                             (word 19 : 7 word))
-                           "BM%PVAR%10")
-                         (SOME (riscv_ADDI (riscv_xreg rd) (riscv_xreg rs1) (word_sx imm : int32))
-                         = "BM%PVAR%11"))
-                   (_SEQPATTERN
-                     (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                       ?shamt:(5 word) rs1:(5 word) rd:(5 word).
-                         _UNGUARDED_PATTERN
-                           (pat_set
-                             (CONSPAT
-                               (CONSPAT
-                                 (CONSPAT
-                                   (CONSPAT (CONSPAT (CONSPAT NILPAT (word 0 : 7 word)) shamt) rs1)
-                                   (word 1 : 3 word))
-                                 rd)
-                               (word 19 : 7 word))
-                             "BM%PVAR%10")
-                           (SOME (riscv_SLLI (riscv_xreg rd) (riscv_xreg rs1) (val shamt))
-                           = "BM%PVAR%11"))
-                     (_SEQPATTERN
-                       (\"BM%PVAR%10":num "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                         ?shamt:(5 word) rs1:(5 word) rd:(5 word).
-                           _UNGUARDED_PATTERN
-                             (pat_set
-                               (CONSPAT
-                                 (CONSPAT
-                                   (CONSPAT
-                                     (CONSPAT (CONSPAT (CONSPAT NILPAT (word 32 : 7 word)) shamt)
-                                       rs1)
-                                     (word 5 : 3 word))
-                                   rd)
-                                 (word 19 : 7 word))
-                               "BM%PVAR%10")
-                             (SOME (riscv_SRAI (riscv_xreg rd) (riscv_xreg rs1) (val shamt))
-                             = "BM%PVAR%11"))
-                       (_SEQPATTERN
-                         (\"BM%PVAR%10":num
-                           "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                           ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                             _UNGUARDED_PATTERN
-                               (pat_set
-                                 (CONSPAT
-                                   (CONSPAT
-                                     (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1) (word 2 : 3 word))
-                                     rd)
-                                   (word 3 : 7 word))
-                                 "BM%PVAR%10")
-                               (SOME (riscv_LW (riscv_xreg rd) (riscv_xreg rs1)
-                                 (word_sx imm : int32))
-                               = "BM%PVAR%11"))
-                         (_SEQPATTERN
-                           (\"BM%PVAR%10":num
-                             "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                             ?immhi:(7 word) rs2:(5 word) rs1:(5 word) immlo:(5 word).
-                               _UNGUARDED_PATTERN
-                                 (pat_set
-                                   (CONSPAT
-                                     (CONSPAT
-                                       (CONSPAT (CONSPAT (CONSPAT (CONSPAT NILPAT immhi) rs2) rs1)
-                                         (word 2 : 3 word))
-                                       immlo)
-                                     (word 35 : 7 word))
-                                   "BM%PVAR%10")
-                                 (SOME (riscv_SW (riscv_xreg rs2) (riscv_xreg rs1)
-                                   (word_sx (word_join immhi immlo : 12 word) : int32))
-                                 = "BM%PVAR%11"))
-                           (_SEQPATTERN
-                             (\"BM%PVAR%10":num
-                               "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                               ?imm12:(1 word) imm10_5:(6 word) rs2:(5 word) rs1:(5 word)
-                                imm4_1:(4 word) imm11:(1 word).
-                                 _UNGUARDED_PATTERN
-                                   (pat_set
-                                     (CONSPAT
-                                       (CONSPAT
-                                         (CONSPAT
-                                           (CONSPAT
-                                             (CONSPAT
-                                               (CONSPAT (CONSPAT (CONSPAT NILPAT imm12) imm10_5)
-                                                 rs2)
-                                               rs1)
-                                             (word 1 : 3 word))
-                                           imm4_1)
-                                         imm11)
-                                       (word 99 : 7 word))
-                                     "BM%PVAR%10")
-                                   (SOME (riscv_BNE (riscv_xreg rs1) (riscv_xreg rs2)
-                                     (word_sx
-                                       (word_join
-                                         (word_join (word_join imm12 imm11 : 2 word) imm10_5 : byte)
-                                         (word_join imm4_1 (word 0 : 1 word) : 5 word)
-                                         : 13 word)
-                                       : int32))
-                                   = "BM%PVAR%11"))
-                             (_SEQPATTERN
-                               (\"BM%PVAR%10":num
-                                 "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                                 ?imm:(20 word) rd:(5 word).
-                                   _UNGUARDED_PATTERN
-                                     (pat_set
-                                       (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rd)
-                                         (word 55 : 7 word))
-                                       "BM%PVAR%10")
-                                     (SOME (riscv_LUI (riscv_xreg rd)
-                                       (word_join imm (word 0 : 12 word) : int32))
-                                     = "BM%PVAR%11"))
-                               (_SEQPATTERN
-                                 (\"BM%PVAR%10":num
-                                   "BM%PVAR%11":((riscvstate -> riscvstate -> bool) option).
-                                   ?imm:(12 word) rs1:(5 word) rd:(5 word).
-                                     _UNGUARDED_PATTERN
-                                       (pat_set
-                                         (CONSPAT
-                                           (CONSPAT
-                                             (CONSPAT (CONSPAT (CONSPAT NILPAT imm) rs1)
-                                               (word 0 : 3 word))
-                                             rd)
-                                           (word 103 : 7 word))
-                                         "BM%PVAR%10")
-                                       (SOME (riscv_JALR (riscv_xreg rd) (riscv_xreg rs1)
-                                         (word_sx imm : int32))
-                                       = "BM%PVAR%11"))
-                                 (_ELSEPATTERN (NONE : (riscvstate -> riscvstate -> bool) option)
-                                   : num -> (riscvstate -> riscvstate -> bool) option ->
-                                       bool))))))))))))))
+  sha256 313760dfda1d079197662ff90fa9460b031565bcbfe3025bf8617752e92a323f (137606 characters, not shown)
 
 definition decode32
   |- (decode32 : (int32 -> '?1 option) -> riscvstate -> int32 -> '?1 -> bool)
@@ -2275,87 +2361,105 @@ typedef component
        = {r:('S -> 'V) # ('V -> 'S -> 'S)})
 
 typedef address_uarch_event
-  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
-         recspace).
-       !address_uarch_event':((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                (int64 # num) # int64) recspace -> bool).
-         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-               int64) recspace).
+  |- (\a:((('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+           (int64 # num) # int64) recspace).
+       !address_uarch_event':((('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                (int64 # int64 # num) # (int64 # num) # int64) recspace -> bool).
+         (!a:((('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+               (int64 # num) # int64) recspace).
            (?a:('A word # num).
-             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                 int64) recspace}
+             {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+                 (int64 # num) # int64) recspace}
              = (\a:('A word # num).
                  CONSTR 0
                    (a
                    , (@v:('A word # 'A word). T)
-                     , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+                     , (@v:(int64 # int64). T)
+                       , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                    (\n:num.
-                     (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                         (int64 # num) # int64) recspace))) a)
+                     (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                         (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                    int64) recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
                 = (\a:('A word # num).
                     CONSTR (SUC 0)
                       (a
                       , (@v:('A word # 'A word). T)
-                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+                        , (@v:(int64 # int64). T)
+                          , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
-                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            (int64 # num) # int64) recspace))) a)
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
            \/ (?a:('A word # 'A word).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                    int64) recspace}
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
                 = (\a:('A word # 'A word).
                     CONSTR (SUC (SUC 0))
                       ((@v:('A word # num). T)
-                      , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
+                      , a
+                        , (@v:(int64 # int64). T)
+                          , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
-                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            (int64 # num) # int64) recspace))) a)
-           \/ (?a:(int64 # int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                    int64) recspace}
-                = (\a:(int64 # int64 # num).
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
+           \/ (?a:(int64 # int64).
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
+                = (\a:(int64 # int64).
                     CONSTR (SUC (SUC (SUC 0)))
                       ((@v:('A word # num). T)
-                      , (@v:('A word # 'A word). T), a, (@v:(int64 # num). T), (@v:int64. T))
+                      , (@v:('A word # 'A word). T)
+                        , a, (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
-                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            (int64 # num) # int64) recspace))) a)
-           \/ (?a:(int64 # num).
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                    int64) recspace}
-                = (\a:(int64 # num).
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
+           \/ (?a:(int64 # int64 # num).
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
+                = (\a:(int64 # int64 # num).
                     CONSTR (SUC (SUC (SUC (SUC 0))))
                       ((@v:('A word # num). T)
                       , (@v:('A word # 'A word). T)
-                        , (@v:(int64 # int64 # num). T), a, (@v:int64. T))
+                        , (@v:(int64 # int64). T), a, (@v:(int64 # num). T), (@v:int64. T))
                       (\n:num.
-                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            (int64 # num) # int64) recspace))) a)
-           \/ (?a:int64.
-                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) #
-                    int64) recspace}
-                = (\a:int64.
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
+           \/ (?a:(int64 # num).
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
+                = (\a:(int64 # num).
                     CONSTR (SUC (SUC (SUC (SUC (SUC 0)))))
                       ((@v:('A word # num). T)
                       , (@v:('A word # 'A word). T)
-                        , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+                        , (@v:(int64 # int64). T), (@v:(int64 # int64 # num). T), a, (@v:int64. T))
                       (\n:num.
-                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) #
-                            (int64 # num) # int64) recspace))) a)
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
+           \/ (?a:int64.
+                {a:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                    (int64 # int64 # num) # (int64 # num) # int64) recspace}
+                = (\a:int64.
+                    CONSTR (SUC (SUC (SUC (SUC (SUC (SUC 0))))))
+                      ((@v:('A word # num). T)
+                      , (@v:('A word # 'A word). T)
+                        , (@v:(int64 # int64). T)
+                          , (@v:(int64 # int64 # num). T), (@v:(int64 # num). T), a)
+                      (\n:num.
+                        (BOTTOM : (('A word # num) # ('A word # 'A word) # (int64 # int64) #
+                            (int64 # int64 # num) # (int64 # num) # int64) recspace))) a)
            ==> address_uarch_event' a)
-         ==> address_uarch_event' a) {r:(('A word # num) # ('A word # 'A word) #
+         ==> address_uarch_event' a) {r:(('A word # num) # ('A word # 'A word) # (int64 # int64) #
          (int64 # int64 # num) # (int64 # num) # int64) recspace}
      = ((_dest_address_uarch_event : 'A address_uarch_event ->
-           (('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
-             recspace) ((_mk_address_uarch_event : (('A word # num) # ('A word # 'A word) #
-               (int64 # int64 # num) # (int64 # num) # int64) recspace -> 'A address_uarch_event)
-         {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
-           recspace})
-       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64 # num) # (int64 # num) # int64)
-           recspace})
+           (('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+               (int64 # num) # int64) recspace) ((_mk_address_uarch_event
+         : (('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+                 (int64 # num) # int64) recspace -> 'A address_uarch_event)
+         {r:(('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+             (int64 # num) # int64) recspace})
+       = {r:(('A word # num) # ('A word # 'A word) # (int64 # int64) # (int64 # int64 # num) #
+             (int64 # num) # int64) recspace})
 
 typedef riscvstate
   |- (\a:((int32 # (5 word -> int32) # (int32 -> byte) # (32 address_uarch_event) list) recspace).

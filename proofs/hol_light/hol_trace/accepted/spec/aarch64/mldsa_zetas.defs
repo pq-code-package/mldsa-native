@@ -5,7 +5,7 @@
 # Definitions added by loading proofs/hol_light/aarch64/proofs/mldsa_zetas.ml.
 # The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
 # pin: hol_light https://github.com/jrh13/hol-light/commit/72f2059e632021b940636156925a7500a3f253fd
-# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/1d097f630f0ca91cc2271491b9dd57dc9c9023a5
+# pin: s2n_bignum https://github.com/awslabs/s2n-bignum/commit/bfd3ab6ed1eecae60fc74624872de62ea75e2791
 # source: proofs/hol_light/aarch64/proofs/mldsa_zetas.ml 47b333ceb8e1e931ba4f2b86d372042f40ac0ce5b0151ab112e2ea8082d21ca7
 
 definition ntt_zetas_layer012345
