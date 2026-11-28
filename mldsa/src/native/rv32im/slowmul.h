@@ -36,6 +36,8 @@
 #define MLD_USE_NATIVE_INTT
 #define MLD_USE_NATIVE_POINTWISE_MONTGOMERY
 #define MLD_USE_NATIVE_REJ_UNIFORM
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_32
+#define MLD_USE_NATIVE_POLY_DECOMPOSE_88
 
 /* Identifier for this backend so that source and assembly files
  * in the build can be appropriately guarded. */
@@ -87,6 +89,29 @@ static MLD_INLINE int mld_rej_uniform_native(int32_t *r, unsigned len,
   /* Safety: outlen is at most MLDSA_N, hence, this cast is safe. */
   return (int)mld_rej_uniform_rv32im_asm(r, buf, buflen);
 }
+
+#if !defined(MLD_CONFIG_NO_SIGN_API)
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || \
+    (MLD_CONFIG_PARAMETER_SET == 65 || MLD_CONFIG_PARAMETER_SET == 87)
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_32_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_32_rv32im_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 65 \
+          || MLD_CONFIG_PARAMETER_SET == 87 */
+
+#if defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) || MLD_CONFIG_PARAMETER_SET == 44
+MLD_MUST_CHECK_RETURN_VALUE
+static MLD_INLINE int mld_poly_decompose_88_native(int32_t *a1, int32_t *a0)
+{
+  mld_poly_decompose_88_rv32im_asm(a1, a0);
+  return MLD_NATIVE_FUNC_SUCCESS;
+}
+#endif /* MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44 \
+        */
+#endif /* !MLD_CONFIG_NO_SIGN_API */
 
 #endif /* !__ASSEMBLER__ */
 

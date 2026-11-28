@@ -1,0 +1,174 @@
+/*
+ * Copyright (c) The mldsa-native project authors
+ * SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+ */
+
+/*
+ * RV32-IM ML-DSA Decompose for GAMMA2 = (q-1)/88. For 0 <= i < 256 and
+ * c = a0[i] in [0, q), computes
+ *
+ *     a1[i] = c1,  a0[i] = c0,  c = c1 * 2*GAMMA2 + c0 (mod q),
+ *
+ * with the same arithmetic as mld_decompose() in mldsa/src/rounding.h:
+ *
+ *     f  = (c + 127) >> 7
+ *     c1 = (f * 11275 + 2^23) >> 24              in [0, 44]
+ *     c1 = (c1 < 44) ? c1 : 0
+ *     c0 = c - c1 * 2*GAMMA2
+ *     c0 = (c0 > (q-1)/2) ? c0 - q : c0
+ *
+ * The selections are computed with masks, so the routine runs in
+ * constant time.
+ */
+
+/*yaml
+  Name: poly_decompose_88_rv32im_asm
+  Description: RV32IM Decompose of a polynomial for GAMMA2 = (q-1)/88
+  Signature: void mld_poly_decompose_88_rv32im_asm(int32_t a1[256], int32_t a0[256])
+  ABI:
+    Architecture: riscv32
+    CallingConvention: ILP32
+    Features: [RV32M]
+    a0:
+      type: buffer
+      size_bytes: 1024
+      permissions: write-only
+      c_parameter: int32_t a1[256]
+      description: Output high bits
+    a1:
+      type: buffer
+      size_bytes: 1024
+      permissions: read/write
+      c_parameter: int32_t a0[256]
+      description: Input polynomial, output low bits
+*/
+
+#include "../../../common.h"
+#if defined(MLD_SYS_RISCV32_M) && defined(MLD_ARITH_BACKEND_RV32IM) && \
+    !defined(MLD_CONFIG_NO_SIGN_API) &&                                \
+    !defined(MLD_CONFIG_MULTILEVEL_NO_SHARED) &&                       \
+    (defined(MLD_CONFIG_MULTILEVEL_WITH_SHARED) ||                     \
+     MLD_CONFIG_PARAMETER_SET == 44)
+        /* Without linker relaxation, GNU as resolves the branches to .L
+         * labels and leaves no relocations in the kernel. It uses the
+         * setting in force at the end of the file, so keep this outside
+         * the push/pop below. */
+        .option norelax
+        /* Keep RV32IMC builds byte-identical to the verified RV32IM code. */
+        .option push
+        .option norvc
+/* simpasm: header-end */
+
+/*****************************************************************
+ * Register aliases
+ *****************************************************************/
+
+/* Arguments */
+#define hi          a0          /* a1: output high bits            */
+#define lo          a1          /* a0: input, output low bits      */
+
+/* Constants */
+#define end         a2          /* lo + 1024                       */
+#define kmul        t0          /* 11275                           */
+#define rnd         t1          /* 2^23                            */
+#define g2x2        t2          /* 2*GAMMA2 = 190464               */
+#define halfq       t3          /* (q-1)/2 = 4190208               */
+#define q           t4          /* q = 8380417                     */
+
+/* Working set */
+#define c0          a3          /* coefficient, then low bits      */
+#define c1          a4
+#define h0          a5          /* high bits                       */
+#define h1          a6
+#define t           t5
+#define u           t6
+
+/*****************************************************************
+ * Macros
+ *****************************************************************/
+
+/* decompose c, f:
+ *
+ * Decompose the coefficient c: set f to its high bits and c to its low
+ * bits. Clobbers t, u.
+ */
+.macro decompose c, f
+        addi  \f, \c, 127
+        srli  \f, \f, 7
+        mul   \f, \f, kmul
+        add   \f, \f, rnd
+        srli  \f, \f, 24
+        sltiu t,  \f, 44
+        neg   t,  t
+        and   \f, \f, t
+        mul   t,  \f, g2x2
+        sub   \c, \c, t
+        sub   u,  halfq, \c
+        srai  u,  u,  31
+        and   u,  u,  q
+        sub   \c, \c, u
+.endm
+
+/*****************************************************************
+ * Function
+ *****************************************************************/
+
+        .text
+        .global MLD_ASM_NAMESPACE(poly_decompose_88_rv32im_asm)
+        .balign 4
+MLD_ASM_FN_SYMBOL(poly_decompose_88_rv32im_asm)
+
+        /* check-magic: 11275 == floor(2**24 / 1488) */
+        lui   kmul,  0x3
+        addi  kmul,  kmul, -1013
+        /* rnd = 2^23 */
+        lui   rnd,   0x800
+        /* check-magic: 190464 == 2 * intdiv(MLDSA_Q - 1, 88) */
+        lui   g2x2,  0x2F
+        addi  g2x2,  g2x2, -2048
+        /* check-magic: 4190208 == intdiv(MLDSA_Q - 1, 2) */
+        lui   halfq, 0x3FF
+        /* check-magic: 8380417 == MLDSA_Q */
+        lui   q,     0x7FE
+        addi  q,     q,    1
+
+        addi  end,   lo,   1024
+
+mld_poly_decompose_88_rv32im_loop:
+        lw    c0,  0(lo)
+        lw    c1,  4(lo)
+        decompose c0, h0
+        decompose c1, h1
+        sw    h0,  0(hi)
+        sw    h1,  4(hi)
+        sw    c0,  0(lo)
+        sw    c1,  4(lo)
+        addi  hi,  hi,  8
+        addi  lo,  lo,  8
+        bne   lo,  end, mld_poly_decompose_88_rv32im_loop
+
+        ret
+
+/* To facilitate single-compilation-unit (SCU) builds, undefine all macros.
+ * Don't modify by hand -- this is auto-generated by scripts/autogen. */
+#undef hi
+#undef lo
+#undef end
+#undef kmul
+#undef rnd
+#undef g2x2
+#undef halfq
+#undef q
+#undef c0
+#undef c1
+#undef h0
+#undef h1
+#undef t
+#undef u
+
+/* simpasm: footer-start */
+        .option pop
+#endif /* MLD_SYS_RISCV32_M && MLD_ARITH_BACKEND_RV32IM && \
+          !MLD_CONFIG_NO_SIGN_API && !MLD_CONFIG_MULTILEVEL_NO_SHARED && \
+          (MLD_CONFIG_MULTILEVEL_WITH_SHARED || MLD_CONFIG_PARAMETER_SET == 44) \
+        */

@@ -1,0 +1,21 @@
+# Copyright (c) The mldsa-native project authors
+# SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
+#
+# mldsa_poly_decompose_32_rv32im_asm
+#
+# The definitions that the main theorems use beyond the shared files
+# in accepted/base and accepted/spec. Written by `hol-trace outline`
+# or `hol-trace compare --accept`. check-binary compares the byte list
+# with functions in binaries, through proofs/hol_light/bind.yml.
+# The notation is explained in proofs/hol_light/hol_trace/accepted/README.md.
+
+# mldsa_poly_decompose_32_mc: 168 bytes
+# sha256 72938d09c7eb9d4b54e341fc18b5bc74e8b78743acdcdee100fad1c41085a33d
+definition mldsa_poly_decompose_32_mc
+  |- mldsa_poly_decompose_32_mc
+     = #x[93 02 10 40 37 03 20 00 b7 03 08 00 93 83 03 e0 37 fe 3f 00 b7 ee 7f 00 93 8e 1e 00 13 86
+          05 40 83 a6 05 00 03 a7 45 00 93 87 f6 07 93 d7 77 00 b3 87 57 02 b3 87 67 00 93 d7 67 01
+          93 f7 f7 00 33 8f 77 02 b3 86 e6 41 b3 0f de 40 93 df ff 41 b3 ff df 01 b3 86 f6 41 13 08
+          f7 07 13 58 78 00 33 08 58 02 33 08 68 00 13 58 68 01 13 78 f8 00 33 0f 78 02 33 07 e7 41
+          b3 0f ee 40 93 df ff 41 b3 ff df 01 33 07 f7 41 23 20 f5 00 23 22 05 01 23 a0 d5 00 23 a2
+          e5 00 13 05 85 00 93 85 85 00 e3 90 c5 f8 67 80 00 00]

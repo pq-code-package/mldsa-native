@@ -166,6 +166,11 @@ poly_decompose_32_avx2_asm:
   sha256:
     mldsa_decompose32_mc: f4fb2fecf340caa17743442666a93716d84f3405afa6063e5d8cdf1e099bd378
     mldsa_decompose32_tmc: 515992c0382305d66adbdf398e3e6632f2c13e534a83025c250bac16edcba40a
+poly_decompose_32_rv32im_asm:
+  arch: riscv32
+  function: mldsa_poly_decompose_32_rv32im_asm
+  sha256:
+    mldsa_poly_decompose_32_mc: 72938d09c7eb9d4b54e341fc18b5bc74e8b78743acdcdee100fad1c41085a33d
 poly_decompose_88_aarch64_asm:
   arch: aarch64
   function: mldsa_poly_decompose_88_aarch64_asm
@@ -177,6 +182,11 @@ poly_decompose_88_avx2_asm:
   sha256:
     mldsa_decompose88_mc: adaa0615a4a68f976694b73e9b35708547b162c8156e8d0c7b501aef613b82c5
     mldsa_decompose88_tmc: bda98dd502107540aabf4d3d8f3e56c549986506f76e91ef00a673c18855d696
+poly_decompose_88_rv32im_asm:
+  arch: riscv32
+  function: mldsa_poly_decompose_88_rv32im_asm
+  sha256:
+    mldsa_poly_decompose_88_mc: d0fa7ca2953db1fd901486990a3d8bc530901aa5892d7a5aa00dae1efab9730a
 poly_pointwise_montgomery_aarch64_asm:
   arch: aarch64
   function: mldsa_pointwise_montgomery_aarch64_asm
